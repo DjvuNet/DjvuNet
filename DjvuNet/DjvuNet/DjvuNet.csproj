@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E681B178-E5F8-4782-89C8-F32720B1464A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DjvuNet</RootNamespace>
+    <AssemblyName>DjvuNet</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Compression\BSInputStream.cs" />
+    <Compile Include="Compression\MutableValue.cs" />
+    <Compile Include="Compression\ZPCodec.cs" />
+    <Compile Include="Compression\ZPTable.cs" />
+    <Compile Include="DataChunks\Annotations\Annotation.cs" />
+    <Compile Include="DataChunks\Annotations\AnnotationChunk.cs" />
+    <Compile Include="DataChunks\AntaChunk.cs" />
+    <Compile Include="DataChunks\AntzChunk.cs" />
+    <Compile Include="DataChunks\BG44Chunk.cs" />
+    <Compile Include="DataChunks\BGjpChunk.cs" />
+    <Compile Include="DataChunks\Navigation\DocumentNavigator.cs" />
+    <Compile Include="DataChunks\Navigation\Interfaces\INavigation.cs" />
+    <Compile Include="DataChunks\UnknownChunk.cs" />
+    <Compile Include="DataChunks\Navigation\Bookmark.cs" />
+    <Compile Include="DataChunks\Enums\ChunkTypes.cs" />
+    <Compile Include="DataChunks\Graphics\ColorPalette.cs" />
+    <Compile Include="DataChunks\DirmChunk.cs" />
+    <Compile Include="DataChunks\Directory\DirmComponent.cs" />
+    <Compile Include="DataChunks\DjbzChunk.cs" />
+    <Compile Include="DataChunks\DjviChunk.cs" />
+    <Compile Include="DataChunks\DjvmChunk.cs" />
+    <Compile Include="DataChunks\DjvuChunk.cs" />
+    <Compile Include="DataChunks\Enums\ZoneTypes.cs" />
+    <Compile Include="DataChunks\FG44Chunk.cs" />
+    <Compile Include="DataChunks\FGbzChunk.cs" />
+    <Compile Include="DataChunks\FGjpChunk.cs" />
+    <Compile Include="DataChunks\FormChunk.cs" />
+    <Compile Include="DataChunks\InclChunk.cs" />
+    <Compile Include="DataChunks\InfoChunk.cs" />
+    <Compile Include="DataChunks\NavmChunk.cs" />
+    <Compile Include="DataChunks\Enums\PageRotations.cs" />
+    <Compile Include="DataChunks\SjbzChunk.cs" />
+    <Compile Include="DataChunks\SmmrChunk.cs" />
+    <Compile Include="DataChunks\Text\TextChunk.cs" />
+    <Compile Include="DataChunks\Text\TextZone.cs" />
+    <Compile Include="DataChunks\TH44Chunk.cs" />
+    <Compile Include="DataChunks\ThumChunk.cs" />
+    <Compile Include="DataChunks\TxtaChunk.cs" />
+    <Compile Include="DataChunks\TxtzChunk.cs" />
+    <Compile Include="DataChunks\WmrmChunk.cs" />
+    <Compile Include="DjvuDocument.cs" />
+    <Compile Include="DjvuPage.cs" />
+    <Compile Include="DjvuReader.cs" />
+    <Compile Include="DataChunks\IFFChunk.cs" />
+    <Compile Include="Extentions\ExtentionMethods.cs" />
+    <Compile Include="Graphics\Bitmap.cs" />
+    <Compile Include="Graphics\DjvuImage.cs" />
+    <Compile Include="Graphics\Map.cs" />
+    <Compile Include="Graphics\Pixel.cs" />
+    <Compile Include="Graphics\PixelMapScaler.cs" />
+    <Compile Include="Graphics\PixelReference.cs" />
+    <Compile Include="Graphics\PixelMap.cs" />
+    <Compile Include="Graphics\Rectangle.cs" />
+    <Compile Include="Interfaces\ICodec.cs" />
+    <Compile Include="JB2\JB2Blit.cs" />
+    <Compile Include="JB2\JB2Codec.cs" />
+    <Compile Include="JB2\JB2Decoder.cs" />
+    <Compile Include="JB2\JB2Dictionary.cs" />
+    <Compile Include="JB2\JB2Image.cs" />
+    <Compile Include="JB2\JB2Item.cs" />
+    <Compile Include="JB2\JB2Shape.cs" />
+    <Compile Include="Text\PageText.cs" />
+    <Compile Include="Text\PageTextItem.cs" />
+    <Compile Include="Text\PageTextSearch.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Wavelet\IWBlock.cs" />
+    <Compile Include="Wavelet\IWBucket.cs" />
+    <Compile Include="Wavelet\IWCodec.cs" />
+    <Compile Include="Wavelet\IWMap.cs" />
+    <Compile Include="Wavelet\IWPixelMap.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
