@@ -1,7 +1,7 @@
 DjvuNet
 =======
 
-DjvuNet is a fully managed Djvu reader in C#. This was created to support my commercial activities as Djvu is a superior format for certain document types. This is a faithful reimplementation of the Java Djvu Viewer. It is totally usable, but probably needs to be optimized a bit as Djvu is complicated.
+DjvuNet is a fully managed Djvu reader in C# and fully supports the entire Djvu file structure. This was created to support my commercial activities as Djvu is a superior format for certain document types. DjvuNet is a faithful reimplementation of the Java Djvu Viewer. It is fully usable, but probably needs to be optimized a bit as Djvu is complicated.
 
 Optimal performance will be achieved with some background thread processing.
 
