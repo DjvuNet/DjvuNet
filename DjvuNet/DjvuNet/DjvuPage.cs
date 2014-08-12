@@ -879,6 +879,9 @@ namespace DjvuNet
         public System.Drawing.Bitmap BuildPageImage()
         {
             int subsample = 1;
+            if ( this.Info==null && Document.FormChunk.Children[0].ChunkID=="DJVU" && Document.FormChunk.Children[1] is InfoChunk )
+            	this._info = (InfoChunk)Document.FormChunk.Children[1];
+            
             int width = Info.Width / subsample;
             int height = Info.Height / subsample;
 
