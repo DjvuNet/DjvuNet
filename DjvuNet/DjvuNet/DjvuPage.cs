@@ -15,7 +15,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
 using ColorPalette = DjvuNet.DataChunks.Graphics.ColorPalette;
@@ -252,7 +251,7 @@ namespace DjvuNet
         private DataChunks.Text.TextChunk _text;
 
         /// <summary>
-        /// Gets the info chunk for the page
+        /// Gets the text chunk for the page
         /// </summary>
         public DataChunks.Text.TextChunk Text
         {
@@ -274,7 +273,7 @@ namespace DjvuNet
         private JB2.JB2Image _foregroundJB2Image;
 
         /// <summary>
-        /// Gets the forground image
+        /// Gets the foreground image
         /// </summary>
         public JB2.JB2Image ForegroundJB2Image
         {
@@ -439,6 +438,7 @@ namespace DjvuNet
                 if (_image == null)
                 {
                     _image = BuildImage();
+                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("Image"));
                 }
 
                 return _image;
@@ -446,8 +446,11 @@ namespace DjvuNet
 
             private set
             {
-                _image = value;
-                if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("Image"));
+                if (_image != value)
+                {
+                    _image = value;
+                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("Image"));
+                }
             }
         }
 

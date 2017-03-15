@@ -2,28 +2,26 @@
 // TODO: Update copyright text.
 // </copyright>
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DjvuNet.DataChunks;
 using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Enums;
 using DjvuNet.DataChunks.Navigation;
 using DjvuNet.DataChunks.Navigation.Interfaces;
-using System.Collections.Concurrent;
-using System.ComponentModel;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DjvuNet
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjvuDocument : INotifyPropertyChanged
+    public class DjvuDocument : INotifyPropertyChanged, IDisposable
     {
         #region Private Variables
 
@@ -215,7 +213,7 @@ namespace DjvuNet
 
                     OnPropertyChanged("IsInverted");
 
-                    // Propogate value to children
+                    // Propagate value to children
                     Pages.ToList().ForEach(x => x.IsInverted = value);
                 }
             }
@@ -412,6 +410,37 @@ namespace DjvuNet
         }
 
         #endregion Constructors
+
+        #region IDisposable implementation
+
+        protected bool _Disposed;
+
+        public bool Disposed { get { return _Disposed; } }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+            }
+
+            _reader?.Close();
+            _reader = null;
+
+            _Disposed = true;
+        }
+
+        ~DjvuDocument()
+        {
+            Dispose(false);
+        }
+
+        #endregion IDisposable implementation
 
         #region Public Methods
 

@@ -3,8 +3,8 @@ using System.IO;
 
 namespace DjvuNet.Compression
 {
-    /// <summary> This class decodes a bzz encoded InputStream.
-    ///
+    /// <summary> 
+    /// This class decodes a bzz encoded InputStream.
     /// </summary>
     public sealed class BSInputStream : MemoryStream
     {
@@ -98,7 +98,7 @@ namespace DjvuNet.Compression
         #region Public Methods
 
         /// <summary>
-        ///
+        /// TODO documentation
         /// </summary>
         public void Flush()
         {
@@ -106,7 +106,7 @@ namespace DjvuNet.Compression
         }
 
         /// <summary>
-        ///
+        /// TODO documentation
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -123,7 +123,7 @@ namespace DjvuNet.Compression
         }
 
         /// <summary>
-        ///
+        /// TODO Documentation
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="offset"></param>
@@ -192,7 +192,7 @@ namespace DjvuNet.Compression
         #region Private Methods
 
         /// <summary>
-        ///
+        /// TODO documentation
         /// </summary>
         /// <param name="ctxoff"></param>
         /// <param name="bits"></param>
@@ -213,7 +213,7 @@ namespace DjvuNet.Compression
         }
 
         /// <summary>
-        ///
+        /// TODO documentation
         /// </summary>
         /// <returns></returns>
         private int Decode()
@@ -494,7 +494,7 @@ namespace DjvuNet.Compression
         }
 
         /// <summary>
-        ///
+        /// TODO documentation
         /// </summary>
         /// <param name="bits"></param>
         /// <returns></returns>
