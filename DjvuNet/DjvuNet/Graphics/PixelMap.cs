@@ -17,7 +17,7 @@ namespace DjvuNet.Graphics
         /// <summary>Used to represent division as multiplication. </summary>
         private static readonly int[] _invmap = new int[256];
 
-        /// <summary>Indentity color correction table. </summary>
+        /// <summary>Identity color correction table. </summary>
         private static readonly int[] _ctableI = new int[256];
 
         /// <summary>Cached color correction table. </summary>
@@ -31,6 +31,8 @@ namespace DjvuNet.Graphics
 
         /// <summary>Used for attenuation </summary>
         private static readonly Object[] _multiplierRefArray = new Object[256];
+
+        private static object _syncObject = new object();
 
         #endregion Private Variables
 
@@ -74,17 +76,18 @@ namespace DjvuNet.Graphics
 
         #region Public Methods
 
-        /// <summary> Fill the array with color correction constants.
-        ///
+        /// <summary> 
+        /// Fill the array with color correction constants.
         /// </summary>
-        /// <param name="gamma">color correction subsample
-        ///
+        /// <param name="gamma">
+        /// color correction subsample
         /// </param>
-        /// <returns> the new color correction table
+        /// <returns> 
+        /// the new color correction table
         /// </returns>
         public static int[] GetColorCorrection(double gamma)
         {
-            lock (typeof(PixelMap))
+            lock (_syncObject)
             {
                 if ((gamma < 0.10000000000000001D) || (gamma > 10D))
                 {
@@ -125,14 +128,17 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Attenuate the specified bitmap.
-        ///
+        /// <summary> 
+        /// Attenuate the specified bitmap.
         /// </summary>
-        /// <param name="bm">Bitmap to attenuate
+        /// <param name="bm">
+        /// Bitmap to attenuate
         /// </param>
-        /// <param name="xpos">horizontal position
+        /// <param name="xpos">
+        /// horizontal position
         /// </param>
-        /// <param name="ypos">vertical position
+        /// <param name="ypos">
+        /// vertical position
         /// </param>
         public virtual void Attenuate(Bitmap bm, int xpos, int ypos)
         {
@@ -209,16 +215,20 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Insert the specified bitmap with the specified color.
-        ///
+        /// <summary> 
+        /// Insert the specified bitmap with the specified color.
         /// </summary>
-        /// <param name="bm">bitmap to insert
+        /// <param name="bm">
+        /// bitmap to insert
         /// </param>
-        /// <param name="xpos">horizontal position
+        /// <param name="xpos">
+        /// horizontal position
         /// </param>
-        /// <param name="ypos">vertical position
+        /// <param name="ypos">
+        /// vertical position
         /// </param>
-        /// <param name="color">color to insert bitmap with
+        /// <param name="color">
+        /// color to insert bitmap with
         /// </param>
         public virtual void Blit(Bitmap bm, int xpos, int ypos, Pixel color)
         {
@@ -312,10 +322,11 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Correct the colors with a gamma subsample normalized to 1.0 for no correction.
-        ///
+        /// <summary> 
+        /// Correct the colors with a gamma subsample normalized to 1.0 for no correction.
         /// </summary>
-        /// <param name="gamma">color correction
+        /// <param name="gamma">
+        /// Color correction
         /// </param>
         public void ApplyGammaCorrection(double gamma)
         {
@@ -332,9 +343,9 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Fill this image from another source at reduced resolution.  Pixel
+        /// <summary> 
+        /// Fill this image from another source at reduced resolution.  Pixel
         /// averaging will be used.
-        ///
         /// </summary>
         /// <param name="src">image map to reduce
         /// </param>
@@ -439,7 +450,7 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary> Fill this image from another source at reduced resolution of 4 vertical
-        /// pixels to 3.  An extrapulating pixel averaging algorithm is used.
+        /// pixels to 3.  An extrapolating pixel averaging algorithm is used.
         ///
         /// </summary>
         /// <param name="src">image map to reduce
@@ -903,23 +914,30 @@ namespace DjvuNet.Graphics
             return this;
         }
 
-        /// <summary> Draw the foreground layer onto this background image.
-        ///
+        /// <summary> 
+        /// Draw the foreground layer onto this background image.
         /// </summary>
-        /// <param name="mask">the mask layer
+        /// <param name="mask">
+        /// the mask layer
         /// </param>
-        /// <param name="foregroundMap">the foreground colors
+        /// <param name="foregroundMap">
+        /// the foreground colors
         /// </param>
-        /// <param name="supersample">rate to upsample the foreground colors
+        /// <param name="supersample">
+        /// rate to upsample the foreground colors
         /// </param>
-        /// <param name="subsample">rate to subsample the foreground colors
+        /// <param name="subsample">
+        /// rate to subsample the foreground colors
         /// </param>
-        /// <param name="bounds">the target rectangle
+        /// <param name="bounds">
+        /// the target rectangle
         /// </param>
-        /// <param name="gamma">color correction factor
-        ///
+        /// <param name="gamma">
+        /// color correction factor
         /// </param>
-        /// <throws>  IllegalArgumentException if the specified bounds are not contained in the page </throws>
+        /// <throws>  
+        /// IllegalArgumentException if the specified bounds are not contained in the page 
+        /// </throws>
         public unsafe virtual void Stencil(Bitmap mask, PixelMap foregroundMap, int supersample, int subsample, Rectangle bounds,
                                     double gamma)
         {
@@ -1054,15 +1072,17 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Copy this image with a translated origin.
-        ///
+        /// <summary> 
+        /// Copy this image with a translated origin.
         /// </summary>
-        /// <param name="dx">horizontal distance to translate
+        /// <param name="dx">
+        /// horizontal distance to translate
         /// </param>
-        /// <param name="dy">vertical distance to translate
+        /// <param name="dy">
+        /// vertical distance to translate
         /// </param>
-        /// <param name="retval">an old image to try and reuse for the return value
-        ///
+        /// <param name="retval">
+        /// an old image to try and reuse for the return value
         /// </param>
         /// <returns> the translated image
         /// </returns>
@@ -1078,15 +1098,17 @@ namespace DjvuNet.Graphics
             return retval;
         }
 
-        /// <summary> Initiallize this PixelMap with a preallocated buffer.
-        ///
+        /// <summary> 
+        /// Initialize this PixelMap with a preallocated buffer.
         /// </summary>
-        /// <param name="data">buffer to use
+        /// <param name="data">
+        /// buffer to use
         /// </param>
-        /// <param name="arows">number of rows
+        /// <param name="arows">
+        /// number of rows
         /// </param>
-        /// <param name="acolumns">number of columns
-        ///
+        /// <param name="acolumns">
+        /// number of columns
         /// </param>
         /// <returns> the initialized PixelMap
         /// </returns>

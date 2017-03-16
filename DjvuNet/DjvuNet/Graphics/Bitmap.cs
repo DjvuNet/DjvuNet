@@ -17,6 +17,8 @@ namespace DjvuNet.Graphics
 
         private Pixel[] _rampData;
 
+        private object _syncObject = new object();
+
         #endregion Private Variables
 
         #region Protected Variables
@@ -697,7 +699,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         public virtual Rectangle ComputeBoundingBox()
         {
-            lock (this)
+            lock (_syncObject)
             {
                 int w = ImageWidth;
                 int h = ImageHeight;

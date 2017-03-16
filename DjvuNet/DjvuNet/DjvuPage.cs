@@ -4,35 +4,35 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using DjvuNet.DataChunks;
 using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Text;
 using DjvuNet.Graphics;
 using DjvuNet.JB2;
-using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
 using ColorPalette = DjvuNet.DataChunks.Graphics.ColorPalette;
+using GBitmap = DjvuNet.Graphics.Bitmap;
+using GMap = DjvuNet.Graphics.Map;
+using GPixel = DjvuNet.Graphics.Pixel;
+using GPixelReference = DjvuNet.Graphics.PixelReference;
+using GPixmap = DjvuNet.Graphics.PixelMap;
+using GRect = DjvuNet.Graphics.Rectangle;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace DjvuNet
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using GBitmap = DjvuNet.Graphics.Bitmap;
-    using GMap = DjvuNet.Graphics.Map;
-    using GPixel = DjvuNet.Graphics.Pixel;
-    using GPixelReference = DjvuNet.Graphics.PixelReference;
-    using GPixmap = DjvuNet.Graphics.PixelMap;
-    using GRect = DjvuNet.Graphics.Rectangle;
+
 
     /// <summary>
     /// TODO: Update summary.
@@ -248,18 +248,34 @@ namespace DjvuNet
 
         #region Text
 
-        private DataChunks.Text.TextChunk _text;
+        private DataChunks.Text.TextChunk _textChunk;
 
         /// <summary>
         /// Gets the text chunk for the page
         /// </summary>
-        public DataChunks.Text.TextChunk Text
+        public DataChunks.Text.TextChunk TextChunk
+        {
+            get
+            {
+                if (_textChunk == null)
+                {
+                    _textChunk = (DataChunks.Text.TextChunk) PageForm.Children.FirstOrDefault(
+                        x => x is DataChunks.Text.TextChunk);
+                }
+
+                return _textChunk;
+            }
+        }
+
+        private String _text;
+
+        public String Text
         {
             get
             {
                 if (_text == null)
                 {
-                    _text = (DataChunks.Text.TextChunk)PageForm.Children.FirstOrDefault(x => x is DataChunks.Text.TextChunk);
+                    _text = TextChunk.Text;
                 }
 
                 return _text;
@@ -363,7 +379,10 @@ namespace DjvuNet
             {
                 if (_foregroundPalette == null)
                 {
-                    //_foregroundPalette = PageForm.Children.FirstOrDefault(x => x is XYZ);
+                    // TODO - verify if tests or this code is failing to handle palette correctly
+                    FGbzChunk result = (FGbzChunk)PageForm.Children.FirstOrDefault(x => x is FGbzChunk);
+                    if (result != null)
+                        _foregroundPalette = result.Palette;
                 }
 
                 return _foregroundPalette;
@@ -595,11 +614,12 @@ namespace DjvuNet
         /// <returns></returns>
         public string GetTextForLocation(Rectangle rect)
         {
-            if (Text == null || Text.Zone == null) return "";
+            if (TextChunk == null || TextChunk.Zone == null)
+                return "";
 
             StringBuilder text = new StringBuilder();
 
-            TextZone[] textItems = Text.Zone.OrientedSearchForText(rect, Height);
+            TextZone[] textItems = TextChunk.Zone.OrientedSearchForText(rect, Height);
 
             TextZone currentParent = null;
 
