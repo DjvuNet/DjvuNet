@@ -216,6 +216,24 @@ namespace DjvuNet.DataChunks
         #region Public Methods
 
         /// <summary>
+        /// Gets the chunk type based on the ID
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <returns></returns>
+        public static ChunkType GetChunkType(string ID)
+        {
+            try
+            {
+                return (ChunkType)Enum.Parse(typeof(ChunkType), ID, true);
+            }
+            catch (ArgumentException)  // Catch unsupported chunks i.e. "CIDa"
+            {
+            }
+
+            return ChunkType.Unknown;
+        }
+
+        /// <summary>
         /// Builds the appropriate chunk for the ID
         /// </summary>
         /// <returns></returns>
@@ -302,24 +320,6 @@ namespace DjvuNet.DataChunks
         }
 
         /// <summary>
-        /// Gets the chunk type based on the ID
-        /// </summary>
-        /// <param name="ID"></param>
-        /// <returns></returns>
-        public static ChunkType GetChunkType(string ID)
-        {
-            try
-            {
-                return (ChunkType)Enum.Parse(typeof(ChunkType), ID, true);
-            }
-            catch(ArgumentException)  // Catch unsupported chunks i.e. "CIDa"
-            {
-            }
-
-            return ChunkType.Unknown;
-        }
-
-        /// <summary>
         /// Gets all the children items of the given type
         /// </summary>
         /// <typeparam name="TItem"></typeparam>
@@ -335,7 +335,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         public override string ToString()
         {
-            return $"IFF {{ Name:{Name}; ID:{ChunkID} Offset:{Offset} }}";
+            return $"{this.GetType().Name} {{ Name: {Name}; ID: {ChunkID} Offset: {Offset} Length: {Length} }}";
         }
 
         #endregion Public Methods

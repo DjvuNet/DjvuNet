@@ -14,36 +14,32 @@ namespace DjvuNetTest
     {
         public static void Main(string[] args)
         {
-            using (DjvuDocument doc = new DjvuDocument("..\\..\\..\\artifacts\\test001.djvu"))
-            {
-                string fileName = Path.GetFileNameWithoutExtension(doc.Location);
-                var page = doc.Pages[0];
+            //using (DjvuDocument doc = new DjvuDocument("..\\..\\..\\artifacts\\test001.djvu"))
+            //{
+            //    string fileName = Path.GetFileNameWithoutExtension(doc.Location);
+            //    var page = doc.Pages[0];
 
-                page
-                    .BuildPageImage()
-                    .Save(fileName + ".png", ImageFormat.Png);
+            //    page.BuildPageImage()
+            //        .Save(fileName + "_1.png", ImageFormat.Png);
 
-                page.IsInverted = true;
+            //    page.IsInverted = true;
 
-                page
-                    .BuildPageImage()
-                    .Save(fileName + ".png", ImageFormat.Png);
-            }
+            //    page.BuildPageImage()
+            //        .Save(fileName + "_2.png", ImageFormat.Png);
+            //}
 
             using (DjvuDocument doc = new DjvuDocument("..\\..\\..\\artifacts\\test003.djvu"))
             {
                 string fileName = Path.GetFileNameWithoutExtension(doc.Location);
                 var page = doc.Pages[0];
 
-                page
-                    .BuildPageImage()
-                    .Save(fileName + ".png", ImageFormat.Png);
+                page.BuildPageImage()
+                    .Save(fileName + "_1.png", ImageFormat.Png);
 
                 page.IsInverted = true;
 
-                page
-                    .BuildPageImage()
-                    .Save(fileName + ".png", ImageFormat.Png);
+                page.BuildPageImage()
+                    .Save(fileName + "_2.png", ImageFormat.Png);
             }
         }
     }

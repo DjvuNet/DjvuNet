@@ -72,7 +72,7 @@ namespace DjvuNet
 
         #endregion Identifier
 
-        #region FormChunk
+        #region RootForm
 
         private FormChunk _rootForm;
 
@@ -95,7 +95,7 @@ namespace DjvuNet
             }
         }
 
-        #endregion FormChunk
+        #endregion RootForm
 
         #region Directory
 
@@ -156,6 +156,22 @@ namespace DjvuNet
 
         #endregion Navigation
 
+        #region SharedItems
+
+        private List<DjviChunk> _sharedItems;
+
+        public IReadOnlyList<DjviChunk> SharedItems
+        {
+            get { return _sharedItems; }
+            internal set
+            {
+                if (_sharedItems == null)
+                    _sharedItems = new List<DjviChunk>(value);
+            } 
+        }
+
+        #endregion SharedItems
+
         #region Pages
 
         private DjvuPage[] _pages;
@@ -165,10 +181,7 @@ namespace DjvuNet
         /// </summary>
         public DjvuPage[] Pages
         {
-            get
-            {
-                return _pages;
-            }
+            get { return _pages; }
 
             internal set
             {
@@ -229,7 +242,6 @@ namespace DjvuNet
                 if (IsInverted != value)
                 {
                     _isInverted = value;
-
                     OnPropertyChanged("IsInverted");
 
                     // Propagate value to children
@@ -551,51 +563,63 @@ namespace DjvuNet
             }
         }
 
+        public List<T> GetRootFormChildren<T>() where T : IFFChunk
+        {
+            string id = typeof(T).Name.Replace("Chunk", null);
+            ChunkType chunkType = IFFChunk.GetChunkType(id);
+            return RootForm.Children.Where<IFFChunk>(x => x.ChunkType == chunkType)
+                .ToList<IFFChunk>().ConvertAll<T>(x => { return (T)x; });
+        }
+
         /// <summary>
         /// Builds the list of pages
         /// </summary>
 		internal void BuildPageList()
 		{
+            //
+            // TODO Handle single page document RootForm is Page
+            //
+
 			List<DjvuPage> pages = new List<DjvuPage>();
 			Queue<DirmComponent> pageHeaders = null;
-			Queue<TH44Chunk> thumbnail = new Queue<TH44Chunk>(RootForm.GetChildrenItems<TH44Chunk>());
+			Queue<ThumChunk> thumbnails = new Queue<ThumChunk>(GetRootFormChildren<ThumChunk>());
 			int pageCount = 1;
-			DjviChunk[] sharedItems = RootForm.GetChildrenItems<DjviChunk>();
+
+			_sharedItems = RootForm.Children.Where<IFFChunk>(x => x.ChunkType == ChunkType.Djvi)
+                .ToList<IFFChunk>().ConvertAll<DjviChunk>(x => { return (DjviChunk)x; });
 			
-			if (this.RootForm.Children.Length > 0 && this.RootForm.Children[0].ChunkID == "DJVU")
-			{
-				foreach (IFFChunk child in RootForm.Children)
-					if (child is FormChunk)
-				{
-					FormChunk form = (FormChunk)child;
-					
-					TH44Chunk currentThumbnail = thumbnail.Count > 0 ? thumbnail.Dequeue() : null;
-					DjvuPage newPage = new DjvuPage(pageCount++, this, null, currentThumbnail, sharedItems, form);
-					pages.Add(newPage);
-				}
-			}
-			else
-			{
-				pageHeaders = new Queue<DirmComponent>(Directory.Components.Where(x => x.IsPage));
-			}
+            foreach (DjvuChunk child in GetRootFormChildren<DjvuChunk>())
+            {
+                if (child.ChunkType == ChunkType.Djvu)
+                {
+                    DjvuChunk form = (DjvuChunk)child;
 
+                    //TH44Chunk currentThumbnail = thumbnail.Count > 0 ? thumbnail.Dequeue() : null;
+                    // TODO Get rid of arrays for shared items
+                    DjvuPage newPage = new DjvuPage(pageCount++, this, null, null, SharedItems.ToArray(), form);
+                    pages.Add(newPage);
+                }
+            }
 
-			foreach (IFFChunk child in RootForm.Children)
-			{
-				if (child is FormChunk)
-				{
-					FormChunk form = (FormChunk)child;
+   //         pageHeaders = new Queue<DirmComponent>(Directory.Components.Where(x => x.IsPage));
 
-					if (form.Children.Any(x => x.ChunkType == ChunkType.Djvu))
-					{
-						DirmComponent currentHeader = pageHeaders.Count > 0 ? pageHeaders.Dequeue() : null;
-						TH44Chunk currentThumbnail = thumbnail.Count > 0 ? thumbnail.Dequeue() : null;
-						DjvuPage newPage = new DjvuPage(pageCount++, this, currentHeader, currentThumbnail, sharedItems, form);
+   //         foreach (IFFChunk child in RootForm.Children)
+			//{
+			//	if (child is FormChunk)
+			//	{
+			//		FormChunk form = (FormChunk)child;
 
-						pages.Add(newPage);
-					}
-				}
-			}
+			//		if (form.Children.Any(x => x.ChunkType == ChunkType.Djvu))
+			//		{
+			//			DirmComponent currentHeader = pageHeaders.Count > 0 ? pageHeaders.Dequeue() : null;
+			//			//TH44Chunk currentThumbnail = thumbnails.Count > 0 ? thumbnails.Dequeue() : null;
+			//			DjvuPage newPage = new DjvuPage(pageCount++, this, currentHeader, null, 
+   //                         SharedItems.ToArray(), form);
+
+			//			pages.Add(newPage);
+			//		}
+			//	}
+			//}
 
 			Pages = pages.ToArray();
 		}

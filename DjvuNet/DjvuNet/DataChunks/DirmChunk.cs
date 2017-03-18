@@ -122,7 +122,7 @@ namespace DjvuNet.DataChunks
 
         protected override void ReadChunkData(DjvuReader reader)
         {
-            reader.Position = Offset + 12;
+            reader.Position = Offset;
             sbyte flagByte = reader.ReadSByte();
 
             // B[7]

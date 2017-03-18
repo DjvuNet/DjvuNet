@@ -67,15 +67,6 @@ namespace DjvuNet.DataChunks
 
         #region Public Methods
 
-        /// <summary>
-        /// Gets the string representation of the item
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return string.Format("Unknown N:{0}; O:{2};", Name, Offset);
-        }
-
         #endregion Public Methods
 
         #region Protected Methods

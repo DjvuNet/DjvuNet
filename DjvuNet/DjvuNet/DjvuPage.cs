@@ -401,7 +401,7 @@ namespace DjvuNet
                     FGbzChunk result = (FGbzChunk)PageForm.Children
                         .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.FGbz);
 
-                    _foregroundPalette = result.Palette;
+                    _foregroundPalette = result?.Palette;
                     if (_foregroundPalette != null)
                         OnPropertyChanged(nameof(ForegroundPalette));
                 }

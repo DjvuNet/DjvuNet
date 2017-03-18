@@ -96,7 +96,7 @@ namespace DjvuNet.DataChunks
         {
             get
             {
-                if (_NavmData == null && Children != null)
+                if (Children != null && Children.Length > 0 && _NavmData == null )
                     _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
 
                 return _NavmData;
@@ -193,6 +193,14 @@ namespace DjvuNet.DataChunks
 
             long maxPosition = this.Length + Offset;
 
+            // Jump to next FORM data "space" - it is skipped for root FORM
+            if (this != Document.RootForm)
+            {
+                reader.Position = Offset;
+                if (IsFormChunk(ChunkType))
+                    maxPosition -= 4;
+            }
+
             // Read in all the chunks
             while (reader.Position <  maxPosition)
             {
@@ -224,16 +232,17 @@ namespace DjvuNet.DataChunks
                     if (!IsRootFormChild(type))
                     {
                         TempChildren.Add(chunk);
+                        TempChildren[TempChildren.Count - 1].Initialize(reader);
+                        reader.Position = chunk.Length + chunk.Offset;
                     }
                     else
                     {
                         Document.RootForm.TempChildren.Add(chunk);
+                        reader.Position = chunk.Length + chunk.Offset;
                         if (isFormChunk)
                             reader.Position -= 4;
                     }
-                }
-
-                reader.Position += chunk.Length;
+                }                
             }
 
             Children = TempChildren.ToArray();
