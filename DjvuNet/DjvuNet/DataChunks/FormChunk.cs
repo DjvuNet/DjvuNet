@@ -2,15 +2,15 @@
 // TODO: Update copyright text.
 // </copyright>
 
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using DjvuNet.DataChunks.Enums;
 
 namespace DjvuNet.DataChunks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
     /// TODO: Update summary.
@@ -34,17 +34,12 @@ namespace DjvuNet.DataChunks
         /// </summary>
         public IFFChunk[] Children
         {
-            get
-            {
-                return _children;
-            }
+            get { return _children; }
 
-            private set
+            internal set
             {
                 if (Children != value)
-                {
                     _children = value;
-                }
             }
         }
 
@@ -62,9 +57,7 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_data == null)
-                {
                     _data = ExtractRawData();
-                }
 
                 return _data;
             }
@@ -84,9 +77,7 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_dirmData == null && Children != null)
-                {
                     _dirmData = (DirmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
-                }
 
                 return _dirmData;
             }
@@ -106,9 +97,7 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_NavmData == null && Children != null)
-                {
                     _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
-                }
 
                 return _NavmData;
             }
@@ -136,7 +125,6 @@ namespace DjvuNet.DataChunks
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
-            // Nothing
         }
 
         #endregion Constructors
@@ -199,7 +187,7 @@ namespace DjvuNet.DataChunks
         /// Decodes the children of this chunk
         /// </summary>
         /// <param name="reader"></param>
-        private void ReadChildren(DjvuReader reader)
+        internal void ReadChildren(DjvuReader reader)
         {
             TempChildren = new List<IFFChunk>();
 
@@ -256,7 +244,7 @@ namespace DjvuNet.DataChunks
         /// Extracts the raw data from the chunk
         /// </summary>
         /// <returns></returns>
-        private DjvuReader ExtractRawData()
+        internal DjvuReader ExtractRawData()
         {
             // Read the data in
             return Reader.CloneReader(Offset + 4 + 4, Length);

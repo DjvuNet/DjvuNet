@@ -254,7 +254,7 @@ namespace DjvuNet
                 return _firstPage;
             }
 
-            private set
+            internal set
             {
                 if (FirstPage != value)
                 {
@@ -280,7 +280,7 @@ namespace DjvuNet
                 return _lastPage;
             }
 
-            private set
+            internal set
             {
                 if (LastPage != value)
                 {
@@ -562,14 +562,14 @@ namespace DjvuNet
 			int pageCount = 1;
 			DjviChunk[] sharedItems = RootForm.GetChildrenItems<DjviChunk>();
 			
-			if (this.RootForm.Children.Any() && this.RootForm.Children[0].ChunkID=="DJVU")
+			if (this.RootForm.Children.Length > 0 && this.RootForm.Children[0].ChunkID == "DJVU")
 			{
 				foreach (IFFChunk child in RootForm.Children)
 					if (child is FormChunk)
 				{
 					FormChunk form = (FormChunk)child;
 					
-					TH44Chunk currentThumbnail = thumbnail.Any() ? thumbnail.Dequeue() : null;
+					TH44Chunk currentThumbnail = thumbnail.Count > 0 ? thumbnail.Dequeue() : null;
 					DjvuPage newPage = new DjvuPage(pageCount++, this, null, currentThumbnail, sharedItems, form);
 					pages.Add(newPage);
 				}

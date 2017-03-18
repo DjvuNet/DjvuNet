@@ -1,7 +1,9 @@
+using System;
+
 namespace DjvuNet.Compression
 {
     /// <summary>
-    ///
+    /// TODO docs
     /// </summary>
     public class ZPTable
     {

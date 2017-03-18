@@ -4,18 +4,18 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
 namespace DjvuNet.JB2
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
-    /// TODO: Update summary.
+    /// Used to share a common type for storage purposes.
     /// </summary>
     public class JB2Item
     {
-        //Nothing - Used to share a common type for storage purposes
     }
 }

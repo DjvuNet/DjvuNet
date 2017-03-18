@@ -2,14 +2,14 @@
 // TODO: Update copyright text.
 // </copyright>
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using DjvuNet.DataChunks.Enums;
 
 namespace DjvuNet.DataChunks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
     /// TODO: Update summary.
@@ -40,11 +40,6 @@ namespace DjvuNet.DataChunks
         #endregion Constructors
 
         #region Protected Methods
-
-        //protected override void ReadChunkData(DjvuReader reader)
-        //{
-        //    // Nothing
-        //}
 
         #endregion Protected Methods
     }

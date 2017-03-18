@@ -5,10 +5,11 @@ namespace DjvuNet.Interfaces
 {
     public interface ICodec
     {
-        /// <summary> Query if this is image data.  Any data which will effects Map data should return true.
-        ///
+        /// <summary> 
+        /// Query if this is image data.  Any data which will effects Map data should return true.
         /// </summary>
-        /// <returns> true if effects image data
+        /// <returns> 
+        /// true if effects image data
         /// </returns>
         bool ImageData
         {

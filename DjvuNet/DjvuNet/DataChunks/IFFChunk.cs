@@ -26,20 +26,14 @@ namespace DjvuNet.DataChunks
         /// Gets the reader for the chunk data
         /// </summary>
         //[DataMember]
-        protected DjvuReader Reader
+        internal DjvuReader Reader
         {
-            get
-            {
-                return _reader;
-            }
+            get { return _reader; }
 
-            private set
+            set
             {
-                //if (ValidateReader(value) == false) return;
                 if (Reader != value)
-                {
                     _reader = value;
-                }
             }
         }
 
@@ -54,10 +48,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the chunk type
         /// </summary>
-        public abstract ChunkType ChunkType
-        {
-            get;
-        }
+        public abstract ChunkType ChunkType { get; }
 
         #endregion ChunkType
 
@@ -72,12 +63,10 @@ namespace DjvuNet.DataChunks
         {
             get { return _parent; }
 
-            private set
+            internal set
             {
                 if (Parent != value)
-                {
                     _parent = value;
-                }
             }
         }
 
@@ -94,12 +83,10 @@ namespace DjvuNet.DataChunks
         {
             get { return _length; }
 
-            protected set
+            internal set
             {
                 if (Length != value)
-                {
                     _length = value;
-                }
             }
         }
 
@@ -116,12 +103,10 @@ namespace DjvuNet.DataChunks
         {
             get { return _chunkID; }
 
-            private set
+            internal set
             {
                 if (ChunkID != value)
-                {
                     _chunkID = value;
-                }
             }
         }
 
@@ -138,12 +123,10 @@ namespace DjvuNet.DataChunks
         {
             get { return _offset; }
 
-            protected set
+            internal set
             {
                 if (Offset != value)
-                {
                     _offset = value;
-                }
             }
         }
 
@@ -155,13 +138,7 @@ namespace DjvuNet.DataChunks
         /// Gets the name of the chunk
         /// </summary>
         //[DataMember]
-        public string Name
-        {
-            get
-            {
-                return ChunkType.ToString().ToUpper();
-            }
-        }
+        public string Name { get { return ChunkType.ToString(); } }
 
         #endregion Name
 
@@ -190,12 +167,10 @@ namespace DjvuNet.DataChunks
         {
             get { return _document; }
 
-            private set
+            internal set
             {
                 if (Document != value)
-                {
                     _document = value;
-                }
             }
         }
 
@@ -206,10 +181,13 @@ namespace DjvuNet.DataChunks
         #region Constructors
 
         /// <summary>
-        /// Initializes the IFFChunk
+        /// IFFChunk constructor
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="parent"></param>
+        /// <param name="document"></param>
+        /// <param name="chunkID"></param>
+        /// <param name="length"></param>
         public IFFChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document, 
             string chunkID = "", long length = 0)
         {
@@ -221,23 +199,21 @@ namespace DjvuNet.DataChunks
 
             // Move back 4 to compensate for the chunk type already read
             _offset = reader.Position; // - 4;
-            //ReadChunkHeader(reader);
         }
 
+        /// <summary>
+        /// Initialize allows to delay reading of IFFChunk content to the moment it is needed.
+        /// </summary>
+        /// <param name="reader"></param>
         public virtual void Initialize(DjvuReader reader)
         {
-            reader.Position = Offset; // + 12;
+            reader.Position = Offset;
             ReadChunkData(reader);
         }
 
         #endregion Constructors
 
         #region Public Methods
-
-        public DjvuReader GetReader()
-        {
-            return Reader;
-        }
 
         /// <summary>
         /// Builds the appropriate chunk for the ID
@@ -359,7 +335,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("N:{0}; O:{1};", Name, Offset);
+            return $"IFF {{ Name:{Name}; ID:{ChunkID} Offset:{Offset} }}";
         }
 
         #endregion Public Methods
@@ -382,7 +358,7 @@ namespace DjvuNet.DataChunks
         /// <typeparam name="T"></typeparam>
         /// <param name="page"></param>
         /// <returns></returns>
-        private T[] GetChildrenItems<T>(IFFChunk page) where T : IFFChunk
+        internal T[] GetChildrenItems<T>(IFFChunk page) where T : IFFChunk
         {
             // Check if this is a thumbnail
             if (page is T)
@@ -405,25 +381,6 @@ namespace DjvuNet.DataChunks
             }
 
             return results.ToArray();
-        }
-
-        /// <summary>
-        /// Reads in the chunk data
-        /// </summary>
-        /// <param name="reader"></param>
-        protected virtual void ReadChunkHeader(DjvuReader reader)
-        {
-            bool isForm = IsFormChunk(ChunkType);
-            if (isForm)
-            {
-                reader.Position -= 8;
-                Length = (int)reader.ReadUInt32MSB();
-            }
-
-            ChunkID = reader.ReadUTF8String(4);
-            if (!isForm)
-                Length = (int)reader.ReadUInt32MSB();
-
         }
 
         #endregion Private Methods

@@ -3,7 +3,7 @@ using System;
 namespace DjvuNet.Graphics
 {
     /// <summary>
-    /// A general class for rectange shapes.
+    /// A general class for rectangle shapes.
     /// </summary>
     public class Rectangle
     {

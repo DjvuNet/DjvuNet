@@ -2,16 +2,14 @@
 // TODO: Update copyright text.
 // </copyright>
 
-using DjvuNet.Compression;
+using System;
+using System.Collections.Generic;
 using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Enums;
 
 namespace DjvuNet.DataChunks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+
 
     /// <summary>
     /// TODO: Update summary.
@@ -47,18 +45,12 @@ namespace DjvuNet.DataChunks
         //[DataMember]
         public bool IsBundled
         {
-            get
-            {
-                return _isBundled;
-            }
+            get { return _isBundled; }
 
-            private set
+            internal set
             {
-                //if (ValidateIsBundled(value) == false) return;
-                if (IsBundled != value)
-                {
+                if (_isBundled != value)
                     _isBundled = value;
-                }
             }
         }
 
@@ -74,18 +66,12 @@ namespace DjvuNet.DataChunks
         //[DataMember]
         public int Version
         {
-            get
-            {
-                return _version;
-            }
+            get { return _version; }
 
-            private set
+            internal set
             {
-                //if (ValidateVersion(value) == false) return;
-                if (Version != value)
-                {
+                if (_version != value)
                     _version = value;
-                }
             }
         }
 
@@ -105,20 +91,16 @@ namespace DjvuNet.DataChunks
                 if (_isInitialized == false)
                 {
                     using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
-                    {
                         ReadCompressedData(reader, _components.Length, _compressedSectionLength);
-                    }
                 }
 
                 return _components;
             }
 
-            private set
+            internal set
             {
-                if (Components != value)
-                {
+                if (_components != value)
                     _components = value;
-                }
             }
         }
 
@@ -163,7 +145,7 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="count"></param>
-        private void ReadComponentData(DjvuReader reader, int count)
+        internal void ReadComponentData(DjvuReader reader, int count)
         {
             List<DirmComponent> components = new List<DirmComponent>();
 
@@ -190,7 +172,7 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         /// <param name="count"></param>
         /// <param name="compressedSectionLength"></param>
-        private void ReadCompressedData(DjvuReader reader, int count, int compressedSectionLength)
+        internal void ReadCompressedData(DjvuReader reader, int count, int compressedSectionLength)
         {
             DjvuReader decompressor = reader.GetBZZEncodedReader(compressedSectionLength);
 

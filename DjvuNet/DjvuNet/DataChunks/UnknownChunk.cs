@@ -2,10 +2,10 @@
 // TODO: Update copyright text.
 // </copyright>
 
-using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using DjvuNet.DataChunks.Enums;
