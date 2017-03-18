@@ -27,7 +27,7 @@ namespace DjvuNet.Tests
             if (pageCount > 1)
                 Assert.NotNull(document.Directory);
             Assert.NotNull(document.ActivePage);
-            Assert.NotNull(document.RootFormChunk);
+            Assert.NotNull(document.RootForm);
             Assert.NotNull(document.Navigation);
         }
 

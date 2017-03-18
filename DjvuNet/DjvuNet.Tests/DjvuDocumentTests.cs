@@ -149,7 +149,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -165,7 +165,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -181,7 +181,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -197,7 +197,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -213,7 +213,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -229,7 +229,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -245,7 +245,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -261,7 +261,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -277,7 +277,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -293,7 +293,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -309,7 +309,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -325,7 +325,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -341,7 +341,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -357,7 +357,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -373,7 +373,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -389,7 +389,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -405,7 +405,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -421,7 +421,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -437,7 +437,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -453,7 +453,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -469,7 +469,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -485,7 +485,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -501,7 +501,7 @@ namespace DjvuNet.Tests
                 Assert.False(document.Disposed);
                 Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }
@@ -518,7 +518,7 @@ namespace DjvuNet.Tests
                 // TODO Verify why it is failing
                 //Assert.NotNull(document.Directory);
                 Assert.NotNull(document.ActivePage);
-                Assert.NotNull(document.RootFormChunk);
+                Assert.NotNull(document.RootForm);
                 Assert.NotNull(document.Navigation);
             }
         }

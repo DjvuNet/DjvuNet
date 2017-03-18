@@ -12,6 +12,8 @@ using DjvuNet.Compression;
 
 namespace DjvuNet
 {
+    // TODO File feature request with .NET CoreClr project to change BinaryReader API
+    // to enable > 4 GB reads support - data got lot bigger now
 
     /// <summary>
     /// TODO: Update summary.
@@ -73,9 +75,9 @@ namespace DjvuNet
 
         #region Public Methods
 
-        public Image GetJPEGImage(int length)
+        public Image GetJPEGImage(long length)
         {            
-            MemoryStream mem = new MemoryStream(ReadBytes(length));
+            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)));
             return Image.FromStream(mem);
         }
 
@@ -84,9 +86,9 @@ namespace DjvuNet
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
-        public DjvuReader GetFixedLengthStream(int length)
+        public DjvuReader GetFixedLengthStream(long length)
         {
-            MemoryStream mem = new MemoryStream(ReadBytes(length));
+            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)));
 
             return new DjvuReader(mem);
         }
@@ -95,10 +97,10 @@ namespace DjvuNet
         /// Gets a reader for the BZZ data
         /// </summary>
         /// <returns></returns>
-        public DjvuReader GetBZZEncodedReader(int length)
+        public DjvuReader GetBZZEncodedReader(long length)
         {
             // Read the bytes into a stream to decode
-            MemoryStream memStream = new MemoryStream(ReadBytes(length));
+            MemoryStream memStream = new MemoryStream(ReadBytes(checked((int)length)));
 
             return new DjvuReader(new BSInputStream(memStream));
         }
@@ -250,7 +252,7 @@ namespace DjvuNet
             unchecked
             {
                 var value = base.ReadUInt16();
-                return (ushort)IPAddress.HostToNetworkOrder((short)value);
+                return (ushort)IPAddress.HostToNetworkOrder((int)value);
             }
         }
 
@@ -281,6 +283,7 @@ namespace DjvuNet
         {
             unchecked
             {
+                // TODO Fix implementation
                 var value = base.ReadUInt64();
                 return (ulong)IPAddress.HostToNetworkOrder((long)value);
             }
@@ -291,9 +294,9 @@ namespace DjvuNet
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
-        public string ReadUTF8String(int length)
+        public string ReadUTF8String(long length)
         {
-            byte[] data = ReadBytes(length);
+            byte[] data = ReadBytes(checked((int)length));
             return Encoding.UTF8.GetString(data);
         }
 
@@ -302,9 +305,9 @@ namespace DjvuNet
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
-        public string ReadUTF7String(int length)
+        public string ReadUTF7String(long length)
         {
-            byte[] data = ReadBytes(length);
+            byte[] data = ReadBytes(checked((int)length));
             return Encoding.UTF7.GetString(data);
         }
 
@@ -352,7 +355,7 @@ namespace DjvuNet
         /// Clones the reader for parallel reading at the given position
         /// </summary>
         /// <returns></returns>
-        public DjvuReader CloneReader(long position, int length)
+        public DjvuReader CloneReader(long position, long length)
         {
             DjvuReader newReader = null;
 
@@ -360,7 +363,7 @@ namespace DjvuNet
             newReader = _location != null ? new DjvuReader(_location) : new DjvuReader(BaseStream);
             newReader.Position = position;
 
-            return newReader.GetFixedLengthStream(length);
+            return newReader.GetFixedLengthStream(checked((int)length));
         }
 
         public override string ToString()

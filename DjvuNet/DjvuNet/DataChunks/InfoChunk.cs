@@ -185,8 +185,9 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public InfoChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document)
-            : base(reader, parent, document)
+        public InfoChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+            string chunkID = "", long length = 0)
+            : base(reader, parent, document, chunkID, length)
         {
         }
 

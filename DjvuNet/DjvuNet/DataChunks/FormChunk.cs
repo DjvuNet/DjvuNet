@@ -21,7 +21,7 @@ namespace DjvuNet.DataChunks
 
         #region TempChildren
 
-        protected List<IFFChunk> _TempChildren;
+        protected List<IFFChunk> TempChildren;
 
         #endregion TempChildren
 
@@ -132,25 +132,26 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        protected FormChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document)
-            : base(reader, parent, document)
+        protected FormChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+            string chunkID = "", long length = 0)
+            : base(reader, parent, document, chunkID, length)
         {
             // Nothing
         }
 
         #endregion Constructors
 
-        public static FormChunk GetForm(DjvuReader reader, IFFChunk parent, DjvuDocument document)
+        public static FormChunk GetRootForm(DjvuReader reader, IFFChunk parent, DjvuDocument document)
         {
             string formStr = reader.ReadUTF8String(4);
             // use of int in Djvu Format limits file size to 2 GB - should be long
             int length = (int) reader.ReadUInt32MSB(); 
             string formType = reader.ReadUTF8String(4);
-            //reader.Position -= 4;
+            reader.Position -= 4;
 
             ChunkType type = IFFChunk.GetChunkType(formType);
 
-            FormChunk formObj = (FormChunk)IFFChunk.BuildIFFChunk(reader, document, parent, type);
+            FormChunk formObj = (FormChunk)IFFChunk.BuildIFFChunk(reader, document, parent, type, formType, length);
 
             return formObj;
         }
@@ -200,7 +201,7 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         private void ReadChildren(DjvuReader reader)
         {
-            _TempChildren = new List<IFFChunk>();
+            TempChildren = new List<IFFChunk>();
 
             long maxPosition = this.Length + Offset;
 
@@ -215,40 +216,40 @@ namespace DjvuNet.DataChunks
                 // Read the chunk ID
                 string id = reader.ReadUTF8String(4);
                 ChunkType type = IFFChunk.GetChunkType(id);
+                long length = reader.ReadInt32MSB();
 
-                bool isFormChunk = IsSubFormChunk(type);
+                bool isFormChunk = IsFormChunk(type);
 
                 if (isFormChunk)
                 {
-                    int length = reader.ReadInt32MSB();
                     id = reader.ReadUTF8String(4);
                     type = IFFChunk.GetChunkType(id);
-                    reader.Position += 4;
                 }
 
                 // Reset the stream position
-                reader.Position -= 4;
+                // reader.Position -= 4;
 
-                var chunk = IFFChunk.BuildIFFChunk(reader, Document, this, type);
+                var chunk = IFFChunk.BuildIFFChunk(reader, Document, this, type, id, length);
 
                 if (chunk != null)
                 {
-                    if (!isFormChunk)
+                    if (!IsRootFormChild(type))
                     {
-                        _TempChildren.Add(chunk);
+                        TempChildren.Add(chunk);
                     }
                     else
                     {
-                        Document.RootFormChunk._TempChildren.Add((FormChunk)chunk);
-                        reader.Position -= 4;
+                        Document.RootForm.TempChildren.Add(chunk);
+                        if (isFormChunk)
+                            reader.Position -= 4;
                     }
                 }
 
                 reader.Position += chunk.Length;
             }
 
-            Children = _TempChildren.ToArray();
-            _TempChildren = null;
+            Children = TempChildren.ToArray();
+            TempChildren = null;
         }
 
         /// <summary>

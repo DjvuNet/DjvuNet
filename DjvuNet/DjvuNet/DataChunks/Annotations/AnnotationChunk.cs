@@ -60,8 +60,9 @@ namespace DjvuNet.DataChunks.Annotations
 
         #region Constructors
 
-        public AnnotationChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document)
-            : base(reader, parent, document)
+        public AnnotationChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+            string chunkID = "", long length = 0)
+            : base(reader, parent, document, chunkID, length)
         {
         }
 

@@ -60,14 +60,12 @@ namespace DjvuNet
                 return _identifier;
             }
 
-            private set
+            internal set
             {
-                if (Identifier != value)
+                if (_identifier != value)
                 {
                     _identifier = value;
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("Identifier"));
-
-                    //OnPropertyChanged("Identifier");
+                    OnPropertyChanged(nameof(Identifier));
                 }
             }
         }
@@ -76,22 +74,23 @@ namespace DjvuNet
 
         #region FormChunk
 
-        private FormChunk _rootFormChunk;
+        private FormChunk _rootForm;
 
         /// <summary>
         /// Gets the root form in the document
         /// </summary>
-        public FormChunk RootFormChunk
+        public FormChunk RootForm
         {
             get
             {
-                return _rootFormChunk;
+                return _rootForm;
             }
-            private set
+            internal set
             {
-                if (_rootFormChunk != value)
+                if (_rootForm != value)
                 {
-                    _rootFormChunk = value;
+                    _rootForm = value;
+                    OnPropertyChanged(nameof(RootForm));
                 }
             }
         }
@@ -111,8 +110,10 @@ namespace DjvuNet
             {
                 if (_directory == null)
                 {
-                    _directory = (DirmChunk)RootFormChunk.Children
+                    _directory = (DirmChunk)RootForm.Children
                         .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
+                    if (_directory != null)
+                        OnPropertyChanged(nameof(Directory));
                 }
 
                 return _directory;
@@ -134,18 +135,21 @@ namespace DjvuNet
             {
                 if (_navigation == null)
                 {
-                    _navigation = (NavmChunk)RootFormChunk.Children
+                    _navigation = (NavmChunk)RootForm.Children
                         .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
+                    if (_navigation != null)
+                        OnPropertyChanged(nameof(Navigation));
                 }
 
                 return _navigation;
             }
 
-            private set
+            internal set
             {
-                if (Navigation != value)
+                if (_navigation != value)
                 {
                     _navigation = value;
+                    OnPropertyChanged(nameof(Navigation));
                 }
             }
         }
@@ -166,7 +170,7 @@ namespace DjvuNet
                 return _pages;
             }
 
-            private set
+            internal set
             {
                 if (Pages != value)
                 {
@@ -255,9 +259,7 @@ namespace DjvuNet
                 if (FirstPage != value)
                 {
                     _firstPage = value;
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("FirstPage"));
-
-                    //OnPropertyChanged("FirstPage");
+                    OnPropertyChanged(nameof(FirstPage));
                 }
             }
         }
@@ -283,9 +285,7 @@ namespace DjvuNet
                 if (LastPage != value)
                 {
                     _lastPage = value;
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("LastPage"));
-
-                    //OnPropertyChanged("LastPage");
+                    OnPropertyChanged(nameof(LastPage));
                 }
             }
         }
@@ -306,14 +306,12 @@ namespace DjvuNet
                 return _nextPage;
             }
 
-            private set
+            internal set
             {
                 if (NextPage != value)
                 {
                     _nextPage = value;
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("NextPage"));
-
-                    //OnPropertyChanged("NextPage");
+                    OnPropertyChanged(nameof(NextPage));
                 }
             }
         }
@@ -334,14 +332,12 @@ namespace DjvuNet
                 return _previousPage;
             }
 
-            private set
+            internal set
             {
                 if (PreviousPage != value)
                 {
                     _previousPage = value;
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("PreviousPage"));
-
-                    //OnPropertyChanged("PreviousPage");
+                    OnPropertyChanged(nameof(PreviousPage));
                 }
             }
         }
@@ -362,14 +358,12 @@ namespace DjvuNet
                 return _name;
             }
 
-            private set
+            internal set
             {
                 if (Name != value)
                 {
                     _name = value;
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("Name"));
-
-                    //OnPropertyChanged("Name");
+                    OnPropertyChanged(nameof(Name));
                 }
             }
         }
@@ -387,13 +381,12 @@ namespace DjvuNet
         {
             get { return _location; }
 
-            private set
+            internal set
             {
                 if (Location != value)
                 {
                     _location = value;
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("Location"));
-                    //OnPropertyChanged("Location");
+                    OnPropertyChanged(nameof(Location));
                 }
             }
         }
@@ -404,22 +397,31 @@ namespace DjvuNet
 
         #region Constructors
 
-        public DjvuDocument(string location)
+        /// <summary>
+        /// TODO docs
+        /// </summary>
+        /// <param name="filePath"></param>
+        public DjvuDocument(string filePath)
         {
             Identifier = 0;            
-            _reader = new DjvuReader(location);
-            _name = Path.GetFileNameWithoutExtension(location);
-            _location = location;
+            _reader = new DjvuReader(filePath);
+            _name = Path.GetFileNameWithoutExtension(filePath);
+            _location = filePath;
 
             DecodeDjvuDocument(_reader);
         }
 
-        public DjvuDocument(string location, int identifier)
+        /// <summary>
+        /// TODO docs
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="identifier"></param>
+        public DjvuDocument(string filePath, int identifier)
         {
             Identifier = identifier;
-            _reader = new DjvuReader(location);
-            _name = Path.GetFileNameWithoutExtension(location);
-            _location = location;
+            _reader = new DjvuReader(filePath);
+            _name = Path.GetFileNameWithoutExtension(filePath);
+            _location = filePath;
 
             DecodeDjvuDocument(_reader);
         }
@@ -475,7 +477,7 @@ namespace DjvuNet
             if (component == null)
                 return null;
 
-            TItem[] children = RootFormChunk.GetChildrenItems<TItem>().ToArray();
+            TItem[] children = RootForm.GetChildrenItems<TItem>().ToArray();
             TItem child = children.Where(x => x.Offset - 8 == component.Offset).FirstOrDefault<TItem>();
 
             return child;
@@ -531,50 +533,38 @@ namespace DjvuNet
 
         #region Private Methods
 
-        private void DecodeDjvuDocument(DjvuReader reader)
+        internal void DecodeDjvuDocument(DjvuReader reader)
         {
             //Check the first 4 bytes
             CheckDjvuHeader(reader);
-            DecodeFormChunk(reader);
+            DecodeRootForm(reader);
 
             BuildPageList();
 
             if (Navigation == null)
-            {
                 Navigation = new DocumentNavigator(this);
+
+            if (Pages?.Length > 0)
+            {
+                ActivePage = FirstPage = Pages[0];
+                LastPage = Pages[Pages.Length - 1];
             }
-
-            ActivePage = Pages.FirstOrDefault<DjvuPage>();
-            LastPage = Pages.Last();
-            FirstPage = Pages.First();
-
-            // Run the preload in the background with low priority
-            //var thread = new Thread(() =>
-            //                            {
-            //                                // Start after a bit
-            //                                Thread.Sleep(5000);
-            //                                Pages.ToList().ForEach(x => x.Preload());
-            //                            });
-            //thread.Priority = ThreadPriority.Lowest;
-            //thread.IsBackground = true;
-            //thread.Start();
-            //Task.Factory.StartNew(() => Parallel.ForEach(Pages, page => page.Preload()), TaskCreationOptions.LongRunning);
         }
 
         /// <summary>
         /// Builds the list of pages
         /// </summary>
-		private void BuildPageList()
+		internal void BuildPageList()
 		{
 			List<DjvuPage> pages = new List<DjvuPage>();
 			Queue<DirmComponent> pageHeaders = null;
-			Queue<TH44Chunk> thumbnail = new Queue<TH44Chunk>(RootFormChunk.GetChildrenItems<TH44Chunk>());
+			Queue<TH44Chunk> thumbnail = new Queue<TH44Chunk>(RootForm.GetChildrenItems<TH44Chunk>());
 			int pageCount = 1;
-			DjviChunk[] sharedItems = RootFormChunk.GetChildrenItems<DjviChunk>();
+			DjviChunk[] sharedItems = RootForm.GetChildrenItems<DjviChunk>();
 			
-			if (this.RootFormChunk.Children.Any() && this.RootFormChunk.Children[0].ChunkID=="DJVU")
+			if (this.RootForm.Children.Any() && this.RootForm.Children[0].ChunkID=="DJVU")
 			{
-				foreach (IFFChunk child in RootFormChunk.Children)
+				foreach (IFFChunk child in RootForm.Children)
 					if (child is FormChunk)
 				{
 					FormChunk form = (FormChunk)child;
@@ -590,7 +580,7 @@ namespace DjvuNet
 			}
 
 
-			foreach (IFFChunk child in RootFormChunk.Children)
+			foreach (IFFChunk child in RootForm.Children)
 			{
 				if (child is FormChunk)
 				{
@@ -614,7 +604,7 @@ namespace DjvuNet
         /// Checks for a valid file header
         /// </summary>
         /// <param name="reader"></param>
-        private void CheckDjvuHeader(DjvuReader reader)
+        internal void CheckDjvuHeader(DjvuReader reader)
         {
             byte[] header = new byte[4];
             reader.Read(header, 0, 4);
@@ -629,18 +619,18 @@ namespace DjvuNet
         /// Decodes the available IFF chunks
         /// </summary>
         /// <param name="reader"></param>
-        private void DecodeFormChunk(DjvuReader reader)
+        internal void DecodeRootForm(DjvuReader reader)
         {
-            _rootFormChunk = FormChunk.GetForm(reader, null, this);
-            _rootFormChunk.Initialize(reader);
-            foreach (IFFChunk chunk in _rootFormChunk.Children)
+            _rootForm = FormChunk.GetRootForm(reader, null, this);
+            _rootForm.Initialize(reader);
+            foreach (IFFChunk chunk in _rootForm.Children)
                 chunk.Initialize(reader);
         }
 
         /// <summary>
         /// Updates the cached page images
         /// </summary>
-        private void UpdateImageCache()
+        internal void UpdateImageCache()
         {
             // Clear all except active
             Pages.Where(page => page != ActivePage).ToList().ForEach(x => x.ClearImage());
@@ -685,7 +675,7 @@ namespace DjvuNet
         /// <summary>
         /// Update the current pages
         /// </summary>
-        private void UpdateCurrentPages()
+        internal void UpdateCurrentPages()
         {
             // Find the index of the current page
             for (int index = 0; index < Pages.Length; index++)
@@ -707,7 +697,7 @@ namespace DjvuNet
         /// Caches the page image referenced by the page index
         /// </summary>
         /// <param name="pages"></param>
-        private void CachePageImages(IEnumerable<DjvuPage> cachePages)
+        internal void CachePageImages(IEnumerable<DjvuPage> cachePages)
         {
             // Clear all the current pages which are not needed
             Pages.Except(cachePages).ToList().ForEach(x => x.ClearImage());
@@ -725,12 +715,10 @@ namespace DjvuNet
         /// Sends the property changed notification
         /// </summary>
         /// <param name="property"></param>
-        private void OnPropertyChanged(string property)
+        protected void OnPropertyChanged(string property)
         {
             if (PropertyChanged != null)
-            {
                 PropertyChanged(this, new PropertyChangedEventArgs(property));
-            }
         }
 
         #endregion Private Methods
