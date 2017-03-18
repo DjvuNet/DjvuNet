@@ -21,17 +21,17 @@ namespace DjvuNet.Compression
         private const int MAXBLOCK = 4096;
 
         /// <summary>
-        /// Sorting treshold
+        /// Sorting threshold
         /// </summary>
         private const int FREQMAX = 4;
 
         /// <summary>
-        /// Sorting treshold
+        /// Sorting threshold
         /// </summary>
         private const int CTXIDS = 3;
 
         /// <summary>
-        /// Sorting treshold
+        /// Sorting threshold
         /// </summary>
         private static readonly sbyte[] MTF = new sbyte[256];
 
@@ -100,7 +100,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// TODO documentation
         /// </summary>
-        public void Flush()
+        public override void Flush()
         {
             size = bptr = 0;
         }

@@ -328,7 +328,7 @@ namespace DjvuNet.DataChunks.Text
         /// <param name="text"></param>
         public TextZone[] SearchForText(string text)
         {
-            if (Children.Count() == 0 && ZoneType == ZoneTypes.Word)
+            if (Children.Length == 0 && ZoneType == ZoneTypes.Word)
             {
                 if (Text.IndexOf(text, StringComparison.CurrentCultureIgnoreCase) != -1)
                 {
@@ -347,7 +347,7 @@ namespace DjvuNet.DataChunks.Text
         /// <returns></returns>
         public TextZone[] OrientedSearchForText(System.Drawing.Rectangle rectangle, int pageHeight)
         {
-            if (Children.Count() == 0 && ZoneType == ZoneTypes.Word)
+            if (Children.Length == 0 && ZoneType == ZoneTypes.Word)
             {
                 if (rectangle.Contains(Rectangle.OrientRectangle(pageHeight)))
                 {
@@ -366,7 +366,7 @@ namespace DjvuNet.DataChunks.Text
         /// <returns></returns>
         public TextZone[] SearchForText(System.Drawing.Rectangle rectangle)
         {
-            if (Children.Count() == 0 && ZoneType == ZoneTypes.Word)
+            if (Children.Length == 0 && ZoneType == ZoneTypes.Word)
             {
                 if (rectangle.Contains(Rectangle))
                 {

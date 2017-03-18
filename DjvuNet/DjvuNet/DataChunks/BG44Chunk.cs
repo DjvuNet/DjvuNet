@@ -27,9 +27,9 @@ namespace DjvuNet.DataChunks
 
         #region ChunkType
 
-        public override ChunkTypes ChunkType
+        public override ChunkType ChunkType
         {
-            get { return ChunkTypes.BG44; }
+            get { return ChunkType.BG44; }
         }
 
         #endregion ChunkType

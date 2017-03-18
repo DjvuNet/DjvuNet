@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DataChunks;
+using DjvuNet.DataChunks.Enums;
 using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Text;
 using DjvuNet.Graphics;
@@ -172,7 +173,9 @@ namespace DjvuNet
             {
                 if (_info == null)
                 {
-                    _info = (InfoChunk)PageForm.Children.FirstOrDefault(x => x is InfoChunk);
+                    var chunk = PageForm.Children
+                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Info);
+                    _info = chunk as InfoChunk;
                 }
 
                 return _info;
@@ -259,8 +262,8 @@ namespace DjvuNet
             {
                 if (_textChunk == null)
                 {
-                    _textChunk = (DataChunks.Text.TextChunk) PageForm.Children.FirstOrDefault(
-                        x => x is DataChunks.Text.TextChunk);
+                    _textChunk = (DataChunks.Text.TextChunk) PageForm.Children.FirstOrDefault<IFFChunk>(
+                        x => x.ChunkType == ChunkType.Text);
                 }
 
                 return _textChunk;
@@ -298,7 +301,8 @@ namespace DjvuNet
                 if (_foregroundJB2Image == null)
                 {
                     // Get the first chunk if present
-                    var chunk = (SjbzChunk)PageForm.Children.FirstOrDefault(x => x is SjbzChunk);
+                    var chunk = (SjbzChunk)PageForm.Children
+                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Sjbz);
 
                     if (chunk != null)
                     {
@@ -325,7 +329,8 @@ namespace DjvuNet
             {
                 if (_foregroundIWPixelMap == null)
                 {
-                    var chunk = (FG44Chunk)PageForm.Children.FirstOrDefault(x => x is FG44Chunk);
+                    var chunk = (FG44Chunk)PageForm.Children
+                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.FG44);
 
                     if (chunk != null)
                     {
@@ -352,7 +357,8 @@ namespace DjvuNet
             {
                 if (_backgroundIWPixelMap == null)
                 {
-                    var chunk = (BG44Chunk)PageForm.Children.FirstOrDefault(x => x is BG44Chunk);
+                    var chunk = (BG44Chunk)PageForm.Children
+                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.BG44);
 
                     if (chunk != null)
                     {
@@ -380,9 +386,10 @@ namespace DjvuNet
                 if (_foregroundPalette == null)
                 {
                     // TODO - verify if tests or this code is failing to handle palette correctly
-                    FGbzChunk result = (FGbzChunk)PageForm.Children.FirstOrDefault(x => x is FGbzChunk);
-                    if (result != null)
-                        _foregroundPalette = result.Palette;
+                    FGbzChunk result = (FGbzChunk)PageForm.Children
+                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.FGbz);
+
+                    _foregroundPalette = result.Palette;
                 }
 
                 return _foregroundPalette;
@@ -902,15 +909,16 @@ namespace DjvuNet
         public System.Drawing.Bitmap BuildPageImage()
         {
             int subsample = 1;
-            if ( this.Info==null && Document.FormChunk.Children[0].ChunkID=="DJVU" && Document.FormChunk.Children[1] is InfoChunk )
-            	this._info = (InfoChunk)Document.FormChunk.Children[1];
+            if ( this.Info==null && Document.RootFormChunk.Children[0].ChunkID=="DJVU" && Document.RootFormChunk.Children[1] is InfoChunk )
+            	this._info = (InfoChunk)Document.RootFormChunk.Children[1];
             
             int width = Info.Width / subsample;
             int height = Info.Height / subsample;
 
             var map = GetMap(new GRect(0, 0, width, height), subsample, null);
 
-            if (map == null) return new Bitmap(Info.Width, Info.Height);
+            if (map == null)
+                return new Bitmap(Info.Width, Info.Height);
 
             int[] pixels = new int[width * height];            
 
@@ -1497,7 +1505,7 @@ namespace DjvuNet
         {
             BG44Chunk[] backgrounds = PageForm.GetChildrenItems<BG44Chunk>();
 
-            if (backgrounds == null || backgrounds.Count() == 0)
+            if (backgrounds == null || backgrounds.Length == 0)
             {
                 return CreateBlankImage(Brushes.White, Info.Width, Info.Height);
             }

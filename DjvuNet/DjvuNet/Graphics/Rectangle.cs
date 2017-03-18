@@ -203,7 +203,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public long Area
         {
-            get { return (Left - Right) * (long)(Top - Bottom); }
+            get { return (long) (Left - Right) * (Top - Bottom); }
         }
 
         #endregion Area
@@ -242,16 +242,20 @@ namespace DjvuNet.Graphics
             Right = Left = Bottom = Top = 0;
         }
 
-        /// <summary> Creates a new Rectangle object.
-        ///
+        /// <summary> 
+        /// Creates a new Rectangle object initialized with provided values.
         /// </summary>
-        /// <param name="right">left edge
+        /// <param name="right">
+        /// left edge
         /// </param>
-        /// <param name="bottom">bottom edge
+        /// <param name="bottom">
+        /// bottom edge
         /// </param>
-        /// <param name="width">horizontal length
+        /// <param name="width">
+        /// horizontal length
         /// </param>
-        /// <param name="height">vertical length
+        /// <param name="height">
+        /// vertical length
         /// </param>
         public Rectangle(int right, int bottom, int width, int height)
         {
@@ -265,63 +269,82 @@ namespace DjvuNet.Graphics
 
         #region Public Methods
 
-        /// <summary> Create a clone of this rectangle.
-        ///
+        /// <summary> 
+        /// Create a clone of this rectangle.
         /// </summary>
-        /// <returns> the newly created copy
+        /// <returns> 
+        /// the newly created copy
         /// </returns>
         public Rectangle Duplicate()
         {
             return new Rectangle { Left = Left, Right = Right, Top = Top, Bottom = Bottom };
         }
 
-        /// <summary> Reset this rectange with all edges at the origin.</summary>
+        /// <summary> Reset this rectangle with all edges at the origin.</summary>
         public virtual void Clear()
         {
             Right = Left = Bottom = Top = 0;
         }
 
-        /// <summary> Test if a point is contained in this rectangle.
-        ///
+        /// <summary> 
+        /// Test if a point is contained in this rectangle. The definition of point 
+        /// contained by rectangle on 2D plane is
+        /// that point lies inside or on the edge of the rectangle.
         /// </summary>
-        /// <param name="x">horizontal coordinate
+        /// <param name="x">
+        /// horizontal coordinate
         /// </param>
-        /// <param name="y">vertical coordinate
-        ///
+        /// <param name="y">
+        /// vertical coordinate
         /// </param>
-        /// <returns> true if the point is within this rectangle
+        /// <returns> 
+        /// true if the point is within this rectangle
         /// </returns>
         public virtual bool Contains(int x, int y)
         {
-            return (x >= Right) && (x < Left) && (y >= Bottom) && (y < Top);
+            return (x >= Right) && (x <= Left) && (y >= Bottom) && (y <= Top);
         }
 
-        /// <summary> Test if a rectangle is contained within this rectangle.
-        ///
+        /// <summary> 
+        /// Test if a rectangle is contained within this rectangle.
+        /// Empty rectangle is treated as a point on 2D plane with coordinates which may 
+        /// "contain" other points with same coordinates. In other words on 2D plane
+        /// rectangle with width and height equal to zero is reduced to a point.
         /// </summary>
-        /// <param name="rect">rectangle to test
-        ///
+        /// <param name="rect">
+        /// rectangle to test
         /// </param>
-        /// <returns> true if the rectangle is contained
+        /// <returns> 
+        /// true if the rectangle is contained within this rectangle
         /// </returns>
         public virtual bool Contains(Rectangle rect)
         {
-            return rect.Empty || (Contains(rect.Right, rect.Bottom) && Contains(rect.Left - 1, rect.Top - 1));
+            // First check for special cases
+
+            if (this.Empty && !rect.Empty)
+                return false;
+
+            // Test point coordinates on 2D plane
+            if (this.Empty && rect.Empty)
+                return (this.Right == rect.Right) && (this.Bottom == rect.Bottom);
+
+            return (Contains(rect.Right, rect.Bottom) && Contains(rect.Left - 1, rect.Top - 1));
         }
 
-        /// <summary> Test if two rectangles are equal.
-        ///
+        /// <summary> 
+        /// Test if two rectangles are equal.
         /// </summary>
-        /// <param name="ref">reference rectangle to compare with
-        ///
+        /// <param name="obj">
+        /// reference rectangle to compare with
         /// </param>
-        /// <returns> true if all the edges are equal
+        /// <returns> 
+        /// true if all the edges are equal
         /// </returns>
-        public override bool Equals(Object ref_Renamed)
+        public override bool Equals(object obj)
         {
-            if (ref_Renamed is Rectangle)
+            Rectangle r = obj as Rectangle;
+            if (null != r)
             {
-                Rectangle r = (Rectangle)ref_Renamed;
                 bool isempty1 = Empty;
                 bool isempty2 = r.Empty;
 
@@ -332,15 +355,23 @@ namespace DjvuNet.Graphics
             return false;
         }
 
-        /// <summary> Grow the size of this rectangle by moving all the edges outwards.
-        ///
+        public override int GetHashCode()
+        {
+            return (Right.GetHashCode() - Width.GetHashCode() + Bottom.GetHashCode() 
+                - Height.GetHashCode()).GetHashCode();
+        }
+
+        /// <summary> 
+        /// Grow the size of this rectangle by moving all the edges outwards.
         /// </summary>
-        /// <param name="dx">Amount to grow the horizontal edges
+        /// <param name="dx">
+        /// Amount to grow the horizontal edges
         /// </param>
-        /// <param name="dy">Amount to grow the vertical edges
-        ///
+        /// <param name="dy">
+        /// Amount to grow the vertical edges
         /// </param>
-        /// <returns> true if not empty.
+        /// <returns> 
+        /// true if not empty.
         /// </returns>
         public virtual bool Inflate(int dx, int dy)
         {
@@ -361,15 +392,17 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Set this rectangle as the intersection of two rectangles.
-        ///
+        /// <summary> 
+        /// Set this rectangle as the intersection of two rectangles.
         /// </summary>
-        /// <param name="rect1">rectangle to intersect
+        /// <param name="rect1">
+        /// rectangle to intersect
         /// </param>
-        /// <param name="rect2">rectangle to intersect
-        ///
+        /// <param name="rect2">
+        /// rectangle to intersect
         /// </param>
-        /// <returns> true if the intersection is not empty
+        /// <returns> 
+        /// true if the intersection is not empty
         /// </returns>
         public virtual bool Intersect(Rectangle rect1, Rectangle rect2)
         {
@@ -391,12 +424,14 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Set this rectangle as the union of two rectangles.
         /// </summary>
-        /// <param name="rect1">rectangle to union
+        /// <param name="rect1">
+        /// rectangle to union
         /// </param>
-        /// <param name="rect2">rectangle to union
-        ///
+        /// <param name="rect2">
+        /// rectangle to union
         /// </param>
-        /// <returns> true if the results are non-empty
+        /// <returns> 
+        /// true if the results are non-empty
         /// </returns>
         public virtual bool Recthull(Rectangle rect1, Rectangle rect2)
         {
@@ -426,15 +461,17 @@ namespace DjvuNet.Graphics
             return true;
         }
 
-        /// <summary> Shift this rectangle
-        ///
+        /// <summary> 
+        /// Shift this rectangle (linear translation)
         /// </summary>
-        /// <param name="dx">horizontal distance to shift
+        /// <param name="dx">
+        /// horizontal distance to shift
         /// </param>
-        /// <param name="dy">vertical distance to shift
-        ///
+        /// <param name="dy">
+        /// vertical distance to shift
         /// </param>
-        /// <returns> true if not empty
+        /// <returns> 
+        /// true if not empty
         /// </returns>
         public virtual bool Translate(int dx, int dy)
         {
@@ -451,10 +488,13 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Implicit conversion to drawing rectangle
+        /// Implicit conversion to <typeparamref name="System.Drawing.Rectangle">
+        /// System.Drawing.Rectangle</typeparamref>
         /// </summary>
-        /// <param name="rect"></param>
-        /// <returns></returns>
+        /// <param name="rect">
+        /// </param>
+        /// <returns>
+        /// </returns>
         public static implicit operator System.Drawing.Rectangle(Rectangle rect)
         {
             return new System.Drawing.Rectangle(rect.Left, rect.Top, rect.Width, rect.Height);

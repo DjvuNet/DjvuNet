@@ -119,7 +119,7 @@ namespace DjvuNet.DataChunks.Navigation
         /// </summary>
         public int TotalBookmarks
         {
-            get { return Children.Count() + Children.Sum(x => x.TotalBookmarks); }
+            get { return Children.Length + Children.Sum(x => x.TotalBookmarks); }
         }
 
         #endregion TotalBookmarks
@@ -216,7 +216,7 @@ namespace DjvuNet.DataChunks.Navigation
             {
                 pageNumber--;
 
-                if (pageNumber < 0 || pageNumber >= Document.Pages.Count())
+                if (pageNumber < 0 || pageNumber >= Document.Pages.Length)
                 {
                     throw new Exception("Navigation URL is out of range: " + URL);
                 }

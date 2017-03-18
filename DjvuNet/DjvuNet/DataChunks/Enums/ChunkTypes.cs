@@ -7,7 +7,7 @@ namespace DjvuNet.DataChunks.Enums
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public enum ChunkTypes
+    public enum ChunkType
     {
         /// <summary>
         /// Unknown chunk type
@@ -26,23 +26,23 @@ namespace DjvuNet.DataChunks.Enums
         /// DIRM chunk, possibly shared/included chunks and subsequent
         /// FORM:DJVU chunks which make up a multipage document
         /// </summary>
-        Form_Djvm,
+        Djvm,
 
         /// <summary>
         /// A DjVu Page / single page DjVu document. Composite chunk that
         /// contains the chunks which make up a page in a djvu document
         /// </summary>
-        Form_Djvu,
+        Djvu,
 
         /// <summary>
         /// A "shared" DjVu file which is included via the INCL chunk. Shared annotations, shared shape dictionary.
         /// </summary>
-        Form_Djvi,
+        Djvi,
 
         /// <summary>
         /// Composite chunk that contains the TH44 chunks which are the embedded thumbnails
         /// </summary>
-        Form_Thum,
+        Thum,
 
         /// <summary>
         /// Page name information for multi-page documents
@@ -105,7 +105,7 @@ namespace DjvuNet.DataChunks.Enums
         WMRM,
 
         /// <summary>
-        /// Color JB2 data. Provides a color for each (blit or shape?) in the corresponding Sjbz chunk.
+        /// Foreground Color JB2 Chunk.
         /// </summary>
         FGbz,
 
@@ -132,6 +132,11 @@ namespace DjvuNet.DataChunks.Enums
         /// <summary>
         /// G4 encoded mask
         /// </summary>
-        Smmr
+        Smmr,
+
+        /// <summary>
+        /// Abstract TextChunk type
+        /// </summary>
+        Text = int.MaxValue,
     }
 }

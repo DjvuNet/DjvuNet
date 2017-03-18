@@ -3,14 +3,16 @@
 // </copyright>
 
 using System.IO;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using DjvuNet.DataChunks.Enums;
 
 namespace DjvuNet.DataChunks
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
+
 
     /// <summary>
     /// TODO: Update summary.
@@ -21,9 +23,9 @@ namespace DjvuNet.DataChunks
 
         #region ChunkType
 
-        public override ChunkTypes ChunkType
+        public override ChunkType ChunkType
         {
-            get { return ChunkTypes.Smmr; }
+            get { return ChunkType.Smmr; }
         }
 
         #endregion ChunkType
@@ -84,9 +86,7 @@ namespace DjvuNet.DataChunks
 
             // CIDa is a known unknown chunk
             if (ChunkID != "CIDa")
-            {
-                //Console.WriteLine("Creating unknown chunk for: {0}", ChunkID);
-            }
+                Debug.WriteLine("Creating unknown chunk for: {0}", ChunkID);
         }
 
         #endregion Protected Methods

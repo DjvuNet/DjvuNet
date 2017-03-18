@@ -2,7 +2,7 @@ using System;
 
 namespace DjvuNet.Graphics
 {
-    public sealed class PixelReference : Pixel
+    public class PixelReference : DjvuNet.Graphics.Pixel
     {
         #region Private Variables
 

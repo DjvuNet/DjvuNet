@@ -54,7 +54,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the chunk type
         /// </summary>
-        public abstract ChunkTypes ChunkType
+        public abstract ChunkType ChunkType
         {
             get;
         }
@@ -170,13 +170,10 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// True if the chunk is a sub form chunk, false otherwise
         /// </summary>
-        public bool IsSubFormChunk
+        public bool IsSubFormChunk (ChunkType type)
         {
-            get
-            {
-                return ChunkType == ChunkTypes.Form_Djvu || ChunkType == ChunkTypes.Form_Djvi ||
-                       ChunkType == ChunkTypes.Form_Thum || ChunkType == ChunkTypes.Form_Djvm;
-            }
+            return type == ChunkType.Djvu || type == ChunkType.Djvi ||
+                    type == ChunkType.Thum || type == ChunkType.Djvm || type == ChunkType.Form;
         }
 
         #endregion IsSubFormChunk
@@ -220,8 +217,13 @@ namespace DjvuNet.DataChunks
 
             // Move back 4 to compensate for the chunk type already read
             _offset = reader.Position - 4;
-
             ReadChunkHeader(reader);
+            //Initialize(reader);
+        }
+
+        public virtual void Initialize(DjvuReader reader)
+        {
+            reader.Position = Offset + 12;
             ReadChunkData(reader);
         }
 
@@ -238,36 +240,87 @@ namespace DjvuNet.DataChunks
         /// Builds the appropriate chunk for the ID
         /// </summary>
         /// <returns></returns>
-        public static IFFChunk BuildIFFChunk(DjvuReader reader, DjvuDocument rootDocument, IFFChunk parent, ChunkTypes chunkType)
+        public static IFFChunk BuildIFFChunk(DjvuReader reader, DjvuDocument rootDocument, 
+            IFFChunk parent, ChunkType chunkType)
         {
             IFFChunk result = null;
 
-            if (chunkType == ChunkTypes.Form) result = new FormChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Form_Djvm) result = new DjvmChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Form_Djvu) result = new DjvuChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Form_Djvi) result = new DjviChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Form_Thum) result = new ThumChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Dirm) result = new DirmChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Navm) result = new NavmChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Anta) result = new AntaChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Antz) result = new AntzChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Txta) result = new TxtaChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Txtz) result = new TxtzChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Djbz) result = new DjbzChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Sjbz) result = new SjbzChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.FG44) result = new FG44Chunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.BG44) result = new BG44Chunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.TH44) result = new TH44Chunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.WMRM) result = new WmrmChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.FGbz) result = new FGbzChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Info) result = new InfoChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Incl) result = new InclChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.BGjp) result = new BGjpChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.FGjp) result = new FGjpChunk(reader, parent, rootDocument);
-            else if (chunkType == ChunkTypes.Smmr) result = new SmmrChunk(reader, parent, rootDocument);
-            else result = new UnknownChunk(reader, parent, rootDocument);
-
-            //Console.WriteLine(result);
+            switch (chunkType)
+            {
+                //case ChunkType.Form:
+                //    result = new FormChunk(reader, parent, rootDocument);
+                //    break;
+                case ChunkType.Djvm:
+                    result = new DjvmChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Djvu:
+                    result = new DjvuChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Djvi:
+                    result = new DjviChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Thum:
+                    result = new ThumChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Dirm:
+                    result = new DirmChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Navm:
+                    result = new NavmChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Anta:
+                    result = new AntaChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Antz:
+                    result = new AntzChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Txta:
+                    result = new TxtaChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Txtz:
+                    result = new TxtzChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Djbz:
+                    result = new DjbzChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Sjbz:
+                    result = new SjbzChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.FG44:
+                    result = new FG44Chunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.BG44:
+                    result = new BG44Chunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.TH44:
+                    result = new TH44Chunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.WMRM:
+                    result = new WmrmChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.FGbz:
+                    result = new FGbzChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Info:
+                    result = new InfoChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Incl:
+                    result = new InclChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.BGjp:
+                    result = new BGjpChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.FGjp:
+                    result = new FGjpChunk(reader, parent, rootDocument);
+                    break;
+                case ChunkType.Smmr:
+                    result = new SmmrChunk(reader, parent, rootDocument);
+                    break;
+                default:
+                    result = new UnknownChunk(reader, parent, rootDocument);
+                    break;
+            }
+           
             return result;
         }
 
@@ -276,22 +329,17 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <param name="ID"></param>
         /// <returns></returns>
-        public static ChunkTypes GetChunkType(string ID)
+        public static ChunkType GetChunkType(string ID)
         {
-            string lowerID = ID.ToLower();
-
-            var values = Enum.GetValues(typeof(ChunkTypes)).Cast<ChunkTypes>();
-
-            foreach (ChunkTypes value in values)
+            try
             {
-                if (value.ToString().ToLower().Replace("form_", "") == lowerID)
-                {
-                    return value;
-                }
+                return (ChunkType)Enum.Parse(typeof(ChunkType), ID, true);
+            }
+            catch(ArgumentException)  // Catch unsupported chunks i.e. "CIDa"
+            {
             }
 
-            return ChunkTypes.Unknown;
-            //throw new Exception("Unknown chunk type: " + ID);
+            return ChunkType.Unknown;
         }
 
         /// <summary>
@@ -364,12 +412,17 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         private void ReadChunkHeader(DjvuReader reader)
         {
-            ChunkID = reader.ReadUTF8String(4);
-
-            if (IsSubFormChunk == false)
+            bool isForm = IsSubFormChunk(ChunkType);
+            if (isForm)
             {
-                Length = reader.ReadInt32MSB();
+                reader.Position -= 8;
+                Length = (int)reader.ReadUInt32MSB();
             }
+
+            ChunkID = reader.ReadUTF8String(4);
+            if (!isForm)
+                Length = (int)reader.ReadUInt32MSB();
+
         }
 
         #endregion Private Methods

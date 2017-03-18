@@ -30,9 +30,9 @@ namespace DjvuNet.DataChunks
 
         #region ChunkType
 
-        public override ChunkTypes ChunkType
+        public override ChunkType ChunkType
         {
-            get { return ChunkTypes.Dirm; }
+            get { return ChunkType.Dirm; }
         }
 
         #endregion ChunkType
@@ -139,6 +139,7 @@ namespace DjvuNet.DataChunks
 
         protected override void ReadChunkData(DjvuReader reader)
         {
+            reader.Position = Offset + 12;
             sbyte flagByte = reader.ReadSByte();
 
             // B[7]

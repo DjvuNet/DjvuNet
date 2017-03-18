@@ -1,11 +1,15 @@
+using System;
 using System.Collections;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.Graphics
 {
     /// <summary>
     /// This is an abstract class for representing pixel maps.
     /// </summary>
-    public abstract class Map : DjvuImage
+    public abstract class Map
     {
         #region Public Properties
 
@@ -38,7 +42,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the image data
         /// </summary>
-        public override sbyte[] Data
+        public sbyte[] Data
         {
             get { return _data; }
 
@@ -60,7 +64,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the width of the image (ncolumns)
         /// </summary>
-        public override int ImageWidth
+        public int ImageWidth
         {
             get { return _imageWidth; }
 
@@ -82,7 +86,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the height of the image (nrows)
         /// </summary>
-        public override int ImageHeight
+        public int ImageHeight
         {
             get { return _imageHeight; }
 
@@ -104,7 +108,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the number of bytes per pixel (NColumns)
         /// </summary>
-        public override int BytesPerPixel
+        public int BytesPerPixel
         {
             get { return _bytesPerPixel; }
 
@@ -336,6 +340,57 @@ namespace DjvuNet.Graphics
         public virtual Pixel PixelRamp(PixelReference pixel)
         {
             return pixel;
+        }
+
+        /// <summary>
+        /// Converts the pixel data to an image
+        /// </summary>
+        /// <returns></returns>
+        public System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
+        {
+            byte[] byteData = new byte[Data.Length];
+            Buffer.BlockCopy(Data, 0, byteData, 0, Data.Length);
+
+            PixelFormat format = PixelFormat.Undefined;
+
+            if (BytesPerPixel == 1) format = PixelFormat.Format8bppIndexed;
+            else if (BytesPerPixel == 2) format = PixelFormat.Format16bppRgb555;
+            else if (BytesPerPixel == 3) format = PixelFormat.Format24bppRgb;
+            else if (BytesPerPixel == 4) format = PixelFormat.Format32bppArgb;
+            else throw new FormatException(string.Format("Unknown pixel format for byte count: {0}", BytesPerPixel));
+
+            System.Drawing.Bitmap image = CopyDataToBitmap(ImageWidth, ImageHeight, byteData, format);
+            image.RotateFlip(rotation);
+
+            return image;
+        }
+
+        /// <summary>
+        /// TODO create summary
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public static System.Drawing.Bitmap CopyDataToBitmap(int width, int height, byte[] data, PixelFormat format)
+        {
+            //Here create the Bitmap to the know height, width and format
+            //PixelFormat.Format24bppRgb
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height, format);
+
+            //Create a BitmapData and Lock all pixels to be written
+            BitmapData bmpData = bmp.LockBits(
+                                 new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
+                                 ImageLockMode.WriteOnly, bmp.PixelFormat);
+
+            //Copy the data from the byte array into BitmapData.Scan0
+            Marshal.Copy(data, 0, bmpData.Scan0, data.Length);
+
+            //Unlock the pixels
+            bmp.UnlockBits(bmpData);
+
+            //Return the bitmap
+            return bmp;
         }
 
         #endregion Public Methods

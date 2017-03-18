@@ -21,9 +21,9 @@ namespace DjvuNet.DataChunks
 
         #region ChunkType
 
-        public override ChunkTypes ChunkType
+        public override ChunkType ChunkType
         {
-            get { return ChunkTypes.Form_Thum; }
+            get { return ChunkType.Thum; }
         }
 
         #endregion ChunkType
@@ -41,10 +41,13 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
+#if DEBUG
         protected override void ReadChunkData(DjvuReader reader)
         {
-            // Nothing
+            base.ReadChunkData(reader);
         }
+
+#endif
 
         #endregion Protected Methods
     }

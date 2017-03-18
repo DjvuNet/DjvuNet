@@ -256,7 +256,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         public override int GetHashCode()
         {
-            return unchecked((int)0xff000000) | (Red << 16) | (Green << 8) | Blue;
+            return unchecked((int)0xff000000) | ((int)Red << 16) | ((int)Green << 8) | (int)Blue;
         }
 
         /// <summary>

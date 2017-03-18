@@ -58,7 +58,7 @@ namespace DjvuNet.Wavelet
                     }
                 }
             }
-            catch (Exception ignored)
+            catch (Exception)
             {
             }
 

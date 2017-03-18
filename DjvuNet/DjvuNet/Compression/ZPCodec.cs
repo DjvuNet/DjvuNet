@@ -251,7 +251,7 @@ namespace DjvuNet.Compression
                 int shift = FFZ(AValue);
                 _scount = (short)(_scount - shift);
                 AValue = 0xffff & (AValue << shift);
-                _code = 0xffff & ((_code << shift) | ((_buffer >> _scount) & ((1 << shift) - 1)));
+                _code = 0xffff & ((_code << shift) | (((long)_buffer >> _scount) & ((1 << shift) - 1)));
 
                 if (_scount < 16)
                 {
@@ -275,7 +275,7 @@ namespace DjvuNet.Compression
 
             _scount--;
             AValue = 0xffff & (z << 1);
-            _code = 0xffff & ((_code << 1) | ((_buffer >> _scount) & 1));
+            _code = 0xffff & ((_code << 1) | (((long)_buffer >> _scount) & 1));
 
             if (_scount < 16)
             {
@@ -310,7 +310,7 @@ namespace DjvuNet.Compression
                 int shift = FFZ(AValue);
                 _scount = (short)(_scount - shift);
                 AValue = 0xffff & (AValue << shift);
-                _code = 0xffff & ((_code << shift) | ((_buffer >> _scount) & ((1 << shift) - 1)));
+                _code = 0xffff & ((_code << shift) | (((long)_buffer >> _scount) & ((1 << shift) - 1)));
 
                 if (_scount < 16)
                 {
@@ -329,7 +329,7 @@ namespace DjvuNet.Compression
 
             _scount--;
             AValue = 0xffff & (z << 1);
-            _code = 0xffff & ((_code << 1) | ((_buffer >> _scount) & 1));
+            _code = 0xffff & ((_code << 1) | (((long)_buffer >> _scount) & 1));
 
             if (_scount < 16)
             {
@@ -357,7 +357,7 @@ namespace DjvuNet.Compression
                 int shift = FFZ(AValue);
                 _scount = (short)(_scount - shift);
                 AValue = 0xffff & (AValue << shift);
-                _code = 0xffff & ((_code << shift) | ((_buffer >> _scount) & ((1 << shift) - 1)));
+                _code = 0xffff & ((_code << shift) | (((long)_buffer >> _scount) & ((1 << shift) - 1)));
 
                 if (_scount < 16)
                 {
@@ -376,7 +376,7 @@ namespace DjvuNet.Compression
 
             _scount--;
             AValue = 0xffff & (z << 1);
-            _code = 0xffff & ((_code << 1) | ((_buffer >> _scount) & 1));
+            _code = 0xffff & ((_code << 1) | (((long)_buffer >> _scount) & 1));
 
             if (_scount < 16)
             {
@@ -457,7 +457,7 @@ namespace DjvuNet.Compression
                     }
                 }
 
-                _buffer = (_buffer << 8) | _zByte;
+                _buffer = (_buffer << 8) |(int) _zByte;
             }
         }
 
@@ -476,12 +476,12 @@ namespace DjvuNet.Compression
                 _code &= (_ibs.ReadByte() << 8);
                 _zByte = (short)(0xff & _ibs.ReadByte());
             }
-            catch (IOException exp)
+            catch (IOException)
             {
                 _zByte = 255;
             }
 
-            _code |= _zByte;
+            _code |=(long) _zByte;
             _delay = 25;
             _scount = 0;
             Preload();

@@ -108,12 +108,12 @@ namespace DjvuNet.Wavelet
                     throw new IOException("File has been compressed with a more recent Codec");
                 }
 
-                int header3size = 5;
+                //int header3size = 5;
 
-                if (minor < 2)
-                {
-                    header3size = 4;
-                }
+                //if (minor < 2)
+                //{
+                //    header3size = 4;
+                //}
 
                 int w = (bs.ReadByte() << 8);
                 w |= bs.ReadByte();

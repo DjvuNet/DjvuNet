@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.DataChunks;
@@ -23,10 +24,15 @@ namespace DjvuNet
     /// </summary>
     public class DjvuDocument : INotifyPropertyChanged, IDisposable
     {
-        #region Private Variables
 
-        // This should always be 4
-        private long _startOffset = 4;
+        /// <summary>
+        /// DjvuFile according to specification starts with AT&T followed by FORM
+        /// </summary>
+        public static readonly byte[] MagicBuffer = new byte[] { 0x41, 0x54, 0x26, 0x54, 0x46, 0x4f, 0x52, 0x4d };
+
+        public const string DjvuFileHeader = "AT&TFORM";
+
+        #region Private Variables
 
         private DjvuReader _reader;
 
@@ -70,16 +76,23 @@ namespace DjvuNet
 
         #region FormChunk
 
-        private FormChunk _formChunk;
+        private FormChunk _rootFormChunk;
 
         /// <summary>
-        /// Gets the form chunk in the document
+        /// Gets the root form in the document
         /// </summary>
-        public FormChunk FormChunk
+        public FormChunk RootFormChunk
         {
             get
             {
-                return _formChunk;
+                return _rootFormChunk;
+            }
+            private set
+            {
+                if (_rootFormChunk != value)
+                {
+                    _rootFormChunk = value;
+                }
             }
         }
 
@@ -98,7 +111,8 @@ namespace DjvuNet
             {
                 if (_directory == null)
                 {
-                    _directory = (DirmChunk)FormChunk.Children.FirstOrDefault(x => x.ChunkType == ChunkTypes.Dirm);
+                    _directory = (DirmChunk)RootFormChunk.Children
+                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
                 }
 
                 return _directory;
@@ -120,7 +134,8 @@ namespace DjvuNet
             {
                 if (_navigation == null)
                 {
-                    _navigation = (NavmChunk)FormChunk.Children.FirstOrDefault(x => x.ChunkType == ChunkTypes.Navm);
+                    _navigation = (NavmChunk)RootFormChunk.Children
+                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
                 }
 
                 return _navigation;
@@ -453,21 +468,63 @@ namespace DjvuNet
         public TItem GetChunkByID<TItem>(string ID) where TItem : IFFChunk
         {
             if (Directory == null)
-            {
                 return null;
-            }
 
-            DirmComponent component = Directory.Components.FirstOrDefault(x => x.ID == ID);
+            DirmComponent component = Directory.Components.FirstOrDefault<DirmComponent>(x => x.ID == ID);
 
             if (component == null)
-            {
                 return null;
-            }
 
-            TItem[] children = FormChunk.GetChildrenItems<TItem>().ToArray();
-            TItem child = children.Where(x => x.Offset - 8 == component.Offset).FirstOrDefault();
+            TItem[] children = RootFormChunk.GetChildrenItems<TItem>().ToArray();
+            TItem child = children.Where(x => x.Offset - 8 == component.Offset).FirstOrDefault<TItem>();
 
             return child;
+        }
+
+        public static bool IsDjvuDocument(String filePath)
+        {
+            if (!String.IsNullOrWhiteSpace(filePath))
+                if (File.Exists(filePath))
+                    using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
+                        return IsDjvuDocument(stream);
+                else
+                    throw new FileNotFoundException($"File was not found: {filePath}");
+
+            throw new ArgumentException($"Invalid file path: \"{filePath}\" ");
+        }
+
+        public static bool IsDjvuDocument(Stream stream)
+        {
+            if (null == stream)
+                throw new ArgumentNullException(nameof(stream));
+
+            // Minimum empty Djvu file will consist of file header (8 bytes)
+            // followed by length of IFF stream in the form of uint (4 bytes) and 
+            // "DJVM" or "DJVU" ASCII string (4 bytes) giving total of 16 bytes.
+            if (stream.Length < MagicBuffer.Length * 2)
+                return false;
+
+            if (stream.Position != 0)
+                if (stream.CanSeek)
+                    stream.Position = 0;
+                else
+                    throw new ArgumentException(
+                        $"Stream is not set to the start of data and does not support seek. Current position: {stream.Position}", nameof(stream));
+
+            byte[] buff = new byte[MagicBuffer.Length];
+            int readBytes = stream.Read(buff, 0, buff.Length);
+
+            string actualFileHeader = Encoding.ASCII.GetString(buff);
+
+            // TODO Verify speed of alternative test - compare UInt64 / Int64 created from first 8 bytes
+            // but use BinaryReader to read first bytes.
+
+            //readBytes = stream.Read(buff, 0, buff.Length);
+            //var docLength = BitConverter.ToUInt64(buff, 0);
+            //readBytes = stream.Read(buff, 0, buff.Length);
+            //var formTypeTest = BitConverter.ToUInt64(MagicBuffer, 0))
+
+            return (actualFileHeader == DjvuFileHeader);
         }
 
         #endregion Public Methods
@@ -487,7 +544,7 @@ namespace DjvuNet
                 Navigation = new DocumentNavigator(this);
             }
 
-            ActivePage = Pages.FirstOrDefault();
+            ActivePage = Pages.FirstOrDefault<DjvuPage>();
             LastPage = Pages.Last();
             FirstPage = Pages.First();
 
@@ -511,13 +568,13 @@ namespace DjvuNet
 		{
 			List<DjvuPage> pages = new List<DjvuPage>();
 			Queue<DirmComponent> pageHeaders = null;
-			Queue<TH44Chunk> thumbnail = new Queue<TH44Chunk>(FormChunk.GetChildrenItems<TH44Chunk>());
+			Queue<TH44Chunk> thumbnail = new Queue<TH44Chunk>(RootFormChunk.GetChildrenItems<TH44Chunk>());
 			int pageCount = 1;
-			DjviChunk[] sharedItems = FormChunk.GetChildrenItems<DjviChunk>();
+			DjviChunk[] sharedItems = RootFormChunk.GetChildrenItems<DjviChunk>();
 			
-			if (this.FormChunk.Children.Any() && this.FormChunk.Children[0].ChunkID=="DJVU")
+			if (this.RootFormChunk.Children.Any() && this.RootFormChunk.Children[0].ChunkID=="DJVU")
 			{
-				foreach (IFFChunk child in FormChunk.Children)
+				foreach (IFFChunk child in RootFormChunk.Children)
 					if (child is FormChunk)
 				{
 					FormChunk form = (FormChunk)child;
@@ -533,16 +590,16 @@ namespace DjvuNet
 			}
 
 
-			foreach (IFFChunk child in FormChunk.Children)
+			foreach (IFFChunk child in RootFormChunk.Children)
 			{
 				if (child is FormChunk)
 				{
 					FormChunk form = (FormChunk)child;
 
-					if (form.Children.Any(x => x.ChunkType == ChunkTypes.Form_Djvu))
+					if (form.Children.Any(x => x.ChunkType == ChunkType.Djvu))
 					{
-						DirmComponent currentHeader = pageHeaders.Count() > 0 ? pageHeaders.Dequeue() : null;
-						TH44Chunk currentThumbnail = thumbnail.Count() > 0 ? thumbnail.Dequeue() : null;
+						DirmComponent currentHeader = pageHeaders.Count > 0 ? pageHeaders.Dequeue() : null;
+						TH44Chunk currentThumbnail = thumbnail.Count > 0 ? thumbnail.Dequeue() : null;
 						DjvuPage newPage = new DjvuPage(pageCount++, this, currentHeader, currentThumbnail, sharedItems, form);
 
 						pages.Add(newPage);
@@ -574,7 +631,10 @@ namespace DjvuNet
         /// <param name="reader"></param>
         private void DecodeFormChunk(DjvuReader reader)
         {
-            _formChunk = new FormChunk(reader, null, this);
+            _rootFormChunk = FormChunk.GetForm(reader, null, this);
+            _rootFormChunk.Initialize(reader);
+            foreach (IFFChunk chunk in _rootFormChunk.Children)
+                chunk.Initialize(reader);
         }
 
         /// <summary>
@@ -628,12 +688,12 @@ namespace DjvuNet
         private void UpdateCurrentPages()
         {
             // Find the index of the current page
-            for (int index = 0; index < Pages.Count(); index++)
+            for (int index = 0; index < Pages.Length; index++)
             {
                 if (Pages[index] == ActivePage)
                 {
                     int previous = Math.Max(index - 1, 0);
-                    int next = Math.Min(index + 1, Pages.Count() - 1);
+                    int next = Math.Min(index + 1, Pages.Length - 1);
 
                     PreviousPage = Pages[previous];
                     NextPage = Pages[next];

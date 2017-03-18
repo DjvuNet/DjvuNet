@@ -7,6 +7,8 @@ namespace DjvuNet.DataChunks.Graphics
     {
         #region Private Variables
 
+        private FGbzChunk _parent;
+
         #endregion Private Variables
 
         #region Public Properties
@@ -80,12 +82,18 @@ namespace DjvuNet.DataChunks.Graphics
 
         #endregion BlitColors
 
+        public FGbzChunk Parent
+        {
+            get { return _parent; }
+        }
+
         #endregion Public Properties
 
         #region Constructors
 
-        public ColorPalette(DjvuReader reader)
+        public ColorPalette(DjvuReader reader, FGbzChunk parent)
         {
+            _parent = parent;
             ReadPaletteData(reader);
         }
 
@@ -93,9 +101,9 @@ namespace DjvuNet.DataChunks.Graphics
 
         #region Public Methods
 
-        /// <summary> Overwrites #p# with the color located at position #index# in the
-        /// palette.
-        ///
+        /// <summary> 
+        /// Overwrites #p# with the color located at position 
+        /// #index# in the palette.
         /// </summary>
         /// <param name="index">DOCUMENT ME!
         /// </param>
@@ -120,10 +128,13 @@ namespace DjvuNet.DataChunks.Graphics
             bool isShapeTable = (header >> 7) == 1;
             _version = header & 127;
 
-            int paletteSize = reader.ReadInt16MSB();
+            // Color palette size is expressed as unsigned short int
+            // in reference implementation while INT16 is indicated in
+            // standard document
+            ushort paletteSize = reader.ReadUInt16MSB();
 
             // Read in the palette colors
-            List<Pixel> paletteColors = new List<Pixel>();
+            List<Pixel> paletteColors = new List<Pixel>(paletteSize);
             for (int x = 0; x < paletteSize; x++)
             {
                 sbyte b = reader.ReadSByte();
@@ -136,7 +147,7 @@ namespace DjvuNet.DataChunks.Graphics
 
             if (isShapeTable == true)
             {
-                int totalBlits = reader.ReadInt24MSB();
+                int totalBlits = (int) reader.ReadUInt24MSB();
 
                 DjvuReader compressed = reader.GetBZZEncodedReader();
 

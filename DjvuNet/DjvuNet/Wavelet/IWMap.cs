@@ -201,7 +201,7 @@ namespace DjvuNet.Wavelet
                     blocks[i] = (IWBlock)blocks[i].Duplicate();
                 }
             }
-            catch (Exception ignored)
+            catch (Exception)
             {
             }
 

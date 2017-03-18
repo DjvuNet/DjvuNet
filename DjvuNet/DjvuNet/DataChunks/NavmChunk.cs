@@ -28,9 +28,9 @@ namespace DjvuNet.DataChunks
 
         #region ChunkType
 
-        public override ChunkTypes ChunkType
+        public override ChunkType ChunkType
         {
-            get { return ChunkTypes.Navm; }
+            get { return ChunkType.Navm; }
         }
 
         #endregion ChunkType
@@ -105,7 +105,7 @@ namespace DjvuNet.DataChunks
                 List<Bookmark> bookmarks = new List<Bookmark>();
 
                 // Read in all the bookmarks
-                while (bookmarks.Count() + bookmarks.Sum(x => x.TotalBookmarks) != totalBookmarks)
+                while (bookmarks.Count + bookmarks.Sum(x => x.TotalBookmarks) != totalBookmarks)
                 {
                     bookmarks.Add(new Bookmark(decompressor, Document, null));
                 }

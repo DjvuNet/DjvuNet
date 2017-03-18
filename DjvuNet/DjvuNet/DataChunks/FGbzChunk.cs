@@ -21,15 +21,33 @@ namespace DjvuNet.DataChunks
 
         private long _dataLocation = 0;
 
+        private byte _firstByte;
+
         #endregion Private Variables
 
         #region Public Properties
 
         #region ChunkType
 
-        public override ChunkTypes ChunkType
+        public override ChunkType ChunkType
         {
-            get { return ChunkTypes.FGbz; }
+            get { return ChunkType.FGbz; }
+        }
+
+        /// <summary>
+        /// FGbz chunk contains shape table correspondence data
+        /// </summary>
+        public bool HasShapeTableData
+        {
+            get { return (_firstByte & 0xf0) == 0x80; }
+        }
+
+        /// <summary>
+        /// Version of the FGbz chunk
+        /// </summary>
+        public int Version
+        {
+            get { return (_firstByte & 0x7f); }
         }
 
         #endregion ChunkType
@@ -80,9 +98,11 @@ namespace DjvuNet.DataChunks
         protected override void ReadChunkData(DjvuReader reader)
         {
             _dataLocation = reader.Position;
+            _firstByte = reader.ReadByte();
 
             // Skip past the bytes which will be delayed read
-            reader.Position += Length;
+            // account for already read byte
+            reader.Position += (Length - 1);
         }
 
         #endregion Protected Methods
@@ -90,7 +110,7 @@ namespace DjvuNet.DataChunks
         #region Private Methods
 
         /// <summary>
-        /// Decodes the data for the palette
+        /// Decodes the data for the color palette contained by FGbz chunk
         /// </summary>
         /// <returns></returns>
         private ColorPalette DecodePaletteData()
@@ -98,7 +118,7 @@ namespace DjvuNet.DataChunks
             using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
             {
                 // Read in the palette data
-                return new ColorPalette(reader);
+                return new ColorPalette(reader, this);
             }
         }
 

@@ -15,18 +15,15 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class FormChunk : IFFChunk
+    public abstract class FormChunk : IFFChunk
     {
         #region Public Properties
 
-        #region ChunkType
+        #region TempChildren
 
-        public override ChunkTypes ChunkType
-        {
-            get { return ChunkTypes.Form; }
-        }
+        protected List<IFFChunk> _TempChildren;
 
-        #endregion ChunkType
+        #endregion TempChildren
 
         #region Children
 
@@ -88,7 +85,7 @@ namespace DjvuNet.DataChunks
             {
                 if (_dirmData == null && Children != null)
                 {
-                    _dirmData = (DirmChunk)Children.FirstOrDefault(x => x.ChunkType == ChunkTypes.Dirm);
+                    _dirmData = (DirmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
                 }
 
                 return _dirmData;
@@ -110,7 +107,7 @@ namespace DjvuNet.DataChunks
             {
                 if (_NavmData == null && Children != null)
                 {
-                    _NavmData = (NavmChunk)Children.FirstOrDefault(x => x.ChunkType == ChunkTypes.Navm);
+                    _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
                 }
 
                 return _NavmData;
@@ -135,13 +132,35 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public FormChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document)
+        protected FormChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document)
             : base(reader, parent, document)
         {
             // Nothing
         }
 
         #endregion Constructors
+
+        public static FormChunk GetForm(DjvuReader reader, IFFChunk parent, DjvuDocument document)
+        {
+            string formStr = reader.ReadUTF8String(4);
+            // use of int in Djvu Format limits file size to 2 GB - should be long
+            int length = (int) reader.ReadUInt32MSB(); 
+            string formType = reader.ReadUTF8String(4);
+            //reader.Position -= 4;
+
+            ChunkType type = IFFChunk.GetChunkType(formType);
+
+            FormChunk formObj = (FormChunk)IFFChunk.BuildIFFChunk(reader, document, parent, type);
+
+            return formObj;
+        }
+
+
+        public override void Initialize(DjvuReader reader)
+        {
+            reader.Position = Offset + 4;
+            ReadChunkData(reader);
+        }
 
         #region Public Methods
 
@@ -166,6 +185,11 @@ namespace DjvuNet.DataChunks
             }
         }
 
+        protected void AddRootFormChild(FormChunk form)
+        {
+
+        }
+
         #endregion Protected Methods
 
         #region Private Methods
@@ -176,10 +200,12 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         private void ReadChildren(DjvuReader reader)
         {
-            List<IFFChunk> children = new List<IFFChunk>();
+            _TempChildren = new List<IFFChunk>();
+
+            long maxPosition = this.Length + Offset;
 
             // Read in all the chunks
-            while (reader.Position < Offset + Length + 8)
+            while (reader.Position <  maxPosition)
             {
                 if (reader.Position % 2 == 1)
                 {
@@ -188,7 +214,17 @@ namespace DjvuNet.DataChunks
 
                 // Read the chunk ID
                 string id = reader.ReadUTF8String(4);
-                ChunkTypes type = IFFChunk.GetChunkType(id);
+                ChunkType type = IFFChunk.GetChunkType(id);
+
+                bool isFormChunk = IsSubFormChunk(type);
+
+                if (isFormChunk)
+                {
+                    int length = reader.ReadInt32MSB();
+                    id = reader.ReadUTF8String(4);
+                    type = IFFChunk.GetChunkType(id);
+                    reader.Position += 4;
+                }
 
                 // Reset the stream position
                 reader.Position -= 4;
@@ -197,11 +233,22 @@ namespace DjvuNet.DataChunks
 
                 if (chunk != null)
                 {
-                    children.Add(chunk);
+                    if (!isFormChunk)
+                    {
+                        _TempChildren.Add(chunk);
+                    }
+                    else
+                    {
+                        Document.RootFormChunk._TempChildren.Add((FormChunk)chunk);
+                        reader.Position -= 4;
+                    }
                 }
+
+                reader.Position += chunk.Length;
             }
 
-            Children = children.ToArray();
+            Children = _TempChildren.ToArray();
+            _TempChildren = null;
         }
 
         /// <summary>

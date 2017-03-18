@@ -2,7 +2,9 @@
 // TODO: Update copyright text.
 // </copyright>
 
+using System;
 using System.Text;
+using DjvuNet.DataChunks.Enums;
 
 namespace DjvuNet.DataChunks.Text
 {
@@ -19,6 +21,8 @@ namespace DjvuNet.DataChunks.Text
         #endregion Private Variables
 
         #region Public Properties
+
+        public override ChunkType ChunkType { get { return ChunkType.Text; } }
 
         #region TextLength
 

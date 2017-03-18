@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks.Enums
         RightSideUp = 1,
 
         /// <summary>
-        /// Counter clockwise rotation 270 degrees
+        /// Counter clockwise rotation 90 degrees
         /// </summary>
         CounterClockwise = 6,
 

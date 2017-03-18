@@ -2,17 +2,16 @@
 // TODO: Update copyright text.
 // </copyright>
 
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Text;
 using DjvuNet.Compression;
 
 namespace DjvuNet
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
     /// TODO: Update summary.
@@ -22,14 +21,9 @@ namespace DjvuNet
         #region Private Variables
 
         /// <summary>
-        /// Full location for the djvu file
+        /// Full path to the djvu file
         /// </summary>
         private readonly string _location;
-
-        /// <summary>
-        /// Base stream for read access
-        /// </summary>
-        private Stream _baseStream;
 
         #endregion Private Variables
 
@@ -198,12 +192,20 @@ namespace DjvuNet
         }
 
         /// <summary>
-        /// Reads a 2-sbyte signed integer from the current stream and advances the current position of the stream by two bytes.
+        /// Reads a 2-sbyte signed integer from the current stream and advances 
+        /// the current position of the stream by two bytes.
         /// </summary>
         /// <returns>
         /// A 2-sbyte signed integer read from the current stream.
         /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
+        /// <exception cref="T:System.IO.EndOfStreamException">
+        /// The end of the stream is reached. 
+        /// </exception>
+        /// <exception cref="T:System.ObjectDisposedException">
+        /// The stream is closed. 
+        /// </exception>
+        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
+        /// <filterpriority>2</filterpriority>
         public short ReadInt16MSB()
         {
             var value = base.ReadInt16();
@@ -359,6 +361,11 @@ namespace DjvuNet
             newReader.Position = position;
 
             return newReader.GetFixedLengthStream(length);
+        }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()} {{ Position {Position}, Length {this.BaseStream?.Length} }}";
         }
 
         #endregion Public Methods

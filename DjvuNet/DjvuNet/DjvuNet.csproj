@@ -86,7 +86,6 @@
     <Compile Include="DataChunks\IFFChunk.cs" />
     <Compile Include="Extentions\ExtentionMethods.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
-    <Compile Include="Graphics\DjvuImage.cs" />
     <Compile Include="Graphics\Map.cs" />
     <Compile Include="Graphics\Pixel.cs" />
     <Compile Include="Graphics\PixelMapScaler.cs" />

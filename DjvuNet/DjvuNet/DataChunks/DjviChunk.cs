@@ -20,9 +20,9 @@ namespace DjvuNet.DataChunks
 
         #region ChunkType
 
-        public override ChunkTypes ChunkType
+        public override ChunkType ChunkType
         {
-            get { return ChunkTypes.Form_Djvi; }
+            get { return ChunkType.Djvi; }
         }
 
         #endregion ChunkType
@@ -34,16 +34,17 @@ namespace DjvuNet.DataChunks
         public DjviChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document)
             : base(reader, parent, document)
         {
+            Length = (int)reader.ReadUInt32MSB();
         }
 
         #endregion Constructors
 
         #region Protected Methods
 
-        protected override void ReadChunkData(DjvuReader reader)
-        {
-            // Nothing
-        }
+        //protected override void ReadChunkData(DjvuReader reader)
+        //{
+        //    // Nothing
+        //}
 
         #endregion Protected Methods
     }
