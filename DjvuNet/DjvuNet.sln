@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Tests", "DjvuNet.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}"
 	ProjectSection(SolutionItems) = preProject
-		artifacts\Mcguffey's_Primer.djvu = artifacts\Mcguffey's_Primer.djvu
+		artifacts\test001.djvu = artifacts\test001.djvu
 		artifacts\test002.djvu = artifacts\test002.djvu
 		artifacts\test003.djvu = artifacts\test003.djvu
 		artifacts\test004.djvu = artifacts\test004.djvu
@@ -21,9 +21,43 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{
 		artifacts\test008.djvu = artifacts\test008.djvu
 		artifacts\test009.djvu = artifacts\test009.djvu
 		artifacts\test010.djvu = artifacts\test010.djvu
+		artifacts\test011.djvu = artifacts\test011.djvu
+		artifacts\test012.djvu = artifacts\test012.djvu
+		artifacts\test013.djvu = artifacts\test013.djvu
+		artifacts\test014.djvu = artifacts\test014.djvu
+		artifacts\test015.djvu = artifacts\test015.djvu
+		artifacts\test016.djvu = artifacts\test016.djvu
+		artifacts\test017.djvu = artifacts\test017.djvu
+		artifacts\test018.djvu = artifacts\test018.djvu
+		artifacts\test019.djvu = artifacts\test019.djvu
+		artifacts\test020.djvu = artifacts\test020.djvu
+		artifacts\test021.djvu = artifacts\test021.djvu
+		artifacts\test022.djvu = artifacts\test022.djvu
+		artifacts\test023.djvu = artifacts\test023.djvu
+		artifacts\test024.djvu = artifacts\test024.djvu
+		artifacts\test025.djvu = artifacts\test025.djvu
+		artifacts\test026.djvu = artifacts\test026.djvu
+		artifacts\test027.djvu = artifacts\test027.djvu
+		artifacts\test028.djvu = artifacts\test028.djvu
+		artifacts\test029.djvu = artifacts\test029.djvu
+		artifacts\test030.djvu = artifacts\test030.djvu
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared.Tests", "DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.shproj", "{B7EF5575-5932-4EA7-B250-E7DA238D60A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Helper.Tests", "DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj", "{4FEC9875-D7E6-47BD-A13A-5C1944464545}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{508EA7BC-4576-4C24-877B-7D7EE4369DA0}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{b7ef5575-5932-4ea7-b250-e7da238d60a9}*SharedItemsImports = 13
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -41,6 +75,10 @@ Global
 		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
