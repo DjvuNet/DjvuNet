@@ -52,7 +52,7 @@ namespace DjvuNet.Graphics.Tests
 
                 PixelMap mapStencil = new PixelMap();
                 Rectangle rectStencil = new Rectangle(0, 3000, 0, 3000);
-                var mapStencil2 =  page2.GetPixelMap(rectStencil, 0, 1.0, mapStencil);
+                var mapStencil2 = page2.GetPixelMap(rectStencil, 0, 1.0, mapStencil);
                 Assert.NotNull(mapStencil2);
                 Assert.IsType<PixelMap>(mapStencil2);
 
@@ -84,6 +84,90 @@ namespace DjvuNet.Graphics.Tests
 
                 }
             }
+        }
+
+        [Fact()]
+        public void PixelMapTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void GetColorCorrectionTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void AttenuateTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void BlitTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void ApplyGammaCorrectionTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void DownsampleTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void Downsample43Test()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void FillTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void InitTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void InitTest1()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void InitTest2()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void StencilTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void TranslateTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void InitTest3()
+        {
+            Assert.True(false, "This test needs an implementation");
         }
     }
 }

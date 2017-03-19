@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -17,6 +18,8 @@
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -70,11 +73,39 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="DataChunks\Annotations\AnnotationChunkTests.cs" />
+    <Compile Include="DataChunks\Annotations\AnnotationTests.cs" />
+    <Compile Include="DataChunks\Directory\DirmComponentTests.cs" />
+    <Compile Include="DataChunks\DirmChunkTests.cs" />
+    <Compile Include="DataChunks\DjbzChunkTests.cs" />
+    <Compile Include="DataChunks\DjviChunkTests.cs" />
+    <Compile Include="DataChunks\DjvmChunkTests.cs" />
+    <Compile Include="DataChunks\DjvuChunkTests.cs" />
+    <Compile Include="DataChunks\FormChunkTests.cs" />
+    <Compile Include="DataChunks\Graphics\ColorPaletteTests.cs" />
+    <Compile Include="DataChunks\IFFChunkTests.cs" />
+    <Compile Include="DataChunks\InclChunkTests.cs" />
+    <Compile Include="DataChunks\InfoChunkTests.cs" />
+    <Compile Include="DataChunks\Navigation\BookmarkTests.cs" />
+    <Compile Include="DataChunks\Navigation\DocumentNavigatorTests.cs" />
+    <Compile Include="DataChunks\TH44ChunkTests.cs" />
+    <Compile Include="DataChunks\ThumChunkTests.cs" />
+    <Compile Include="DataChunks\TxtaChunkTests.cs" />
+    <Compile Include="DataChunks\TxtzChunkTests.cs" />
     <Compile Include="DjvuDocumentTests.cs" />
+    <Compile Include="Extentions\ExtentionMethodsTests.cs" />
+    <Compile Include="Graphics\BitmapTests.cs" />
+    <Compile Include="Graphics\MapTests.cs" />
+    <Compile Include="Graphics\PixelMapScalerTests.cs" />
     <Compile Include="Graphics\PixelMapTests.cs" />
+    <Compile Include="Graphics\PixelReferenceTests.cs" />
+    <Compile Include="Graphics\PixelTests.cs" />
     <Compile Include="Graphics\RectangleTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DjvuPageTests.cs" />
+    <Compile Include="Text\PageTextItemTests.cs" />
+    <Compile Include="Text\PageTextSearchTests.cs" />
+    <Compile Include="Text\PageTextTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj">
@@ -110,6 +141,12 @@
   </Choose>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

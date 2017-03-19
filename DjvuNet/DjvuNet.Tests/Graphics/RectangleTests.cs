@@ -4,7 +4,7 @@ using DjvuNet.Graphics;
 
 namespace DjvuNet.Graphics.Tests
 {
-    
+
     public class RectangleTests
     {
 
@@ -189,6 +189,78 @@ namespace DjvuNet.Graphics.Tests
             Assert.False(target1.Equals(rect2), "Rectangle after translation is not equal to original rectangle.");
             Assert.False(rect2.Equals(rect1));
             Assert.False(target1.Equals(rect1), "Bigger rectangle is not equal to original one.");
+        }
+
+        [Fact()]
+        public void RectangleTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void RectangleTest1()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void DuplicateTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void ClearTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void ContainsTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void ContainsTest1()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void EqualsTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void GetHashCodeTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void InflateTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void IntersectTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void RecthullTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void TranslateTest()
+        {
+            Assert.True(false, "This test needs an implementation");
         }
     }
 }
