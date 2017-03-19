@@ -41,10 +41,8 @@ namespace DjvuNet.DataChunks.Text
 
             private set
             {
-                if (TextLength != value)
-                {
+                if (_textLength != value)
                     _textLength = value;
-                }
             }
         }
 
@@ -62,19 +60,15 @@ namespace DjvuNet.DataChunks.Text
             get
             {
                 if (_text == null)
-                {
                     DecodeIfNeeded();
-                }
 
                 return _text;
             }
 
             private set
             {
-                if (Text != value)
-                {
+                if (_text != value)
                     _text = value;
-                }
             }
         }
 
@@ -97,10 +91,8 @@ namespace DjvuNet.DataChunks.Text
 
             private set
             {
-                if (Version != value)
-                {
+                if (_version != value)
                     _version = value;
-                }
             }
         }
 
@@ -123,10 +115,8 @@ namespace DjvuNet.DataChunks.Text
 
             private set
             {
-                if (Zone != value)
-                {
+                if (_zone != value)
                     _zone = value;
-                }
             }
         }
 
@@ -191,7 +181,7 @@ namespace DjvuNet.DataChunks.Text
             {
                 _textLength = reader.ReadInt24MSB();
                 byte[] textBytes = reader.ReadBytes(_textLength);
-                _text = Encoding.UTF7.GetString(textBytes);
+                _text = Encoding.UTF8.GetString(textBytes);
                 _version = reader.ReadSByte();
 
                 _zone = new TextZone(reader, null, null, this);
