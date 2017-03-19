@@ -99,14 +99,24 @@ namespace DjvuNet.DataChunks
 
                 JB2.JB2Dictionary includedDictionary = null;
 
-                if (Parent is FormChunk)
+                DjvuChunk djvuChunk = Parent as DjvuChunk;
+
+                if (djvuChunk != null)
                 {
-                    InclChunk[] includes = ((FormChunk)Parent).IncludedItems;
+                    InclChunk[] includes = djvuChunk.IncludedItems;
 
                     if (includes != null && includes.Length > 0)
                     {
+                        // TODO - verify selection strategy which seems slow and not taking into account dictionary names 
                         string includeID = includes.FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Incl)?.IncludeID;
-                        var includeItem = Document.GetChunkByID<DjbzChunk>(includeID);
+                        var includeForm = Document.GetRootFormChildren<DjviChunk>()
+                            .Where(x => x.Children.FirstOrDefault<IFFChunk>(d => d.ChunkType == ChunkType.Djbz) != null)
+                            .FirstOrDefault<DjviChunk>();
+
+                        DirmChunk dirm = Document.GetRootFormChildren<DirmChunk>().FirstOrDefault();
+                        
+                        var includeItem = includeForm.Children
+                            .Where<IFFChunk>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
 
                         if (includeItem != null)
                         {

@@ -622,16 +622,16 @@ namespace DjvuNet
         internal void UpdateImageCache()
         {
             // Clear all except active
-            Pages.Where(page => page != ActivePage).ToList().ForEach(x => x.ClearImage());
+            //Pages.Where(page => page != ActivePage).ToList().ForEach(x => x.ClearImage());
 
-            Task.Factory.StartNew(() =>
-                                      {
-                                          Thread.CurrentThread.Priority = ThreadPriority.Lowest;
+            //Task.Factory.StartNew(() =>
+            //                          {
+            //                              Thread.CurrentThread.Priority = ThreadPriority.Lowest;
 
-                                          // Make sure the previous and next pages are preloaded
-                                          var previous = PreviousPage.ForegroundJB2Image;
-                                          var next = NextPage.ForegroundJB2Image;
-                                      });
+            //                              // Make sure the previous and next pages are preloaded
+            //                              var previous = PreviousPage.ForegroundJB2Image;
+            //                              var next = NextPage.ForegroundJB2Image;
+            //                          });
 
             //int pageCount = 3;
 

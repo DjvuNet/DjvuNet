@@ -30,43 +30,36 @@ namespace DjvuNet.DataChunks.Navigation
         /// </summary>
         public string Name
         {
-            get
-            {
-                return _name;
-            }
+            get { return _name; }
 
             private set
             {
-                if (Name != value)
-                {
+                if (_name != value)
                     _name = value;
-                }
             }
         }
 
         #endregion Name
 
-        #region URL
+        #region Url
 
-        private string _uRL;
+        private string _url;
 
         /// <summary>
         /// Gets the url of the bookmark
         /// </summary>
-        public string URL
+        public string Url
         {
-            get { return _uRL; }
+            get { return _url; }
 
             private set
             {
-                if (URL != value)
-                {
-                    _uRL = value;
-                }
+                if (_url != value)
+                    _url = value;
             }
         }
 
-        #endregion URL
+        #endregion Url
 
         #region Children
 
@@ -81,10 +74,8 @@ namespace DjvuNet.DataChunks.Navigation
 
             private set
             {
-                if (Children != value)
-                {
+                if (_children != value)
                     _children = value;
-                }
             }
         }
 
@@ -103,10 +94,8 @@ namespace DjvuNet.DataChunks.Navigation
 
             private set
             {
-                if (Parent != value)
-                {
+                if (_parent != value)
                     _parent = value;
-                }
             }
         }
 
@@ -137,7 +126,7 @@ namespace DjvuNet.DataChunks.Navigation
 
             private set
             {
-                if (ReferencedPage != value)
+                if (_referencedPage != value)
                 {
                     _referencedPage = value;
                 }
@@ -159,10 +148,8 @@ namespace DjvuNet.DataChunks.Navigation
 
             private set
             {
-                if (Document != value)
-                {
+                if (_document != value)
                     _document = value;
-                }
             }
         }
 
@@ -186,7 +173,7 @@ namespace DjvuNet.DataChunks.Navigation
             _document = document;
             _parent = parent;
             _name = name;
-            _uRL = url;
+            _url = url;
             _children = children;
 
             LoadReferencedPage();
@@ -198,7 +185,7 @@ namespace DjvuNet.DataChunks.Navigation
 
         public override string ToString()
         {
-            return string.Format("{0} : {1}", Name, URL);
+            return string.Format("{0} : {1}", Name, Url);
         }
 
         #endregion Public Methods
@@ -212,20 +199,20 @@ namespace DjvuNet.DataChunks.Navigation
         {
             int pageNumber = 0;
 
-            if (int.TryParse(URL, out pageNumber) || (URL.StartsWith("#") && int.TryParse(URL.Substring(1), out pageNumber)))
+            if (int.TryParse(Url, out pageNumber) || (Url.StartsWith("#") && int.TryParse(Url.Substring(1), out pageNumber)))
             {
                 pageNumber--;
 
                 if (pageNumber < 0 || pageNumber >= Document.Pages.Length)
                 {
-                    throw new Exception("Navigation URL is out of range: " + URL);
+                    throw new InvalidOperationException("Navigation URL is out of range: " + Url);
                 }
 
                 ReferencedPage = Document.Pages[pageNumber];
             }
             else
             {
-                throw new Exception("Navigation URL in unknown format: " + URL);
+                throw new InvalidOperationException("Navigation URL in unknown format: " + Url);
             }
         }
 
@@ -241,7 +228,7 @@ namespace DjvuNet.DataChunks.Navigation
             Name = reader.ReadUTF8String(textSize);
 
             int urlSize = reader.ReadInt24MSB();
-            URL = reader.ReadUTF8String(urlSize);
+            Url = reader.ReadUTF8String(urlSize);
 
             // Read in all the children bookmarks
             List<Bookmark> children = new List<Bookmark>();

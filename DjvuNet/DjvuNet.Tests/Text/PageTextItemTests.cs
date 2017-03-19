@@ -10,13 +10,13 @@ namespace DjvuNet.Text.Tests
 {
     public class PageTextItemTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void PageTextItemTest()
         {
 
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void PageTextItemTest1()
         {
             Assert.True(false, "This test needs an implementation");

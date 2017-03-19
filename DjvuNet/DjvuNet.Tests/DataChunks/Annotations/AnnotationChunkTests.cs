@@ -10,7 +10,7 @@ namespace DjvuNet.DataChunks.Annotations.Tests
 {
     public class AnnotationChunkTests
     {
-        [Fact()]
+        [Fact(Skip ="Not implemented")]
         public void AnnotationChunkTest()
         {
             Assert.True(false, "This test needs an implementation");

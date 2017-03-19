@@ -29,17 +29,12 @@ namespace DjvuNet.DataChunks.Navigation
         /// </summary>
         public Bookmark[] Bookmarks
         {
-            get
-            {
-                return _bookmarks;
-            }
+            get { return _bookmarks; }
 
             private set
             {
-                if (Bookmarks != value)
-                {
+                if (_bookmarks != value)
                     _bookmarks = value;
-                }
             }
         }
 
@@ -66,7 +61,8 @@ namespace DjvuNet.DataChunks.Navigation
             {
                 DjvuPage page = document.Pages[x];
                 int pageNum = x + 1;
-                bookmarks.Add(new Bookmark(document, null, string.Format("Page {0}", pageNum), string.Format("#{0}", pageNum), new Bookmark[0]));
+                bookmarks.Add(new Bookmark(document, null, 
+                    string.Format("Page {0}", pageNum), string.Format("#{0}", pageNum), new Bookmark[0]));
             }
 
             _bookmarks = bookmarks.ToArray();

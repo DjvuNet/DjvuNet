@@ -10,19 +10,19 @@ namespace DjvuNet.DataChunks.Navigation.Tests
 {
     public class BookmarkTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void BookmarkTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void BookmarkTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void ToStringTest()
         {
             Assert.True(false, "This test needs an implementation");

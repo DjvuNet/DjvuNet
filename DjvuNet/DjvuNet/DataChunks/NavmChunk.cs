@@ -47,19 +47,15 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_bookmarks == null)
-                {
                     _bookmarks = ReadBookmarkData();
-                }
 
                 return _bookmarks;
             }
 
             private set
             {
-                if (Bookmarks != value)
-                {
+                if (_bookmarks != value)
                     _bookmarks = value;
-                }
             }
         }
 

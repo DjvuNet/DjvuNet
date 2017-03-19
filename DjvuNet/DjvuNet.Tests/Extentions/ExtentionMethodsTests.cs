@@ -10,13 +10,13 @@ namespace DjvuNet.Extentions.Tests
 {
     public class ExtentionMethodsTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void OrientRectangleTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void OrientRectangleTest1()
         {
             Assert.True(false, "This test needs an implementation");

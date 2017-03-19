@@ -10,7 +10,7 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class DirmChunkTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void DirmChunkTest()
         {
             Assert.True(false, "This test needs an implementation");

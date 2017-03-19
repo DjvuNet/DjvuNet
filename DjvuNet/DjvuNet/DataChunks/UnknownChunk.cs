@@ -8,11 +8,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using DjvuNet.Configuration;
 using DjvuNet.DataChunks.Enums;
 
 namespace DjvuNet.DataChunks
 {
-
 
     /// <summary>
     /// TODO: Update summary.
@@ -76,9 +76,7 @@ namespace DjvuNet.DataChunks
             // Skip the data bytes which are delayed read
             reader.Position += Length;
 
-            // CIDa is a known unknown chunk
-            if (ChunkID != "CIDa")
-                Debug.WriteLine("Creating unknown chunk for: {0}", ChunkID);
+            Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo , $"Creating unknown chunk for ID: {ChunkID}");
         }
 
         #endregion Protected Methods

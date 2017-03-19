@@ -10,13 +10,13 @@ namespace DjvuNet.DataChunks.Directory.Tests
 {
     public class DirmComponentTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void DirmComponentTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void DecodeFlagsTest()
         {
             Assert.True(false, "This test needs an implementation");

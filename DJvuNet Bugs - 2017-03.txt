@@ -1,0 +1,17 @@
+﻿Major DjvuNet bugs:
+
+1. Managed and unmanaged resources used by library are not realeased
+	a) DjvuDocument does not close acquired file stream
+	b) DjvuPage does not dispose image
+
+2. IFF format is double read -> each FORM object is composed from two objects
+	a) generalized FORM class FormChunk
+	b) and its specific implementation i.e. DJVM, DJVI, DJVT or DJVU
+	c) all parsing is done recursively (instead of sequantially for pages/recursively for each page content) in constructors - it creates huge call stack
+
+3. Problem with concurrent programming model - multiple locks used for blocking access to assets - access contention is warranted
+	a) images in DjvuPage
+
+4. Inefficient implementation of set accessors for Properties 
+
+5. 

@@ -31,6 +31,7 @@ using GPixmap = DjvuNet.Graphics.PixelMap;
 using GRect = DjvuNet.Graphics.Rectangle;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
+using DjvuNet.Configuration;
 
 namespace DjvuNet
 {
@@ -254,7 +255,7 @@ namespace DjvuNet
             {
                 if (_textChunk == null)
                 {
-                    _textChunk = (DataChunks.Text.TextChunk) PageForm.Children.FirstOrDefault<IFFChunk>(
+                    _textChunk = (TextChunk) PageForm.Children.FirstOrDefault(
                         x => x.ChunkType == ChunkType.Txtz);
                     if (_textChunk != null)
                         OnPropertyChanged(nameof(TextChunk)); ;
@@ -961,20 +962,22 @@ namespace DjvuNet
 
             lock (_loadingLock)
             {
-                DateTime start = DateTime.Now;
+                Stopwatch stopWatch = Stopwatch.StartNew();
+
                 System.Drawing.Bitmap background = GetBackgroundImage(subsample, false);
-                Debug.WriteLine("Background: " + DateTime.Now.Subtract(start).TotalMilliseconds);
-                start = DateTime.Now;                
+
+                Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Background: {stopWatch.ElapsedTicks}");
+                stopWatch.Restart();                
 
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
                 {
-                    Debug.WriteLine("Foreground: " + DateTime.Now.Subtract(start).TotalMilliseconds);
-                    start = DateTime.Now;                    
+                    Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Foreground: {stopWatch.ElapsedTicks}");
+                    stopWatch.Restart();
 
                     using (System.Drawing.Bitmap mask = GetTextImage(subsample, false))
-                    {                        
-                        Debug.WriteLine("Mask: " + DateTime.Now.Subtract(start).TotalMilliseconds);
-                        start = DateTime.Now;
+                    {
+                        Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Mask: {stopWatch.ElapsedTicks}");
+                        stopWatch.Restart();
 
                         _hasLoaded = true;
 
@@ -993,37 +996,57 @@ namespace DjvuNet
 
                         //int maskPixelSize = GetPixelSize(maskData);
 
-                        int height = background.Height;
-                        int width = background.Width;
+                        int bgndHeight = background.Height;
+                        int bgndWidth = background.Width;
 
-                        Parallel.For(
-                            0,
-                            height,
-                            y =>
+                        int fgndHeight = foreground.Height;
+                        int fgndWidth = foreground.Width;
+
+                        int maskHeight = mask.Height;
+                        int maskWidth = mask.Width;
+
+                        Debug.WriteLine($"Height of data: {bgndHeight} = {maskHeight} = {fgndHeight}");
+                        Debug.WriteLine($"Width of data:  {bgndWidth} = {maskWidth} = {fgndWidth}");
+
+                        //Parallel.For(
+                        //    0,
+                        //    height,
+                        //    y =>
+                        //    {
+                        for (int y = 0; y < bgndHeight && y < maskHeight && y < fgndHeight; y++)
+                        {
+                            byte* maskRow = (byte*)maskData.Scan0 + (y * maskData.Stride);
+                            uint* backgroundRow = (uint*)(backgroundData.Scan0 + (y * backgroundData.Stride));
+                            uint* foregroundRow = (uint*)(foregroundData.Scan0 + (y * foregroundData.Stride));
+
+                            for (int x = 0; x < bgndWidth && x < maskWidth && x < fgndWidth ; x++)
                             {
-                                byte* maskRow = (byte*)maskData.Scan0 + (y * maskData.Stride);
-                                uint* backgroundRow = (uint*)(backgroundData.Scan0 + (y * backgroundData.Stride));
-                                uint* foregroundRow = (uint*)(foregroundData.Scan0 + (y * foregroundData.Stride));
-
-                                for (int x = 0; x < width; x++)
+                                // Check if the mask byte is set
+                                if (maskRow[x] > 0)
                                 {
-                                    // Check if the mask byte is set
-                                    if (maskRow[x] > 0)
-                                    {
-                                        backgroundRow[x] = _isInverted == true
-                                                               ? InvertColor(foregroundRow[x])
-                                                               : foregroundRow[x];
-                                    }
-                                    else if (_isInverted == true)
-                                    {
-                                        backgroundRow[x] = InvertColor(backgroundRow[x]);
-                                    }
+                                    bool inverted = _isInverted == true;
+
+                                    uint xF = foregroundRow[x];
+
+                                    if (inverted)
+                                        backgroundRow[x] = InvertColor(xF);
+                                    else
+                                        backgroundRow[x] = xF;
                                 }
-                            });
+                                else if (_isInverted == true)
+                                {
+                                    uint xB = backgroundRow[x];
+                                    backgroundRow[x] = InvertColor(xB);
+                                }
+                            }
+                        }
+                        //});
 
                         mask.UnlockBits(maskData);
                         foreground.UnlockBits(foregroundData);
                         background.UnlockBits(backgroundData);
+
+                        Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Return Background: {stopWatch.ElapsedTicks}");
 
                         return background;
                     }

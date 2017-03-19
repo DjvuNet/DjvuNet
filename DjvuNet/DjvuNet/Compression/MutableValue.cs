@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using DjvuNet.Configuration;
 
 namespace DjvuNet.Compression
 {
@@ -27,18 +28,15 @@ namespace DjvuNet.Compression
         /// </summary>
         public T Value
         {
-            get
-            {
-                return _value;
-            }
+            get { return _value; }
 
             set
             {
-                Debug.WriteLine("Mutable value changing: {0} to {1}", _value, value);
-                //if (Value.Equals(value) == false)
-                {
+                //if (_value.Equals(value) == false)
+                //{
                     _value = value;
-                }
+                //    Trace.WriteLineIf(DjvuSettings.LogLevel.TraceVerbose, $"Mutable value changing: {_value} to {value}");
+                //}
             }
         }
 

@@ -55,7 +55,7 @@ namespace DjvuNet.Tests
 
         [Theory]
         [MemberData(nameof(DjvuArtifacts))]
-        public void DjvuDocument_IsDjvuDocumentString_Theory(string filePath, int pageCount)
+        public void DjvuDocument_IsDjvuDocument_String_Theory(string filePath, int pageCount)
         {
             Assert.True(DjvuDocument.IsDjvuDocument(filePath));
         }

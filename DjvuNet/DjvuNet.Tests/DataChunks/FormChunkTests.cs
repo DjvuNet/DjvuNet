@@ -10,19 +10,19 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class FormChunkTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void GetRootFormTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void InitializeTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void ToStringTest()
         {
             Assert.True(false, "This test needs an implementation");

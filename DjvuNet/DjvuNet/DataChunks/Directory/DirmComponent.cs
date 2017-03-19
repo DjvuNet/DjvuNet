@@ -22,17 +22,12 @@ namespace DjvuNet.DataChunks.Directory
         /// </summary>
         public string ID
         {
-            get
-            {
-                return _ID;
-            }
+            get { return _ID; }
 
             set
             {
-                if (ID != value)
-                {
+                if (_ID != value)
                     _ID = value;
-                }
             }
         }
 
@@ -51,10 +46,8 @@ namespace DjvuNet.DataChunks.Directory
 
             set
             {
-                if (Name != value)
-                {
+                if (_name != value)
                     _name = value;
-                }
             }
         }
 
@@ -73,10 +66,8 @@ namespace DjvuNet.DataChunks.Directory
 
             set
             {
-                if (Title != value)
-                {
+                if (_title != value)
                     _title = value;
-                }
             }
         }
 
@@ -91,17 +82,12 @@ namespace DjvuNet.DataChunks.Directory
         /// </summary>
         public int Offset
         {
-            get
-            {
-                return _offset;
-            }
+            get { return _offset; }
 
             private set
             {
-                if (Offset != value)
-                {
+                if (_offset != value)
                     _offset = value;
-                }
             }
         }
 
@@ -120,10 +106,8 @@ namespace DjvuNet.DataChunks.Directory
 
             set
             {
-                if (Size != value)
-                {
+                if (_size != value)
                     _size = value;
-                }
             }
         }
 
@@ -142,10 +126,8 @@ namespace DjvuNet.DataChunks.Directory
 
             private set
             {
-                if (HasName != value)
-                {
+                if (_hasName != value)
                     _hasName = value;
-                }
             }
         }
 
@@ -164,10 +146,8 @@ namespace DjvuNet.DataChunks.Directory
 
             private set
             {
-                if (HasTitle != value)
-                {
+                if (_hasTitle != value)
                     _hasTitle = value;
-                }
             }
         }
 
@@ -186,10 +166,8 @@ namespace DjvuNet.DataChunks.Directory
 
             private set
             {
-                if (IsIncluded != value)
-                {
+                if (_isIncluded != value)
                     _isIncluded = value;
-                }
             }
         }
 
@@ -208,10 +186,8 @@ namespace DjvuNet.DataChunks.Directory
 
             private set
             {
-                if (IsPage != value)
-                {
+                if (_isPage != value)
                     _isPage = value;
-                }
             }
         }
 
@@ -230,10 +206,8 @@ namespace DjvuNet.DataChunks.Directory
 
             private set
             {
-                if (IsThumbnail != value)
-                {
+                if (_isThumbnail != value)
                     _isThumbnail = value;
-                }
             }
         }
 

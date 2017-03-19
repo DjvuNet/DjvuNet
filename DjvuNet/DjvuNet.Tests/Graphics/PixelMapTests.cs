@@ -52,7 +52,7 @@ namespace DjvuNet.Graphics.Tests
 
                 PixelMap mapStencil = new PixelMap();
                 Rectangle rectStencil = new Rectangle(0, 3000, 0, 3000);
-                var mapStencil2 = page2.GetPixelMap(rectStencil, 0, 1.0, mapStencil);
+                var mapStencil2 = page2.GetPixelMap(rectStencil, 1, 1.0, mapStencil);
                 Assert.NotNull(mapStencil2);
                 Assert.IsType<PixelMap>(mapStencil2);
 
@@ -65,7 +65,7 @@ namespace DjvuNet.Graphics.Tests
                     result1.Downsample(result1, 2, rect2);
 
                     PixelMap map2 = new PixelMap();
-                    var result2 = page1.GetPixelMap(rect1, 0, 2.2, map2);
+                    var result2 = page1.GetPixelMap(rect1, 1, 2.2, map2);
 
                     Rectangle rect3 = new Rectangle(100, 100, 100, 100);
                     result2.Downsample43(result1, rect3);
@@ -86,85 +86,85 @@ namespace DjvuNet.Graphics.Tests
             }
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void PixelMapTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void GetColorCorrectionTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void AttenuateTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void BlitTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void ApplyGammaCorrectionTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void DownsampleTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void Downsample43Test()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void FillTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void InitTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void InitTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void InitTest2()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void StencilTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void TranslateTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void InitTest3()
         {
             Assert.True(false, "This test needs an implementation");

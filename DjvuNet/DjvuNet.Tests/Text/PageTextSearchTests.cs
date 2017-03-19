@@ -10,25 +10,25 @@ namespace DjvuNet.Text.Tests
 {
     public class PageTextSearchTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void PageTextSearchTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void PageTextSearchTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void PageTextSearchTest2()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void PageTextSearchTest3()
         {
             Assert.True(false, "This test needs an implementation");

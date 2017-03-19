@@ -50,12 +50,14 @@
     <Compile Include="Compression\MutableValue.cs" />
     <Compile Include="Compression\ZPCodec.cs" />
     <Compile Include="Compression\ZPTable.cs" />
+    <Compile Include="Configuration\DjvuSettings.cs" />
     <Compile Include="DataChunks\Annotations\Annotation.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationChunk.cs" />
     <Compile Include="DataChunks\AntaChunk.cs" />
     <Compile Include="DataChunks\AntzChunk.cs" />
     <Compile Include="DataChunks\BG44Chunk.cs" />
     <Compile Include="DataChunks\BGjpChunk.cs" />
+    <Compile Include="DataChunks\CidaChunkcs.cs" />
     <Compile Include="DataChunks\Navigation\DocumentNavigator.cs" />
     <Compile Include="DataChunks\Navigation\Interfaces\INavigation.cs" />
     <Compile Include="DataChunks\UnknownChunk.cs" />
@@ -86,6 +88,7 @@
     <Compile Include="DataChunks\TxtaChunk.cs" />
     <Compile Include="DataChunks\TxtzChunk.cs" />
     <Compile Include="DataChunks\WmrmChunk.cs" />
+    <Compile Include="Diagnostics\DjvuEventSource.cs" />
     <Compile Include="DjvuDocument.cs" />
     <Compile Include="DjvuPage.cs" />
     <Compile Include="DjvuReader.cs" />
@@ -117,8 +120,10 @@
     <Compile Include="Wavelet\IWPixelMap.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config" />
     <None Include="Snk.snk" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

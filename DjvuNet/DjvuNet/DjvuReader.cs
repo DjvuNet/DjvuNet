@@ -344,8 +344,8 @@ namespace DjvuNet
         {
             DjvuReader newReader = null;
 
-            // Clone the reader
-            newReader = _location != null ? new DjvuReader(_location) : new DjvuReader(BaseStream);
+            // Get rid of not properly synchronized clones
+            newReader =  _location != null ? new DjvuReader(_location) : new DjvuReader(BaseStream);
             newReader.Position = position;
             
             return newReader;

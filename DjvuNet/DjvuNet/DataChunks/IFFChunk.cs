@@ -147,13 +147,25 @@ namespace DjvuNet.DataChunks
         /// </summary>
         public bool IsFormChunk (ChunkType type)
         {
-            return type == ChunkType.Djvu || type == ChunkType.Djvi ||
+            return type == ChunkType.Djvu || type == ChunkType.Djvi || 
                     type == ChunkType.Thum || type == ChunkType.Djvm || type == ChunkType.Form;
         }
-
+        
+        /// <summary>
+        /// Three types of FORM chunks could form a root of DjVu document / file:
+        /// DJVU for single page documents, DJVM for multi page documents 
+        /// and DJVI for include files associated with separate multi page 
+        /// document - include files can not function independently (?).
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public bool IsRootFormChild(ChunkType type)
         {
-            return IsFormChunk(type) || type == ChunkType.Dirm;
+            // DJVM form is the only chunk type which is always in document root
+            if (type == ChunkType.Djvm) return false;
+
+            return IsFormChunk(type) || type == ChunkType.Dirm || type == ChunkType.Navm;
         }
 
         #region Document
@@ -226,7 +238,7 @@ namespace DjvuNet.DataChunks
             {
                 return (ChunkType)Enum.Parse(typeof(ChunkType), ID, true);
             }
-            catch (ArgumentException)  // Catch unsupported chunks i.e. "CIDa"
+            catch (ArgumentException)  // Catch unsupported chunks i.e. "LTAnno"
             {
             }
 
@@ -310,6 +322,9 @@ namespace DjvuNet.DataChunks
                     break;
                 case ChunkType.Smmr:
                     result = new SmmrChunk(reader, parent, rootDocument, chunkID, length);
+                    break;
+                case ChunkType.Cida:
+                    result = new CidaChunk(reader, parent, rootDocument, chunkID, length);
                     break;
                 default:
                     result = new UnknownChunk(reader, parent, rootDocument, chunkID, length);

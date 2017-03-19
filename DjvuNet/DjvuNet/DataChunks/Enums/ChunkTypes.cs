@@ -135,6 +135,11 @@ namespace DjvuNet.DataChunks.Enums
         Smmr,
 
         /// <summary>
+        /// Unsupported since version 3.23 - 2002 July
+        /// </summary>
+        Cida,
+
+        /// <summary>
         /// Abstract TextChunk type
         /// </summary>
         Text = int.MaxValue,

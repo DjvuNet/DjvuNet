@@ -10,13 +10,13 @@ namespace DjvuNet.DataChunks.Graphics.Tests
 {
     public class ColorPaletteTests
     {
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void ColorPaletteTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented")]
         public void index_to_colorTest()
         {
             Assert.True(false, "This test needs an implementation");
