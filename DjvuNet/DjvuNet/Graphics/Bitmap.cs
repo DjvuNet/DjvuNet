@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace DjvuNet.Graphics
 {
     /// <summary>
-    /// Represents bitonal and gray scale images
+    /// Represents bi tonal and gray scale images
     /// </summary>
     public class Bitmap : Map
     {
@@ -67,7 +67,7 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Grays != value)
+                if (_grays != value)
                 {
                     if ((value < 2) || (value > 256))
                     {
@@ -95,7 +95,7 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Border != value)
+                if (_border != value)
                 {
                     _border = value;
                     _maxRowOffset = RowOffset(ImageHeight);
@@ -158,7 +158,7 @@ namespace DjvuNet.Graphics
 
             private set
             {
-                if (BytesPerRow != value)
+                if (_bytesPerRow != value)
                 {
                     _bytesPerRow = value;
                     _maxRowOffset = RowOffset(ImageHeight);
@@ -177,7 +177,7 @@ namespace DjvuNet.Graphics
         {
             set
             {
-                if (Border < value)
+                if (_border < value)
                 {
                     if (Data != null)
                     {
@@ -189,7 +189,7 @@ namespace DjvuNet.Graphics
                         GC.Collect();
                     }
 
-                    Border = value;
+                    _border = value;
                 }
             }
         }

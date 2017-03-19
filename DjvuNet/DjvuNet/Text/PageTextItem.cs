@@ -29,17 +29,12 @@ namespace DjvuNet.Text
         /// </summary>
         public PageTextSearch Parent
         {
-            get
-            {
-                return _parent;
-            }
+            get { return _parent; }
 
-            private set
+            internal set
             {
                 if (Parent != value)
-                {
                     _parent = value;
-                }
             }
         }
 
@@ -59,9 +54,7 @@ namespace DjvuNet.Text
             private set
             {
                 if (Zone != value)
-                {
                     _zone = value;
-                }
             }
         }
 

@@ -35,12 +35,19 @@ namespace DjvuNet.DataChunks
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
-            Length = (int)reader.ReadUInt32MSB();
         }
 
         #endregion Constructors
 
         #region Protected Methods
+
+        protected override void ReadChunkData(DjvuReader reader)
+        {
+            if (Length > 0)
+            {
+                ReadChildren(reader);
+            }
+        }
 
         #endregion Protected Methods
     }

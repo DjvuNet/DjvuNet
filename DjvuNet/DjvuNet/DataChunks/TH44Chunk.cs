@@ -47,19 +47,15 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_thumbnail == null)
-                {
                     _thumbnail = DecodeThumbnailImage();
-                }
 
                 return _thumbnail;
             }
 
             private set
             {
-                if (Thumbnail != value)
-                {
+                if (_thumbnail != value)
                     _thumbnail = value;
-                }
             }
         }
 
@@ -119,7 +115,7 @@ namespace DjvuNet.DataChunks
         /// Decodes the thumbnail image for this chunk
         /// </summary>
         /// <returns></returns>
-        private IWPixelMap DecodeThumbnailImage()
+        internal IWPixelMap DecodeThumbnailImage()
         {
             using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
             {

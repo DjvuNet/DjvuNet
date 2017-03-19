@@ -53,12 +53,10 @@ namespace DjvuNet.DataChunks
                 return _shapeDictionary;
             }
 
-            private set
+            internal set
             {
-                if (ShapeDictionary != value)
-                {
+                if (_shapeDictionary != value)
                     _shapeDictionary = value;
-                }
             }
         }
 
@@ -90,7 +88,7 @@ namespace DjvuNet.DataChunks
 
         #region Private Methods
 
-        private JB2.JB2Dictionary DecodeShapeDictionary()
+        internal JB2.JB2Dictionary DecodeShapeDictionary()
         {
             using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
             {

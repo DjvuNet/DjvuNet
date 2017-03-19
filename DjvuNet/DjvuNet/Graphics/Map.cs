@@ -26,10 +26,8 @@ namespace DjvuNet.Graphics
 
             protected set
             {
-                if (Properties != value)
-                {
+                if (_properties != value)
                     _properties = value;
-                }
             }
         }
 
@@ -48,10 +46,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Data != value)
-                {
+                if (_data != value)
                     _data = value;
-                }
             }
         }
 
@@ -70,10 +66,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (ImageWidth != value)
-                {
+                if (_imageWidth != value)
                     _imageWidth = value;
-                }
             }
         }
 
@@ -92,10 +86,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (ImageHeight != value)
-                {
+                if (_imageHeight != value)
                     _imageHeight = value;
-                }
             }
         }
 
@@ -114,10 +106,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (BytesPerPixel != value)
-                {
+                if (_bytesPerPixel != value)
                     _bytesPerPixel = value;
-                }
             }
         }
 
@@ -136,10 +126,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (BlueOffset != value)
-                {
+                if (_blueOffset != value)
                     _blueOffset = value;
-                }
             }
         }
 
@@ -158,10 +146,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (GreenOffset != value)
-                {
+                if (_greenOffset != value)
                     _greenOffset = value;
-                }
             }
         }
 
@@ -180,10 +166,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (RedOffset != value)
-                {
+                if (_redOffset != value)
                     _redOffset = value;
-                }
             }
         }
 
@@ -202,10 +186,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (IsRampNeeded != value)
-                {
+                if (_isRampNeeded != value)
                     _isRampNeeded = value;
-                }
             }
         }
 

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -33,7 +34,7 @@ namespace DjvuNet.Compression
 
             set
             {
-                //Console.WriteLine("Mutable value changing: {0} to {1}", _value, value);
+                Debug.WriteLine("Mutable value changing: {0} to {1}", _value, value);
                 //if (Value.Equals(value) == false)
                 {
                     _value = value;

@@ -105,7 +105,7 @@ namespace DjvuNet.DataChunks
 
                     if (includes != null && includes.Length > 0)
                     {
-                        string includeID = includes.FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Djbz).IncludeID;
+                        string includeID = includes.FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Incl)?.IncludeID;
                         var includeItem = Document.GetChunkByID<DjbzChunk>(includeID);
 
                         if (includeItem != null)

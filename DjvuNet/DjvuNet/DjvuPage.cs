@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -38,8 +39,11 @@ namespace DjvuNet
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjvuPage : INotifyPropertyChanged
+    public class DjvuPage : INotifyPropertyChanged, IDisposable
     {
+        public const int SubsambpleMin = 1;
+        public const int SubsampleMax = 12;
+        
         #region Private Variables
 
         /// <summary>
@@ -69,10 +73,7 @@ namespace DjvuNet
         /// </summary>
         public TH44Chunk Thumbnail
         {
-            get
-            {
-                return _thumbnail;
-            }
+            get { return _thumbnail; }
 
             internal set
             {
@@ -95,10 +96,7 @@ namespace DjvuNet
         /// </summary>
         public DjvuDocument Document
         {
-            get
-            {
-                return _document;
-            }
+            get { return _document; }
 
             internal set
             {
@@ -121,10 +119,7 @@ namespace DjvuNet
         /// </summary>
         public DjviChunk[] IncludedItems
         {
-            get
-            {
-                return _includedItems;
-            }
+            get { return _includedItems; }
 
             internal set
             {
@@ -147,10 +142,7 @@ namespace DjvuNet
         /// </summary>
         public FormChunk PageForm
         {
-            get
-            {
-                return _pageForm;
-            }
+            get { return _pageForm; }
 
             internal set
             {
@@ -200,9 +192,7 @@ namespace DjvuNet
             get
             {
                 if (Info != null)
-                {
                     return Info.Width;
-                }
 
                 return 0;
             }
@@ -220,9 +210,7 @@ namespace DjvuNet
             get
             {
                 if (Info != null)
-                {
                     return Info.Height;
-                }
 
                 return 0;
             }
@@ -239,10 +227,7 @@ namespace DjvuNet
         /// </summary>
         public DirmComponent Header
         {
-            get
-            {
-                return _header;
-            }
+            get { return _header; }
 
             internal set
             {
@@ -270,7 +255,7 @@ namespace DjvuNet
                 if (_textChunk == null)
                 {
                     _textChunk = (DataChunks.Text.TextChunk) PageForm.Children.FirstOrDefault<IFFChunk>(
-                        x => x.ChunkType == ChunkType.Text);
+                        x => x.ChunkType == ChunkType.Txtz);
                     if (_textChunk != null)
                         OnPropertyChanged(nameof(TextChunk)); ;
                 }
@@ -286,9 +271,7 @@ namespace DjvuNet
             get
             {
                 if (_text == null)
-                {
-                    _text = TextChunk.Text;
-                }
+                    _text = TextChunk?.Text;
 
                 return _text;
             }
@@ -445,20 +428,14 @@ namespace DjvuNet
         /// </summary>
         public bool IsPageImageCached
         {
-            get
-            {
-                return _isPageImageCached;
-            }
+            get { return _isPageImageCached; }
 
             set
             {
-                if (IsPageImageCached != value)
+                if (_isPageImageCached != value)
                 {
                     _isPageImageCached = value;
                     _image = null;
-
-                    if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("IsPageImageCached"));
-
                     OnPropertyChanged(nameof(IsPageImageCached));
                 }
             }
@@ -507,14 +484,11 @@ namespace DjvuNet
         /// </summary>
         public bool IsInverted
         {
-            get
-            {
-                return _isInverted;
-            }
+            get { return _isInverted; }
 
             set
             {
-                if (IsInverted != value)
+                if (_isInverted != value)
                 {
                     _isInverted = value;
                     ClearImage();
@@ -535,10 +509,7 @@ namespace DjvuNet
         /// </summary>
         public System.Drawing.Bitmap ThumbnailImage
         {
-            get
-            {
-                return _thumbnailImage;
-            }
+            get { return _thumbnailImage; }
 
             set
             {
@@ -561,14 +532,11 @@ namespace DjvuNet
         /// </summary>
         public int PageNumber
         {
-            get
-            {
-                return _pageNumber;
-            }
+            get { return _pageNumber; }
 
-            private set
+            internal set
             {
-                if (PageNumber != value)
+                if (_pageNumber != value)
                 {
                     _pageNumber = value;
                     OnPropertyChanged(nameof(PageNumber));
@@ -595,7 +563,7 @@ namespace DjvuNet
         #region Constructors
 
         public DjvuPage(int pageNumber, DjvuDocument document, DirmComponent header, 
-            TH44Chunk thumbnail, DjviChunk[] includedItems, FormChunk form)
+            TH44Chunk thumbnail, DjviChunk[] includedItems, DjvuChunk form)
         {
             PageNumber = pageNumber;
             Document = document;
@@ -606,6 +574,40 @@ namespace DjvuNet
         }
 
         #endregion Constructors
+
+        #region IDisposable implementation
+
+        protected bool _Disposed;
+
+        public bool Disposed { get { return _Disposed; } }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+            }
+
+            _image?.Dispose();
+            _image = null;
+
+            _thumbnailImage?.Dispose();
+            _thumbnailImage = null;
+
+            _Disposed = true;
+        }
+
+        ~DjvuPage()
+        {
+            Dispose(false);
+        }
+
+        #endregion IDisposable implementation
 
         #region Public Methods
 
@@ -682,13 +684,11 @@ namespace DjvuNet
         /// <param name="newWidth"></param>
         /// <param name="newHeight"></param>
         /// <returns></returns>
-        public System.Drawing.Bitmap ResizeImage(System.Drawing.Bitmap srcImage, int newWidth, int newHeight)
+        public static System.Drawing.Bitmap ResizeImage(System.Drawing.Bitmap srcImage, int newWidth, int newHeight)
         {
             // Check if the image needs resizing
             if (srcImage.Width == newWidth && srcImage.Height == newHeight)
-            {
                 return srcImage;
-            }
 
             // Resize the image
             System.Drawing.Bitmap newImage = new System.Drawing.Bitmap(newWidth, newHeight);
@@ -725,9 +725,7 @@ namespace DjvuNet
         public System.Drawing.Bitmap ExtractThumbnailImage()
         {
             if (Thumbnail != null)
-            {
                 return Thumbnail.Image;
-            }
 
             var result = BuildImage();
             var scaleAmount = (double)128 / result.Width;
@@ -747,6 +745,8 @@ namespace DjvuNet
         /// <returns></returns>
         public GPixmap GetBgPixmap(GRect rect, int subsample, double gamma, GPixmap retval)
         {
+            VerifySubsampleRange(subsample);
+
             GPixmap pm = null;
             int width = (Info == null)
                             ? 0
@@ -881,11 +881,15 @@ namespace DjvuNet
 
         public Graphics.Bitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, Bitmap retVal)
         {
+            VerifySubsampleRange(subsample);
+
             return GetBitmap(rect, subsample, align, null);
         }
 
         public GPixmap GetPixelMap(GRect rect, int subsample, double gamma, PixelMap retval)
         {
+            VerifySubsampleRange(subsample);
+
             if (rect.Empty)
             {
                 return (retval == null)
@@ -953,21 +957,23 @@ namespace DjvuNet
         /// <returns></returns>
         public unsafe System.Drawing.Bitmap BuildImage(int subsample = 1)
         {
+            VerifySubsampleRange(subsample);
+
             lock (_loadingLock)
             {
                 DateTime start = DateTime.Now;
                 System.Drawing.Bitmap background = GetBackgroundImage(subsample, false);
-                Console.WriteLine("Background: " + DateTime.Now.Subtract(start).TotalMilliseconds);
+                Debug.WriteLine("Background: " + DateTime.Now.Subtract(start).TotalMilliseconds);
                 start = DateTime.Now;                
 
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
                 {
-                    Console.WriteLine("Foreground: " + DateTime.Now.Subtract(start).TotalMilliseconds);
+                    Debug.WriteLine("Foreground: " + DateTime.Now.Subtract(start).TotalMilliseconds);
                     start = DateTime.Now;                    
 
                     using (System.Drawing.Bitmap mask = GetTextImage(subsample, false))
                     {                        
-                        Console.WriteLine("Mask: " + DateTime.Now.Subtract(start).TotalMilliseconds);
+                        Debug.WriteLine("Mask: " + DateTime.Now.Subtract(start).TotalMilliseconds);
                         start = DateTime.Now;
 
                         _hasLoaded = true;
@@ -1027,15 +1033,17 @@ namespace DjvuNet
 
         public GBitmap GetBitmap(GRect rect, int subsample, int align, GBitmap retval)
         {
+            VerifySubsampleRange(subsample);
+
             return GetBitmapList(rect, 1, 1, null);
         }
 
         public GBitmap GetBitmapList(GRect rect, int subsample, int align, List<int> components)
         {
+            VerifySubsampleRange(subsample);
+
             if (rect.Empty)
-            {
                 return new Graphics.Bitmap();
-            }
 
             if (Info != null)
             {
@@ -1060,22 +1068,21 @@ namespace DjvuNet
 
         public Map GetMap(GRect segment, int subsample, GMap retval)
         {
+            VerifySubsampleRange(subsample);
+
             retval =
                IsColor
-              ? (GMap)GetPixelMap(
-                segment,
-                subsample,
-                0.0D,
-                (retval is GPixmap)
-                ? (GPixmap)retval
-                : null)
-              : (GMap)GetBitmap(
-                segment,
-                subsample,
-                1,
-                ((retval is GBitmap)
-                ? (GBitmap)retval
-                : null));
+                  ? (GMap)GetPixelMap(
+                        segment,
+                        subsample,
+                        0.0D,
+                        (retval is GPixmap) ? (GPixmap)retval : null)
+                  : (GMap)GetBitmap(
+                        segment,
+                        subsample,
+                        1,
+                        ((retval is GBitmap) ? (GBitmap)retval : null)
+                    );
 
             return retval;
         }
@@ -1123,24 +1130,18 @@ namespace DjvuNet
         internal bool IsLegalBilevel()
         {
             if (Info == null)
-            {
                 return false;
-            }
 
             int width = Info.Width;
             int height = Info.Height;
 
             if ((width <= 0) || (height <= 0))
-            {
                 return false;
-            }
 
             JB2Image fgJb2 = ForegroundJB2Image;
 
             if ((fgJb2 == null) || (fgJb2.Width != width) || (fgJb2.Height != height))
-            {
                 return false;
-            }
 
             return !(BackgroundIWPixelMap != null || ForegroundIWPixelMap != null
                      || ForegroundPalette != null);
@@ -1150,24 +1151,18 @@ namespace DjvuNet
         {
 
             if (Info == null)
-            {
                 return false;
-            }
 
             int width = Info.Width;
             int height = Info.Height;
 
             if ((width <= 0) || (height <= 0))
-            {
                 return false;
-            }
 
             JB2Image fgJb2 = ForegroundJB2Image;
 
             if ((fgJb2 == null) || (fgJb2.Width != width) || (fgJb2.Height != height))
-            {
                 return false;
-            }
 
             // There is no need to synchronize since we won't access data which could be updated.
             IWPixelMap bgIWPixmap = (IWPixelMap)BackgroundIWPixelMap;
@@ -1205,6 +1200,8 @@ namespace DjvuNet
 
         internal bool Stencil(PixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
         {
+            VerifySubsampleRange(subsample);
+
             if (Info == null)
             {
                 return false;
@@ -1396,9 +1393,7 @@ namespace DjvuNet
             for (int red = 1; red < 16; red++)
             {
                 if (((((w + red) - 1) / red) == rw) && ((((h + red) - 1) / red) == rh))
-                {
                     return red;
-                }
             }
 
             return 16;
@@ -1407,9 +1402,7 @@ namespace DjvuNet
         internal unsafe System.Drawing.Bitmap InvertImage(System.Drawing.Bitmap invertImage)
         {
             if (invertImage == null)
-            {
                 return null;
-            }
 
             var image = (System.Drawing.Bitmap)invertImage.Clone();
 
@@ -1427,10 +1420,8 @@ namespace DjvuNet
                     uint* imageRow = (uint*)(imageData.Scan0 + (y * imageData.Stride));
 
                     for (int x = 0; x < width; x++)
-                    {
                         // Check if the mask byte is set
                         imageRow[x] = InvertColor(imageRow[x]);
-                    }
                 });
 
             image.UnlockBits(imageData);
@@ -1466,27 +1457,19 @@ namespace DjvuNet
         internal int GetPixelSize(BitmapData data)
         {
             if (data.PixelFormat == PixelFormat.Format8bppIndexed)
-            {
                 return 1;
-            }
 
             if (data.PixelFormat == PixelFormat.Format16bppGrayScale || data.PixelFormat == PixelFormat.Format16bppRgb555 ||
                 data.PixelFormat == PixelFormat.Format16bppRgb565 || data.PixelFormat == PixelFormat.Format16bppArgb1555)
-            {
                 return 2;
-            }
 
             if (data.PixelFormat == PixelFormat.Format24bppRgb)
-            {
                 return 3;
-            }
 
             if (data.PixelFormat == PixelFormat.Format32bppArgb || data.PixelFormat == PixelFormat.Format32bppArgb || data.PixelFormat == PixelFormat.Format32bppPArgb || data.PixelFormat == PixelFormat.Format32bppRgb)
-            {
                 return 4;
-            }
 
-            throw new Exception("Unknown image format: " + data.PixelFormat);
+            throw new FormatException("Unsupported image format: " + data.PixelFormat);
         }
 
         /// <summary>
@@ -1496,6 +1479,8 @@ namespace DjvuNet
         /// <returns></returns>
         internal System.Drawing.Bitmap GetForegroundImage(int subsample, bool resizeImage = false)
         {
+            VerifySubsampleRange(subsample);
+
             lock (_loadingLock)
             {
                 var result = ForegroundIWPixelMap == null
@@ -1508,15 +1493,14 @@ namespace DjvuNet
 
         internal System.Drawing.Bitmap GetTextImage(int subsample, bool resizeImage = false)
         {
+            VerifySubsampleRange(subsample);
+
             if (ForegroundJB2Image == null)
-            {
                 return new System.Drawing.Bitmap(Info.Width / subsample, Info.Height / subsample);
-            }
 
             lock (_loadingLock)
             {
                 var result = ForegroundJB2Image.GetBitmap(subsample, 4).ToImage();
-
                 return resizeImage == true ? ResizeImage(result, Info.Width / subsample, Info.Height / subsample) : result;
             }
         }
@@ -1527,12 +1511,12 @@ namespace DjvuNet
         /// <returns></returns>
         internal System.Drawing.Bitmap GetBackgroundImage(int subsample, bool resizeImage = false)
         {
+            VerifySubsampleRange(subsample);
+
             BG44Chunk[] backgrounds = PageForm.GetChildrenItems<BG44Chunk>();
 
             if (backgrounds == null || backgrounds.Length == 0)
-            {
                 return CreateBlankImage(Brushes.White, Info.Width, Info.Height);
-            }
 
             // Get the composite background image
             Wavelet.IWPixelMap backgroundMap = null;
@@ -1542,16 +1526,12 @@ namespace DjvuNet
                 foreach (var background in backgrounds)
                 {
                     if (backgroundMap == null)
-                    {
                         // Get the initial image
                         backgroundMap = background.BackgroundImage;
-                    }
                     else
                     {
                         if (_isBackgroundDecoded == false)
-                        {
                             background.ProgressiveDecodeBackground(backgroundMap);
-                        }
                     }
                 }
 
@@ -1560,6 +1540,14 @@ namespace DjvuNet
 
             Bitmap result = backgroundMap.GetPixmap().ToImage();
             return resizeImage == true ? ResizeImage(result, Info.Width / subsample, Info.Height / subsample) : result;
+        }
+
+        internal static void VerifySubsampleRange(int subsample)
+        {
+            if (subsample < SubsambpleMin || subsample > SubsampleMax)
+                throw new ArgumentException(
+                    $"Argument is outside of allowed values expected from {SubsambpleMin} to {SubsampleMax}" +
+                    $" actual value {subsample}");
         }
 
         /// <summary>
@@ -1573,9 +1561,7 @@ namespace DjvuNet
 
             // Fill the whole image with white
             using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newBackground))
-            {
                 g.FillRegion(imageColor, new Region(new System.Drawing.Rectangle(0, 0, width, height)));
-            }
 
             return newBackground;
         }

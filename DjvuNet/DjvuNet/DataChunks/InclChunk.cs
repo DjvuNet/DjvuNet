@@ -40,10 +40,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (IncludeID != value)
-                {
+                if (_includeID != value)
                     _includeID = value;
-                }
             }
         }
 

@@ -185,7 +185,7 @@ namespace DjvuNet
 
             internal set
             {
-                if (Pages != value)
+                if (_pages != value)
                 {
                     _pages = value;
                     OnPropertyChanged("Pages");
@@ -204,14 +204,11 @@ namespace DjvuNet
         /// </summary>
         public DjvuPage ActivePage
         {
-            get
-            {
-                return _activePage;
-            }
+            get { return _activePage; }
 
             set
             {
-                if (ActivePage != value)
+                if (_activePage != value)
                 {
                     _activePage = value;
                     UpdateCurrentPages();
@@ -232,14 +229,11 @@ namespace DjvuNet
         /// </summary>
         public bool IsInverted
         {
-            get
-            {
-                return _isInverted;
-            }
+            get { return _isInverted; }
 
             set
             {
-                if (IsInverted != value)
+                if (_isInverted != value)
                 {
                     _isInverted = value;
                     OnPropertyChanged("IsInverted");
@@ -261,14 +255,11 @@ namespace DjvuNet
         /// </summary>
         public DjvuPage FirstPage
         {
-            get
-            {
-                return _firstPage;
-            }
+            get { return _firstPage; }
 
             internal set
             {
-                if (FirstPage != value)
+                if (_firstPage != value)
                 {
                     _firstPage = value;
                     OnPropertyChanged(nameof(FirstPage));
@@ -287,14 +278,11 @@ namespace DjvuNet
         /// </summary>
         public DjvuPage LastPage
         {
-            get
-            {
-                return _lastPage;
-            }
+            get { return _lastPage; }
 
             internal set
             {
-                if (LastPage != value)
+                if (_lastPage != value)
                 {
                     _lastPage = value;
                     OnPropertyChanged(nameof(LastPage));
@@ -313,14 +301,11 @@ namespace DjvuNet
         /// </summary>
         public DjvuPage NextPage
         {
-            get
-            {
-                return _nextPage;
-            }
+            get { return _nextPage; }
 
             internal set
             {
-                if (NextPage != value)
+                if (_nextPage != value)
                 {
                     _nextPage = value;
                     OnPropertyChanged(nameof(NextPage));
@@ -339,14 +324,11 @@ namespace DjvuNet
         /// </summary>
         public DjvuPage PreviousPage
         {
-            get
-            {
-                return _previousPage;
-            }
+            get { return _previousPage; }
 
             internal set
             {
-                if (PreviousPage != value)
+                if (_previousPage != value)
                 {
                     _previousPage = value;
                     OnPropertyChanged(nameof(PreviousPage));
@@ -365,14 +347,11 @@ namespace DjvuNet
         /// </summary>
         public string Name
         {
-            get
-            {
-                return _name;
-            }
+            get { return _name; }
 
             internal set
             {
-                if (Name != value)
+                if (_name != value)
                 {
                     _name = value;
                     OnPropertyChanged(nameof(Name));
@@ -395,7 +374,7 @@ namespace DjvuNet
 
             internal set
             {
-                if (Location != value)
+                if (_location != value)
                 {
                     _location = value;
                     OnPropertyChanged(nameof(Location));
@@ -460,6 +439,12 @@ namespace DjvuNet
 
             _reader?.Close();
             _reader = null;
+
+            for (int i = 0; i < Pages.Length; i++)
+            {
+                Pages[i]?.Dispose();
+                Pages[i] = null;
+            }
 
             _Disposed = true;
         }
@@ -565,6 +550,9 @@ namespace DjvuNet
 
         public List<T> GetRootFormChildren<T>() where T : IFFChunk
         {
+            if (RootForm.ChunkType == ChunkType.Djvu)
+                return new List<T>(new T[] { RootForm as T });
+
             string id = typeof(T).Name.Replace("Chunk", null);
             ChunkType chunkType = IFFChunk.GetChunkType(id);
             return RootForm.Children.Where<IFFChunk>(x => x.ChunkType == chunkType)
@@ -577,16 +565,13 @@ namespace DjvuNet
 		internal void BuildPageList()
 		{
             //
-            // TODO Handle single page document RootForm is Page
+            // TODO Handle single page document RootForm as Page
             //
 
 			List<DjvuPage> pages = new List<DjvuPage>();
-			Queue<DirmComponent> pageHeaders = null;
 			Queue<ThumChunk> thumbnails = new Queue<ThumChunk>(GetRootFormChildren<ThumChunk>());
-			int pageCount = 1;
 
-			_sharedItems = RootForm.Children.Where<IFFChunk>(x => x.ChunkType == ChunkType.Djvi)
-                .ToList<IFFChunk>().ConvertAll<DjviChunk>(x => { return (DjviChunk)x; });
+			_sharedItems = GetRootFormChildren<DjviChunk>();
 			
             foreach (DjvuChunk child in GetRootFormChildren<DjvuChunk>())
             {
@@ -596,30 +581,10 @@ namespace DjvuNet
 
                     //TH44Chunk currentThumbnail = thumbnail.Count > 0 ? thumbnail.Dequeue() : null;
                     // TODO Get rid of arrays for shared items
-                    DjvuPage newPage = new DjvuPage(pageCount++, this, null, null, SharedItems.ToArray(), form);
+                    DjvuPage newPage = new DjvuPage(pages.Count + 1, this, null, null, SharedItems.ToArray(), form);
                     pages.Add(newPage);
                 }
             }
-
-   //         pageHeaders = new Queue<DirmComponent>(Directory.Components.Where(x => x.IsPage));
-
-   //         foreach (IFFChunk child in RootForm.Children)
-			//{
-			//	if (child is FormChunk)
-			//	{
-			//		FormChunk form = (FormChunk)child;
-
-			//		if (form.Children.Any(x => x.ChunkType == ChunkType.Djvu))
-			//		{
-			//			DirmComponent currentHeader = pageHeaders.Count > 0 ? pageHeaders.Dequeue() : null;
-			//			//TH44Chunk currentThumbnail = thumbnails.Count > 0 ? thumbnails.Dequeue() : null;
-			//			DjvuPage newPage = new DjvuPage(pageCount++, this, currentHeader, null, 
-   //                         SharedItems.ToArray(), form);
-
-			//			pages.Add(newPage);
-			//		}
-			//	}
-			//}
 
 			Pages = pages.ToArray();
 		}

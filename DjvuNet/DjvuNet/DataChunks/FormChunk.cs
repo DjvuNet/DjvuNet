@@ -159,7 +159,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("N:{0}; L:{1}; O:{2}; C:{3}", Name, Length, Offset, Children.Length);
+            return $"{this.GetType().Name} {{ Name: {Name}; ID: {ChunkID} Offset: {Offset} Length: {Length} Children: {Children?.Length} }}";
         }
 
         #endregion Public Methods

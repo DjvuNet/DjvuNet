@@ -40,10 +40,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (Width != value)
-                {
+                if (_width != value)
                     _width = value;
-                }
             }
         }
 
@@ -62,10 +60,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (Height != value)
-                {
+                if (_height != value)
                     _height = value;
-                }
             }
         }
 
@@ -84,10 +80,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (MinorVersion != value)
-                {
+                if (_minorVersion != value)
                     _minorVersion = value;
-                }
             }
         }
 
@@ -106,10 +100,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (DPI != value)
-                {
+                if (_dPI != value)
                     _dPI = value;
-                }
             }
         }
 
@@ -128,10 +120,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (MajorVersion != value)
-                {
+                if (_majorVersion != value)
                     _majorVersion = value;
-                }
             }
         }
 
@@ -150,10 +140,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (Gamma != value)
-                {
+                if (_gamma != value)
                     _gamma = value;
-                }
             }
         }
 
@@ -172,10 +160,8 @@ namespace DjvuNet.DataChunks
 
             private set
             {
-                if (PageRotation != value)
-                {
+                if (_pageRotation != value)
                     _pageRotation = value;
-                }
             }
         }
 

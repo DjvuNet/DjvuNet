@@ -28,10 +28,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Blue != value)
-                {
+                if (_parent.Data[_offset + _blueOffset] != value)
                     _parent.Data[_offset + _blueOffset] = value;
-                }
             }
         }
 
@@ -48,10 +46,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Green != value)
-                {
+                if (_parent.Data[_offset + _greenOffset] != value)
                     _parent.Data[_offset + _greenOffset] = value;
-                }
             }
         }
 
@@ -68,10 +64,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Red != value)
-                {
+                if (_parent.Data[_offset + _redOffset] != value)
                     _parent.Data[_offset + _redOffset] = value;
-                }
             }
         }
 

@@ -43,13 +43,11 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-#if DEBUG
         protected override void ReadChunkData(DjvuReader reader)
         {
             base.ReadChunkData(reader);
         }
 
-#endif
 
         #endregion Protected Methods
     }

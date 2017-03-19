@@ -18,17 +18,12 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int Left
         {
-            get
-            {
-                return _left;
-            }
+            get { return _left; }
 
             set
             {
-                if (Left != value)
-                {
+                if (_left != value)
                     _left = value;
-                }
             }
         }
 
@@ -45,11 +40,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (XMax != value)
-                {
-                    Left = value;
-                    //if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("XMax"));
-                }
+                if (_left != value)
+                    _left = value;
             }
         }
 
@@ -68,10 +60,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Right != value)
-                {
+                if (_right != value)
                     _right = value;
-                }
             }
         }
 
@@ -88,11 +78,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (XMin != value)
-                {
-                    Right = value;
-                    //if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("XMin"));
-                }
+                if (_right != value)
+                    _right = value;
             }
         }
 
@@ -111,10 +98,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Top != value)
-                {
+                if (_top != value)
                     _top = value;
-                }
             }
         }
 
@@ -131,11 +116,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (YMax != value)
-                {
-                    Top = value;
-                    //if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("YMax"));
-                }
+                if (_top != value)
+                    _top = value;
             }
         }
 
@@ -154,10 +136,8 @@ namespace DjvuNet.Graphics
 
             set
             {
-                if (Bottom != value)
-                {
+                if (_bottom != value)
                     _bottom = value;
-                }
             }
         }
 
@@ -170,15 +150,12 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int YMin
         {
-            get { return Bottom; }
+            get { return _bottom; }
 
             set
             {
-                if (YMin != value)
-                {
-                    Bottom = value;
-                    //if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs("YMin"));
-                }
+                if (_bottom != value)
+                    _bottom = value;
             }
         }
 
