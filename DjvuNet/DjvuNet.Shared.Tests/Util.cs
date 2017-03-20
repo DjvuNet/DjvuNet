@@ -35,7 +35,8 @@ namespace DjvuNet.Tests
         {
             Assert.NotNull(document.FirstPage);
             Assert.NotNull(document.LastPage);
-            Assert.Equal<int>(pageCount, document.Pages.Length);
+            if (pageCount > 0)
+                Assert.Equal<int>(pageCount, document.Pages.Length);
         }
     }
 }
