@@ -440,7 +440,7 @@ namespace DjvuNet
             _reader?.Close();
             _reader = null;
 
-            for (int i = 0; i < Pages.Length; i++)
+            for (int i = 0; i < Pages?.Length; i++)
             {
                 Pages[i]?.Dispose();
                 Pages[i] = null;
@@ -590,17 +590,24 @@ namespace DjvuNet
 		}
 
         /// <summary>
-        /// Checks for a valid file header
+        /// Checks for a valid DjVu AT&T file header
         /// </summary>
         /// <param name="reader"></param>
         internal void CheckDjvuHeader(DjvuReader reader)
         {
-            byte[] header = new byte[4];
-            reader.Read(header, 0, 4);
-
-            if (header[0] != 0x41 || header[1] != 0x54 || header[2] != 0x26 || header[3] != 0x54)
+            long previousPosition = reader.Position;
+            try
             {
-                throw new Exception("File header is invalid");
+                reader.Position = 0;
+                uint expectedHeader = 0x54265441;
+                uint actual = reader.ReadUInt32();
+
+                if (expectedHeader != actual)
+                    throw new FormatException("DjVu \"AT$T\" file header is invalid");
+            }
+            finally
+            {
+                reader.Position = previousPosition;
             }
         }
 

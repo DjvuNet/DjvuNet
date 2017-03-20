@@ -88,7 +88,7 @@ namespace DjvuNet.Graphics
               || (destWidth <= 0)
               || (destHeight <= 0))
             {
-                throw new Exception("Scaler undefined size");
+                throw new FormatException("Scaler undefined size");
             }
 
             // Implicit ratio (determined by the input/output sizes)
@@ -99,7 +99,7 @@ namespace DjvuNet.Graphics
             }
             else if ((numer <= 0) || (denom <= 0))
             {
-                throw new Exception("Scaler illegal ratio");
+                throw new FormatException("Scaler illegal ratio");
             }
 
             // Compute horz reduction
@@ -145,7 +145,7 @@ namespace DjvuNet.Graphics
               || (destWidth <= 0)
               || (destHeight <= 0))
             {
-                throw new Exception("Scaler undefined size");
+                throw new FormatException("Scaler undefined size");
             }
 
             // Implicit ratio (determined by the input/output sizes)
@@ -156,7 +156,7 @@ namespace DjvuNet.Graphics
             }
             else if ((numer <= 0) || (denom <= 0))
             {
-                throw new Exception("Scaler illegal ratio");
+                throw new FormatException("Scaler illegal ratio");
             }
 
             // Compute horz reduction
@@ -190,7 +190,7 @@ namespace DjvuNet.Graphics
               || (desired.XMax > destWidth)
               || (desired.YMax > destHeight))
             {
-                throw new Exception(
+                throw new FormatException(
                   "desired rectangle too big: " + desired.XMin + "," + desired.YMin
                   + "," + desired.XMax + "," + desired.YMax + "," + destWidth + ","
                   + destHeight);
@@ -270,7 +270,7 @@ namespace DjvuNet.Graphics
               (provided_input.Width != sourceMap.ImageWidth)
               || (provided_input.Height != sourceMap.ImageHeight))
             {
-                throw new Exception("invalid rectangle");
+                throw new FormatException("invalid rectangle");
             }
 
             if (
@@ -279,7 +279,7 @@ namespace DjvuNet.Graphics
               || (provided_input.XMax < sourceRect.XMax)
               || (provided_input.YMax < sourceRect.YMax))
             {
-                throw new Exception("invalid rectangle");
+                throw new FormatException("invalid rectangle");
             }
 
             // Adjust output pixmap
@@ -432,7 +432,7 @@ namespace DjvuNet.Graphics
             // Result must fit exactly
             if ((@out == outmax) && (y != (beg + len)))
             {
-                throw new Exception("Scaler assertion");
+                throw new FormatException("Scaler assertion");
             }
         }
 

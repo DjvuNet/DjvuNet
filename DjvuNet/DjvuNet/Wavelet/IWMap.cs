@@ -234,7 +234,7 @@ namespace DjvuNet.Wavelet
 
             if ((z < b) || (z > e))
             {
-                throw new Exception("Filter parameters were out of bounds");
+                throw new FormatException("Filter parameters were out of bounds");
             }
 
             int n = z;

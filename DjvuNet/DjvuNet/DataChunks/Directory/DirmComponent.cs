@@ -241,7 +241,7 @@ namespace DjvuNet.DataChunks.Directory
             if (remainder == 0 || remainder == 3) IsIncluded = true;
             else if (remainder == 1) IsPage = true;
             else if (remainder == 2) IsThumbnail = true;
-            //else throw new Exception("Invalid Dirm flag value");
+            //else throw new FormatException("Invalid Dirm flag value");
         }
 
         #endregion Public Methods

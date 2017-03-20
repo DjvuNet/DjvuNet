@@ -91,7 +91,7 @@ namespace DjvuNet.Graphics
             {
                 if ((gamma < 0.10000000000000001D) || (gamma > 10D))
                 {
-                    throw new Exception("Illegal gamma: " + gamma);
+                    throw new FormatException("Illegal gamma: " + gamma);
                 }
 
                 int[] retval;
