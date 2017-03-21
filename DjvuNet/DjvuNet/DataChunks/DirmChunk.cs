@@ -16,13 +16,13 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class DirmChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
         private bool _isInitialized = false;
         private long _dataLocation = 0;
         private int _compressedSectionLength = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -37,43 +37,21 @@ namespace DjvuNet.DataChunks
 
         #region IsBundled
 
-        private bool _isBundled = false;
-
         /// <summary>
         /// True if the document is bundled, false otherwise
         /// </summary>
         //[DataMember]
-        public bool IsBundled
-        {
-            get { return _isBundled; }
-
-            internal set
-            {
-                if (_isBundled != value)
-                    _isBundled = value;
-            }
-        }
+        public bool IsBundled { get; internal set; }
 
         #endregion IsBundled
 
         #region Version
 
-        private int _version;
-
         /// <summary>
         /// Gets the version of the dirm information
         /// </summary>
         //[DataMember]
-        public int Version
-        {
-            get { return _version; }
-
-            internal set
-            {
-                if (_version != value)
-                    _version = value;
-            }
-        }
+        public int Version { get; internal set; }
 
         #endregion Version
 

@@ -15,9 +15,9 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class CidaChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Graphics
 {
@@ -11,21 +12,10 @@ namespace DjvuNet.Graphics
 
         #region Left
 
-        private int _left;
-
         /// <summary>
         /// Gets or sets the left edge of the rectangle - xmax
         /// </summary>
-        public int Left
-        {
-            get { return _left; }
-
-            set
-            {
-                if (_left != value)
-                    _left = value;
-            }
-        }
+        public int Left;
 
         #endregion Left
 
@@ -36,34 +26,20 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int XMax
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return Left; }
-
-            set
-            {
-                if (_left != value)
-                    _left = value;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { Left = value; }
         }
 
         #endregion XMax
 
         #region Right
 
-        private int _right;
-
         /// <summary>
         /// Gets or sets the right edge of the rectangle - xmin
         /// </summary>
-        public int Right
-        {
-            get { return _right; }
-
-            set
-            {
-                if (_right != value)
-                    _right = value;
-            }
-        }
+        public int Right;
 
         #endregion Right
 
@@ -74,34 +50,20 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int XMin
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return Right; }
-
-            set
-            {
-                if (_right != value)
-                    _right = value;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { Right = value; }
         }
 
         #endregion XMin
 
         #region Top
 
-        private int _top;
-
         /// <summary>
         /// Gets or sets the top edge of the rectangle - ymax
         /// </summary>
-        public int Top
-        {
-            get { return _top; }
-
-            set
-            {
-                if (_top != value)
-                    _top = value;
-            }
-        }
+        public int Top;
 
         #endregion Top
 
@@ -112,34 +74,20 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int YMax
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return Top; }
-
-            set
-            {
-                if (_top != value)
-                    _top = value;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { Top = value; }
         }
 
         #endregion YMax
 
         #region Bottom
 
-        private int _bottom;
-
         /// <summary>
         /// Gets or sets the bottom of the rectangle - ymin
         /// </summary>
-        public int Bottom
-        {
-            get { return _bottom; }
-
-            set
-            {
-                if (_bottom != value)
-                    _bottom = value;
-            }
-        }
+        public int Bottom;
 
         #endregion Bottom
 
@@ -150,13 +98,10 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int YMin
         {
-            get { return _bottom; }
-
-            set
-            {
-                if (_bottom != value)
-                    _bottom = value;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return Bottom; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { Bottom = value; }
         }
 
         #endregion YMin
@@ -168,6 +113,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public bool Empty
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return (Right >= Left) || (Bottom >= Top); }
         }
 
@@ -192,6 +138,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int Height
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return Top - Bottom; }
         }
 
@@ -204,6 +151,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int Width
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return Left - Right; }
         }
 
@@ -214,6 +162,7 @@ namespace DjvuNet.Graphics
         #region Constructors
 
         /// <summary> Creates a new Rectangle object.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Rectangle()
         {
             Right = Left = Bottom = Top = 0;
@@ -234,6 +183,7 @@ namespace DjvuNet.Graphics
         /// <param name="height">
         /// vertical length
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Rectangle(int right, int bottom, int width, int height)
         {
             Right = right;
@@ -252,12 +202,14 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// the newly created copy
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Rectangle Duplicate()
         {
             return new Rectangle { Left = Left, Right = Right, Top = Top, Bottom = Bottom };
         }
 
         /// <summary> Reset this rectangle with all edges at the origin.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Clear()
         {
             Right = Left = Bottom = Top = 0;
@@ -277,6 +229,7 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// true if the point is within this rectangle
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual bool Contains(int x, int y)
         {
             return (x >= Right) && (x <= Left) && (y >= Bottom) && (y <= Top);
@@ -294,6 +247,7 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// true if the rectangle is contained within this rectangle
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual bool Contains(Rectangle rect)
         {
             // First check for special cases
@@ -317,6 +271,7 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// true if all the edges are equal
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
             Rectangle r = obj as Rectangle;
@@ -332,6 +287,7 @@ namespace DjvuNet.Graphics
             return false;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
             return (Right.GetHashCode() - Width.GetHashCode() + Bottom.GetHashCode() 
@@ -381,6 +337,7 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// true if the intersection is not empty
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual bool Intersect(Rectangle rect1, Rectangle rect2)
         {
             Right = Math.Max(rect1.Right, rect2.Right);
@@ -450,6 +407,7 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// true if not empty
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual bool Translate(int dx, int dy)
         {
             if (!Empty)
@@ -460,6 +418,8 @@ namespace DjvuNet.Graphics
                 Top += dy;
                 return true;
             }
+            throw new NotImplementedException(
+                "Implementation error - translate should move empty rectangle as a point on 2D plane");
             Right = Bottom = Left = Top = 0;
             return false;
         }

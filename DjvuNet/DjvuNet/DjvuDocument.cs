@@ -32,11 +32,11 @@ namespace DjvuNet
 
         public const string DjvuFileHeader = "AT&TFORM";
 
-        #region Private Variables
+        #region Private Members
 
         private DjvuReader _reader;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Events
 
@@ -388,18 +388,19 @@ namespace DjvuNet
 
         #region Constructors
 
+        public DjvuDocument()
+        {
+        }
+
+
+
         /// <summary>
         /// TODO docs
         /// </summary>
         /// <param name="filePath"></param>
         public DjvuDocument(string filePath)
         {
-            Identifier = 0;            
-            _reader = new DjvuReader(filePath);
-            _name = Path.GetFileNameWithoutExtension(filePath);
-            _location = filePath;
-
-            DecodeDjvuDocument(_reader);
+            Load(filePath, 0);
         }
 
         /// <summary>
@@ -409,12 +410,7 @@ namespace DjvuNet
         /// <param name="identifier"></param>
         public DjvuDocument(string filePath, int identifier)
         {
-            Identifier = identifier;
-            _reader = new DjvuReader(filePath);
-            _name = Path.GetFileNameWithoutExtension(filePath);
-            _location = filePath;
-
-            DecodeDjvuDocument(_reader);
+            Load(filePath, identifier);
         }
 
         #endregion Constructors
@@ -433,6 +429,9 @@ namespace DjvuNet
 
         protected void Dispose(bool disposing)
         {
+            if (_Disposed)
+                return;
+
             if (disposing)
             {
             }
@@ -457,6 +456,16 @@ namespace DjvuNet
         #endregion IDisposable implementation
 
         #region Public Methods
+
+        public void Load(string filePath, int identifier = 0)
+        {
+            Identifier = identifier;
+            _reader = new DjvuReader(filePath);
+            _name = Path.GetFileNameWithoutExtension(filePath);
+            _location = filePath;
+
+            DecodeDjvuDocument(_reader);
+        }
 
         /// <summary>
         /// Gets a chunk type by the given ID
@@ -499,7 +508,7 @@ namespace DjvuNet
 
             // Minimum empty Djvu file will consist of file header (8 bytes)
             // followed by length of IFF stream in the form of uint (4 bytes) and 
-            // "DJVM" or "DJVU" ASCII string (4 bytes) giving total of 16 bytes.
+            // "DJVM", "DJVU" or "DJVI" ASCII string (4 bytes) giving total of 16 bytes.
             if (stream.Length < MagicBuffer.Length * 2)
                 return false;
 
@@ -603,11 +612,12 @@ namespace DjvuNet
                 uint actual = reader.ReadUInt32();
 
                 if (expectedHeader != actual)
-                    throw new FormatException("DjVu \"AT$T\" file header is invalid");
+                    throw new DjvuFormatException("DjVu \"AT$T\" file header is invalid");
             }
             finally
             {
-                reader.Position = previousPosition;
+                // 
+                reader.Position = previousPosition + 4;
             }
         }
 

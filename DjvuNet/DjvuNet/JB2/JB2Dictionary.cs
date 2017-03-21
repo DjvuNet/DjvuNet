@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using DjvuNet.Interfaces;
 
 namespace DjvuNet.JB2
@@ -18,23 +19,10 @@ namespace DjvuNet.JB2
 
         #region Comment
 
-        private string _comment;
-
         /// <summary>
         /// Gets or sets the string coded by the JB2 file
         /// </summary>
-        public string Comment
-        {
-            get { return _comment; }
-
-            set
-            {
-                if (Comment != value)
-                {
-                    _comment = value;
-                }
-            }
-        }
+        public string Comment;
 
         #endregion Comment
 
@@ -47,6 +35,7 @@ namespace DjvuNet.JB2
         /// </summary>
         public virtual bool ImageData
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return false; }
         }
 
@@ -61,14 +50,13 @@ namespace DjvuNet.JB2
         /// </summary>
         public JB2Dictionary InheritedDictionary
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _inheritedDictionary; }
-
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (InheritedDictionary != value)
-                {
+                if (_inheritedDictionary != value)
                     SetInheritedDict(value, false);
-                }
             }
         }
 
@@ -76,23 +64,10 @@ namespace DjvuNet.JB2
 
         #region InheritedShapes
 
-        private int _inheritedShapes;
-
         /// <summary>
         /// Gets the total inherited shapes
         /// </summary>
-        public int InheritedShapes
-        {
-            get { return _inheritedShapes; }
-
-            private set
-            {
-                if (InheritedShapes != value)
-                {
-                    _inheritedShapes = value;
-                }
-            }
-        }
+        public int InheritedShapes;
 
         #endregion InheritedShapes
 
@@ -103,6 +78,7 @@ namespace DjvuNet.JB2
         /// </summary>
         public int ShapeCount
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return InheritedShapes + _shapes.Count; }
         }
 
@@ -116,6 +92,7 @@ namespace DjvuNet.JB2
 
         #region Public Methods
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Decode(BinaryReader pool)
         {
             Decode(pool, null);
@@ -124,45 +101,38 @@ namespace DjvuNet.JB2
         public virtual int AddShape(JB2Shape jb2Shape)
         {
             if (jb2Shape.Parent >= ShapeCount)
-            {
                 throw new ArgumentException("Image bad parent shape");
-            }
 
             int retval = InheritedShapes + _shapes.Count;
             _shapes.Add(jb2Shape);
-
             return retval;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Decode(BinaryReader gbs, JB2Dictionary zdict)
         {
             Init();
-
             JB2Decoder codec = new JB2Decoder();
             codec.Init(gbs, zdict);
             codec.Code(this);
         }
 
-        public virtual JB2Shape GetShape(int shapeno)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public virtual JB2Shape GetShape(int shapeNum)
         {
             JB2Shape retval;
 
-            if (shapeno >= InheritedShapes)
-            {
-                retval = (JB2Shape)_shapes[shapeno - InheritedShapes];
-            }
+            if (shapeNum >= InheritedShapes)
+                retval = (JB2Shape)_shapes[shapeNum - InheritedShapes];
             else if (InheritedDictionary != null)
-            {
-                retval = InheritedDictionary.GetShape(shapeno);
-            }
+                retval = InheritedDictionary.GetShape(shapeNum);
             else
-            {
-                throw new SystemException("Image bad number");
-            }
+                throw new DjvuFormatException("Bad image number");
 
             return retval;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Init()
         {
             InheritedDictionary = null;
@@ -174,26 +144,21 @@ namespace DjvuNet.JB2
             if (value == null)
             {
                 _inheritedDictionary = null;
-                _inheritedShapes = 0;
-
+                InheritedShapes = 0;
                 return;
             }
 
             if (force == false)
             {
                 if (_shapes.Count > 0)
-                {
-                    throw new SystemException("Image cannot set");
-                }
+                    throw new DjvuFormatException("Can not set image.");
 
                 if (InheritedDictionary != null)
-                {
-                    throw new SystemException("Image cannot change");
-                }
+                    throw new DjvuFormatException("Image can not be changed.");
             }
 
             _inheritedDictionary = value;
-            _inheritedShapes = value.ShapeCount;
+            InheritedShapes = value.ShapeCount;
 
             //    for (int i=0; i<inherited_shapes; i++)
             //    {

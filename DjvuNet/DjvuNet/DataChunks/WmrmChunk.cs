@@ -17,11 +17,11 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class WmrmChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
         private long _dataLocation = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -46,19 +46,15 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_watermarkImage == null)
-                {
                     _watermarkImage = ReadCompressedWatermarkImage();
-                }
 
                 return _watermarkImage;
             }
 
-            private set
+            internal set
             {
-                if (WatermarkImage != value)
-                {
+                if (_watermarkImage != value)
                     _watermarkImage = value;
-                }
             }
         }
 

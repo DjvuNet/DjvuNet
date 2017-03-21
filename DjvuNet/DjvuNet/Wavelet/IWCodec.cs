@@ -4,7 +4,7 @@ namespace DjvuNet.Wavelet
 {
     public sealed class IWCodec
     {
-        #region Private Variables
+        #region Private Members
 
         private readonly sbyte[] _bucketstate;
         private readonly sbyte[] _coeffstate;
@@ -38,7 +38,7 @@ namespace DjvuNet.Wavelet
                                                                 new IWBucket(48, 16)
                                                             };
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Constructors
 
@@ -48,22 +48,16 @@ namespace DjvuNet.Wavelet
             _ctxStart = new MutableValue<sbyte>[32];
 
             for (int i = 0; i < _ctxStart.Length; i++)
-            {
                 _ctxStart[i] = new MutableValue<sbyte>();
-            }
 
             _ctxBucket = new MutableValue<sbyte>[10][];
             for (int i2 = 0; i2 < _ctxBucket.Length; i2++)
-            {
                 _ctxBucket[i2] = new MutableValue<sbyte>[8];
-            }
 
             for (int i = 0; i < _ctxBucket.Length; i++)
             {
                 for (int j = 0; j < _ctxBucket[i].Length; j++)
-                {
                     _ctxBucket[i][j] = new MutableValue<sbyte>();
-                }
             }
 
             _quantHi = new int[10];
@@ -83,9 +77,7 @@ namespace DjvuNet.Wavelet
         public int CodeSlice(ZPCodec zp)
         {
             if (_curbit < 0)
-            {
                 return 0;
-            }
 
             if (IsNullSlice(_curbit, _curband) == 0)
             {
@@ -105,7 +97,6 @@ namespace DjvuNet.Wavelet
                 if (NextQuant() == 0)
                 {
                     _curbit = -1;
-
                     return 0;
                 }
             }
@@ -126,9 +117,7 @@ namespace DjvuNet.Wavelet
                 short[] pcoeff = blk.GetBlock(fbucket + buckno);
 
                 if (pcoeff == null)
-                {
                     bstatetmp = 8;
-                }
                 else
                 {
                     for (int i = 0; i < 16; i++)
@@ -138,13 +127,9 @@ namespace DjvuNet.Wavelet
                         if (cstatetmp == 0)
                         {
                             if (pcoeff[i] != 0)
-                            {
                                 cstatetmp |= 2;
-                            }
                             else
-                            {
                                 cstatetmp |= 8;
-                            }
                         }
 
                         cstate[cidx + i] = (sbyte)cstatetmp;
@@ -189,37 +174,25 @@ namespace DjvuNet.Wavelet
                                 k &= 0xf;
 
                                 if (b[k] != 0)
-                                {
                                     ctx++;
-                                }
 
                                 if (b[k + 1] != 0)
-                                {
                                     ctx++;
-                                }
 
                                 if (b[k + 2] != 0)
-                                {
                                     ctx++;
-                                }
 
                                 if ((ctx < 3) && (b[k + 3] != 0))
-                                {
                                     ctx++;
-                                }
                             }
                         }
 
                         //if (!DjVuOptions.NOCTX_BUCKET_ACTIVE && ((bbstate & 2) != 0))
                         if (((bbstate & 2) != 0))
-                        {
                             ctx |= 4;
-                        }
 
                         if (zp.Decoder(_ctxBucket[band][ctx]) != 0)
-                        {
                             _bucketstate[buckno] |= 4;
-                        }
                     }
                 }
             }
@@ -242,9 +215,7 @@ namespace DjvuNet.Wavelet
                             for (int i = 0; i < 16; i++)
                             {
                                 if ((cstate[cidx + i] & 1) == 0)
-                                {
                                     cstate[cidx + i] = 8;
-                                }
                             }
                         }
 
@@ -256,9 +227,7 @@ namespace DjvuNet.Wavelet
                             for (int i = 0; i < 16; i++)
                             {
                                 if ((cstate[cidx + i] & 8) != 0)
-                                {
                                     gotcha++;
-                                }
                             }
                         }
 
@@ -267,29 +236,21 @@ namespace DjvuNet.Wavelet
                             if ((cstate[cidx + i] & 8) != 0)
                             {
                                 if (band == 0)
-                                {
                                     thres = _quantLo[i];
-                                }
 
                                 int ctx = 0;
 
                                 //if (!DjVuOptions.NOCTX_EXPECT)
                                 {
                                     if (gotcha >= maxgotcha)
-                                    {
                                         ctx = maxgotcha;
-                                    }
                                     else
-                                    {
                                         ctx = gotcha;
-                                    }
                                 }
 
                                 //if (!DjVuOptions.NOCTX_ACTIVE && ((bucketstate[buckno] & 2) != 0))
                                 if (((_bucketstate[buckno] & 2) != 0))
-                                {
                                     ctx |= 8;
-                                }
 
                                 if (zp.Decoder(_ctxStart[ctx]) != 0)
                                 {
@@ -299,25 +260,17 @@ namespace DjvuNet.Wavelet
                                     int coeff = (thres + halfthres) - (halfthres >> 2);
 
                                     if (zp.IWDecoder() != 0)
-                                    {
                                         pcoeff[i] = (short)(-coeff);
-                                    }
                                     else
-                                    {
                                         pcoeff[i] = (short)coeff;
-                                    }
                                 }
 
                                 //if (!DjVuOptions.NOCTX_EXPECT)
                                 {
                                     if ((cstate[cidx + i] & 4) != 0)
-                                    {
                                         gotcha = 0;
-                                    }
                                     else if (gotcha > 0)
-                                    {
                                         gotcha--;
-                                    }
                                 }
                             }
                         }
@@ -346,48 +299,32 @@ namespace DjvuNet.Wavelet
                                 int coeff = pcoeff[i];
 
                                 if (coeff < 0)
-                                {
                                     coeff = -coeff;
-                                }
 
                                 if (band == 0)
-                                {
                                     thres = _quantLo[i];
-                                }
 
                                 if (coeff <= (3 * thres))
                                 {
                                     coeff += (thres >> 2);
 
                                     if (zp.Decoder(_ctxMant) != 0)
-                                    {
                                         coeff += (thres >> 1);
-                                    }
                                     else
-                                    {
                                         coeff = (coeff - thres) + (thres >> 1);
-                                    }
                                 }
                                 else
                                 {
                                     if (zp.IWDecoder() != 0)
-                                    {
                                         coeff += (thres >> 1);
-                                    }
                                     else
-                                    {
                                         coeff = (coeff - thres) + (thres >> 1);
-                                    }
                                 }
 
                                 if (pcoeff[i] > 0)
-                                {
                                     pcoeff[i] = (short)coeff;
-                                }
                                 else
-                                {
                                     pcoeff[i] = (short)(-coeff);
-                                }
                             }
                         }
                     }
@@ -406,42 +343,32 @@ namespace DjvuNet.Wavelet
             int[] q = IwQuant;
             int qidx = 0;
 
+            // Ideal for 128/256 packed integer
+
             for (int j = 0; i < 4; j++)
-            {
                 _quantLo[i++] = q[qidx++];
-            }
 
             for (int j = 0; j < 4; j++)
-            {
                 _quantLo[i++] = q[qidx];
-            }
 
             qidx++;
 
             for (int j = 0; j < 4; j++)
-            {
                 _quantLo[i++] = q[qidx];
-            }
 
             qidx++;
 
             for (int j = 0; j < 4; j++)
-            {
                 _quantLo[i++] = q[qidx];
-            }
 
             qidx++;
             _quantHi[0] = 0;
 
             for (int j = 1; j < 10; j++)
-            {
                 _quantHi[j] = q[qidx++];
-            }
 
             while (_quantLo[0] >= 32768)
-            {
                 NextQuant();
-            }
 
             return this;
         }
@@ -458,9 +385,7 @@ namespace DjvuNet.Wavelet
                     _coeffstate[i] = 1;
 
                     if ((threshold > 0) && (threshold < 32768))
-                    {
                         is_null = _coeffstate[i] = 0;
-                    }
                 }
 
                 return is_null;
@@ -469,14 +394,10 @@ namespace DjvuNet.Wavelet
             int threshold2 = _quantHi[band];
 
             if ((threshold2 <= 0) || (threshold2 >= 32768))
-            {
                 return 1;
-            }
 
             for (int i = 0; i < (Bandbuckets[band].Size << 4); i++)
-            {
                 _coeffstate[i] = 0;
-            }
 
             return 0;
         }
@@ -486,20 +407,12 @@ namespace DjvuNet.Wavelet
             int flag = 0;
 
             for (int i = 0; i < 16; i++)
-            {
                 if ((_quantLo[i] = _quantLo[i] >> 1) != 0)
-                {
                     flag = 1;
-                }
-            }
 
             for (int i = 0; i < 10; i++)
-            {
                 if ((_quantHi[i] = _quantHi[i] >> 1) != 0)
-                {
                     flag = 1;
-                }
-            }
 
             return flag;
         }

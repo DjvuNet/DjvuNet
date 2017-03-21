@@ -19,48 +19,19 @@ namespace DjvuNet.DataChunks.Annotations
 
         #region Name
 
-        private string _Name;
-
         /// <summary>
         /// Gets the name of the annotation which also could be an annotations value
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return _Name;
-            }
-
-            private set
-            {
-                if (Name != value)
-                {
-                    _Name = value;
-                }
-            }
-        }
+        public string Name { get; internal set; }
 
         #endregion Name
 
         #region Parameters
 
-        private Annotation[] _parameters;
-
         /// <summary>
         /// Gets the parameters for the annotation
         /// </summary>
-        public Annotation[] Parameters
-        {
-            get { return _parameters; }
-
-            private set
-            {
-                if (Parameters != value)
-                {
-                    _parameters = value;
-                }
-            }
-        }
+        public Annotation[] Parameters { get; internal set; }
 
         #endregion Parameters
 
@@ -160,7 +131,7 @@ namespace DjvuNet.DataChunks.Annotations
             string[] parameters = BreakIntoParameterPieces(text);
 
             Name = parameters[0];
-            _parameters = parameters
+            Parameters = parameters
                 .Skip(1)
                 .Select(x => new Annotation(x))
                 .ToArray();

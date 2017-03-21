@@ -17,11 +17,11 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class DjbzChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
         private long _dataLocation = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -46,9 +46,7 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_shapeDictionary == null)
-                {
                     _shapeDictionary = DecodeShapeDictionary();
-                }
 
                 return _shapeDictionary;
             }

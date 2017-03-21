@@ -1,10 +1,11 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Graphics
 {
     public class PixelReference : DjvuNet.Graphics.Pixel
     {
-        #region Private Variables
+        #region Private Members
 
         private readonly int _blueOffset;
         private readonly int _greenOffset;
@@ -13,7 +14,7 @@ namespace DjvuNet.Graphics
         private readonly int _redOffset;
         private int _offset;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -24,13 +25,11 @@ namespace DjvuNet.Graphics
         /// </summary>
         public override sbyte Blue
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _parent.Data[_offset + _blueOffset]; }
 
-            set
-            {
-                if (_parent.Data[_offset + _blueOffset] != value)
-                    _parent.Data[_offset + _blueOffset] = value;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _parent.Data[_offset + _blueOffset] = value; }
         }
 
         #endregion Blue
@@ -42,13 +41,11 @@ namespace DjvuNet.Graphics
         /// </summary>
         public override sbyte Green
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _parent.Data[_offset + _greenOffset]; }
 
-            set
-            {
-                if (_parent.Data[_offset + _greenOffset] != value)
-                    _parent.Data[_offset + _greenOffset] = value;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _parent.Data[_offset + _greenOffset] = value; }
         }
 
         #endregion Green
@@ -58,15 +55,13 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the referenced red value
         /// </summary>
-        public override sbyte Red
+        public new sbyte Red
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _parent.Data[_offset + _redOffset]; }
 
-            set
-            {
-                if (_parent.Data[_offset + _redOffset] != value)
-                    _parent.Data[_offset + _redOffset] = value;
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _parent.Data[_offset + _redOffset] = value; }
         }
 
         #endregion Red
@@ -75,26 +70,28 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        /// <summary> Creates a createGPixelReference object.
-        ///
+        /// <summary> 
+        /// Creates a createGPixelReference object.
         /// </summary>
-        /// <param name="parent">the image map to refere to
+        /// <param name="parent">
+        /// the image map to refer to
         /// </param>
-        /// <param name="offset">the initial pixel position to refere to
+        /// <param name="offset">
+        /// the initial pixel position to refer to
         /// </param>
-        public PixelReference(Map parent, int offset)
+        public PixelReference(Map parent, int offset) : base()
         {
-            this._parent = parent;
+            _parent = parent;
             _ncolors = parent.BytesPerPixel;
-            this._offset = offset * _ncolors;
+            _offset = offset * _ncolors;
             _blueOffset = parent.BlueOffset;
             _greenOffset = parent.GreenOffset;
             _redOffset = parent.RedOffset;
         }
 
-        public PixelReference(Map parent, int row, int column)
+        public PixelReference(Map parent, int row, int column) : base()
         {
-            this._parent = parent;
+            _parent = parent;
             _ncolors = parent.BytesPerPixel;
             _offset = (parent.RowOffset(row) + column) * _ncolors;
             _blueOffset = parent.BlueOffset;
@@ -131,40 +128,43 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Set the map image pixel we are refering to.
-        ///
+        /// <summary> 
+        /// Set the map image pixel we are referring to.
         /// </summary>
         /// <param name="offset">pixel position
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetOffset(int offset)
         {
             _offset = offset * _ncolors;
         }
 
-        /// <summary> Set the map image pixel we are refering to.
-        ///
+        /// <summary> 
+        /// Set the map image pixel we are referring to.
         /// </summary>
         /// <param name="row">vertical position
         /// </param>
         /// <param name="column">horizontal position
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetOffset(int row, int column)
         {
             _offset = (_parent.RowOffset(row) + column) * _ncolors;
         }
 
-        /// <summary> Convert the following number of pixels from YCC to RGB. The offset will
+        /// <summary> 
+        /// Convert the following number of pixels from YCC to RGB. The offset will
         /// be advanced to the end.
-        ///
         /// </summary>
-        /// <param name="count">The number of pixels to convert.
+        /// <param name="count">
+        /// The number of pixels to convert.
         /// </param>
-        public void YCC_to_RGB(int count)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Ycc2Rgb(int count)
         {
             if ((_ncolors != 3) || _parent.IsRampNeeded)
-            {
-                throw new SystemException("YCC_to_RGB only legal with three colors");
-            }
+                throw new SystemException($"{nameof(Ycc2Rgb)} only legal with three colors");
+
             while (count-- > 0)
             {
                 int y = _parent.Data[_offset];
@@ -192,6 +192,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="red">pixel value
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void SetBGR(int blue, int green, int red)
         {
             _parent.Data[_offset + _blueOffset] = (sbyte)blue;
@@ -260,6 +261,7 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary> Step to the next pixel.  Care should be taken when stepping past the end of a row.</summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncOffset()
         {
             _offset += _ncolors;
@@ -271,6 +273,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <param name="offset">number of pixels to step past.
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncOffset(int offset)
         {
             _offset += (_ncolors * offset);

@@ -19,210 +19,90 @@ namespace DjvuNet.DataChunks.Text
     /// </summary>
     public class TextZone
     {
-        #region Private Variables
+        #region Private Members
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
         #region X
 
-        private int _x;
-
         /// <summary>
         /// Gets the X offset for the zone
         /// </summary>
-        public int X
-        {
-            get
-            {
-                return _x;
-            }
-
-            private set
-            {
-                if (X != value)
-                {
-                    _x = value;
-                }
-            }
-        }
+        public int X { get; internal set; }
 
         #endregion X
 
         #region Y
 
-        private int _y;
-
         /// <summary>
         /// Gets the Y offset for the zone
         /// </summary>
-        public int Y
-        {
-            get { return _y; }
-
-            private set
-            {
-                if (Y != value)
-                {
-                    _y = value;
-                }
-            }
-        }
+        public int Y { get; internal set; }
 
         #endregion Y
 
         #region Width
 
-        private int _width;
-
         /// <summary>
         /// Gets the width of the text zone
         /// </summary>
-        public int Width
-        {
-            get { return _width; }
-
-            private set
-            {
-                if (Width != value)
-                {
-                    _width = value;
-                }
-            }
-        }
+        public int Width { get; internal set; }
 
         #endregion Width
 
         #region Height
 
-        private int _height;
-
         /// <summary>
         /// Gets the height of the text zone
         /// </summary>
-        public int Height
-        {
-            get { return _height; }
-
-            private set
-            {
-                if (Height != value)
-                {
-                    _height = value;
-                }
-            }
-        }
+        public int Height { get; internal set; }
 
         #endregion Height
 
         #region TextLength
 
-        private int _textLength;
-
         /// <summary>
         /// Gets the length of text in the zone
         /// </summary>
-        public int TextLength
-        {
-            get { return _textLength; }
-
-            private set
-            {
-                if (TextLength != value)
-                {
-                    _textLength = value;
-                }
-            }
-        }
+        public int TextLength { get; internal set; }
 
         #endregion TextLength
 
         #region TextOffset
 
-        private int _textOffset;
-
         /// <summary>
         /// Gets the offset of the text
         /// </summary>
-        public int TextOffset
-        {
-            get { return _textOffset; }
-
-            private set
-            {
-                if (TextOffset != value)
-                {
-                    _textOffset = value;
-                }
-            }
-        }
+        public int TextOffset { get; internal set; }
 
         #endregion TextOffset
 
         #region Children
 
-        private TextZone[] _children;
-
         /// <summary>
         /// Gets the children text zones
         /// </summary>
-        public TextZone[] Children
-        {
-            get { return _children; }
-
-            private set
-            {
-                if (Children != value)
-                {
-                    _children = value;
-                }
-            }
-        }
+        public TextZone[] Children { get; internal set; }
 
         #endregion Children
 
         #region ZoneType
 
-        private ZoneTypes _zoneType;
-
         /// <summary>
         /// Gets the zone type
         /// </summary>
-        public ZoneTypes ZoneType
-        {
-            get { return _zoneType; }
-
-            private set
-            {
-                if (ZoneType != value)
-                {
-                    _zoneType = value;
-                }
-            }
-        }
+        public ZoneTypes ZoneType { get; internal set; }
 
         #endregion ZoneType
 
         #region Parent
 
-        private TextZone _parent;
-
         /// <summary>
         /// Gets the parent for this text zone
         /// </summary>
-        public TextZone Parent
-        {
-            get { return _parent; }
-
-            private set
-            {
-                if (Parent != value)
-                {
-                    _parent = value;
-                }
-            }
-        }
+        public TextZone Parent { get; internal set; }
 
         #endregion Parent
 
@@ -264,45 +144,19 @@ namespace DjvuNet.DataChunks.Text
 
         #region Rectangle
 
-        private Rectangle _rectangle;
-
         /// <summary>
         /// Gets the rectangle for the zone
         /// </summary>
-        public Rectangle Rectangle
-        {
-            get { return _rectangle; }
-
-            private set
-            {
-                if (Rectangle != value)
-                {
-                    _rectangle = value;
-                }
-            }
-        }
+        public Rectangle Rectangle { get; internal set; }
 
         #endregion Rectangle
 
         #region ChunkParent
 
-        private TextChunk _chunkParent;
-
         /// <summary>
         /// Gets the text chunk parent for the zone
         /// </summary>
-        public TextChunk ChunkParent
-        {
-            get { return _chunkParent; }
-
-            private set
-            {
-                if (ChunkParent != value)
-                {
-                    _chunkParent = value;
-                }
-            }
-        }
+        public TextChunk ChunkParent { get; internal set; }
 
         #endregion ChunkParent
 
@@ -312,8 +166,8 @@ namespace DjvuNet.DataChunks.Text
 
         public TextZone(DjvuReader reader, TextZone parent, TextZone sibling, TextChunk chunkParent)
         {
-            _parent = parent;
-            _chunkParent = chunkParent;
+            Parent = parent;
+            ChunkParent = chunkParent;
 
             DecodeZoneData(reader, sibling, chunkParent);
         }
@@ -388,18 +242,18 @@ namespace DjvuNet.DataChunks.Text
         /// <param name="reader"></param>
         private void DecodeZoneData(DjvuReader reader, TextZone sibling, TextChunk chunkParent)
         {
-            _zoneType = (ZoneTypes)reader.ReadByte();
-            _x = reader.ReadUInt16MSB() - 0x8000;
-            _y = reader.ReadUInt16MSB() - 0x8000;
-            _width = reader.ReadUInt16MSB() - 0x8000;
-            _height = reader.ReadUInt16MSB() - 0x8000;
+            ZoneType = (ZoneTypes)reader.ReadByte();
+            X = reader.ReadUInt16MSB() - 0x8000;
+            Y = reader.ReadUInt16MSB() - 0x8000;
+            Width = reader.ReadUInt16MSB() - 0x8000;
+            Height = reader.ReadUInt16MSB() - 0x8000;
 
-            _textOffset = reader.ReadUInt16MSB() - 0x8000;
-            _textLength = reader.ReadInt24MSB();
+            TextOffset = reader.ReadUInt16MSB() - 0x8000;
+            TextLength = reader.ReadInt24MSB();
 
-            ResolveOffsets(_parent, sibling);
+            ResolveOffsets(Parent, sibling);
 
-            _rectangle = new Rectangle(_x, _y, _width, _height);
+            Rectangle = new Rectangle(X, Y, Width, Height);
 
             int childrenZones = reader.ReadInt24MSB();
             List<TextZone> children = new List<TextZone>();
@@ -414,7 +268,7 @@ namespace DjvuNet.DataChunks.Text
                 children.Add(newZone);
             }
 
-            _children = children.ToArray();
+            Children = children.ToArray();
         }
 
         /// <summary>
@@ -477,22 +331,22 @@ namespace DjvuNet.DataChunks.Text
         {
             if (ZoneType == ZoneTypes.Word)
             {
-                int length = Math.Min(TextLength, ChunkParent.Text.Length - _textOffset);
+                int length = Math.Min(TextLength, ChunkParent.Text.Length - TextOffset);
 
                 if (length <= 0)
                 {
                     return "";
                 }
 
-                return ChunkParent.Text.Substring(_textOffset, length).Trim();
+                return ChunkParent.Text.Substring(TextOffset, length).Trim();
             }
 
             if (ZoneType == ZoneTypes.Line)
             {
-                return string.Join(" ", _children.Select(x => x.Text)) + "\r\n";
+                return string.Join(" ", Children.Select(x => x.Text)) + "\r\n";
             }
 
-            return string.Join(" ", _children.Select(x => x.Text));
+            return string.Join(" ", Children.Select(x => x.Text));
         }
 
         /// <summary>
@@ -504,24 +358,24 @@ namespace DjvuNet.DataChunks.Text
 
             if (sibling == null)
             {
-                _x += parent.Rectangle.Right;
-                _y = parent.Rectangle.Top - (_y + Height);
-                _textOffset += parent.TextOffset;
+                X += parent.Rectangle.Right;
+                Y = parent.Rectangle.Top - (Y + Height);
+                TextOffset += parent.TextOffset;
             }
             else
             {
                 if (sibling.ZoneType == ZoneTypes.Page || sibling.ZoneType == ZoneTypes.Paragraph || sibling.ZoneType == ZoneTypes.Line)
                 {
-                    _x = _x + sibling.Rectangle.Right;
-                    _y = sibling.Rectangle.Bottom - (_y + _height);
+                    X += sibling.Rectangle.Right;
+                    Y = sibling.Rectangle.Bottom - (Y + Height);
                 }
                 else if (sibling.ZoneType == ZoneTypes.Column || sibling.ZoneType == ZoneTypes.Word || sibling.ZoneType == ZoneTypes.Character)
                 {
-                    _x += sibling.Rectangle.Left;
-                    _y += sibling.Rectangle.Bottom;
+                    X += sibling.Rectangle.Left;
+                    Y += sibling.Rectangle.Bottom;
                 }
 
-                _textOffset += sibling.TextOffset + sibling.TextLength;
+                TextOffset += sibling.TextOffset + sibling.TextLength;
             }
         }
 

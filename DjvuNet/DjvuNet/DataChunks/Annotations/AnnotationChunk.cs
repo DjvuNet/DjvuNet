@@ -18,11 +18,11 @@ namespace DjvuNet.DataChunks.Annotations
     /// </summary>
     public abstract class AnnotationChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
         private long _dataLocation = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -38,19 +38,15 @@ namespace DjvuNet.DataChunks.Annotations
             get
             {
                 if (_annotations == null)
-                {
                     _annotations = ReadAnnotationData();
-                }
 
                 return _annotations;
             }
 
-            private set
+            internal set
             {
-                if (Annotations != value)
-                {
+                if (_annotations != value)
                     _annotations = value;
-                }
             }
         }
 

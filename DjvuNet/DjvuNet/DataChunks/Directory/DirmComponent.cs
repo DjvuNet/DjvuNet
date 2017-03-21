@@ -15,201 +15,91 @@ namespace DjvuNet.DataChunks.Directory
 
         #region ID
 
-        private string _ID;
-
         /// <summary>
         /// Gets or sets the ID of the component
         /// </summary>
-        public string ID
-        {
-            get { return _ID; }
-
-            set
-            {
-                if (_ID != value)
-                    _ID = value;
-            }
-        }
+        public string ID { get; set; }
 
         #endregion ID
 
         #region Name
 
-        private string _name;
-
         /// <summary>
         /// Gets or sets the name of the component
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-
-            set
-            {
-                if (_name != value)
-                    _name = value;
-            }
-        }
+        public string Name { get; set; }
 
         #endregion Name
 
         #region Title
 
-        private string _title;
-
         /// <summary>
         /// Gets or sets the title of the component
         /// </summary>
-        public string Title
-        {
-            get { return _title; }
-
-            set
-            {
-                if (_title != value)
-                    _title = value;
-            }
-        }
+        public string Title { get; set; }
 
         #endregion Title
 
         #region Offset
 
-        private int _offset;
-
         /// <summary>
         /// Gets the offset of the component
         /// </summary>
-        public int Offset
-        {
-            get { return _offset; }
-
-            private set
-            {
-                if (_offset != value)
-                    _offset = value;
-            }
-        }
+        public int Offset { get; set; }
 
         #endregion Offset
 
         #region Size
 
-        private int _size;
-
         /// <summary>
         /// Gets or sets the size of the component
         /// </summary>
-        public int Size
-        {
-            get { return _size; }
-
-            set
-            {
-                if (_size != value)
-                    _size = value;
-            }
-        }
+        public int Size { get; set; }
 
         #endregion Size
 
         #region HasName
 
-        private bool _hasName;
-
         /// <summary>
         /// True if the component has a different name
         /// </summary>
-        public bool HasName
-        {
-            get { return _hasName; }
-
-            private set
-            {
-                if (_hasName != value)
-                    _hasName = value;
-            }
-        }
+        public bool HasName { get; internal set; }
 
         #endregion HasName
 
         #region HasTitle
 
-        private bool _hasTitle;
-
         /// <summary>
         /// True if the component has a different title
         /// </summary>
-        public bool HasTitle
-        {
-            get { return _hasTitle; }
-
-            private set
-            {
-                if (_hasTitle != value)
-                    _hasTitle = value;
-            }
-        }
+        public bool HasTitle { get; internal set; }
 
         #endregion HasTitle
 
         #region IsIncluded
 
-        private bool _isIncluded;
-
         /// <summary>
         /// True if the component is included by other files
         /// </summary>
-        public bool IsIncluded
-        {
-            get { return _isIncluded; }
-
-            private set
-            {
-                if (_isIncluded != value)
-                    _isIncluded = value;
-            }
-        }
+        public bool IsIncluded { get; set; }
 
         #endregion IsIncluded
 
         #region IsPage
 
-        private bool _isPage;
-
         /// <summary>
         /// True if the component represents a page
         /// </summary>
-        public bool IsPage
-        {
-            get { return _isPage; }
-
-            private set
-            {
-                if (_isPage != value)
-                    _isPage = value;
-            }
-        }
+        public bool IsPage { get; internal set; }
 
         #endregion IsPage
 
         #region IsThumbnail
 
-        private bool _isThumbnail;
-
         /// <summary>
         /// True if the component represents a thumbnail
         /// </summary>
-        public bool IsThumbnail
-        {
-            get { return _isThumbnail; }
-
-            private set
-            {
-                if (_isThumbnail != value)
-                    _isThumbnail = value;
-            }
-        }
+        public bool IsThumbnail { get; internal set; }
 
         #endregion IsThumbnail
 

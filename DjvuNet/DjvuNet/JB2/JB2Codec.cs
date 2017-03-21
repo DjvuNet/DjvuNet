@@ -8,9 +8,9 @@ namespace DjvuNet.JB2
 {
     public abstract class JB2Codec
     {
-        #region Private Variables
+        #region Private Members
 
-        private readonly bool _encoding;
+        private bool _encoding;
 
         private const sbyte NewMark = 1;
         private const sbyte NewMarkLibraryOnly = 2;
@@ -48,52 +48,59 @@ namespace DjvuNet.JB2
         private readonly int[] short_list = new int[3];
         private int _shortListPos;
 
-        #endregion Private Variables
+        #endregion Private Members
 
-        #region Protected Variables
+        #region Protected Members
 
         protected const int Bigpositive = 262142;
         protected const int Bignegative = -262143;
         protected const sbyte StartOfData = 0;
         protected const sbyte EndOfData = 11;
 
-        protected MutableValue<int> AbsLocX = new MutableValue<int>();
-        protected MutableValue<int> AbsLocY = new MutableValue<int>();
-        protected MutableValue<int> AbsSizeX = new MutableValue<int>();
-        protected MutableValue<int> AbsSizeY = new MutableValue<int>();
-        protected sbyte[] Bitdist = new sbyte[1024];
-        protected sbyte[] Cbitdist = new sbyte[2048];
-        protected MutableValue<int> DistCommentByte = new MutableValue<int>();
-        protected MutableValue<int> DistCommentLength = new MutableValue<int>();
-        protected MutableValue<int> DistMatchIndex = new MutableValue<int>();
+        protected MutableValue<int> AbsLocX;
+        protected MutableValue<int> AbsLocY;
+        protected MutableValue<int> AbsSizeX;
+        protected MutableValue<int> AbsSizeY;
+        protected sbyte[] Bitdist;
+        protected sbyte[] Cbitdist;
+        protected MutableValue<int> DistCommentByte;
+        protected MutableValue<int> DistCommentLength;
+        protected MutableValue<int> DistMatchIndex;
 
-        protected MutableValue<int> DistRecordType = new MutableValue<int>();
+        protected MutableValue<int> DistRecordType;
         protected bool GotStartRecordP;
         protected int ImageColumns;
         protected int ImageRows;
-        protected MutableValue<int> ImageSizeDist = new MutableValue<int>();
-        protected MutableValue<int> InheritedShapeCountDist = new MutableValue<int>();
-        protected List<int> Lib2Shape = new List<int>();
-        protected MutableValue<int> RelSizeX = new MutableValue<int>();
-        protected MutableValue<int> RelSizeY = new MutableValue<int>();
+        protected MutableValue<int> ImageSizeDist;
+        protected MutableValue<int> InheritedShapeCountDist;
+        protected List<int> Lib2Shape;
+        protected MutableValue<int> RelSizeX;
+        protected MutableValue<int> RelSizeY;
 
-        #endregion Protected Variables
+        #endregion Protected Members
 
         #region Constructors
 
         protected JB2Codec(bool encoding)
         {
+            AbsLocX = new MutableValue<int>();
+            AbsLocY = new MutableValue<int>();
+            AbsSizeX = new MutableValue<int>();
+            AbsSizeY = new MutableValue<int>();
+            Bitdist = new sbyte[1024];
+            Cbitdist = new sbyte[2048];
+            DistCommentByte = new MutableValue<int>();
+            DistCommentLength = new MutableValue<int>();
+            DistMatchIndex = new MutableValue<int>();
+
+            DistRecordType = new MutableValue<int>();
+            ImageSizeDist = new MutableValue<int>();
+            InheritedShapeCountDist = new MutableValue<int>();
+            Lib2Shape = new List<int>();
+            RelSizeX = new MutableValue<int>();
+            RelSizeY = new MutableValue<int>();
+
             _encoding = encoding;
-
-            for (int i = 0; i < Bitdist.Length; )
-            {
-                Bitdist[i++] = 0;
-            }
-
-            for (int i = 0; i < Cbitdist.Length; )
-            {
-                Cbitdist[i++] = 0;
-            }
 
             _bitcells.Add(new MutableValue<sbyte>());
             _leftcell.Add(new MutableValue<int>());
@@ -112,9 +119,7 @@ namespace DjvuNet.JB2
             int ictx = ctx.Value;
 
             if (ictx >= _bitcells.Count)
-            {
                 throw new IndexOutOfRangeException("Image bad MutableValue<int>");
-            }
 
             for (int phase = 1, range = -1; range != 1; ictx = ctx.Value)
             {
@@ -161,9 +166,7 @@ namespace DjvuNet.JB2
                             if (negative)
                             {
                                 if (_encoding)
-                                {
                                     v = -v - 1;
-                                }
 
                                 int temp = -low - 1;
                                 low = -high - 1;
@@ -184,18 +187,12 @@ namespace DjvuNet.JB2
                                 range = (cutoff + 1) >> 1;
 
                                 if (range == 1)
-                                {
                                     cutoff = 0;
-                                }
                                 else
-                                {
                                     cutoff -= (range >> 1);
-                                }
                             }
                             else
-                            {
                                 cutoff = (cutoff << 1) + 1;
-                            }
 
                             break;
                         }
@@ -207,18 +204,12 @@ namespace DjvuNet.JB2
                             if (range != 1)
                             {
                                 if (!decision)
-                                {
                                     cutoff -= (range >> 1);
-                                }
                                 else
-                                {
                                     cutoff += (range >> 1);
-                                }
                             }
                             else if (!decision)
-                            {
                                 cutoff--;
-                            }
 
                             break;
                         }
@@ -284,13 +275,9 @@ namespace DjvuNet.JB2
                 case MatchedRefineLibraryOnly:
                     {
                         if (!_encoding)
-                        {
                             jshp = new JB2Shape().Init(-1);
-                        }
                         else if (jshp == null)
-                        {
                             jshp = new JB2Shape();
-                        }
 
                         bm = jshp.Bitmap;
 
@@ -306,9 +293,7 @@ namespace DjvuNet.JB2
                         CodeEventualLosslessRefinement();
 
                         if (!_encoding)
-                        {
                             InitLibrary(jim);
-                        }
 
                         break;
                     }
@@ -326,9 +311,7 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_encoding)
-                        {
                             jshp.Parent = Convert.ToInt32((Lib2Shape[match]));
-                        }
 
                         Bitmap cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_libinfo[match];
@@ -341,20 +324,15 @@ namespace DjvuNet.JB2
                 case PreservedComment:
                     {
                         jim.Comment = CodeComment(jim.Comment);
-
                         break;
                     }
 
                 case RequiredDictOrReset:
                     {
                         if (!GotStartRecordP)
-                        {
                             CodeInheritedShapeCount(jim);
-                        }
                         else
-                        {
                             ResetNumcoder();
-                        }
 
                         break;
                     }
@@ -363,7 +341,7 @@ namespace DjvuNet.JB2
                     break;
 
                 default:
-                    throw new ArgumentException("Image bad type");
+                    throw new DjvuFormatException("Image bad type");
             }
 
             if (!_encoding)
@@ -374,9 +352,7 @@ namespace DjvuNet.JB2
                     case MatchedRefineLibraryOnly:
                         {
                             if (xjshp != null)
-                            {
                                 jshp = jshp.Duplicate();
-                            }
 
                             shapeno = jim.AddShape(jshp);
                             AddLibrary(shapeno, jshp);
@@ -406,10 +382,7 @@ namespace DjvuNet.JB2
                 case NonMarkData:
                     {
                         if (jblt == null)
-                        {
                             jblt = new JB2Blit();
-                        }
-
                         // fall through
                     }
                     goto case NewMarkLibraryOnly;
@@ -418,25 +391,18 @@ namespace DjvuNet.JB2
                 case MatchedRefineLibraryOnly:
                     {
                         if (!_encoding)
-                        {
                             jshp = new JB2Shape().Init((rectype == NonMarkData) ? (-2) : (-1));
-                        }
                         else if (jshp == null)
-                        {
                             jshp = new JB2Shape();
-                        }
 
                         bm = jshp.Bitmap;
-
                         break;
                     }
 
                 case MatchedCopy:
                     {
                         if (jblt == null)
-                        {
                             jblt = new JB2Blit();
-                        }
 
                         break;
                     }
@@ -453,9 +419,7 @@ namespace DjvuNet.JB2
                         CodeEventualLosslessRefinement();
 
                         if (!_encoding)
-                        {
                             InitLibrary(jim);
-                        }
 
                         break;
                     }
@@ -497,9 +461,7 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_encoding)
-                        {
                             jshp.Parent = Convert.ToInt32((Lib2Shape[match]));
-                        }
 
                         Bitmap cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_libinfo[match];
@@ -521,9 +483,7 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_encoding)
-                        {
                             jshp.Parent = Convert.ToInt32((Lib2Shape[match]));
-                        }
 
                         Bitmap cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_libinfo[match];
@@ -539,9 +499,7 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_encoding)
-                        {
                             jshp.Parent = Convert.ToInt32((Lib2Shape[match]));
-                        }
 
                         Bitmap cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_libinfo[match];
@@ -557,9 +515,7 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jblt.ShapeNumber, jim);
 
                         if (!_encoding)
-                        {
                             jblt.ShapeNumber = Convert.ToInt32((Lib2Shape[match]));
-                        }
 
                         bm = jim.GetShape(jblt.ShapeNumber).Bitmap;
 
@@ -589,20 +545,15 @@ namespace DjvuNet.JB2
                 case PreservedComment:
                     {
                         jim.Comment = CodeComment(jim.Comment);
-
                         break;
                     }
 
                 case RequiredDictOrReset:
                     {
                         if (!GotStartRecordP)
-                        {
                             CodeInheritedShapeCount(jim);
-                        }
                         else
-                        {
                             ResetNumcoder();
-                        }
 
                         break;
                     }
@@ -627,26 +578,20 @@ namespace DjvuNet.JB2
                     case NonMarkData:
                         {
                             if (xjshp != null)
-                            {
                                 jshp = jshp.Duplicate();
-                            }
 
                             shapeno = jim.AddShape(jshp);
                             Shape2Lib(shapeno, MinusOneObject);
 
                             if (needAddLibrary)
-                            {
                                 AddLibrary(shapeno, jshp);
-                            }
 
                             if (needAddBlit)
                             {
                                 jblt.ShapeNumber = shapeno;
 
                                 if (xjblt != null)
-                                {
                                     jblt = (JB2Blit)xjblt.Duplicate();
-                                }
 
                                 jim.AddBlit(jblt);
                             }
@@ -657,12 +602,9 @@ namespace DjvuNet.JB2
                     case MatchedCopy:
                         {
                             if (xjblt != null)
-                            {
                                 jblt = (JB2Blit)xjblt.Duplicate();
-                            }
 
                             jim.AddBlit(jblt);
-
                             break;
                         }
                 }
@@ -755,16 +697,12 @@ namespace DjvuNet.JB2
             if (size <= shapeno)
             {
                 while (size++ < shapeno)
-                {
                     shape2lib_Renamed_Field.Add(MinusOneObject);
-                }
 
                 shape2lib_Renamed_Field.Add(libno);
             }
             else
-            {
                 shape2lib_Renamed_Field[shapeno] = libno;
-            }
         }
 
         protected int ShiftCrossContext(Bitmap bm, Bitmap cbm, int context, int n, int up1, int up0,
@@ -837,9 +775,7 @@ namespace DjvuNet.JB2
         protected virtual void CodeRelativeLocation(JB2Blit jblt, int rows, int columns)
         {
             if (!GotStartRecordP)
-            {
                 throw new SystemException("Image no start");
-            }
 
             int bottom = 0;
             int left = 0;
@@ -923,9 +859,7 @@ namespace DjvuNet.JB2
         protected virtual int UpdateShortList(int v)
         {
             if (++_shortListPos == 3)
-            {
                 _shortListPos = 0;
-            }
 
             short_list[_shortListPos] = v;
 

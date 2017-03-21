@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace DjvuNet.Graphics
@@ -15,181 +16,82 @@ namespace DjvuNet.Graphics
 
         #region Properties
 
-        private Hashtable _properties = Hashtable.Synchronized(new Hashtable());
-
         /// <summary>
         /// Gets the property values
         /// </summary>
-        public Hashtable Properties
-        {
-            get { return _properties; }
-
-            protected set
-            {
-                if (_properties != value)
-                    _properties = value;
-            }
-        }
+        public Hashtable Properties { get; internal set; }
 
         #endregion Properties
 
         #region Data
 
-        private sbyte[] _data;
-
         /// <summary>
         /// Gets or sets the image data
         /// </summary>
-        public sbyte[] Data
-        {
-            get { return _data; }
-
-            set
-            {
-                if (_data != value)
-                    _data = value;
-            }
-        }
+        public sbyte[] Data { get; set; }
 
         #endregion Data
 
         #region ImageWidth
 
-        private int _imageWidth;
-
         /// <summary>
         /// Gets or sets the width of the image (ncolumns)
         /// </summary>
-        public int ImageWidth
-        {
-            get { return _imageWidth; }
-
-            set
-            {
-                if (_imageWidth != value)
-                    _imageWidth = value;
-            }
-        }
+        public int ImageWidth { get; set; }
 
         #endregion ImageWidth
 
         #region ImageHeight
 
-        private int _imageHeight;
-
         /// <summary>
         /// Gets or sets the height of the image (nrows)
         /// </summary>
-        public int ImageHeight
-        {
-            get { return _imageHeight; }
-
-            set
-            {
-                if (_imageHeight != value)
-                    _imageHeight = value;
-            }
-        }
+        public int ImageHeight { get; set; }
 
         #endregion ImageHeight
 
         #region BytesPerPixel
 
-        private int _bytesPerPixel;
-
         /// <summary>
         /// Gets or sets the number of bytes per pixel (NColumns)
         /// </summary>
-        public int BytesPerPixel
-        {
-            get { return _bytesPerPixel; }
-
-            set
-            {
-                if (_bytesPerPixel != value)
-                    _bytesPerPixel = value;
-            }
-        }
+        public int BytesPerPixel { get; set; }
 
         #endregion BytesPerPixel
 
         #region BlueOffset
 
-        private int _blueOffset;
-
         /// <summary>
         /// Gets or sets the offset to the blue color
         /// </summary>
-        public int BlueOffset
-        {
-            get { return _blueOffset; }
-
-            set
-            {
-                if (_blueOffset != value)
-                    _blueOffset = value;
-            }
-        }
+        public int BlueOffset { get; set; }
 
         #endregion BlueOffset
 
         #region GreenOffset
 
-        private int _greenOffset;
-
         /// <summary>
         /// Gets or sets the offset to the green color
         /// </summary>
-        public int GreenOffset
-        {
-            get { return _greenOffset; }
-
-            set
-            {
-                if (_greenOffset != value)
-                    _greenOffset = value;
-            }
-        }
+        public int GreenOffset { get; set; }
 
         #endregion GreenOffset
 
         #region RedOffset
 
-        private int _redOffset;
-
         /// <summary>
         /// Gets or sets the offset to the red color
         /// </summary>
-        public int RedOffset
-        {
-            get { return _redOffset; }
-
-            set
-            {
-                if (_redOffset != value)
-                    _redOffset = value;
-            }
-        }
+        public int RedOffset { get; set; }
 
         #endregion RedOffset
 
         #region IsRampNeeded
 
-        private bool _isRampNeeded;
-
         /// <summary>
         /// True if the ramp call is needed, false otherwise
         /// </summary>
-        public bool IsRampNeeded
-        {
-            get { return _isRampNeeded; }
-
-            set
-            {
-                if (_isRampNeeded != value)
-                    _isRampNeeded = value;
-            }
-        }
+        public bool IsRampNeeded { get; set; }
 
         #endregion IsRampNeeded
 
@@ -199,6 +101,7 @@ namespace DjvuNet.Graphics
 
         public Map(int ncolors, int redOffset, int greenOffset, int blueOffset, bool isRampNeeded)
         {
+            Properties = Hashtable.Synchronized(new Hashtable());
             BytesPerPixel = ncolors;
             this.IsRampNeeded = isRampNeeded;
             this.RedOffset = redOffset;
@@ -268,6 +171,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the offset to the pixel data
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual int RowOffset(int row)
         {
             return row * GetRowSize();
@@ -278,6 +182,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <returns> the getRowSize
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual int GetRowSize()
         {
             return ImageWidth;
@@ -292,6 +197,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the newly created PixelReference
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual PixelReference CreateGPixelReference(int offset)
         {
             return new PixelReference(this, offset);
@@ -308,6 +214,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the newly created PixelReference
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual PixelReference CreateGPixelReference(int row, int column)
         {
             return new PixelReference(this, row, column);
@@ -319,6 +226,7 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// the converted pixel
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Pixel PixelRamp(PixelReference pixel)
         {
             return pixel;

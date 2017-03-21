@@ -12,158 +12,64 @@ namespace DjvuNet.Wavelet
 
         #region Bh
 
-        private int _bh;
-
         /// <summary>
         /// Gets or sets the Bh value
         /// </summary>
-        public int Bh
-        {
-            get
-            {
-                return _bh;
-            }
-
-            set
-            {
-                if (Bh != value)
-                {
-                    _bh = value;
-                }
-            }
-        }
+        public int Bh;
 
         #endregion Bh
 
         #region Blocks
 
-        private IWBlock[] _blocks;
-
         /// <summary>
         /// Gets or sets the blocks
         /// </summary>
-        public IWBlock[] Blocks
-        {
-            get { return _blocks; }
-
-            set
-            {
-                if (Blocks != value)
-                {
-                    _blocks = value;
-                }
-            }
-        }
+        public IWBlock[] Blocks;
 
         #endregion Blocks
 
         #region Bw
 
-        private int _bw;
-
         /// <summary>
         /// Gets or sets the Bw value
         /// </summary>
-        public int Bw
-        {
-            get { return _bw; }
-
-            set
-            {
-                if (Bw != value)
-                {
-                    _bw = value;
-                }
-            }
-        }
+        public int Bw;
 
         #endregion Bw
 
         #region Ih
 
-        private int _ih;
-
         /// <summary>
         /// Gets or sets the Ih value
         /// </summary>
-        public int Ih
-        {
-            get { return _ih; }
-
-            private set
-            {
-                if (Ih != value)
-                {
-                    _ih = value;
-                }
-            }
-        }
+        public int Ih;
 
         #endregion Ih
 
         #region Iw
 
-        private int _iw;
-
         /// <summary>
         /// Gets or sets the Iw value
         /// </summary>
-        public int Iw
-        {
-            get { return _iw; }
-
-            set
-            {
-                if (Iw != value)
-                {
-                    _iw = value;
-                }
-            }
-        }
+        public int Iw;
 
         #endregion Iw
 
         #region Nb
 
-        private int _nb;
-
         /// <summary>
         /// Gets or sets the Nb value
         /// </summary>
-        public int Nb
-        {
-            get { return _nb; }
-
-            private set
-            {
-                if (Nb != value)
-                {
-                    _nb = value;
-                }
-            }
-        }
+        public int Nb;
 
         #endregion Nb
 
         #region Top
 
-        private int _top;
-
         /// <summary>
         /// Gets or sets the top value
         /// </summary>
-        public int Top
-        {
-            get { return _top; }
-
-            private set
-            {
-                if (Top != value)
-                {
-                    _top = value;
-                }
-            }
-        }
+        public int Top;
 
         #endregion Top
 
@@ -191,15 +97,22 @@ namespace DjvuNet.Wavelet
 
             try
             {
-                retval = new IWMap { Bh = Bh, Blocks = this.Blocks, Bw = Bw, Ih = Ih, Iw = Iw, Nb = Nb, Top = Top };
+                retval = new IWMap
+                {
+                    Bh = Bh,
+                    Blocks = (IWBlock[])Blocks.Clone(),
+                    Bw = Bw,
+                    Ih = Ih,
+                    Iw = Iw,
+                    Nb = Nb,
+                    Top = Top
+                };
 
-                IWBlock[] blocks = (IWBlock[])this.Blocks.Clone();
-                ((IWMap)retval).Blocks = blocks;
+                //IWBlock[] blocks = (IWBlock[])this.Blocks.Clone();
+                //((IWMap)retval).Blocks = blocks;
 
                 for (int i = 0; i < Nb; i++)
-                {
-                    blocks[i] = (IWBlock)blocks[i].Duplicate();
-                }
+                    retval.Blocks[i] = Blocks[i].Duplicate();
             }
             catch (Exception)
             {
@@ -217,14 +130,10 @@ namespace DjvuNet.Wavelet
             for (int scale = begin >> 1; scale >= end; scale >>= 1)
             {
                 for (int j = 0; j < w; j += scale)
-                {
                     BackwardFilter(p, pidx, j, j + (h * rowsize), j, scale * rowsize);
-                }
 
                 for (int i = 0; i < h; i += scale)
-                {
                     BackwardFilter(p, pidx, i * rowsize, (i * rowsize) + w, i * rowsize, scale);
-                }
             }
         }
 
@@ -233,9 +142,7 @@ namespace DjvuNet.Wavelet
             int s3 = 3 * s;
 
             if ((z < b) || (z > e))
-            {
-                throw new FormatException("Filter parameters were out of bounds");
-            }
+                throw new DjvuFormatException("Filter parameters were out of bounds");
 
             int n = z;
             int bb;
@@ -272,9 +179,7 @@ namespace DjvuNet.Wavelet
                 int x = bb;
 
                 if ((n + s) < e)
-                {
                     x = (bb + cc + 1) >> 1;
-                }
 
                 p[pidx + n] = (short)(p[pidx + n] + x);
                 n = n + s + s;
@@ -324,9 +229,7 @@ namespace DjvuNet.Wavelet
                 for (int buckno = 0; buckno < 64; buckno++)
                 {
                     if (Blocks[blockno].GetBlock(buckno) != null)
-                    {
                         buckets++;
-                    }
                 }
             }
 
@@ -352,9 +255,7 @@ namespace DjvuNet.Wavelet
                     ppidx = pidx + j;
 
                     for (int ii = 0, p1idx = 0; ii++ < 32; p1idx += 32, ppidx += Bw)
-                    {
                         Array.Copy(liftblock, p1idx, data16, ppidx, 32);
-                    }
                 }
             }
 
@@ -366,15 +267,11 @@ namespace DjvuNet.Wavelet
                 for (int i = 0; i < Bh; i += 2, pidx += Bw)
                 {
                     for (int jj = 0; jj < Bw; jj += 2, pidx += 2)
-                    {
                         data16[pidx + Bw] = data16[pidx + Bw + 1] = data16[pidx + 1] = data16[pidx];
-                    }
                 }
             }
             else
-            {
                 Backward(data16, 0, Iw, Ih, Bw, 32, 1);
-            }
 
             pidx = 0;
 
@@ -385,13 +282,9 @@ namespace DjvuNet.Wavelet
                     int x = (data16[pidx + (j++)] + 32) >> 6;
 
                     if (x < -128)
-                    {
                         x = -128;
-                    }
                     else if (x > 127)
-                    {
                         x = 127;
-                    }
 
                     img8[pixidx] = (sbyte)x;
                 }
@@ -403,29 +296,21 @@ namespace DjvuNet.Wavelet
             int nlevel = 0;
 
             while ((nlevel < 5) && ((32 >> nlevel) > subsample))
-            {
                 nlevel++;
-            }
 
             int boxsize = 1 << nlevel;
 
             if (subsample != (32 >> nlevel))
-            {
                 throw new ArgumentException("(Map::image) Unsupported subsampling factor");
-            }
 
             if (rect.Empty)
-            {
                 throw new ArgumentException("(Map::image) Rectangle is empty");
-            }
 
             Rectangle irect = new Rectangle(0, 0, ((Iw + subsample) - 1) / subsample, ((Ih + subsample) - 1) / subsample);
 
             if ((rect.Right < 0) || (rect.Bottom < 0) || (rect.Left > irect.Left) || (rect.Top > irect.Top))
-            {
                 throw new ArgumentException("(Map::image) Rectangle is out of bounds: " + rect.Right + "," + rect.Bottom +
                                             "," + rect.Left + "," + rect.Top + "," + irect.Left + "," + irect.Top);
-            }
 
             Rectangle[] needed = new Rectangle[8];
             Rectangle[] recomp = new Rectangle[8];
@@ -493,9 +378,7 @@ namespace DjvuNet.Wavelet
                     for (int ii = 0, tt = 0, pp = rdata; ii < boxsize; ii += ppinc, pp += ppmod1, tt += (ttmod1 - 32))
                     {
                         for (int jj = 0; jj < boxsize; jj += ppinc, tt += ttmod0)
-                        {
                             data[pp + jj] = liftblock[tt];
-                        }
                     }
                 }
             }
@@ -514,9 +397,7 @@ namespace DjvuNet.Wavelet
                     for (int ii = comp.Bottom, pp = (comp.Bottom * dataw); ii < comp.Top; ii += 2, pp += (dataw + dataw))
                     {
                         for (int jj = comp.Right; jj < comp.Left; jj += 2)
-                        {
                             data[pp + jj + dataw] = data[pp + jj + dataw + 1] = data[pp + jj + 1] = data[pp + jj];
-                        }
                     }
 
                     break;
@@ -538,13 +419,9 @@ namespace DjvuNet.Wavelet
                     int x = (data[pidx + j] + 32) >> 6;
 
                     if (x < -128)
-                    {
                         x = -128;
-                    }
                     else if (x > 127)
-                    {
                         x = 127;
-                    }
 
                     img8[pixidx] = (sbyte)x;
                 }
@@ -561,9 +438,7 @@ namespace DjvuNet.Wavelet
             Blocks = new IWBlock[Nb];
 
             for (int i = 0; i < Blocks.Length; i++)
-            {
                 Blocks[i] = new IWBlock();
-            }
 
             return this;
         }
@@ -573,25 +448,17 @@ namespace DjvuNet.Wavelet
             int minbucket = 1;
 
             if (res < 2)
-            {
                 return;
-            }
 
             if (res < 4)
-            {
                 minbucket = 16;
-            }
             else if (res < 8)
-            {
                 minbucket = 4;
-            }
 
             for (int blockno = 0; blockno < Blocks.Length; blockno++)
             {
                 for (int buckno = minbucket; buckno < 64; buckno++)
-                {
                     Blocks[blockno].ClearBlock(buckno);
-                }
             }
         }
 

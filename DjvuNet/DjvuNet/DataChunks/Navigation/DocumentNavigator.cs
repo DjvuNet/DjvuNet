@@ -22,21 +22,10 @@ namespace DjvuNet.DataChunks.Navigation
 
         #region Bookmarks
 
-        private Bookmark[] _bookmarks;
-
         /// <summary>
         /// Gets the list of document bookmarks
         /// </summary>
-        public Bookmark[] Bookmarks
-        {
-            get { return _bookmarks; }
-
-            private set
-            {
-                if (_bookmarks != value)
-                    _bookmarks = value;
-            }
-        }
+        public Bookmark[] Bookmarks { get; internal set; }
 
         #endregion Bookmarks
 
@@ -65,7 +54,7 @@ namespace DjvuNet.DataChunks.Navigation
                     string.Format("Page {0}", pageNum), string.Format("#{0}", pageNum), new Bookmark[0]));
             }
 
-            _bookmarks = bookmarks.ToArray();
+            Bookmarks = bookmarks.ToArray();
         }
 
         #endregion Private Methods

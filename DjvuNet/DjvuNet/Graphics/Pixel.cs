@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Graphics
 {
@@ -7,9 +8,9 @@ namespace DjvuNet.Graphics
     /// </summary>
     public class Pixel
     {
-        #region Private Variables
+        #region Private Members
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Static Properties
 
@@ -91,66 +92,45 @@ namespace DjvuNet.Graphics
 
         #region Blue
 
-        private sbyte _blue = -51;
-
         /// <summary>
         /// Gets or sets the blue value for the pixel
         /// </summary>
         public virtual sbyte Blue
         {
-            get { return _blue; }
-
-            set
-            {
-                if (Blue != value)
-                {
-                    _blue = value;
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
         }
 
         #endregion Blue
 
         #region Green
 
-        private sbyte _green = -51;
-
         /// <summary>
         /// Gets or sets the green value for the pixel
         /// </summary>
         public virtual sbyte Green
         {
-            get { return _green; }
-
-            set
-            {
-                if (Green != value)
-                {
-                    _green = value;
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
         }
 
         #endregion Green
 
         #region Red
 
-        private sbyte _red = -51;
-
         /// <summary>
         /// Gets or sets the red value for the pixel
         /// </summary>
-        public virtual sbyte Red
+        public sbyte Red
         {
-            get { return _red; }
-
-            set
-            {
-                if (Red != value)
-                {
-                    _red = value;
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
         }
 
         #endregion Red
@@ -159,9 +139,8 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        public Pixel()
+        protected Pixel()
         {
-            // Nothing
         }
 
         /// <summary> Creates a new Pixel object.
@@ -173,7 +152,8 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="red">pixel value
         /// </param>
-        public Pixel(sbyte blue, sbyte green, sbyte red)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Pixel(sbyte blue = -51, sbyte green = -51, sbyte red = -51)
         {
             Blue = blue;
             Green = green;
@@ -191,12 +171,13 @@ namespace DjvuNet.Graphics
         /// </returns>
         public virtual Pixel Duplicate()
         {
-            return new Pixel(_blue, _green, _red);
+            return new Pixel(Blue, Green, Red);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
-            return string.Format("R: {0} G: {1} B: {2}", _red, _green, _blue);
+            return $"{{ {base.ToString()} Red: {Red} Green: {Green} Blue: {Blue} }}";
         }
 
         /// <summary> Initialize a pixel with bgr values.

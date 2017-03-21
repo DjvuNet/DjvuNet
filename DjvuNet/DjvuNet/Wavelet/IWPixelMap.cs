@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using DjvuNet.Compression;
 using DjvuNet.Graphics;
 using DjvuNet.Interfaces;
@@ -11,7 +12,7 @@ namespace DjvuNet.Wavelet
     /// </summary>
     public class IWPixelMap : ICodec
     {
-        #region Protected Variables
+        #region Protected Members
 
         private IWCodec _cbcodec;
         private IWMap _cbmap;
@@ -25,7 +26,7 @@ namespace DjvuNet.Wavelet
         private IWCodec _ycodec;
         private IWMap _ymap;
 
-        #endregion Protected Variables
+        #endregion Protected Members
 
         #region Public Properties
 
@@ -46,6 +47,7 @@ namespace DjvuNet.Wavelet
 
         public virtual int Height
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return (_ymap != null) ? _ymap.Ih : 0; }
         }
 
@@ -55,6 +57,7 @@ namespace DjvuNet.Wavelet
 
         public virtual int Width
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return (_ymap != null) ? _ymap.Iw : 0; }
         }
 
@@ -64,6 +67,7 @@ namespace DjvuNet.Wavelet
 
         public virtual bool ImageData
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return true; }
         }
 
@@ -77,6 +81,7 @@ namespace DjvuNet.Wavelet
 
         #region Public Methods
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Decode(BinaryReader bs)
         {
             if (_ycodec == null)
@@ -87,9 +92,7 @@ namespace DjvuNet.Wavelet
 
             byte serial = bs.ReadByte();
             if (serial != _cserial)
-            {
-                throw new IOException("Chunk does not bear expected serial number");
-            }
+                throw new DjvuFormatException("Chunk does not bear expected serial number");
 
             int nslices = _cslice + bs.ReadByte();
 
@@ -99,14 +102,10 @@ namespace DjvuNet.Wavelet
                 int minor = bs.ReadByte();
 
                 if ((major & 0x7f) != 1)
-                {
-                    throw new IOException("File has been compressed with an incompatible Codec");
-                }
+                    throw new DjvuFormatException("File has been compressed with an incompatible Codec");
 
                 if (minor > 2)
-                {
-                    throw new IOException("File has been compressed with a more recent Codec");
-                }
+                    throw new DjvuFormatException("File has been compressed with a more recent Codec");
 
                 //int header3size = 5;
 
@@ -126,19 +125,13 @@ namespace DjvuNet.Wavelet
                 int b = bs.ReadByte();
 
                 if (minor >= 2)
-                {
                     _crcbDelay = 0x7f & b;
-                }
 
                 if (minor >= 2)
-                {
                     _crcbHalf = ((0x80 & b) == 0);
-                }
 
                 if ((major & 0x80) != 0)
-                {
                     _crcbDelay = -1;
-                }
 
                 _ymap = new IWMap().Init(w, h);
                 _ycodec = new IWCodec().Init(_ymap);
@@ -178,12 +171,11 @@ namespace DjvuNet.Wavelet
             GC.Collect();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Graphics.PixelMap GetPixmap()
         {
             if (_ymap == null)
-            {
                 return null;
-            }
 
             int w = _ymap.Iw;
             int h = _ymap.Ih;
@@ -208,32 +200,25 @@ namespace DjvuNet.Wavelet
                 pixel.SetOffset(i++, 0);
 
                 if ((_crmap != null) && (_cbmap != null) && (_crcbDelay >= 0))
-                {
-                    pixel.YCC_to_RGB(w);
-                }
+                    pixel.Ycc2Rgb(w);
                 else
                 {
                     for (int x = w; x-- > 0; pixel.IncOffset())
-                    {
                         pixel.SetGray((sbyte)(127 - pixel.Blue));
-                    }
                 }
             }
 
             return ppm;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Graphics.PixelMap GetPixmap(int subsample, Rectangle rect, Graphics.PixelMap retval)
         {
             if (_ymap == null)
-            {
                 return null;
-            }
 
             if (retval == null)
-            {
                 retval = new Graphics.PixelMap();
-            }
 
             int w = rect.Width;
             int h = rect.Height;
@@ -256,15 +241,11 @@ namespace DjvuNet.Wavelet
                 pixel.SetOffset(i++, 0);
 
                 if ((_crmap != null) && (_cbmap != null) && (_crcbDelay >= 0))
-                {
-                    pixel.YCC_to_RGB(w);
-                }
+                    pixel.Ycc2Rgb(w);
                 else
                 {
                     for (int x = w; x-- > 0; pixel.IncOffset())
-                    {
                         pixel.SetGray((sbyte)(127 - pixel.Blue));
-                    }
                 }
             }            
 

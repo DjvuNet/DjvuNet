@@ -7,7 +7,7 @@ namespace DjvuNet.Graphics
 {
     public class PixelMapScaler
     {
-        #region Private Variables
+        #region Private Members
 
         private static int FRACBITS = 4;
         private static int FRACSIZE = (1 << FRACBITS);
@@ -82,14 +82,8 @@ namespace DjvuNet.Graphics
 
         public void SetHorzRatio(int numer, int denom)
         {
-            if (
-              (srcWidth <= 0)
-              || (srcHeight <= 0)
-              || (destWidth <= 0)
-              || (destHeight <= 0))
-            {
+            if ((srcWidth <= 0) || (srcHeight <= 0) || (destWidth <= 0) || (destHeight <= 0))
                 throw new FormatException("Scaler undefined size");
-            }
 
             // Implicit ratio (determined by the input/output sizes)
             if ((numer == 0) && (denom == 0))
@@ -98,9 +92,7 @@ namespace DjvuNet.Graphics
                 denom = srcWidth;
             }
             else if ((numer <= 0) || (denom <= 0))
-            {
                 throw new FormatException("Scaler illegal ratio");
-            }
 
             // Compute horz reduction
             xshift = 0;
@@ -139,14 +131,8 @@ namespace DjvuNet.Graphics
 
         public void SetVertRatio(int numer, int denom)
         {
-            if (
-              (srcWidth <= 0)
-              || (srcHeight <= 0)
-              || (destWidth <= 0)
-              || (destHeight <= 0))
-            {
+            if ((srcWidth <= 0) || (srcHeight <= 0) || (destWidth <= 0) || (destHeight <= 0))
                 throw new FormatException("Scaler undefined size");
-            }
 
             // Implicit ratio (determined by the input/output sizes)
             if ((numer == 0) && (denom == 0))
@@ -155,9 +141,7 @@ namespace DjvuNet.Graphics
                 denom = srcHeight;
             }
             else if ((numer <= 0) || (denom <= 0))
-            {
                 throw new FormatException("Scaler illegal ratio");
-            }
 
             // Compute horz reduction
             yshift = 0;
@@ -172,9 +156,7 @@ namespace DjvuNet.Graphics
 
             // Compute coordinate table
             if (vcoord == null)
-            {
                 vcoord = new int[destHeight];
-            }
 
             PrepareCoord(vcoord, redh, destHeight, denom, numer);
         }
@@ -184,11 +166,7 @@ namespace DjvuNet.Graphics
             Rectangle inp = new Rectangle();
 
             // Parameter validation
-            if (
-              (desired.XMin < 0)
-              || (desired.YMin < 0)
-              || (desired.XMax > destWidth)
-              || (desired.YMax > destHeight))
+            if ((desired.XMin < 0) || (desired.YMin < 0) || (desired.XMax > destWidth) || (desired.YMax > destHeight))
             {
                 throw new FormatException(
                   "desired rectangle too big: " + desired.XMin + "," + desired.YMin
@@ -198,14 +176,10 @@ namespace DjvuNet.Graphics
 
             // Compute ratio (if not done yet)
             if (vcoord == null)
-            {
                 SetVertRatio(0, 0);
-            }
 
             if (hcoord == null)
-            {
                 SetHorzRatio(0, 0);
-            }
 
             // Compute reduced bounds
             red.XMin = (hcoord[desired.XMin]) >> FRACBITS;
@@ -214,47 +188,31 @@ namespace DjvuNet.Graphics
             red.YMax = ((vcoord[desired.YMax - 1] + FRACSIZE) - 1) >> FRACBITS;
 
             // Borders
-            red.XMin = (red.XMin > 0)
-              ? red.XMin
-              : 0;
-            red.XMax = (red.XMax < redw)
-              ? (red.XMax + 1)
-              : redw;
-            red.YMin = (red.YMin > 0)
-              ? red.YMin
-              : 0;
-            red.YMax = (red.YMax < redh)
-              ? (red.YMax + 1)
-              : redh;
+            red.XMin = (red.XMin > 0) ? red.XMin : 0;
+            red.XMax = (red.XMax < redw) ? (red.XMax + 1) : redw;
+            red.YMin = (red.YMin > 0) ? red.YMin : 0;
+            red.YMax = (red.YMax < redh) ? (red.YMax + 1) : redh;
 
             // Input
             inp.XMin = red.XMin << xshift;
 
             if (inp.XMin < 0)
-            {
                 inp.XMin = 0;
-            }
 
             inp.XMax = red.XMax << xshift;
 
             if (inp.XMax > srcWidth)
-            {
                 inp.XMax = srcWidth;
-            }
 
             inp.YMin = red.YMin << yshift;
 
             if (inp.YMin < 0)
-            {
                 inp.YMin = 0;
-            }
 
             inp.YMax = red.YMax << yshift;
 
             if (inp.YMax > srcHeight)
-            {
                 inp.YMax = srcHeight;
-            }
 
             return inp;
         }
@@ -266,41 +224,23 @@ namespace DjvuNet.Graphics
             Rectangle sourceRect = CreateRectangles(targetRect, required_red);
 
             // Parameter validation
-            if (
-              (provided_input.Width != sourceMap.ImageWidth)
-              || (provided_input.Height != sourceMap.ImageHeight))
-            {
-                throw new FormatException("invalid rectangle");
-            }
+            if ((provided_input.Width != sourceMap.ImageWidth) || (provided_input.Height != sourceMap.ImageHeight))
+                throw new FormatException("Invalid rectangle");
 
-            if (
-              (provided_input.XMin > sourceRect.XMin)
-              || (provided_input.YMin > sourceRect.YMin)
-              || (provided_input.XMax < sourceRect.XMax)
-              || (provided_input.YMax < sourceRect.YMax))
-            {
-                throw new FormatException("invalid rectangle");
-            }
+            if ( (provided_input.XMin > sourceRect.XMin) || (provided_input.YMin > sourceRect.YMin)
+              || (provided_input.XMax < sourceRect.XMax) || (provided_input.YMax < sourceRect.YMax))
+                throw new FormatException("Invalid rectangle");
 
             // Adjust output pixmap
-            if (
-              (targetRect.Width != (int)output.ImageWidth)
-              || (targetRect.Height != (int)output.ImageHeight))
-            {
-                output.Init(
-                  targetRect.Height,
-                  targetRect.Width,
-                  null);
-            }
+            if ((targetRect.Width != (int)output.ImageWidth) || (targetRect.Height != (int)output.ImageHeight))
+                output.Init(targetRect.Height, targetRect.Width, null);
 
             // Prepare temp stuff 
             int bufw = required_red.Width;
             Pixel[] lbuffer = new Pixel[bufw + 2];
 
             for (int i = 0; i < lbuffer.Length; )
-            {
                 lbuffer[i++] = new Pixel();
-            }
 
             try
             {
@@ -333,14 +273,10 @@ namespace DjvuNet.Graphics
                             int dx = required_red.XMin - provided_input.XMin;
 
                             if (required_red.YMin > fy1)
-                            {
                                 fy1 = required_red.YMin;
-                            }
 
                             if (required_red.YMax <= fy2)
-                            {
                                 fy2 = required_red.YMax - 1;
-                            }
 
                             lower =
                               sourceMap.CreateGPixelReference(fy1 - provided_input.YMin, dx);
@@ -375,8 +311,7 @@ namespace DjvuNet.Graphics
 
                         // lbuffer[bufw] = lbuffer[bufw];
                         int line = 1 - required_red.XMin;
-                        PixelReference dest =
-                          output.CreateGPixelReference(y - targetRect.YMin, 0);
+                        PixelReference dest = output.CreateGPixelReference(y - targetRect.YMin, 0);
 
                         // Loop horizontally
                         for (int x = targetRect.XMin; x < targetRect.XMax; x++)
@@ -421,9 +356,7 @@ namespace DjvuNet.Graphics
 
             for (int x = 0; x < outmax; x++)
             {
-                coord[x] = (y < inmaxlim)
-                  ? y
-                  : inmaxlim;
+                coord[x] = (y < inmaxlim) ? y : inmaxlim;
                 z = z + len;
                 y = y + (z / @out);
                 z = z % @out;
@@ -431,32 +364,22 @@ namespace DjvuNet.Graphics
 
             // Result must fit exactly
             if ((@out == outmax) && (y != (beg + len)))
-            {
                 throw new FormatException("Scaler assertion");
-            }
         }
 
         private PixelReference GetLine(int fy, Rectangle required_red, Rectangle provided_input, PixelMap input)
         {
             if (fy < required_red.YMin)
-            {
                 fy = required_red.YMin;
-            }
             else if (fy >= required_red.YMax)
-            {
                 fy = required_red.YMax - 1;
-            }
 
             // Cached line
             if (fy == l2)
-            {
                 return p2.CreateGPixelReference(0);
-            }
 
             if (fy == l1)
-            {
                 return p1.CreateGPixelReference(0);
-            }
 
             // Shift
             PixelMap p = p1;
@@ -497,9 +420,7 @@ namespace DjvuNet.Graphics
                 int sy1 = (1 << yshift);
 
                 if (sy1 > sy2)
-                {
                     sy1 = sy2;
-                }
 
                 for (int sy = 0; sy < sy1; sy++, inp0 += rowsize)
                 {
@@ -507,9 +428,7 @@ namespace DjvuNet.Graphics
                     inp1.SetOffset(inp0);
 
                     if (sx1 > line.XMax)
-                    {
                         sx1 = line.XMax;
-                    }
 
                     for (int sx = sx1 - x; sx-- > 0; s++, inp1.IncOffset())
                     {
@@ -520,16 +439,10 @@ namespace DjvuNet.Graphics
                 }
 
                 if (s == rnd2)
-                {
                     ip.SetBGR((b + rnd) >> div, (g + r) >> div, (r + rnd) >> div);
-                }
                 else
-                {
                     ip.SetBGR((b + (s / 2)) / 2, (g + (s / 2)) / s, (r + (s / 2)) / s);
-                }
             }
-
-            // Return
             return p2.CreateGPixelReference(0);
         }
 

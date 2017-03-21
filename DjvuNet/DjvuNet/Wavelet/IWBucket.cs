@@ -17,78 +17,36 @@ namespace DjvuNet.Wavelet
     /// </summary>
     public class IWBucket
     {
-        #region Public Properties
+        #region Public Fields
 
         #region Sz
-
-        private static int _sz = 8;
 
         /// <summary>
         /// Gets or sets the Sz value
         /// </summary>
-        public static int Sz
-        {
-            get
-            {
-                return _sz;
-            }
-
-            set
-            {
-                if (Sz != value)
-                {
-                    _sz = value;
-                }
-            }
-        }
+        public static int Sz = 8;
 
         #endregion Sz
 
         #region Size
 
-        private int _size;
-
         /// <summary>
         /// Gets or sets the bucket size
         /// </summary>
-        public int Size
-        {
-            get { return _size; }
-
-            set
-            {
-                if (Size != value)
-                {
-                    _size = value;
-                }
-            }
-        }
+        public int Size;
 
         #endregion Size
 
         #region Start
 
-        private int _start;
-
         /// <summary>
         /// Gets or sets the bucket start
         /// </summary>
-        public int Start
-        {
-            get { return _start; }
-
-            set
-            {
-                if (Start != value)
-                {
-                    _start = value;
-                }
-            }
-        }
+        public int Start;
 
         #endregion Start
 
-        #endregion Public Properties
+        #endregion Public Fields
 
         #region Constructors
 

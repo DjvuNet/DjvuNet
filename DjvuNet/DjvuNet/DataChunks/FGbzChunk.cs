@@ -17,13 +17,13 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class FGbzChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
         private long _dataLocation = 0;
 
         private byte _firstByte;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -64,19 +64,15 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_palette == null)
-                {
                     _palette = DecodePaletteData();
-                }
 
                 return _palette;
             }
 
             private set
             {
-                if (Palette != value)
-                {
+                if (_palette != value)
                     _palette = value;
-                }
             }
         }
 

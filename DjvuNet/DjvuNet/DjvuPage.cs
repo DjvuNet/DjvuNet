@@ -32,20 +32,17 @@ using GRect = DjvuNet.Graphics.Rectangle;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
 using DjvuNet.Configuration;
+using DjvuNet.Util;
 
 namespace DjvuNet
 {
-
-
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
     public class DjvuPage : INotifyPropertyChanged, IDisposable
     {
-        public const int SubsambpleMin = 1;
-        public const int SubsampleMax = 12;
         
-        #region Private Variables
+        #region Private Members
 
         /// <summary>
         /// True if the page has been previously loaded, false otherwise
@@ -55,7 +52,7 @@ namespace DjvuNet
         private object _loadingLock = new object();
         private bool _isBackgroundDecoded = false;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Events
 
@@ -746,7 +743,7 @@ namespace DjvuNet
         /// <returns></returns>
         public GPixmap GetBgPixmap(GRect rect, int subsample, double gamma, GPixmap retval)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             GPixmap pm = null;
             int width = (Info == null)
@@ -882,14 +879,14 @@ namespace DjvuNet
 
         public Graphics.Bitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, Bitmap retVal)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             return GetBitmap(rect, subsample, align, null);
         }
 
         public GPixmap GetPixelMap(GRect rect, int subsample, double gamma, PixelMap retval)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             if (rect.Empty)
             {
@@ -958,7 +955,7 @@ namespace DjvuNet
         /// <returns></returns>
         public unsafe System.Drawing.Bitmap BuildImage(int subsample = 1)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             lock (_loadingLock)
             {
@@ -1056,14 +1053,14 @@ namespace DjvuNet
 
         public GBitmap GetBitmap(GRect rect, int subsample, int align, GBitmap retval)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             return GetBitmapList(rect, 1, 1, null);
         }
 
         public GBitmap GetBitmapList(GRect rect, int subsample, int align, List<int> components)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             if (rect.Empty)
                 return new Graphics.Bitmap();
@@ -1091,7 +1088,7 @@ namespace DjvuNet
 
         public Map GetMap(GRect segment, int subsample, GMap retval)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             retval =
                IsColor
@@ -1223,7 +1220,7 @@ namespace DjvuNet
 
         internal bool Stencil(PixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             if (Info == null)
             {
@@ -1281,7 +1278,7 @@ namespace DjvuNet
 
                     for (int i = 0; i < colors.ImageWidth; color.IncOffset())
                     {
-                        fgPalette.index_to_color(i++, color);
+                        fgPalette.IndexToColor(i++, color);
                     }
 
                     colors.ApplyGammaCorrection(gamma_correction);
@@ -1434,18 +1431,20 @@ namespace DjvuNet
 
             int height = image.Height;
             int width = image.Width;
+            
+            for(int y = 0; y < height; y++)
+            //Parallel.For(
+            //    0,
+            //    height,
+            //    y =>
+            {
+                uint* imageRow = (uint*)(imageData.Scan0 + (y * imageData.Stride));
 
-            Parallel.For(
-                0,
-                height,
-                y =>
-                {
-                    uint* imageRow = (uint*)(imageData.Scan0 + (y * imageData.Stride));
-
-                    for (int x = 0; x < width; x++)
-                        // Check if the mask byte is set
-                        imageRow[x] = InvertColor(imageRow[x]);
-                });
+                for (int x = 0; x < width; x++)
+                    // Check if the mask byte is set
+                    imageRow[x] = InvertColor(imageRow[x]);
+                //});
+            }
 
             image.UnlockBits(imageData);
 
@@ -1502,7 +1501,7 @@ namespace DjvuNet
         /// <returns></returns>
         internal System.Drawing.Bitmap GetForegroundImage(int subsample, bool resizeImage = false)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             lock (_loadingLock)
             {
@@ -1516,7 +1515,7 @@ namespace DjvuNet
 
         internal System.Drawing.Bitmap GetTextImage(int subsample, bool resizeImage = false)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             if (ForegroundJB2Image == null)
                 return new System.Drawing.Bitmap(Info.Width / subsample, Info.Height / subsample);
@@ -1534,7 +1533,7 @@ namespace DjvuNet
         /// <returns></returns>
         internal System.Drawing.Bitmap GetBackgroundImage(int subsample, bool resizeImage = false)
         {
-            VerifySubsampleRange(subsample);
+            Verify.SubsampleRange(subsample);
 
             BG44Chunk[] backgrounds = PageForm.GetChildrenItems<BG44Chunk>();
 
@@ -1563,14 +1562,6 @@ namespace DjvuNet
 
             Bitmap result = backgroundMap.GetPixmap().ToImage();
             return resizeImage == true ? ResizeImage(result, Info.Width / subsample, Info.Height / subsample) : result;
-        }
-
-        internal static void VerifySubsampleRange(int subsample)
-        {
-            if (subsample < SubsambpleMin || subsample > SubsampleMax)
-                throw new ArgumentException(
-                    $"Argument is outside of allowed values expected from {SubsambpleMin} to {SubsampleMax}" +
-                    $" actual value {subsample}");
         }
 
         /// <summary>

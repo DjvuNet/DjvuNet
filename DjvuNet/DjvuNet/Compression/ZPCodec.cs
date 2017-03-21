@@ -1,11 +1,12 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Compression
 {
     public class ZPCodec
     {
-        #region Private Variables
+        #region Private Members
 
         private int _buffer;
         private long _code;
@@ -16,7 +17,7 @@ namespace DjvuNet.Compression
         private short _zByte;
         private const int _arraySize = 256;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Protected Properties
 
@@ -27,142 +28,67 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets the FFZT data
         /// </summary>
-        protected static sbyte[] FFZT
-        {
-            get { return _FFZT; }
-        }
+        protected static sbyte[] FFZT { get { return _FFZT; } }
 
         #endregion FFZT
 
         #region AValue
 
-        private int _AValue;
-
         /// <summary>
         /// Gets or sets the A Value for the item
         /// </summary>
-        protected int AValue
-        {
-            get { return _AValue; }
-
-            set
-            {
-                _AValue = value;
-            }
-        }
+        protected int AValue { get; set; }
 
         #endregion AValue
 
-        #region Down
+        #region Ffzt
 
-        private MutableValue<sbyte>[] _down = new MutableValue<sbyte>[_arraySize];
+        /// <summary>
+        /// Gets the Ffzt data
+        /// </summary>
+        protected sbyte[] Ffzt;
+
+        #endregion Ffzt
+
+        #endregion Protected Properties
+
+        #region Public Properties
+
+        #region Down
 
         /// <summary>
         /// Gets or sets the down values for the item
         /// </summary>
-        public MutableValue<sbyte>[] Down
-        {
-            get { return _down; }
-
-            set
-            {
-                if (Down != value)
-                {
-                    _down = value;
-                }
-            }
-        }
+        public MutableValue<sbyte>[] Down;
 
         #endregion Down
 
         #region Up
 
-        private MutableValue<sbyte>[] _up = new MutableValue<sbyte>[_arraySize];
-
         /// <summary>
         /// Gets or sets the up values for the item
         /// </summary>
-        public MutableValue<sbyte>[] Up
-        {
-            get { return _up; }
-
-            set
-            {
-                if (Up != value)
-                {
-                    _up = value;
-                }
-            }
-        }
+        public MutableValue<sbyte>[] Up;
 
         #endregion Up
 
-        #region Ffzt
-
-        private sbyte[] _ffzt = new sbyte[_arraySize];
-
-        /// <summary>
-        /// Gets the Ffzt data
-        /// </summary>
-        protected sbyte[] Ffzt
-        {
-            get { return _ffzt; }
-
-            private set
-            {
-                if (Ffzt != value)
-                {
-                    _ffzt = value;
-                }
-            }
-        }
-
-        #endregion Ffzt
-
         #region MArray
-
-        private int[] _mArray = new int[_arraySize];
 
         /// <summary>
         /// Gets or sets the M Array values for the item
         /// </summary>
-        public int[] MArray
-        {
-            get { return _mArray; }
-
-            set
-            {
-                if (MArray != value)
-                {
-                    _mArray = value;
-                }
-            }
-        }
+        public int[] MArray;
 
         #endregion MArray
 
         #region PArray
 
-        private int[] _pArray = new int[_arraySize];
-
         /// <summary>
         /// Gets or sets the P Array values for the item
         /// </summary>
-        public int[] PArray
-        {
-            get { return _pArray; }
-
-            set
-            {
-                _pArray = value;
-            }
-        }
+        public int[] PArray;
 
         #endregion PArray
-
-        #endregion Protected Properties
-
-        #region Public Properties
 
         #region DefaultZPTable
 
@@ -176,9 +102,7 @@ namespace DjvuNet.Compression
             get
             {
                 if (_defaultZPTable == null)
-                {
                     _defaultZPTable = BuildDefaultZPTable();
-                }
 
                 return _defaultZPTable;
             }
@@ -197,9 +121,7 @@ namespace DjvuNet.Compression
                 FFZT[i] = 0;
 
                 for (int j = i; (j & 0x80) > 0; j <<= 1)
-                {
                     FFZT[i]++;
-                }
             }
         }
 
@@ -207,6 +129,11 @@ namespace DjvuNet.Compression
         {
             Ffzt = new sbyte[FFZT.Length];
             Array.Copy(FFZT, 0, Ffzt, 0, Ffzt.Length);
+
+            Down = new MutableValue<sbyte>[_arraySize];
+            Up = new MutableValue<sbyte>[_arraySize];
+            MArray = new int[_arraySize];
+            PArray = new int[_arraySize];
 
             for (int i = 0; i < _arraySize; i++)
             {
@@ -237,9 +164,7 @@ namespace DjvuNet.Compression
             int d = 24576 + ((z + AValue) >> 2);
 
             if (z > d)
-            {
                 z = d;
-            }
 
             if (z > _code)
             {
@@ -254,40 +179,30 @@ namespace DjvuNet.Compression
                 _code = 0xffff & ((_code << shift) | (((long)_buffer >> _scount) & ((1 << shift) - 1)));
 
                 if (_scount < 16)
-                {
                     Preload();
-                }
 
                 _fence = _code;
 
                 if (_code >= 32768L)
-                {
                     _fence = 32767L;
-                }
 
                 return bit ^ 1;
             }
 
             if ((unchecked((int)0xffffffffL) & AValue) >= (unchecked((int)0xffffffffL) & MArray[0xff & ctx.Value]))
-            {
                 ctx.Value = Up[0xff & ctx.Value].Value;
-            }
 
             _scount--;
             AValue = 0xffff & (z << 1);
             _code = 0xffff & ((_code << 1) | (((long)_buffer >> _scount) & 1));
 
             if (_scount < 16)
-            {
                 Preload();
-            }
 
             _fence = _code;
 
             if (_code >= 32768L)
-            {
                 _fence = 32767L;
-            }
 
             return bit;
         }
@@ -297,9 +212,7 @@ namespace DjvuNet.Compression
             int d = 24576 + ((z + AValue) >> 2);
 
             if (z > d)
-            {
                 z = d;
-            }
 
             if (z > _code)
             {
@@ -313,16 +226,12 @@ namespace DjvuNet.Compression
                 _code = 0xffff & ((_code << shift) | (((long)_buffer >> _scount) & ((1 << shift) - 1)));
 
                 if (_scount < 16)
-                {
                     Preload();
-                }
 
                 _fence = _code;
 
                 if (_code >= 32768L)
-                {
                     _fence = 32767L;
-                }
 
                 return mps ^ 1;
             }
@@ -332,16 +241,12 @@ namespace DjvuNet.Compression
             _code = 0xffff & ((_code << 1) | (((long)_buffer >> _scount) & 1));
 
             if (_scount < 16)
-            {
                 Preload();
-            }
 
             _fence = _code;
 
             if (_code >= 32768L)
-            {
                 _fence = 32767L;
-            }
 
             return mps;
         }
@@ -360,16 +265,12 @@ namespace DjvuNet.Compression
                 _code = 0xffff & ((_code << shift) | (((long)_buffer >> _scount) & ((1 << shift) - 1)));
 
                 if (_scount < 16)
-                {
                     Preload();
-                }
 
                 _fence = _code;
 
                 if (_code >= 32768L)
-                {
                     _fence = 32767L;
-                }
 
                 return mps ^ 1;
             }
@@ -379,16 +280,12 @@ namespace DjvuNet.Compression
             _code = 0xffff & ((_code << 1) | (((long)_buffer >> _scount) & 1));
 
             if (_scount < 16)
-            {
                 Preload();
-            }
 
             _fence = _code;
 
             if (_code >= 32768L)
-            {
                 _fence = 32767L;
-            }
 
             return mps;
         }
@@ -398,6 +295,7 @@ namespace DjvuNet.Compression
             return DecodeSubSimple(0, 0x8000 + (AValue >> 1));
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Decoder(MutableValue<sbyte> ctx)
         {
             int ictx = 0xff & ctx.Value;
@@ -406,15 +304,13 @@ namespace DjvuNet.Compression
             if (z <= _fence)
             {
                 AValue = z;
-
                 return ictx & 1;
             }
             else
-            {
                 return DecodeSub(ctx, z);
-            }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int FFZ(int x)
         {
             return ((unchecked((int)0xffffffffL) & x) < 65280L) ? Ffzt[0xff & (x >> 8)] : (Ffzt[0xff & x] + 8);
@@ -439,12 +335,12 @@ namespace DjvuNet.Compression
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Preload()
         {
             for (; _scount <= 24; _scount = (short)(_scount + 8))
             {
                 _zByte = -1;
-
                 _zByte = (short)_ibs.ReadByte();
 
                 if (_zByte == -1)
@@ -452,11 +348,8 @@ namespace DjvuNet.Compression
                     _zByte = 255;
 
                     if (--_delay < 1)
-                    {
                         throw new IOException("EOF");
-                    }
                 }
-
                 _buffer = (_buffer << 8) |(int) _zByte;
             }
         }
@@ -488,9 +381,7 @@ namespace DjvuNet.Compression
             _fence = _code;
 
             if (_code >= 32768L)
-            {
                 _fence = 32767L;
-            }
         }
 
         /// <summary>

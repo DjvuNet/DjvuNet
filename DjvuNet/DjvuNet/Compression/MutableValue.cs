@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DjvuNet.Configuration;
 
@@ -21,24 +22,30 @@ namespace DjvuNet.Compression
 
         #region Value
 
-        private T _value;
+        //private T _value;
 
         /// <summary>
         /// Gets or sets the value
         /// </summary>
         public T Value
         {
-            get { return _value; }
-
-            set
-            {
-                //if (_value.Equals(value) == false)
-                //{
-                    _value = value;
-                //    Trace.WriteLineIf(DjvuSettings.LogLevel.TraceVerbose, $"Mutable value changing: {_value} to {value}");
-                //}
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get;
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set;
         }
+        //{
+        //    get { return _value; }
+
+        //    set
+        //    {
+        //        //if (_value.Equals(value) == false)
+        //        //{
+        //            _value = value;
+        //        //    Trace.WriteLineIf(DjvuSettings.LogLevel.TraceVerbose, $"Mutable value changing: {_value} to {value}");
+        //        //}
+        //    }
+        //}
 
         #endregion Value
 
@@ -46,11 +53,13 @@ namespace DjvuNet.Compression
 
         #region Constructors
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MutableValue()
         {
             // Nothing
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MutableValue(T value)
         {
             Value = value;
@@ -60,6 +69,7 @@ namespace DjvuNet.Compression
 
         #region Public Methods
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             return Value.ToString();

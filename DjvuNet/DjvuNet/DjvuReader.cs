@@ -20,14 +20,14 @@ namespace DjvuNet
     /// </summary>
     public class DjvuReader : BinaryReader
     {
-        #region Private Variables
+        #region Private Members
 
         /// <summary>
         /// Full path to the djvu file
         /// </summary>
         private readonly string _location;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 

@@ -15,89 +15,45 @@ namespace DjvuNet.DataChunks.Navigation
     /// </summary>
     public class Bookmark
     {
-        #region Private Variables
+        #region Private Members
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
         #region Name
 
-        private string _name;
-
         /// <summary>
         /// Gets the name of the bookmark
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-
-            private set
-            {
-                if (_name != value)
-                    _name = value;
-            }
-        }
+        public string Name { get; internal set; }
 
         #endregion Name
 
         #region Url
 
-        private string _url;
-
         /// <summary>
         /// Gets the url of the bookmark
         /// </summary>
-        public string Url
-        {
-            get { return _url; }
-
-            private set
-            {
-                if (_url != value)
-                    _url = value;
-            }
-        }
+        public string Url { get; internal set; }
 
         #endregion Url
 
         #region Children
 
-        private Bookmark[] _children;
-
         /// <summary>
         /// Gets the children bookmarks
         /// </summary>
-        public Bookmark[] Children
-        {
-            get { return _children; }
-
-            private set
-            {
-                if (_children != value)
-                    _children = value;
-            }
-        }
+        public Bookmark[] Children { get; internal set; }
 
         #endregion Children
 
         #region Parent
 
-        private Bookmark _parent;
-
         /// <summary>
         /// Gets the parent bookmark for this item
         /// </summary>
-        public Bookmark Parent
-        {
-            get { return _parent; }
-
-            private set
-            {
-                if (_parent != value)
-                    _parent = value;
-            }
-        }
+        public Bookmark Parent { get; internal set; }
 
         #endregion Parent
 
@@ -115,43 +71,19 @@ namespace DjvuNet.DataChunks.Navigation
 
         #region ReferencedPage
 
-        private DjvuPage _referencedPage;
-
         /// <summary>
         /// Gets the page this bookmark references
         /// </summary>
-        public DjvuPage ReferencedPage
-        {
-            get { return _referencedPage; }
-
-            private set
-            {
-                if (_referencedPage != value)
-                {
-                    _referencedPage = value;
-                }
-            }
-        }
+        public DjvuPage ReferencedPage { get; internal set; }
 
         #endregion ReferencedPage
 
         #region Document
 
-        private DjvuDocument _document;
-
         /// <summary>
         /// Gets the document this bookmark pertains to
         /// </summary>
-        public DjvuDocument Document
-        {
-            get { return _document; }
-
-            private set
-            {
-                if (_document != value)
-                    _document = value;
-            }
-        }
+        public DjvuDocument Document { get; internal set; }
 
         #endregion Document
 
@@ -161,8 +93,8 @@ namespace DjvuNet.DataChunks.Navigation
 
         public Bookmark(DjvuReader reader, DjvuDocument document, Bookmark parent)
         {
-            _document = document;
-            _parent = parent;
+            Document = document;
+            Parent = parent;
             DecodeBookmarkData(reader);
 
             LoadReferencedPage();
@@ -170,11 +102,11 @@ namespace DjvuNet.DataChunks.Navigation
 
         public Bookmark(DjvuDocument document, Bookmark parent, string name, string url, Bookmark[] children)
         {
-            _document = document;
-            _parent = parent;
-            _name = name;
-            _url = url;
-            _children = children;
+            Document = document;
+            Parent = parent;
+            Name = name;
+            Url = url;
+            Children = children;
 
             LoadReferencedPage();
         }
@@ -236,7 +168,7 @@ namespace DjvuNet.DataChunks.Navigation
             {
                 children.Add(new Bookmark(reader, Document, this));
             }
-            _children = children.ToArray();
+            Children = children.ToArray();
         }
 
         #endregion Private Methods

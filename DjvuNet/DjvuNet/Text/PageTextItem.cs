@@ -22,41 +22,19 @@ namespace DjvuNet.Text
 
         #region Parent
 
-        private PageTextSearch _parent;
-
         /// <summary>
         /// Gets the parent for the text item
         /// </summary>
-        public PageTextSearch Parent
-        {
-            get { return _parent; }
-
-            internal set
-            {
-                if (Parent != value)
-                    _parent = value;
-            }
-        }
+        public PageTextSearch Parent { get; internal set; }
 
         #endregion Parent
 
         #region Zone
 
-        private TextZone _zone;
-
         /// <summary>
         /// Gets the text zone for the item
         /// </summary>
-        public TextZone Zone
-        {
-            get { return _zone; }
-
-            private set
-            {
-                if (Zone != value)
-                    _zone = value;
-            }
-        }
+        public TextZone Zone { get; internal set; }
 
         #endregion Zone
 
@@ -67,8 +45,8 @@ namespace DjvuNet.Text
         public PageTextItem(DjvuPage page, PageTextSearch parent, TextZone zone)
             : base(page)
         {
-            _zone = zone;
-            _parent = parent;
+            Zone = zone;
+            Parent = parent;
         }
 
         #endregion Constructors

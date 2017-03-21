@@ -31,6 +31,46 @@ namespace DjvuNet.DataChunks
 
         #endregion ChunkType
 
+        #region DirmData
+
+        private DirmChunk _dirmData;
+
+        /// <summary>
+        /// Gets the DIRM chunk for the form
+        /// </summary>
+        public DirmChunk DirmData
+        {
+            get
+            {
+                if (_dirmData == null && Children?.Length > 0)
+                    _dirmData = (DirmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
+
+                return _dirmData;
+            }
+        }
+
+        #endregion DirmData
+
+        #region NavmData
+
+        private NavmChunk _NavmData;
+
+        /// <summary>
+        /// Gets the Navm chunk for the form
+        /// </summary>
+        public NavmChunk NavmData
+        {
+            get
+            {
+                if (Children != null && Children.Length > 0 && _NavmData == null)
+                    _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
+
+                return _NavmData;
+            }
+        }
+
+        #endregion NavmData
+
         #endregion Public Properties
 
         #region Constructors

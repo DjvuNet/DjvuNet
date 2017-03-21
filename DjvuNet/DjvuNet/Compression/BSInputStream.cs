@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Compression
 {
@@ -8,7 +9,7 @@ namespace DjvuNet.Compression
     /// </summary>
     public sealed class BSInputStream : MemoryStream
     {
-        #region Private Variables
+        #region Private Members
 
         /// <summary>
         /// Minimum block size
@@ -70,7 +71,7 @@ namespace DjvuNet.Compression
         /// </summary>
         private int size = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Constructors
 
@@ -84,10 +85,17 @@ namespace DjvuNet.Compression
             }
         }
 
+        /// <summary>
+        /// TODO docs
+        /// </summary>
         public BSInputStream()
         {
         }
 
+        /// <summary>
+        /// TODO docs
+        /// </summary>
+        /// <param name="input"></param>
         public BSInputStream(Stream input)
         {
             Init(input);
@@ -197,6 +205,7 @@ namespace DjvuNet.Compression
         /// <param name="ctxoff"></param>
         /// <param name="bits"></param>
         /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int DecodeBinary(int ctxoff, int bits)
         {
             int n = 1;

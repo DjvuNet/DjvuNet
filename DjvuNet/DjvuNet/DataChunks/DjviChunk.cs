@@ -41,10 +41,6 @@ namespace DjvuNet.DataChunks
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
-            //long previousPosition = reader.Position;
-            //reader.Position = (Offset + 4);
-            //int dictLength = reader.
-            //Dictionary = reader.ReadUTF8String(4);
         }
 
         #endregion Constructors

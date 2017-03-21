@@ -29,141 +29,64 @@ namespace DjvuNet.DataChunks
 
         #region Width
 
-        private int _width;
-
         /// <summary>
         /// Gets the width for the page
         /// </summary>
-        public int Width
-        {
-            get { return _width; }
-
-            private set
-            {
-                if (_width != value)
-                    _width = value;
-            }
-        }
+        public int Width { get; internal set; }
 
         #endregion Width
 
         #region Height
 
-        private int _height;
-
         /// <summary>
         /// Gets the height for the page
         /// </summary>
-        public int Height
-        {
-            get { return _height; }
-
-            private set
-            {
-                if (_height != value)
-                    _height = value;
-            }
-        }
+        public int Height { get; internal set; }
 
         #endregion Height
 
         #region MinorVersion
 
-        private sbyte _minorVersion;
-
         /// <summary>
         /// Gets the minor version for the page encoder
         /// </summary>
-        public sbyte MinorVersion
-        {
-            get { return _minorVersion; }
-
-            private set
-            {
-                if (_minorVersion != value)
-                    _minorVersion = value;
-            }
-        }
+        public sbyte MinorVersion { get; internal set; }
 
         #endregion MinorVersion
 
         #region DPI
 
-        private int _dPI;
-
         /// <summary>
         /// Gets dots per inch (2.54 cm) for the image
         /// </summary>
-        public int DPI
-        {
-            get { return _dPI; }
-
-            private set
-            {
-                if (_dPI != value)
-                    _dPI = value;
-            }
-        }
+        public int DPI { get; internal set; }
 
         #endregion DPI
 
         #region MajorVersion
 
-        private sbyte _majorVersion;
-
         /// <summary>
         /// Gets the major version for the page encoder
         /// </summary>
-        public sbyte MajorVersion
-        {
-            get { return _majorVersion; }
-
-            private set
-            {
-                if (_majorVersion != value)
-                    _majorVersion = value;
-            }
-        }
+        public sbyte MajorVersion { get; internal set; }
 
         #endregion MajorVersion
 
         #region Gamma
 
-        private float _gamma;
-
         /// <summary>
         /// Gets the gamma amount for the page
         /// </summary>
-        public float Gamma
-        {
-            get { return _gamma; }
-
-            private set
-            {
-                if (_gamma != value)
-                    _gamma = value;
-            }
-        }
+        public float Gamma { get; internal set; }
 
         #endregion Gamma
 
         #region PageRotation
 
-        private PageRotations _pageRotation;
-
         /// <summary>
         /// Gets the rotation for the page
         /// </summary>
-        public PageRotations PageRotation
-        {
-            get { return _pageRotation; }
-
-            private set
-            {
-                if (_pageRotation != value)
-                    _pageRotation = value;
-            }
-        }
+        public PageRotations PageRotation { get; internal set; }
 
         #endregion PageRotation
 

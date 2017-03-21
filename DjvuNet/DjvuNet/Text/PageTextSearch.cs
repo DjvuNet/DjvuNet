@@ -18,23 +18,10 @@ namespace DjvuNet.Text
 
         #region TextItems
 
-        private PageTextItem[] _textItems;
-
         /// <summary>
         /// Gets the text items for the search
         /// </summary>
-        public PageTextItem[] TextItems
-        {
-            get { return _textItems; }
-
-            private set
-            {
-                if (TextItems != value)
-                {
-                    _textItems = value;
-                }
-            }
-        }
+        public PageTextItem[] TextItems { get; internal set; }
 
         #endregion TextItems
 
@@ -45,13 +32,13 @@ namespace DjvuNet.Text
         public PageTextSearch(DjvuPage page, TextZone[] items)
             : base(page)
         {
-            _textItems = items.Select(x => new PageTextItem(page, this, x)).ToArray();
+            TextItems = items.Select(x => new PageTextItem(page, this, x)).ToArray();
         }
 
         public PageTextSearch(DjvuPage page, PageTextItem[] items)
             : base(page)
         {
-            _textItems = items;
+            TextItems = items;
         }
 
         #endregion Constructors

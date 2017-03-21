@@ -20,22 +20,11 @@ namespace DjvuNet.DataChunks
 
         #region Reader
 
-        private DjvuReader _reader;
-
         /// <summary>
         /// Gets the reader for the chunk data
         /// </summary>
         //[DataMember]
-        internal DjvuReader Reader
-        {
-            get { return _reader; }
-
-            set
-            {
-                if (Reader != value)
-                    _reader = value;
-            }
-        }
+        internal DjvuReader Reader { get; set; }
 
         #endregion Reader
 
@@ -54,81 +43,37 @@ namespace DjvuNet.DataChunks
 
         #region Parent
 
-        private IFFChunk _parent;
-
         /// <summary>
         /// Gets the parent for the IFF chunk
         /// </summary>
-        public IFFChunk Parent
-        {
-            get { return _parent; }
-
-            internal set
-            {
-                if (Parent != value)
-                    _parent = value;
-            }
-        }
+        public IFFChunk Parent { get; internal set; }
 
         #endregion Parent
 
         #region Length
 
-        private long _length;
-
         /// <summary>
         /// Gets the length of the chunk data
         /// </summary>
-        public long Length
-        {
-            get { return _length; }
-
-            internal set
-            {
-                if (Length != value)
-                    _length = value;
-            }
-        }
+        public long Length { get; internal set; }
 
         #endregion Length
 
         #region ChunkID
 
-        private string _chunkID;
-
         /// <summary>
         /// Gets the chunk identifier
         /// </summary>
-        public string ChunkID
-        {
-            get { return _chunkID; }
-
-            internal set
-            {
-                if (ChunkID != value)
-                    _chunkID = value;
-            }
-        }
+        public string ChunkID { get; internal set; }
 
         #endregion ChunkID
 
         #region Offset
 
-        private long _offset;
-
         /// <summary>
         /// Gets the offset to the start of the chunk data
         /// </summary>
-        public long Offset
-        {
-            get { return _offset; }
-
-            internal set
-            {
-                if (Offset != value)
-                    _offset = value;
-            }
-        }
+        public long Offset { get; internal set; }
 
         #endregion Offset
 
@@ -170,21 +115,10 @@ namespace DjvuNet.DataChunks
 
         #region Document
 
-        private DjvuDocument _document;
-
         /// <summary>
         /// Gets the root Djvu document for the form
         /// </summary>
-        public DjvuDocument Document
-        {
-            get { return _document; }
-
-            internal set
-            {
-                if (Document != value)
-                    _document = value;
-            }
-        }
+        public DjvuDocument Document { get; internal set; }
 
         #endregion Document
 
@@ -203,14 +137,12 @@ namespace DjvuNet.DataChunks
         public IFFChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document, 
             string chunkID = "", long length = 0)
         {
-            _reader = reader;
-            _parent = parent;
-            _document = document;
-            _length = length;
-            _chunkID = chunkID;
-
-            // Move back 4 to compensate for the chunk type already read
-            _offset = reader.Position; // - 4;
+            Reader = reader;
+            Parent = parent;
+            Document = document;
+            Length = length;
+            ChunkID = chunkID;
+            Offset = reader.Position;
         }
 
         /// <summary>
@@ -234,13 +166,8 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         public static ChunkType GetChunkType(string ID)
         {
-            try
-            {
-                return (ChunkType)Enum.Parse(typeof(ChunkType), ID, true);
-            }
-            catch (ArgumentException)  // Catch unsupported chunks i.e. "LTAnno"
-            {
-            }
+            try { return (ChunkType)Enum.Parse(typeof(ChunkType), ID, true); }
+            catch (ArgumentException) { } // Catch unsupported chunks i.e. "LTAnno"
 
             return ChunkType.Unknown;
         }

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.JB2
 {
@@ -7,9 +8,9 @@ namespace DjvuNet.JB2
     /// </summary>
     public class JB2Blit
     {
-        #region Protected Variables
+        #region Protected Members
 
-        #endregion Protected Variables
+        #endregion Protected Members
 
         #region Public Properties
 
@@ -22,18 +23,10 @@ namespace DjvuNet.JB2
         /// </summary>
         public int Bottom
         {
-            get
-            {
-                return 0xffff & _bottom;
-            }
-
-            set
-            {
-                if (Bottom != value)
-                {
-                    _bottom = (short)value;
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return 0xffff & _bottom; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _bottom = (short)value; }
         }
 
         #endregion Bottom
@@ -47,38 +40,20 @@ namespace DjvuNet.JB2
         /// </summary>
         public int Left
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return 0xffff & _left; }
-
-            set
-            {
-                if (Left != value)
-                {
-                    _left = (short)value;
-                }
-            }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _left = (short)value; }
         }
 
         #endregion Left
 
         #region ShapeNumber
 
-        private int _shapeNumber;
-
         /// <summary>
         /// Gets or sets the shape number of the blit
         /// </summary>
-        public int ShapeNumber
-        {
-            get { return _shapeNumber; }
-
-            set
-            {
-                if (ShapeNumber != value)
-                {
-                    _shapeNumber = value;
-                }
-            }
-        }
+        public int ShapeNumber;
 
         #endregion ShapeNumber
 

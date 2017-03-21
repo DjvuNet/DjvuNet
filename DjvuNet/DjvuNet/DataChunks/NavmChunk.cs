@@ -18,11 +18,11 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class NavmChunk : IFFChunk, INavigation
     {
-        #region Private Variables
+        #region Private Members
 
         private long _dataLocation = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 

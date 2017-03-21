@@ -14,7 +14,7 @@ namespace DjvuNet.Wavelet
         /// <summary>
         /// The data structure for this block
         /// </summary>
-        private short[][][] _pdata = new short[][][] { null, null, null, null };
+        private short[][][] PData = new short[][][] { null, null, null, null };
 
         #endregion Variables
 
@@ -36,10 +36,10 @@ namespace DjvuNet.Wavelet
 
             try
             {
-                retval = new IWBlock { _pdata = this._pdata };
+                retval = new IWBlock { PData = this.PData };
 
-                short[][][] pdata = (short[][][])this._pdata.Clone();
-                ((IWBlock)retval)._pdata = pdata;
+                short[][][] pdata = (short[][][])this.PData.Clone();
+                ((IWBlock)retval).PData = pdata;
 
                 for (int i = 0; i < pdata.Length; i++)
                 {
@@ -80,7 +80,7 @@ namespace DjvuNet.Wavelet
         public short[] GetBlock(int n)
         {
             int nms = n >> 4;
-            return (_pdata[nms] != null) ? _pdata[nms][n & 0xf] : null;
+            return (PData[nms] != null) ? PData[nms][n & 0xf] : null;
         }
 
         /// <summary> Query a data block.
@@ -96,17 +96,14 @@ namespace DjvuNet.Wavelet
         public short[] GetInitializedBlock(int n)
         {
             int nms = n >> 4;
-            if (_pdata[nms] == null)
-            {
-                _pdata[nms] = new short[16][];
-            }
-            int nls = n & 0xf;
-            if (_pdata[nms][nls] == null)
-            {
-                _pdata[nms][nls] = new short[16];
-            }
+            if (PData[nms] == null)
+                PData[nms] = new short[16][];
 
-            return _pdata[nms][nls];
+            int nls = n & 0xf;
+            if (PData[nms][nls] == null)
+                PData[nms][nls] = new short[16];
+
+            return PData[nms][nls];
         }
 
         /// <summary> Query a data value.
@@ -152,18 +149,14 @@ namespace DjvuNet.Wavelet
             int n = bmin << 4;
 
             for (int i = 0; i < coeff.Length; i++)
-            {
                 coeff[i] = 0;
-            }
 
             for (int n1 = bmin; n1 < bmax; n1++)
             {
                 short[] d = GetBlock(n1);
 
                 if (d == null)
-                {
                     n += 16;
-                }
                 else
                 {
                     for (int n2 = 0; n2 < d.Length; )
@@ -184,9 +177,9 @@ namespace DjvuNet.Wavelet
         public void ClearBlock(int n)
         {
             int nms = n >> 4;
-            if (_pdata[nms] != null)
+            if (PData[nms] != null)
             {
-                _pdata[nms][n & 0xf] = null;
+                PData[nms][n & 0xf] = null;
             }
         }
 

@@ -12,7 +12,6 @@ using DjvuNet.Wavelet;
 namespace DjvuNet.DataChunks
 {
 
-
     /// <summary>
     /// TODO: Update summary.
     /// </summary>

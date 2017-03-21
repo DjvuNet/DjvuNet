@@ -13,12 +13,12 @@ namespace DjvuNet.DataChunks.Text
     /// </summary>
     public abstract class TextChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
         private bool _isDecoded = false;
         private long _dataLocation = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 

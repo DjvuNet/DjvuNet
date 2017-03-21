@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -12,29 +13,41 @@ namespace DjvuNet.Graphics
     /// </summary>
     public class PixelMap : Map
     {
-        #region Private Variables
+        #region Private Members
 
-        /// <summary>Used to represent division as multiplication. </summary>
+        /// <summary>
+        /// Used to represent division as multiplication. 
+        /// </summary>
         private static readonly int[] _invmap = new int[256];
 
-        /// <summary>Identity color correction table. </summary>
+        /// <summary>
+        /// Identity color correction table. 
+        /// </summary>
         private static readonly int[] _ctableI = new int[256];
 
-        /// <summary>Cached color correction table. </summary>
+        /// <summary>
+        /// Cached color correction table. 
+        /// </summary>
         private static int[] _ctable = new int[256];
 
-        /// <summary> The color correction subsample for the cached color table. </summary>
+        /// <summary> 
+        /// The color correction subsample for the cached color table. 
+        /// </summary>
         private static double _lgamma = -1D;
 
-        /// <summary>Used to quickly clip out of bounds values. </summary>
+        /// <summary>
+        /// Used to quickly clip out of bounds values. 
+        /// </summary>
         private static readonly sbyte[] _clip = new sbyte[512];
 
-        /// <summary>Used for attenuation </summary>
+        /// <summary>
+        /// Used for attenuation 
+        /// </summary>
         private static readonly Object[] _multiplierRefArray = new Object[256];
 
         private static object _syncObject = new object();
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -45,24 +58,16 @@ namespace DjvuNet.Graphics
         static PixelMap()
         {
             for (int i = 0; i < _clip.Length; i++)
-            {
                 _clip[i] = (sbyte)((i < 256) ? i : 255);
-            }
 
             for (int i = 1; i < _invmap.Length; i++)
-            {
                 _invmap[i] = 0x10000 / i;
-            }
 
             for (int i = 0; i < _ctableI.Length; i++)
-            {
                 _ctableI[i] = i;
-            }
 
             for (int i = 1; i < _multiplierRefArray.Length; )
-            {
                 _multiplierRefArray[i++] = null;
-            }
         }
 
         /// <summary> Creates a new PixelMap object.</summary>
@@ -90,15 +95,11 @@ namespace DjvuNet.Graphics
             lock (_syncObject)
             {
                 if ((gamma < 0.10000000000000001D) || (gamma > 10D))
-                {
                     throw new FormatException("Illegal gamma: " + gamma);
-                }
 
                 int[] retval;
                 if ((gamma < 1.0009999999999999D) && (gamma > 0.999D))
-                {
                     retval = _ctableI;
-                }
                 else
                 {
                     if (gamma != _lgamma)
@@ -147,31 +148,21 @@ namespace DjvuNet.Graphics
             int xrows = ypos + bm.ImageHeight;
 
             if (xrows > ImageHeight)
-            {
                 xrows = ImageHeight;
-            }
 
             if (ypos > 0)
-            {
                 xrows -= ypos;
-            }
 
             int xcolumns = xpos + bm.ImageWidth;
 
             if (xcolumns > ImageWidth)
-            {
                 xcolumns = ImageWidth;
-            }
 
             if (xpos > 0)
-            {
                 xcolumns -= xpos;
-            }
 
             if ((xrows <= 0) || (xcolumns <= 0))
-            {
                 return;
-            }
 
             // Precompute multiplier map
             int maxgray = bm.Grays - 1;
@@ -197,9 +188,7 @@ namespace DjvuNet.Graphics
                     if (srcpix > 0)
                     {
                         if (srcpix >= maxgray)
-                        {
                             dstPixel.SetGray(0);
-                        }
                         else
                         {
                             int level = multiplier[srcpix];
@@ -234,48 +223,34 @@ namespace DjvuNet.Graphics
         {
             // Check
             if (color == null)
-            {
                 return;
-            }
 
             // Compute number of rows and columns
             int xrows = ypos + bm.ImageHeight;
 
             if (xrows > ImageHeight)
-            {
                 xrows = ImageHeight;
-            }
 
             if (ypos > 0)
-            {
                 xrows -= ypos;
-            }
 
             int xcolumns = xpos + bm.ImageWidth;
 
             if (xcolumns > ImageWidth)
-            {
                 xcolumns = ImageWidth;
-            }
 
             if (xpos > 0)
-            {
                 xcolumns -= xpos;
-            }
 
             if ((xrows <= 0) || (xcolumns <= 0))
-            {
                 return;
-            }
 
             // Precompute multiplier map
             int maxgray = bm.Grays - 1;
             int[] multiplier = new int[maxgray];
 
             for (int i = 0; i < maxgray; i++)
-            {
                 multiplier[i] = 0x10000 - ((i << 16) / maxgray);
-            }
 
             // Cache target color
             int gr = color.Red;
@@ -302,9 +277,7 @@ namespace DjvuNet.Graphics
                     if (srcpix != 0)
                     {
                         if (srcpix >= maxgray)
-                        {
                             dstPixel.SetBGR(gb, gg, gr);
-                        }
                         else
                         {
                             int level0 = multiplier[srcpix];
@@ -331,16 +304,12 @@ namespace DjvuNet.Graphics
         public void ApplyGammaCorrection(double gamma)
         {
             if (((gamma > 0.999D) && (gamma < 1.0009999999999999D)))
-            {
                 return;
-            }
 
             int[] gtable = GetColorCorrection(gamma);
 
             for (int i = 0; i < Data.Length; i++)
-            {
                 Data[i] = (sbyte)gtable[Data[i]];
-            }
         }
 
         /// <summary> 
@@ -361,9 +330,8 @@ namespace DjvuNet.Graphics
             if (pdr != null)
             {
                 if ((pdr.Right < rect.Right) || (pdr.Bottom < rect.Bottom) || (pdr.Left > rect.Left) || (pdr.Top > rect.Top))
-                {
                     throw new ArgumentException("Specified rectangle overflows destination PixelMap");
-                }
+
                 rect = pdr;
             }
 
@@ -391,16 +359,12 @@ namespace DjvuNet.Graphics
                     int lsy = sy + subsample;
 
                     if (lsy > src.ImageHeight)
-                    {
                         lsy = src.ImageHeight;
-                    }
 
                     int lsx = sx + subsample;
 
                     if (lsx > src.ImageWidth)
-                    {
                         lsx = src.ImageWidth;
-                    }
 
                     for (int rsy = sy; rsy < lsy; rsy++)
                     {
@@ -431,14 +395,10 @@ namespace DjvuNet.Graphics
                     }
 
                     if (s >= _invmap.Length)
-                    {
                         dptr.SetBGR(b / s, g / s, r / s);
-                    }
                     else
-                    {
                         dptr.SetBGR(((b * _invmap[s]) + 32768) >> 16, ((g * _invmap[s]) + 32768) >> 16,
                                     ((r * _invmap[s]) + 32768) >> 16);
-                    }
 
                     sx += subsample;
                 }
@@ -472,11 +432,9 @@ namespace DjvuNet.Graphics
             if (pdr != null)
             {
                 if ((pdr.Right < rect.Right) || (pdr.Bottom < rect.Bottom) || (pdr.Left > rect.Left) || (pdr.Top > rect.Top))
-                {
                     throw new ArgumentException("rectangle out of bounds" + "pdr=(" + pdr.Right + "," + pdr.Bottom + "," +
                                                 pdr.Left + "," + pdr.Top + "),rect=(" + rect.Right + "," + rect.Bottom +
                                                 "," + rect.Left + "," + rect.Top + ")");
-                }
 
                 rect = pdr;
                 destwidth = rect.Width;
@@ -518,39 +476,29 @@ namespace DjvuNet.Graphics
                 spix0.SetOffset(sy++, sxz);
 
                 if (sy >= srcheight)
-                {
                     sy--;
-                }
 
                 spix1.SetOffset(sy++, sxz);
 
                 if (sy >= srcheight)
-                {
                     sy--;
-                }
 
                 spix2.SetOffset(sy++, sxz);
 
                 if (sy >= srcheight)
-                {
                     sy--;
-                }
 
                 spix3.SetOffset(sy++, sxz);
 
                 dpix0.SetOffset((dy < 0) ? 0 : dy, dxz);
 
                 if (++dy >= destheight)
-                {
                     dy--;
-                }
 
                 dpix1.SetOffset((dy < 0) ? 0 : dy, dxz);
 
                 if (++dy >= destheight)
-                {
                     dy--;
-                }
 
                 dpix2.SetOffset(dy++, dxz);
                 int dx = dxz;
@@ -778,6 +726,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the initialized PixelMap
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual PixelMap Init(int arows, int acolumns, Pixel filler)
         {
             //    boolean needFill=false;
@@ -793,10 +742,8 @@ namespace DjvuNet.Graphics
             if (npix > 0)
             {
                 if (Data == null)
-                {
                     Data = new sbyte[npix * 3];
                     //        needFill=true;
-                }
 
                 if (filler != null)
                 {
@@ -852,19 +799,11 @@ namespace DjvuNet.Graphics
                     refPixel.SetOffset(y + rect.Bottom, rect.Right + rect2.Right);
 
                     if (!IsRampNeeded)
-                    {
                         for (int x = rect2.Left - rect2.Right; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                        {
                             pixel.CopyFrom(refPixel);
-                        }
-                    }
                     else
-                    {
                         for (int x = rect2.Left - rect2.Right; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                        {
                             pixel.CopyFrom(ref_Renamed.PixelRamp(refPixel));
-                        }
-                    }
                 }
             }
 
@@ -895,19 +834,11 @@ namespace DjvuNet.Graphics
                     refPixel.SetOffset(y, 0);
 
                     if (!IsRampNeeded)
-                    {
                         for (int x = ImageWidth; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                        {
                             pixel.CopyFrom(refPixel);
-                        }
-                    }
                     else
-                    {
                         for (int x = ImageWidth; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                        {
                             pixel.CopyFrom(ref_Renamed.PixelRamp(refPixel));
-                        }
-                    }
                 }
             }
 
@@ -962,36 +893,26 @@ namespace DjvuNet.Graphics
             int xrows = ImageHeight;
 
             if (mask.ImageHeight < xrows)
-            {
                 xrows = mask.ImageHeight;
-            }
 
             if (rect.Height < xrows)
-            {
                 xrows = rect.Height;
-            }
 
             // Compute number of columns
             int xcolumns = ImageWidth;
 
             if (mask.ImageWidth < xcolumns)
-            {
                 xcolumns = mask.ImageWidth;
-            }
 
             if (rect.Width < xcolumns)
-            {
                 xcolumns = rect.Width;
-            }
 
             // Precompute multiplier map
             int maxgray = mask.Grays - 1;
             int[] multiplier = new int[maxgray];
 
             for (int i = 1; i < maxgray; i++)
-            {
                 multiplier[i] = (0x10000 * i) / maxgray;
-            }
 
             // Prepare color correction table
             int[] gtable = GetColorCorrection(gamma);
@@ -1089,9 +1010,7 @@ namespace DjvuNet.Graphics
         public override Map Translate(int dx, int dy, Map retval)
         {
             if (!(retval is PixelMap) || (retval.ImageWidth != ImageWidth) || (retval.ImageHeight != ImageHeight))
-            {
                 retval = new PixelMap().Init(ImageHeight, ImageWidth, null);
-            }
 
             retval.Fill(this, -dx, -dy);
 
@@ -1138,9 +1057,8 @@ namespace DjvuNet.Graphics
                 retval = new int[maxgray];
 
                 for (int i = 0; i < maxgray; i++)
-                {
                     retval[i] = 0x10000 - ((i << 16) / maxgray);
-                }
+
                 _multiplierRefArray[maxgray] = retval;
             }
             return retval;

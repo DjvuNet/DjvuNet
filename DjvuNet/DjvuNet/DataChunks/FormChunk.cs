@@ -27,21 +27,10 @@ namespace DjvuNet.DataChunks
 
         #region Children
 
-        private IFFChunk[] _children = new IFFChunk[0];
-
         /// <summary>
         /// Gets the children chunks for this chunk
         /// </summary>
-        public IFFChunk[] Children
-        {
-            get { return _children; }
-
-            internal set
-            {
-                if (Children != value)
-                    _children = value;
-            }
-        }
+        public IFFChunk[] Children { get; internal set; }
 
         #endregion Children
 
@@ -64,46 +53,6 @@ namespace DjvuNet.DataChunks
         }
 
         #endregion Data
-
-        #region DirmData
-
-        private DirmChunk _dirmData;
-
-        /// <summary>
-        /// Gets the DIRM chunk for the form
-        /// </summary>
-        public DirmChunk DirmData
-        {
-            get
-            {
-                if (_dirmData == null && Children != null)
-                    _dirmData = (DirmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
-
-                return _dirmData;
-            }
-        }
-
-        #endregion DirmData
-
-        #region NavmData
-
-        private NavmChunk _NavmData;
-
-        /// <summary>
-        /// Gets the Navm chunk for the form
-        /// </summary>
-        public NavmChunk NavmData
-        {
-            get
-            {
-                if (Children != null && Children.Length > 0 && _NavmData == null )
-                    _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
-
-                return _NavmData;
-            }
-        }
-
-        #endregion NavmData
 
         #region IncludedItems
 

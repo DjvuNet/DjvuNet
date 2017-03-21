@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace DjvuNet.Graphics
@@ -10,7 +11,14 @@ namespace DjvuNet.Graphics
     /// </summary>
     public class Bitmap : Map
     {
-        #region Private Variables
+        // TODO Verify if this change does not break rendering
+
+        // As this is read and assigned from instance methods changing 
+        // to instance field - will verify results but perhaps it is
+        // one of the bugs which prevents proper image rendering
+        private Object[] RampRefArray = new Object[256];
+
+        #region Private Members
 
         /// <summary>end of the buffer  </summary>
         private int _maxRowOffset;
@@ -19,17 +27,11 @@ namespace DjvuNet.Graphics
 
         private object _syncObject = new object();
 
-        #endregion Private Variables
+        #endregion Private Members
 
-        #region Protected Variables
+        #region Protected Members
 
-        #endregion Protected Variables
-
-        #region Variables
-
-        private static readonly Object[] RampRefArray = new Object[256];
-
-        #endregion Variables
+        #endregion Protected Members
 
         #region Private Properties
 
@@ -70,9 +72,7 @@ namespace DjvuNet.Graphics
                 if (_grays != value)
                 {
                     if ((value < 2) || (value > 256))
-                    {
                         throw new ArgumentException("(Bitmap::set_grays) Illegal number of gray levels");
-                    }
 
                     _grays = value;
                     _rampData = null;
@@ -198,15 +198,15 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        static Bitmap()
-        {
-            {
-                for (int i = 0; i < RampRefArray.Length; )
-                {
-                    RampRefArray[i++] = null;
-                }
-            }
-        }
+        //static Bitmap()
+        //{
+        //    {
+        //        for (int i = 0; i < RampRefArray.Length; )
+        //        {
+        //            RampRefArray[i++] = null;
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Creates a new Bitmap object.
@@ -214,6 +214,9 @@ namespace DjvuNet.Graphics
         public Bitmap()
             : base(1, 0, 0, 0, true)
         {
+            for (int i = 0; i < RampRefArray.Length;)
+                RampRefArray[i++] = null;
+
             IsRampNeeded = true;
         }
 
@@ -384,6 +387,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the offset to the pixel data
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int RowOffset(int row)
         {
             return (row * BytesPerRow) + Border;
@@ -394,6 +398,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <returns> bytes per row
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetRowSize()
         {
             return BytesPerRow;
@@ -429,6 +434,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="dy">vertical position to insert at
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void Fill(Map ref_Renamed, int dx, int dy)
         {
             InsertMap((Bitmap)ref_Renamed, dx, dy, false);
@@ -527,6 +533,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the initialized image map
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual Bitmap Init(int arows, int acolumns, int aborder)
         {
             Data = null;
@@ -672,9 +679,7 @@ namespace DjvuNet.Graphics
                 Bitmap r = new Bitmap().Init(ImageHeight, ImageWidth, 0);
 
                 if ((Grays >= 2) && (Grays <= 256))
-                {
                     r.Grays = (Grays);
-                }
 
                 retval = r;
             }
@@ -687,6 +692,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Convert the pixel to 24 bit color.
         /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override Pixel PixelRamp(PixelReference ref_Renamed)
         {
             return Ramp[ref_Renamed.Blue];

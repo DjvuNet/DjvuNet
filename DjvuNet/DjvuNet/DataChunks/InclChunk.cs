@@ -29,21 +29,10 @@ namespace DjvuNet.DataChunks
 
         #region IncludeID
 
-        private string _includeID;
-
         /// <summary>
         /// Gets the ID of the element to include
         /// </summary>
-        public string IncludeID
-        {
-            get { return _includeID; }
-
-            private set
-            {
-                if (_includeID != value)
-                    _includeID = value;
-            }
-        }
+        public string IncludeID { get; internal set; }
 
         #endregion IncludeID
 
@@ -63,7 +52,7 @@ namespace DjvuNet.DataChunks
 
         protected override void ReadChunkData(DjvuReader reader)
         {
-            _includeID = reader.ReadUTF8String(Length);
+            IncludeID = reader.ReadUTF8String(Length);
         }
 
         #endregion Protected Methods

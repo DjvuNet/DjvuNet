@@ -17,11 +17,11 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class FGjpChunk : IFFChunk
     {
-        #region Private Variables
+        #region Private Members
 
         private long _dataLocation = 0;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
@@ -46,19 +46,15 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_foregroundImage == null)
-                {
                     _foregroundImage = DecodeImageData();
-                }
 
                 return _foregroundImage;
             }
 
             private set
             {
-                if (ForegroundImage != value)
-                {
+                if (_foregroundImage != value)
                     _foregroundImage = value;
-                }
             }
         }
 

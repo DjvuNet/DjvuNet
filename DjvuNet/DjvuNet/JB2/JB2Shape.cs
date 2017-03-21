@@ -5,78 +5,36 @@ namespace DjvuNet.JB2
 {
     public class JB2Shape : JB2Item
     {
-        #region Private Variables
+        #region Private Members
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
         #region Parent
 
-        private int _parent;
-
         /// <summary>
         /// Gets or sets the parent for the shape
         /// </summary>
-        public int Parent
-        {
-            get
-            {
-                return _parent;
-            }
-
-            set
-            {
-                if (Parent != value)
-                {
-                    _parent = value;
-                }
-            }
-        }
+        public int Parent;
 
         #endregion Parent
 
         #region UserData
 
-        private long _userData;
-
         /// <summary>
         /// Gets or sets the user data for the shape
         /// </summary>
-        public long UserData
-        {
-            get { return _userData; }
-
-            set
-            {
-                if (UserData != value)
-                {
-                    _userData = value;
-                }
-            }
-        }
+        public long UserData;
 
         #endregion UserData
 
         #region Bitmap
 
-        private Bitmap _bitmap;
-
         /// <summary>
         /// Gets or sets the bitmap for the shape
         /// </summary>
-        public Bitmap Bitmap
-        {
-            get { return _bitmap; }
-
-            private set
-            {
-                if (Bitmap != value)
-                {
-                    _bitmap = value;
-                }
-            }
-        }
+        public Bitmap Bitmap;
 
         #endregion Bitmap
 
@@ -94,8 +52,6 @@ namespace DjvuNet.JB2
         /// </summary>
         public JB2Shape()
         {
-            Parent = 0;
-            _bitmap = null;
         }
 
         #endregion Constructors
@@ -104,12 +60,17 @@ namespace DjvuNet.JB2
 
         public virtual JB2Shape Duplicate()
         {
-            JB2Shape retval = new JB2Shape { _bitmap = _bitmap, Bitmap = Bitmap, Parent = Parent, UserData = UserData };
-
-            if (retval._bitmap != null)
+            JB2Shape retval = new JB2Shape
             {
-                retval._bitmap = retval._bitmap.Duplicate();
-            }
+                Bitmap = Bitmap?.Duplicate(),
+                Parent = Parent,
+                UserData = UserData
+            };
+
+            // TODO test bitmap copy logic
+
+            //if (retval.Bitmap != null)
+            //    retval.Bitmap = retval.Bitmap.Duplicate();
 
             return retval;
         }
@@ -117,8 +78,7 @@ namespace DjvuNet.JB2
         public virtual JB2Shape Init(int parent)
         {
             this.Parent = parent;
-            _bitmap = new Bitmap();
-
+            Bitmap = new Bitmap();
             return this;
         }
 

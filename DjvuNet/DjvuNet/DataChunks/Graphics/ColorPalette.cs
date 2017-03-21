@@ -5,80 +5,38 @@ namespace DjvuNet.DataChunks.Graphics
 {
     public class ColorPalette
     {
-        #region Private Variables
+        #region Private Members
 
         private FGbzChunk _parent;
 
-        #endregion Private Variables
+        #endregion Private Members
 
         #region Public Properties
 
         #region Version
 
-        private int _version;
-
         /// <summary>
         /// Gets the version of the palette data
         /// </summary>
-        public int Version
-        {
-            get
-            {
-                return _version;
-            }
-
-            private set
-            {
-                if (Version != value)
-                {
-                    _version = value;
-                }
-            }
-        }
+        public int Version { get; internal set; }
 
         #endregion Version
 
         #region PaletteColors
 
-        private Pixel[] _paletteColors;
-
         /// <summary>
         /// Gets the colors for the palette
         /// </summary>
-        public Pixel[] PaletteColors
-        {
-            get { return _paletteColors; }
-
-            private set
-            {
-                if (PaletteColors != value)
-                {
-                    _paletteColors = value;
-                }
-            }
-        }
+        public Pixel[] PaletteColors { get; internal set; }
 
         #endregion PaletteColors
 
         #region BlitColors
 
-        private int[] _blitColors;
-
         /// <summary>
         /// Gets the list of blit color indexes
         /// </summary>
-        public int[] BlitColors
-        {
-            get { return _blitColors; }
-
-            private set
-            {
-                if (BlitColors != value)
-                {
-                    _blitColors = value;
-                }
-            }
-        }
+        public int[] BlitColors { get; internal set; }
 
         #endregion BlitColors
 
@@ -109,7 +67,7 @@ namespace DjvuNet.DataChunks.Graphics
         /// </param>
         /// <param name="p">DOCUMENT ME!
         /// </param>
-        public void index_to_color(int index, DjvuNet.Graphics.Pixel p)
+        public void IndexToColor(int index, DjvuNet.Graphics.Pixel p)
         {
             p.CopyFrom(PaletteColors[index]);
         }
@@ -126,7 +84,7 @@ namespace DjvuNet.DataChunks.Graphics
         {
             sbyte header = reader.ReadSByte();
             bool isShapeTable = (header >> 7) == 1;
-            _version = header & 127;
+            Version = header & 127;
 
             // Color palette size is expressed as unsigned short int
             // in reference implementation while INT16 is indicated in
@@ -143,7 +101,7 @@ namespace DjvuNet.DataChunks.Graphics
 
                 paletteColors.Add(new Pixel(b, g, r));
             }
-            _paletteColors = paletteColors.ToArray();
+            PaletteColors = paletteColors.ToArray();
 
             if (isShapeTable == true)
             {
@@ -158,7 +116,7 @@ namespace DjvuNet.DataChunks.Graphics
                     int index = compressed.ReadInt16MSB();
                     blitColors.Add(index);
                 }
-                _blitColors = blitColors.ToArray();
+                BlitColors = blitColors.ToArray();
             }
         }
 
