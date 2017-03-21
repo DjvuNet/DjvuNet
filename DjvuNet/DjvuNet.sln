@@ -111,6 +111,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{b7ef5575-5932-4ea7-b250-e7da238d60a9}*SharedItemsImports = 13

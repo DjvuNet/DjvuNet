@@ -262,3 +262,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/DjvuNet/Profiler/Report20170321-1310.diagsession
+/DjvuNet/Profiler/Report20170321-1242.diagsession
+/DjvuNet/Profiler/Report20170321-1151.diagsession
+/DjvuNet/Profiler/Report20170321-1107.diagsession

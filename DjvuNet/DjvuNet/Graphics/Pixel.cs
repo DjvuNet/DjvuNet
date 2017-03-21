@@ -1,14 +1,35 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.Graphics
 {
+    ///
+    /// TODO - break inheritance hierarchy with PixelReference
+    ///
+
     /// <summary>
     /// This class represents a single pixel.
     /// </summary>
-    public class Pixel
+    [StructLayout(LayoutKind.Explicit)]
+    public class Pixel : IEquatable<Pixel>
     {
         #region Private Members
+
+        [FieldOffset(0)]
+        private int _Color;
+
+        [FieldOffset(0)]
+        private sbyte _Alpha;
+
+        [FieldOffset(1)]
+        private sbyte _Blue;
+
+        [FieldOffset(2)]
+        private sbyte _Green;
+
+        [FieldOffset(3)]
+        private sbyte _Red;
 
         #endregion Private Members
 
@@ -19,10 +40,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets the total number of colors in a pixel
         /// </summary>
-        public static int TotalColorsPerPixel
-        {
-            get { return 3; }
-        }
+        public const int TotalColorsPerPixel = 3;
 
         #endregion TotalColorsPerPixel
 
@@ -98,9 +116,9 @@ namespace DjvuNet.Graphics
         public virtual sbyte Blue
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get;
+            get { return _Blue; }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set;
+            set { _Blue = value; }
         }
 
         #endregion Blue
@@ -113,9 +131,9 @@ namespace DjvuNet.Graphics
         public virtual sbyte Green
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get;
+            get { return _Green; }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set;
+            set { _Green = value; }
         }
 
         #endregion Green
@@ -128,9 +146,9 @@ namespace DjvuNet.Graphics
         public sbyte Red
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get;
+            get { return _Red; }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set;
+            set { _Red = value; }
         }
 
         #endregion Red
@@ -141,6 +159,12 @@ namespace DjvuNet.Graphics
 
         protected Pixel()
         {
+            _Color = unchecked((int)0xff000000);
+        }
+
+        protected Pixel(int color)
+        {
+            _Color = color;
         }
 
         /// <summary> Creates a new Pixel object.
@@ -155,9 +179,10 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Pixel(sbyte blue = -51, sbyte green = -51, sbyte red = -51)
         {
-            Blue = blue;
-            Green = green;
-            Red = red;
+            _Color = unchecked((int)0xff000000);
+            _Blue = blue;
+            _Green = green;
+            _Red = red;
         }
 
         #endregion Constructors
@@ -171,7 +196,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         public virtual Pixel Duplicate()
         {
-            return new Pixel(Blue, Green, Red);
+            return new Pixel(this.GetHashCode());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -191,9 +216,18 @@ namespace DjvuNet.Graphics
         /// </param>
         public virtual void SetBGR(int blue, int green, int red)
         {
-            Blue = (sbyte)blue;
-            Red = (sbyte)red;
-            Green = (sbyte)green;
+            _Blue = (sbyte)blue;
+            _Red = (sbyte)red;
+            _Green = (sbyte)green;
+        }
+
+        public unsafe virtual void SetBGR(int color)
+        {
+            sbyte* colorPtr = (sbyte*)&color;
+            colorPtr++;
+            _Blue = *colorPtr; colorPtr++;
+            _Green = *colorPtr; colorPtr++;
+            _Red = *colorPtr;
         }
 
         /// <summary> Test if two pixels are equal.
@@ -206,16 +240,16 @@ namespace DjvuNet.Graphics
         /// </returns>
         public override bool Equals(Object item)
         {
-            if (!(item is Pixel))
+            if (null != item)
             {
-                return false;
+                Pixel other = item as Pixel;
+                if (null != other)
+                    return _Color == other._Color;
+                else
+                    return false;
             }
-
-            Pixel other = (Pixel)item;
-
-            return (other.Blue == Blue) &&
-                   (other.Green == Green) &&
-                   (other.Red == Red);
+            else
+                return false;
         }
 
         /// <summary> Set the gray color.
@@ -225,9 +259,9 @@ namespace DjvuNet.Graphics
         /// </param>
         public void SetGray(sbyte gray)
         {
-            Blue = gray;
-            Red = gray;
-            Green = gray;
+            _Blue = gray;
+            _Red = gray;
+            _Green = gray;
         }
 
         /// <summary> Generates a hashCode equal to 0xffRRGGBB.
@@ -235,9 +269,10 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <returns> hashCode of 0xffRRGGBB
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return unchecked((int)0xff000000) | ((int)Red << 16) | ((int)Green << 8) | (int)Blue;
+            return _Color;
         }
 
         /// <summary>
@@ -248,9 +283,18 @@ namespace DjvuNet.Graphics
         /// </param>
         public void CopyFrom(Pixel pixel)
         {
-            Blue = pixel.Blue;
-            Red = pixel.Red;
-            Green = pixel.Green;
+            _Blue = pixel._Blue;
+            _Red = pixel._Red;
+            _Green = pixel._Green;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Pixel other)
+        {
+            if (other != null)
+                return _Color == other._Color;
+            else
+                return false;
         }
 
         #endregion Public Methods

@@ -288,19 +288,31 @@ namespace DjvuNet.Graphics
                         int idest = 1;
                         short[] deltas = interp[fy & FRACMASK];
 
-                        for (
-                          int edest = idest + bufw;
-                          idest < edest;
-                          upper.IncOffset(), lower.IncOffset())
+                        unsafe
                         {
-                            Pixel dest = lbuffer[idest++];
-                            int lower_r = lower.Red;
-                            int delta_r = deltas[(256 + upper.Red) - lower_r];
-                            int lower_g = lower.Green;
-                            int delta_g = deltas[(256 + upper.Green) - lower_g];
-                            int lower_b = lower.Blue;
-                            int delta_b = deltas[(256 + upper.Blue) - lower_b];
-                            dest.SetBGR(lower_b + delta_b, lower_g + delta_g, lower_r + delta_r);
+                            for (int edest = idest + bufw; idest < edest; upper.IncOffset(), lower.IncOffset())
+                            {
+                                Pixel dest = lbuffer[idest++];
+
+                                int color = 0;
+                                sbyte* colorPtr = (sbyte*)&color;
+                                // Skip alpha and set pointer to Blue
+                                colorPtr++;
+                                *colorPtr = lower.Blue;
+                                *colorPtr += (sbyte)deltas[(256 + upper.Blue) - *colorPtr];
+
+                                // Set pointer to Green
+                                colorPtr++;
+                                *colorPtr = lower.Green;
+                                *colorPtr += (sbyte)deltas[(256 + upper.Green) - *colorPtr];
+
+                                // Set pointer to Red
+                                colorPtr++;
+                                *colorPtr = lower.Red;
+                                *colorPtr += (sbyte)deltas[(256 + upper.Red) - *colorPtr];
+
+                                dest.SetBGR(*colorPtr);
+                            }
                         }
                     }
 
@@ -314,21 +326,36 @@ namespace DjvuNet.Graphics
                         PixelReference dest = output.CreateGPixelReference(y - targetRect.YMin, 0);
 
                         // Loop horizontally
-                        for (int x = targetRect.XMin; x < targetRect.XMax; x++)
+                        unsafe
                         {
-                            int n = hcoord[x];
-                            int lower = line + (n >> FRACBITS);
-                            Pixel lower0 = lbuffer[lower];
-                            Pixel lower1 = lbuffer[lower + 1];
-                            short[] deltas = interp[n & FRACMASK];
-                            int lower_r = lower0.Red;
-                            int delta_r = deltas[(256 + lower1.Red) - lower_r];
-                            int lower_g = lower0.Green;
-                            int delta_g = deltas[(256 + lower1.Green) - lower_g];
-                            int lower_b = lower0.Blue;
-                            int delta_b = deltas[(256 + lower1.Blue) - lower_b];
-                            dest.SetBGR(lower_b + delta_b, lower_g + delta_g, lower_r + delta_r);
-                            dest.IncOffset();
+                            for (int x = targetRect.XMin; x < targetRect.XMax; x++)
+                            {
+                                int n = hcoord[x];
+                                int lower = line + (n >> FRACBITS);
+                                Pixel lower0 = lbuffer[lower];
+                                Pixel lower1 = lbuffer[lower + 1];
+                                short[] deltas = interp[n & FRACMASK];
+
+                                int color = 0;
+                                sbyte* colorPtr = (sbyte*) &color;
+                                // Skip alpha and set pointer to Blue
+                                colorPtr++;
+                                *colorPtr = lower0.Blue;
+                                *colorPtr += (sbyte) deltas[(256 + lower1.Blue) - *colorPtr];
+
+                                // Set pointer to Green
+                                colorPtr++;
+                                *colorPtr = lower0.Green;
+                                *colorPtr += (sbyte) deltas[(256 + lower1.Green) - *colorPtr];
+
+                                // Set pointer to Red
+                                colorPtr++;
+                                *colorPtr = lower0.Red;
+                                *colorPtr += (sbyte) deltas[(256 + lower1.Red) - *colorPtr];
+
+                                dest.SetBGR(*colorPtr);
+                                dest.IncOffset();
+                            }
                         }
                     }
                 }

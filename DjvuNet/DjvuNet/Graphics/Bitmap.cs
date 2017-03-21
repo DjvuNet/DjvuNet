@@ -40,6 +40,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         private int Rows
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (value != ImageHeight)
@@ -48,7 +49,7 @@ namespace DjvuNet.Graphics
                     _maxRowOffset = RowOffset(ImageHeight);
                 }
             }
-
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return ImageHeight; }
         }
 
@@ -65,8 +66,9 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int Grays
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _grays; }
-
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (_grays != value)
@@ -91,8 +93,9 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int Border
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _border; }
-
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (_border != value)
@@ -104,45 +107,52 @@ namespace DjvuNet.Graphics
         }
 
         #endregion Border
-
-        public virtual Pixel[] Ramp
+        
+        public Pixel[] Ramp
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                Pixel[] retval = _rampData;
-                if (retval == null)
-                {
-                    int grays = this.Grays;
-                    retval = (Pixel[])RampRefArray[grays];
-
-                    if (retval == null)
-                    {
-                        retval = new Pixel[256];
-                        retval[0] = Pixel.WhitePixel;
-                        int color = 0xff0000;
-                        int gmax = (grays > 1) ? (grays - 1) : 1;
-                        int i = 1;
-                        if (gmax > 1)
-                        {
-                            int delta = color / gmax;
-                            do
-                            {
-                                color -= delta;
-                                sbyte c = (sbyte)(color >> 16);
-                                retval[i++] = new Pixel(c, c, c);
-                            } while (i < gmax);
-                        }
-                        while (i < retval.Length)
-                        {
-                            retval[i++] = Pixel.BlackPixel;
-                        }
-                        RampRefArray[grays] = retval;
-                    }
-                    _rampData = retval;
-                }
-
-                return retval;
+                if (_rampData != null)
+                    return _rampData;
+                else
+                    return RampNullGrays();
             }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Pixel[] RampNullGrays()
+        {
+            Pixel[] retval = (Pixel[])RampRefArray[Grays];
+            if (retval != null)
+                return _rampData = retval;
+            else 
+                return _rampData = RampNullRefArrayGreys(Grays);
+        }
+
+        private Pixel[] RampNullRefArrayGreys(int grays)
+        {
+            Pixel[] retval = new Pixel[256];
+            retval[0] = Pixel.WhitePixel;
+            int color = 0xff0000;
+            int gmax = (grays > 1) ? (grays - 1) : 1;
+            int i = 1;
+            if (gmax > 1)
+            {
+                int delta = color / gmax;
+                do
+                {
+                    color -= delta;
+                    sbyte c = (sbyte)(color >> 16);
+                    retval[i++] = new Pixel(c, c, c);
+                } while (i < gmax);
+            }
+
+            while (i < retval.Length)
+                retval[i++] = Pixel.BlackPixel;
+
+            RampRefArray[grays] = retval;
+            return retval;
         }
 
         #region BytesPerRow
@@ -154,8 +164,9 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int BytesPerRow
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _bytesPerRow; }
-
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             private set
             {
                 if (_bytesPerRow != value)
@@ -173,7 +184,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <param name="minimum">the minumum border needed
         /// </param>
-        public virtual int MinimumBorder
+        public int MinimumBorder
         {
             set
             {
@@ -185,8 +196,6 @@ namespace DjvuNet.Graphics
                         BytesPerRow = tmp.GetRowSize();
                         Data = tmp.Data;
                         tmp.Data = null;
-
-                        GC.Collect();
                     }
 
                     _border = value;
@@ -198,25 +207,12 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        //static Bitmap()
-        //{
-        //    {
-        //        for (int i = 0; i < RampRefArray.Length; )
-        //        {
-        //            RampRefArray[i++] = null;
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// Creates a new Bitmap object.
         /// </summary>
         public Bitmap()
             : base(1, 0, 0, 0, true)
         {
-            for (int i = 0; i < RampRefArray.Length;)
-                RampRefArray[i++] = null;
-
             IsRampNeeded = true;
         }
 
@@ -253,6 +249,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> true if zero
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetBooleanAt(int offset)
         {
             return (offset < Border) || (offset >= _maxRowOffset) || (Data[offset] == 0);
@@ -265,6 +262,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="value">gray scale value to set
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetByteAt(int offset, int value)
         {
             if ((offset >= Border) || (offset < _maxRowOffset))
@@ -281,6 +279,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the gray scale value
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe int GetByteAt(int offset)
         {
             fixed (sbyte* dataLocation = Data)
@@ -304,15 +303,13 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> true if the blit intersected this bitmap
         /// </returns>
-        public virtual bool Blit(Bitmap bm, int xh, int yh, int subsample)
+        public bool Blit(Bitmap bm, int xh, int yh, int subsample)
         {
             int pidx = 0;
             int qidx = 0;
 
             if (subsample == 1)
-            {
                 return InsertMap(bm, xh, yh, true);
-            }
 
             if ((xh >= (ImageWidth * subsample)) || (yh >= (ImageHeight * subsample)) || ((xh + bm.ImageWidth) < 0) ||
                 ((yh + bm.ImageHeight) < 0))
@@ -355,9 +352,7 @@ namespace DjvuNet.Graphics
                         for (int sc = 0; sc < bm.ImageWidth; sc++)
                         {
                             if ((dc >= 0) && (dc < ImageWidth))
-                            {
                                 Data[pidx + dc] = (sbyte)(Data[pidx + dc] + bm.Data[qidx + sc]);
-                            }
 
                             if (++dc1 >= subsample)
                             {
@@ -387,7 +382,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the offset to the pixel data
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public override int RowOffset(int row)
         {
             return (row * BytesPerRow) + Border;
@@ -398,7 +393,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <returns> bytes per row
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public override int GetRowSize()
         {
             return BytesPerRow;
@@ -409,7 +404,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <param name="value">gray scale value to assign to all pixels
         /// </param>
-        public virtual void Fill(short value_Renamed)
+        public void Fill(short value_Renamed)
         {
             int idx = 0;
 
@@ -419,9 +414,7 @@ namespace DjvuNet.Graphics
                 idx = RowOffset(y);
 
                 for (int x = 0; x < ImageWidth; x++)
-                {
                     Data[idx + x] = v;
-                }
             }
         }
 
@@ -434,14 +427,14 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="dy">vertical position to insert at
         /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public override void Fill(Map ref_Renamed, int dx, int dy)
         {
             InsertMap((Bitmap)ref_Renamed, dx, dy, false);
         }
 
-        /// <summary> Insert the reference map at the specified location.
-        ///
+        /// <summary> 
+        /// Insert the reference map at the specified location.
         /// </summary>
         /// <param name="bit">map to insert
         /// </param>
@@ -449,12 +442,12 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="dy">vertical position to insert at
         /// </param>
-        /// <param name="doBlit">true if the gray scale values should be added
-        ///
+        /// <param name="doBlit">
+        /// true if the gray scale values should be added
         /// </param>
         /// <returns> true if pixels are inserted
         /// </returns>
-        public unsafe virtual bool InsertMap(Bitmap bit, int dx, int dy, bool doBlit)
+        public unsafe bool InsertMap(Bitmap bit, int dx, int dy, bool doBlit)
         {
             int x0 = (dx > 0) ? dx : 0;
             int y0 = (dy > 0) ? dy : 0;
@@ -534,19 +527,20 @@ namespace DjvuNet.Graphics
         /// <returns> the initialized image map
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual Bitmap Init(int arows, int acolumns, int aborder)
+        public Bitmap Init(int arows, int acolumns, int aborder)
         {
             Data = null;
             Grays = 2;
             Rows = arows;
             ImageWidth = acolumns;
             Border = aborder;
-            BytesPerRow = (ImageWidth + Border);
+            BytesPerRow = (ImageWidth + Border);   
+            // TODO: Verify if value of Bitmap.Border is double sided or single sided?
 
             int npixels = RowOffset(ImageHeight);
 
             if (npixels > 0)
-            {
+            { 
                 Data = new sbyte[npixels];
 
                 //for (int i = 0; i < npixels; i++)
@@ -556,19 +550,6 @@ namespace DjvuNet.Graphics
             }
 
             return this;
-        }
-
-        /// <summary> Initialize this map by copying a reference map
-        ///
-        /// </summary>
-        /// <param name="ref">map to copy
-        ///
-        /// </param>
-        /// <returns> the initialized map
-        /// </returns>
-        public Bitmap Init(Bitmap ref_Renamed)
-        {
-            return Init(ref_Renamed, 0);
         }
 
         /// <summary>
@@ -581,7 +562,8 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the initialized map
         /// </returns>
-        public virtual Bitmap Init(Bitmap ref_Renamed, int aborder)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Bitmap Init(Bitmap ref_Renamed, int aborder = 0)
         {
             if (this != ref_Renamed)
             {
@@ -591,15 +573,11 @@ namespace DjvuNet.Graphics
                 for (int i = 0; i < ImageHeight; i++)
                 {
                     for (int j = ImageWidth, k = RowOffset(i), kr = ref_Renamed.RowOffset(i); j-- > 0; )
-                    {
                         Data[k++] = ref_Renamed.Data[kr++];
-                    }
                 }
             }
             else if (aborder > Border)
-            {
                 MinimumBorder = aborder;
-            }
 
             return this;
         }
@@ -616,7 +594,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the initialized map
         /// </returns>
-        public virtual Bitmap Init(Bitmap ref_Renamed, Rectangle rect, int border)
+        public Bitmap Init(Bitmap ref_Renamed, Rectangle rect, int border)
         {
             if (this == ref_Renamed)
             {
@@ -685,7 +663,6 @@ namespace DjvuNet.Graphics
             }
 
             retval.Fill(this, -dx, -dy);
-
             return retval;
         }
 
@@ -718,14 +695,10 @@ namespace DjvuNet.Graphics
                     int pe = p + (s * h);
 
                     while ((p < pe) && GetBooleanAt(p))
-                    {
                         p += s;
-                    }
 
                     if (p < pe)
-                    {
                         break;
-                    }
                 }
 
                 for (ymax = h - 1; ymax >= 0; ymax--)
@@ -734,14 +707,10 @@ namespace DjvuNet.Graphics
                     int pe = p + w;
 
                     while ((p < pe) && GetBooleanAt(p))
-                    {
                         ++p;
-                    }
 
                     if (p < pe)
-                    {
                         break;
-                    }
                 }
 
                 for (xmin = 0; xmin <= xmax; xmin++)
@@ -750,14 +719,10 @@ namespace DjvuNet.Graphics
                     int pe = p + (s * h);
 
                     while ((p < pe) && GetBooleanAt(p))
-                    {
                         p += s;
-                    }
 
                     if (p < pe)
-                    {
                         break;
-                    }
                 }
 
                 for (ymin = 0; ymin <= ymax; ymin++)

@@ -161,6 +161,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the translated image
         /// </returns>
+        // TODO virtual methods are not inlined - find some other optimizations
         public abstract Map Translate(int dx, int dy, Map retval);
 
         /// <summary> Query the start offset of a row.
@@ -171,7 +172,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the offset to the pixel data
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public virtual int RowOffset(int row)
         {
             return row * GetRowSize();
@@ -182,7 +183,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <returns> the getRowSize
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public virtual int GetRowSize()
         {
             return ImageWidth;
@@ -197,7 +198,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the newly created PixelReference
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public virtual PixelReference CreateGPixelReference(int offset)
         {
             return new PixelReference(this, offset);
@@ -214,7 +215,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the newly created PixelReference
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public virtual PixelReference CreateGPixelReference(int row, int column)
         {
             return new PixelReference(this, row, column);
@@ -226,7 +227,7 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// the converted pixel
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO virtual methods are not inlined - find some other optimizations
         public virtual Pixel PixelRamp(PixelReference pixel)
         {
             return pixel;

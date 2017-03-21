@@ -192,12 +192,20 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="red">pixel value
         /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override void SetBGR(int blue, int green, int red)
         {
             _parent.Data[_offset + _blueOffset] = (sbyte)blue;
             _parent.Data[_offset + _greenOffset] = (sbyte)green;
             _parent.Data[_offset + _redOffset] = (sbyte)red;
+        }
+
+        public unsafe override void SetBGR(int color)
+        {
+            sbyte* colorPtr = (sbyte*) &color;
+            colorPtr++;
+            _parent.Data[_offset + _blueOffset] = *colorPtr; colorPtr++;
+            _parent.Data[_offset + _greenOffset] = *colorPtr; colorPtr++;
+            _parent.Data[_offset + _redOffset] = *colorPtr;
         }
 
         /// <summary> Create a duplicate of this PixelReference.
