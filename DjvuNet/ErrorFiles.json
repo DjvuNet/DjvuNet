@@ -1,0 +1,12 @@
+{
+    "Test-Files-With-Errors": {
+        "File": "testE003.djvu",
+        "Errors": [
+            {
+                "Position": 4,
+                "Expected": "FORM",
+                "Actual": "\"OR#"
+            }
+        ]
+    }
+}

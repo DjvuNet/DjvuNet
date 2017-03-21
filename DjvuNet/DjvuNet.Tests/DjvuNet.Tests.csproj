@@ -122,6 +122,9 @@
     <None Include="packages.config" />
     <None Include="Snk.snk" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="PublicKey.txt" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
