@@ -12,6 +12,13 @@
 3. Problem with concurrent programming model - multiple locks used for blocking access to assets - access contention is warranted
 	a) images in DjvuPage
 
-4. Inefficient implementation of set accessors for Properties 
+4. Inefficient implementation of set accessors for Properties in many different classes
 
-5. 
+5. Inefficient implementation of Pixle and PixelReference - due to usage it had huge impact on performance
+
+6. Parsing bugs for some chunks
+
+7. DjvuReader bugs in reading Big Endian integers
+
+8. Implementation of graphics and parsing based mainly on signed int while reference implementation uses unsigned int (specification states INT32 but in comments it is explained that unsigned int was used)
+
