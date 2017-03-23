@@ -139,15 +139,12 @@ namespace DjvuNet.Compression
         /// <returns></returns>
         public override int Read(byte[] buffer, int offset, int sz)
         {
-            if (eof)
-            {
-                return 0;
-            }
-
-            // Loop
             int copied = 0;
 
-            while ((sz > 0) && !eof)
+            if (eof)
+                return copied;
+
+            while (sz > 0 && !eof)
             {
                 // Decoder if needed
                 if (size == 0)
@@ -232,14 +229,10 @@ namespace DjvuNet.Compression
             size = DecodeRaw(24);
 
             if (size == 0)
-            {
                 return 0;
-            }
 
-            if (size > (MAXBLOCK * 1024))
-            {
+            if (size > MAXBLOCK * 1024)
                 throw new System.IO.IOException("ByteStream.corrupt");
-            }
 
             // Allocate
             if (blocksize < size)
@@ -248,9 +241,7 @@ namespace DjvuNet.Compression
                 data = new byte[blocksize];
             }
             else if (data == null)
-            {
                 data = new byte[blocksize];
-            }
 
             // Decoder Estimation Speed
             int fshift = 0;
@@ -260,20 +251,13 @@ namespace DjvuNet.Compression
                 fshift++;
 
                 if (zp.Decoder() != 0)
-                {
                     fshift++;
-                }
             }
 
             // Prepare Quasi MTF
             byte[] mtf = (byte[])MTF.Clone();
 
             int[] freq = new int[FREQMAX];
-
-            //for (int i = 0; i < FREQMAX; freq[i++] = 0)
-            //{
-            //    ;
-            //}
 
             int fadd = 4;
 
@@ -286,9 +270,7 @@ namespace DjvuNet.Compression
                 int ctxid = CTXIDS - 1;
 
                 if (ctxid > mtfno)
-                {
                     ctxid = mtfno;
-                }
 
                 int ctxoff = 0;
 
@@ -405,23 +387,17 @@ namespace DjvuNet.Compression
                     freq[3] >>= 24;
 
                     for (k = 4; k < freq.Length; k++)
-                    {
                         freq[k] >>= 24;
-                    }
                 }
 
                 // Relocate new char according to new freq
                 int fc = fadd;
 
                 if (mtfno < FREQMAX)
-                {
                     fc += freq[mtfno];
-                }
 
                 for (k = mtfno; k >= FREQMAX; k--)
-                {
                     mtf[k] = mtf[k - 1];
-                }
 
                 for (; (k > 0) && ((unchecked((int)0xffffffffL) & fc) >= (unchecked((int)0xffffffffL) & freq[k - 1])); k--)
                 {
@@ -436,25 +412,13 @@ namespace DjvuNet.Compression
             /////////////////////////////////
             ////////// Reconstruct the string
             if ((markerpos < 1) || (markerpos >= size))
-            {
                 throw new System.IO.IOException("ByteStream.corrupt");
-            }
 
             // Allocate pointers
             int[] pos = new int[size];
 
-            //for (int j = 0; j < size; pos[j++] = 0)
-            //{
-            //    ;
-            //}
-
             // Prepare count buffer
             int[] count = new int[256];
-
-            //for (int i = 0; i < 256; count[i++] = 0)
-            //{
-            //    ;
-            //}
 
             // Fill count buffer
             for (int i = 0; i < markerpos; i++)
@@ -495,9 +459,7 @@ namespace DjvuNet.Compression
 
             // Free and check
             if (j2 != markerpos)
-            {
                 throw new System.IO.IOException("ByteStream.corrupt");
-            }
 
             return size;
         }

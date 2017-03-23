@@ -22,7 +22,7 @@ namespace DjvuNet.Graphics.Tests
                 var page1 = document1.FirstPage;
                 var page2 = document2.FirstPage;
 
-                Rectangle rect1 = new Rectangle(2000, 2000, 2000, 2000);
+                Rectangle rect1 = new Rectangle(0, 0, page1.Width, page1.Height);
                 Rectangle rect2 = new Rectangle(500, 500, 500, 500);
 
                 PixelMap map = new PixelMap();
@@ -43,7 +43,7 @@ namespace DjvuNet.Graphics.Tests
 
                 result1.Attenuate(bitmap, 0, 0);
 
-                result1.Blit(bitmap, 0, 0, new Pixel(0, 0, 0));
+                result1.Blit(bitmap, 0, 0, Pixel.WhitePixel);
 
                 result1.Stencil(bitmap, result1, 1, 1, rect2, 1.0);
 

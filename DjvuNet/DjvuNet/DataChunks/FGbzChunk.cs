@@ -82,6 +82,10 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
+        public FGbzChunk() : base()
+        {
+        }
+
         public FGbzChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)

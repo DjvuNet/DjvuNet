@@ -361,6 +361,7 @@ namespace DjvuNet
             {
                 if (_foregroundPalette == null)
                 {
+                    DjvmChunk root = Document.RootForm as DjvmChunk;
                     // TODO - verify if tests or this code is failing to handle palette correctly
                     FGbzChunk result = (FGbzChunk)PageForm.Children
                         .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.FGbz);
@@ -555,6 +556,11 @@ namespace DjvuNet
             IncludedItems = includedItems;
             PageForm = form;
             PropertyChanged += DjvuPage_PropertyChanged;
+
+            if (Info == null)
+                throw new DjvuFormatException(
+                    $"Page {PageNumber} from document {Document.Name} does not have associated Info chunk." + 
+                    "Page is invalid and can not be displayed");
         }
 
         private void DjvuPage_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -651,9 +657,7 @@ namespace DjvuNet
                 }
 
                 if (item.Parent == currentParent)
-                {
                     text.Append(item.Text + " ");
-                }
             }
 
             return text.ToString().Trim();
@@ -682,9 +686,17 @@ namespace DjvuNet
         /// <returns></returns>
         public static System.Drawing.Bitmap ResizeImage(System.Drawing.Bitmap srcImage, int newWidth, int newHeight)
         {
+            if (srcImage == null)
+                throw new ArgumentNullException(nameof(srcImage));
+
             // Check if the image needs resizing
             if (srcImage.Width == newWidth && srcImage.Height == newHeight)
                 return srcImage;
+
+            if (newWidth <= 0 || newHeight <= 0)
+                throw new ArgumentException(
+                    $"Invalid new image dimensions with: {newWidth}, height: {newHeight}", 
+                    nameof(newWidth) + " " + nameof(newHeight));
 
             // Resize the image
             System.Drawing.Bitmap newImage = new System.Drawing.Bitmap(newWidth, newHeight);
@@ -743,14 +755,12 @@ namespace DjvuNet
         {
             Verify.SubsampleRange(subsample);
 
-            GPixmap pm = null;
+            GPixmap pMap = null;
             int width = Width;
             int height = Height;
 
             if (width <= 0 || height <= 0)
-            {
                 return null;
-            }
 
             double gamma_correction = 1.0D;
 
@@ -772,36 +782,32 @@ namespace DjvuNet
 
             if (bgIWPixmap != null)
             {
-                int w = bgIWPixmap.Width;
-                int h = bgIWPixmap.Height;
+                int iwWidth = bgIWPixmap.Width;
+                int iwHeight = bgIWPixmap.Height;
 
-                if ((w == 0) || (h == 0) || (width == 0) || (height == 0))
-                {
+                if (iwWidth == 0 || iwHeight == 0 || width == 0 || height == 0)
                     return null;
-                }
 
-                int red = ComputeRed(width, height, w, h);
+                int red = ComputeRed(width, height, iwWidth, iwHeight);
 
-                if ((red < 1) || (red > 12))
-                {
+                if (red < 1 || red > 12)
                     return null;
-                }
 
                 if (subsample == red)
                 {
-                    pm = bgIWPixmap.GetPixmap(1, rect, retval);
+                    pMap = bgIWPixmap.GetPixmap(1, rect, retval);
                 }
                 else if (subsample == (2 * red))
                 {
-                    pm = bgIWPixmap.GetPixmap(2, rect, retval);
+                    pMap = bgIWPixmap.GetPixmap(2, rect, retval);
                 }
                 else if (subsample == (4 * red))
                 {
-                    pm = bgIWPixmap.GetPixmap(4, rect, retval);
+                    pMap = bgIWPixmap.GetPixmap(4, rect, retval);
                 }
                 else if (subsample == (8 * red))
                 {
-                    pm = bgIWPixmap.GetPixmap(8, rect, retval);
+                    pMap = bgIWPixmap.GetPixmap(8, rect, retval);
                 }
                 else if ((red * 4) == (subsample * 3))
                 {
@@ -812,69 +818,57 @@ namespace DjvuNet
                     xrect.Top = (int)Math.Ceiling((double)rect.Top * 4D / 3D);
 
                     GRect nrect = new GRect(0, 0, rect.Width, rect.Height);
-                    if (xrect.Left > w)
-                    {
-                        xrect.Left = w;
-                    }
 
-                    if (xrect.Top > h)
-                    {
-                        xrect.Top = h;
-                    }
+                    if (xrect.Left > iwWidth)
+                        xrect.Left = iwWidth;
 
-                    GPixmap ipm = bgIWPixmap.GetPixmap(1, xrect, null);
-                    pm = (retval != null)
-                             ? retval
-                             : new GPixmap();
-                    pm.Downsample43(ipm, nrect);
+                    if (xrect.Top > iwHeight)
+                        xrect.Top = iwHeight;
+
+                    GPixmap iwPMap = bgIWPixmap.GetPixmap(1, xrect, null);
+                    pMap = (retval != null) ? retval : new GPixmap();
+                    pMap.Downsample43(iwPMap, nrect);
                 }
                 else
                 {
                     int po2 = 16;
 
-                    while ((po2 > 1) && (subsample < (po2 * red)))
-                    {
+                    while (po2 > 1 && subsample < po2 * red)
                         po2 >>= 1;
-                    }
 
-                    int inw = ((w + po2) - 1) / po2;
-                    int inh = ((h + po2) - 1) / po2;
+                    int inw = ((iwWidth + po2) - 1) / po2;
+                    int inh = ((iwHeight + po2) - 1) / po2;
                     int outw = ((width + subsample) - 1) / subsample;
                     int outh = ((height + subsample) - 1) / subsample;
-                    PixelMapScaler ps = new PixelMapScaler(inw, inh, outw, outh);
-                    ps.SetHorzRatio(red * po2, subsample);
-                    ps.SetVertRatio(red * po2, subsample);
+                    PixelMapScaler mapScaler = new PixelMapScaler(inw, inh, outw, outh);
 
-                    GRect xrect = ps.GetRequiredRect(rect);
-                    GPixmap ipm = bgIWPixmap.GetPixmap(po2, xrect, null);
-                    pm = (retval != null)
-                             ? retval
-                             : new GPixmap();
-                    ps.Scale(xrect, ipm, rect, pm);
+                    mapScaler.SetHorzRatio(red * po2, subsample);
+                    mapScaler.SetVertRatio(red * po2, subsample);
+
+                    GRect xrect = mapScaler.GetRequiredRect(rect);
+                    GPixmap iwPMap = bgIWPixmap.GetPixmap(po2, xrect, null);
+                    pMap = (retval != null) ? retval : new GPixmap();
+
+                    mapScaler.Scale(xrect, iwPMap, rect, pMap);
                 }
 
-                if ((pm != null) && (gamma_correction != 1.0D))
+                if (pMap != null && gamma_correction != 1.0D)
                 {
-                    pm.ApplyGammaCorrection(gamma_correction);
+                    pMap.ApplyGammaCorrection(gamma_correction);
 
                     for (int i = 0; i < 9; i++)
-                    {
-                        pm.ApplyGammaCorrection(gamma_correction);
-                    }
+                        pMap.ApplyGammaCorrection(gamma_correction);
                 }
 
-                return pm;
+                return pMap;
             }
             else
-            {
                 return null;
-            }
         }
 
         public Graphics.Bitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, Bitmap retVal)
         {
             Verify.SubsampleRange(subsample);
-
             return GetBitmap(rect, subsample, align, null);
         }
 
@@ -883,11 +877,7 @@ namespace DjvuNet
             Verify.SubsampleRange(subsample);
 
             if (rect.Empty)
-            {
-                return (retval == null)
-                ? (new PixelMap())
-                : retval.Init(0, 0, null);
-            }
+                return (retval == null) ? (new PixelMap()) : retval.Init(0, 0, null);
 
             GPixmap bg = GetBgPixmap(rect, subsample, gamma, retval);
             if (ForegroundJB2Image != null)
@@ -895,19 +885,13 @@ namespace DjvuNet
                 if (bg == null)
                 {
                     bg = (retval == null) ? new PixelMap() : retval;
-                    bg.Init(
-                     rect.Height,
-                     rect.Width, GPixel.WhitePixel);
+                    bg.Init(rect.Height, rect.Width, GPixel.WhitePixel);
                 }
                 if (Stencil(bg, rect, subsample, gamma))
-                {
                     retval = bg;
-                }
             }
             else
-            {
                 retval = bg;
-            }
 
             return retval;
         }
@@ -915,12 +899,12 @@ namespace DjvuNet
         /// <summary>
         /// Gets a complete image for the page
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// <see cref="System.Drawing.Bitmap"/>Bitmap page image.
+        /// </returns>
         public System.Drawing.Bitmap BuildPageImage()
         {
             int subsample = 1;
-            if ( Info == null)
-                return null;
             
             int width = Width / subsample;
             int height = Height / subsample;
@@ -928,7 +912,7 @@ namespace DjvuNet
             var map = GetMap(new GRect(0, 0, width, height), subsample, null);
 
             if (map == null)
-                return new Bitmap(Width, Height);
+                return new Bitmap(width, height);
 
             int[] pixels = new int[width * height];            
 
@@ -936,9 +920,7 @@ namespace DjvuNet
             var image = ConvertDataToImage(pixels);
 
             if (IsInverted == true)
-            {
                 image = InvertImage(image);
-            }
 
             return image;
         }
@@ -946,9 +928,15 @@ namespace DjvuNet
         /// <summary>
         /// Gets the image for the page
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// <see cref="System.Drawing.Bitmap"/>Bitmap image. 
+        /// </returns>
         public unsafe System.Drawing.Bitmap BuildImage(int subsample = 1)
         {
+            ///
+            /// TODO Fix image components size mismatches.
+            ///
+
             Verify.SubsampleRange(subsample);
 
             lock (_loadingLock)
@@ -1048,7 +1036,6 @@ namespace DjvuNet
         public GBitmap GetBitmap(GRect rect, int subsample, int align, GBitmap retval)
         {
             Verify.SubsampleRange(subsample);
-
             return GetBitmapList(rect, 1, 1, null);
         }
 
@@ -1059,23 +1046,13 @@ namespace DjvuNet
             if (rect.Empty)
                 return new Graphics.Bitmap();
 
-            if (Info != null)
-            {
-                int width = Width;
-                int height = Height;
+            int width = Width;
+            int height = Height;
 
-                JB2Image fgJb2 = ForegroundJB2Image;
+            JB2Image fgJb2 = ForegroundJB2Image;
 
-                if (
-                  (width != 0)
-                  && (height != 0)
-                  && (fgJb2 != null)
-                  && (fgJb2.Width == width)
-                  && (fgJb2.Height == height))
-                {
-                    return fgJb2.GetBitmap(rect, subsample, align, 0, components);
-                }
-            }
+            if (width != 0 && height != 0 && fgJb2 != null && fgJb2.Width == width && fgJb2.Height == height)
+                return fgJb2.GetBitmap(rect, subsample, align, 0, components);
 
             return null;
         }
@@ -1122,10 +1099,7 @@ namespace DjvuNet
         /// <returns></returns>
         internal unsafe System.Drawing.Bitmap ConvertDataToImage(int[] pixels)
         {
-            if (Info == null)
-                return null;
             // create a bitmap and manipulate it
-
             int width = Width;
             int height = Height;
 
@@ -1140,9 +1114,7 @@ namespace DjvuNet
                 var row = (int*)((byte*)bits.Scan0 + (y * bits.Stride));
 
                 for (int x = 0; x < width; x++)
-                {
                     row[x] = pixels[y * width + x];
-                }
             }
 
             bmp.UnlockBits(bits);
@@ -1152,18 +1124,15 @@ namespace DjvuNet
 
         internal bool IsLegalBilevel()
         {
-            if (Info == null)
-                return false;
-
             int width = Info.Width;
             int height = Info.Height;
 
-            if ((width <= 0) || (height <= 0))
+            if (width <= 0 || height <= 0)
                 return false;
 
             JB2Image fgJb2 = ForegroundJB2Image;
 
-            if ((fgJb2 == null) || (fgJb2.Width != width) || (fgJb2.Height != height))
+            if (fgJb2 == null || fgJb2.Width != width || fgJb2.Height != height)
                 return false;
 
             return !(BackgroundIWPixelMap != null || ForegroundIWPixelMap != null
@@ -1172,19 +1141,15 @@ namespace DjvuNet
 
         internal bool IsLegalCompound()
         {
-
-            if (Info == null)
-                return false;
-
             int width = Info.Width;
             int height = Info.Height;
 
-            if ((width <= 0) || (height <= 0))
+            if (width <= 0 || height <= 0)
                 return false;
 
             JB2Image fgJb2 = ForegroundJB2Image;
 
-            if ((fgJb2 == null) || (fgJb2.Width != width) || (fgJb2.Height != height))
+            if (fgJb2 == null || fgJb2.Width != width || fgJb2.Height != height)
                 return false;
 
             // There is no need to synchronize since we won't access data which could be updated.
@@ -1192,30 +1157,17 @@ namespace DjvuNet
             int bgred = 0;
 
             if (bgIWPixmap != null)
-            {
-                bgred =
-                  ComputeRed(
-                    width,
-                    height,
-                    bgIWPixmap.Width,
-                    bgIWPixmap.Height);
-            }
+                bgred = ComputeRed(width, height, bgIWPixmap.Width, bgIWPixmap.Height);
 
             if ((bgred < 1) || (bgred > 12))
-            {
                 return false;
-            }
 
             int fgred = 0;
 
             if (ForegroundIWPixelMap != null)
             {
                 GPixmap fgPixmap = ForegroundPixelMap;
-                fgred = ComputeRed(
-                    width,
-                    height,
-                    fgPixmap.ImageWidth,
-                    fgPixmap.ImageHeight);
+                fgred = ComputeRed( width, height, fgPixmap.ImageWidth, fgPixmap.ImageHeight);
             }
 
             return ((fgred >= 1) && (fgred <= 12));
@@ -1224,9 +1176,6 @@ namespace DjvuNet
         internal bool Stencil(PixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
         {
             Verify.SubsampleRange(subsample);
-
-            if (Info == null)
-                return false;
 
             int width = Info.Width;
             int height = Info.Height;
@@ -1261,7 +1210,7 @@ namespace DjvuNet
                     List<int> components = new List<int>();
                     GBitmap bm = GetBitmapList(rect, subsample, 1, components);
 
-                    if (fgJb2.Blits.Count != fgPalette.BlitColors.Length)
+                    if (fgJb2.Blits.Count != fgPalette.BlitColors?.Length)
                     {
                         pm.Attenuate(bm, 0, 0);
 
@@ -1542,10 +1491,13 @@ namespace DjvuNet
         {
             Verify.SubsampleRange(subsample);
 
+            int width = Info.Width;
+            int height = Info.Height;
+
             BG44Chunk[] backgrounds = PageForm.GetChildrenItems<BG44Chunk>();
 
-            if (backgrounds == null || backgrounds.Length == 0)
-                return CreateBlankImage(Brushes.White, Width, Height);
+            if ((backgrounds == null || backgrounds.Length == 0) && width > 0 && height > 0)
+                return CreateBlankImage(Brushes.White, width, height);
 
             // Get the composite background image
             Wavelet.IWPixelMap backgroundMap = null;
@@ -1568,7 +1520,15 @@ namespace DjvuNet
             }
 
             Bitmap result = backgroundMap.GetPixmap().ToImage();
-            return resizeImage == true ? ResizeImage(result, Width / subsample, Height / subsample) : result;
+
+            if (resizeImage)
+            {
+                int newWidth = width / subsample;
+                int newHeight = height / subsample;
+                return ResizeImage(result, newWidth, newHeight);
+            }
+            else
+                return result;
         }
 
         /// <summary>
@@ -1578,6 +1538,9 @@ namespace DjvuNet
         /// <returns></returns>
         internal System.Drawing.Bitmap CreateBlankImage(Brush imageColor, int width, int height)
         {
+            if (Info == null)
+                return null;
+
             System.Drawing.Bitmap newBackground = new System.Drawing.Bitmap(Width, Height);
 
             // Fill the whole image with white

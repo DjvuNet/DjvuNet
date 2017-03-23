@@ -126,6 +126,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public long Area
         {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return (long) (Left - Right) * (Top - Bottom); }
         }
 
@@ -161,11 +162,11 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        /// <summary> Creates a new Rectangle object.</summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        /// <summary> 
+        /// Creates a new Rectangle object.
+        /// </summary>
         public Rectangle()
         {
-            Right = Left = Bottom = Top = 0;
         }
 
         /// <summary> 
@@ -287,7 +288,6 @@ namespace DjvuNet.Graphics
             return false;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
             return (Right.GetHashCode() - Width.GetHashCode() + Bottom.GetHashCode() 
@@ -306,23 +306,13 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// true if not empty.
         /// </returns>
-        public virtual bool Inflate(int dx, int dy)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Inflate(int dx, int dy)
         {
             Right -= dx;
             Left += dx;
             Bottom -= dy;
             Top += dy;
-
-            if (!Empty)
-            {
-                return true;
-            }
-            else
-            {
-                Right = Bottom = Left = Top = 0;
-
-                return false;
-            }
         }
 
         /// <summary> 
@@ -338,21 +328,12 @@ namespace DjvuNet.Graphics
         /// true if the intersection is not empty
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual bool Intersect(Rectangle rect1, Rectangle rect2)
+        public void Intersect(Rectangle rect1, Rectangle rect2)
         {
             Right = Math.Max(rect1.Right, rect2.Right);
             Left = Math.Min(rect1.Left, rect2.Left);
             Bottom = Math.Max(rect1.Bottom, rect2.Bottom);
             Top = Math.Min(rect1.Top, rect2.Top);
-
-            if (Empty)
-            {
-                Right = Bottom = Left = Top = 0;
-
-                return false;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -367,7 +348,22 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// true if the results are non-empty
         /// </returns>
-        public virtual bool Recthull(Rectangle rect1, Rectangle rect2)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Recthull(Rectangle rect1, Rectangle rect2)
+        {
+            if (!rect1.Empty && !rect2.Empty)
+            {
+                Right = Math.Min(rect1.Right, rect2.Right);
+                Left = Math.Max(rect1.Left, rect2.Left);
+                Bottom = Math.Min(rect1.Bottom, rect2.Bottom);
+                Top = Math.Max(rect1.Top, rect2.Top);
+            }
+
+            ProcessEmptyRect(rect1, rect2);
+
+        }
+
+        private bool ProcessEmptyRect(Rectangle rect1, Rectangle rect2)
         {
             if (rect1.Empty)
             {
@@ -378,8 +374,7 @@ namespace DjvuNet.Graphics
 
                 return !Empty;
             }
-
-            if (rect2.Empty)
+            else if (rect2.Empty)
             {
                 Right = rect1.Right;
                 Left = rect1.Left;
@@ -388,40 +383,27 @@ namespace DjvuNet.Graphics
 
                 return !Empty;
             }
-            Right = Math.Min(rect1.Right, rect2.Right);
-            Left = Math.Max(rect1.Left, rect2.Left);
-            Bottom = Math.Min(rect1.Bottom, rect2.Bottom);
-            Top = Math.Max(rect1.Top, rect2.Top);
-            return true;
+
+            return false;
         }
 
         /// <summary> 
-        /// Shift this rectangle (linear translation)
+        /// Shift this rectangle (linear translation), if rectangle is empty linear
+        /// translation effectively is applied to a point on 2D plane.
         /// </summary>
         /// <param name="dx">
-        /// horizontal distance to shift
+        /// Horizontal translation distance dX.
         /// </param>
         /// <param name="dy">
-        /// vertical distance to shift
+        /// Vertical translation distance dY.
         /// </param>
-        /// <returns> 
-        /// true if not empty
-        /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual bool Translate(int dx, int dy)
+        public void Translate(int dx, int dy)
         {
-            if (!Empty)
-            {
-                Right += dx;
-                Left += dx;
-                Bottom += dy;
-                Top += dy;
-                return true;
-            }
-            throw new NotImplementedException(
-                "Implementation error - translate should move empty rectangle as a point on 2D plane");
-            Right = Bottom = Left = Top = 0;
-            return false;
+            Right += dx;
+            Left += dx;
+            Bottom += dy;
+            Top += dy;
         }
 
         /// <summary>

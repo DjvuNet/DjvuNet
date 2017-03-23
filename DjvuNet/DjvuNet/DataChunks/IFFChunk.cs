@@ -110,7 +110,8 @@ namespace DjvuNet.DataChunks
             // DJVM form is the only chunk type which is always in document root
             if (type == ChunkType.Djvm) return false;
 
-            return IsFormChunk(type) || type == ChunkType.Dirm || type == ChunkType.Navm;
+            return IsFormChunk(type) || type == ChunkType.Dirm || 
+                type == ChunkType.Navm;
         }
 
         #region Document
@@ -125,6 +126,11 @@ namespace DjvuNet.DataChunks
         #endregion Public Properties
 
         #region Constructors
+
+        /// <summary>
+        /// IFFChunk parameterless constructor mainly used for testing
+        /// </summary>
+        public IFFChunk() { }
 
         /// <summary>
         /// IFFChunk constructor

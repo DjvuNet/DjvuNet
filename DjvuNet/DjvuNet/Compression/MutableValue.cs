@@ -5,10 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
-using DjvuNet.Configuration;
 
 namespace DjvuNet.Compression
 {
@@ -16,6 +15,7 @@ namespace DjvuNet.Compression
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public class MutableValue<T> where T : IComparable<T>, IEquatable<T>
     {
         #region Public Properties
@@ -27,24 +27,10 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets or sets the value
         /// </summary>
-        public T Value
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get;
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set;
-        }
+        public T Value;
         //{
-        //    get { return _value; }
-
-        //    set
-        //    {
-        //        //if (_value.Equals(value) == false)
-        //        //{
-        //            _value = value;
-        //        //    Trace.WriteLineIf(DjvuSettings.LogLevel.TraceVerbose, $"Mutable value changing: {_value} to {value}");
-        //        //}
-        //    }
+        //    get;
+        //    set;
         //}
 
         #endregion Value
@@ -56,7 +42,6 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public MutableValue()
         {
-            // Nothing
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -69,7 +54,6 @@ namespace DjvuNet.Compression
 
         #region Public Methods
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
             return Value.ToString();

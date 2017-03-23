@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Enums;
 using DjvuNet.JB2;
 
@@ -103,13 +104,16 @@ namespace DjvuNet.DataChunks
 
                     if (includes != null && includes.Length > 0)
                     {
-                        // TODO - verify selection strategy which seems slow and not taking into account dictionary names 
                         string includeID = includes.FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Incl)?.IncludeID;
+                        DirmComponent component = null;
+                        DjvmChunk root = Document.RootForm as DjvmChunk;
+                        if (root != null)
+                             component = root.DirmData.Components.Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
+                       
+                        // TODO - verify selection strategy which seems slow and not taking into account dictionary names 
                         var includeForm = Document.GetRootFormChildren<DjviChunk>()
                             .Where(x => x.Children.FirstOrDefault<IFFChunk>(d => d.ChunkType == ChunkType.Djbz) != null)
                             .FirstOrDefault<DjviChunk>();
-
-                        DirmChunk dirm = Document.GetRootFormChildren<DirmChunk>().FirstOrDefault();
                         
                         var includeItem = includeForm.Children
                             .Where<IFFChunk>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;

@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Enums;
 
@@ -125,7 +126,7 @@ namespace DjvuNet.DataChunks
         /// <param name="count"></param>
         internal void ReadComponentData(DjvuReader reader, int count)
         {
-            List<DirmComponent> components = new List<DirmComponent>();
+            List<DirmComponent> components = new List<DirmComponent>(count);
 
             // Read the offsets for the components
             for (int x = 0; x < count; x++)
@@ -150,31 +151,34 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         /// <param name="count"></param>
         /// <param name="compressedSectionLength"></param>
-        internal void ReadCompressedData(DjvuReader reader, int count, int compressedSectionLength)
+        internal unsafe void ReadCompressedData(DjvuReader reader, int count, int compressedSectionLength)
         {
+            long prevPos = reader.Position;
+
             DjvuReader decompressor = reader.GetBZZEncodedReader(compressedSectionLength);
 
             // Read the component sizes
             for (int x = 0; x < count; x++)
-            {
                 _components[x].Size = decompressor.ReadInt24MSB();
-            }
 
             // Read the component flag information
             for (int x = 0; x < count; x++)
-            {
-                _components[x].DecodeFlags(decompressor.ReadSByte());
-            }
+                _components[x].DecodeFlags(decompressor.ReadByte());
 
             // Read the component strings
             for (int x = 0; x < count; x++)
             {
                 _components[x].ID = decompressor.ReadNullTerminatedString();
-                if (_components[x].HasName == true) _components[x].Name = decompressor.ReadNullTerminatedString();
-                if (_components[x].HasTitle == true) _components[x].Title = decompressor.ReadNullTerminatedString();
+                if (_components[x].HasName == true)
+                    _components[x].Name = decompressor.ReadNullTerminatedString();
+
+                if (_components[x].HasTitle == true)
+                    _components[x].Title = decompressor.ReadNullTerminatedString();
             }
 
             _isInitialized = true;
+
+            reader.Position = prevPos;
         }
 
         #endregion Private Methods

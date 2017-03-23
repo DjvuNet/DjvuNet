@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DjvuNet.Graphics;
 
 namespace DjvuNet.DataChunks.Graphics
@@ -51,6 +52,12 @@ namespace DjvuNet.DataChunks.Graphics
 
         public ColorPalette(DjvuReader reader, FGbzChunk parent)
         {
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+
+            if (parent == null)
+                throw new ArgumentNullException(nameof(parent));
+
             _parent = parent;
             ReadPaletteData(reader);
         }
@@ -80,7 +87,7 @@ namespace DjvuNet.DataChunks.Graphics
         /// Decodes the palette data
         /// </summary>
         /// <param name="reader"></param>
-        private void ReadPaletteData(DjvuReader reader)
+        internal void ReadPaletteData(DjvuReader reader)
         {
             sbyte header = reader.ReadSByte();
             bool isShapeTable = (header >> 7) == 1;
@@ -103,21 +110,23 @@ namespace DjvuNet.DataChunks.Graphics
             }
             PaletteColors = paletteColors.ToArray();
 
+            List<int> blitColors = new List<int>();
+
             if (isShapeTable == true)
             {
                 int totalBlits = (int) reader.ReadUInt24MSB();
-
                 DjvuReader compressed = reader.GetBZZEncodedReader();
 
                 // Read in the blit colors
-                List<int> blitColors = new List<int>();
                 for (int x = 0; x < totalBlits; x++)
                 {
                     int index = compressed.ReadInt16MSB();
                     blitColors.Add(index);
                 }
-                BlitColors = blitColors.ToArray();
             }
+
+            BlitColors = blitColors.ToArray();
+
         }
 
         #endregion Private Methods

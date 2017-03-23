@@ -117,21 +117,34 @@ namespace DjvuNet.DataChunks.Directory
         #region Public Methods
 
         /// <summary>
-        /// Decoder the flags for the sbyte
+        /// Decode component flags.
         /// </summary>
         /// <param name="flag"></param>
-        public void DecodeFlags(sbyte flag)
+        public void DecodeFlags(byte flag)
         {
-            // B[7]
-            HasName = (flag & 128) == 1;
-            HasTitle = (flag & 64) == 1;
+            HasName = (flag >> 7) == 1;
+            HasTitle = (flag & 0x80) == 1;
 
-            int remainder = flag & 3;
+            int test = flag & 0x03;
 
-            if (remainder == 0 || remainder == 3) IsIncluded = true;
-            else if (remainder == 1) IsPage = true;
-            else if (remainder == 2) IsThumbnail = true;
-            //else throw new FormatException("Invalid Dirm flag value");
+            switch(test)
+            {
+                case 0:
+                    IsIncluded = true;
+                    break;
+                case 1:
+                    IsPage = true;
+                    break;
+                case 2:
+                case 3:
+                    IsThumbnail = true;
+                    break;
+            }
+        }
+
+        public override string ToString()
+        {
+            return  $"{ID}";
         }
 
         #endregion Public Methods

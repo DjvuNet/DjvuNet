@@ -18,15 +18,15 @@ namespace DjvuNetTest
         {
             Repository repo = new Repository("..\\..\\..\\..\\");
             Commit cmt = repo.Commits.FirstOrDefault<Commit>();
-            int testsToSkip = 4;
-            int testsNumber = 21;
+            int testsToSkip = 0;
+            int testsNumber = 1;
 
             string[] docs = new string[]
             {
-               //"..\\..\\..\\artifacts\\test001.djvu",
-               //"..\\..\\..\\artifacts\\test003.djvu",
-               //"..\\..\\..\\artifacts\\test032.djvu"
-               "..\\..\\..\\artifacts\\test046.djvu"
+               "..\\..\\..\\artifacts\\test001.djvu",
+               "..\\..\\..\\artifacts\\test003.djvu",
+               "..\\..\\..\\artifacts\\test032.djvu",
+               "..\\..\\..\\artifacts\\test046.djvu",
             };
 
             long[] elapsed = new long[docs.Length * 3];
@@ -36,6 +36,10 @@ namespace DjvuNetTest
             Console.WriteLine($"Test Configuration:                                        ");
             Console.WriteLine($"Git Commit -          \t{cmt.Sha}");
             Console.WriteLine($"Test Documents -      \t{docs.Length}");
+            Console.WriteLine($"                                                           ");
+            for (int d = 0; d < docs.Length; d++)
+                Console.WriteLine($"Document\t\t{(d + 1)}\t{Path.GetFileName(docs[d])}");
+            Console.WriteLine($"                                                           ");
             Console.WriteLine($"Measured Tests -      \t{testsNumber}");
             Console.WriteLine($"Warm up Tests -       \t{testsToSkip}");
             Console.WriteLine($"                                                           ");
@@ -81,11 +85,11 @@ namespace DjvuNetTest
             {
                 watch.Stop();
                 Console.WriteLine($"Document {doc.Name} opened in\t{watch.ElapsedTicks:000 000 000 000}");
-                if (i > testsToSkip)
+                if (i + 1 > testsToSkip)
                     elapsed[docNo*3 + 0] += watch.ElapsedTicks;
 
                 string fileName = Path.GetFileNameWithoutExtension(doc.Location);
-                var page = doc.Pages[8];
+                var page = doc.Pages[0];
 
                 BenchmarkBuildPageImageCall(testsToSkip, elapsed, i, docNo, watch, fileName, page, 1);
 
@@ -102,10 +106,10 @@ namespace DjvuNetTest
             {
                 watch.Stop();
                 Console.WriteLine($"Image {docNo + 1} - {imageNo} generated in\t{watch.ElapsedTicks:000 000 000 000}");
-                if (i > testsToSkip)
+                if (i + 1 > testsToSkip)
                     elapsed[docNo*3 + imageNo] += watch.ElapsedTicks;
 
-                bmp.Save(fileName + $"_{imageNo}.png", ImageFormat.Png);
+                //bmp.Save(fileName + $"_{imageNo}.png", ImageFormat.Png);
             }
         }
     }
