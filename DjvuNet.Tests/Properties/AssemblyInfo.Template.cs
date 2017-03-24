@@ -7,8 +7,8 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyTitle("DjvuNet.Tests")]
 [assembly: AssemblyDescription("Main DjvuNet test harness build into DjvuNet.Tests assembly")]
-[assembly: AssemblyConfiguration("Debug")]
-[assembly: AssemblyPlatform("AnyCPU")]
+[assembly: AssemblyConfiguration("__LIBRARY_CONFIGURATION__")]
+[assembly: AssemblyPlatform("__LIBRARY_PLATFORM__")]
 [assembly: AssemblyCulture("")]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM

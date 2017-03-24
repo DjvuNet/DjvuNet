@@ -62,7 +62,6 @@ namespace DjvuNet
         public DjvuReader(Stream stream)
             : base(stream)
         {
-            // Nothing
         }
 
         public DjvuReader(string location)
@@ -374,7 +373,7 @@ namespace DjvuNet
 
         public override string ToString()
         {
-            return $"{base.ToString()} {{ Position {Position}, Length {this.BaseStream?.Length} }}";
+            return $"{base.ToString()} {{ Position {Position}, Length {this.BaseStream?.Length} BaseStream {BaseStream} }}";
         }
 
         #endregion Public Methods

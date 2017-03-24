@@ -25,6 +25,9 @@ bld/
 # Test related content
 artifacts/
 
+# Helper projects
+DjvuNet.Build/
+
 # External dependencies directory with repositories
 [Ee]xternal/
 
