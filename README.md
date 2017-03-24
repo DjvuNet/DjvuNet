@@ -1,7 +1,7 @@
 DjvuNet
 =======
 
-DjvuNet is a fully managed Djvu reader in C# and supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
+DjvuNet is a fully managed library written in C# for reading and analyzing Djvu documents. Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
 The so called "Secure DjVu" format is not supported as it's specification was never published. Project was started several years ago
 by [Telavian](https://github.com/Telavian) and after remaining inactive for some time currently is continued at new 
 [GitHub DjvuNet](https://github.com/DjvuNet) location. Current status can be described as a fast code review with 
@@ -13,13 +13,13 @@ Therefore, use it at your own risk and do not blame us for any of your problems.
 Project undergoes several architectural changes, which are done in "parser_archit" branch. Refactoring which should 
 be rather called rearchitecturing comprises IFF file parser, DjVu specific file format parsing, image data processing, 
 and some hot project code paths. Test framework which is systematically developed covers project in top down
-way. First test are developed to verify top level functions of the library (i.e. document parsing, decompression, 
+way. First test have been developed to verify top level functions of the library (i.e. document parsing, decompression, 
 image decoding, image generation) and only later as code review and refactoring goes lower unit tests are added 
-for lower level classes and functions with some notable exceptions. This should significantly improve code quality
+for lower level classes and functions. Some notable exceptions are the hottest code paths. This should significantly improve code quality
 in short and long term, as original project essentially did not have any test harness.
 
-Project is developed as part of larger effort to create scientific data analysis framework which first has to read 
-data which will be analyzed. 
+Project is developed as part of larger effort to create scientific data analysis framework. First step in data analysis
+is to get data and the second is to read data. 
 
 License
 =======
@@ -43,7 +43,7 @@ cd djvunet
 `````
 Build using MSBuild from command line
 `````
-msbuild /t:Rebuild /p:Configuration=Release djvunet\djvunet\djvunet.csproj
+msbuild /t:Rebuild /p:Configuration=Release djvunet\djvunet.csproj
 `````
 Available configurations: 
 `````
@@ -54,7 +54,13 @@ Available targets:
 Clean, Build, Rebuild   (/t:Clean)
 `````  
 
-To build with Visual Studio open DjvuNet.sln file located in DjvuNet\DjvuNet directory and build DjvuNet.csproj.
+To build with Visual Studio open DjvuNet.sln file located in root directory of DjvuNet cloned 
+repository and build DjvuNet.csproj. 
+
+Tests can be run by building and running tests from DjvuNet.Tests.dll assembly under Visual Studio 
+or xUnit test runner from command line or from Visual Studio using Test Explorer.
+
+Performance tests can be run with help of DjvuNetTest project.
 
 **Usage**
 `````c#
