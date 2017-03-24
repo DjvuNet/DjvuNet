@@ -24,7 +24,7 @@ is to get data and the second is to read data.
 License
 =======
 
-DjvuNet is licensed under MIT license.
+DjvuNet is licensed under [MIT license](https://opensource.org/licenses/mit-license.php).
 
 Building
 ========
@@ -33,11 +33,11 @@ Building
 
 Building from command line on Windows (tested on Windows 10 with Visual Studio 2015 installed).
 
-Open devloper command prompt and clone repository
+Open Visual Studio devloper command prompt and clone repository
 `````
 git clone https://github.com/DjvuNet/DjvuNet.git
 `````
-Change directory 
+Change directory to your repo
 `````
 cd djvunet
 `````
@@ -47,11 +47,15 @@ msbuild /t:Rebuild /p:Configuration=Release djvunet\djvunet.csproj
 `````
 Available configurations: 
 `````
-Debug, Release  (/p:Configuration=Debug)
+Debug, Release  (example - /p:Configuration=Debug, default value Debug)
+`````
+Available platforms:
+`````
+AnyCPU, x86, x64 (example /p:Platform=x64, default value AnyCPU)
 `````
 Available targets:
 `````
-Clean, Build, Rebuild   (/t:Clean)
+Clean, Build, Rebuild   (example /t:Clean, default value Build)
 `````  
 
 To build with Visual Studio open DjvuNet.sln file located in root directory of DjvuNet cloned 

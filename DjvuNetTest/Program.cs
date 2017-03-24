@@ -16,7 +16,7 @@ namespace DjvuNetTest
     {
         public static void Main(string[] args)
         {
-            Repository repo = new Repository("..\\..\\..\\..\\");
+            Repository repo = new Repository("..\\..\\..\\");
             Commit cmt = repo.Commits.FirstOrDefault<Commit>();
             int testsToSkip = 0;
             int testsNumber = 1;
