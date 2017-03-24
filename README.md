@@ -29,7 +29,7 @@ DjvuNet is licensed under MIT license.
 Building
 ========
 
-**Windows**
+#### Windows
 
 Building from command line on Windows (tested on Windows 10 with Visual Studio 2015 installed).
 
@@ -62,11 +62,33 @@ or xUnit test runner from command line or from Visual Studio using Test Explorer
 
 Performance tests can be run with help of DjvuNetTest project.
 
-**Usage**
+Usage
+=====
+
 `````c#
 using DjvuNet;
 
-using(DjvuDocument doc = new DjvuDocument(@"Mcguffey's_Primer.djvu"))
+using(DjvuDocument doc = new DjvuDocument())
+{
+    doc.Load("Document.djvu");
+    if (doc.Pages.Length > 0)
+    {
+        var firstPage = doc.Pages[0];
+        var lastPage = doc.Pages[doc.Pages.Length - 1];
+        
+        using(System.Drawing.Bitmap pageImage = page.BuildPageImage())
+            firstPage.Save("DocumentTestImage1.png", ImageFormat.Png);
+        
+        string firstPageText = firstPage.Text;
+        string lastPageText = lastPage.Text;
+    }
+}
+`````
+
+`````c#
+using DjvuNet;
+
+using(DjvuDocument doc = new DjvuDocument("Mcguffey's_Primer.djvu"))
 {
     var page = doc.Pages[0];
     using(System.Drawing.Bitmap pageImage = page.BuildPageImage())
