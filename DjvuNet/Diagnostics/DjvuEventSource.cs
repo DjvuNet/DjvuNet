@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WaveCode.Infrastructure.Diagnostics
+namespace DjvuNet.Diagnostics
 {
     [EventSource(Name = _Name, Guid = _Guid)]
     public partial class DjvuEventSource : EventSource

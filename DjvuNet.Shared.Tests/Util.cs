@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using Xunit;
 
 namespace DjvuNet.Tests
 {
-    public static class Util
+    public static partial class Util
     {
         public static void FailOnException(Exception ex, string message, params object[] data)
         {
@@ -38,5 +40,15 @@ namespace DjvuNet.Tests
             if (pageCount > 0)
                 Assert.Equal<int>(pageCount, document.Pages.Length);
         }
+
+        public static string GetArtifactsRoot()
+        {
+            char dirSep = Path.DirectorySeparatorChar;
+            string filePathTempl = $"artifacts{dirSep}test{{0}}.djvu";
+            string rootDir = Util.RepoRoot;
+            filePathTempl = Path.Combine(rootDir, filePathTempl);
+            return filePathTempl;
+        }
+
     }
 }
