@@ -22,6 +22,9 @@ bld/
 [Oo]bj/
 [Ll]og/
 
+# Test related content
+artifacts/
+
 # External dependencies directory with repositories
 [Ee]xternal/
 
@@ -46,7 +49,6 @@ dlldata.c
 # DNX
 project.lock.json
 project.fragment.lock.json
-artifacts/
 
 *_i.c
 *_p.c
@@ -92,6 +94,7 @@ ipch/
 *.vsp
 *.vspx
 *.sap
+*.diagsession
 
 # TFS 2012 Local Workspace
 $tf/

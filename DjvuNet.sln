@@ -1,0 +1,184 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet", "DjvuNet\DjvuNet.csproj", "{E681B178-E5F8-4782-89C8-F32720B1464A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNetTest", "DjvuNetTest\DjvuNetTest.csproj", "{192F4E63-6ED7-410F-A372-0B54C6CDF987}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Tests", "DjvuNet.Tests\DjvuNet.Tests.csproj", "{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}"
+	ProjectSection(SolutionItems) = preProject
+		artifacts\test001.djvu = artifacts\test001.djvu
+		artifacts\test002.djvu = artifacts\test002.djvu
+		artifacts\test003.djvu = artifacts\test003.djvu
+		artifacts\test004.djvu = artifacts\test004.djvu
+		artifacts\test005.djvu = artifacts\test005.djvu
+		artifacts\test006.djvu = artifacts\test006.djvu
+		artifacts\test007.djvu = artifacts\test007.djvu
+		artifacts\test008.djvu = artifacts\test008.djvu
+		artifacts\test009.djvu = artifacts\test009.djvu
+		artifacts\test010.djvu = artifacts\test010.djvu
+		artifacts\test011.djvu = artifacts\test011.djvu
+		artifacts\test012.djvu = artifacts\test012.djvu
+		artifacts\test013.djvu = artifacts\test013.djvu
+		artifacts\test014.djvu = artifacts\test014.djvu
+		artifacts\test015.djvu = artifacts\test015.djvu
+		artifacts\test016.djvu = artifacts\test016.djvu
+		artifacts\test017.djvu = artifacts\test017.djvu
+		artifacts\test018.djvu = artifacts\test018.djvu
+		artifacts\test019.djvu = artifacts\test019.djvu
+		artifacts\test020.djvu = artifacts\test020.djvu
+		artifacts\test021.djvu = artifacts\test021.djvu
+		artifacts\test022.djvu = artifacts\test022.djvu
+		artifacts\test023.djvu = artifacts\test023.djvu
+		artifacts\test024.djvu = artifacts\test024.djvu
+		artifacts\test025.djvu = artifacts\test025.djvu
+		artifacts\test026.djvu = artifacts\test026.djvu
+		artifacts\test027.djvu = artifacts\test027.djvu
+		artifacts\test028.djvu = artifacts\test028.djvu
+		artifacts\test029.djvu = artifacts\test029.djvu
+		artifacts\test030.djvu = artifacts\test030.djvu
+		artifacts\test031.djvu = artifacts\test031.djvu
+		artifacts\test032.djvu = artifacts\test032.djvu
+		artifacts\test033.djvu = artifacts\test033.djvu
+		artifacts\test034.djvu = artifacts\test034.djvu
+		artifacts\test035.djvu = artifacts\test035.djvu
+		artifacts\test036.djvu = artifacts\test036.djvu
+		artifacts\test037.djvu = artifacts\test037.djvu
+		artifacts\test038.djvu = artifacts\test038.djvu
+		artifacts\test039.djvu = artifacts\test039.djvu
+		artifacts\test040.djvu = artifacts\test040.djvu
+		artifacts\test041.djvu = artifacts\test041.djvu
+		artifacts\test042.djvu = artifacts\test042.djvu
+		artifacts\test043.djvu = artifacts\test043.djvu
+		artifacts\test044.djvu = artifacts\test044.djvu
+		artifacts\test045.djvu = artifacts\test045.djvu
+		artifacts\test046.djvu = artifacts\test046.djvu
+		artifacts\test047.djvu = artifacts\test047.djvu
+		artifacts\test048.djvu = artifacts\test048.djvu
+		artifacts\test049.djvu = artifacts\test049.djvu
+		artifacts\test050.djvu = artifacts\test050.djvu
+		artifacts\test051.djvu = artifacts\test051.djvu
+		artifacts\test052.djvu = artifacts\test052.djvu
+		artifacts\test053.djvu = artifacts\test053.djvu
+		artifacts\test054.djvu = artifacts\test054.djvu
+		artifacts\test055.djvu = artifacts\test055.djvu
+		artifacts\test056.djvu = artifacts\test056.djvu
+		artifacts\test057.djvu = artifacts\test057.djvu
+		artifacts\test058.djvu = artifacts\test058.djvu
+		artifacts\test059.djvu = artifacts\test059.djvu
+		artifacts\test060.djvu = artifacts\test060.djvu
+		artifacts\test061.djvu = artifacts\test061.djvu
+		artifacts\test062.djvu = artifacts\test062.djvu
+		artifacts\test063.djvu = artifacts\test063.djvu
+		artifacts\test064.djvu = artifacts\test064.djvu
+		artifacts\test065.djvu = artifacts\test065.djvu
+		artifacts\test066.djvu = artifacts\test066.djvu
+		artifacts\test067.djvu = artifacts\test067.djvu
+		artifacts\test068.djvu = artifacts\test068.djvu
+		artifacts\test069.djvu = artifacts\test069.djvu
+		artifacts\test070.djvu = artifacts\test070.djvu
+		artifacts\test071.djvu = artifacts\test071.djvu
+		artifacts\test072.djvu = artifacts\test072.djvu
+		artifacts\test073.djvu = artifacts\test073.djvu
+		artifacts\test074.djvu = artifacts\test074.djvu
+		artifacts\test075.djvu = artifacts\test075.djvu
+		artifacts\testE001.djvu = artifacts\testE001.djvu
+		artifacts\testE002.djvu = artifacts\testE002.djvu
+		artifacts\testE003.djvu = artifacts\testE003.djvu
+		artifacts\testE004.djvu = artifacts\testE004.djvu
+		artifacts\testE005.djvu = artifacts\testE005.djvu
+		artifacts\testE006.djvu = artifacts\testE006.djvu
+		artifacts\testE007.djvu = artifacts\testE007.djvu
+		artifacts\testE008.djvu = artifacts\testE008.djvu
+		artifacts\testE009.djvu = artifacts\testE009.djvu
+		artifacts\testE010.djvu = artifacts\testE010.djvu
+		artifacts\testE011.djvu = artifacts\testE011.djvu
+		artifacts\testE012.djvu = artifacts\testE012.djvu
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared.Tests", "DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.shproj", "{B7EF5575-5932-4EA7-B250-E7DA238D60A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Helper.Tests", "DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj", "{4FEC9875-D7E6-47BD-A13A-5C1944464545}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{508EA7BC-4576-4C24-877B-7D7EE4369DA0}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		..\LICENSE.md = ..\LICENSE.md
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{b7ef5575-5932-4ea7-b250-e7da238d60a9}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x64.ActiveCfg = Debug|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x64.Build.0 = Debug|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x86.Build.0 = Debug|Any CPU
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x64.ActiveCfg = Release|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x64.Build.0 = Release|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x86.ActiveCfg = Release|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x86.Build.0 = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x64.ActiveCfg = Debug|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x64.Build.0 = Debug|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x86.Build.0 = Debug|Any CPU
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|Any CPU.Build.0 = Release|Any CPU
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x64.ActiveCfg = Release|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x64.Build.0 = Release|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x86.ActiveCfg = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x86.Build.0 = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x64.ActiveCfg = Debug|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x64.Build.0 = Debug|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x86.Build.0 = Debug|Any CPU
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x64.ActiveCfg = Release|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x64.Build.0 = Release|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x86.ActiveCfg = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x86.Build.0 = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x64.ActiveCfg = Debug|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x64.Build.0 = Debug|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x86.ActiveCfg = Debug|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x86.Build.0 = Debug|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x64.ActiveCfg = Release|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x64.Build.0 = Release|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x86.ActiveCfg = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
