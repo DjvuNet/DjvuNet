@@ -76,7 +76,7 @@ using(DjvuDocument doc = new DjvuDocument())
         var firstPage = doc.Pages[0];
         var lastPage = doc.Pages[doc.Pages.Length - 1];
         
-        using(System.Drawing.Bitmap pageImage = page.BuildPageImage())
+        using(System.Drawing.Bitmap pageImage = firstPage.BuildPageImage())
             firstPage.Save("DocumentTestImage1.png", ImageFormat.Png);
         
         string firstPageText = firstPage.Text;
