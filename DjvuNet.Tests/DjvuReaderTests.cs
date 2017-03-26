@@ -85,19 +85,6 @@ namespace DjvuNet.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
-        public void GetBZZEncodedReaderTest001()
-        {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
-            using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
-            using (DjvuReader reader = new DjvuReader(memStream))
-            {
-                BzzReader bzzReader = reader.GetBZZEncodedReader();
-                Assert.NotNull(bzzReader);
-                Assert.IsType<BzzReader>(bzzReader);
-            }
-        }
-
         [Fact]
         public void ReadStringBytesTest001()
         {
@@ -144,10 +131,202 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented")]
-        public void CheckEncodingSignatureTest()
+        [Fact()]
+        public void CheckEncodingSignatureTest001()
         {
+            // Encoding Scheme Signature
+            // UTF-8                    EF BB BF
+            byte[] buffer = new byte[] { 0xEF, 0xBB, 0xBF, 0x42, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length;
+            int bomLength = 3;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Encoding result = DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength);
+                Assert.NotNull(result);
+                Assert.IsType<UTF8Encoding>(result);
 
+                byte[] bom = ((UTF8Encoding)result).GetPreamble();
+                Assert.NotNull(bom);
+                Assert.Equal<int>(0, bom.Length);
+
+                Assert.Equal<long>(buffer.Length - bomLength, stream.Position);
+                Assert.Equal<int>(buffer.Length - bomLength, bufferLength);
+            }
+
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest002()
+        {
+            // Encoding Scheme Signature
+            // UTF-16 Big-endian        FE FF
+            byte[] buffer = new byte[] { 0xFE, 0xFF, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length;
+            int bomLength = 2;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Encoding result = DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength);
+                Assert.NotNull(result);
+
+                var resultU = result as UnicodeEncoding;
+                Assert.NotNull(result);
+                Assert.True(resultU.EncodingName.Contains("Big-Endian"));
+
+                byte[] bom = resultU.GetPreamble();
+                Assert.NotNull(bom);
+                Assert.Equal<int>(0, bom.Length);
+
+                Assert.Equal<long>(buffer.Length - bomLength, stream.Position);
+                Assert.Equal<int>(buffer.Length - bomLength, bufferLength);
+            }
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest003()
+        {
+            // Encoding Scheme Signature
+            // UTF-16 Little-endian     FF FE
+            byte[] buffer = new byte[] { 0xFF, 0xFE, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length;
+            int bomLength = 2;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Encoding result = DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength);
+                Assert.NotNull(result);
+
+                var resultU = result as UnicodeEncoding;
+                Assert.NotNull(result);
+                Assert.False(resultU.EncodingName.Contains("Big-Endian"));
+
+                byte[] bom = resultU.GetPreamble();
+                Assert.NotNull(bom);
+                Assert.Equal<int>(0, bom.Length);
+
+                Assert.Equal<long>(buffer.Length - bomLength, stream.Position);
+                Assert.Equal<int>(buffer.Length - bomLength, bufferLength);
+            }
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest004()
+        {
+            // Encoding Scheme Signature
+            // UTF-32 Big-endian        00 00 FE FF
+            byte[] buffer = new byte[] { 0x00, 0x00, 0xFE, 0xFF, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length;
+            int bomLength = 4;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Encoding result = DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength);
+                Assert.NotNull(result);
+
+                var resultU = result as UTF32Encoding;
+                Assert.NotNull(result);
+                Assert.True(resultU.EncodingName.Contains("Big-Endian"));
+
+                byte[] bom = resultU.GetPreamble();
+                Assert.NotNull(bom);
+                Assert.Equal<int>(0, bom.Length);
+
+                Assert.Equal<long>(buffer.Length - bomLength, stream.Position);
+                Assert.Equal<int>(buffer.Length - bomLength, bufferLength);
+            }
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest005()
+        {
+            // Encoding Scheme Signature
+            // UTF-32 Little-endian     FF FE 00 00
+            byte[] buffer = new byte[] { 0xFF, 0xFE, 0x00, 0x00, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length;
+            int bomLength = 4;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Encoding result = DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength);
+                Assert.NotNull(result);
+
+                var resultU = result as UTF32Encoding;
+                Assert.NotNull(result);
+                Assert.False(resultU.EncodingName.Contains("Big-Endian"));
+
+                byte[] bom = resultU.GetPreamble();
+                Assert.NotNull(bom);
+                Assert.Equal<int>(0, bom.Length);
+
+                Assert.Equal<long>(buffer.Length - bomLength, stream.Position);
+                Assert.Equal<int>(buffer.Length - bomLength, bufferLength);
+            }
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest006()
+        {
+            // Encoding Scheme Signature
+            // UTF-32 Little-endian     FF FE 00 00
+            int bufferLength = 5;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Assert.Throws<ArgumentNullException>("buffer",
+                    () => DjvuReader.CheckEncodingSignature(null, stream, ref bufferLength));
+            }
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest007()
+        {
+            // Encoding Scheme Signature
+            // UTF-32 Little-endian     FF FE 00 00
+            byte[] buffer = new byte[] { 0xFF, 0xFE, 0x00, 0x00, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Assert.Throws<ArgumentNullException>("stream",
+                    () => DjvuReader.CheckEncodingSignature(buffer, null, ref bufferLength));
+            }
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest008()
+        {
+            // Encoding Scheme Signature
+            // UTF-32 Little-endian     FF FE 00 00
+            byte[] buffer = new byte[] { 0xFF, 0xFE, 0x00, 0x00, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = 3;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Assert.Throws<ArgumentOutOfRangeException>(
+                    () => DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength));
+            }
+        }
+
+        [Fact()]
+        public void CheckEncodingSignatureTest009()
+        {
+            // No Encoding Scheme Signature
+            byte[] buffer = new byte[] { 0x39, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Encoding result = DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength);
+                Assert.Null(result);
+
+                Assert.Equal<long>(0, stream.Position);
+                Assert.Equal<int>(buffer.Length, bufferLength);
+            }
+        }
+
+        [Fact()]
+        public void GetBZZEncodedReaderTest001()
+        {
+            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                BzzReader bzzReader = reader.GetBZZEncodedReader();
+                Assert.NotNull(bzzReader);
+                Assert.IsType<BzzReader>(bzzReader);
+            }
         }
 
         [Fact()]
