@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 using DjvuNet.Compression;
@@ -26,6 +27,8 @@ namespace DjvuNet
         /// Full path to the djvu file
         /// </summary>
         private readonly string _location;
+
+        internal Encoding _currentEncoding;
 
         #endregion Private Members
 
@@ -56,6 +59,14 @@ namespace DjvuNet
         #region Constructors
 
         /// <summary>
+        /// Creates DjvuReader for the resource indicated by Uri
+        /// </summary>
+        /// <param name="link"></param>
+        public DjvuReader(Uri link) : base(GetWebStream(link)) 
+        {
+        }
+
+        /// <summary>
         /// Creates the DjvuReader from the stream
         /// </summary>
         /// <param name="stream"></param>
@@ -71,6 +82,19 @@ namespace DjvuNet
         }
 
         #endregion Constructors
+
+        #region Internal Methods
+
+        internal static Stream GetWebStream(Uri link)
+        {
+            if (link == null)
+                throw new ArgumentNullException(nameof(link));
+
+            WebClient client = new WebClient();
+            return client.OpenRead(link);
+        }
+
+        #endregion Internal Methods
 
         #region Public Methods
 
@@ -96,63 +120,21 @@ namespace DjvuNet
         /// Gets a reader for the BZZ data
         /// </summary>
         /// <returns></returns>
-        public DjvuReader GetBZZEncodedReader(long length)
+        public BzzReader GetBZZEncodedReader(long length)
         {
             // Read the bytes into a stream to decode
             MemoryStream memStream = new MemoryStream(ReadBytes(checked((int)length)));
 
-            return new DjvuReader(new BSInputStream(memStream));
+            return new BzzReader(new BSInputStream(memStream));
         }
 
         /// <summary>
         /// Gets a reader for the BZZ data
         /// </summary>
         /// <returns></returns>
-        public DjvuReader GetBZZEncodedReader()
+        public BzzReader GetBZZEncodedReader()
         {
-            return new DjvuReader(new BSInputStream(BaseStream));
-        }
-
-        /// <summary>
-        /// Reads UTF8 encoded, null terminated string.
-        /// </summary>
-        /// <returns></returns>
-        public string ReadNullTerminatedString(int bufferSize = 64)
-        {
-            try
-            {
-                byte[] buffer = new byte[bufferSize];
-                int i = 0;
-                for (; ; i++)
-                {
-                    byte b = ReadByte();
-                    if (b == 0)
-                        break;
-
-                    // Increase buffer size if string is longer
-                    if (i >= (buffer.Length - 1))
-                    {
-                        byte[] copyBuffer = new byte[buffer.Length * 2];
-                        Buffer.BlockCopy(buffer, 0, copyBuffer, 0, buffer.Length);
-                        buffer = copyBuffer;
-                    }
-
-                    buffer[i] = b;
-                }
-
-                if (i <= 0)
-                    return String.Empty;
-                else
-                {
-                    byte[] copyBuffer = new byte[i];
-                    Buffer.BlockCopy(buffer, 0, copyBuffer, 0, copyBuffer.Length);
-                    return Encoding.UTF8.GetString(copyBuffer);
-                }
-            }
-            catch (Exception err)
-            {
-                throw new DjvuFormatException("Error while reading null terminated string.", err);
-            }
+            return new BzzReader(new BSInputStream(BaseStream));
         }
 
         /// <summary>
@@ -319,26 +301,141 @@ namespace DjvuNet
         /// Reads a string which terminates at EOS
         /// </summary>
         /// <returns></returns>
-        public string ReadUnknownLengthString()
+        public string ReadUnknownLengthString(bool skipBOM = true)
         {
-            int bufferSize = 1024;
-            byte[] strBuffer = null;
-            using (MemoryStream ms = new MemoryStream(bufferSize))
+            Encoding enc = null;
+            int length = 0;
+            using(MemoryStream stream = ReadStringBytes(out enc, out length, skipBOM))
             {
-                byte[] buffer = new byte[bufferSize];
-                while (true)
+                byte[] test = stream.GetBuffer();
+                if (enc == null)
                 {
-                    int result = Read(buffer, 0, bufferSize);
-                    ms.Write(buffer, 0, result);
-
-                    // Check if we read to the end of the stream
-                    if (buffer.Length != bufferSize)
-                        break;
+                    if (_currentEncoding != null)
+                        enc = _currentEncoding;
+                    else
+                        enc = _currentEncoding = new UTF8Encoding();
                 }
-                strBuffer = ms.GetBuffer();
+                return enc.GetString(test, 0, length);
+            }
+        }
+
+        internal virtual MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, bool skipBOM = true, int bufferSize = 1024)
+        {
+            enc = null;
+            int bytesRead = 0;
+            MemoryStream ms = new MemoryStream(bufferSize);
+            byte[] buffer = new byte[bufferSize];
+            while (true)
+            {
+                int result = Read(buffer, 0, bufferSize);
+                    
+                if (!skipBOM)
+                    ms.Write(buffer, 0, result);
+                else
+                {
+                    enc = CheckEncodingSignature(buffer, ms, ref result);
+                    skipBOM = false;
+                }
+
+                bytesRead += result;
+
+                // Check if we read to the end of the stream
+                if (result < bufferSize)
+                    break;
+            }
+            readBytes = bytesRead;
+
+            return ms;
+        }
+
+        /// <summary>
+        /// Function verifies if Encoding Scheme Signature is present, decodes it,
+        /// creates Encoding object with detected encoding and writes to passed Stream
+        /// skipping decoded signature (Byte Order Mark - BOM).
+        /// For more information see http://www.unicode.org/versions/Unicode9.0.0/ch23.pdf
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="stream"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        internal static Encoding CheckEncodingSignature(byte[] buffer, Stream stream, ref int count)
+        {
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
+            if (count < 4)
+                throw new ArgumentOutOfRangeException(
+                    "To verify Encoding Scheme Signature caller should pass buffer with at least 4 bytes.", 
+                    nameof(count));
+
+            if (buffer.Length < count)
+                throw new ArgumentException(nameof(buffer));
+
+            byte[] checkBuffer = new byte[4];
+            Buffer.BlockCopy(buffer, 0, checkBuffer, 0, 4);
+            uint testValue = BitConverter.ToUInt32(checkBuffer, 0);
+
+            // If data are coming from file need to compensate
+            // for Encoding Scheme Signature which may be present
+            // http://www.unicode.org/versions/Unicode9.0.0/ch23.pdf
+            // Encoding Scheme Signature
+            // UTF-8                    EF BB BF
+            // UTF-16 Big-endian        FE FF
+            // UTF-16 Little-endian     FF FE
+            // UTF-32 Big-endian        00 00 FE FF
+            // UTF-32 Little-endian     FF FE 00 00
+
+            Encoding detectedEncoding = null;
+
+            switch (testValue & 0x00ffffff)
+            {
+                // UTF-8  EF BB BF
+                case 0x00bfbbef:
+                    detectedEncoding = new UTF8Encoding(false);
+                    stream.Write(buffer, 3, count - 3);
+                    count -= 3;
+                    return detectedEncoding;
             }
 
-            return Encoding.UTF8.GetString(strBuffer);
+            switch(testValue & 0xffffffff)
+            {
+                // UTF-32 Big-endian  00 00 FE FF
+                case 0xfffe0000:
+                    detectedEncoding = new UTF32Encoding(true, false);
+                    goto process;
+
+                // UTF-32 Little-endian  FF FE 00 00
+                case 0x0000feff:
+                    detectedEncoding = new UTF32Encoding(false, false);
+
+                    process:
+                    stream.Write(buffer, 4, count - 4);
+                    count -= 4;
+                    return detectedEncoding;
+
+            }
+
+            switch(testValue & 0x0000ffff)
+            {
+                // UTF-16 Big-endian   FE FF
+                case 0x0000fffe:
+                    detectedEncoding = new UnicodeEncoding(true, false);
+                    goto process;
+
+                // UTF-16 Little-endian   FF FE
+                case 0x0000feff:
+                    detectedEncoding = new UnicodeEncoding(false, false);
+
+                    process:
+                    stream.Write(buffer, 2, count - 2);
+                    count -= 2;
+                    return detectedEncoding;
+
+            }
+            return null;
         }
 
         /// <summary>
@@ -373,7 +470,7 @@ namespace DjvuNet
 
         public override string ToString()
         {
-            return $"{base.ToString()} {{ Position {Position}, Length {this.BaseStream?.Length} BaseStream {BaseStream} }}";
+            return $"{this.GetType().Name} {{ Position: {Position}, Length: {this.BaseStream?.Length} BaseStream: {BaseStream} }}";
         }
 
         #endregion Public Methods

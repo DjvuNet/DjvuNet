@@ -14,7 +14,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets the P-Value for the item
         /// </summary>
-        public int PValue { get; set; }
+        public int PValue;
 
         #endregion PValue
 
@@ -23,7 +23,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets the M-Value for the item
         /// </summary>
-        public int MValue { get; set; }
+        public int MValue;
 
         #endregion MValue
 
@@ -32,7 +32,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets the down value for the item
         /// </summary>
-        public short Down { get; set; }
+        public short Down;
 
         #endregion Down
 
@@ -41,7 +41,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets the up value for the item
         /// </summary>
-        public short Up { get; set; }
+        public short Up;
 
         #endregion Up
 

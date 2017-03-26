@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DjvuNet.Compression;
 using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Enums;
 
@@ -155,25 +156,25 @@ namespace DjvuNet.DataChunks
         {
             long prevPos = reader.Position;
 
-            DjvuReader decompressor = reader.GetBZZEncodedReader(compressedSectionLength);
+            BzzReader bzReader = reader.GetBZZEncodedReader(compressedSectionLength);
 
             // Read the component sizes
             for (int x = 0; x < count; x++)
-                _components[x].Size = decompressor.ReadInt24MSB();
+                _components[x].Size = bzReader.ReadInt24MSB();
 
             // Read the component flag information
             for (int x = 0; x < count; x++)
-                _components[x].DecodeFlags(decompressor.ReadByte());
+                _components[x].DecodeFlags(bzReader.ReadByte());
 
             // Read the component strings
             for (int x = 0; x < count; x++)
             {
-                _components[x].ID = decompressor.ReadNullTerminatedString();
+                _components[x].ID = bzReader.ReadNullTerminatedString();
                 if (_components[x].HasName == true)
-                    _components[x].Name = decompressor.ReadNullTerminatedString();
+                    _components[x].Name = bzReader.ReadNullTerminatedString();
 
                 if (_components[x].HasTitle == true)
-                    _components[x].Title = decompressor.ReadNullTerminatedString();
+                    _components[x].Title = bzReader.ReadNullTerminatedString();
             }
 
             _isInitialized = true;

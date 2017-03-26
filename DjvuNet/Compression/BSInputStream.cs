@@ -39,39 +39,54 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Decoder to use
         /// </summary>
-        private ZPCodec zp = null;
+        internal ZPCodec ZpCoder;
 
         /// <summary>
         /// Values being decoded
         /// </summary>
-        private MutableValue<sbyte>[] ctx = new MutableValue<sbyte>[300];
+        private MutableValue<sbyte>[] _ctx = new MutableValue<sbyte>[300];
 
         /// <summary>
         /// Decoded data
         /// </summary>
-        private byte[] data = null;
+        private byte[] _data;
 
         /// <summary>
         /// True if the EOF has been read
         /// </summary>
-        private bool eof = false;
+        private bool _eof;
 
         /// <summary>
         /// Block size of the data
         /// </summary>
-        private int blocksize = 0;
+        private int _blocksize;
 
         /// <summary>
         /// Offset into the data
         /// </summary>
-        private int bptr = 0;
+        private int _bptr = 0;
 
         /// <summary>
         /// Size of the data read
         /// </summary>
-        private int size = 0;
+        private int _size = 0;
 
         #endregion Private Members
+
+        #region Properties
+
+        public override long Length
+        {
+            get
+            {
+                if (_data == null)
+                    return 0;
+                else
+                    return _data.Length;
+            }
+        }
+
+        #endregion Properties
 
         #region Constructors
 
@@ -88,8 +103,142 @@ namespace DjvuNet.Compression
         /// <summary>
         /// TODO docs
         /// </summary>
-        public BSInputStream()
+        public BSInputStream() : base()
         {
+            Init((MemoryStream)this);
+        }
+
+        public BSInputStream(int capacity):base(capacity)
+        {
+            Init((MemoryStream)this);
+        }
+
+        public BSInputStream(byte[] buffer): base(buffer)
+        {
+            Init((MemoryStream)this);
+        }
+
+        //
+        // Summary:
+        //     Initializes a new non-resizable instance of the System.IO.MemoryStream class
+        //     based on the specified byte array with the System.IO.MemoryStream.CanWrite property
+        //     set as specified.
+        //
+        // Parameters:
+        //   buffer:
+        //     The array of unsigned bytes from which to create this stream.
+        //
+        //   writable:
+        //     The setting of the System.IO.MemoryStream.CanWrite property, which determines
+        //     whether the stream supports writing.
+        //
+        // Exceptions:
+        //   T:System.ArgumentNullException:
+        //     buffer is null.
+        public BSInputStream(byte[] buffer, bool writable) : base(buffer, writable)
+        {
+            Init((MemoryStream)this);
+        }
+        //
+        // Summary:
+        //     Initializes a new non-resizable instance of the System.IO.MemoryStream class
+        //     based on the specified region (index) of a byte array.
+        //
+        // Parameters:
+        //   buffer:
+        //     The array of unsigned bytes from which to create this stream.
+        //
+        //   index:
+        //     The index into buffer at which the stream begins.
+        //
+        //   count:
+        //     The length of the stream in bytes.
+        //
+        // Exceptions:
+        //   T:System.ArgumentNullException:
+        //     buffer is null.
+        //
+        //   T:System.ArgumentOutOfRangeException:
+        //     index or count is less than zero.
+        //
+        //   T:System.ArgumentException:
+        //     The buffer length minus index is less than count.
+        public BSInputStream(byte[] buffer, int index, int count) : base(buffer, index, count)
+        {
+            Init((MemoryStream)this);
+        }
+        //
+        // Summary:
+        //     Initializes a new non-resizable instance of the System.IO.MemoryStream class
+        //     based on the specified region of a byte array, with the System.IO.MemoryStream.CanWrite
+        //     property set as specified.
+        //
+        // Parameters:
+        //   buffer:
+        //     The array of unsigned bytes from which to create this stream.
+        //
+        //   index:
+        //     The index in buffer at which the stream begins.
+        //
+        //   count:
+        //     The length of the stream in bytes.
+        //
+        //   writable:
+        //     The setting of the System.IO.MemoryStream.CanWrite property, which determines
+        //     whether the stream supports writing.
+        //
+        // Exceptions:
+        //   T:System.ArgumentNullException:
+        //     buffer is null.
+        //
+        //   T:System.ArgumentOutOfRangeException:
+        //     index or count are negative.
+        //
+        //   T:System.ArgumentException:
+        //     The buffer length minus index is less than count.
+        public BSInputStream(byte[] buffer, int index, int count, bool writable) 
+            : base(buffer, index, count, writable)
+        {
+            Init((MemoryStream)this);
+        }
+        //
+        // Summary:
+        //     Initializes a new instance of the System.IO.MemoryStream class based on the specified
+        //     region of a byte array, with the System.IO.MemoryStream.CanWrite property set
+        //     as specified, and the ability to call System.IO.MemoryStream.GetBuffer set as
+        //     specified.
+        //
+        // Parameters:
+        //   buffer:
+        //     The array of unsigned bytes from which to create this stream.
+        //
+        //   index:
+        //     The index into buffer at which the stream begins.
+        //
+        //   count:
+        //     The length of the stream in bytes.
+        //
+        //   writable:
+        //     The setting of the System.IO.MemoryStream.CanWrite property, which determines
+        //     whether the stream supports writing.
+        //
+        //   publiclyVisible:
+        //     true to enable System.IO.MemoryStream.GetBuffer, which returns the unsigned byte
+        //     array from which the stream was created; otherwise, false.
+        //
+        // Exceptions:
+        //   T:System.ArgumentNullException:
+        //     buffer is null.
+        //
+        //   T:System.ArgumentOutOfRangeException:
+        //     index or count is negative.
+        //
+        //   T:System.ArgumentException:
+        //     The buffer length minus index is less than count.
+        public BSInputStream(byte[] buffer, int index, int count, bool writable, bool publiclyVisible) 
+            : base(buffer, index, count, writable, publiclyVisible)
+        {
+            Init((MemoryStream)this);
         }
 
         /// <summary>
@@ -103,6 +252,12 @@ namespace DjvuNet.Compression
 
         #endregion Constructors
 
+        public long PositionEncoded
+        {
+            get { return ZpCoder.InputStream.Position; }
+            set { ZpCoder.InputStream.Position = value; }
+        }
+
         #region Public Methods
 
         /// <summary>
@@ -110,7 +265,7 @@ namespace DjvuNet.Compression
         /// </summary>
         public override void Flush()
         {
-            size = bptr = 0;
+            _size = _bptr = 0;
         }
 
         /// <summary>
@@ -120,12 +275,10 @@ namespace DjvuNet.Compression
         /// <returns></returns>
         public BSInputStream Init(Stream input)
         {
-            zp = new ZPCodec().Init(input);
+            ZpCoder = new ZPCodec().Initializa(input);
 
-            for (int i = 0; i < ctx.Length; )
-            {
-                ctx[i++] = new MutableValue<sbyte>();
-            }
+            for (int i = 0; i < _ctx.Length; )
+                _ctx[i++] = new MutableValue<sbyte>();
 
             return this;
         }
@@ -135,44 +288,44 @@ namespace DjvuNet.Compression
         /// </summary>
         /// <param name="buffer"></param>
         /// <param name="offset"></param>
-        /// <param name="sz"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public override int Read(byte[] buffer, int offset, int sz)
+        public override int Read(byte[] buffer, int offset, int length)
         {
             int copied = 0;
 
-            if (eof)
+            if (_eof)
                 return copied;
 
-            while (sz > 0 && !eof)
+            while (length > 0 && !_eof)
             {
                 // Decoder if needed
-                if (size == 0)
+                if (_size == 0)
                 {
-                    bptr = 0;
+                    _bptr = 0;
 
                     if (Decode() == 0)
                     {
-                        size = 1;
-                        eof = true;
+                        _size = 1;
+                        _eof = true;
                     }
 
-                    size--;
+                    _size--;
                 }
 
                 // Compute remaining
-                int bytes = (size > sz) ? sz : size;
+                int bytes = (_size > length) ? length : _size;
 
                 // Transfer
                 if (bytes > 0)
                 {
-                    Array.Copy(data, bptr, buffer, offset, bytes);
+                    Array.Copy(_data, _bptr, buffer, offset, bytes);
                     offset += bytes;
                 }
 
-                size -= bytes;
-                bptr += bytes;
-                sz -= bytes;
+                _size -= bytes;
+                _bptr += bytes;
+                length -= bytes;
                 copied += bytes;
             }
 
@@ -211,7 +364,7 @@ namespace DjvuNet.Compression
 
             while (n < m)
             {
-                int b = zp.Decoder(ctx[ctxoff + n]);
+                int b = ZpCoder.Decoder(_ctx[ctxoff + n]);
                 n = (n << 1) | b;
             }
 
@@ -222,35 +375,35 @@ namespace DjvuNet.Compression
         /// TODO documentation
         /// </summary>
         /// <returns></returns>
-        private int Decode()
+        internal int Decode()
         {
             /////////////////////////////////
             ////////////  Decoder input stream
-            size = DecodeRaw(24);
+            _size = DecodeRaw(24);
 
-            if (size == 0)
+            if (_size == 0)
                 return 0;
 
-            if (size > MAXBLOCK * 1024)
+            if (_size > MAXBLOCK * 1024)
                 throw new System.IO.IOException("ByteStream.corrupt");
 
             // Allocate
-            if (blocksize < size)
+            if (_blocksize < _size)
             {
-                blocksize = size;
-                data = new byte[blocksize];
+                _blocksize = _size;
+                _data = new byte[_blocksize];
             }
-            else if (data == null)
-                data = new byte[blocksize];
+            else if (_data == null)
+                _data = new byte[_blocksize];
 
             // Decoder Estimation Speed
             int fshift = 0;
 
-            if (zp.Decoder() != 0)
+            if (ZpCoder.Decoder() != 0)
             {
                 fshift++;
 
-                if (zp.Decoder() != 0)
+                if (ZpCoder.Decoder() != 0)
                     fshift++;
             }
 
@@ -265,7 +418,7 @@ namespace DjvuNet.Compression
             int mtfno = 3;
             int markerpos = -1;
 
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < _size; i++)
             {
                 int ctxid = CTXIDS - 1;
 
@@ -278,96 +431,96 @@ namespace DjvuNet.Compression
                 {
                     default:
 
-                        if (zp.Decoder(ctx[ctxoff + ctxid]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + ctxid]) != 0)
                         {
                             mtfno = 0;
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += CTXIDS;
 
-                        if (zp.Decoder(ctx[ctxoff + ctxid]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + ctxid]) != 0)
                         {
                             mtfno = 1;
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += CTXIDS;
 
-                        if (zp.Decoder(ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 2 + DecodeBinary(ctxoff + 1, 1);
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += (1 + 1);
 
-                        if (zp.Decoder(ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 4 + DecodeBinary(ctxoff + 1, 2);
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += (1 + 3);
 
-                        if (zp.Decoder(ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 8 + DecodeBinary(ctxoff + 1, 3);
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += (1 + 7);
 
-                        if (zp.Decoder(ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 16 + DecodeBinary(ctxoff + 1, 4);
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += (1 + 15);
 
-                        if (zp.Decoder(ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 32 + DecodeBinary(ctxoff + 1, 5);
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += (1 + 31);
 
-                        if (zp.Decoder(ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 64 + DecodeBinary(ctxoff + 1, 6);
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         ctxoff += (1 + 63);
 
-                        if (zp.Decoder(ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 128 + DecodeBinary(ctxoff + 1, 7);
-                            data[i] = mtf[mtfno];
+                            _data[i] = mtf[mtfno];
 
                             break;
                         }
 
                         mtfno = 256;
-                        data[i] = 0;
+                        _data[i] = 0;
                         markerpos = i;
 
                         continue;
@@ -405,17 +558,17 @@ namespace DjvuNet.Compression
                     freq[k] = freq[k - 1];
                 }
 
-                mtf[k] = data[i];
+                mtf[k] = _data[i];
                 freq[k] = fc;
             }
 
             /////////////////////////////////
             ////////// Reconstruct the string
-            if ((markerpos < 1) || (markerpos >= size))
+            if ((markerpos < 1) || (markerpos >= _size))
                 throw new System.IO.IOException("ByteStream.corrupt");
 
             // Allocate pointers
-            int[] pos = new int[size];
+            int[] pos = new int[_size];
 
             // Prepare count buffer
             int[] count = new int[256];
@@ -423,14 +576,14 @@ namespace DjvuNet.Compression
             // Fill count buffer
             for (int i = 0; i < markerpos; i++)
             {
-                sbyte c = (sbyte)data[i];
+                sbyte c = (sbyte)_data[i];
                 pos[i] = (c << 24) | (count[0xff & c] & 0xffffff);
                 count[0xff & c]++;
             }
 
-            for (int i = markerpos + 1; i < size; i++)
+            for (int i = markerpos + 1; i < _size; i++)
             {
-                sbyte c = (sbyte)data[i];
+                sbyte c = (sbyte)_data[i];
                 pos[i] = (c << 24) | (count[0xff & c] & 0xffffff);
                 count[0xff & c]++;
             }
@@ -447,13 +600,13 @@ namespace DjvuNet.Compression
 
             // Undo the sort transform
             int j2 = 0;
-            last = size - 1;
+            last = _size - 1;
 
             while (last > 0)
             {
                 int n = pos[j2];
                 sbyte c = (sbyte)(pos[j2] >> 24);
-                data[--last] = (byte)c;
+                _data[--last] = (byte)c;
                 j2 = count[0xff & c] + (n & 0xffffff);
             }
 
@@ -461,7 +614,7 @@ namespace DjvuNet.Compression
             if (j2 != markerpos)
                 throw new System.IO.IOException("ByteStream.corrupt");
 
-            return size;
+            return _size;
         }
 
         /// <summary>
@@ -476,7 +629,7 @@ namespace DjvuNet.Compression
 
             while (n < m)
             {
-                int b = zp.Decoder();
+                int b = ZpCoder.Decoder();
                 n = (n << 1) | b;
             }
 
