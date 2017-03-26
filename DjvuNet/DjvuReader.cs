@@ -309,7 +309,12 @@ namespace DjvuNet
             {
                 byte[] test = stream.GetBuffer();
                 if (enc == null)
-                    enc = new UTF8Encoding();
+                {
+                    if (_currentEncoding != null)
+                        enc = _currentEncoding;
+                    else
+                        enc = _currentEncoding = new UTF8Encoding();
+                }
                 return enc.GetString(test, 0, length);
             }
         }
@@ -353,7 +358,7 @@ namespace DjvuNet
         /// <param name="stream"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        internal Encoding CheckEncodingSignature(byte[] buffer, Stream stream, ref int count)
+        internal static Encoding CheckEncodingSignature(byte[] buffer, Stream stream, ref int count)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
@@ -383,31 +388,33 @@ namespace DjvuNet
             // UTF-32 Big-endian        00 00 FE FF
             // UTF-32 Little-endian     FF FE 00 00
 
+            Encoding detectedEncoding = null;
+
             switch (testValue & 0x00ffffff)
             {
                 // UTF-8  EF BB BF
                 case 0x00bfbbef:
-                    _currentEncoding = Encoding.UTF8;
+                    detectedEncoding = new UTF8Encoding(false);
                     stream.Write(buffer, 3, count - 3);
                     count -= 3;
-                    return _currentEncoding;
+                    return detectedEncoding;
             }
 
             switch(testValue & 0xffffffff)
             {
                 // UTF-32 Big-endian  00 00 FE FF
                 case 0xfffe0000:
-                    _currentEncoding = new UTF32Encoding(true, false);
+                    detectedEncoding = new UTF32Encoding(true, false);
                     goto process;
 
                 // UTF-32 Little-endian  FF FE 00 00
                 case 0x0000feff:
-                    _currentEncoding = new UTF32Encoding(false, false);
+                    detectedEncoding = new UTF32Encoding(false, false);
 
                     process:
                     stream.Write(buffer, 4, count - 4);
                     count -= 4;
-                    return _currentEncoding;
+                    return detectedEncoding;
 
             }
 
@@ -415,17 +422,17 @@ namespace DjvuNet
             {
                 // UTF-16 Big-endian   FE FF
                 case 0x0000fffe:
-                    _currentEncoding = new UnicodeEncoding(true, false);
+                    detectedEncoding = new UnicodeEncoding(true, false);
                     goto process;
 
                 // UTF-16 Little-endian   FF FE
                 case 0x0000feff:
-                    _currentEncoding = new UnicodeEncoding(false, false);
+                    detectedEncoding = new UnicodeEncoding(false, false);
 
                     process:
                     stream.Write(buffer, 2, count - 2);
                     count -= 2;
-                    return _currentEncoding;
+                    return detectedEncoding;
 
             }
             return null;
@@ -463,7 +470,7 @@ namespace DjvuNet
 
         public override string ToString()
         {
-            return $"{base.ToString()} {{ Position {Position}, Length {this.BaseStream?.Length} BaseStream {BaseStream} }}";
+            return $"{this.GetType().Name} {{ Position: {Position}, Length: {this.BaseStream?.Length} BaseStream: {BaseStream} }}";
         }
 
         #endregion Public Methods
