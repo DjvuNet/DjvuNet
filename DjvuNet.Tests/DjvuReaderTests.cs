@@ -55,10 +55,9 @@ namespace DjvuNet.Tests
             get
             {
                 string txtFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
-                using (StreamReader reader = new StreamReader(txtFile, Encoding.UTF8))
-                {
-                    return reader.ReadToEnd();
-                }
+                byte[] buffer = ReadFileToEnd(txtFile);
+                // Skip BOM
+                return Encoding.UTF8.GetString(buffer, 3, buffer.Length - 3);
             }
         }
 
@@ -90,29 +89,13 @@ namespace DjvuNet.Tests
         public void GetBZZEncodedReaderTest001()
         {
             byte[] bzzBuffer = BzzCompressedTestBuffer;
-            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer, false))
+            using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
                 BzzReader bzzReader = reader.GetBZZEncodedReader();
-                String result = bzzReader.ReadUnknownLengthString();
-
-                Assert.NotNull(result);
-                Assert.False(String.IsNullOrWhiteSpace(result));
-                Assert.True(result.StartsWith("========================================================================================="), "String.StartsWith");
-                Assert.True(result.Contains("Test start - bzz format encoding"));
-                Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
-                Assert.True(result.Contains("Test end bzz format encoding"));
-                string expected = OriginalBzzTestString;
-
-                for(int i = 0; i < expected.Length; i++)
-                {
-                    if (expected[i] != result[i])
-                        Assert.True(false, $"String mismatch at character position {i}, expected character:" + 
-                            $" \"{expected[i]}\" (0x{(byte)expected[i]:x})," + 
-                            $" actual character \"{result[i]}\" (0x{(byte)result[i]:x})");
-                }
+                Assert.NotNull(bzzReader);
+                Assert.IsType<BzzReader>(bzzReader);
             }
-            
         }
 
         [Fact]
@@ -171,54 +154,63 @@ namespace DjvuNet.Tests
         public void GetBZZEncodedReaderTest002()
         {
             string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
-            string origTextFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
             using (DjvuReader reader = new DjvuReader(bzzFile))
             {
                 BzzReader bzzReader = reader.GetBZZEncodedReader();
-                string result = bzzReader.ReadUnknownLengthString(false);
-
-                Assert.NotNull(result);
-                Assert.False(String.IsNullOrWhiteSpace(result));
-                Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
-
-                string expected = OriginalBzzTestString;
-                Assert.NotNull(expected);
-                Assert.False(String.IsNullOrWhiteSpace(expected));
-
-                if (expected.Length > result.Length)
-                {
-                    if ((expected.Length - result.Length) == 1 && expected[expected.Length - 1] != '\0')
-                        Assert.True(false, "String mismatch is not due to null terminating character.");
-                    else if ((expected.Length - result.Length) == 1)
-                    {
-                        expected = expected.Substring(0, result.Length);
-                    }
-                }
-
-                Assert.Equal<string>(expected, result);
+                Assert.NotNull(bzzReader);
+                Assert.IsType<BzzReader>(bzzReader);
+                Assert.IsType<BSInputStream>(bzzReader.BaseStream);
+                BSInputStream bsStream = bzzReader.BaseStream as BSInputStream;
+                Assert.NotNull(bsStream.ZpCoder?.InputStream);
+                Assert.IsType<FileStream>(bsStream.ZpCoder.InputStream);
             }
-
         }
 
         [Fact()]
         public void GetBZZEncodedReaderTest003()
         {
-            string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
-            string origTextFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
-            using (DjvuReader reader = new DjvuReader(bzzFile))
-            using (StreamReader reader2 = new StreamReader(origTextFile, Encoding.UTF8))
+            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
+            using (DjvuReader reader = new DjvuReader(memStream))
             {
                 BzzReader bzzReader = reader.GetBZZEncodedReader();
-                string result = bzzReader.ReadUnknownLengthString(false);
+                Assert.NotNull(bzzReader);
+                Assert.IsType<BzzReader>(bzzReader);
+                Assert.IsType<BSInputStream>(bzzReader.BaseStream);
+                BSInputStream bsStream = bzzReader.BaseStream as BSInputStream;
+                Assert.NotNull(bsStream.ZpCoder?.InputStream);
+                Assert.IsType<MemoryStream>(bsStream.ZpCoder.InputStream);
+            }
+        }
 
-                Assert.NotNull(result);
-                Assert.False(String.IsNullOrWhiteSpace(result));
+        [Fact()]
+        public void GetBZZEncodedReaderTest004()
+        {
+            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                BzzReader bzzReader = reader.GetBZZEncodedReader(1024);
+                Assert.NotNull(bzzReader);
+                Assert.IsType<BzzReader>(bzzReader);
+                Assert.IsType<BSInputStream>(bzzReader.BaseStream);
+            }
+        }
 
-                string expectedResult = reader2.ReadToEnd().Trim();
-                Assert.NotNull(expectedResult);
-                Assert.False(String.IsNullOrWhiteSpace(expectedResult));
-
-                Assert.Equal<int>(expectedResult.Length, result.Length);
+        [Fact()]
+        public void GetBZZEncodedReaderTest005()
+        {
+            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                BzzReader bzzReader = reader.GetBZZEncodedReader(1024);
+                Assert.NotNull(bzzReader);
+                Assert.IsType<BzzReader>(bzzReader);
+                Assert.IsType<BSInputStream>(bzzReader.BaseStream);
+                BSInputStream bsStream = bzzReader.BaseStream as BSInputStream;
+                Assert.NotNull(bsStream.ZpCoder?.InputStream);
+                Assert.IsType<MemoryStream>(bsStream.ZpCoder.InputStream);
             }
         }
 
@@ -306,10 +298,74 @@ namespace DjvuNet.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
-        public void ReadUnknownLengthStringTest()
+        [Fact()]
+        public void ReadUnknownLengthStringTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer, false))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                BzzReader bzzReader = reader.GetBZZEncodedReader();
+                String result = bzzReader.ReadUnknownLengthString();
+
+                Assert.NotNull(result);
+                Assert.False(String.IsNullOrWhiteSpace(result));
+                Assert.True(result.StartsWith("========================================================================================="), "String.StartsWith");
+                Assert.True(result.Contains("Test start - bzz format encoding"));
+                Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
+                Assert.True(result.Contains("Test end bzz format encoding"));
+                string expected = OriginalBzzTestString;
+
+                for (int i = 0; i < expected.Length; i++)
+                {
+                    if (expected[i] != result[i])
+                        Assert.True(false, $"String mismatch at character position {i}, expected character:" +
+                            $" \"{expected[i]}\" (0x{(byte)expected[i]:x})," +
+                            $" actual character \"{result[i]}\" (0x{(byte)result[i]:x})");
+                }
+            }
+        }
+
+        [Fact()]
+        public void ReadUnknownLengthStringTest002()
+        {
+            string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
+            using (DjvuReader reader = new DjvuReader(bzzFile))
+            {
+                BzzReader bzzReader = reader.GetBZZEncodedReader();
+                string result = bzzReader.ReadUnknownLengthString();
+
+                Assert.NotNull(result);
+                Assert.False(String.IsNullOrWhiteSpace(result));
+                Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
+
+                string expected = OriginalBzzTestString;
+                Assert.NotNull(expected);
+                Assert.False(String.IsNullOrWhiteSpace(expected));
+
+                Assert.Equal<string>(expected, result);
+            }
+        }
+
+        [Fact()]
+        public void ReadUnknownLengthStringTest003()
+        {
+            string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
+            string origTextFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
+            using (DjvuReader reader = new DjvuReader(bzzFile))
+            {
+                BzzReader bzzReader = reader.GetBZZEncodedReader();
+                string result = bzzReader.ReadUnknownLengthString();
+
+                Assert.NotNull(result);
+                Assert.False(String.IsNullOrWhiteSpace(result));
+
+                string expectedResult = OriginalBzzTestString;
+                Assert.NotNull(expectedResult);
+                Assert.False(String.IsNullOrWhiteSpace(expectedResult));
+
+                Assert.Equal<int>(expectedResult.Length, result.Length);
+            }
         }
 
         [Fact(Skip = "Not implemented")]

@@ -78,15 +78,14 @@ namespace DjvuNet.Compression
             }
         }
 
-        internal override MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, bool skipBOM = true)
+
+        internal override MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, bool skipBOM = true, int bufferSize = 1024)
         {
             enc = null;
-            int bufferSize = 1024;
             int bytesRead = 0;
             int streamLength = 0;
 
             MemoryStream targetStream = new MemoryStream(bufferSize);
-
             byte[] buffer = new byte[bufferSize];
             while (true)
             {
@@ -96,12 +95,14 @@ namespace DjvuNet.Compression
                     targetStream.Write(buffer, 0, result);
                 else
                 {
-                    enc = CheckEncodingSignature(buffer, targetStream, result);
+                    enc = CheckEncodingSignature(buffer, targetStream, ref result);
                     skipBOM = false;
                 }
 
+                if (bytesRead == 0)
+                    streamLength = (int)BaseStream.Length - 1 - (bufferSize - result);
+
                 bytesRead += result;
-                streamLength = (int)BaseStream.Length - 1;
 
                 // TODO verify if BSInputStream always creates data buffer 
                 //      longer by 1 byte than decoded data and appends null
@@ -112,7 +113,6 @@ namespace DjvuNet.Compression
                         bufferSize = streamLength - bytesRead;
                 }
 
-                // Check if we read to the end of the stream
                 if (bytesRead >= streamLength)
                     break;
             }

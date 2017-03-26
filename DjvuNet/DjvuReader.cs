@@ -314,10 +314,9 @@ namespace DjvuNet
             }
         }
 
-        internal virtual MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, bool skipBOM = true)
+        internal virtual MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, bool skipBOM = true, int bufferSize = 1024)
         {
             enc = null;
-            int bufferSize = 1024;
             int bytesRead = 0;
             MemoryStream ms = new MemoryStream(bufferSize);
             byte[] buffer = new byte[bufferSize];
@@ -329,7 +328,7 @@ namespace DjvuNet
                     ms.Write(buffer, 0, result);
                 else
                 {
-                    enc = CheckEncodingSignature(buffer, ms, result);
+                    enc = CheckEncodingSignature(buffer, ms, ref result);
                     skipBOM = false;
                 }
 
@@ -354,7 +353,7 @@ namespace DjvuNet
         /// <param name="stream"></param>
         /// <param name="count"></param>
         /// <returns></returns>
-        internal Encoding CheckEncodingSignature(byte[] buffer, Stream stream, int count)
+        internal Encoding CheckEncodingSignature(byte[] buffer, Stream stream, ref int count)
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
@@ -390,6 +389,7 @@ namespace DjvuNet
                 case 0x00bfbbef:
                     _currentEncoding = Encoding.UTF8;
                     stream.Write(buffer, 3, count - 3);
+                    count -= 3;
                     return _currentEncoding;
             }
 
@@ -404,8 +404,9 @@ namespace DjvuNet
                 case 0x0000feff:
                     _currentEncoding = new UTF32Encoding(false, false);
 
-                process:
+                    process:
                     stream.Write(buffer, 4, count - 4);
+                    count -= 4;
                     return _currentEncoding;
 
             }
@@ -421,8 +422,9 @@ namespace DjvuNet
                 case 0x0000feff:
                     _currentEncoding = new UnicodeEncoding(false, false);
 
-                process :
+                    process:
                     stream.Write(buffer, 2, count - 2);
+                    count -= 2;
                     return _currentEncoding;
 
             }
