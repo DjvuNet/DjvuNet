@@ -1,6 +1,8 @@
 DjvuNet
 =======
 
+## ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true)
+
 DjvuNet is a fully managed library written in C# for reading and analyzing Djvu documents. Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
 The so called "Secure DjVu" format is not supported as it's specification was never published. Project was started several years ago
 by [Telavian](https://github.com/Telavian) and after remaining inactive for some time currently is continued at new 
