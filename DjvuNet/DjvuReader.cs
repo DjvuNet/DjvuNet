@@ -446,7 +446,7 @@ namespace DjvuNet
         {
             DjvuReader newReader = null;
 
-            // Get rid of not properly synchronized clones
+            // TODO Get rid of not properly synchronized clones or synchronize readers properly
             newReader = _location != null ? new DjvuReader(_location) : new DjvuReader(BaseStream);
             newReader.Position = position;
 
