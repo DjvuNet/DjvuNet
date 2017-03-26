@@ -1,5 +1,3 @@
-environment:
-
 image: Visual Studio 2015
 
 version: '0.7.0.{build}'
