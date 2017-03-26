@@ -39,7 +39,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Decoder to use
         /// </summary>
-        private ZPCodec _zpCoder;
+        internal ZPCodec ZpCoder;
 
         /// <summary>
         /// Values being decoded
@@ -254,8 +254,8 @@ namespace DjvuNet.Compression
 
         public long PositionEncoded
         {
-            get { return _zpCoder.InputStream.Position; }
-            set { _zpCoder.InputStream.Position = value; }
+            get { return ZpCoder.InputStream.Position; }
+            set { ZpCoder.InputStream.Position = value; }
         }
 
         #region Public Methods
@@ -275,7 +275,7 @@ namespace DjvuNet.Compression
         /// <returns></returns>
         public BSInputStream Init(Stream input)
         {
-            _zpCoder = new ZPCodec().Initializa(input);
+            ZpCoder = new ZPCodec().Initializa(input);
 
             for (int i = 0; i < _ctx.Length; )
                 _ctx[i++] = new MutableValue<sbyte>();
@@ -364,7 +364,7 @@ namespace DjvuNet.Compression
 
             while (n < m)
             {
-                int b = _zpCoder.Decoder(_ctx[ctxoff + n]);
+                int b = ZpCoder.Decoder(_ctx[ctxoff + n]);
                 n = (n << 1) | b;
             }
 
@@ -399,11 +399,11 @@ namespace DjvuNet.Compression
             // Decoder Estimation Speed
             int fshift = 0;
 
-            if (_zpCoder.Decoder() != 0)
+            if (ZpCoder.Decoder() != 0)
             {
                 fshift++;
 
-                if (_zpCoder.Decoder() != 0)
+                if (ZpCoder.Decoder() != 0)
                     fshift++;
             }
 
@@ -431,7 +431,7 @@ namespace DjvuNet.Compression
                 {
                     default:
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + ctxid]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + ctxid]) != 0)
                         {
                             mtfno = 0;
                             _data[i] = mtf[mtfno];
@@ -441,7 +441,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += CTXIDS;
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + ctxid]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + ctxid]) != 0)
                         {
                             mtfno = 1;
                             _data[i] = mtf[mtfno];
@@ -451,7 +451,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += CTXIDS;
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 2 + DecodeBinary(ctxoff + 1, 1);
                             _data[i] = mtf[mtfno];
@@ -461,7 +461,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 1);
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 4 + DecodeBinary(ctxoff + 1, 2);
                             _data[i] = mtf[mtfno];
@@ -471,7 +471,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 3);
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 8 + DecodeBinary(ctxoff + 1, 3);
                             _data[i] = mtf[mtfno];
@@ -481,7 +481,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 7);
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 16 + DecodeBinary(ctxoff + 1, 4);
                             _data[i] = mtf[mtfno];
@@ -491,7 +491,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 15);
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 32 + DecodeBinary(ctxoff + 1, 5);
                             _data[i] = mtf[mtfno];
@@ -501,7 +501,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 31);
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 64 + DecodeBinary(ctxoff + 1, 6);
                             _data[i] = mtf[mtfno];
@@ -511,7 +511,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 63);
 
-                        if (_zpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
+                        if (ZpCoder.Decoder(_ctx[ctxoff + 0]) != 0)
                         {
                             mtfno = 128 + DecodeBinary(ctxoff + 1, 7);
                             _data[i] = mtf[mtfno];
@@ -629,7 +629,7 @@ namespace DjvuNet.Compression
 
             while (n < m)
             {
-                int b = _zpCoder.Decoder();
+                int b = ZpCoder.Decoder();
                 n = (n << 1) | b;
             }
 
