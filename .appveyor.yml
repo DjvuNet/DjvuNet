@@ -1,0 +1,25 @@
+environment:
+
+image: Visual Studio 2015
+
+version: '0.7.0.{build}'
+
+platform:
+  - x86
+  - x64
+  - Any CPU
+
+configuration:
+  - Debug
+  - Release
+
+branches:
+  only:
+    - master
+# block testing until test data committed
+test:
+  categories:
+    only:
+      - NonExistingCategory
+matrix:
+  fast_finish: true
