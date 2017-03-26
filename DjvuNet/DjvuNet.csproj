@@ -157,6 +157,7 @@
     <Compile Include="JB2\JB2Item.cs" />
     <Compile Include="JB2\JB2Shape.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Text\PageText.cs" />
     <Compile Include="Text\PageTextItem.cs" />
