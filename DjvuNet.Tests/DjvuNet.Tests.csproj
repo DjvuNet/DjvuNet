@@ -161,6 +161,7 @@
     <Compile Include="JB2\JB2ShapeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DjvuPageTests.cs" />
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Text\PageTextItemTests.cs" />
     <Compile Include="Text\PageTextSearchTests.cs" />

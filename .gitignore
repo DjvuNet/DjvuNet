@@ -29,8 +29,8 @@ artifacts/
 DjvuNet.Build/
 
 # Code generated during build
-AssemblyCommonInfo.cs
-AssemblyInfo.cs
+/*/Properties/AssemblyInfoCommon.cs
+/*/Properties/AssemblyInfo.cs
 
 # External dependencies directory with repositories
 [Ee]xternal/
@@ -272,3 +272,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
