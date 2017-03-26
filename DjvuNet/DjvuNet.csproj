@@ -88,6 +88,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compression\BSInputStream.cs" />
+    <Compile Include="Compression\BzzReader.cs" />
+    <Compile Include="Compression\BzzWriter.cs" />
     <Compile Include="Compression\MutableValue.cs" />
     <Compile Include="Compression\ZPCodec.cs" />
     <Compile Include="Compression\ZPTable.cs" />
@@ -136,6 +138,7 @@
     <Compile Include="DjvuParser.cs" />
     <Compile Include="DjvuReader.cs" />
     <Compile Include="DataChunks\IFFChunk.cs" />
+    <Compile Include="DjvuWriter.cs" />
     <Compile Include="Extentions\ExtentionMethods.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
     <Compile Include="Graphics\Map.cs" />

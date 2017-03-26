@@ -121,6 +121,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Compression\BSInputStreamTests.cs" />
+    <Compile Include="Compression\BzzReaderTests.cs" />
     <Compile Include="Compression\MutableValueTests.cs" />
     <Compile Include="Compression\ZPCodecTests.cs" />
     <Compile Include="Compression\ZPTableTests.cs" />
@@ -169,6 +170,10 @@
     <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj">
       <Project>{4fec9875-d7e6-47bd-a13a-5c1944464545}</Project>
       <Name>DjvuNet.Helper.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DjvuNetTest\DjvuNetTest.csproj">
+      <Project>{192f4e63-6ed7-410f-a372-0b54c6cdf987}</Project>
+      <Name>DjvuNetTest</Name>
     </ProjectReference>
     <ProjectReference Include="..\DjvuNet\DjvuNet.csproj">
       <Project>{e681b178-e5f8-4782-89c8-f32720b1464a}</Project>

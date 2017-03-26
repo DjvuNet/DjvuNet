@@ -28,6 +28,10 @@ artifacts/
 # Helper projects
 DjvuNet.Build/
 
+# Code generated during build
+AssemblyCommonInfo.cs
+AssemblyInfo.cs
+
 # External dependencies directory with repositories
 [Ee]xternal/
 

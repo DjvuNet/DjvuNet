@@ -12,7 +12,7 @@ namespace DjvuNet.Compression
         private long _code;
         private short _delay;
         private long _fence;
-        private Stream _ibs;
+        internal Stream InputStream;
         private short _scount;
         private short _zByte;
         private const int _arraySize = 256;
@@ -23,12 +23,12 @@ namespace DjvuNet.Compression
 
         #region FFZT
 
-        private static readonly sbyte[] _FFZT = new sbyte[_arraySize];
+        private sbyte[] _FFZT;
 
         /// <summary>
         /// Gets the FFZT data
         /// </summary>
-        protected static sbyte[] FFZT { get { return _FFZT; } }
+        internal sbyte[] FFZT { get { return _FFZT; } }
 
         #endregion FFZT
 
@@ -37,7 +37,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets or sets the A Value for the item
         /// </summary>
-        protected int AValue { get; set; }
+        internal int AValue { get; set; }
 
         #endregion AValue
 
@@ -46,7 +46,7 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets the Ffzt data
         /// </summary>
-        protected sbyte[] Ffzt;
+        internal sbyte[] Ffzt;
 
         #endregion Ffzt
 
@@ -92,7 +92,7 @@ namespace DjvuNet.Compression
 
         #region DefaultZPTable
 
-        private ZPTable[] _defaultZPTable;
+        internal ZPTable[] _defaultZPTable;
 
         /// <summary>
         /// Gets the default ZP table
@@ -114,19 +114,17 @@ namespace DjvuNet.Compression
 
         #region Constructors
 
-        static ZPCodec()
-        {
-            for (int i = 0; i < _arraySize; i++)
-            {
-                FFZT[i] = 0;
-
-                for (int j = i; (j & 0x80) > 0; j <<= 1)
-                    FFZT[i]++;
-            }
-        }
 
         public ZPCodec()
         {
+            _FFZT = new sbyte[_arraySize];
+
+            for (int i = 0; i < _arraySize; i++)
+            {
+                for (int j = i; (j & 0x80) > 0; j <<= 1)
+                    FFZT[i]++;
+            }
+
             Ffzt = new sbyte[FFZT.Length];
             Array.Copy(FFZT, 0, Ffzt, 0, Ffzt.Length);
 
@@ -142,10 +140,10 @@ namespace DjvuNet.Compression
             }
         }
 
-        public ZPCodec(Stream ibs)
+        public ZPCodec(Stream inputStream)
             : this()
         {
-            Init(ibs);
+            Initializa(inputStream);
         }
 
         #endregion Constructors
@@ -316,10 +314,10 @@ namespace DjvuNet.Compression
             return ((unchecked((int)0xffffffffL) & x) < 65280L) ? Ffzt[0xff & (x >> 8)] : (Ffzt[0xff & x] + 8);
         }
 
-        public ZPCodec Init(Stream ibs)
+        public ZPCodec Initializa(Stream inputStream)
         {
-            _ibs = ibs;
-            dinit();
+            InputStream = inputStream;
+            DecoderInitialize();
 
             return this;
         }
@@ -338,27 +336,35 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Preload()
         {
-            for (; _scount <= 24; _scount = (short)(_scount + 8))
-            {
-                _zByte = -1;
-                _zByte = (short)_ibs.ReadByte();
+            short scount = _scount;
+            short zByte = _zByte;
+            int buffer = _buffer;
 
-                if (_zByte == -1)
+            for (; scount <= 24; scount = (short)(scount + 8))
+            {
+                zByte = -1;
+                zByte = (short)InputStream.ReadByte();
+
+                if (zByte == -1)
                 {
-                    _zByte = 255;
+                    zByte = 255;
 
                     if (--_delay < 1)
                         throw new IOException("EOF");
                 }
-                _buffer = (_buffer << 8) |(int) _zByte;
+                buffer = (buffer << 8) |(int) zByte;
             }
+
+            _scount = scount;
+            _zByte = zByte;
+            _buffer = buffer;
         }
 
         #endregion Public Methods
 
         #region Private Methods
 
-        private void dinit()
+        private void DecoderInitialize()
         {
             AValue = 0;
             NewZPTable(DefaultZPTable);
@@ -366,8 +372,8 @@ namespace DjvuNet.Compression
 
             try
             {
-                _code &= (_ibs.ReadByte() << 8);
-                _zByte = (short)(0xff & _ibs.ReadByte());
+                _code &= (InputStream.ReadByte() << 8);
+                _zByte = (short)(0xff & InputStream.ReadByte());
             }
             catch (IOException)
             {
@@ -388,7 +394,7 @@ namespace DjvuNet.Compression
         /// Builds the default version of the ZP Table
         /// </summary>
         /// <returns></returns>
-        private ZPTable[] BuildDefaultZPTable()
+        internal ZPTable[] BuildDefaultZPTable()
         {
             return new[]
                        {

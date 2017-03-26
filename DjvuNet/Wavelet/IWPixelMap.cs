@@ -145,7 +145,7 @@ namespace DjvuNet.Wavelet
                 }
             }
 
-            ZPCodec zp = new ZPCodec().Init(bs.BaseStream);
+            ZPCodec zp = new ZPCodec().Initializa(bs.BaseStream);
 
             for (int flag = 1; (flag != 0) && (_cslice < nslices); _cslice++)
             {

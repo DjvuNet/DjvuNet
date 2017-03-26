@@ -5,21 +5,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+using DjvuNet.Tests;
 
 namespace DjvuNet.Compression.Tests
 {
     public class ZPCodecTests
     {
-        [Fact(Skip = "Not implemented")]
-        public void ZPCodecTest()
+        [Fact()]
+        public void ZPCodecTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            ZPCodec codec = new ZPCodec();
+            Assert.NotNull(codec.FFZT);
+            Assert.Equal<int>(256, codec.FFZT.Length);
         }
 
-        [Fact(Skip = "Not implemented")]
-        public void ZPCodecTest1()
+        [Fact()]
+        public void ZPCodecTest002()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = DjvuReaderTests.BzzCompressedTestBuffer;
+            using(MemoryStream stream = new MemoryStream(buffer, false))
+            {
+                ZPCodec codec = new ZPCodec(stream);
+                Assert.NotNull(codec.InputStream);
+            }
         }
 
         [Fact(Skip = "Not implemented")]
