@@ -13,7 +13,7 @@ configuration:
 
 branches:
   only:
-    - master
+    - parser_archit
 # block testing until test data committed
 test:
   categories:
@@ -21,3 +21,6 @@ test:
       - NonExistingCategory
 matrix:
   fast_finish: true
+
+before_build:
+    nuget restore -DisableParallelProcessing  -verbosity detailed
