@@ -151,12 +151,15 @@ namespace DjvuNet.DataChunks
             }
 
             // Read in all the chunks
-            while (reader.Position <  maxPosition)
+            while (true)
             {
                 if (reader.Position % 2 == 1)
                 {
                     reader.Position++;
                 }
+
+                if (reader.Position >= maxPosition)
+                    break;
 
                 // Read the chunk ID
                 string id = reader.ReadUTF8String(4);
