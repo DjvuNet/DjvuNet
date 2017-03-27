@@ -65,7 +65,7 @@ namespace DjvuNet.DataChunks.Graphics.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void index_to_colorTest()
         {
             Assert.True(false, "This test needs an implementation");

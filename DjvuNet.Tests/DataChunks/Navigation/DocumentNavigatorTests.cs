@@ -10,7 +10,7 @@ namespace DjvuNet.DataChunks.Navigation.Tests
 {
     public class DocumentNavigatorTests
     {
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void DocumentNavigatorTest()
         {
             Assert.True(false, "This test needs an implementation");
