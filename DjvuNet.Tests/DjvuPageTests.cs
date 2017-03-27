@@ -88,9 +88,9 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_Text001()
         {
-            int pageCount = 62;
             string expectedValue = "Can Ann fan the lad?";
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -106,9 +106,9 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_Text003()
         {
-            int pageCount = 300;
             string expectedValue = "This book grew out of a graduate course on 3-manifolds taught at Emory";
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -124,8 +124,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildImage001()
         {
-            int pageCount = 17;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -140,8 +140,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildImage002()
         {
-            int pageCount = 11;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test002C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -156,8 +156,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildImage003()
         {
-            int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -172,8 +172,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildPageImage001()
         {
-            int pageCount = 17;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -188,8 +188,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildPageImage002()
         {
-            int pageCount = 11;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test002C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -204,8 +204,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildPageImage003()
         {
-            int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -220,8 +220,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_ExtractThumbnailImage001()
         {
-            int pageCount = 17;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -236,11 +236,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetBgPixmap001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(62, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -260,11 +259,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetBitmapList001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(62, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -286,11 +284,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetTextForLocation001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(17, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -304,11 +301,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_Image001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(17, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -321,11 +317,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_InvertImage001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(17, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -339,11 +334,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetPixelMap001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(17, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -357,8 +351,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetPixelMap002()
         {
-            int pageCount = 11;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test002C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -375,8 +369,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetPixelMap003()
         {
-            int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 int count = 0;
                 try
@@ -385,7 +379,7 @@ namespace DjvuNet.Tests
 
                     foreach (DjvuPage page in document.Pages)
                     {
-                        if (count > 5)
+                        if (count > 0)
                             break;
 
                         var jb2img = page.ForegroundJB2Image;
@@ -395,14 +389,7 @@ namespace DjvuNet.Tests
                         Graphics.PixelMap map = new Graphics.PixelMap();
                         DPixelMap result = null;
 
-                        try
-                        {
-                            result = page.GetPixelMap(rect, 1, 2.2, map);
-                        }
-                        catch (Exception ex)
-                        {
-                            Util.FailOnException(ex, $"1. Exception while calling DjvuPage.GetPixelMap:\n");
-                        }
+                        result = page.GetPixelMap(rect, 1, 2.2, map);
 
                         VerifyPixelMap(result);
 
@@ -410,14 +397,7 @@ namespace DjvuNet.Tests
                         Graphics.PixelMap map2 = new Graphics.PixelMap();
                         result = null;
 
-                        try
-                        {
-                            result = page.GetPixelMap(rect12, 12, 2.2, map2);
-                        }
-                        catch (Exception ex)
-                        {
-                            Util.FailOnException(ex, $"2. Exception while calling DjvuPage.GetPixelMap:\n");
-                        }
+                        result = page.GetPixelMap(rect12, 12, 2.2, map2);
 
                         VerifyPixelMap(result);
 
