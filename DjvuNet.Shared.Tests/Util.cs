@@ -41,10 +41,10 @@ namespace DjvuNet.Tests
                 Assert.Equal<int>(pageCount, document.Pages.Length);
         }
 
-        public static string GetArtifactsRoot()
+        public static string GetTestFilePathTemplate()
         {
             char dirSep = Path.DirectorySeparatorChar;
-            string filePathTempl = $"artifacts{dirSep}test{{0}}.djvu";
+            string filePathTempl = $"artifacts{dirSep}test{{0:00#}}C.djvu";
             string rootDir = Util.RepoRoot;
             filePathTempl = Path.Combine(rootDir, filePathTempl);
             return filePathTempl;
