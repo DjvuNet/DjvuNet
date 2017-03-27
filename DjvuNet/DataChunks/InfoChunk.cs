@@ -113,7 +113,7 @@ namespace DjvuNet.DataChunks
             DPI = reader.ReadInt16(); // LSB
             Gamma = (float)reader.ReadByte() / 10;
 
-            sbyte flag = reader.ReadSByte();
+            byte flag = reader.ReadByte();
             // B[3..0]
             PageRotation = (PageRotations)(flag & 0x07);
         }
