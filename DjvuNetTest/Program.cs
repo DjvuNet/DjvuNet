@@ -23,10 +23,10 @@ namespace DjvuNetTest
 
             string[] docs = new string[]
             {
-               "..\\..\\..\\artifacts\\test001.djvu",
-               "..\\..\\..\\artifacts\\test003.djvu",
-               "..\\..\\..\\artifacts\\test032.djvu",
-               "..\\..\\..\\artifacts\\test046.djvu",
+               DjvuNet.Tests.Util.GetTestFilePath(1),
+               DjvuNet.Tests.Util.GetTestFilePath(3),
+               //"..\\..\\..\\artifacts\\test032.djvu",
+               //"..\\..\\..\\artifacts\\test046.djvu",
             };
 
             long[] elapsed = new long[docs.Length * 3];
@@ -109,7 +109,7 @@ namespace DjvuNetTest
                 if (i + 1 > testsToSkip)
                     elapsed[docNo*3 + imageNo] += watch.ElapsedTicks;
 
-                //bmp.Save(fileName + $"_{imageNo}.png", ImageFormat.Png);
+                bmp.Save(fileName + $"_{imageNo}.png", ImageFormat.Png);
             }
         }
     }

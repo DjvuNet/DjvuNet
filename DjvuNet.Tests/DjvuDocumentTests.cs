@@ -133,7 +133,7 @@ namespace DjvuNet.Tests
             }
             catch(Exception error)
             {
-                Util.FailOnException(error, $"DjvuDocument_ctor failed {filePath}:{pageCount}");
+                Util.FailOnException(error, $"\nDjvuDocument_ctor failed. File: {filePath}, Page count: {pageCount}");
             }
             finally
             {
@@ -149,7 +149,7 @@ namespace DjvuNet.Tests
         {
             string path = Util.RepoRoot;
             int pageCount = 62;
-            using(DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001C.djvu"))
+            using(DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
             }
@@ -159,7 +159,7 @@ namespace DjvuNet.Tests
         public void DjvuDocument_ctor002()
         {
             int pageCount = 11;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test002C.djvu"))
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
             }

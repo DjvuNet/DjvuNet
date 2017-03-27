@@ -107,6 +107,10 @@
     <None Include="TestFiles\Mcguffey%27s_Primer.djvu" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj">
+      <Project>{4fec9875-d7e6-47bd-a13a-5c1944464545}</Project>
+      <Name>DjvuNet.Helper.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DjvuNet\DjvuNet.csproj">
       <Project>{e681b178-e5f8-4782-89c8-f32720b1464a}</Project>
       <Name>DjvuNet</Name>
