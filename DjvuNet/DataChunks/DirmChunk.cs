@@ -111,7 +111,7 @@ namespace DjvuNet.DataChunks
             // B[6..0]
             Version = flagByte & 0x7f;
 
-            int count = reader.ReadInt16MSB();
+            int count = reader.ReadUInt16MSB();
 
             ReadComponentData(reader, count);
         }
@@ -132,7 +132,7 @@ namespace DjvuNet.DataChunks
             // Read the offsets for the components
             for (int x = 0; x < count; x++)
             {
-                int offset = reader.ReadInt32MSB();
+                int offset = (int) reader.ReadUInt32MSB();
                 components.Add(new DirmComponent(offset));
             }
 

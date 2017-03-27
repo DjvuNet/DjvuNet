@@ -50,7 +50,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the minor version for the page encoder
         /// </summary>
-        public sbyte MinorVersion { get; internal set; }
+        public byte MinorVersion { get; internal set; }
 
         #endregion MinorVersion
 
@@ -68,7 +68,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the major version for the page encoder
         /// </summary>
-        public sbyte MajorVersion { get; internal set; }
+        public byte MajorVersion { get; internal set; }
 
         #endregion MajorVersion
 
@@ -106,10 +106,10 @@ namespace DjvuNet.DataChunks
 
         protected override void ReadChunkData(DjvuReader reader)
         {
-            Width = reader.ReadInt16MSB();
-            Height = reader.ReadInt16MSB();
-            MinorVersion = reader.ReadSByte();
-            MajorVersion = reader.ReadSByte();
+            Width = reader.ReadUInt16MSB();
+            Height = reader.ReadUInt16MSB();
+            MinorVersion = reader.ReadByte();
+            MajorVersion = reader.ReadByte();
             DPI = reader.ReadInt16(); // LSB
             Gamma = (float)reader.ReadByte() / 10;
 
