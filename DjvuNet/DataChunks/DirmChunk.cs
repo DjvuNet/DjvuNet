@@ -103,13 +103,13 @@ namespace DjvuNet.DataChunks
         protected override void ReadChunkData(DjvuReader reader)
         {
             reader.Position = Offset;
-            sbyte flagByte = reader.ReadSByte();
+            byte flagByte = reader.ReadByte();
 
             // B[7]
             IsBundled = (flagByte >> 7) == 1;
 
             // B[6..0]
-            Version = flagByte & 127;
+            Version = flagByte & 0x7f;
 
             int count = reader.ReadInt16MSB();
 
