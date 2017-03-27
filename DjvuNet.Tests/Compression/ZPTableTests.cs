@@ -10,7 +10,7 @@ namespace DjvuNet.Compression.Tests
 {
     public class ZPTableTests
     {
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ZPTableTest()
         {
             Assert.True(false, "This test needs an implementation");

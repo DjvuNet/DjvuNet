@@ -12,7 +12,7 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class DirmChunkTests
     {
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void DirmChunk_ctor001()
         {
             int pageCount = 62;

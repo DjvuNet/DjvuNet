@@ -107,6 +107,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 		Templates\UtilRoot.Template.cs = Templates\UtilRoot.Template.cs
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\nuget.exe = Tools\nuget.exe
+	EndProjectSection
+EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared.Tests", "DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.shproj", "{B7EF5575-5932-4EA7-B250-E7DA238D60A9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Helper.Tests", "DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj", "{4FEC9875-D7E6-47BD-A13A-5C1944464545}"

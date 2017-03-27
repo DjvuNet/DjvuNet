@@ -61,25 +61,30 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact]
         public void DjvuReaderTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            using (MemoryStream stream = new MemoryStream())
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                Assert.NotNull(reader);
+                Assert.IsType<MemoryStream>(reader.BaseStream);
+            }
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void DjvuReaderTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void GetJPEGImageTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void GetFixedLengthStreamTest()
         {
             Assert.True(false, "This test needs an implementation");
@@ -393,85 +398,85 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void GetBZZEncodedReaderTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadNullTerminatedStringTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadUInt24MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadInt24MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadUInt24Test()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadInt24Test()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadInt16MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadInt32MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadInt64MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadUInt16MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadUInt32MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadUInt64MSBTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadUTF8StringTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadUTF7StringTest()
         {
             Assert.True(false, "This test needs an implementation");
@@ -547,19 +552,19 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void CloneReaderTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void CloneReaderTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ToStringTest()
         {
             Assert.True(false, "This test needs an implementation");
