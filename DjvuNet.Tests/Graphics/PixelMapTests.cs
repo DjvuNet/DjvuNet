@@ -13,8 +13,8 @@ namespace DjvuNet.Graphics.Tests
         {
             int pageCount1 = 223;
             int pageCount2 = 62;
-            using (DjvuDocument document1 = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test010.djvu"))
-            using (DjvuDocument document2 = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test001.djvu"))
+            using (DjvuDocument document1 = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test010C.djvu"))
+            using (DjvuDocument document2 = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test001C.djvu"))
             {
                 DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount1, document1);
                 DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount2, document2);

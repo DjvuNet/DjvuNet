@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks.Tests
         public void DirmChunk_ctor001()
         {
             int pageCount = 62;
-            using (DjvuDocument document = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test001.djvu"))
+            using (DjvuDocument document = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test001C.djvu"))
             {
                 DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
                 DirmChunk dirm = ((DjvmChunk)document.RootForm).DirmData;
@@ -29,7 +29,7 @@ namespace DjvuNet.DataChunks.Tests
         public void DirmChunk_ctor003()
         {
             int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test003.djvu"))
+            using (DjvuDocument document = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test003C.djvu"))
             {
                 DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
                 DirmChunk dirm = ((DjvmChunk)document.RootForm).DirmData;
