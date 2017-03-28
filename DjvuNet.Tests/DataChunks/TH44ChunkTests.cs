@@ -10,7 +10,7 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class TH44ChunkTests
     {
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void TH44ChunkTest()
         {
             Assert.True(false, "This test needs an implementation");

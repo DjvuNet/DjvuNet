@@ -76,12 +76,12 @@ namespace DjvuNet.DataChunks.Text
 
         #region Version
 
-        private sbyte _version;
+        private byte _version;
 
         /// <summary>
         /// Gets the version of the text chunk
         /// </summary>
-        public sbyte Version
+        public int Version
         {
             get
             {
@@ -92,7 +92,7 @@ namespace DjvuNet.DataChunks.Text
             private set
             {
                 if (_version != value)
-                    _version = value;
+                    _version = (byte) value;
             }
         }
 
@@ -179,10 +179,10 @@ namespace DjvuNet.DataChunks.Text
 
             using (DjvuReader reader = GetTextDataReader(_dataLocation))
             {
-                _textLength = reader.ReadInt24MSB();
+                _textLength = (int) reader.ReadUInt24MSB();
                 byte[] textBytes = reader.ReadBytes(_textLength);
                 _text = Encoding.UTF8.GetString(textBytes);
-                _version = reader.ReadSByte();
+                _version = reader.ReadByte();
 
                 _zone = new TextZone(reader, null, null, this);
             }

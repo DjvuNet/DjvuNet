@@ -17,39 +17,39 @@ namespace DjvuNet.Tests
             {
                 return new List<object[]>
                 {
-                     new object[] {$"{Util.RepoRoot}artifacts\\test001.djvu", 62, 9, "Can Ann fan the lad?" },
-                     new object[] {$"{Util.RepoRoot}artifacts\\test002.djvu", 107, 2, "The famous Riemann Hypothesis, asserting that all of the non-trivial zeros of zeta are on"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test003.djvu", 300, 37, "We have discussed manifolds from several points of view. The key idea,"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test004.djvu", 494, 485, "77. Yaglom, I.M., Geometric Transformations II, Mathematical Association of America,"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test005.djvu", 286, 10, "Because of these divisions in the human population, anyone"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test006.djvu", 348, 211, "property of the exponential density, as the following intuitive argument"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test007.djvu", 186, 71, "In view of (3.2.8), the final assertion when j is recurrent comes down to"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test008.djvu", 427, 5, "ISBN 978-1-107-10012-1 Hardback"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test009.djvu", 274, 250, "a perfect mirror - something that does not exist in nature? Could the approach"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test010.djvu", 223, 32, "charged particle is a diverging wave. I argue that this condition is best thought of as"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test011.djvu", 154, 39, "Definition 3.14 (Diameter). The diameter of a topology is the maximal number of links"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test012.djvu", 239, 2, "Second printing of the third edition with ISBN 3-540-64611-6, published as softcover edition"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test013.djvu", 9, 9, "DUNKL, С. Р. 1962. Romberg quadrature to prescribed accuracy. SHARE File 7090-1481,"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test013.djvu", 9, 9, "DUNKL, C. P. AND RAMIREZ, D. E. 1994. Computing hyperelliptic integrals for surface measure of"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test014.djvu", 20, 1, "algebra system Maple [16], [4] and the Maple packages FPS [9], [7], gfun [19], hsum"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test015.djvu", 40, 15, "so that p (5) = 7. The generating function in this case"},
-                     // new object[] {$"{Util.RepoRoot}artifacts\\test016.djvu", 30}, - text without OCR
-                     new object[] {$"{Util.RepoRoot}artifacts\\test017.djvu", 12, 1, "1. Introduction. The Riemann zeta function f(s) is the analytic function of s ="},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test018.djvu", 7, 3, "3.1 1—1 correspondence proof"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test018.djvu", 7, 3, "Figure 3: The Riemann surface of W(z)"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test019.djvu", 28, 1, "MA 02142-1493 USA; F17J53-2889; journals-orders@mit.edu, journals-info@mit.edu."},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test020.djvu", 5, 5, "implementation independent: the average number of main"},
-                     //new object[] {$"{Util.RepoRoot}artifacts\\test021.djvu", 12, 1, "Algebraic Algorithms using p-adic Constructions"}, // Crashes test execution engine
-                     new object[] {$"{Util.RepoRoot}artifacts\\test022.djvu", 10, 7, "and prime p is again provided by the EZGCD Algor-"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test023.djvu", 3, 2, "• Part 3 is split again into 4 parts recursively and its"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test023.djvu", 3, 2, "Part 3 is split again into 4 parts recursively and its"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test024.djvu", 3, 1, "are analog to S-polynomials of Buchberger and cntical pairs"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test025.djvu", 9, 2, "time with the sparse representation. Theorem 1 states that the existence of an integer root"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test026.djvu", 146, 93, "One interesting example of a flexible Lie-admissible algebra is the so-"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test027.djvu", 173, 70, "It is worth noting that if η € N is a value of the mapping F and if m € Μ"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test027.djvu", 173, 70, "It is not difficult to see that Theorem 3.5.1 is also true when the domain W"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test028.djvu", 267, 38, "global solution (see Snyman and Fatti, 1987; Groenwold and Snyman,"},
-                     new object[] {$"{Util.RepoRoot}artifacts\\test029.djvu", 323, 215, "Proof. For any large integer r, we can apply the solvability theorem (8.3.6)"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test001C.djvu", 62, 9, "Can Ann fan the lad?" },
+                     new object[] {$"{Util.RepoRoot}artifacts\\test002C.djvu", 11, 2, "Figure 1. Example of a phylogenetic sequencing workflow. A diagram of an experimental and analysis workflow for amplicon or shotgun" },
+                     new object[] {$"{Util.RepoRoot}artifacts\\test003C.djvu", 300, 37, "We have discussed manifolds from several points of view. The key idea,"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test004C.djvu", 494, 485, "77. Yaglom, I.M., Geometric Transformations II, Mathematical Association of America,"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test005C.djvu", 286, 10, "Because of these divisions in the human population, anyone"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test006C.djvu", 348, 211, "property of the exponential density, as the following intuitive argument"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test007C.djvu", 186, 71, "In view of (3.2.8), the final assertion when j is recurrent comes down to"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test008C.djvu", 427, 5, "ISBN 978-1-107-10012-1 Hardback"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test009C.djvu", 274, 250, "a perfect mirror - something that does not exist in nature? Could the approach"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test010C.djvu", 17, 9, "no way interferes with the theory's usefulness, and thus can be ignored by physics" },
+                     new object[] {$"{Util.RepoRoot}artifacts\\test011C.djvu", 154, 39, "Definition 3.14 (Diameter). The diameter of a topology is the maximal number of links"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test012C.djvu", 239, 2, "Second printing of the third edition with ISBN 3-540-64611-6, published as softcover edition"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test013C.djvu", 9, 9, "DUNKL, С. Р. 1962. Romberg quadrature to prescribed accuracy. SHARE File 7090-1481,"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test013C.djvu", 9, 9, "DUNKL, C. P. AND RAMIREZ, D. E. 1994. Computing hyperelliptic integrals for surface measure of"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test014C.djvu", 20, 1, "algebra system Maple [16], [4] and the Maple packages FPS [9], [7], gfun [19], hsum"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test015C.djvu", 40, 15, "so that p (5) = 7. The generating function in this case"},
+                     // new object[] {$"{Util.RepoRoot}artifacts\\test016C.djvu", 30}, - text without OCR
+                     new object[] {$"{Util.RepoRoot}artifacts\\test017C.djvu", 12, 1, "1. Introduction. The Riemann zeta function f(s) is the analytic function of s ="},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test018C.djvu", 7, 3, "3.1 1—1 correspondence proof"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test018C.djvu", 7, 3, "Figure 3: The Riemann surface of W(z)"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test019C.djvu", 28, 1, "MA 02142-1493 USA; F17J53-2889; journals-orders@mit.edu, journals-info@mit.edu."},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test020C.djvu", 5, 5, "implementation independent: the average number of main"},
+                     //new object[] {$"{Util.RepoRoot}artifacts\\test021C.djvu", 12, 1, "Algebraic Algorithms using p-adic Constructions"}, // Crashes test execution engine
+                     new object[] {$"{Util.RepoRoot}artifacts\\test022C.djvu", 10, 7, "and prime p is again provided by the EZGCD Algor-"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test023C.djvu", 3, 2, "• Part 3 is split again into 4 parts recursively and its"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test023C.djvu", 3, 2, "Part 3 is split again into 4 parts recursively and its"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test024C.djvu", 3, 1, "are analog to S-polynomials of Buchberger and cntical pairs"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test025C.djvu", 9, 2, "time with the sparse representation. Theorem 1 states that the existence of an integer root"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test026C.djvu", 146, 93, "One interesting example of a flexible Lie-admissible algebra is the so-"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test027C.djvu", 173, 70, "It is worth noting that if η € N is a value of the mapping F and if m € Μ"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test027C.djvu", 173, 70, "It is not difficult to see that Theorem 3.5.1 is also true when the domain W"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test028C.djvu", 267, 38, "global solution (see Snyman and Fatti, 1987; Groenwold and Snyman,"},
+                     new object[] {$"{Util.RepoRoot}artifacts\\test029C.djvu", 323, 215, "Proof. For any large integer r, we can apply the solvability theorem (8.3.6)"},
                      //new object[] {$"{Util.RepoRoot}artifacts\\test030.djvu", 1}, - technical drawing without OCR
                     //new object[] {$"{Util.RepoRoot}artifacts\\test001.djvu"},
                     //new object[] {$"{Util.RepoRoot}artifacts\\test001.djvu"},
@@ -88,9 +88,9 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_Text001()
         {
-            int pageCount = 62;
             string expectedValue = "Can Ann fan the lad?";
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -106,9 +106,9 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_Text003()
         {
-            int pageCount = 300;
             string expectedValue = "This book grew out of a graduate course on 3-manifolds taught at Emory";
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -124,8 +124,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildImage001()
         {
-            int pageCount = 223;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -140,8 +140,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildImage002()
         {
-            int pageCount = 107;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test002.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -156,8 +156,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildImage003()
         {
-            int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -172,8 +172,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildPageImage001()
         {
-            int pageCount = 223;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -188,8 +188,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildPageImage002()
         {
-            int pageCount = 107;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test002.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -204,8 +204,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_BuildPageImage003()
         {
-            int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -220,8 +220,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_ExtractThumbnailImage001()
         {
-            int pageCount = 223;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -236,11 +236,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetBgPixmap001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(62, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -260,11 +259,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetBitmapList001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(62, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -286,11 +284,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetTextForLocation001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(223, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -304,11 +301,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_Image001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(223, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -321,11 +317,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_InvertImage001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(223, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -339,11 +334,10 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetPixelMap001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(223, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
@@ -357,8 +351,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetPixelMap002()
         {
-            int pageCount = 107;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test002.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
@@ -375,8 +369,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuPage_GetPixelMap003()
         {
-            int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
             {
                 int count = 0;
                 try
@@ -385,7 +379,7 @@ namespace DjvuNet.Tests
 
                     foreach (DjvuPage page in document.Pages)
                     {
-                        if (count > 5)
+                        if (count > 0)
                             break;
 
                         var jb2img = page.ForegroundJB2Image;
@@ -395,14 +389,7 @@ namespace DjvuNet.Tests
                         Graphics.PixelMap map = new Graphics.PixelMap();
                         DPixelMap result = null;
 
-                        try
-                        {
-                            result = page.GetPixelMap(rect, 1, 2.2, map);
-                        }
-                        catch (Exception ex)
-                        {
-                            Util.FailOnException(ex, $"1. Exception while calling DjvuPage.GetPixelMap:\n");
-                        }
+                        result = page.GetPixelMap(rect, 1, 2.2, map);
 
                         VerifyPixelMap(result);
 
@@ -410,14 +397,7 @@ namespace DjvuNet.Tests
                         Graphics.PixelMap map2 = new Graphics.PixelMap();
                         result = null;
 
-                        try
-                        {
-                            result = page.GetPixelMap(rect12, 12, 2.2, map2);
-                        }
-                        catch (Exception ex)
-                        {
-                            Util.FailOnException(ex, $"2. Exception while calling DjvuPage.GetPixelMap:\n");
-                        }
+                        result = page.GetPixelMap(rect12, 12, 2.2, map2);
 
                         VerifyPixelMap(result);
 
@@ -445,7 +425,7 @@ namespace DjvuNet.Tests
         [Fact(/*Skip = "DjvuNet bug prevents clean pass and test is to general to track the bug."*/)]
         public void DjvuPage_Preload001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001.djvu"))
+            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001C.djvu"))
             {
                 Assert.NotNull(document.FirstPage);
                 Assert.NotNull(document.LastPage);

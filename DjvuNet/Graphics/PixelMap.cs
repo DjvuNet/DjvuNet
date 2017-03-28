@@ -282,9 +282,9 @@ namespace DjvuNet.Graphics
                         {
                             int level0 = multiplier[srcpix];
                             int level1 = 0x10000 - level0;
-                            dstPixel.SetBGR(_clip[((dstPixel.Blue * level0) + (gb * level1)) >> 16],
-                                            _clip[((dstPixel.Green * level0) + (gg * level1)) >> 16],
-                                            _clip[((dstPixel.Red * level0) + (gr * level1)) >> 16]);
+                            dstPixel.SetBGR(_clip[unchecked ((byte)((dstPixel.Blue * level0) + (gb * level1)) >> 16)],
+                                            _clip[unchecked((byte)((dstPixel.Green * level0) + (gg * level1)) >> 16)],
+                                            _clip[unchecked((byte)((dstPixel.Red * level0) + (gr * level1)) >> 16)]);
                         }
                     }
                 }
@@ -309,7 +309,9 @@ namespace DjvuNet.Graphics
             int[] gtable = GetColorCorrection(gamma);
 
             for (int i = 0; i < Data.Length; i++)
-                Data[i] = (sbyte)gtable[Data[i]];
+            {
+                Data[i] = (sbyte)gtable[unchecked((byte)Data[i])];
+            }
         }
 
         /// <summary> 

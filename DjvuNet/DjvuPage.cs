@@ -1255,15 +1255,13 @@ namespace DjvuNet
                             if (fgPalette.BlitColors[blitno] == colorindex)
                             {
                                 JB2Shape pshape = fgJb2.GetShape(pblit.ShapeNumber);
-                                GRect xrect =
-                                  new GRect(
-                                    pblit.Left,
-                                    pblit.Bottom,
-                                    pshape.Bitmap.ImageWidth,
-                                    pshape.Bitmap.ImageHeight);
+                                GRect xrect = new GRect(pblit.Left, pblit.Bottom, 
+                                    pshape.Bitmap.ImageWidth, pshape.Bitmap.ImageHeight);
+
                                 comprect.Recthull(comprect, xrect);
                                 compset.Add(components[pos]);
-                                components.Remove(pos);
+                                components.RemoveAt(0);
+
                             }
                             else
                             {

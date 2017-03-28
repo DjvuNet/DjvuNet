@@ -89,9 +89,9 @@ namespace DjvuNet.DataChunks.Graphics
         /// <param name="reader"></param>
         internal void ReadPaletteData(DjvuReader reader)
         {
-            sbyte header = reader.ReadSByte();
+            byte header = reader.ReadByte();
             bool isShapeTable = (header >> 7) == 1;
-            Version = header & 127;
+            Version = header & 0x7f;
 
             // Color palette size is expressed as unsigned short int
             // in reference implementation while INT16 is indicated in
@@ -120,7 +120,7 @@ namespace DjvuNet.DataChunks.Graphics
                 // Read in the blit colors
                 for (int x = 0; x < totalBlits; x++)
                 {
-                    int index = compressed.ReadInt16MSB();
+                    int index = compressed.ReadUInt16MSB();
                     blitColors.Add(index);
                 }
             }

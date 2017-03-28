@@ -2,6 +2,7 @@
 using System.Drawing;
 using Xunit;
 using DjvuNet.Graphics;
+using TUtil = DjvuNet.Tests.Util;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -9,15 +10,15 @@ namespace DjvuNet.Graphics.Tests
     public class PixelMapTests
     {
         [Fact]
-        public void PixelMap_GotColorCorrection001()
+        public void PixelMap_GetColorCorrection001()
         {
-            int pageCount1 = 223;
-            int pageCount2 = 62;
-            using (DjvuDocument document1 = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test010.djvu"))
-            using (DjvuDocument document2 = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test001.djvu"))
+            int pageCount1 = 0;
+            int pageCount2 = 0;
+            using (DjvuDocument document1 = TUtil.GetTestDocument(10, out pageCount1))
+            using (DjvuDocument document2 = TUtil.GetTestDocument(1, out pageCount2))
             {
-                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount1, document1);
-                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount2, document2);
+                TUtil.VerifyDjvuDocument(pageCount1, document1);
+                TUtil.VerifyDjvuDocument(pageCount2, document2);
 
                 var page1 = document1.FirstPage;
                 var page2 = document2.FirstPage;
@@ -86,85 +87,85 @@ namespace DjvuNet.Graphics.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void PixelMapTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void GetColorCorrectionTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void AttenuateTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void BlitTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ApplyGammaCorrectionTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void DownsampleTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void Downsample43Test()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void FillTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void InitTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void InitTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void InitTest2()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void StencilTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void TranslateTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void InitTest3()
         {
             Assert.True(false, "This test needs an implementation");
