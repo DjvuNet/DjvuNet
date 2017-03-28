@@ -134,9 +134,6 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared", "DjvuNet.Shared\DjvuNet.Shared.shproj", "{61B8CB33-F13A-4309-A137-895017B28E31}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{61b8cb33-f13a-4309-a137-895017b28e31}*SharedItemsImports = 13
