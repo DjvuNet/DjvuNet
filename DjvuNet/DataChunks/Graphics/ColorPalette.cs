@@ -96,7 +96,7 @@ namespace DjvuNet.DataChunks.Graphics
             // Color palette size is expressed as unsigned short int
             // in reference implementation while INT16 is indicated in
             // standard document
-            ushort paletteSize = reader.ReadUInt16MSB();
+            ushort paletteSize = reader.ReadUInt16BigEndian();
 
             // Read in the palette colors
             List<Pixel> paletteColors = new List<Pixel>(paletteSize);
@@ -114,13 +114,13 @@ namespace DjvuNet.DataChunks.Graphics
 
             if (isShapeTable == true)
             {
-                int totalBlits = (int) reader.ReadUInt24MSB();
+                int totalBlits = (int) reader.ReadUInt24BigEndian();
                 DjvuReader compressed = reader.GetBZZEncodedReader();
 
                 // Read in the blit colors
                 for (int x = 0; x < totalBlits; x++)
                 {
-                    int index = compressed.ReadUInt16MSB();
+                    int index = compressed.ReadUInt16BigEndian();
                     blitColors.Add(index);
                 }
             }

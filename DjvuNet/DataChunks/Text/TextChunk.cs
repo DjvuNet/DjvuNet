@@ -179,7 +179,7 @@ namespace DjvuNet.DataChunks.Text
 
             using (DjvuReader reader = GetTextDataReader(_dataLocation))
             {
-                _textLength = (int) reader.ReadUInt24MSB();
+                _textLength = (int) reader.ReadUInt24BigEndian();
                 byte[] textBytes = reader.ReadBytes(_textLength);
                 _text = Encoding.UTF8.GetString(textBytes);
                 _version = reader.ReadByte();

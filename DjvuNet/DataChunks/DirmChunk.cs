@@ -111,7 +111,7 @@ namespace DjvuNet.DataChunks
             // B[6..0]
             Version = flagByte & 0x7f;
 
-            int count = reader.ReadUInt16MSB();
+            int count = reader.ReadUInt16BigEndian();
 
             ReadComponentData(reader, count);
         }
@@ -132,7 +132,7 @@ namespace DjvuNet.DataChunks
             // Read the offsets for the components
             for (int x = 0; x < count; x++)
             {
-                int offset = (int) reader.ReadUInt32MSB();
+                int offset = (int) reader.ReadUInt32BigEndian();
                 components.Add(new DirmComponent(offset));
             }
 
@@ -160,7 +160,7 @@ namespace DjvuNet.DataChunks
 
             // Read the component sizes
             for (int x = 0; x < count; x++)
-                _components[x].Size = bzReader.ReadInt24MSB();
+                _components[x].Size = bzReader.ReadInt24BigEndian();
 
             // Read the component flag information
             for (int x = 0; x < count; x++)
