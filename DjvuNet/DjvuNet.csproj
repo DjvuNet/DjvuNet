@@ -156,6 +156,13 @@
     <Compile Include="JB2\JB2Image.cs" />
     <Compile Include="JB2\JB2Item.cs" />
     <Compile Include="JB2\JB2Shape.cs" />
+    <Compile Include="Parser\AbstractDocumentTree.cs" />
+    <Compile Include="Parser\DjvuParser.cs" />
+    <Compile Include="Parser\IAbstractDocumentTree.cs" />
+    <Compile Include="Parser\IDjvuParser.cs" />
+    <Compile Include="Parser\IDocumentElement.cs" />
+    <Compile Include="Parser\IDocumentNode.cs" />
+    <Compile Include="Parser\IDocumentRootNode.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
