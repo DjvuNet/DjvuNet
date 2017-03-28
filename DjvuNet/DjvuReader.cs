@@ -54,6 +54,20 @@ namespace DjvuNet
 
         #endregion Position
 
+        public long Length
+        {
+            get
+            {
+                try
+                {
+                    return BaseStream.Length;
+                }
+                catch (NotSupportedException) { }
+
+                return -1;
+            }
+        }
+
         #endregion Public Properties
 
         #region Constructors
@@ -145,7 +159,7 @@ namespace DjvuNet
         /// Reads a 3 sbyte unsigned integer value
         /// </summary>
         /// <returns></returns>
-        public uint ReadUInt24MSB()
+        public uint ReadUInt24BigEndian()
         {
             byte[] buffer = new byte[4];
             Read(buffer, 1, 3);
@@ -157,7 +171,7 @@ namespace DjvuNet
         /// Reads a 3 sbyte signed integer value
         /// </summary>
         /// <returns></returns>
-        public int ReadInt24MSB()
+        public int ReadInt24BigEndian()
         {
             byte[] buffer = new byte[4];
             Read(buffer, 1, 3);
@@ -202,7 +216,7 @@ namespace DjvuNet
         /// </exception>
         /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
         /// <filterpriority>2</filterpriority>
-        public short ReadInt16MSB()
+        public short ReadInt16BigEndian()
         {
             var value = ReadBytes(2);
             Array.Reverse(value);
@@ -216,7 +230,7 @@ namespace DjvuNet
         /// A 4-sbyte signed integer read from the current stream.
         /// </returns>
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
-        public int ReadInt32MSB()
+        public int ReadInt32BigEndian()
         {
             var value = ReadBytes(4);
             Array.Reverse(value);
@@ -230,7 +244,7 @@ namespace DjvuNet
         /// An 8-sbyte signed integer read from the current stream.
         /// </returns>
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
-        public long ReadInt64MSB()
+        public long ReadInt64BigEndian()
         {
             var value = ReadBytes(8);
             Array.Reverse(value);
@@ -244,7 +258,7 @@ namespace DjvuNet
         /// A 2-sbyte unsigned integer read from this stream.
         /// </returns>
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
-        public ushort ReadUInt16MSB()
+        public ushort ReadUInt16BigEndian()
         {
             var value = ReadBytes(2);
             Array.Reverse(value);
@@ -258,7 +272,7 @@ namespace DjvuNet
         /// A 4-sbyte unsigned integer read from this stream.
         /// </returns>
         /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
-        public uint ReadUInt32MSB()
+        public uint ReadUInt32BigEndian()
         {
             var value = ReadBytes(4);
             Array.Reverse(value);
@@ -282,7 +296,7 @@ namespace DjvuNet
         /// The stream is closed. 
         /// </exception>
         /// <filterpriority>2</filterpriority>
-        public ulong ReadUInt64MSB()
+        public ulong ReadUInt64BigEndian()
         {
             var value = ReadBytes(8);
             Array.Reverse(value);

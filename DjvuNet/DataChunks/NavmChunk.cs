@@ -97,7 +97,7 @@ namespace DjvuNet.DataChunks
             {
                 DjvuReader decompressor = reader.GetBZZEncodedReader(Length);
 
-                int totalBookmarks = decompressor.ReadUInt16MSB();
+                int totalBookmarks = decompressor.ReadUInt16BigEndian();
 
                 List<Bookmark> bookmarks = new List<Bookmark>();
 

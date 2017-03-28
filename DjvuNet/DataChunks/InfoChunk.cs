@@ -106,8 +106,8 @@ namespace DjvuNet.DataChunks
 
         protected override void ReadChunkData(DjvuReader reader)
         {
-            Width = reader.ReadUInt16MSB();
-            Height = reader.ReadUInt16MSB();
+            Width = reader.ReadUInt16BigEndian();
+            Height = reader.ReadUInt16BigEndian();
             MinorVersion = reader.ReadByte();
             MajorVersion = reader.ReadByte();
             DPI = reader.ReadInt16(); // LSB

@@ -243,19 +243,19 @@ namespace DjvuNet.DataChunks.Text
         private void DecodeZoneData(DjvuReader reader, TextZone sibling, TextChunk chunkParent)
         {
             ZoneType = (ZoneTypes)reader.ReadByte();
-            X = reader.ReadUInt16MSB() - 0x8000;
-            Y = reader.ReadUInt16MSB() - 0x8000;
-            Width = reader.ReadUInt16MSB() - 0x8000;
-            Height = reader.ReadUInt16MSB() - 0x8000;
+            X = reader.ReadUInt16BigEndian() - 0x8000;
+            Y = reader.ReadUInt16BigEndian() - 0x8000;
+            Width = reader.ReadUInt16BigEndian() - 0x8000;
+            Height = reader.ReadUInt16BigEndian() - 0x8000;
 
-            TextOffset = reader.ReadUInt16MSB() - 0x8000;
-            TextLength = reader.ReadInt24MSB();
+            TextOffset = reader.ReadUInt16BigEndian() - 0x8000;
+            TextLength = reader.ReadInt24BigEndian();
 
             ResolveOffsets(Parent, sibling);
 
             Rectangle = new Rectangle(X, Y, Width, Height);
 
-            int childrenZones = reader.ReadInt24MSB();
+            int childrenZones = reader.ReadInt24BigEndian();
             List<TextZone> children = new List<TextZone>();
 
             TextZone childrenSibling = null;

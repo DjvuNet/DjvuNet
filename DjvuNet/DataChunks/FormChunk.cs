@@ -82,7 +82,7 @@ namespace DjvuNet.DataChunks
         {
             string formStr = reader.ReadUTF8String(4);
             // use of int in Djvu Format limits file size to 2 GB - should be long
-            int length = (int) reader.ReadUInt32MSB(); 
+            int length = (int) reader.ReadUInt32BigEndian(); 
             string formType = reader.ReadUTF8String(4);
             reader.Position -= 4;
 
@@ -164,7 +164,7 @@ namespace DjvuNet.DataChunks
                 // Read the chunk ID
                 string id = reader.ReadUTF8String(4);
                 ChunkType type = IFFChunk.GetChunkType(id);
-                long length = reader.ReadUInt32MSB();
+                long length = reader.ReadUInt32BigEndian();
 
                 bool isFormChunk = IsFormChunk(type);
 
