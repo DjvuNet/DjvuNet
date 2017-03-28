@@ -91,7 +91,13 @@ namespace DjvuNet
                 throw new ArgumentNullException(nameof(link));
 
             WebClient client = new WebClient();
-            return client.OpenRead(link);
+            if (String.CompareOrdinal(link.Scheme, "file") == 0)
+                return client.OpenRead(link);
+            else
+            {
+                byte[] buffer = client.DownloadData(link);
+                return new MemoryStream(buffer, false);
+            }
         }
 
         #endregion Internal Methods
@@ -111,8 +117,7 @@ namespace DjvuNet
         /// <returns></returns>
         public DjvuReader GetFixedLengthStream(long length)
         {
-            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)));
-
+            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)), false);
             return new DjvuReader(mem);
         }
 
@@ -123,8 +128,7 @@ namespace DjvuNet
         public BzzReader GetBZZEncodedReader(long length)
         {
             // Read the bytes into a stream to decode
-            MemoryStream memStream = new MemoryStream(ReadBytes(checked((int)length)));
-
+            MemoryStream memStream = new MemoryStream(ReadBytes(checked((int)length)), false);
             return new BzzReader(new BSInputStream(memStream));
         }
 
@@ -168,7 +172,7 @@ namespace DjvuNet
         public uint ReadUInt24()
         {
             byte[] buffer = new byte[4];
-            Read(buffer, 1, 3);
+            Read(buffer, 0, 3);
             return BitConverter.ToUInt32(buffer, 0);
         }
 
@@ -179,7 +183,7 @@ namespace DjvuNet
         public int ReadInt24()
         {
             byte[] buffer = new byte[4];
-            Read(buffer, 1, 3);
+            Read(buffer, 0, 3);
             return BitConverter.ToInt32(buffer, 0);
         }
 
@@ -262,12 +266,22 @@ namespace DjvuNet
         }
 
         /// <summary>
-        /// Reads an 8-sbyte unsigned integer from the current stream and advances the position of the stream by eight bytes.
+        /// Reads an 8-sbyte unsigned integer from the current stream and advances 
+        /// the position of the stream by eight bytes.
         /// </summary>
         /// <returns>
         /// An 8-sbyte unsigned integer read from this stream.
         /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><filterpriority>2</filterpriority>
+        /// <exception cref="T:System.IO.EndOfStreamException">
+        /// The end of the stream is reached. 
+        /// </exception>
+        /// <exception cref="T:System.IO.IOException">
+        /// An I/O error occurs. 
+        /// </exception>
+        /// <exception cref="T:System.ObjectDisposedException">
+        /// The stream is closed. 
+        /// </exception>
+        /// <filterpriority>2</filterpriority>
         public ulong ReadUInt64MSB()
         {
             var value = ReadBytes(8);
@@ -319,7 +333,8 @@ namespace DjvuNet
             }
         }
 
-        internal virtual MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, bool skipBOM = true, int bufferSize = 1024)
+        internal virtual MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, 
+            bool skipBOM = true, int bufferSize = 1024)
         {
             enc = null;
             int bytesRead = 0;
@@ -446,10 +461,18 @@ namespace DjvuNet
         {
             DjvuReader newReader = null;
 
-            // TODO Get rid of not properly synchronized clones or synchronize readers properly
-            newReader = _location != null ? new DjvuReader(_location) : new DjvuReader(BaseStream);
-            newReader.Position = position;
+            // TODO Get rid of not properly synchronized clones or synchronize readers
 
+            // Do a deep clone with new BaseStream
+            if (_location != null)
+                newReader = new DjvuReader(_location);
+            else
+            {
+                MemoryStream stream = new MemoryStream((int)BaseStream.Length);
+                BaseStream.CopyTo(stream);
+                newReader = new DjvuReader(stream);
+            }
+            newReader.Position = position;
             return newReader;
         }
 
@@ -459,18 +482,14 @@ namespace DjvuNet
         /// <returns></returns>
         public DjvuReader CloneReader(long position, long length)
         {
-            DjvuReader newReader = null;
-
-            // Clone the reader
-            newReader = _location != null ? new DjvuReader(_location) : new DjvuReader(BaseStream);
-            newReader.Position = position;
-
+            // TODO Get rid of not properly synchronized clones or synchronize readers
+            DjvuReader newReader = CloneReader(position);
             return newReader.GetFixedLengthStream(checked((int)length));
         }
 
         public override string ToString()
         {
-            return $"{this.GetType().Name} {{ Position: {Position}, Length: {this.BaseStream?.Length} BaseStream: {BaseStream} }}";
+            return $"{{{this.GetType().Name} {{ Position: 0x{Position:x}, Length: 0x{this.BaseStream?.Length:x} BaseStream: {BaseStream} }}}}";
         }
 
         #endregion Public Methods
