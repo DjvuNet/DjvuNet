@@ -3,6 +3,7 @@ using DjvuNet;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
@@ -25,7 +26,6 @@ namespace DjvuNet.Tests
                         throw new IOException($"Unable to read file with test data: {bzzFile}");
                     return buffer;
                 }
-
             }
         }
 
@@ -62,7 +62,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuReaderTest()
+        public void DjvuReaderTest001()
         {
             using (MemoryStream stream = new MemoryStream())
             using (DjvuReader reader = new DjvuReader(stream))
@@ -72,10 +72,59 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void DjvuReaderTest1()
+        [Fact()]
+        public void DjvuReaderTest002()
         {
-            Assert.True(false, "This test needs an implementation");
+            using (DjvuReader reader = new DjvuReader(Util.GetTestFilePath(2)))
+            {
+                Assert.NotNull(reader);
+                Assert.IsType<FileStream>(reader.BaseStream);
+                FileStream fs = reader.BaseStream as FileStream;
+                Assert.True(fs.CanRead && fs.CanSeek && !fs.CanWrite);
+            }
+        }
+
+        [Fact()]
+        public void DjvuReaderTest003()
+        {
+            Uri filePath = new Uri(Util.GetTestFilePath(2));
+            using (DjvuReader reader = new DjvuReader(filePath))
+            {
+                Assert.NotNull(reader);
+                // Verify that BaseStream is System.Net.FileWebStream
+                FileStream fs = reader.BaseStream as FileStream;
+                Assert.NotNull(fs);
+                Assert.IsNotType<FileStream>(reader.BaseStream);
+                Assert.True(fs.CanRead && fs.CanSeek && !fs.CanWrite);
+                Assert.Equal<String>("System.Net.FileWebStream", fs.GetType().FullName);
+            }
+        }
+
+        [Fact()]
+
+
+
+        public void DjvuReaderTest004()
+        {
+            Uri filePath = new Uri("https://upload.wikimedia.org/wikipedia/commons/6/69/Tain_Bo_Cuailnge.djvu");
+            using (DjvuReader reader = new DjvuReader(filePath))
+            {
+                Assert.NotNull(reader);
+                Assert.NotNull(reader.BaseStream);
+                MemoryStream s = reader.BaseStream as MemoryStream;
+                Assert.True(s.CanRead && s.CanSeek && !s.CanWrite);
+                Assert.IsType<MemoryStream>(s);
+            }
+        }
+
+        [Fact()]
+        public void DjvuReaderTest005()
+        {
+            Assert.Throws<WebException>(() =>
+           {
+               Uri filePath = new Uri("https://upload.wikimedia.org/wikipedia/commons/6/69/No_such_file.djvu");
+               using (DjvuReader reader = new DjvuReader(filePath)) { }
+           });
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
@@ -84,10 +133,18 @@ namespace DjvuNet.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void GetFixedLengthStreamTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            using(DjvuReader reader = new DjvuReader(Util.GetTestFilePath(1)))
+            {
+                long length = 4096;
+                DjvuReader rf = reader.GetFixedLengthStream(length);
+                Assert.NotNull(rf);
+                Assert.Equal<long>(length, rf.BaseStream.Length);
+                Assert.False(rf.BaseStream.CanWrite);
+                Assert.IsType<MemoryStream>(rf.BaseStream);
+            }
         }
 
         [Fact]
@@ -157,7 +214,6 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length - bomLength, stream.Position);
                 Assert.Equal<int>(buffer.Length - bomLength, bufferLength);
             }
-
         }
 
         [Fact()]
@@ -398,88 +454,374 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void GetBZZEncodedReaderTest1()
+
+        [Fact()]
+        public void ReadUInt24MSBTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                uint result = reader.ReadUInt24MSB();
+                Assert.Equal<uint>(0x0080ff00, result);
+                Assert.Equal<long>(3, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadNullTerminatedStringTest()
+        [Fact()]
+        public void ReadUInt24MSBTest002()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                uint result = reader.ReadUInt24MSB();
+                Assert.Equal<uint>(0x000000ff, result);
+                Assert.Equal<long>(3 + advanceReader, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadUInt24MSBTest()
+        [Fact()]
+        public void ReadInt24MSBTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int result = reader.ReadInt24MSB();
+                Assert.Equal<int>(0x0080ff00, result);
+                Assert.Equal<long>(3, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadInt24MSBTest()
+        [Fact()]
+        public void ReadInt24MSBTest002()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                int result = reader.ReadInt24MSB();
+                Assert.Equal<int>(0x000000ff, result);
+                Assert.Equal<long>(3 + advanceReader, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadUInt24Test()
+        [Fact()]
+        public void ReadUInt24Test001()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                uint result = reader.ReadUInt24();
+                Assert.Equal<uint>(0x00ff0000, result);
+                Assert.Equal<long>(3 + advanceReader, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadInt24Test()
+        [Fact()]
+        public void ReadUInt24Test002()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                uint result = reader.ReadUInt24();
+                Assert.Equal<uint>(0x00ff0000, result);
+                Assert.Equal<long>(3 + advanceReader, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadInt16MSBTest()
+        [Fact()]
+        public void ReadInt24Test001()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int result = reader.ReadInt24();
+                int expected = BitConverter.ToInt32(buffer, 0);
+                Assert.Equal<int>(expected, result);
+                Assert.Equal<long>(3, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadInt32MSBTest()
+        [Fact()]
+        public void ReadInt24Test002()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                buffer[5] = 0x00;
+                int result = reader.ReadInt24();
+                int expected = BitConverter.ToInt32(buffer, 2);
+                Assert.Equal<int>(expected, result);
+                Assert.Equal<long>(3 + advanceReader, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadInt64MSBTest()
+        [Fact()]
+        public void ReadInt16MSBTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                short result = reader.ReadInt16MSB();
+                short expected = BitConverter.ToInt16(new byte[] { 0xff, 0x80 }, 0);
+                Assert.Equal<short>(expected, result);
+                Assert.Equal<long>(sizeof(short), reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadUInt16MSBTest()
+        [Fact()]
+        public void ReadInt16MSBTest002()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 7;
+                reader.Position = advanceReader;
+                int result = reader.ReadInt16MSB();
+                Assert.Equal<int>(0x0100, result);
+                Assert.Equal<long>(sizeof(short) + advanceReader, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadUInt32MSBTest()
+        [Fact()]
+        public void ReadInt32MSBTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int result = reader.ReadInt32MSB();
+                int expected = BitConverter.ToInt32(new byte[] { 0x00, 0x00, 0xff, 0x80 }, 0);
+                Assert.Equal<int>(expected, result);
+                Assert.Equal<long>(sizeof(int), reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ReadUInt64MSBTest()
+        [Fact()]
+        public void ReadInt32MSBTest002()
         {
-            Assert.True(false, "This test needs an implementation");
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                int result = reader.ReadInt32MSB();
+                int expected = BitConverter.ToInt32(new byte[] { 0x01, 0xff, 0x00, 0x00 }, 0);
+                Assert.Equal<int>(expected, result);
+                Assert.Equal<long>(sizeof(int) + advanceReader, reader.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
+        public void ReadInt64MSBTest001()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                long result = reader.ReadInt64MSB();
+                long expected = BitConverter.ToInt64(new byte[] { 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, 0xff, 0x80 }, 0);
+                Assert.Equal<long>(expected, result);
+                Assert.Equal<long>(sizeof(long), reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadInt64MSBTest002()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                long result = reader.ReadInt64MSB();
+                long expected = BitConverter.ToInt64(
+                    new byte[] { 0x80, 0x00, 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, }, 0);
+                Assert.Equal<long>(expected, result);
+                Assert.Equal<long>(sizeof(long) + advanceReader, reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadUInt16MSBTest001()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                ushort result = reader.ReadUInt16MSB();
+                ushort expected = BitConverter.ToUInt16(new byte[] { 0xff, 0x80 }, 0);
+                Assert.Equal<ushort>(expected, result);
+                Assert.Equal<long>(sizeof(ushort), reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadUInt16MSBTest002()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 4;
+                reader.Position = advanceReader;
+                ushort result = reader.ReadUInt16MSB();
+                ushort expected = BitConverter.ToUInt16(new byte[] { 0x01, 0xff }, 0);
+                Assert.Equal<ushort>(expected, result);
+                Assert.Equal<long>(sizeof(ushort) + advanceReader, reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadUInt32MSBTest001()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                uint result = reader.ReadUInt32MSB();
+                uint expected = BitConverter.ToUInt32(new byte[] { 0x00, 0x00, 0xff, 0x80 }, 0);
+                Assert.Equal<uint>(expected, result);
+                Assert.Equal<long>(sizeof(uint), reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadUInt32MSBTest002()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                uint result = reader.ReadUInt32MSB();
+                uint expected = BitConverter.ToUInt32(new byte[] { 0x01, 0xff, 0x00, 0x00 }, 0);
+                Assert.Equal<uint>(expected, result);
+                Assert.Equal<long>(sizeof(uint) + advanceReader, reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadUInt64MSBTest001()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                ulong result = reader.ReadUInt64MSB();
+                ulong expected = BitConverter.ToUInt64(new byte[] { 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, 0xff, 0x80 }, 0);
+                Assert.Equal<ulong>(expected, result);
+                Assert.Equal<long>(sizeof(ulong), reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadUInt64MSBTest002()
+        {
+            byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                ulong result = reader.ReadUInt64MSB();
+                ulong expected = BitConverter.ToUInt64(
+                    new byte[] { 0x80, 0x00, 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, }, 0);
+                Assert.Equal<ulong>(expected, result);
+                Assert.Equal<long>(sizeof(ulong) + advanceReader, reader.Position);
+            }
+        }
+
+        [Fact()]
         public void ReadUTF8StringTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            string expected = "This is a test text: łążźćń Vor nicht einmal fünf 百度目前是全球最大的中文搜索引擎，2000年1月创立于北京中关村。百度的使命是让人们最便捷地获取信";
+            UTF8Encoding utf8 = new UTF8Encoding(false);
+            byte[] buffer = utf8.GetBytes(expected);
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                string result = reader.ReadUTF8String(buffer.Length);
+                Assert.False(String.IsNullOrWhiteSpace(result));
+                Assert.Equal(0, String.CompareOrdinal(expected, result));
+            }
+
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void ReadUTF7StringTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            string expected = "This is a test text: łążźćń Vor nicht einmal fünf 百度目前是全球最大的中文搜索引擎，2000年1月创立于北京中关村。百度的使命是让人们最便捷地获取信";
+            UTF7Encoding utf7 = new UTF7Encoding(false);
+            byte[] buffer = utf7.GetBytes(expected);
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                string result = reader.ReadUTF7String(buffer.Length);
+                Assert.False(String.IsNullOrWhiteSpace(result));
+                Assert.Equal(0, String.CompareOrdinal(expected, result));
+            }
         }
 
         [Fact()]
@@ -552,22 +894,46 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void CloneReaderTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            using (DjvuReader reader = new DjvuReader(Util.GetTestFilePath(1)))
+            {
+                var reader2 = reader.CloneReader(reader.BaseStream.Length / 2);
+                Assert.NotNull(reader2);
+                Assert.NotSame(reader, reader2);
+                Assert.Equal<long>(reader.BaseStream.Length / 2, reader2.BaseStream.Position);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void CloneReaderTest1()
         {
-            Assert.True(false, "This test needs an implementation");
+            using (DjvuReader reader = new DjvuReader(Util.GetTestFilePath(1)))
+            {
+                long length = 4096;
+                var reader2 = reader.CloneReader(reader.BaseStream.Length / 2, length);
+                Assert.NotNull(reader2);
+                Assert.NotSame(reader, reader2);
+                Assert.Equal<long>(reader.BaseStream.Position / 2, reader2.BaseStream.Position);
+                Assert.Equal<long>(length, reader2.BaseStream.Length);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void ToStringTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            int length = 1024 * 1024;
+            using (MemoryStream stream = new MemoryStream(new byte[length]))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                string result = reader.ToString();
+                Assert.NotNull(result);
+                Assert.True(result.Contains("DjvuReader"));
+                Assert.True(result.Contains("MemoryStream"));
+                Assert.True(result.Contains("Position: 0x0"));
+                Assert.True(result.Contains("Length: 0x100000"));
+            }
         }
     }
 }
