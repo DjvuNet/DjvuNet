@@ -101,6 +101,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{
 		artifacts\testE012.djvu = artifacts\testE012.djvu
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specs", "Specs", "{0E66E677-173D-4071-8615-2F0D69E97EFA}"
+	ProjectSection(SolutionItems) = preProject
+		Specs\1998_compression.djvu = Specs\1998_compression.djvu
+		Specs\1998_lossy_masked.djvu = Specs\1998_lossy_masked.djvu
+		Specs\1998_zcoder.djvu = Specs\1998_zcoder.djvu
+		Specs\2000_compression_system.djvu = Specs\2000_compression_system.djvu
+		Specs\2001_compression_overview.djvu = Specs\2001_compression_overview.djvu
+		Specs\2001_doc_browsing.djvu = Specs\2001_doc_browsing.djvu
+		Specs\2001_efficient_compression.djvu = Specs\2001_efficient_compression.djvu
+		Specs\2002_electronic_publishing.djvu = Specs\2002_electronic_publishing.djvu
+		Specs\2002_segmentation_scheme.djvu = Specs\2002_segmentation_scheme.djvu
+		Specs\DjVu3Spec.djvu = Specs\DjVu3Spec.djvu
+		Specs\DjVu3Spec.pdf = Specs\DjVu3Spec.pdf
+		Specs\DjVu_Tech_Primer.djvu = Specs\DjVu_Tech_Primer.djvu
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{79CE4EAD-3414-4E10-B9B0-F0BF675DF9D6}"
 	ProjectSection(SolutionItems) = preProject
 		Templates\AssemblyInfoCommon.Template.cs = Templates\AssemblyInfoCommon.Template.cs
@@ -116,7 +132,7 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared.Tests", "Djv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Helper.Tests", "DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj", "{4FEC9875-D7E6-47BD-A13A-5C1944464545}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{508EA7BC-4576-4C24-877B-7D7EE4369DA0}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{508EA7BC-4576-4C24-877B-7D7EE4369DA0}"
 	ProjectSection(SolutionItems) = preProject
 		.appveyor.yml = .appveyor.yml
 		.gitattributes = .gitattributes
