@@ -156,10 +156,10 @@ namespace DjvuNet.DataChunks.Navigation
         {
             int childrenCount = reader.ReadByte();
 
-            int textSize = reader.ReadInt24MSB();
+            int textSize = reader.ReadInt24BigEndian();
             Name = reader.ReadUTF8String(textSize);
 
-            int urlSize = reader.ReadInt24MSB();
+            int urlSize = reader.ReadInt24BigEndian();
             Url = reader.ReadUTF8String(urlSize);
 
             // Read in all the children bookmarks

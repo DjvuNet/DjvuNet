@@ -456,7 +456,7 @@ namespace DjvuNet.Tests
 
 
         [Fact()]
-        public void ReadUInt24MSBTest001()
+        public void ReadUInt24BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -464,14 +464,14 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                uint result = reader.ReadUInt24MSB();
+                uint result = reader.ReadUInt24BigEndian();
                 Assert.Equal<uint>(0x0080ff00, result);
                 Assert.Equal<long>(3, reader.Position);
             }
         }
 
         [Fact()]
-        public void ReadUInt24MSBTest002()
+        public void ReadUInt24BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -481,14 +481,14 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 2;
                 reader.Position = advanceReader;
-                uint result = reader.ReadUInt24MSB();
+                uint result = reader.ReadUInt24BigEndian();
                 Assert.Equal<uint>(0x000000ff, result);
                 Assert.Equal<long>(3 + advanceReader, reader.Position);
             }
         }
 
         [Fact()]
-        public void ReadInt24MSBTest001()
+        public void ReadInt24BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -496,14 +496,14 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                int result = reader.ReadInt24MSB();
+                int result = reader.ReadInt24BigEndian();
                 Assert.Equal<int>(0x0080ff00, result);
                 Assert.Equal<long>(3, reader.Position);
             }
         }
 
         [Fact()]
-        public void ReadInt24MSBTest002()
+        public void ReadInt24BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -513,7 +513,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 2;
                 reader.Position = advanceReader;
-                int result = reader.ReadInt24MSB();
+                int result = reader.ReadInt24BigEndian();
                 Assert.Equal<int>(0x000000ff, result);
                 Assert.Equal<long>(3 + advanceReader, reader.Position);
             }
@@ -589,7 +589,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadInt16MSBTest001()
+        public void ReadInt16BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -597,7 +597,7 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                short result = reader.ReadInt16MSB();
+                short result = reader.ReadInt16BigEndian();
                 short expected = BitConverter.ToInt16(new byte[] { 0xff, 0x80 }, 0);
                 Assert.Equal<short>(expected, result);
                 Assert.Equal<long>(sizeof(short), reader.Position);
@@ -605,7 +605,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadInt16MSBTest002()
+        public void ReadInt16BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -615,14 +615,14 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 7;
                 reader.Position = advanceReader;
-                int result = reader.ReadInt16MSB();
+                int result = reader.ReadInt16BigEndian();
                 Assert.Equal<int>(0x0100, result);
                 Assert.Equal<long>(sizeof(short) + advanceReader, reader.Position);
             }
         }
 
         [Fact()]
-        public void ReadInt32MSBTest001()
+        public void ReadInt32BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -630,7 +630,7 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                int result = reader.ReadInt32MSB();
+                int result = reader.ReadInt32BigEndian();
                 int expected = BitConverter.ToInt32(new byte[] { 0x00, 0x00, 0xff, 0x80 }, 0);
                 Assert.Equal<int>(expected, result);
                 Assert.Equal<long>(sizeof(int), reader.Position);
@@ -638,7 +638,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadInt32MSBTest002()
+        public void ReadInt32BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -648,7 +648,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 2;
                 reader.Position = advanceReader;
-                int result = reader.ReadInt32MSB();
+                int result = reader.ReadInt32BigEndian();
                 int expected = BitConverter.ToInt32(new byte[] { 0x01, 0xff, 0x00, 0x00 }, 0);
                 Assert.Equal<int>(expected, result);
                 Assert.Equal<long>(sizeof(int) + advanceReader, reader.Position);
@@ -656,7 +656,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadInt64MSBTest001()
+        public void ReadInt64BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -664,7 +664,7 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                long result = reader.ReadInt64MSB();
+                long result = reader.ReadInt64BigEndian();
                 long expected = BitConverter.ToInt64(new byte[] { 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, 0xff, 0x80 }, 0);
                 Assert.Equal<long>(expected, result);
                 Assert.Equal<long>(sizeof(long), reader.Position);
@@ -672,7 +672,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadInt64MSBTest002()
+        public void ReadInt64BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -682,7 +682,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 2;
                 reader.Position = advanceReader;
-                long result = reader.ReadInt64MSB();
+                long result = reader.ReadInt64BigEndian();
                 long expected = BitConverter.ToInt64(
                     new byte[] { 0x80, 0x00, 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, }, 0);
                 Assert.Equal<long>(expected, result);
@@ -691,7 +691,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUInt16MSBTest001()
+        public void ReadUInt16BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -699,7 +699,7 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                ushort result = reader.ReadUInt16MSB();
+                ushort result = reader.ReadUInt16BigEndian();
                 ushort expected = BitConverter.ToUInt16(new byte[] { 0xff, 0x80 }, 0);
                 Assert.Equal<ushort>(expected, result);
                 Assert.Equal<long>(sizeof(ushort), reader.Position);
@@ -707,7 +707,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUInt16MSBTest002()
+        public void ReadUInt16BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -717,7 +717,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 4;
                 reader.Position = advanceReader;
-                ushort result = reader.ReadUInt16MSB();
+                ushort result = reader.ReadUInt16BigEndian();
                 ushort expected = BitConverter.ToUInt16(new byte[] { 0x01, 0xff }, 0);
                 Assert.Equal<ushort>(expected, result);
                 Assert.Equal<long>(sizeof(ushort) + advanceReader, reader.Position);
@@ -725,7 +725,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUInt32MSBTest001()
+        public void ReadUInt32BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -733,7 +733,7 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                uint result = reader.ReadUInt32MSB();
+                uint result = reader.ReadUInt32BigEndian();
                 uint expected = BitConverter.ToUInt32(new byte[] { 0x00, 0x00, 0xff, 0x80 }, 0);
                 Assert.Equal<uint>(expected, result);
                 Assert.Equal<long>(sizeof(uint), reader.Position);
@@ -741,7 +741,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUInt32MSBTest002()
+        public void ReadUInt32BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -751,7 +751,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 2;
                 reader.Position = advanceReader;
-                uint result = reader.ReadUInt32MSB();
+                uint result = reader.ReadUInt32BigEndian();
                 uint expected = BitConverter.ToUInt32(new byte[] { 0x01, 0xff, 0x00, 0x00 }, 0);
                 Assert.Equal<uint>(expected, result);
                 Assert.Equal<long>(sizeof(uint) + advanceReader, reader.Position);
@@ -759,7 +759,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUInt64MSBTest001()
+        public void ReadUInt64BigEndianTest001()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -767,7 +767,7 @@ namespace DjvuNet.Tests
             {
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
-                ulong result = reader.ReadUInt64MSB();
+                ulong result = reader.ReadUInt64BigEndian();
                 ulong expected = BitConverter.ToUInt64(new byte[] { 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, 0xff, 0x80 }, 0);
                 Assert.Equal<ulong>(expected, result);
                 Assert.Equal<long>(sizeof(ulong), reader.Position);
@@ -775,7 +775,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUInt64MSBTest002()
+        public void ReadUInt64BigEndianTest002()
         {
             byte[] buffer = new byte[] { 0x80, 0xff, 0x00, 0x00, 0xff, 0x01, 0x80, 0x01, 0x00, 0x80 };
             using (MemoryStream memStream = new MemoryStream(buffer))
@@ -785,7 +785,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int advanceReader = 2;
                 reader.Position = advanceReader;
-                ulong result = reader.ReadUInt64MSB();
+                ulong result = reader.ReadUInt64BigEndian();
                 ulong expected = BitConverter.ToUInt64(
                     new byte[] { 0x80, 0x00, 0x01, 0x80, 0x01, 0xff, 0x00, 0x00, }, 0);
                 Assert.Equal<ulong>(expected, result);
