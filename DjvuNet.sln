@@ -127,16 +127,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		library.version = library.version
 		..\LICENSE.md = ..\LICENSE.md
 		README.md = README.md
+		Snk.snk = Snk.snk
 	EndProjectSection
 EndProject
 Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "DjvuNet.Build", "DjvuNet.Build\DjvuNet.Build.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared", "DjvuNet.Shared\DjvuNet.Shared.shproj", "{61B8CB33-F13A-4309-A137-895017B28E31}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.DjvuLibre", "DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj", "{9B255F5A-716A-4A26-A140-525FDE3FA8F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.DjvuLibre.Tests", "DjvuNet.DjvuLibre.Tests\DjvuNet.DjvuLibre.Tests.csproj", "{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{61b8cb33-f13a-4309-a137-895017b28e31}*SharedItemsImports = 13
+		DjvuNet.Shared\DjvuNet.Shared.projitems*{9b255f5a-716a-4a26-a140-525fde3fa8f7}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{b7ef5575-5932-4ea7-b250-e7da238d60a9}*SharedItemsImports = 13
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{e681b178-e5f8-4782-89c8-f32720b1464a}*SharedItemsImports = 4
 	EndGlobalSection
@@ -209,6 +215,30 @@ Global
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x64.Build.0 = Release|Any CPU
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x86.ActiveCfg = Release|Any CPU
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x86.Build.0 = Release|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x64.Build.0 = Debug|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x86.Build.0 = Debug|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x64.ActiveCfg = Release|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x64.Build.0 = Release|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x86.ActiveCfg = Release|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x86.Build.0 = Release|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x64.Build.0 = Debug|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x86.Build.0 = Debug|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x64.ActiveCfg = Release|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x64.Build.0 = Release|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x86.ActiveCfg = Release|Any CPU
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
