@@ -8,5 +8,12 @@ namespace DjvuNet.Parser
 {
     public class AbstractDocumentTree : IAbstractDocumentTree
     {
+        public IDocumentRootElement RootForm
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }
