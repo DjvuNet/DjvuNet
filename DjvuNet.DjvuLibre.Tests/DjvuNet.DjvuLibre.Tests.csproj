@@ -67,6 +67,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="DjvuPageInfoTests.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="DjvuDocumentInfoTests.cs" />
