@@ -315,7 +315,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns></returns>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_job_status",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
-        internal static extern int GetDjvuJobStatus(IntPtr job);
+        internal static extern DjvuJobStatus GetDjvuJobStatus(IntPtr job);
 
 
         //  #define ddjvu_document_decoding_status(document) \
@@ -480,5 +480,194 @@ namespace DjvuNet.DjvuLibre
         //  if (ctx)
         //      ddjvu_context_release(ctx);
         //  return 0;
+
+        /* ------- ADVANCED ------- */
+
+
+
+        //  DDJVUAPI int
+        //  ddjvu_document_get_filenum(ddjvu_document_t* document);
+
+        /// <summary>
+        /// Returns the number of component files.
+        /// This function might return 0 when called
+        /// before receiving a <m_docinfo> message.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <returns></returns>
+        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_filenum",
+            CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern int GetDjvuDocumentFileCount(IntPtr document);
+
+
+        /* ddjvu_document_get_fileinfo --
+           Returns information about component file <fileno>.
+           This function might return <DDJVU_JOB_STARTED> when
+           called before receiving a <m_docinfo> message.
+           String pointers in the returned data structure 
+           might be null. Strings are UTF8 encoded and remain 
+           allocated as long as the ddjvu_document_t object exists.
+
+           Changes for ddjvuapi=18
+           - Redefined as a macro passing the structure size.
+        */
+
+        //  typedef struct ddjvu_fileinfo_s
+        //  {
+        //    char type;                   /* [P]age, [T]humbnails, [I]nclude. */
+        //    int pageno;                 /* Negative when not applicable. */
+        //    int size;                   /* Negative when unknown. */
+        //    const char* id;               /* File identifier. */
+        //    const char* name;             /* Name for indirect documents. */
+        //    const char* title;            /* Page title. */
+        //  }
+        //  ddjvu_fileinfo_t;
+
+        //  #define ddjvu_document_get_fileinfo(d,f,i) \
+        //   ddjvu_document_get_fileinfo_imp(d, f, i,sizeof(ddjvu_fileinfo_t))
+
+        //  DDJVUAPI ddjvu_status_t
+        //  ddjvu_document_get_fileinfo_imp(ddjvu_document_t* document, int fileno,
+        //                                ddjvu_fileinfo_t* info, unsigned int infosz);
+
+
+
+        //  DDJVUAPI int
+        //  ddjvu_document_check_pagedata(ddjvu_document_t* document, int pageno);
+
+        /// <summary>
+        /// Returns a non zero result if the data for page <pageno>
+        /// is already in memory. When this is the case, functions
+        /// <ddjvu_document_get_pageinfo> and <ddjvu_document_get_pagetext>
+        /// return the information immediately.
+        /// This function causes the emission of <m_pageinfo> messages
+        /// with zero in the <m_any.page> field whenever a new file
+        /// is completely downloaded.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="pageNumber">
+        /// Zero based index page number (values from 0 to page count - 1).
+        /// </param>
+        /// <returns></returns>
+        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_check_pagedata",
+            CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern int CheckDjvuDocumentPageData(IntPtr document, int pageNumber);
+
+        //  typedef struct ddjvu_pageinfo_s
+        //  {
+        //    int width;                    /* page width (in pixels) */
+        //    int height;                   /* page height (in pixels) */
+        //    int dpi;                      /* page resolution (in dots per inche) */
+        //    int rotation;                 /* initial page orientation */
+        //    int version;                  /* page version */
+        //  }
+        //  ddjvu_pageinfo_t;
+
+        //  #define ddjvu_document_get_pageinfo(d,p,i) \
+        //   ddjvu_document_get_pageinfo_imp(d, p, i,sizeof(ddjvu_pageinfo_t))
+
+        //  DDJVUAPI ddjvu_status_t
+        //  ddjvu_document_get_pageinfo_imp(ddjvu_document_t* document, int pageno,
+        //                                ddjvu_pageinfo_t* info, unsigned int infosz);
+
+        /// <summary>
+        /// Attempts to obtain information about page with given page number
+        /// without decoding the page. If the information is available,
+        /// the function returns DDJVU_JOB_OK and fills the info structure.
+        /// Otherwise it starts fetching page data and returns DDJVU_JOB_STARTED.
+        /// This function causes the emission of m_pageinfo messages
+        /// with zero in the m_any.page field.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="pageNumber">
+        /// Zero based index page number (values from 0 to page count - 1).
+        /// </param>
+        /// <param name="pageInfo"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// Typical synchronous usage:
+        /// 
+        /// ddjvu_status_t r;
+        /// ddjvu_pageinfo_t info;
+        /// while ((r=ddjvu_document_get_pageinfo(doc,pageno,&info)) less than DDJVU_JOB_OK)
+        ///     handle_ddjvu_messages(ctx, TRUE);
+        /// if (r>=DDJVU_JOB_FAILED)
+        ///   signal_error();
+        /// </remarks>
+        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pageinfo_imp",
+            CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern int GetDjvuDocumentPageInfo(IntPtr document, int pageNumber, 
+            ref PageInfo pageInfo, int size = 20);
+
+
+        //  DDJVUAPI char*
+        //  ddjvu_document_get_pagedump(ddjvu_document_t* document, int pageno);
+
+        /// <summary>
+        /// This function returns a UTF8 encoded text describing the contents
+        /// of page pageno using the same format as command djvudump.
+        /// The returned string must be deallocated using free().
+        /// It returns 0 when the information is not yet available.
+        /// It may then cause then the emission of m_pageinfo
+        /// messages with null m_any.page.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="pageNumber">
+        /// Zero based index page number (values from 0 to page count - 1).
+        /// </param>
+        /// <returns>
+        /// Pointer to null terminated UTF8 string which has to be released by caller.
+        /// </returns>
+        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pagedump",
+            CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern IntPtr GetDjvuDocumentPageDump(IntPtr document, int pageNumber);
+
+
+        //  DDJVUAPI char*
+        //  ddjvu_document_get_filedump(ddjvu_document_t* document, int fileno);
+
+        /// <summary>
+        /// This function returns a UTF8 encoded text describing the contents
+        /// of file fileno using the same format as command djvudump.
+        /// The returned string must be deallocated using free().
+        /// It returns 0 when the information is not yet available.
+        /// It may then cause then the emission of m_pageinfo
+        ///  messages with null m_any.page.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="fileNumber"></param>
+        /// <returns>
+        /// Pointer to null terminated UTF8 string which has to be released by caller.
+        /// </returns>
+        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_filedump",
+            CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern IntPtr GetDjvuDocumentFileDump(IntPtr document, int fileNumber);
+
+        //  DDJVUAPI ddjvu_page_t *
+        //  ddjvu_page_create_by_pageno(ddjvu_document_t* document, int pageno);
+
+        /// <summary>
+        /// Each page of a document can be accessed by creating a
+        /// ddjvu_page_t object with this function. Argument
+        /// pageno indicates the page number, starting with page
+        /// 0 to pagenum-1. This function may return NULL
+        /// when called before receiving the m_docinfo message.
+        /// Calling this function also initiates the data transfer
+        /// and the decoding threads for the specified page.
+        /// Various messages will document the progress of these
+        /// operations. Error messages will be generated if
+        /// the page does not exists.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="pageNumber">
+        /// Zero based index page number (values from 0 to page count - 1).
+        /// </param>
+        /// <returns>
+        /// Pointer to null terminated UTF8 string which has to be released by caller.
+        /// </returns>
+        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_create_by_pageno",
+            CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern IntPtr GetDjvuDocumentPage(IntPtr document, int pageNumber);
     }
 }
