@@ -58,21 +58,21 @@ namespace DjvuNet.DjvuLibre
                 if (document == IntPtr.Zero)
                     throw new ApplicationException($"Failed to open native djvu_document: {filePath}");
 
-                int status = 0;
+                DjvuJobStatus status = DjvuJobStatus.NotStarted;
                 while (true)
                 {
                     status = NativeMethods.GetDjvuJobStatus(document);
-                    if (status >= 2)
+                    if ((int)status >= 2)
                         break;
                     else
                         ProcessMessage(context, true);
                 }
 
-                if (status == 2)
+                if (status == DjvuJobStatus.OK)
                     return new DjvuDocumentInfo(context, document, filePath);
-                else if (status == 3)
+                else if (status == DjvuJobStatus.Failed)
                     throw new ApplicationException($"Failed to parse document: {filePath}");
-                else if (status == 4)
+                else if (status == DjvuJobStatus.Stopped)
                     throw new ApplicationException(
                         $"Parsing of DjVu document interrupted by user. Document path: {filePath}");
 
@@ -149,7 +149,7 @@ namespace DjvuNet.DjvuLibre
             ProcessMessage(context, true);
         }
 
-        protected static void ProcessMessage(IntPtr context, bool wait = true)
+        internal static void ProcessMessage(IntPtr context, bool wait = true)
         {
             if (context == IntPtr.Zero)
                 throw new ArgumentException(nameof(context));
@@ -164,8 +164,8 @@ namespace DjvuNet.DjvuLibre
             message = NativeMethods.DjvuPeekMessage(context);
             while(message != IntPtr.Zero)
             {
-                var djvuMsg = Marshal.PtrToStructure<DjvuMessage>(message);
-                switch (djvuMsg.DocInfo.Tag)
+                var djvuMsg = new DjvuMessage(message);
+                switch (djvuMsg.Any.Tag)
                 {
                     case MessageTag.DocInfo:
                         break;
@@ -201,6 +201,32 @@ namespace DjvuNet.DjvuLibre
 
         public virtual String Path { get; protected set; }
 
+        public PageInfo GetPageInfo(int pageNumber)
+        {
+            PageInfo info = new PageInfo();
+            int status = 0;
 
+            while (true)
+            {
+                status = NativeMethods.GetDjvuDocumentPageInfo(Document, pageNumber,
+                    ref info, Marshal.SizeOf<PageInfo>());
+
+                if (status >= 2)
+                    break;
+                else
+                    ProcessMessage(Context, true);
+            }
+
+            if (status == 2)
+                return info;
+            else
+                throw new ApplicationException($"Failed to get PageInfo for page number: {pageNumber}");
+        }
+
+        public string GetPageText(int pageNumber)
+        {
+
+            return null;
+        }
     }
 }
