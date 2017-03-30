@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Messages\AnyMessage.cs" />
     <Compile Include="Messages\ChunkMessage.cs" />
     <Compile Include="Messages\DisplayMessage.cs" />
     <Compile Include="DjvuFileInfo.cs" />
@@ -52,7 +53,6 @@
     <Compile Include="Messages\ErrorMessage.cs" />
     <Compile Include="Messages\InfoMessage.cs" />
     <Compile Include="Messages\LayoutMessage.cs" />
-    <Compile Include="Messages\Structures.cs" />
     <Compile Include="Messages\NewStreamMessage.cs" />
     <Compile Include="PageInfo.cs" />
     <Compile Include="Messages\PageInfoMessage.cs" />
