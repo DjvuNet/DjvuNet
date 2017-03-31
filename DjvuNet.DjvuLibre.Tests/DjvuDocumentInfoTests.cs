@@ -57,5 +57,28 @@ namespace DjvuNet.DjvuLibre.Tests
                 }
             }
         }
+
+        [Fact(), Trait("Category", "DjvuLibre")]
+        public void GetDjvuPageInfoTest001()
+        {
+            using (DjvuDocumentInfo document =
+                DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+            {
+                Assert.NotNull(document);
+                int pageCount = document.PageCount;
+                Assert.Equal<int>(300, pageCount);
+                var type = document.DocumentType;
+                Assert.Equal<DocumentType>(DocumentType.Bundled, type);
+
+                var info = document.GetPageInfo(0);
+                Assert.NotNull(info);
+                Assert.IsType<PageInfo>(info);
+                Assert.Equal<int>(25, info.Version);
+                Assert.Equal<int>(600, info.Dpi);
+                Assert.Equal<int>(6054, info.Height);
+                Assert.Equal<int>(3916, info.Width);
+                Assert.Equal<int>(0, info.Rotation);
+            }
+        }
     }
 }

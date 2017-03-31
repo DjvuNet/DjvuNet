@@ -17,7 +17,7 @@ namespace DjvuNet.DjvuLibre
             if (docInfo == null)
                 throw new ArgumentNullException(nameof(docInfo));
 
-            if (docInfo.GetPageInfo(pageNumber) == null)
+            if ((_Info = docInfo.GetPageInfo(pageNumber)) == null)
                 throw new ArgumentException(
                     $"{nameof(DjvuDocumentInfo)} object {nameof(docInfo)} is not initialized properly.", 
                     nameof(docInfo));
@@ -30,13 +30,14 @@ namespace DjvuNet.DjvuLibre
             Page = NativeMethods.GetDjvuDocumentPage(_DocumentInfo.Document, pageNumber);
 
             DjvuJobStatus status = DjvuJobStatus.NotStarted;
+            List<object> messagesList = new List<object>();
             while (true)
             {
                 status = NativeMethods.GetDjvuJobStatus(Page);
                 if ((int)status >= 2)
                     break;
                 else
-                    DjvuDocumentInfo.ProcessMessage(docInfo.Context, true);
+                    messagesList.AddRange(DjvuDocumentInfo.ProcessMessage(docInfo.Context, true));
             }
 
             if (status == DjvuJobStatus.Failed)
@@ -45,12 +46,14 @@ namespace DjvuNet.DjvuLibre
                 throw new ApplicationException(
                     $"Parsing of DjVu document page interrupted by user. Page number: {pageNumber}");
 
-            _Info = docInfo.GetPageInfo(pageNumber);
-            Width = _Info.Width;
-            Height = _Info.Height;
-            Dpi = _Info.Dpi;
-            Version = _Info.Version;
-            Rotation = _Info.Rotation;
+            if (_Info != null)
+            {
+                Width = _Info.Width;
+                Height = _Info.Height;
+                Dpi = _Info.Dpi;
+                Version = _Info.Version;
+                Rotation = _Info.Rotation;
+            }
         }
 
         #region IDisposable implementation
@@ -101,6 +104,11 @@ namespace DjvuNet.DjvuLibre
         public int Rotation { get; protected set; }
 
         public int Version { get; protected set; }
+
+        public PageType GetPageType()
+        {
+            return NativeMethods.GetDjvuPageType(Page);
+        }
 
     }
 }

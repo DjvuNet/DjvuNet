@@ -25,16 +25,19 @@ namespace DjvuNet.DjvuLibre
         /// <summary>
         /// File identifier.
         /// </summary>
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         public String ID;
 
         /// <summary>
         /// Name for indirect documents.
         /// </summary>
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         public String Name;
 
         /// <summary>
         /// Page title.
         /// </summary>
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         public String Title;
     }
 }

@@ -1,25 +1,101 @@
-﻿using Xunit;
-using DjvuNet.DjvuLibre;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.DjvuLibre;
+using DjvuNet.Tests;
+using Xunit;
 
 namespace DjvuNet.DjvuLibre.Tests
 {
     public class DjvuPageInfoTests
     {
-        [Fact()]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DjvuPageInfoTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            using (DjvuDocumentInfo document =
+                DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                Assert.Equal<int>(300, pageCount);
+
+                DocumentType type = document.DocumentType;
+                Assert.Equal<DocumentType>(DocumentType.Bundled, type);
+
+                using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+                {
+                    Assert.NotNull(page);
+                    Assert.IsType<DjvuPageInfo>(page);
+                }
+            }
         }
 
-        [Fact()]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DisposeTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            DjvuPageInfo page = null;
+            try
+            {
+                using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+                {
+                    Assert.NotNull(document);
+
+                    int pageCount = document.PageCount;
+                    Assert.Equal<int>(300, pageCount);
+
+                    DocumentType type = document.DocumentType;
+                    Assert.Equal<DocumentType>(DocumentType.Bundled, type);
+
+                    page = new DjvuPageInfo(document, 0);
+                    Assert.NotNull(page);
+                    Assert.IsType<DjvuPageInfo>(page);
+                }
+            }
+            finally
+            {
+                if (page != null)
+                {
+                    page.Dispose();
+                    Assert.True(page.Disposed);
+                    page = null;
+                }
+            }
+        }
+
+        [Fact(), Trait("Category", "DjvuLibre")]
+        public void GetPageTypeTest()
+        {
+            using (DjvuDocumentInfo document =
+                DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                Assert.Equal<int>(300, pageCount);
+
+                DocumentType type = document.DocumentType;
+                Assert.Equal<DocumentType>(DocumentType.Bundled, type);
+
+                using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+                {
+                    Assert.NotNull(page);
+                    Assert.IsType<DjvuPageInfo>(page);
+
+                    PageType pageType = page.GetPageType();
+                }
+
+                using (DjvuPageInfo page = new DjvuPageInfo(document, 1))
+                {
+                    Assert.NotNull(page);
+                    Assert.IsType<DjvuPageInfo>(page);
+
+                    PageType pageType = page.GetPageType();
+                }
+            }
         }
     }
 }

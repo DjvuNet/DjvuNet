@@ -12,8 +12,27 @@ namespace DjvuNet.DjvuLibre
     [StructLayout(LayoutKind.Sequential)]
     public class ChunkMessage
     {
+        private ChunkMessage(NativeChunkMessage nativeMsg)
+        {
+            Any = nativeMsg.Any;
+            ChunkID = (string) UTF8StringMarshaler.GetInstance("").MarshalNativeToManaged(nativeMsg.ChunkIdPtr);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private class NativeChunkMessage
+        {
+            public AnyMassege Any;
+            public IntPtr ChunkIdPtr;
+        }
         public AnyMassege Any;
 
-        private IntPtr _ChunkID;
+        public String ChunkID;
+
+        public static ChunkMessage GetMessage(IntPtr nativeChunkMsg)
+        {
+            NativeChunkMessage msg = Marshal.PtrToStructure<NativeChunkMessage>(nativeChunkMsg);
+            ChunkMessage message = new ChunkMessage(msg);
+            return message;
+        }
     };
 }

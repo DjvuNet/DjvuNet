@@ -20,12 +20,12 @@ namespace DjvuNet.DjvuLibre
             Document = document;
             Path = filePath;
 
-            _MessageCallbackDelegate = 
-                new NativeMethods.DjvuMessageCallbackDelegate(this.DjvuMessageCallback);
+            //_MessageCallbackDelegate = 
+            //    new NativeMethods.DjvuMessageCallbackDelegate(this.DjvuMessageCallback);
 
-            IntPtr callback = Marshal.GetFunctionPointerForDelegate(_MessageCallbackDelegate);
+            //IntPtr callback = Marshal.GetFunctionPointerForDelegate(_MessageCallbackDelegate);
 
-            NativeMethods.DjvuSetMessageCallback(Context, callback, IntPtr.Zero);
+            //NativeMethods.DjvuSetMessageCallback(Context, callback, IntPtr.Zero);
             DocumentType = NativeMethods.GetDjvuDocumentType(Document);
             PageCount = NativeMethods.GetDjvuDocumentPageCount(Document);
         }
@@ -149,10 +149,10 @@ namespace DjvuNet.DjvuLibre
             ProcessMessage(context, true);
         }
 
-        internal static void ProcessMessage(IntPtr context, bool wait = true)
+        internal static List<object> ProcessMessage(IntPtr context, bool wait = true)
         {
             if (context == IntPtr.Zero)
-                throw new ArgumentException(nameof(context));
+                return null; // throw new ArgumentException(nameof(context));
 
             IntPtr message = IntPtr.Zero;
 
@@ -160,6 +160,7 @@ namespace DjvuNet.DjvuLibre
             if (wait)
                 message = NativeMethods.DjvuWaitMessage(context);
 
+            List<object> messages = new List<object>();
             // Pop all messages currently in the queue
             message = NativeMethods.DjvuPeekMessage(context);
             while(message != IntPtr.Zero)
@@ -168,27 +169,38 @@ namespace DjvuNet.DjvuLibre
                 switch (djvuMsg.Any.Tag)
                 {
                     case MessageTag.DocInfo:
+                        messages.Add(djvuMsg.DocInfo);
                         break;
                     case MessageTag.Error:
+                        messages.Add(djvuMsg.Error);
                         throw new ApplicationException("DjvuLibre error");
                     case MessageTag.Chunk:
+                        messages.Add(djvuMsg.Chunk);
                         break;
                     case MessageTag.Info:
+                        messages.Add(djvuMsg.Info);
                         break;
                     case MessageTag.PageInfo:
+                        messages.Add(djvuMsg.PageInfo);
                         break;
                     case MessageTag.Progress:
+                        messages.Add(djvuMsg.Progress);
                         break;
                     case MessageTag.NewStream:
+                        messages.Add(djvuMsg.NewStream);
                         break;
-                    case MessageTag.ReDisplay:
+                    case MessageTag.Display:
+                        messages.Add(djvuMsg.Display);
                         break;
-                    case MessageTag.ReLayout:
+                    case MessageTag.Layout:
+                        messages.Add(djvuMsg.Layout);
                         break;
                 }
                 NativeMethods.DjvuPopMessage(context);
                 message = NativeMethods.DjvuPeekMessage(context);
             }
+
+            return messages;
         }
 
         public virtual DocumentType DocumentType { get; protected set; }
@@ -205,11 +217,12 @@ namespace DjvuNet.DjvuLibre
         {
             PageInfo info = new PageInfo();
             int status = 0;
-
+            int size = Marshal.SizeOf<PageInfo>();
+            IntPtr buffer = Marshal.AllocHGlobal(size);
             while (true)
             {
-                status = NativeMethods.GetDjvuDocumentPageInfo(Document, pageNumber,
-                    ref info, Marshal.SizeOf<PageInfo>());
+                
+                status = NativeMethods.GetDjvuDocumentPageInfo(Document, pageNumber, buffer, size);
 
                 if (status >= 2)
                     break;
@@ -218,7 +231,11 @@ namespace DjvuNet.DjvuLibre
             }
 
             if (status == 2)
+            {
+                info = Marshal.PtrToStructure<PageInfo>(buffer);
+                Marshal.FreeHGlobal(buffer);
                 return info;
+            }
             else
                 throw new ApplicationException($"Failed to get PageInfo for page number: {pageNumber}");
         }

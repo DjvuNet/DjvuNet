@@ -37,12 +37,40 @@ namespace DjvuNet.DjvuLibre
     [StructLayout(LayoutKind.Sequential)]
     public class NewStreamMessage
     {
+
+        private NewStreamMessage(NativeNewStreamMessage nativeMsg)
+        {
+            Tag = nativeMsg.Tag;
+            StreamID = nativeMsg.StreamID;
+            Name = (string)UTF8StringMarshaler.GetInstance("").MarshalNativeToManaged(nativeMsg.NamePtr);
+            Url = (string)UTF8StringMarshaler.GetInstance("").MarshalNativeToManaged(nativeMsg.UrlPtr);
+        }
+
         public MessageTag Tag;        // TODO - this field equally well could be short - sufficient to have enum expressed
 
         public int StreamID;
 
-        private IntPtr _Name;
+        public String Name;
 
-        private IntPtr _Url;
+        public String Url;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private class NativeNewStreamMessage
+        {
+            public MessageTag Tag;
+
+            public int StreamID;
+
+            public IntPtr NamePtr;
+
+            public IntPtr UrlPtr;
+        }
+
+        public static NewStreamMessage GetMessage(IntPtr nativekMsg)
+        {
+            NativeNewStreamMessage msg = Marshal.PtrToStructure<NativeNewStreamMessage>(nativekMsg);
+            NewStreamMessage message = new NewStreamMessage(msg);
+            return message;
+        }
     }
 }
