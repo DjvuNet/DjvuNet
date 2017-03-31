@@ -15,14 +15,41 @@ namespace DjvuNet.DjvuLibre
     [StructLayout(LayoutKind.Sequential)]
     public class ErrorMessage
     {
+        private ErrorMessage(NativeErrorMessage nativeMsg)
+        {
+            Tag = nativeMsg.Tag;
+            Message = (string)UTF8StringMarshaler.GetInstance("").MarshalNativeToManaged(nativeMsg.MessagePtr);
+            Function = (string)UTF8StringMarshaler.GetInstance("").MarshalNativeToManaged(nativeMsg.FunctionPtr);
+            File = (string)UTF8StringMarshaler.GetInstance("").MarshalNativeToManaged(nativeMsg.FilePtr);
+            LineNumber = nativeMsg.LineNumber;
+
+        }
+
         public MessageTag Tag;        // TODO - this field equally well could be short - sufficient to have enum expressed
 
-        private IntPtr _Message;
+        public String Message;
 
-        private IntPtr _Function;
+        public String Function;
 
-        private IntPtr _File;
+        public String File;
 
         public int LineNumber;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private class NativeErrorMessage
+        {
+            public MessageTag Tag;
+            public IntPtr MessagePtr;
+            public IntPtr FunctionPtr;
+            public IntPtr FilePtr;
+            public int LineNumber;
+        }
+
+        public static ErrorMessage GetMessage(IntPtr nativeChunkMsg)
+        {
+            NativeErrorMessage msg = Marshal.PtrToStructure<NativeErrorMessage>(nativeChunkMsg);
+            ErrorMessage message = new ErrorMessage(msg);
+            return message;
+        }
     }
 }

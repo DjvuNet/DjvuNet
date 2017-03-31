@@ -15,17 +15,17 @@ namespace DjvuNet.DjvuLibre
 
         public AnyMassege           Any { get { return GetMessage<AnyMassege>(); } }
 
-        public ErrorMessage         Error { get { return GetMessage<ErrorMessage>(); } }
+        public ErrorMessage         Error { get { return ErrorMessage.GetMessage(_NativeMessage); } }
 
-        public InfoMessage          Info { get { return GetMessage<InfoMessage>(); } }
+        public InfoMessage          Info { get { return InfoMessage.GetMessage(_NativeMessage); } }
 
-        public NewStreamMessage     NewStream { get { return GetMessage<NewStreamMessage>(); } }
+        public NewStreamMessage     NewStream { get { return NewStreamMessage.GetMessage(_NativeMessage); } }
 
         public DocInfoMessage       DocInfo { get { return GetMessage<DocInfoMessage>(); } }
 
         public PageInfoMessage      PageInfo { get { return GetMessage<PageInfoMessage>(); } }
 
-        public ChunkMessage         Chunk { get { return GetMessage<ChunkMessage>(); } }
+        public ChunkMessage         Chunk { get { return ChunkMessage.GetMessage(_NativeMessage); } }
 
         public LayoutMessage        Layout { get { return GetMessage<LayoutMessage>(); } }
 
