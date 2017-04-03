@@ -33,6 +33,46 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -44,7 +84,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enums\DjvuJobStatus.cs" />
+    <Compile Include="Enums\FormatStyle.cs" />
+    <Compile Include="Interop\DjvuMarshal.cs" />
     <Compile Include="DjvuRectangle.cs" />
+    <Compile Include="Enums\DocumentType.cs" />
     <Compile Include="Interop\UTF8StringMarshaler.cs" />
     <Compile Include="Messages\AnyMessage.cs" />
     <Compile Include="Messages\ChunkMessage.cs" />
@@ -53,27 +97,35 @@
     <Compile Include="Messages\DjvuMessage.cs" />
     <Compile Include="DjvuPageInfo.cs" />
     <Compile Include="Messages\DocInfoMessage.cs" />
-    <Compile Include="Enums.cs" />
     <Compile Include="Messages\ErrorMessage.cs" />
     <Compile Include="Messages\InfoMessage.cs" />
     <Compile Include="Messages\LayoutMessage.cs" />
     <Compile Include="Messages\NewStreamMessage.cs" />
+    <Compile Include="Enums\MessageTag.cs" />
     <Compile Include="PageInfo.cs" />
     <Compile Include="Messages\PageInfoMessage.cs" />
     <Compile Include="Messages\ProgressMessage.cs" />
+    <Compile Include="Enums\PageRotation.cs" />
+    <Compile Include="Enums\PageType.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="DjvuDocumentInfo.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Messages\ThumbnailMessage.cs" />
+    <Compile Include="Enums\RenderMode.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DjvuNet.DjvuLibre.targets" />
     <None Include="LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj">
       <Project>{4fec9875-d7e6-47bd-a13a-5c1944464545}</Project>
       <Name>DjvuNet.Helper.Tests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\libdjvu\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj">
+      <Project>{AAA67337-AABD-4D04-A3CC-0A7F341F216C}</Project>
+      <Name>libdjvulibre</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -83,11 +135,15 @@
   <Import Project="..\DjvuNet.Shared\DjvuNet.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\DjvuNetBuild.targets" />
+  <Import Project="DjvuNet.DjvuLibre.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  </Target>  -->
+  <!--<Target Name="AfterBuild">
+    <PropertyGroup>
+    </PropertyGroup>
+    <Copy SourceFiles="$(ProjectDir)..\..\libdjvu\win32\djvulibre\$(Configuration)\libdjvulibre.dll" DestinationFiles="$(TargetDir)libdjvulibre.dll" />
+    <Copy SourceFiles="$(ProjectDir)..\..\libdjvu\win32\djvulibre\$(Configuration)\libdjvulibre.pdb" DestinationFiles="$(TargetDir)libdjvulibre.pdb" />
+  </Target>-->
 </Project>
