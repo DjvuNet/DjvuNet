@@ -74,30 +74,6 @@
       <HintPath>..\packages\Castle.Core.4.0.0\lib\net45\Castle.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="CppSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CppSharp.0.8.7\lib\CppSharp.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CppSharp.AST, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CppSharp.0.8.7\lib\CppSharp.AST.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CppSharp.Generator, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CppSharp.0.8.7\lib\CppSharp.Generator.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CppSharp.Parser, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CppSharp.0.8.7\lib\CppSharp.Parser.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CppSharp.Parser.CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CppSharp.0.8.7\lib\CppSharp.Parser.CSharp.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="CppSharp.Runtime, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\CppSharp.0.8.7\lib\CppSharp.Runtime.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Moq, Version=4.7.8.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\packages\Moq.4.7.8\lib\net45\Moq.dll</HintPath>
       <Private>True</Private>
