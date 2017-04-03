@@ -13,6 +13,7 @@ namespace DjvuNet.DjvuLibre
         private DjvuDocumentInfo _DocumentInfo;
         private PageInfo _Info;
         private string _Text;
+        private string _Annotation;
         private PageType _PageType;
         
         public DjvuPageInfo(DjvuDocumentInfo docInfo, int pageNumber)
@@ -146,33 +147,65 @@ namespace DjvuNet.DjvuLibre
                     return _Text;
                 else
                 {
-
-                    _Text = NativeMethods.GetDjvuDocumentPageTextUtf8(
-                        _DocumentInfo.Document, Number, "word");
-
-                    // Avoid repeating search for null
-                    if (_Text == null)
-                        _Text = String.Empty;
+                    try
+                    {
+                        _Text = NativeMethods.GetDjvuDocumentPageTextUtf8(
+                            _DocumentInfo.Document, Number, "word");
+                    }
+                    finally
+                    {
+                        // Avoid repeating search for null
+                        if (_Text == null)
+                            _Text = String.Empty;
+                    }
 
                     return _Text;
                 }
             }
         }
 
-        private string ExtractTextFromMiniexp(IntPtr result, int count = 0)
+        public string Annotation
+        {
+            get
+            {
+                if (_Annotation != null)
+                    return _Annotation;
+                else
+                {
+                    IntPtr miniexp = IntPtr.Zero;
+                    try
+                    {
+                        miniexp = NativeMethods.GetDjvuPageAnnotation(_DocumentInfo.Document, Number);
+                        _Annotation = ExtractTextFromMiniexp(miniexp);
+                    }
+                    finally
+                    {
+                        if (_Annotation == null)
+                            _Annotation = String.Empty;
+                        if (miniexp != IntPtr.Zero)
+                            NativeMethods.ReleaseDjvuMiniexp(_DocumentInfo.Document, miniexp);
+                    }
+
+                    return _Annotation;
+                }
+
+            }
+        }
+
+        internal static string ExtractTextFromMiniexp(IntPtr miniexp, int count = 0)
         {
             string text = null;
 
-            text = NativeMethods.GetMiniexpString(result);
+            text = NativeMethods.GetMiniexpString(miniexp);
             if (!String.IsNullOrWhiteSpace(text))
                 return text;
 
             if (count == 0)
-                count = NativeMethods.MiniexpLength(result);
+                count = NativeMethods.MiniexpLength(miniexp);
 
             for (int i = 0; i < count; i++)
             {
-                IntPtr element = NativeMethods.MiniexpItem(i, result);
+                IntPtr element = NativeMethods.MiniexpItem(i, miniexp);
                 int count2 = NativeMethods.MiniexpLength(element);
 
                 text = ExtractTextFromMiniexp(element, count2);
@@ -181,7 +214,7 @@ namespace DjvuNet.DjvuLibre
 
                 if (NativeMethods.IsMiniexpString(element))
                 {
-                    text = NativeMethods.GetMiniexpString(result);
+                    text = NativeMethods.GetMiniexpString(miniexp);
                     if (!String.IsNullOrWhiteSpace(text))
                         return text;
                 }

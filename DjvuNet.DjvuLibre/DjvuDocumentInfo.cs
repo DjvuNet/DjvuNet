@@ -11,7 +11,7 @@ namespace DjvuNet.DjvuLibre
 {
     public class DjvuDocumentInfo : IDisposable
     {
-        private NativeMethods.DjvuMessageCallbackDelegate _MessageCallbackDelegate;
+        //private NativeMethods.DjvuMessageCallbackDelegate _MessageCallbackDelegate;
         //private NativeMethods.DjvuMessageCallbackDelegate _PreviousMessageCallback;
 
         private DjvuDocumentInfo(IntPtr context, IntPtr document, string filePath)
@@ -22,10 +22,9 @@ namespace DjvuNet.DjvuLibre
 
             //_MessageCallbackDelegate = 
             //    new NativeMethods.DjvuMessageCallbackDelegate(this.DjvuMessageCallback);
-
             //IntPtr callback = Marshal.GetFunctionPointerForDelegate(_MessageCallbackDelegate);
-
             //NativeMethods.DjvuSetMessageCallback(Context, callback, IntPtr.Zero);
+
             DocumentType = NativeMethods.GetDjvuDocumentType(Document);
             PageCount = NativeMethods.GetDjvuDocumentPageCount(Document);
             FileCount = NativeMethods.GetDjvuDocumentFileCount(Document);
@@ -131,10 +130,10 @@ namespace DjvuNet.DjvuLibre
                 Context = IntPtr.Zero;
             }
 
-            if (_MessageCallbackDelegate != null)
-            {
-                _MessageCallbackDelegate = null;
-            }
+            //if (_MessageCallbackDelegate != null)
+            //{
+            //    _MessageCallbackDelegate = null;
+            //}
 
             _Disposed = true;
         }
@@ -285,6 +284,23 @@ namespace DjvuNet.DjvuLibre
         public string DumpFileData(int fileNumber, bool json = true)
         {
             return NativeMethods.GetDjvuDocumentFileDump(Document, fileNumber, json);
+        }
+
+        public string GetDocumentAnnotation()
+        {
+            IntPtr miniexp = IntPtr.Zero;
+
+            miniexp = NativeMethods.GetDjvuDocumentAnnotation(Document, 1);
+            if (miniexp != IntPtr.Zero)
+            {
+                // TODO - improve data extraction from miniexp - only part is recovered now
+                string result = DjvuPageInfo.ExtractTextFromMiniexp(miniexp);
+                if (result == null)
+                    return String.Empty;
+                else
+                    return result;
+            }
+            return null;
         }
 
         public string GetPageText(int pageNumber)

@@ -924,11 +924,6 @@ namespace DjvuNet.DjvuLibre
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern PageRotation GetDjvuPageInitialRotation(IntPtr page);
 
-        /* ddjvu_page_get_version ---
-           Returns the version of the djvu file format.
-           Calling this function before receiving a <m_pageinfo>
-           message yields a meaningless but plausible value. */
-
         //  DDJVUAPI int
         //  ddjvu_page_get_version(ddjvu_page_t* page);
 
@@ -1021,7 +1016,7 @@ namespace DjvuNet.DjvuLibre
         /// <summary>
         /// Creates a ddjvu_format_t object describing a pixel format.
         /// Argument style describes the generic pixel format.
-        /// Argument args is an array of nargs unsigned integers
+        /// Argument args is an array of numberOfArgs unsigned integers
         /// providing additional information:
         /// - When style is RGBMASK*, argument numberOfArgs must be 3 or 4.
         ///   The three first entries of array args are three contiguous
@@ -1038,68 +1033,79 @@ namespace DjvuNet.DjvuLibre
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void CreateDjvuFormat(FormatStyle style, int numberOfArgs, IntPtr args);
 
-        /* ddjvu_format_set_row_order ---
-           Sets a flag indicating whether the rows in the pixel buffer
-           are stored starting from the top or the bottom of the image.
-           Default ordering starts from the bottom of the image.
-           This is the opposite of the X11 convention. */
-
         //  DDJVUAPI void
         //  ddjvu_format_set_row_order(ddjvu_format_t* format, int top_to_bottom);
 
+        /// <summary>
+        /// Sets a flag indicating whether the rows in the pixel buffer
+        /// are stored starting from the top or the bottom of the image.
+        /// Default ordering starts from the bottom of the image.
+        /// This is the opposite of the X11 convention.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="topToBottom"></param>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_row_order",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatRowOrder(IntPtr format, int topToBottom);
 
-        /* ddjvu_format_set_y_direction ---
-           Sets a flag indicating whether the y coordinates in the drawing 
-           area are oriented from bottom to top, or from top to bottom.  
-           The default is bottom to top, similar to PostScript.
-           This is the opposite of the X11 convention. */
-
         //  DDJVUAPI void
         //  ddjvu_format_set_y_direction(ddjvu_format_t* format, int top_to_bottom);
 
+        /// <summary>
+        /// Sets a flag indicating whether the y coordinates in the drawing
+        /// area are oriented from bottom to top, or from top to bottom.
+        /// The default is bottom to top, similar to PostScript.
+        /// This is the opposite of the X11 convention.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="topToBottom"></param>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_y_direction",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatYDirection(IntPtr format, int topToBottom);
 
-
-        /* ddjvu_format_set_ditherbits ---
-           Specifies the final depth of the image on the screen.
-           This is used to decide which dithering algorithm should be used.
-           The default is usually appropriate. */
-
         //  DDJVUAPI void
         //  ddjvu_format_set_ditherbits(ddjvu_format_t* format, int bits);
 
+        /// <summary>
+        /// Specifies the final depth of the image on the screen.
+        /// This is used to decide which dithering algorithm should be used.
+        /// The default is usually appropriate.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="bits"></param>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_ditherbits",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatDitherBits(IntPtr format, int bits);
 
-        /* ddjvu_format_set_gamma ---
-           Sets the gamma of the display for which the pixels are
-           intended.  This will be combined with the gamma stored in
-           DjVu documents in order to compute a suitable color
-           correction.  The default value is 2.2. */
-
         //  DDJVUAPI void
         //  ddjvu_format_set_gamma(ddjvu_format_t* format, double gamma);
 
+        /// <summary>
+        /// Sets the gamma of the display for which the pixels are
+        /// intended.  This will be combined with the gamma stored in
+        /// DjVu documents in order to compute a suitable color
+        /// correction. The default value is 2.2.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="gamma"></param>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_gamma",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatGamma(IntPtr format, double gamma);
-
-        /* ddjvu_format_set_white ---
-           Sets the white point of the display for which the pixels are
-           intended. This will be combined with the gamma stored in
-           DjVu documents in order to compute a suitable color
-           correction. The default value is 0xff,0xff,0xff. */
 
         //  DDJVUAPI void
         //  ddjvu_format_set_white(ddjvu_format_t* format,
         //                       unsigned char b, unsigned char g, unsigned char r);
 
+        /// <summary>
+        /// Sets the white point of the display for which the pixels are
+        /// intended. This will be combined with the gamma stored in
+        /// DjVu documents in order to compute a suitable color
+        /// correction. The default value is 0xff,0xff,0xff.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <param name="blue"></param>
+        /// <param name="green"></param>
+        /// <param name="red"></param>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_white",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatWhite(IntPtr format, 
@@ -1126,7 +1132,7 @@ namespace DjvuNet.DjvuLibre
         //  ddjvu_thumbnail_status(ddjvu_document_t* document, int pagenum, int start);
 
         /// <summary>
-        /// Determine whether a thumbnail is available for page pageNumber.
+        /// Determine whether a thumbnail is available for page with pageNumber.
         /// Calling this function with non zero argument start initiates
         /// a thumbnail calculation job. Regardless of its success,
         /// the completion of the job is signaled by a subsequent
@@ -1142,10 +1148,10 @@ namespace DjvuNet.DjvuLibre
 
         //  DDJVUAPI int
         //  ddjvu_thumbnail_render(ddjvu_document_t* document, int pagenum,
-        //               int* wptr, int* hptr,
-        //               const ddjvu_format_t* pixelformat,
-        //               unsigned long rowsize,
-        //               char* imagebuffer);
+        //                          int* wptr, int* hptr,
+        //                          const ddjvu_format_t* pixelformat,
+        //                          unsigned long rowsize,
+        //                          char* imagebuffer);
 
         /// <summary>
         /// Renders a thumbnail for page with pageNumber.
@@ -1168,7 +1174,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns></returns>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_thumbnail_render",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
-        internal static extern unsafe DjvuJobStatus RenderDjvuThumbnail(
+        internal static extern DjvuJobStatus RenderDjvuThumbnail(
             IntPtr document, 
             int pageNumber, 
             ref int pWidth,
@@ -1206,44 +1212,49 @@ namespace DjvuNet.DjvuLibre
 
         //  typedef struct miniexp_s* miniexp_t;
 
-
-        /* ddjvu_miniexp_release -- 
-           This function controls the allocation of the
-           s-expressions returned by functions from the DDJVU
-           API. It indicates that the s-expression <expr> is no
-           longer needed and can be deallocated as soon as
-           necessary. Otherwise the s-expression remains allocated
-           as long as the document object exists. */
-
         //  DDJVUAPI void
         //  ddjvu_miniexp_release(ddjvu_document_t* document, miniexp_t expr);
 
+        /// <summary>
+        /// This function controls the allocation of the
+        /// s-expressions returned by functions from the DDJVU
+        /// API. It indicates that the s-expression expr is no
+        /// longer needed and can be deallocated as soon as
+        /// necessary. Otherwise the s-expression remains allocated
+        /// as long as the document object exists.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="expression"></param>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_miniexp_release",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void ReleaseDjvuMiniexp(IntPtr document, IntPtr expression);
 
-
-        /* ddjvu_document_get_outline -- 
-           This function tries to obtain the document outline.  
-           If this information is available, it returns a
-           s-expression with the same syntax as function
-           <print-outline> of program <djvused>.  
-           Otherwise it returns <miniexp_dummy> until 
-           the document header gets fully decoded.
-           Typical synchronous usage:
-
-            miniexp_t r;
-            while ((r=ddjvu_document_get_outline(doc))==miniexp_dummy)
-              handle_ddjvu_messages(ctx, TRUE); 
-
-           This function returns the empty list <miniexp_nil> when
-           the document contains no outline information. It can also
-           return symbols <failed> or <stopped> when an error occurs
-           while accessing the desired information. */
-
         //  DDJVUAPI miniexp_t
         //  ddjvu_document_get_outline(ddjvu_document_t* document);
 
+        /// <summary>
+        /// This function tries to obtain the document outline.
+        /// If this information is available, it returns a
+        /// s-expression with the same syntax as function
+        /// print-outline of program djvused.
+        /// Otherwise it returns <miniexp_dummy> until the document 
+        /// header gets fully decoded.
+        /// </summary>
+        /// <remarks>
+        /// Typical synchronous usage:
+        /// miniexp_t r;
+        /// while ((r=ddjvu_document_get_outline(doc))==miniexp_dummy)
+        ///   handle_ddjvu_messages(ctx, TRUE);
+        /// </remarks>
+        /// <param name="document"></param>
+        /// <returns>
+        /// Function returns s-expression with the same syntax as function
+        /// print-outline of program djvused.
+        /// This function returns the empty list <miniexp_nil> when
+        /// the document contains no outline information. It can also
+        /// return symbols <failed> or <stopped> when an error occurs
+        /// while accessing the desired information.
+        /// </returns>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_outline",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuDocumentOutline(IntPtr document);
@@ -1325,6 +1336,16 @@ namespace DjvuNet.DjvuLibre
         //  ddjvu_document_get_pagetext_utf8(ddjvu_document_t* document, int pageno,
         //                                  const char* maxdetail)
 
+        /// <summary>
+        /// Function returns decoded DjVu document page text bypassing miniexp 
+        /// and directly reading from native text buffer with support of modified
+        /// libdjvulibre library C API. Fidelity is on par with original miniexp
+        /// based API but skips unnecessary miniexp encoding and decoding.
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="pageNumber"></param>
+        /// <param name="maxDetail"></param>
+        /// <returns></returns>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pagetext_utf8",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
@@ -1334,28 +1355,32 @@ namespace DjvuNet.DjvuLibre
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef=typeof(UTF8StringMarshaler))]
             string maxDetail);
 
-        /* ddjvu_document_get_pageanno -- 
-           This function tries to obtain the annotations for
-           page <pageno>. If this information is available, it
-           returns a s-expression with the same syntax as function
-           <print-ant> of program <djvused>.  Otherwise it starts
-           fetching the page data and returns <miniexp_dummy>.
-           This function causes the emission of <m_pageinfo> messages 
-           with zero in the <m_any.page> field.
-           Typical synchronous usage:
-
-             miniexp_t r;
-             while ((r = ddjvu_document_get_pageanno(doc,pageno))==miniexp_dummy)
-               handle_ddjvu_messages(ctx, TRUE); 
-
-           This function returns the empty list <miniexp_nil> when
-           the page contains no annotations. It can also return
-           symbols <failed> or <stopped> when an error occurs while
-           accessing the desired information. */
-
         //  DDJVUAPI miniexp_t
         //  ddjvu_document_get_pageanno(ddjvu_document_t* document, int pageno);
 
+        /// <summary>
+        /// This function tries to obtain the annotations for
+        /// page pageNumber. If this information is available, it
+        /// returns a s-expression with the same syntax as function
+        /// print-ant of program djvused.  Otherwise it starts
+        /// fetching the page data and returns miniexp_dummy.
+        /// This function causes the emission of m_pageinfo messages
+        /// with zero in the m_any.page field.
+        /// </summary>
+        /// <remarks>
+        /// Typical synchronous usage:
+        /// miniexp_t r;
+        /// while ((r = ddjvu_document_get_pageanno(doc,pageno))==miniexp_dummy)
+        ///   handle_ddjvu_messages(ctx, TRUE);
+        ///   
+        /// This function returns the empty list miniexp_nil when
+        /// the page contains no annotations. It can also return
+        /// symbols failed or stopped when an error occurs while
+        /// accessing the desired information.
+        /// </remarks>
+        /// <param name="document"></param>
+        /// <param name="pageNumber"></param>
+        /// <returns></returns>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pageanno",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuPageAnnotation(IntPtr document, int pageNumber);
@@ -1411,23 +1436,27 @@ namespace DjvuNet.DjvuLibre
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr MiniexpItem(int index, IntPtr miniexpList);
 
-        /* miniexp_stringp --
-           Tests if an expression is a string. */
-
         //  MINILISPAPI int miniexp_stringp(miniexp_t p);
 
+        /// <summary>
+        /// Tests if an expression is a string.
+        /// </summary>
+        /// <param name="miniexp"></param>
+        /// <returns></returns>
         [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_stringp",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern bool IsMiniexpString(IntPtr miniexp);
 
-        /* miniexp_to_str --
-           Returns the c string represented by the expression.
-           Returns NULL if the expression is not a string.
-           The c string remains valid as long as the
-           corresponding lisp object exists. */
-
         // MINILISPAPI const char* miniexp_to_str(miniexp_t p);
 
+        /// <summary>
+        /// Returns the c string represented by the expression.
+        /// Returns NULL if the expression is not a string.
+        /// The c string remains valid as long as the corresponding 
+        /// lisp object exists.
+        /// </summary>
+        /// <param name="miniexp"></param>
+        /// <returns></returns>
         [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_to_str",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
