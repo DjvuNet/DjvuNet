@@ -179,7 +179,12 @@
     <Folder Include="Edition\" />
     <Folder Include="Export\" />
   </ItemGroup>
-  <Import Project="..\DjvuNet.Shared\DjvuNet.Shared.projitems" Label="Shared" />
+  <ItemGroup>
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
+      <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
+      <Name>System.Attributes</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectDir)../DjvuNetBuild.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
