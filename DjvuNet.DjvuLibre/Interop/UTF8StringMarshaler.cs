@@ -42,7 +42,7 @@ namespace DjvuNet.DjvuLibre
 
             // not null terminated
             byte[] buffer = Encoding.UTF8.GetBytes(obj);
-            IntPtr nativeUTF8Str = Marshal.AllocHGlobal(buffer.Length + 1);
+            IntPtr nativeUTF8Str = DjvuMarshal.AllocHGlobal((uint)buffer.Length + 1);
             Marshal.Copy(buffer, 0, nativeUTF8Str, buffer.Length);
 
             // write the terminating null
@@ -70,7 +70,14 @@ namespace DjvuNet.DjvuLibre
 
         public void CleanUpNativeData(IntPtr pNativeData)
         {
-            Marshal.FreeHGlobal(pNativeData);
+            try
+            {
+                DjvuMarshal.FreeHGlobal(pNativeData);
+            }
+            catch(AccessViolationException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
         }
 
         public void CleanUpManagedData(object ManagedObj)
@@ -84,12 +91,18 @@ namespace DjvuNet.DjvuLibre
 
         public static ICustomMarshaler GetInstance(string cookie)
         {
-            // First most probable path
+            // First should be most probable code exec path
             if (_Instance != null)
                 return _Instance;
-            else 
-                return _Instance = new UTF8StringMarshaler();
+            else
+            {
+                _Instance = new UTF8StringMarshaler();
+                _Instance.Cookie = cookie;
+                return _Instance;
+            }
             
         }
+
+        public string Cookie { get; set; }
     }
 }

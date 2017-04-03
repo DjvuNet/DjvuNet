@@ -273,3 +273,5 @@ paket-files/
 __pycache__/
 *.pyc
 
+/Performance tests.txt
+*.runsettings

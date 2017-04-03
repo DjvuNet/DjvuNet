@@ -9,6 +9,7 @@
     <Import_RootNamespace>DjvuNet.Tests</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)SynchronizedBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilRoot.cs" />
   </ItemGroup>

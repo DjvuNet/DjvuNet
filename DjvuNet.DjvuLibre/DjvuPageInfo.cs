@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DjvuNet.DjvuLibre
@@ -11,6 +12,8 @@ namespace DjvuNet.DjvuLibre
     {
         private DjvuDocumentInfo _DocumentInfo;
         private PageInfo _Info;
+        private string _Text;
+        private PageType _PageType;
         
         public DjvuPageInfo(DjvuDocumentInfo docInfo, int pageNumber)
         {
@@ -19,13 +22,14 @@ namespace DjvuNet.DjvuLibre
 
             if ((_Info = docInfo.GetPageInfo(pageNumber)) == null)
                 throw new ArgumentException(
-                    $"{nameof(DjvuDocumentInfo)} object {nameof(docInfo)} is not initialized properly.", 
+                    $"{nameof(DjvuDocumentInfo)} object {nameof(docInfo)} is not fully initialized.", 
                     nameof(docInfo));
 
             if (pageNumber < 0 || pageNumber >= docInfo.PageCount)
                 throw new ArgumentOutOfRangeException(nameof(pageNumber));
 
             _DocumentInfo = docInfo;
+            Number = pageNumber;
 
             Page = NativeMethods.GetDjvuDocumentPage(_DocumentInfo.Document, pageNumber);
 
@@ -54,6 +58,8 @@ namespace DjvuNet.DjvuLibre
                 Version = _Info.Version;
                 Rotation = _Info.Rotation;
             }
+
+            PageType = NativeMethods.GetDjvuPageType(Page);
         }
 
         #region IDisposable implementation
@@ -105,9 +111,82 @@ namespace DjvuNet.DjvuLibre
 
         public int Version { get; protected set; }
 
+        public int Number { get; protected set; }
+
+        public PageInfo PageInfo { get { return _Info; } }
+
+        public PageType PageType
+        {
+            get
+            {
+                if (_PageType != PageType.Unknown)
+                    return _PageType;
+                else
+                {
+                    _PageType = NativeMethods.GetDjvuPageType(Page);
+                    return _PageType;
+                }
+            }
+            protected set
+            {
+                _PageType = value;
+            }
+        }
+
         public PageType GetPageType()
         {
             return NativeMethods.GetDjvuPageType(Page);
+        }
+
+        public string Text
+        {
+            get
+            {
+                if (_Text != null)
+                    return _Text;
+                else
+                {
+
+                    _Text = NativeMethods.GetDjvuDocumentPageTextUtf8(
+                        _DocumentInfo.Document, Number, "word");
+
+                    // Avoid repeating search for null
+                    if (_Text == null)
+                        _Text = String.Empty;
+
+                    return _Text;
+                }
+            }
+        }
+
+        private string ExtractTextFromMiniexp(IntPtr result, int count = 0)
+        {
+            string text = null;
+
+            text = NativeMethods.GetMiniexpString(result);
+            if (!String.IsNullOrWhiteSpace(text))
+                return text;
+
+            if (count == 0)
+                count = NativeMethods.MiniexpLength(result);
+
+            for (int i = 0; i < count; i++)
+            {
+                IntPtr element = NativeMethods.MiniexpItem(i, result);
+                int count2 = NativeMethods.MiniexpLength(element);
+
+                text = ExtractTextFromMiniexp(element, count2);
+                if (!String.IsNullOrWhiteSpace(text))
+                    return text;
+
+                if (NativeMethods.IsMiniexpString(element))
+                {
+                    text = NativeMethods.GetMiniexpString(result);
+                    if (!String.IsNullOrWhiteSpace(text))
+                        return text;
+                }
+            }
+            return text;
         }
 
     }
