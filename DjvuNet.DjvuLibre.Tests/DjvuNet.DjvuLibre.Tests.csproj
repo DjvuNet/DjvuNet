@@ -126,6 +126,10 @@
       <Project>{4fec9875-d7e6-47bd-a13a-5c1944464545}</Project>
       <Name>DjvuNet.Helper.Tests</Name>
     </ProjectReference>
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
+      <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
+      <Name>System.Attributes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -133,13 +133,13 @@
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj">
-      <Project>{e681b178-e5f8-4782-89c8-f32720b1464a}</Project>
-      <Name>DjvuNet</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
+      <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
+      <Name>System.Attributes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
