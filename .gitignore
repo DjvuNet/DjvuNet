@@ -18,6 +18,7 @@
 x64/
 x86/
 bld/
+[Bb]uild/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
@@ -273,3 +274,5 @@ paket-files/
 __pycache__/
 *.pyc
 
+/Performance tests.txt
+*.runsettings

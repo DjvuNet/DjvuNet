@@ -11,7 +11,7 @@ namespace DjvuNet.DjvuLibre
 {
     public class DjvuDocumentInfo : IDisposable
     {
-        private NativeMethods.DjvuMessageCallbackDelegate _MessageCallbackDelegate;
+        //private NativeMethods.DjvuMessageCallbackDelegate _MessageCallbackDelegate;
         //private NativeMethods.DjvuMessageCallbackDelegate _PreviousMessageCallback;
 
         private DjvuDocumentInfo(IntPtr context, IntPtr document, string filePath)
@@ -22,12 +22,12 @@ namespace DjvuNet.DjvuLibre
 
             //_MessageCallbackDelegate = 
             //    new NativeMethods.DjvuMessageCallbackDelegate(this.DjvuMessageCallback);
-
             //IntPtr callback = Marshal.GetFunctionPointerForDelegate(_MessageCallbackDelegate);
-
             //NativeMethods.DjvuSetMessageCallback(Context, callback, IntPtr.Zero);
+
             DocumentType = NativeMethods.GetDjvuDocumentType(Document);
             PageCount = NativeMethods.GetDjvuDocumentPageCount(Document);
+            FileCount = NativeMethods.GetDjvuDocumentFileCount(Document);
         }
 
         public static DjvuDocumentInfo CreateDjvuDocumentInfo(string filePath)
@@ -42,7 +42,8 @@ namespace DjvuNet.DjvuLibre
                 throw new FileNotFoundException($"File was not found - path: {filePath}");
 
             Process proc = Process.GetCurrentProcess();
-            string programName = $"{proc.ProcessName}{proc.Id:0000#}";
+            string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+            string programName = $"{proc.ProcessName}:{proc.Id:0000#}:{fileName}:{DateTime.UtcNow}"; 
 
             IntPtr context = IntPtr.Zero;
             IntPtr document = IntPtr.Zero;
@@ -54,7 +55,7 @@ namespace DjvuNet.DjvuLibre
                 if (context == IntPtr.Zero)
                     throw new ApplicationException("Failed to create native ddjvu_context object");
 
-                document = NativeMethods.GetDjvuDocument(context, filePath, 1);
+                document = NativeMethods.LoadDjvuDocument(context, filePath, 1);
                 if (document == IntPtr.Zero)
                     throw new ApplicationException($"Failed to open native djvu_document: {filePath}");
 
@@ -129,10 +130,10 @@ namespace DjvuNet.DjvuLibre
                 Context = IntPtr.Zero;
             }
 
-            if (_MessageCallbackDelegate != null)
-            {
-                _MessageCallbackDelegate = null;
-            }
+            //if (_MessageCallbackDelegate != null)
+            //{
+            //    _MessageCallbackDelegate = null;
+            //}
 
             _Disposed = true;
         }
@@ -152,7 +153,7 @@ namespace DjvuNet.DjvuLibre
         internal static List<object> ProcessMessage(IntPtr context, bool wait = true)
         {
             if (context == IntPtr.Zero)
-                return null; // throw new ArgumentException(nameof(context));
+                return null;
 
             IntPtr message = IntPtr.Zero;
 
@@ -207,6 +208,8 @@ namespace DjvuNet.DjvuLibre
 
         public virtual int PageCount { get; protected set; }
 
+        public virtual int FileCount { get; protected set; }
+
         public virtual IntPtr Document { get; protected set; }
 
         public virtual IntPtr Context { get; protected set; }
@@ -215,15 +218,17 @@ namespace DjvuNet.DjvuLibre
 
         public PageInfo GetPageInfo(int pageNumber)
         {
-            PageInfo info = new PageInfo();
+            if (pageNumber < 0 || pageNumber >= PageCount)
+                throw new ArgumentOutOfRangeException(nameof(pageNumber));
+
+            PageInfo info = null;
             int status = 0;
             int size = Marshal.SizeOf<PageInfo>();
             IntPtr buffer = Marshal.AllocHGlobal(size);
+
             while (true)
             {
-                
                 status = NativeMethods.GetDjvuDocumentPageInfo(Document, pageNumber, buffer, size);
-
                 if (status >= 2)
                     break;
                 else
@@ -240,10 +245,67 @@ namespace DjvuNet.DjvuLibre
                 throw new ApplicationException($"Failed to get PageInfo for page number: {pageNumber}");
         }
 
+        public DjvuFileInfo GetFileInfo(int fileNumber)
+        {
+            if (fileNumber < 0 || fileNumber >= FileCount)
+                throw new ArgumentOutOfRangeException(nameof(fileNumber));
+
+            DjvuFileInfo info = null;
+            int status = 0;
+            int size = Marshal.SizeOf<DjvuFileInfo>();
+            IntPtr buffer = Marshal.AllocHGlobal(size);
+
+            status = NativeMethods.GetDjvuDocumentFileInfo(Document, fileNumber, buffer, size);
+
+            // DjvuDocumentInfo is not initialized
+            if (status < 2)
+                return null;
+
+            if (status == 2)
+            {
+                info = DjvuFileInfo.GetDjvuFileInfo(buffer);
+                Marshal.FreeHGlobal(buffer);
+                return info;
+            }
+            else
+                throw new ApplicationException($"Failed to get PageInfo for page number: {fileNumber}");
+        }
+
+        public string DumpDocumentData(bool json = true)
+        {
+            return NativeMethods.GetDjvuDocumentDump(Document, json);
+        }
+
+        public string DumpPageData(int pageNumber, bool json = true)
+        {
+            return NativeMethods.GetDjvuDocumentPageDump(Document, pageNumber, json);
+        }
+
+        public string DumpFileData(int fileNumber, bool json = true)
+        {
+            return NativeMethods.GetDjvuDocumentFileDump(Document, fileNumber, json);
+        }
+
+        public string GetDocumentAnnotation()
+        {
+            IntPtr miniexp = IntPtr.Zero;
+
+            miniexp = NativeMethods.GetDjvuDocumentAnnotation(Document, 1);
+            if (miniexp != IntPtr.Zero)
+            {
+                // TODO - improve data extraction from miniexp - only part is recovered now
+                string result = DjvuPageInfo.ExtractTextFromMiniexp(miniexp);
+                if (result == null)
+                    return String.Empty;
+                else
+                    return result;
+            }
+            return null;
+        }
+
         public string GetPageText(int pageNumber)
         {
-
-            return null;
+            throw new NotImplementedException();
         }
     }
 }

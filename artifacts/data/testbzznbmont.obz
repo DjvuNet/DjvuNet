@@ -1,0 +1,127 @@
+=========================================================================================
+Test start - bzz format encoding
+=========================================================================================
+
+Release Copy
+Page 1 of 71
+Lizardtech DjVu Reference
+DjVu v3
+Document Date: November 2005
+From: Lizardtech, a Celartem Company
+Status of Standard: Released
+1 Introduction
+
+Although the Internet has given us a worldwide infrastructure on which to build the
+universal library, much of the world knowledge, history, and literature is still trapped on
+paper in the basements of the world's traditional libraries. Many libraries and content
+owners are in the process of digitizing their collections. While many such efforts involve
+the painstaking process of converting paper documents to computer-friendly form, such
+as SGML based formats, the high cost of such conversions limits their extent. Scanning
+documents and distributing the resulting images electronically is not only considerably
+cheaper, but also more faithful to the original document because it preserves its visual
+aspect.
+Despite the quickly improving speed of network connections and computers, the number
+of scanned document images accessible on the Web today is relatively small. There are
+several reasons for this.
+The first reason is the relatively high cost of scanning anything else but unbound sheets
+in black and white. This problem is slowly going away with the appearance of fast and
+low-cost color scanners with sheet feeders.
+The second reason is that long-established image compression standards and file formats
+have proved inadequate for distributing scanned documents at high resolution,
+particularly color documents. Not only are the file sizes and download times impractical,
+the decoding and rendering times are also prohibitive. A typical magazine page scanned
+in color at 100 dpi in JPEG would typically occupy 100 KB to 200 KB, but the text
+would be hardly readable: insufficient for screen viewing and totally unacceptable for
+printing. The same page at 300 dpi would have sufficient quality for viewing and printing,
+but the file size would be 300 KB to 1000 KB at best, which is impractical for remote
+access. Another major problem is that a fully decoded 300 dpi color images of a lettersize
+page occupies 24 MB of memory and easily causes disk swapping.
+The third reason is that digital documents are more than just a collection of individual
+page images. Pages in a scanned document have a natural serial order. Special provision
+must be made to ensure that flipping pages be instantaneous and effortless so as to
+maintain a good user experience. Even more important, most existing document formats
+force users to download the entire document first before displaying a chosen page.
+However, users often want to jump to individual pages of the document without waiting
+for the entire document to download. Efficient browsing requires efficient random page
+access, fast sequential page flipping, and quick rendering. This can be achieved with a
+combination of advanced compression, pre-fetching, pre-decoding, caching, and
+progressive rendering. DjVu decomposes each page into multiple components (text,
+backgrounds, images, libraries of common shapes...) that may be shared by several pages
+and downloaded on demand. This allows a suitably designed DjVu-viewing application
+to to handle on-demand downloading, pre-fetching, decoding, caching, and progressive
+rendering of the page images.
+2 Document Organization
+This document describes the DjVu File Format. It is written “from top down” providing
+first a high-level understanding of the features and techniques used in DjVu (see
+Overview), then a mid-level view at the IFF85 level (see Component pieces), and finally a
+very detailed decription of the underlying algorithms and and byte-by-byte makeup of
+DjVu files (see Low-level chunk structure and the Appendices).
+3 Overview
+This section describes the DjVu file format at a high level: how DjVu uses the Mixed
+Raster Content model, how images are composed into documents and the non-raster data
+that such documents can also contain.
+3.1 DjVu Images
+The principal imaging model used in DjVu is the “Mixed Raster Content” (MRC) model
+described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is
+decomposed into foreground and background layers. To select whether a particular pixel
+comes from the foreground or background a bitonal “selection” or “mask” layer is
+provided. These three layers are compressed separately using techniques which are
+optimized for each type of data.
+The foreground and background layers are compressed using a wavelete-based continoustone
+image compression technique known as IW44.
+The mask layer is compressed using a bitonal image compression technique that takes
+advantage of repetitions of nearly identical shapes on the page (such as characters) to
+efficiently compress text images.
+A DjVu image need not contain all three layers and alternative compression techniques
+are available for each layer.
+3.2 DjVu Documents
+DjVu Documents can be single- or multi-page. Each page consists of a DjVu image as
+described above (photo, bitonal or an MRC-based composition). Such a page, by itself is
+a valid DjVu Document. Multipage Documents can take either of two forms: Bundled or
+Indirect.
+3.2.1 Bundled multi-page documents
+Bundled multi-page DjVu document uses a single file to represent the entire document.
+This single file contains all the pages as well as ancillary information (e.g. the page
+directory, data shared by several pages, thumbnails, etc.). Using a single file format is
+very convenient for storing documents or for sending email attachments. 
+
+3.2.2 Indirect multi-page documents
+There are problems inherent to storing multiple pages in a single file. A viewer may not
+be able to utilize a byte-serving mechanism such that that available in HTTP1.1.
+Therefore any request for any page of such a file will necessarily result in the entire
+document being transmitted. Furthermore, a reasonable work pattern is to read the first
+few pages (perhaps a Table of Contents) and then navigate to a page much further into
+the document. However, in such a file, data for page 100 can not be viewed until after
+data for pages 1-99 have been downloaded.
+Indirect multipage documents address these problems. Such a document is composed of
+several files. The main file is named the index file. You can view document using the
+URL of the index file, just like you do with a bundled multi-page document. However, the
+index file is very small. It simply contains the document directory and the URLs of
+secondary files containing the page data. When you view an indirect multi-page
+document, the viewer only needs to download the files corresponding to the pages you
+are viewing.
+3.3 Non-raster Data
+3.3.1 Annotations
+Every DjVu image optionally includes several different kinds of annotations. These
+annotations are often used to define hyper-links to other document pages or to arbitrary
+web pages. They can also be used for other purposes such as setting the initial viewing
+mode of a page and defining highlighted zones.
+3.3.2 Hidden text
+Every DjVu image optionally includes a hidden text layer that associated graphical
+features with the corresponding text. The hidden text layer is usually generated by
+running Optical Character Recognition software. This textual information provides for
+indexing DjVu documents and copying/pasting text from DjVu page images.
+3.3.3 Thumbnails
+DjVu documents sometimes contain pre-computed page thumbnails. These allow a
+viewer to display a graphical representation of many pages by downloading a very small
+“thumbnail” file instead of the actual pages themselves.
+4 What’s new in DjVu File Format
+Since the last update to the file format documentation, Reference 1, the file format has
+been extended to include
+• Multipage formats. DjVu documents can span more than one page. There are
+two multipage formats available: bundled (single file) and indirect (separate files
+for each page; see DjVu Documents and Multipage Documents)  
+
+=========================================================================================
+Test end bzz format encoding
+========================================================================================= 

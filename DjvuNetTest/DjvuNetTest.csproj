@@ -115,6 +115,10 @@
       <Project>{e681b178-e5f8-4782-89c8-f32720b1464a}</Project>
       <Name>DjvuNet</Name>
     </ProjectReference>
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
+      <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
+      <Name>System.Attributes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectDir)..\DjvuNetBuild.targets" />
