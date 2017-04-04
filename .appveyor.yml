@@ -21,11 +21,13 @@ clone_folder: c:\projects\djvunet
 
 # shallow_clone: true 
 
-# block testing until test data committed
+# block DjvuNet testing until test data committed and described
 test:
   categories:
     only:
       - NonExistingCategory
+      - DjvuLibre
+
 matrix:
   fast_finish: true
 
