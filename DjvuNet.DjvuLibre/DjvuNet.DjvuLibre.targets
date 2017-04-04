@@ -14,12 +14,12 @@
       <Project>{AAA67337-AABD-4D04-A3CC-0A7F341F216C}</Project>
       <Name>libdjvulibre</Name>
     </ProjectReference>
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(Configuration)\' != '' And
-                                   HasTrailingSlash('$(ProjectDir)..\build\$(Configuration)\')"
-                        Include="$(ProjectDir)..\build\$(Configuration)\**\*.dll" />
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(Configuration)\' != '' And
-                                   HasTrailingSlash('$(ProjectDir)..\build\$(Configuration)\')"
-                    Include="$(ProjectDir)..\build\$(Configuration)\**\*.pdb" />
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\' != '' And
+                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\')"
+                        Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\**\*.dll" />
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\' != '' And
+                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\')"
+                    Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\**\*.pdb" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(ContentDjvuLibreFiles)' != '' And
