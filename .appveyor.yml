@@ -19,7 +19,7 @@ branches:
 # clone directory
 clone_folder: c:\projects\djvunet
 
-shallow_clone: true 
+# shallow_clone: true 
 
 # block testing until test data committed
 test:
