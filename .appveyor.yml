@@ -15,6 +15,10 @@ branches:
   only:
     - parser_archit
     - master
+
+# clone directory
+clone_folder: c:\projects\djvunet
+
 # block testing until test data committed
 test:
   categories:
@@ -24,7 +28,7 @@ matrix:
   fast_finish: true
 
 cache:
-    - packages -> **\packages.config    
+    - packages -> **\packages.config   
 
 ############################################################################
 #
@@ -35,6 +39,8 @@ cache:
 install:
     # Get latest nuget.exe version
     appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+    cmd: cd c:\projects\djvunet
+    cmd: git clone https://github.com/DjvuNet/DjVuLibre
 
 before_build:
     appveyor-retry nuget restore -DisableParallelProcessing  -verbosity detailed
