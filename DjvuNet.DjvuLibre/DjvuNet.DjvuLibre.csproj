@@ -2,6 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <Import Project="..\DjvuNetBuild.props" />
+  <Import Project="DjvuNet.DjvuLibre.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -107,15 +108,12 @@
     <Compile Include="Rendering\RenderEngine.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="DjvuNet.DjvuLibre.props" />
     <None Include="DjvuNet.DjvuLibre.targets" />
     <None Include="LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj">
-      <Project>{4fec9875-d7e6-47bd-a13a-5c1944464545}</Project>
-      <Name>DjvuNet.Helper.Tests</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" >
       <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
       <Name>System.Attributes</Name>
     </ProjectReference>
