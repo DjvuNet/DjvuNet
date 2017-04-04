@@ -253,7 +253,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{847DB819-B1AD-435D-B460-73E06303C477}"
 	ProjectSection(SolutionItems) = preProject
 		deps\x86\Debug\static\jpeg.lib = deps\x86\Debug\static\jpeg.lib
-		deps\x86\Debug\static\jpeg.pdb = deps\x86\Debug\static\jpeg.pdb
 		deps\x86\Debug\static\tiff.lib = deps\x86\Debug\static\tiff.lib
 		deps\x86\Debug\static\zlib.lib = deps\x86\Debug\static\zlib.lib
 	EndProjectSection
@@ -261,15 +260,25 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{35A32C1F-2570-4DB2-9EA2-9455EA724C02}"
 	ProjectSection(SolutionItems) = preProject
 		deps\x64\Debug\static\jpeg.lib = deps\x64\Debug\static\jpeg.lib
-		deps\x64\Debug\static\jpeg.pdb = deps\x64\Debug\static\jpeg.pdb
+		deps\x64\Debug\static\tiffd.lib = deps\x64\Debug\static\tiffd.lib
+		deps\x64\Debug\static\zlibd.lib = deps\x64\Debug\static\zlibd.lib
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{A52C9873-4D9B-4CD1-A74C-21BEC3F5D013}"
 	ProjectSection(SolutionItems) = preProject
 		deps\x64\Release\static\jpeg.lib = deps\x64\Release\static\jpeg.lib
+		deps\x64\Release\static\tiff.lib = deps\x64\Release\static\tiff.lib
+		deps\x64\Release\static\zlib.lib = deps\x64\Release\static\zlib.lib
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "share", "share", "{60A232E8-EBC3-4574-B6F0-92CCCAEAF503}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{384245D7-CAE8-4E63-AFFC-922D923ECB73}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x86\Release\static\jpeg.lib = deps\x86\Release\static\jpeg.lib
+		deps\x86\Release\static\tiff.lib = deps\x86\Release\static\tiff.lib
+		deps\x86\Release\static\zlib.lib = deps\x86\Release\static\zlib.lib
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -346,18 +355,22 @@ Global
 		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x86.ActiveCfg = Release|Any CPU
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x64.ActiveCfg = Debug|x64
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x64.Build.0 = Debug|x64
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x86.ActiveCfg = Debug|x86
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x86.Build.0 = Debug|x86
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x64.ActiveCfg = Release|x64
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x64.Build.0 = Release|x64
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x86.ActiveCfg = Release|x86
 		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x86.Build.0 = Release|x86
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x64.ActiveCfg = Debug|x64
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x64.Build.0 = Debug|x64
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x86.ActiveCfg = Debug|x86
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x86.Build.0 = Debug|x86
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x64.ActiveCfg = Release|x64
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x64.Build.0 = Release|x64
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x86.ActiveCfg = Release|x86
 		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x86.Build.0 = Release|x86
 		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -374,10 +387,12 @@ Global
 		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Release|x86.Build.0 = Release|x86
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|Any CPU.ActiveCfg = Debug|Win32
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x64.ActiveCfg = Debug|x64
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x64.Build.0 = Debug|x64
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x86.ActiveCfg = Debug|Win32
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x86.Build.0 = Debug|Win32
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|Any CPU.ActiveCfg = Release|Win32
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x64.ActiveCfg = Release|x64
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x64.Build.0 = Release|x64
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x86.ActiveCfg = Release|Win32
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
@@ -397,5 +412,6 @@ Global
 		{35A32C1F-2570-4DB2-9EA2-9455EA724C02} = {D8B6CB0B-9D06-429E-B902-F1C70925E3AD}
 		{A52C9873-4D9B-4CD1-A74C-21BEC3F5D013} = {C20C859D-FADB-4380-8107-89FE6D8F1CFD}
 		{60A232E8-EBC3-4574-B6F0-92CCCAEAF503} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
+		{384245D7-CAE8-4E63-AFFC-922D923ECB73} = {8597CB2A-5ED0-4B9E-B86A-16A4795C5146}
 	EndGlobalSection
 EndGlobal
