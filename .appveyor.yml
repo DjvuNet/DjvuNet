@@ -54,5 +54,5 @@ build:
 
 test_script:
     - cmd: cd c:\projects\DjvuNet
-    - cmd: packages\xunit.runner.console.2.2.0\tools\xunit.console.exe DjvuNet.Tests\bin\$(platform)\$(configuration)\DjvuNet.Tests.dll /appveyor
-    - cmd: packages\xunit.runner.console.2.2.0\tools\xunit.console.exe DjvuNet.DjvuLibre.Tests\bin\$(platform)\$(configuration)\DjvuNet.Tests.dll /appveyor
+    - cmd: IF [%PLATFORM%] == [x86] OR IF [%PLATFORM%] == [x64] c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.Tests.dll /appveyor /notrait "Category=Skip"
+    - cmd: IF [%PLATFORM%] == [x86] OR IF [%PLATFORM%] == [x64] c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.DjvuLibre.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.DjvuLibre.Tests.dll /appveyor  /notrait "Category=Skip"
