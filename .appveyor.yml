@@ -53,6 +53,8 @@ build:
     verbosity: detailed
 
 test_script:
-    - cmd: cd c:\projects\DjvuNet
-    - cmd: IF [%PLATFORM%] == [x86] OR IF [%PLATFORM%] == [x64] c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.Tests.dll /appveyor /notrait "Category=Skip"
-    - cmd: IF [%PLATFORM%] == [x86] OR IF [%PLATFORM%] == [x64] c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.DjvuLibre.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.DjvuLibre.Tests.dll /appveyor  /notrait "Category=Skip"
+    - cmd: set "TEST_BUILD="
+    - cmd: IF [%PLATFORM%] == [x86] set TEST_BUILD=1
+    - cmd: IF [%PLATFORM%] == [x64] set TEST_BUILD=1
+    - cmd: IF defined TEST_BUILD c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.Tests.dll /appveyor /notrait "Category=Skip"
+    - cmd: IF defined TEST_BUILD c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.DjvuLibre.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.DjvuLibre.Tests.dll /appveyor  /notrait "Category=Skip"
