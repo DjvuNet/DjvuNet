@@ -252,7 +252,11 @@ namespace DjvuNet
             get
             {
                 if (_text == null)
+                {
                     _text = TextChunk?.Text;
+                    if (_text == null)
+                        _text = String.Empty;
+                }
 
                 return _text;
             }

@@ -13,41 +13,41 @@ namespace DjvuNet.Tests
         {
             get
             {
-                int maxTestNumber = 75;
+                int maxTestNumber = 77;
                 string filePathTempl = Util.GetTestFilePathTemplate();
 
                 List<object[]> retVal = new List<object[]>
                 {
-                     new object[] { null, 62},
-                     new object[] { null, 11},
-                     new object[] { null, 300},
-                     new object[] { null, 494},
-                     new object[] { null, 286},
-                     new object[] { null, 348},
-                     new object[] { null, 186},
-                     new object[] { null, 427},
-                     new object[] { null, 274},
-                     new object[] { null, 17},
-                     new object[] { null, 154},
-                     new object[] { null, 239},
-                     new object[] { null, 9},
-                     new object[] { null, 20},
-                     new object[] { null, 40},
-                     new object[] { null, 30},
-                     new object[] { null, 12},
-                     new object[] { null, 7},
-                     new object[] { null, 28},
-                     new object[] { null, 5},
-                     new object[] { null, 12},
-                     new object[] { null, 10},
-                     new object[] { null, 3},
-                     new object[] { null, 3},
-                     new object[] { null, 9},
-                     new object[] { null, 146},
-                     new object[] { null, 173},
-                     new object[] { null, 267},
-                     new object[] { null, 323},
-                     new object[] { null, 1},
+                     //new object[] { null, 62},
+                     //new object[] { null, 11},
+                     //new object[] { null, 300},
+                     //new object[] { null, 494},
+                     //new object[] { null, 286},
+                     //new object[] { null, 348},
+                     //new object[] { null, 186},
+                     //new object[] { null, 427},
+                     //new object[] { null, 274},
+                     //new object[] { null, 17},
+                     //new object[] { null, 154},
+                     //new object[] { null, 239},
+                     //new object[] { null, 9},
+                     //new object[] { null, 20},
+                     //new object[] { null, 40},
+                     //new object[] { null, 30},
+                     //new object[] { null, 12},
+                     //new object[] { null, 7},
+                     //new object[] { null, 28},
+                     //new object[] { null, 5},
+                     //new object[] { null, 12},
+                     //new object[] { null, 10},
+                     //new object[] { null, 3},
+                     //new object[] { null, 3},
+                     //new object[] { null, 9},
+                     //new object[] { null, 146},
+                     //new object[] { null, 173},
+                     //new object[] { null, 267},
+                     //new object[] { null, 323},
+                     //new object[] { null, 1},
                 };
 
                 GenerateTestFilesPaths(maxTestNumber, filePathTempl, retVal);
@@ -105,13 +105,18 @@ namespace DjvuNet.Tests
 
         public static void GenerateTestFilesPaths(int maxTestNumber, string filePathTempl, List<object[]> retVal)
         {
-            int i = 0;
-            for (; i < retVal.Count; i++)
-                retVal[i][0] = String.Format(filePathTempl, (i + 1));
+            int i = 1;
+            //for (; i < retVal.Count; i++)
+            //    retVal[i][0] = String.Format(filePathTempl, (i + 1));
 
-            for (; i < maxTestNumber; i++)
+            for (; i <= maxTestNumber; i++)
+            {
+                int j = i + 1;
                 retVal.Add(
-                    new object[] { String.Format(filePathTempl, (i + 1)), 0});
+                    new object[] {
+                        Util.GetTestFilePath(i),
+                        Util.GetTestDocumentPageCount(i) });
+            }
         }
 
         [Theory]
@@ -147,8 +152,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor001()
         {
-            string path = Util.RepoRoot;
-            int pageCount = 62;
+            int pageCount = Util.GetTestDocumentPageCount(1);
             using(DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -158,7 +162,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor002()
         {
-            int pageCount = 11;
+            int pageCount = Util.GetTestDocumentPageCount(2);
             using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -168,7 +172,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor003()
         {
-            int pageCount = 300;
+            int pageCount = Util.GetTestDocumentPageCount(3);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test003C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -178,7 +182,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor004()
         {
-            int pageCount = 494;
+            int pageCount = Util.GetTestDocumentPageCount(4);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test004C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -188,7 +192,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor005()
         {
-            int pageCount = 286;
+            int pageCount = Util.GetTestDocumentPageCount(5);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test005C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -198,7 +202,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor006()
         {
-            int pageCount = 348;
+            int pageCount = Util.GetTestDocumentPageCount(6);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test006C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -208,7 +212,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor007()
         {
-            int pageCount = 186;
+            int pageCount = Util.GetTestDocumentPageCount(7);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test007C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -218,7 +222,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor008()
         {
-            int pageCount = 427;
+            int pageCount = Util.GetTestDocumentPageCount(8);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test008C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -228,7 +232,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor009()
         {
-            int pageCount = 274;
+            int pageCount = Util.GetTestDocumentPageCount(9);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test009C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -238,7 +242,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor010()
         {
-            int pageCount = 17;
+            int pageCount = Util.GetTestDocumentPageCount(10);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test010C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -248,7 +252,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor011()
         {
-            int pageCount = 154;
+            int pageCount = Util.GetTestDocumentPageCount(11);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test011C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -258,7 +262,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor012()
         {
-            int pageCount = 239;
+            int pageCount = Util.GetTestDocumentPageCount(12);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test012C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -268,7 +272,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor013()
         {
-            int pageCount = 9;
+            int pageCount = Util.GetTestDocumentPageCount(13);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test013C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -278,7 +282,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor014()
         {
-            int pageCount = 20;
+            int pageCount = Util.GetTestDocumentPageCount(14);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test014C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -288,7 +292,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor015()
         {
-            int pageCount = 40;
+            int pageCount = Util.GetTestDocumentPageCount(15);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test015C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -298,7 +302,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor016()
         {
-            int pageCount = 30;
+            int pageCount = Util.GetTestDocumentPageCount(16);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test016C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -308,7 +312,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor017()
         {
-            int pageCount = 12;
+            int pageCount = Util.GetTestDocumentPageCount(17);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test017C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -318,7 +322,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor018()
         {
-            int pageCount = 7;
+            int pageCount = Util.GetTestDocumentPageCount(18);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test018C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -328,7 +332,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor019()
         {
-            int pageCount = 28;
+            int pageCount = Util.GetTestDocumentPageCount(19);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test019C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -338,7 +342,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor020()
         {
-            int pageCount = 5;
+            int pageCount = Util.GetTestDocumentPageCount(20);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test020C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -348,7 +352,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor021()
         {
-            int pageCount = 12;
+            int pageCount = Util.GetTestDocumentPageCount(21);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test021C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -358,7 +362,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor022()
         {
-            int pageCount = 10;
+            int pageCount = Util.GetTestDocumentPageCount(22);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test022C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -368,7 +372,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor023()
         {
-            int pageCount = 3;
+            int pageCount = Util.GetTestDocumentPageCount(23);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test023C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -378,7 +382,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor024()
         {
-            int pageCount = 3;
+            int pageCount = Util.GetTestDocumentPageCount(24);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test024C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -388,7 +392,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor025()
         {
-            int pageCount = 9;
+            int pageCount = Util.GetTestDocumentPageCount(25);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test025C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -398,7 +402,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor026()
         {
-            int pageCount = 146;
+            int pageCount = Util.GetTestDocumentPageCount(26);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test026C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -408,7 +412,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor027()
         {
-            int pageCount = 173;
+            int pageCount = Util.GetTestDocumentPageCount(27);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test027C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -418,7 +422,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor028()
         {
-            int pageCount = 267;
+            int pageCount = Util.GetTestDocumentPageCount(28);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test028C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -428,7 +432,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor029()
         {
-            int pageCount = 323;
+            int pageCount = Util.GetTestDocumentPageCount(29);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test029C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
@@ -438,7 +442,7 @@ namespace DjvuNet.Tests
         [Fact]
         public void DjvuDocument_ctor030()
         {
-            int pageCount = 1;
+            int pageCount = Util.GetTestDocumentPageCount(30);
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test030C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
