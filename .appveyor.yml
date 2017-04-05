@@ -31,9 +31,7 @@ matrix:
   fast_finish: true
 
 cache:
-    - packages -> **\packages.config
-    - artifacts\**
-    - deps\**   
+    - packages -> **\packages.config  
 
 ############################################################################
 #
