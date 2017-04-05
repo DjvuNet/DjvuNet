@@ -5,7 +5,7 @@ version: '0.7.0.{build}'
 platform:
   - x86
   - x64
-  - Any CPU
+  - AnyCPU
 
 configuration:
   - Debug
@@ -31,7 +31,9 @@ matrix:
   fast_finish: true
 
 cache:
-    - packages -> **\packages.config   
+    - packages -> **\packages.config
+    - artifacts\**
+    - deps\**   
 
 ############################################################################
 #
@@ -45,9 +47,14 @@ install:
 
 
 before_build:
-    - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
+    - appveyor-retry DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
     - appveyor-retry nuget restore -DisableParallelProcessing  -verbosity detailed
 
 build:
     project: DjvuNet.sln
     verbosity: detailed
+
+test_script:
+    - cmd: cd c:\projects\DjvuNet
+    - cmd: packages\xunit.runner.console.2.2.0\tools\xunit.console.exe DjvuNet.Tests\bin\$(platform)\$(configuration)\DjvuNet.Tests.dll /appveyor
+    - cmd: packages\xunit.runner.console.2.2.0\tools\xunit.console.exe DjvuNet.DjvuLibre.Tests\bin\$(platform)\$(configuration)\DjvuNet.Tests.dll /appveyor
