@@ -24,9 +24,8 @@ clone_folder: c:\projects\djvunet
 # block DjvuNet testing until test data committed and described
 test:
   categories:
-    only:
-      - NonExistingCategory
-      - DjvuLibre
+    except:
+      - Skip
 
 matrix:
   fast_finish: true

@@ -112,6 +112,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj">
+      <Project>{9b255f5a-716a-4a26-a140-525fde3fa8f7}</Project>
+      <Name>DjvuNet.DjvuLibre</Name>
+    </ProjectReference>
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
       <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
       <Name>System.Attributes</Name>

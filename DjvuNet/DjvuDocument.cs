@@ -492,11 +492,30 @@ namespace DjvuNet
         public static bool IsDjvuDocument(String filePath)
         {
             if (!String.IsNullOrWhiteSpace(filePath))
+            {
+                FileStream stream = null;
+                bool result = false;
                 if (File.Exists(filePath))
-                    using (FileStream stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
-                        return IsDjvuDocument(stream);
+                {
+                    try
+                    {
+                        stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        result = IsDjvuDocument(stream);
+                    }
+                    catch(Exception error)
+                    {
+                        throw new AggregateException("Error while truing to verify DjVu file.", error);
+                    }
+                    finally
+                    {
+                        stream?.Close();
+                    }
+
+                    return result;
+                }
                 else
                     throw new FileNotFoundException($"File was not found: {filePath}");
+            }
 
             throw new ArgumentException($"Invalid file path: \"{filePath}\" ");
         }
