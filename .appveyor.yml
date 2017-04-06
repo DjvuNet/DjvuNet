@@ -5,7 +5,6 @@ version: '0.7.0.{build}'
 platform:
   - x86
   - x64
-  - AnyCPU
 
 configuration:
   - Debug
