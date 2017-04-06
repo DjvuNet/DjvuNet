@@ -10,6 +10,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)SynchronizedBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestExecution\AppVeyorTestManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestExecution\ITestManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TestExecution\TestManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilRoot.cs" />
   </ItemGroup>
