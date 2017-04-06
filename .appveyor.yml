@@ -39,10 +39,12 @@ cache:
 #
 ############################################################################
 
+init:
+    - git config --global core.autocrlf false
+
 install:
     - cmd: cd c:\projects\djvunet
     - cmd: git clone https://github.com/DjvuNet/DjVuLibre
-
 
 before_build:
     - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
@@ -52,9 +54,5 @@ build:
     project: DjvuNet.sln
     verbosity: detailed
 
-test_script:
-    - cmd: set "TEST_BUILD="
-    - cmd: IF [%PLATFORM%] == [x86] set TEST_BUILD=1
-    - cmd: IF [%PLATFORM%] == [x64] set TEST_BUILD=1
-    - cmd: IF defined TEST_BUILD c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.Tests.dll /appveyor /notrait "Category=Skip"
-    - cmd: IF defined TEST_BUILD c:\projects\DjvuNet\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe c:\projects\DjvuNet\DjvuNet.DjvuLibre.Tests\bin\%PLATFORM%\%CONFIGURATION%\DjvuNet.DjvuLibre.Tests.dll /appveyor  /notrait "Category=Skip"
+#test_script:
+#
