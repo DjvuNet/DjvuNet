@@ -78,7 +78,7 @@ Debug, Release  (example - /p:Configuration=Debug, default value Debug)
 Available platforms:
 DjvuNet.DjvuLibre and libdjvulibre are built only for x86 and x64 platforms
 `````
-AnyCPU, x86, x64 (example /p:Platform=x64, default value AnyCPU)
+x86, x64 (example /p:Platform=x64, default value AnyCPU is temporarily not supported for CI builds)
 `````
 Available targets:
 `````
