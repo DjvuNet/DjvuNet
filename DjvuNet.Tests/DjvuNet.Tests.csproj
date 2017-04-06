@@ -2,6 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\DjvuNetBuild.props" />
+  <Import Project="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -164,6 +165,10 @@
     <Compile Include="Text\PageTextTests.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj">
+      <Project>{9b255f5a-716a-4a26-a140-525fde3fa8f7}</Project>
+      <Name>DjvuNet.DjvuLibre</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DjvuNetTest\DjvuNetTest.csproj">
       <Project>{192f4e63-6ed7-410f-a372-0b54c6cdf987}</Project>
       <Name>DjvuNetTest</Name>
@@ -207,6 +212,7 @@
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\DjvuNetBuild.targets" />
+  <Import Project="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
