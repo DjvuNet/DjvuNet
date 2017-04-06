@@ -26,7 +26,7 @@ if ($TestBuild -eq $true) {
     if ([System.IO.File]::Exists($TestAssembly1) -and !([System.Environment]::GetEnvironmentVariable($DjvuNetEnv) -eq $null)) 
     {
         $Message = "Running tests from Assembly: " -f [System.IO.Path].GetFileName($TestAssembly1);
-        Write-Output 
+        Write-Output $Message;
         $TestArgs1 = "{0} {1}" -f $TestAssembly1, $TestArgs; 
         Start-Process -FilePath $XUnitPath -ArgumentList $TestArgs1;
         [System.Environment]::SetEnvironmentVariable($DjvuNetEnv, "true");
@@ -43,11 +43,13 @@ if ($TestBuild -eq $true) {
 
     if ([System.IO.File]::Exists($TestAssembly2) -and !([System.Environment]::GetEnvironmentVariable($DjvuLibreEnv) -eq $null)) 
     {
-        Write-Output "Running tests from Assembly " + [System.IO.Path].GetFileName($TestAssembly2);
+        $Message = "Running tests from Assembly {0}" -f [System.IO.Path].GetFileName($TestAssembly2);
+        Write-Output $Message;
         $TestArgs2 = "{0} {1}" -f $TestAssembly2, $TestArgs; 
         Start-Process -FilePath $XUnitPath -ArgumentList $TestArgs2;
         [System.Environment]::SetEnvironmentVariable($DjvuLibreEnv, "true");
-        Write-Output "Finished running tests from Assembly " + [System.IO.Path].GetFileName($TestAssembly2); 
+        $Message = "Finished running tests from Assembly " -f [System.IO.Path].GetFileName($TestAssembly2);
+        Write-Output $Message; 
     }
     else
     {
