@@ -61,6 +61,12 @@ Change directory to your repo
 `````
 cd djvunet
 `````
+Here one can run build from command line (command accepts Configuration, Platform and Target parameters and option Test in any order)
+`````
+build x86 Release Rebuild Test
+`````
+or do it step by step as described below:
+
 Clone DjVuLibre from DjvuNet GutHub (this library was modified to integrate it into DjvuNet project)
 `````
 git clone https://github.com/DjvuNet/DjVuLibre.git

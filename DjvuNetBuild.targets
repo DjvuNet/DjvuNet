@@ -7,7 +7,7 @@
             <Output TaskParameter="Lines" PropertyName="LibraryVersion" />
         </ReadLinesFromFile>
 
-        <GitVersion Short="False">
+        <GitVersion Short="False" Condition="Exists('$(SolutionDir).git/HEAD')">
             <Output TaskParameter="CommitHash" PropertyName="CommitVersion" />
         </GitVersion>
 
@@ -35,8 +35,8 @@
               DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.cs"/>
         <Copy SourceFiles="$(ProjectDir)../Templates/AssemblyInfoCommon.Template.cs"
                 DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.cs"/>
-        <Copy SourceFiles="$(ProjectDir)..\Templates\UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'"
-                DestinationFiles="$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs"/>
+        <Copy SourceFiles="$(ProjectDir)../Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'"
+                DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.cs"/>
 
         <ItemGroup>
             <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.cs' />
