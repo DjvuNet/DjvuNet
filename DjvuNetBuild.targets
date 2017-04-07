@@ -7,7 +7,7 @@
             <Output TaskParameter="Lines" PropertyName="LibraryVersion" />
         </ReadLinesFromFile>
 
-        <GitVersion Short="False" Condition="Exists($(SolutionDir).git/HEAD)">
+        <GitVersion Short="False" Condition="Exists('$(SolutionDir).git/HEAD')">
             <Output TaskParameter="CommitHash" PropertyName="CommitVersion" />
         </GitVersion>
 
