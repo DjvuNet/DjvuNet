@@ -12,25 +12,31 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class DirmChunkTests
     {
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void DirmChunk_ctor001()
         {
-            int pageCount = 62;
-            using (DjvuDocument document = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test001C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(1, out pageCount))
             {
+                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
                 DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
                 DirmChunk dirm = ((DjvmChunk)document.RootForm).DirmData;
 
                 Assert.NotNull(dirm);
+                DirmComponent[] components = dirm.Components;
+
+                Assert.NotNull(components);
+                Assert.Equal<int>(31, components.Length);
             }
         }
 
         [Fact]
         public void DirmChunk_ctor003()
         {
-            int pageCount = 300;
-            using (DjvuDocument document = new DjvuDocument($"{DjvuNet.Tests.Util.RepoRoot}artifacts\\test003C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(3, out pageCount))
             {
+                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
                 DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
                 DirmChunk dirm = ((DjvmChunk)document.RootForm).DirmData;
 
@@ -39,7 +45,7 @@ namespace DjvuNet.DataChunks.Tests
                 DirmComponent[] components = dirm.Components;
 
                 Assert.NotNull(components);
-                Assert.Equal<int>(330, components.Length);
+                Assert.Equal<int>(112, components.Length);
             }
         }
 
