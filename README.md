@@ -51,6 +51,8 @@ DjVuLibre used for format support validation is licensed under [GPL v2](https://
 
 #### Windows
 
+##### Building
+
 Building from command line on Windows (tested on Windows 10 with Visual Studio 2015 installed).
 
 Open Visual Studio devloper command prompt and clone repository
@@ -63,7 +65,7 @@ cd djvunet
 `````
 Here one can run build from command line (command accepts Configuration, Platform and Target parameters and option Test in any order)
 `````
-build x86 Release Rebuild Test
+build x86 Release Rebuild Test (Supported case sensitive values: Build, Rebuild, Clean, Debug, Release, x86, x64, Test)
 `````
 or do it step by step as described below:
 
@@ -92,7 +94,15 @@ Clean, Build, Rebuild   (example /t:Clean, default value Build)
 `````  
 
 To build with Visual Studio open DjvuNet.sln file located in root directory of DjvuNet cloned 
-repository and build DjvuNet.csproj or entire solution. 
+repository and build DjvuNet.csproj or entire solution.
+
+##### Testing
+
+Test data are stored in separate repository [artifacts](https://github.com/DjvuNet/artifacts). 
+Clone repository with git command (run it from DjvuNet repo root directory):
+`````
+git clone --depth 1 https://github.com/DjvuNet/artifacts.git
+`````
 
 Tests can be run by building and running tests from DjvuNet.Tests.dll assembly under Visual Studio 
 or xUnit test runner from command line or from Visual Studio using Test Explorer.
