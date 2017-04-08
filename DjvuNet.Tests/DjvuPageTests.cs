@@ -427,11 +427,10 @@ namespace DjvuNet.Tests
         [Fact(/*Skip = "DjvuNet bug prevents clean pass and test is to general to track the bug."*/)]
         public void DjvuPage_Preload001()
         {
-            using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test001C.djvu"))
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
-                Assert.NotNull(document.FirstPage);
-                Assert.NotNull(document.LastPage);
-                Assert.Equal<int>(62, document.Pages.Length);
+                Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.Pages[11];
                 page.Preload();

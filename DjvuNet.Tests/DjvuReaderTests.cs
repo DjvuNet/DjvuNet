@@ -883,11 +883,9 @@ namespace DjvuNet.Tests
                 BzzReader bzzReader = reader.GetBZZEncodedReader();
                 string result = bzzReader.ReadUnknownLengthString();
 
-                Assert.NotNull(result);
                 Assert.False(String.IsNullOrWhiteSpace(result));
 
                 string expectedResult = OriginalBzzTestString;
-                Assert.NotNull(expectedResult);
                 Assert.False(String.IsNullOrWhiteSpace(expectedResult));
 
                 Assert.Equal<int>(expectedResult.Length, result.Length);

@@ -20,7 +20,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.NotNull(document);
 
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
 
                 DocumentType type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
@@ -95,7 +95,7 @@ namespace DjvuNet.DjvuLibre.Tests
                     Assert.NotNull(document);
 
                     int pageCount = document.PageCount;
-                    Assert.Equal<int>(62, pageCount);
+                    Assert.Equal<int>(31, pageCount);
 
                     DocumentType type = document.DocumentType;
                     Assert.Equal<DocumentType>(DocumentType.Bundled, type);
@@ -129,7 +129,7 @@ namespace DjvuNet.DjvuLibre.Tests
                     Assert.NotNull(document);
 
                     int pageCount = document.PageCount;
-                    Assert.Equal<int>(300, pageCount);
+                    Assert.Equal<int>(101, pageCount);
 
                     DocumentType type = document.DocumentType;
                     Assert.Equal<DocumentType>(DocumentType.Bundled, type);
@@ -194,7 +194,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.NotNull(document);
 
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
 
                 DocumentType type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
@@ -208,7 +208,7 @@ namespace DjvuNet.DjvuLibre.Tests
                     Assert.Equal<PageType>(PageType.Compound, pageType);
                 }
 
-                using (DjvuPageInfo page = new DjvuPageInfo(document, 31))
+                using (DjvuPageInfo page = new DjvuPageInfo(document, document.PageCount - 1))
                 {
                     Assert.NotNull(page);
                     Assert.IsType<DjvuPageInfo>(page);
@@ -228,7 +228,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.NotNull(document);
 
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
 
                 DocumentType type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
@@ -287,15 +287,15 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.NotNull(document);
 
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
 
                 DocumentType type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                using (DjvuPageInfo page = new DjvuPageInfo(document, 17))
+                using (DjvuPageInfo page = new DjvuPageInfo(document, 11))
                 {
                     Assert.NotNull(page);
-                    string expected = "20 \n\u001f\u001d\vECLECTIC SERIES. \n\u001f\u001d\vLESSON XIV. \n\u001f\u001d\v■ \n\u001f\u001d\u001f\u001d\u001f\u001dUr^& \n\u001f\u001dJ/: \n\u001f\u001dr;^9 \n\u001f\u001dnf'Jflj \n\u001f\u001dpa i« \n\u001f\u001d^tPC \n\u001f\u001dr ~\" * ii L \n\u001f\u001d\u001f\u001d> \n\u001f\u001d\u001f\u001dohuMfek > j- J \n\u001f\u001d; m*\"^^ \n\u001f\u001d\u001f\u001d\u001f\u001d- rr^r ~ \n\u001f\u001dI m \n\u001f\u001d\u001f\u001d- |PBf \n\u001f\u001dmm \n\u001f\u001d^Ww<\" 1 \n\u001f\u001drm4 \n\u001f\u001d\u001f\u001d\u001f\u001d\u001f\u001d\u001f\u001dL< ' .^J «-. 4 \n\u001f\u001dTflJIE' \"** \n\u001f\u001d\u001f\u001d\u001f\u001d\u001f\u001d\u001f\u001dV9BI — -■«. \n\u001f\u001d\u001f\u001d\u001f\u001dJ« \n\u001f\u001dv\"J0 \n\u001f\u001d^^HL'ti \n\u001f\u001d\u001f\u001d'W \n\u001f\u001d\u001f\u001d\u001f\u001d\u001f\u001d\u001f\u001d\u001f\u001d\vholdg to \n\u001f\u001d\vblind Ma'ry \n\u001f\u001d\vhand kind \n\u001f\u001d\va \n\u001f\u001d\vq k y \n\u001f\u001d\vThis old man can not see. \nHe is blind. \n\u001fMary holds him by the hand. \nShe is kind to the old blind \n\u001fman. \n\u001fLESSON XV.-REVIEW. \n\u001f\u001d\vI see ducks on the pond; Tom \nwill feed them. \n\u001f\u001d\v";
+                    string expected = "14 ECLECTIC SERIES. LESSON VIM. \vit 1§ stand R amp 1 a mat Ann's mat the stand See the lamp! It is on a mat. The mat is on the stand. The lamp is Nat's, and the mat is Ann's. ";
                     string text = page.Text;
                     Assert.False(String.IsNullOrWhiteSpace(text));
                     Assert.Equal<string>(expected, text);
@@ -337,7 +337,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.NotNull(document);
 
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
 
                 DocumentType type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
@@ -345,7 +345,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 using (DjvuPageInfo page = new DjvuPageInfo(document, 15))
                 {
                     Assert.NotNull(page);
-                    string expected = "4 \n\u001f\u001d1. Perspectives on Manifolds \n\u001f\u001dof M such that Vx E L there is a chart in the atlas with x E Mo. and \n<po.(L n Mo.) = {O} x JRP C JRn. \nRemark 1.1.8. A submanifold is itself a manifold. \n\u001f\u001dExample 1.1.9. The equatorial circle in the 2-sphere indicated in Figure \n1.1 is a submanifold of the 2-sphere. \nDefinition 1.1.10. Let L, M be manifolds. A map f : L \u001f M is an \nembedding if it is a homeomorphism onto its image f (L) and f (L) is a \nsubmanifold of M. \nExample 1.1.11. If L is a submanifold of M, then the inclusion map i : \nL \u001f M of an abstract copy L of L to L c M is an embedding. \n\u001f\u001dWe will also consider a slightly larger class of objects: \nDefinition 1.1.12. Set H n = {(Xl,..., X n ) E JRn : Xl > O}. An n-manifold \nwith boundary is a second countable Hausdorff space M with an atlas such \nthat Va, <Po. is a homeomorphism from Mo. to an open subset of JRn or H n . \nThe boundary of M is the set of all points in M that have a neighbor- \nhood homeomorphic to Hn but no neighborhood homeomorphic to JRn. The \nboundary of M is denoted by 8M. Points not on the boundary are called \ninterior points. Two n-manifolds with boundary are considered equivalent \nif they are homeomorphic. \nExample 1.1.13. The set Jmn = {x E JRn : IIxll < I} is an n-dimensional \nmanifold with boundary called the n-ball. For interior points, there is noth- \ning to check (because the identity map on JRn provides the required home- \nomorphism). For boundary points, an extension of the map obtained by \nstereographic projection provides the required homeomorphism. See Fig- \nure 1.5. \n\u001f\u001dFigure 1.5. The 2-ball is also called the disk. \n\u001f\u001d\v";
+                    string expected = "4 1. Perspectives on Manifolds of M such that Vx E L there is a chart in the atlas with x E Mo. and <po.(L n Mo.) = {O} x JRP C JRn. Remark 1.1.8. A submanifold is itself a manifold. Example 1.1.9. The equatorial circle in the 2-sphere indicated in Figure 1.1 is a submanifold of the 2-sphere. Definition 1.1.10. Let L, M be manifolds. A map f : L \u001f M is an embedding if it is a homeomorphism onto its image f (L) and f (L) is a submanifold of M. Example 1.1.11. If L is a submanifold of M, then the inclusion map i : L \u001f M of an abstract copy L of L to L c M is an embedding. We will also consider a slightly larger class of objects: Definition 1.1.12. Set H n = {(Xl,..., X n ) E JRn : Xl > O}. An n-manifold with boundary is a second countable Hausdorff space M with an atlas such that Va, <Po. is a homeomorphism from Mo. to an open subset of JRn or H n . The boundary of M is the set of all points in M that have a neighbor- hood homeomorphic to Hn but no neighborhood homeomorphic to JRn. The boundary of M is denoted by 8M. Points not on the boundary are called interior points. Two n-manifolds with boundary are considered equivalent if they are homeomorphic. Example 1.1.13. The set Jmn = {x E JRn : IIxll < I} is an n-dimensional manifold with boundary called the n-ball. For interior points, there is noth- ing to check (because the identity map on JRn provides the required home- omorphism). For boundary points, an extension of the map obtained by stereographic projection provides the required homeomorphism. See Fig- ure 1.5. Figure 1.5. The 2-ball is also called the disk. ";
                     string text = page.Text;
                     Assert.NotNull(text);
                     Assert.Equal<string>(expected, text);
@@ -354,7 +354,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 using (DjvuPageInfo page = new DjvuPageInfo(document, 19))  
                 {
                     Assert.NotNull(page);
-                    string expected = "8 \n\u001f\u001d1. Perspectives on Manifolds \n\u001f\u001dh' 0 h- l is smooth. (The case h 0 (h')-l is analogous.) Here \nh-I(YI, . . . , Yn) = \n( 2YI 2Yn -1 + Y\u001f + · · · + Y\u001f ) \n1 + Y\u001f + · · · + Y\u001f ' · . · , 1 + Y\u001f + · · · + y\u001f' 1 + Y\u001f + · · · + Y\u001f ' \nh' 0 h -1 (Yb . . . , Yn) = 2 1 2 (Yb . · . , Yn). \nYI + · · · + Y n \nIt follows that h' 0 h- l is smooth except at the origin where the composition \nof maps is not defined. Thus sn is a smooth manifold. \nExample 1.2.5. In the exercises you proved that the product of manifolds \nis a manifold. Since the product of smooth maps is smooth, the product \nof smooth manifolds is a smooth manifold. It follows that 'Jrn is a smooth \nmanifold. \n\u001f\u001dIn calculus we learn about differentiable maps from JRn to JRm. Some \nconcepts extend to manifolds. \nDefinition 1.2.6. Let M be a manifold with atlas {(Mo:, <Po:)} and let N \nbe a manifold with atlas {(N,B, 1/J,B)}. We say that the map f : M \u001f N is \nC q ifVa,{3, the map 1/J,B 0 f 0 <P o: I (where it is defined) is C q . \nDefinition 1.2.7. A Cq-map between Cq-manifolds with a Cq-inverse is \ncalled a Cq-diffeomorphism. A Coo-diffeomorphism is simply called a diffeo- \nmorphism. \nRemark 1.2.8. The map f : JR \u001f JR given by f(x) = x 3 is a Coo-map but \nis not a diffeomorphism because its derivative is singular at o. (In fact, it is \nnot even a Cl-diffeomorphism.) \nDefinition 1.2.9. Two Cq-manifolds are considered equivalent if there is a \nCq-diffeomorphism between them. \nIn the exercises, you will extend the notion of submanifold, manifold \nwith boundary, and submanifold of a manifold with boundary to the DIFF \ncategory, that is, to the setting in which manifolds are considered in this \nsection. \nIn the DIFF category we are interested in smooth maps between mani- \nfolds. \nExample 1.2.10. Projection from 'Jr2 = Sl X Sl onto the second factor is a \nsmooth map between manifolds. \nIn Appendix A, we introduce the notion of transversality in the category \nof DIFF manifolds. Another concept that is best described in this category is \nthat of a Morse function. We discuss the concept in more detail in Appendix \nB but provide the basic definition here. \n\u001f\u001d\v";
+                    string expected = "8 1. Perspectives on Manifolds h' 0 h- l is smooth. (The case h 0 (h')-l is analogous.) Here h-I(YI, . . . , Yn) = ( 2YI 2Yn -1 + Y\u001f + · · · + Y\u001f ) 1 + Y\u001f + · · · + Y\u001f ' · . · , 1 + Y\u001f + · · · + y\u001f' 1 + Y\u001f + · · · + Y\u001f ' h' 0 h -1 (Yb . . . , Yn) = 2 1 2 (Yb . · . , Yn). YI + · · · + Y n It follows that h' 0 h- l is smooth except at the origin where the composition of maps is not defined. Thus sn is a smooth manifold. Example 1.2.5. In the exercises you proved that the product of manifolds is a manifold. Since the product of smooth maps is smooth, the product of smooth manifolds is a smooth manifold. It follows that 'Jrn is a smooth manifold. In calculus we learn about differentiable maps from JRn to JRm. Some concepts extend to manifolds. Definition 1.2.6. Let M be a manifold with atlas {(Mo:, <Po:)} and let N be a manifold with atlas {(N,B, 1/J,B)}. We say that the map f : M \u001f N is C q ifVa,{3, the map 1/J,B 0 f 0 <P o: I (where it is defined) is C q . Definition 1.2.7. A Cq-map between Cq-manifolds with a Cq-inverse is called a Cq-diffeomorphism. A Coo-diffeomorphism is simply called a diffeo- morphism. Remark 1.2.8. The map f : JR \u001f JR given by f(x) = x 3 is a Coo-map but is not a diffeomorphism because its derivative is singular at o. (In fact, it is not even a Cl-diffeomorphism.) Definition 1.2.9. Two Cq-manifolds are considered equivalent if there is a Cq-diffeomorphism between them. In the exercises, you will extend the notion of submanifold, manifold with boundary, and submanifold of a manifold with boundary to the DIFF category, that is, to the setting in which manifolds are considered in this section. In the DIFF category we are interested in smooth maps between mani- folds. Example 1.2.10. Projection from 'Jr2 = Sl X Sl onto the second factor is a smooth map between manifolds. In Appendix A, we introduce the notion of transversality in the category of DIFF manifolds. Another concept that is best described in this category is that of a Morse function. We discuss the concept in more detail in Appendix B but provide the basic definition here. ";
                     string text = page.Text;
                     Assert.NotNull(text);
                     Assert.Equal<string>(expected, text);
@@ -507,7 +507,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.NotNull(document);
 
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
 
                 DocumentType type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
