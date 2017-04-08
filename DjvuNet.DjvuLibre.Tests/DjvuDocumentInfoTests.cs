@@ -24,7 +24,7 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
             }
@@ -38,7 +38,7 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
                 int fileCount = document.FileCount;
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
@@ -87,7 +87,7 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
@@ -110,7 +110,7 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int fileCount = document.FileCount;
-                Assert.Equal<int>(330, fileCount);
+                Assert.Equal<int>(112, fileCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
@@ -133,11 +133,11 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int fileCount = document.FileCount;
-                Assert.Equal<int>(62, fileCount);
+                Assert.Equal<int>(31, fileCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expected = "  FORM:DJVU [11889] \n    INFO [10]         DjVu 2215x3639, v25, 400 dpi, gamma=2.2\n    CIDa [36] \n    Sjbz [5398]       JB2 bilevel data\n    FG44 [1910]       IW4 data #1, 100 slices, v1.2 (color), 185x304\n    BG44 [1119]       IW4 data #1, 74 slices, v1.2 (color), 739x1213\n    BG44 [797]        IW4 data #2, 10 slices\n    BG44 [263]        IW4 data #3, 4 slices\n    BG44 [1878]       IW4 data #4, 9 slices\n    TXTz [399]        Hidden text (text, etc.)\n";
+                string expected = "  FORM:DJVU [11894] \n    INFO [10]         DjVu 2215x3639, v25, 400 dpi, gamma=2.2\n    CIDa [36] \n    Sjbz [5398]       JB2 bilevel data\n    FG44 [1910]       IW4 data #1, 100 slices, v1.2 (color), 185x304\n    BG44 [1119]       IW4 data #1, 74 slices, v1.2 (color), 739x1213\n    BG44 [797]        IW4 data #2, 10 slices\n    BG44 [263]        IW4 data #3, 4 slices\n    BG44 [1878]       IW4 data #4, 9 slices\n    TXTz [375]        Hidden text (text, etc.)\n    ANTz [19]         Page annotation (hyperlinks, etc.)\n";
 
                 var data = document.DumpPageData(1, false);
                 Assert.NotNull(data);
@@ -153,11 +153,11 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int fileCount = document.FileCount;
-                Assert.Equal<int>(62, fileCount);
+                Assert.Equal<int>(31, fileCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 11889, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2215, \"Height\": 3639, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n            { \"ID\": \"CIDa\", \"Size\": 36 },\n            { \"ID\": \"Sjbz\", \"Size\": 5398, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FG44\", \"Size\": 1910, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 185, \"Height\": 304 },\n            { \"ID\": \"BG44\", \"Size\": 1119, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 739, \"Height\": 1213 },\n            { \"ID\": \"BG44\", \"Size\": 797, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 263, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 1878, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n            { \"ID\": \"TXTz\", \"Size\": 399, \"Description\": \"Hidden text (text, etc.)\" }\n        ]\n    }\n}\n";
+                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 11894, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2215, \"Height\": 3639, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n            { \"ID\": \"CIDa\", \"Size\": 36 },\n            { \"ID\": \"Sjbz\", \"Size\": 5398, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FG44\", \"Size\": 1910, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 185, \"Height\": 304 },\n            { \"ID\": \"BG44\", \"Size\": 1119, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 739, \"Height\": 1213 },\n            { \"ID\": \"BG44\", \"Size\": 797, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 263, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 1878, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n            { \"ID\": \"TXTz\", \"Size\": 375, \"Description\": \"Hidden text (text, etc.)\" },\n            { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n        ]\n    }\n}\n";
 
                 var data = document.DumpPageData(1, true);
                 Assert.NotNull(data);
@@ -173,11 +173,11 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int fileCount = document.FileCount;
-                Assert.Equal<int>(62, fileCount);
+                Assert.Equal<int>(31, fileCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 11889, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2215, \"Height\": 3639, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n            { \"ID\": \"CIDa\", \"Size\": 36 },\n            { \"ID\": \"Sjbz\", \"Size\": 5398, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FG44\", \"Size\": 1910, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 185, \"Height\": 304 },\n            { \"ID\": \"BG44\", \"Size\": 1119, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 739, \"Height\": 1213 },\n            { \"ID\": \"BG44\", \"Size\": 797, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 263, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 1878, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n            { \"ID\": \"TXTz\", \"Size\": 399, \"Description\": \"Hidden text (text, etc.)\" }\n        ]\n    }\n}\n";
+                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 11894, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2215, \"Height\": 3639, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n            { \"ID\": \"CIDa\", \"Size\": 36 },\n            { \"ID\": \"Sjbz\", \"Size\": 5398, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FG44\", \"Size\": 1910, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 185, \"Height\": 304 },\n            { \"ID\": \"BG44\", \"Size\": 1119, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 739, \"Height\": 1213 },\n            { \"ID\": \"BG44\", \"Size\": 797, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 263, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 1878, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n            { \"ID\": \"TXTz\", \"Size\": 375, \"Description\": \"Hidden text (text, etc.)\" },\n            { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n        ]\n    }\n}\n";
 
                 var data = document.DumpPageData(1);
                 Assert.NotNull(data);
@@ -193,7 +193,7 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int fileCount = document.FileCount;
-                Assert.Equal<int>(62, fileCount);
+                Assert.Equal<int>(31, fileCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
@@ -291,11 +291,11 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expected = "  FORM:DJVU [27048] \n    INFO [10]         DjVu 3916x6054, v25, 600 dpi, gamma=2.2\n    INCL [38]         Indirection chunk --> {Schultens_Страница_005_1L.djbz}\n    Sjbz [5941]       JB2 bilevel data\n    FGbz [110]        JB2 colors data, v0, 14 colors\n    BG44 [6577]       IW4 data #1, 75 slices, v1.2 (color), 979x1514\n    BG44 [4057]       IW4 data #2, 10 slices\n    BG44 [3433]       IW4 data #3, 4 slices\n    BG44 [6315]       IW4 data #4, 8 slices\n    TXTz [486]        Hidden text (text, etc.)\n";
+                string expected = "  FORM:DJVU [27068] \n    INFO [10]         DjVu 3916x6054, v25, 600 dpi, gamma=2.2\n    INCL [38]         Indirection chunk --> {Schultens_Страница_005_1L.djbz}\n    Sjbz [5941]       JB2 bilevel data\n    FGbz [110]        JB2 colors data, v0, 14 colors\n    BG44 [6577]       IW4 data #1, 75 slices, v1.2 (color), 979x1514\n    BG44 [4057]       IW4 data #2, 10 slices\n    BG44 [3433]       IW4 data #3, 4 slices\n    BG44 [6315]       IW4 data #4, 8 slices\n    TXTz [477]        Hidden text (text, etc.)\n    ANTz [19]         Page annotation (hyperlinks, etc.)\n";
 
                 var data = document.DumpPageData(0, false);
                 Assert.NotNull(data);
@@ -311,11 +311,11 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 27048, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 3916, \"Height\": 6054, \"Version\": 25, \"Dpi\": 600, \"Gamma\": 2.2 },\n            { \"ID\": \"INCL\", \"Size\": 38, \"Description\": \"Indirection chunk\", \"Name\": \"{Schultens_Страница_005_1L.djbz}\" },\n            { \"ID\": \"Sjbz\", \"Size\": 5941, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FGbz\", \"Size\": 110, \"Description\": \"JB2 colors data\", \"Version\": 0, \"Colors\": 14 },\n            { \"ID\": \"BG44\", \"Size\": 6577, \"Description\": \"IW4 data #1\", \"Slices\": 75, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 979, \"Height\": 1514 },\n            { \"ID\": \"BG44\", \"Size\": 4057, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 3433, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 6315, \"Description\": \"IW4 data #4\", \"Slices\": 8 },\n            { \"ID\": \"TXTz\", \"Size\": 486, \"Description\": \"Hidden text (text, etc.)\" }\n        ]\n    }\n}\n";
+                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 27068, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 3916, \"Height\": 6054, \"Version\": 25, \"Dpi\": 600, \"Gamma\": 2.2 },\n            { \"ID\": \"INCL\", \"Size\": 38, \"Description\": \"Indirection chunk\", \"Name\": \"{Schultens_Страница_005_1L.djbz}\" },\n            { \"ID\": \"Sjbz\", \"Size\": 5941, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FGbz\", \"Size\": 110, \"Description\": \"JB2 colors data\", \"Version\": 0, \"Colors\": 14 },\n            { \"ID\": \"BG44\", \"Size\": 6577, \"Description\": \"IW4 data #1\", \"Slices\": 75, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 979, \"Height\": 1514 },\n            { \"ID\": \"BG44\", \"Size\": 4057, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 3433, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 6315, \"Description\": \"IW4 data #4\", \"Slices\": 8 },\n            { \"ID\": \"TXTz\", \"Size\": 477, \"Description\": \"Hidden text (text, etc.)\" },\n            { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n        ]\n    }\n}\n";
 
                 var data = document.DumpPageData(0, true);
                 Assert.NotNull(data);
@@ -331,11 +331,11 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 27048, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 3916, \"Height\": 6054, \"Version\": 25, \"Dpi\": 600, \"Gamma\": 2.2 },\n            { \"ID\": \"INCL\", \"Size\": 38, \"Description\": \"Indirection chunk\", \"Name\": \"{Schultens_Страница_005_1L.djbz}\" },\n            { \"ID\": \"Sjbz\", \"Size\": 5941, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FGbz\", \"Size\": 110, \"Description\": \"JB2 colors data\", \"Version\": 0, \"Colors\": 14 },\n            { \"ID\": \"BG44\", \"Size\": 6577, \"Description\": \"IW4 data #1\", \"Slices\": 75, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 979, \"Height\": 1514 },\n            { \"ID\": \"BG44\", \"Size\": 4057, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 3433, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 6315, \"Description\": \"IW4 data #4\", \"Slices\": 8 },\n            { \"ID\": \"TXTz\", \"Size\": 486, \"Description\": \"Hidden text (text, etc.)\" }\n        ]\n    }\n}\n";
+                string expected = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVU\", \"Size\": 27068, \"Children\": [\n            { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 3916, \"Height\": 6054, \"Version\": 25, \"Dpi\": 600, \"Gamma\": 2.2 },\n            { \"ID\": \"INCL\", \"Size\": 38, \"Description\": \"Indirection chunk\", \"Name\": \"{Schultens_Страница_005_1L.djbz}\" },\n            { \"ID\": \"Sjbz\", \"Size\": 5941, \"Description\": \"JB2 bilevel data\" },\n            { \"ID\": \"FGbz\", \"Size\": 110, \"Description\": \"JB2 colors data\", \"Version\": 0, \"Colors\": 14 },\n            { \"ID\": \"BG44\", \"Size\": 6577, \"Description\": \"IW4 data #1\", \"Slices\": 75, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 979, \"Height\": 1514 },\n            { \"ID\": \"BG44\", \"Size\": 4057, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"ID\": \"BG44\", \"Size\": 3433, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"ID\": \"BG44\", \"Size\": 6315, \"Description\": \"IW4 data #4\", \"Slices\": 8 },\n            { \"ID\": \"TXTz\", \"Size\": 477, \"Description\": \"Hidden text (text, etc.)\" },\n            { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n        ]\n    }\n}\n";
 
                 var data = document.DumpPageData(0);
                 Assert.NotNull(data);
@@ -351,7 +351,7 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(300, pageCount);
+                Assert.Equal<int>(101, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
@@ -539,12 +539,12 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expectedStart = "  FORM:DJVM [2925001] \n    DIRM [603]        Document directory (bundled, 62 files 62 pages)\n    FORM:DJVU [25223] {mcguff1steclprimer01mcguf_0005.djvu} [P1]\n      INFO [10]         DjVu 2260x3669, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [10327]      JB2 bilevel data\n      FG44 [2056]       IW4 data #1, 100 slices, v1.2 (color), 189x306\n      BG44 [2773]       IW4 data #1, 74 slices, v1.2 (color), 754x1223\n      BG44 [2894]       IW4 data #2, 10 slices\n      BG44 [2009]       IW4 data #3, 4 slices\n      BG44 [4643]       IW4 data #4, 9 slices\n      TXTz [395]        Hidden text (text, etc.)\n    FORM:DJVU [11889] {mcguff1steclprimer01mcguf_0006.djvu} [P2]\n      INFO [10]         DjVu 2215x3639, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [5398]       JB2 bilevel data\n      FG44 [1910]       IW4 data #1, 100 slices, v1.2 (color), 185x304\n      BG44 [1119]       IW4 data #1, 74 slices, v1.2 (color), 739x1213\n      BG44 [797]        IW4 data #2, 10 slices\n      BG44 [263]   ";
-                string expectedEnd = " INFO [10]         DjVu 2215x3669, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [5672]       JB2 bilevel data\n      FG44 [1867]       IW4 data #1, 100 slices, v1.2 (color), 185x306\n      BG44 [1213]       IW4 data #1, 74 slices, v1.2 (color), 739x1223\n      BG44 [898]        IW4 data #2, 10 slices\n      BG44 [295]        IW4 data #3, 4 slices\n      BG44 [1974]       IW4 data #4, 9 slices\n      TXTz [485]        Hidden text (text, etc.)\n    FORM:DJVU [13130] {mcguff1steclprimer01mcguf_0064.djvu} [P60]\n      INFO [10]         DjVu 2238x3639, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [6997]       JB2 bilevel data\n      FG44 [1961]       IW4 data #1, 100 slices, v1.2 (color), 187x304\n      BG44 [999]        IW4 data #1, 74 slices, v1.2 (color), 746x1213\n      BG44 [661]        IW4 data #2, 10 slices\n      BG44 [194]        IW4 data #3, 4 slices\n      BG44 [1482]       IW4 data #4, 9 slices\n      TXTz [710]        Hidden text (text, etc.)\n    FORM:DJVU [13966] {mcguff1steclprimer01mcguf_0065.djvu} [P61]\n      INFO [10]         DjVu 2215x3669, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [7227]       JB2 bilevel data\n      FG44 [2112]       IW4 data #1, 100 slices, v1.2 (color), 185x306\n      BG44 [1001]       IW4 data #1, 74 slices, v1.2 (color), 739x1223\n      BG44 [845]        IW4 data #2, 10 slices\n      BG44 [139]        IW4 data #3, 4 slices\n      BG44 [1897]       IW4 data #4, 9 slices\n      TXTz [618]        Hidden text (text, etc.)\n    FORM:DJVU [14833] {mcguff1steclprimer01mcguf_0066.djvu} [P62]\n      INFO [10]         DjVu 2238x3639, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [10293]      JB2 bilevel data\n      FG44 [1421]       IW4 data #1, 100 slices, v1.2 (color), 187x304\n      BG44 [929]        IW4 data #1, 74 slices, v1.2 (color), 746x1213\n      BG44 [363]        IW4 data #2, 10 slices\n      BG44 [16]         IW4 data #3, 4 slices\n      BG44 [886]        IW4 data #4, 9 slices\n      TXTz [799]        Hidden text (text, etc.)\n";
+                string expectedStart = "  FORM:DJVM [1634952] \n    DIRM [338]        Document directory (bundled, 31 files 31 pages)\n    FORM:DJVU [25228] {mcguff1steclprimer01mcguf_0005.djvu} [P1]\n      INFO [10]         DjVu 2260x3669, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [10327]      JB2 bilevel data\n      FG44 [2056]       IW4 data #1, 100 slices, v1.2 (color), 189x306\n      BG44 [2773]       IW4 data #1, 74 slices, v1.2 (color), 754x1223\n      BG44 [2894]       IW4 data #2, 10 slices\n      BG44 [2009]       IW4 data #3, 4 slices\n      BG44 [4643]       IW4 data #4, 9 slices\n      TXTz [372]        Hidden text (text, etc.)\n      ANTz [19]         Page annotation (hyperlinks, etc.)\n    FORM:DJVU [11894] {mcguff1steclprimer01mcguf_0006.djvu} [P2]\n      INFO [10]         DjVu 2215x3639, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [5398]       JB2 bilevel data\n      FG44 [1910]       IW4 data #1, 100 slices, v1.2 (color), 185x304\n      BG44 [1119]       IW4 data #1, 74 slices, v1.2 (color), 739x1213\n      ";
+                string expectedEnd = "     TXTz [1211]       Hidden text (text, etc.)\n      ANTz [19]         Page annotation (hyperlinks, etc.)\n    FORM:DJVU [66482] {mcguff1steclprimer01mcguf_0033.djvu} [P29]\n      INFO [10]         DjVu 2215x3669, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [21842]      JB2 bilevel data\n      FG44 [3991]       IW4 data #1, 100 slices, v1.2 (color), 185x306\n      BG44 [5344]       IW4 data #1, 74 slices, v1.2 (color), 739x1223\n      BG44 [9470]       IW4 data #2, 10 slices\n      BG44 [7883]       IW4 data #3, 4 slices\n      BG44 [17014]      IW4 data #4, 9 slices\n      TXTz [786]        Hidden text (text, etc.)\n      ANTz [19]         Page annotation (hyperlinks, etc.)\n    FORM:DJVU [114994] {mcguff1steclprimer01mcguf_0034.djvu} [P30]\n      INFO [10]         DjVu 2238x3639, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [41920]      JB2 bilevel data\n      FG44 [5456]       IW4 data #1, 100 slices, v1.2 (color), 187x304\n      BG44 [8783]       IW4 data #1, 74 slices, v1.2 (color), 746x1213\n      BG44 [12339]      IW4 data #2, 10 slices\n      BG44 [15941]      IW4 data #3, 4 slices\n      BG44 [30279]      IW4 data #4, 9 slices\n      TXTz [121]        Hidden text (text, etc.)\n      ANTz [19]         Page annotation (hyperlinks, etc.)\n    FORM:DJVU [20228] {mcguff1steclprimer01mcguf_0035.djvu} [P31]\n      INFO [10]         DjVu 2215x3669, v25, 400 dpi, gamma=2.2\n      CIDa [36] \n      Sjbz [11471]      JB2 bilevel data\n      FG44 [2315]       IW4 data #1, 100 slices, v1.2 (color), 185x306\n      BG44 [1054]       IW4 data #1, 74 slices, v1.2 (color), 739x1223\n      BG44 [1172]       IW4 data #2, 10 slices\n      BG44 [522]        IW4 data #3, 4 slices\n      BG44 [2612]       IW4 data #4, 9 slices\n      TXTz [929]        Hidden text (text, etc.)\n      ANTz [19]         Page annotation (hyperlinks, etc.)\n";
                 var data = document.DumpDocumentData(false);
                 Assert.NotNull(data);
                 Assert.StartsWith(expectedStart, data);
@@ -560,11 +560,11 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
-                string expectedStart = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVM\", \"Size\": 2925001, \"Children\": [\n            { \"ID\": \"DIRM\", \"Size\": 603, \"Description\": \"Document directory\", \"DocumentType\": \"bundled\", \"FileCount\": 62, \"PageCount\": 62 },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 25223, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2260, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 10327, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 2056, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 189, \"Height\": 306 },\n                    { \"ID\": \"BG44\", \"Size\": 2773, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 754, \"Height\": 1223 },\n                    { \"ID\": \"BG44\", \"Size\": 2894, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n                    { \"ID\": \"BG44\", \"Size\": 2009,";
-                string expectedEnd = "3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 1897, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 618, \"Description\": \"Hidden text (text, etc.)\" }\n                ]\n            },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 14833, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2238, \"Height\": 3639, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 10293, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 1421, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 187, \"Height\": 304 },\n                    { \"ID\": \"BG44\", \"Size\": 929, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 746, \"Height\": 1213 },\n                    { \"ID\": \"BG44\", \"Size\": 363, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n                    { \"ID\": \"BG44\", \"Size\": 16, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 886, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 799, \"Description\": \"Hidden text (text, etc.)\" }\n                ]\n            }\n        ]\n    }\n}\n";
+                string expectedStart = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVM\", \"Size\": 1634952, \"Children\": [\n            { \"ID\": \"DIRM\", \"Size\": 338, \"Description\": \"Document directory\", \"DocumentType\": \"bundled\", \"FileCount\": 31, \"PageCount\": 31 },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 25228, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2260, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 10327, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 2056, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 189, \"Height\": 306 },\n                    { \"ID\": \"BG44\", \"Size\": 2773, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 754, \"Height\": 1223 },\n                    { \"ID\": \"BG44\", \"Size\": 2";
+                string expectedEnd = "                 { \"ID\": \"BG44\", \"Size\": 15941, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 30279, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 121, \"Description\": \"Hidden text (text, etc.)\" },\n                    { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n                ]\n            },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 20228, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2215, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 11471, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 2315, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 185, \"Height\": 306 },\n                    { \"ID\": \"BG44\", \"Size\": 1054, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 739, \"Height\": 1223 },\n                    { \"ID\": \"BG44\", \"Size\": 1172, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n                    { \"ID\": \"BG44\", \"Size\": 522, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 2612, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 929, \"Description\": \"Hidden text (text, etc.)\" },\n                    { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n                ]\n            }\n        ]\n    }\n}\n";
                 var data = document.DumpDocumentData(true);      
                 Assert.NotNull(data);
                 Assert.StartsWith(expectedStart, data);
@@ -580,12 +580,12 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
 
-                string expectedStart = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVM\", \"Size\": 2925001, \"Children\": [\n            { \"ID\": \"DIRM\", \"Size\": 603, \"Description\": \"Document directory\", \"DocumentType\": \"bundled\", \"FileCount\": 62, \"PageCount\": 62 },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 25223, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2260, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 10327, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 2056, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 189, \"Height\": 306 },\n                    { \"ID\": \"BG44\", \"Size\": 2773, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 754, \"Height\": 1223 },\n                    { \"ID\": \"BG44\", \"Size\": 2894, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n                    { \"ID\": \"BG44\", \"Size\": 2009,";
-                string expectedEnd = "3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 1897, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 618, \"Description\": \"Hidden text (text, etc.)\" }\n                ]\n            },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 14833, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2238, \"Height\": 3639, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 10293, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 1421, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 187, \"Height\": 304 },\n                    { \"ID\": \"BG44\", \"Size\": 929, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 746, \"Height\": 1213 },\n                    { \"ID\": \"BG44\", \"Size\": 363, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n                    { \"ID\": \"BG44\", \"Size\": 16, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 886, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 799, \"Description\": \"Hidden text (text, etc.)\" }\n                ]\n            }\n        ]\n    }\n}\n";
+                string expectedStart = "{ \"DjvuData\":\n    { \"ID\": \"FORM:DJVM\", \"Size\": 1634952, \"Children\": [\n            { \"ID\": \"DIRM\", \"Size\": 338, \"Description\": \"Document directory\", \"DocumentType\": \"bundled\", \"FileCount\": 31, \"PageCount\": 31 },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 25228, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2260, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 10327, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 2056, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 189, \"Height\": 306 },\n                    { \"ID\": \"BG44\", \"Size\": 2773, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 754, \"Height\": 1223 },\n                    { \"ID\": \"BG44\", \"Size\": 2";
+                string expectedEnd = "                 { \"ID\": \"BG44\", \"Size\": 15941, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 30279, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 121, \"Description\": \"Hidden text (text, etc.)\" },\n                    { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n                ]\n            },\n            { \"ID\": \"FORM:DJVU\", \"Size\": 20228, \"Children\": [\n                    { \"ID\": \"INFO\", \"Size\": 10, \"Width\": 2215, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2 },\n                    { \"ID\": \"CIDa\", \"Size\": 36 },\n                    { \"ID\": \"Sjbz\", \"Size\": 11471, \"Description\": \"JB2 bilevel data\" },\n                    { \"ID\": \"FG44\", \"Size\": 2315, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 185, \"Height\": 306 },\n                    { \"ID\": \"BG44\", \"Size\": 1054, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 739, \"Height\": 1223 },\n                    { \"ID\": \"BG44\", \"Size\": 1172, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n                    { \"ID\": \"BG44\", \"Size\": 522, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n                    { \"ID\": \"BG44\", \"Size\": 2612, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"ID\": \"TXTz\", \"Size\": 929, \"Description\": \"Hidden text (text, etc.)\" },\n                    { \"ID\": \"ANTz\", \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n                ]\n            }\n        ]\n    }\n}\n";
                 var data = document.DumpDocumentData();
                 Assert.NotNull(data);
                 Assert.StartsWith(expectedStart, data);
@@ -601,7 +601,7 @@ namespace DjvuNet.DjvuLibre.Tests
             {
                 Assert.NotNull(document);
                 int pageCount = document.PageCount;
-                Assert.Equal<int>(62, pageCount);
+                Assert.Equal<int>(31, pageCount);
                 var type = document.DocumentType;
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
                 var data = document.DumpDocumentData();
