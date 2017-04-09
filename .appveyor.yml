@@ -33,7 +33,8 @@ matrix:
   fast_finish: true
 
 cache:
-    - packages -> **\packages.config  
+    - packages -> **\packages.config
+#    - artifacts -> artifacts.sha256  
 
 ############################################################################
 #

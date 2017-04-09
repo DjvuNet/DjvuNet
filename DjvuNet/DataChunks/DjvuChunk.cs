@@ -16,16 +16,57 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class DjvuChunk : FormChunk
     {
-        #region Public Properties
 
-        #region ChunkType
+        private InfoChunk _Info;
+        private bool _InfoQueried;
+
+        private List<InclChunk> _Includes;
+
+        #region Public Properties
 
         public override ChunkType ChunkType
         {
             get { return ChunkType.Djvu; }
         }
 
-        #endregion ChunkType
+        public InfoChunk Info
+        {
+            get
+            {
+                if (_InfoQueried)
+                    return _Info;
+                else if (Children != null)
+                    _Info = (InfoChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Info);
+
+                _InfoQueried = true;
+                return _Info;
+            }
+        }
+
+        /// <summary>
+        /// Include chunk of page or single page document.
+        /// Theoretically there could be many includes but 
+        /// in practice it is very rare to see that kind of docs.
+        /// </summary>
+        public IReadOnlyList<InclChunk> Includes
+        {
+            get
+            {
+                if (_Includes != null)
+                    return _Includes;
+                else if (Children != null)
+                {
+                    _Includes = Children.Select(
+                        x => x.ChunkType == ChunkType.Incl ? x as InclChunk : null)
+                        .Where(x => x != null).ToList<InclChunk>();
+                }
+                else
+                    _Includes = new List<InclChunk>();
+
+                return _Includes;
+            }
+        }
+
 
         #endregion Public Properties
 

@@ -20,6 +20,12 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class DjvmChunk : FormChunk
     {
+        private List<DjviChunk> _Includes;
+        private List<ThumChunk> _Thumbnails;
+        private List<DjvuChunk> _Pages;
+
+        private List<IFFChunk> _Files;
+
         #region Public Properties
 
         #region ChunkType
@@ -31,27 +37,101 @@ namespace DjvuNet.DataChunks
 
         #endregion ChunkType
 
-        #region DirmData
 
         private DirmChunk _dirmData;
 
         /// <summary>
         /// Gets the DIRM chunk for the form
         /// </summary>
-        public DirmChunk DirmData
+        public DirmChunk Dirm
         {
             get
             {
-                if (_dirmData == null && Children?.Length > 0)
+                if (_dirmData != null)
+                    return _dirmData;
+                else if (Children != null)
+                {
                     _dirmData = (DirmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
-
-                return _dirmData;
+                    return _dirmData;
+                }
+                else
+                    return null;
             }
         }
 
-        #endregion DirmData
+        public IReadOnlyList<DjviChunk> Includes
+        {
+            get
+            {
+                if (_Includes != null)
+                    return _Includes;
+                else if (Children != null)
+                {
+                    _Includes = Children.Select(
+                        (x) => x.ChunkType == ChunkType.Djvi ? x as DjviChunk : null)
+                        .Where(x => x != null).ToList<DjviChunk>();
+                    return _Includes;
+                }
+                else
+                    return null;
+            }
+        }
 
-        #region NavmData
+
+        public IReadOnlyList<ThumChunk> Thumbnails
+        {
+            get
+            {
+                if (_Thumbnails != null)
+                    return _Thumbnails;
+                else if (Children != null)
+                {
+                    _Thumbnails = Children.Select(
+                        (x) => x.ChunkType == ChunkType.Thum ? x as ThumChunk : null)
+                        .Where(x => x != null).ToList<ThumChunk>();
+                    return _Thumbnails;
+                }
+                else
+                    return null;
+            }
+        }
+
+        public IReadOnlyList<DjvuChunk> Pages
+        {
+            get
+            {
+                if (_Pages != null)
+                    return _Pages;
+                else if (Children != null)
+                {
+                    _Pages = Children.Select(
+                        (x) => x.ChunkType == ChunkType.Djvu ? x as DjvuChunk : null)
+                        .Where(x => x != null).ToList<DjvuChunk>();
+                    return _Pages;
+                }
+                else
+                    return null;
+            }
+        }
+
+        public IReadOnlyList<IFFChunk> Files
+        {
+            get
+            {
+                if (_Files != null)
+                    return _Files;
+                else if (Children != null)
+                {
+                    _Files = Children.Where( x =>
+                        x.ChunkType == ChunkType.Djvu || x.ChunkType == ChunkType.Djvi ||
+                        x.ChunkType == ChunkType.Thum || x.ChunkType == ChunkType.Navm).ToList<IFFChunk>();
+                }
+                else
+                    _Files = new List<IFFChunk>();
+
+                return _Files;
+            }
+        }
 
         private NavmChunk _NavmData;
 
@@ -62,14 +142,16 @@ namespace DjvuNet.DataChunks
         {
             get
             {
-                if (Children != null && Children.Length > 0 && _NavmData == null)
-                    _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
-
-                return _NavmData;
+                if (_NavmData != null)
+                    return _NavmData;
+                else
+                {
+                    if (Children != null && Children.Length > 0)
+                        _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
+                    return _NavmData;
+                }
             }
         }
-
-        #endregion NavmData
 
         #endregion Public Properties
 
