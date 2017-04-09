@@ -12,15 +12,16 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class DirmChunkTests
     {
+
         [Fact()]
-        public void DirmChunk_ctor001()
+        public void DirmChunk001()
         {
             int pageCount = 0;
             using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(1, out pageCount))
             {
                 DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
                 DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
-                DirmChunk dirm = ((DjvmChunk)document.RootForm).DirmData;
+                DirmChunk dirm = ((DjvmChunk)document.RootForm).Dirm;
 
                 Assert.NotNull(dirm);
                 DirmComponent[] components = dirm.Components;
@@ -31,14 +32,14 @@ namespace DjvuNet.DataChunks.Tests
         }
 
         [Fact]
-        public void DirmChunk_ctor003()
+        public void DirmChunk003()
         {
             int pageCount = 0;
             using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(3, out pageCount))
             {
                 DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
                 DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
-                DirmChunk dirm = ((DjvmChunk)document.RootForm).DirmData;
+                DirmChunk dirm = ((DjvmChunk)document.RootForm).Dirm;
 
                 Assert.NotNull(dirm);
 
@@ -49,5 +50,29 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
+        [Theory]
+        [ClassData(typeof(DjvuJsonDataSource))]
+        public void DirmChunk_Theory(DjvuJsonDocument doc, int index)
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(index, out pageCount))
+            {
+                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
+                DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
+                // DirmChunk is present only in multi page documents
+                // in which root form is of DjvmChunk type
+                if (document.RootForm is DjvmChunk)
+                {
+                    DirmChunk dirm = ((DjvmChunk)document.RootForm).Dirm;
+
+                    Assert.NotNull(dirm);
+
+                    Assert.True(dirm.IsBundled ? doc.Data.Dirm.DocumentType == "bundled" : doc.Data.Dirm.DocumentType == "indirect");
+
+                    var components = dirm.Components;
+                    Assert.Equal<int>(components.Length, doc.Data.Dirm.FileCount);
+                }
+            }
+        }
     }
 }

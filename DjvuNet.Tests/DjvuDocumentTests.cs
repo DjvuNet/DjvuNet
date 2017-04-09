@@ -18,36 +18,6 @@ namespace DjvuNet.Tests
 
                 List<object[]> retVal = new List<object[]>
                 {
-                     //new object[] { null, 62},
-                     //new object[] { null, 11},
-                     //new object[] { null, 300},
-                     //new object[] { null, 494},
-                     //new object[] { null, 286},
-                     //new object[] { null, 348},
-                     //new object[] { null, 186},
-                     //new object[] { null, 427},
-                     //new object[] { null, 274},
-                     //new object[] { null, 17},
-                     //new object[] { null, 154},
-                     //new object[] { null, 239},
-                     //new object[] { null, 9},
-                     //new object[] { null, 20},
-                     //new object[] { null, 40},
-                     //new object[] { null, 30},
-                     //new object[] { null, 12},
-                     //new object[] { null, 7},
-                     //new object[] { null, 28},
-                     //new object[] { null, 5},
-                     //new object[] { null, 12},
-                     //new object[] { null, 10},
-                     //new object[] { null, 3},
-                     //new object[] { null, 3},
-                     //new object[] { null, 9},
-                     //new object[] { null, 146},
-                     //new object[] { null, 173},
-                     //new object[] { null, 267},
-                     //new object[] { null, 323},
-                     //new object[] { null, 1},
                 };
 
                 GenerateTestFilesPaths(maxTestNumber, filePathTempl, retVal);
@@ -106,8 +76,6 @@ namespace DjvuNet.Tests
         public static void GenerateTestFilesPaths(int maxTestNumber, string filePathTempl, List<object[]> retVal)
         {
             int i = 1;
-            //for (; i < retVal.Count; i++)
-            //    retVal[i][0] = String.Format(filePathTempl, (i + 1));
 
             for (; i <= maxTestNumber; i++)
             {
