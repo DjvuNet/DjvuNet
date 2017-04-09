@@ -108,7 +108,7 @@ namespace DjvuNet.DataChunks
                         DirmComponent component = null;
                         DjvmChunk root = Document.RootForm as DjvmChunk;
                         if (root != null)
-                             component = root.DirmData.Components.Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
+                             component = root.Dirm.Components.Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
                        
                         // TODO - verify selection strategy which seems slow and not taking into account dictionary names 
                         var includeForm = Document.GetRootFormChildren<DjviChunk>()

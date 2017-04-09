@@ -227,7 +227,9 @@
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
+  -->  
   <Target Name="AfterBuild">
+    <Exec Command="$(SolutionDir)Tools\7z h -scrcSHA256 -xr!.* $(SolutionDir)artifacts > $(SolutionDir)artifacts.sha256"></Exec>
   </Target>
-  -->
+
 </Project>
