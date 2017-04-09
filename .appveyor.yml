@@ -48,6 +48,9 @@ init:
 install:
     - cmd: cd c:\projects\djvunet
     - cmd: git clone https://github.com/DjvuNet/DjVuLibre.git
+    - cmd: cd c:\projects\djvunet
+    - appveyor DownloadFile https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.1/artifacts.zip
+    - cmd: 7z x -oartifacts artifacts.zip
 
 before_build:
     - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
@@ -56,9 +59,3 @@ before_build:
 build:
     project: DjvuNet.sln
     verbosity: detailed
-
-before_test:
-    - cmd: cd c:\projects\djvunet
-    - appveyor DownloadFile https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.1/artifacts.zip
-    - cmd: 7z x -oartifacts artifacts.zip
-
