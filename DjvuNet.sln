@@ -212,6 +212,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}"
 	ProjectSection(SolutionItems) = preProject
+		Tools\7z.exe = Tools\7z.exe
 		Tools\nuget.exe = Tools\nuget.exe
 	EndProjectSection
 EndProject
@@ -402,6 +403,7 @@ Global
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{61b8cb33-f13a-4309-a137-895017b28e31}*SharedItemsImports = 13
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{75de07a6-854c-4ec8-9beb-24b8efe42634}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{b7ef5575-5932-4ea7-b250-e7da238d60a9}*SharedItemsImports = 13
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{ec13a71d-dec3-4597-aee1-38c4c40f6650}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{f7ddb3f7-f251-4b2e-aeec-810118877e6f}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

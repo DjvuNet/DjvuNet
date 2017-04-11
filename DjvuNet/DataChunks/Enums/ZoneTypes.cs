@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace DjvuNet.DataChunks.Enums
+namespace DjvuNet.DataChunks
 {
 
     /// <summary>

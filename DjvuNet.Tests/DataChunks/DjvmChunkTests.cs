@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks.Tests
         public void DjvmChunk_Theory(DjvuJsonDocument doc, int index)
         {
             // TODO Fix libdjvulibre DjvuDumpHelper implementation - fails 
-            // for index 30, 63, 64 in some tests
+            // for index 39, 63, 64 in some tests - need DjVuLibre tests
             if (index == 63)
                 return;
 

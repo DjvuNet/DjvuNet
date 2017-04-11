@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using DjvuNet.DataChunks.Enums;
+
 using DjvuNet.Wavelet;
 
 namespace DjvuNet.DataChunks

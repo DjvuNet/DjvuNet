@@ -8,11 +8,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using DjvuNet.DataChunks;
 using DjvuNet.DataChunks.Directory;
-using DjvuNet.DataChunks.Enums;
+
 using DjvuNet.DataChunks.Navigation;
 using DjvuNet.DataChunks.Navigation.Interfaces;
 
@@ -46,8 +44,6 @@ namespace DjvuNet
 
         #region Public Properties
 
-        #region Identifier
-
         private int _identifier;
 
         /// <summary>
@@ -55,10 +51,7 @@ namespace DjvuNet
         /// </summary>
         public int Identifier
         {
-            get
-            {
-                return _identifier;
-            }
+            get { return _identifier; }
 
             internal set
             {
@@ -70,10 +63,6 @@ namespace DjvuNet
             }
         }
 
-        #endregion Identifier
-
-        #region RootForm
-
         private FormChunk _rootForm;
 
         /// <summary>
@@ -81,10 +70,8 @@ namespace DjvuNet
         /// </summary>
         public FormChunk RootForm
         {
-            get
-            {
-                return _rootForm;
-            }
+            get { return _rootForm; }
+
             internal set
             {
                 if (_rootForm != value)
@@ -94,10 +81,6 @@ namespace DjvuNet
                 }
             }
         }
-
-        #endregion RootForm
-
-        #region Directory
 
         private DirmChunk _directory;
 
@@ -110,8 +93,7 @@ namespace DjvuNet
             {
                 if (_directory == null)
                 {
-                    _directory = (DirmChunk)RootForm.Children
-                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
+                    _directory = RootForm.ChunkType == ChunkType.Djvm ? ((DjvmChunk)RootForm).Dirm : null;
                     if (_directory != null)
                         OnPropertyChanged(nameof(Directory));
                 }
@@ -119,10 +101,6 @@ namespace DjvuNet
                 return _directory;
             }
         }
-
-        #endregion Directory
-
-        #region Navigation
 
         private INavigation _navigation;
 
@@ -135,8 +113,7 @@ namespace DjvuNet
             {
                 if (_navigation == null)
                 {
-                    _navigation = (NavmChunk)RootForm.Children
-                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
+                    _navigation = RootForm.ChunkType == ChunkType.Djvm ? ((DjvmChunk)RootForm).NavmData : null;
                     if (_navigation != null)
                         OnPropertyChanged(nameof(Navigation));
                 }
@@ -154,25 +131,23 @@ namespace DjvuNet
             }
         }
 
-        #endregion Navigation
+        private IReadOnlyList<DjviChunk> _sharedItems;
 
-        #region SharedItems
-
-        private List<DjviChunk> _sharedItems;
-
-        public IReadOnlyList<DjviChunk> SharedItems
+        public IReadOnlyList<DjviChunk> Includes
         {
-            get { return _sharedItems; }
-            internal set
+            get
             {
-                if (_sharedItems == null)
-                    _sharedItems = new List<DjviChunk>(value);
-            } 
+                if (_sharedItems != null)
+                    return _sharedItems;
+                else
+                {
+                    _sharedItems = RootForm.ChunkType == ChunkType.Djvm ?
+                        ((DjvmChunk)RootForm).Includes : new List<DjviChunk>();
+                    OnPropertyChanged(nameof(Includes));
+                    return _sharedItems;
+                }
+            }
         }
-
-        #endregion SharedItems
-
-        #region Pages
 
         private DjvuPage[] _pages;
 
@@ -188,14 +163,10 @@ namespace DjvuNet
                 if (_pages != value)
                 {
                     _pages = value;
-                    OnPropertyChanged("Pages");
+                    OnPropertyChanged(nameof(Pages));
                 }
             }
         }
-
-        #endregion Pages
-
-        #region ActivePage
 
         private DjvuPage _activePage;
 
@@ -218,10 +189,6 @@ namespace DjvuNet
             }
         }
 
-        #endregion ActivePage
-
-        #region IsInverted
-
         private bool _isInverted;
 
         /// <summary>
@@ -243,8 +210,6 @@ namespace DjvuNet
                 }
             }
         }
-
-        #endregion IsInverted
 
         #region FirstPage
 
@@ -467,28 +432,6 @@ namespace DjvuNet
             DecodeDjvuDocument(_reader);
         }
 
-        /// <summary>
-        /// Gets a chunk type by the given ID
-        /// </summary>
-        /// <typeparam name="TItem"></typeparam>
-        /// <param name="ID"></param>
-        /// <returns></returns>
-        public TItem GetChunkByID<TItem>(string ID) where TItem : IFFChunk
-        {
-            if (Directory == null)
-                return null;
-
-            DirmComponent component = Directory.Components.FirstOrDefault<DirmComponent>(x => x.ID == ID);
-
-            if (component == null)
-                return null;
-
-            TItem[] children = RootForm.GetChildrenItems<TItem>().ToArray();
-            TItem child = children.Where(x => x.Offset - 8 == component.Offset).FirstOrDefault<TItem>();
-
-            return child;
-        }
-
         public static bool IsDjvuDocument(String filePath)
         {
             if (!String.IsNullOrWhiteSpace(filePath))
@@ -504,7 +447,7 @@ namespace DjvuNet
                     }
                     catch(Exception error)
                     {
-                        throw new AggregateException("Error while truing to verify DjVu file.", error);
+                        throw new AggregateException("Error while trying to verify DjVu file.", error);
                     }
                     finally
                     {
@@ -609,7 +552,7 @@ namespace DjvuNet
 
                     //TH44Chunk currentThumbnail = thumbnail.Count > 0 ? thumbnail.Dequeue() : null;
                     // TODO Get rid of arrays for shared items
-                    DjvuPage newPage = new DjvuPage(pages.Count + 1, this, null, null, SharedItems.ToArray(), form);
+                    DjvuPage newPage = new DjvuPage(pages.Count + 1, this, null, null, Includes.ToArray(), form);
                     pages.Add(newPage);
                 }
             }
