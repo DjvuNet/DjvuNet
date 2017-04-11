@@ -13,9 +13,9 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+
 using DjvuNet.DataChunks;
-using DjvuNet.DataChunks.Enums;
+
 using DjvuNet.DataChunks.Directory;
 using DjvuNet.DataChunks.Text;
 using DjvuNet.Graphics;

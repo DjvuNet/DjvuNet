@@ -8,7 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DjvuNet.DataChunks.Directory;
-using DjvuNet.DataChunks.Enums;
+
 using DjvuNet.JB2;
 
 namespace DjvuNet.DataChunks

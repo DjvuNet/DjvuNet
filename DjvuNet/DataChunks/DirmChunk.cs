@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using DjvuNet.Compression;
 using DjvuNet.DataChunks.Directory;
-using DjvuNet.DataChunks.Enums;
+
 
 namespace DjvuNet.DataChunks
 {

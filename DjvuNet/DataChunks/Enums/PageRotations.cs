@@ -2,7 +2,7 @@
 // TODO: Update copyright text.
 // </copyright>
 
-namespace DjvuNet.DataChunks.Enums
+namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.
