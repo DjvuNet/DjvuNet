@@ -129,7 +129,6 @@
     <Compile Include="DjvuDocument.cs" />
     <Compile Include="DjvuFormatException.cs" />
     <Compile Include="DjvuPage.cs" />
-    <Compile Include="DjvuParser.cs" />
     <Compile Include="DjvuReader.cs" />
     <Compile Include="DataChunks\IFFChunk.cs" />
     <Compile Include="DjvuWriter.cs" />
