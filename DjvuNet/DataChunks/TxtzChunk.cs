@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using DjvuNet.Compression;
-using DjvuNet.DataChunks.Enums;
+
 using DjvuNet.DataChunks.Text;
 
 namespace DjvuNet.DataChunks

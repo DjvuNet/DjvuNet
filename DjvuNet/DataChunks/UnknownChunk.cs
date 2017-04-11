@@ -9,7 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DjvuNet.Configuration;
-using DjvuNet.DataChunks.Enums;
+
 
 namespace DjvuNet.DataChunks
 {

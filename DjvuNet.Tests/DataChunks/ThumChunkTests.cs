@@ -23,12 +23,12 @@ namespace DjvuNet.DataChunks.Tests
 
                 if (doc.Data.Thumbnails?.Length > 0)
                 {
-                    var thumbs = document.RootForm.Children.Where((x) => x.ChunkType == Enums.ChunkType.Thum).ToArray();
+                    var thumbs = document.RootForm.Children.Where((x) => x.ChunkType == ChunkType.Thum).ToArray();
                     Assert.Equal<int>(doc.Data.Thumbnails.Length, thumbs.Length);
                 }
                 else
                 {
-                    var thumbs = document.RootForm.Children.Where((x) => x.ChunkType == Enums.ChunkType.Thum).ToArray();
+                    var thumbs = document.RootForm.Children.Where((x) => x.ChunkType == ChunkType.Thum).ToArray();
                     Assert.Equal<int>(0, thumbs.Length);
                 }
             }

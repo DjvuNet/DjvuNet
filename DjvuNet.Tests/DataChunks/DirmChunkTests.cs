@@ -59,9 +59,10 @@ namespace DjvuNet.DataChunks.Tests
             {
                 DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
                 DjvuNet.Tests.Util.VerifyDjvuDocumentCtor(pageCount, document);
+
                 // DirmChunk is present only in multi page documents
                 // in which root form is of DjvmChunk type
-                if (document.RootForm is DjvmChunk)
+                if (document.RootForm.ChunkType == ChunkType.Djvm)
                 {
                     DirmChunk dirm = ((DjvmChunk)document.RootForm).Dirm;
 
