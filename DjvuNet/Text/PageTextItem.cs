@@ -42,7 +42,7 @@ namespace DjvuNet.Text
 
         #region Constructors
 
-        public PageTextItem(DjvuPage page, PageTextSearch parent, TextZone zone)
+        public PageTextItem(IDjvuPage page, PageTextSearch parent, TextZone zone)
             : base(page)
         {
             Zone = zone;

@@ -74,7 +74,7 @@ namespace DjvuNet.DataChunks.Navigation
         /// <summary>
         /// Gets the page this bookmark references
         /// </summary>
-        public DjvuPage ReferencedPage { get; internal set; }
+        public IDjvuPage ReferencedPage { get; internal set; }
 
         #endregion ReferencedPage
 
@@ -83,7 +83,7 @@ namespace DjvuNet.DataChunks.Navigation
         /// <summary>
         /// Gets the document this bookmark pertains to
         /// </summary>
-        public DjvuDocument Document { get; internal set; }
+        public IDjvuDocument Document { get; internal set; }
 
         #endregion Document
 
@@ -91,7 +91,7 @@ namespace DjvuNet.DataChunks.Navigation
 
         #region Constructors
 
-        public Bookmark(DjvuReader reader, DjvuDocument document, Bookmark parent)
+        public Bookmark(IDjvuReader reader, IDjvuDocument document, Bookmark parent)
         {
             Document = document;
             Parent = parent;
@@ -100,7 +100,7 @@ namespace DjvuNet.DataChunks.Navigation
             LoadReferencedPage();
         }
 
-        public Bookmark(DjvuDocument document, Bookmark parent, string name, string url, Bookmark[] children)
+        public Bookmark(IDjvuDocument document, Bookmark parent, string name, string url, Bookmark[] children)
         {
             Document = document;
             Parent = parent;
@@ -135,7 +135,7 @@ namespace DjvuNet.DataChunks.Navigation
             {
                 pageNumber--;
 
-                if (pageNumber < 0 || pageNumber >= Document.Pages.Length)
+                if (pageNumber < 0 || pageNumber >= Document.Pages.Count)
                 {
                     throw new InvalidOperationException("Navigation URL is out of range: " + Url);
                 }
@@ -152,7 +152,7 @@ namespace DjvuNet.DataChunks.Navigation
         /// Loads the bookmark data
         /// </summary>
         /// <param name="reader"></param>
-        private void DecodeBookmarkData(DjvuReader reader)
+        private void DecodeBookmarkData(IDjvuReader reader)
         {
             int childrenCount = reader.ReadByte();
 

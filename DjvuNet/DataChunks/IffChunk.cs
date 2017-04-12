@@ -7,85 +7,53 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DjvuNet.DataChunks.Directory;
-
+using DjvuNet;
 
 namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class IFFChunk
+    public abstract class IffChunk : IDjvuNode
     {
-        #region Protected Properties
-
-        #region Reader
+        #region Public Properties
 
         /// <summary>
         /// Gets the reader for the chunk data
         /// </summary>
         //[DataMember]
-        internal DjvuReader Reader { get; set; }
-
-        #endregion Reader
-
-        #endregion Protected Properties
-
-        #region Public Properties
-
-        #region ChunkType
+        public IDjvuReader Reader { get; set; }
 
         /// <summary>
         /// Gets the chunk type
         /// </summary>
         public abstract ChunkType ChunkType { get; }
 
-        #endregion ChunkType
-
-        #region Parent
-
         /// <summary>
         /// Gets the parent for the IFF chunk
         /// </summary>
-        public IFFChunk Parent { get; internal set; }
-
-        #endregion Parent
-
-        #region Length
+        public IDjvuNode Parent { get; set; }
 
         /// <summary>
         /// Gets the length of the chunk data
         /// </summary>
-        public long Length { get; internal set; }
-
-        #endregion Length
-
-        #region ChunkID
+        public long Length { get; set; }
 
         /// <summary>
         /// Gets the chunk identifier
         /// </summary>
         public string ChunkID { get; internal set; }
 
-        #endregion ChunkID
-
-        #region Offset
-
         /// <summary>
         /// Gets the offset to the start of the chunk data
         /// </summary>
-        public long Offset { get; internal set; }
-
-        #endregion Offset
-
-        #region Name
+        public long Offset { get; set; }
 
         /// <summary>
         /// Gets the name of the chunk
         /// </summary>
         //[DataMember]
         public string Name { get { return ChunkType.ToString(); } }
-
-        #endregion Name
 
         /// <summary>
         /// True if the chunk is a sub form chunk, false otherwise
@@ -114,14 +82,16 @@ namespace DjvuNet.DataChunks
                 type == ChunkType.Navm;
         }
 
-        #region Document
-
         /// <summary>
         /// Gets the root Djvu document for the form
         /// </summary>
-        public DjvuDocument Document { get; internal set; }
+        public IDjvuDocument Document { get; internal set; }
 
-        #endregion Document
+        public bool IsInitialized { get; internal set; }
+
+        public virtual byte[] ChunkData { get; set; }
+
+        public IDjvuRootElement RootElement { get; set; }
 
         #endregion Public Properties
 
@@ -130,7 +100,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// IFFChunk parameterless constructor mainly used for testing
         /// </summary>
-        public IFFChunk() { }
+        protected IffChunk() { }
 
         /// <summary>
         /// IFFChunk constructor
@@ -140,7 +110,7 @@ namespace DjvuNet.DataChunks
         /// <param name="document"></param>
         /// <param name="chunkID"></param>
         /// <param name="length"></param>
-        public IFFChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document, 
+        public IffChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document, 
             string chunkID = "", long length = 0)
         {
             Reader = reader;
@@ -151,14 +121,20 @@ namespace DjvuNet.DataChunks
             Offset = reader.Position;
         }
 
+        public virtual void Initialize()
+        {
+            Initialize(Reader);
+        }
+
         /// <summary>
         /// Initialize allows to delay reading of IFFChunk content to the moment it is needed.
         /// </summary>
         /// <param name="reader"></param>
-        public virtual void Initialize(DjvuReader reader)
+        public virtual void Initialize(IDjvuReader reader)
         {
             reader.Position = Offset;
             ReadChunkData(reader);
+            IsInitialized = true;
         }
 
         #endregion Constructors
@@ -182,11 +158,11 @@ namespace DjvuNet.DataChunks
         /// Builds the appropriate chunk for the ID
         /// </summary>
         /// <returns></returns>
-        public static IFFChunk BuildIFFChunk(DjvuReader reader, DjvuDocument rootDocument, 
-            IFFChunk parent, ChunkType chunkType,
+        public static IffChunk BuildIFFChunk(IDjvuReader reader, IDjvuDocument rootDocument, 
+            IffChunk parent, ChunkType chunkType,
             string chunkID = "", long length = 0)
         {
-            IFFChunk result = null;
+            IffChunk result = null;
 
             switch (chunkType)
             {
@@ -272,7 +248,7 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <typeparam name="TItem"></typeparam>
         /// <returns></returns>
-        public TItem[] GetChildrenItems<TItem>() where TItem : IFFChunk
+        public TItem[] GetChildrenItems<TItem>() where TItem : IffChunk
         {
             return GetChildrenItems<TItem>(this);
         }
@@ -294,7 +270,7 @@ namespace DjvuNet.DataChunks
         /// Reads the data for the chunk
         /// </summary>
         /// <param name="reader"></param>
-        protected abstract void ReadChunkData(DjvuReader reader);
+        protected abstract void ReadChunkData(IDjvuReader reader);
 
         #endregion Protected Methods
 
@@ -306,7 +282,7 @@ namespace DjvuNet.DataChunks
         /// <typeparam name="T"></typeparam>
         /// <param name="page"></param>
         /// <returns></returns>
-        internal T[] GetChildrenItems<T>(IFFChunk page) where T : IFFChunk
+        internal T[] GetChildrenItems<T>(IffChunk page) where T : IffChunk
         {
             // Check if this is a thumbnail
             if (page is T)
@@ -323,7 +299,7 @@ namespace DjvuNet.DataChunks
             List<T> results = new List<T>();
             FormChunk form = (FormChunk)page;
 
-            foreach (IFFChunk chunk in form.Children)
+            foreach (IffChunk chunk in form.Children)
             {
                 results.AddRange(GetChildrenItems<T>(chunk));
             }

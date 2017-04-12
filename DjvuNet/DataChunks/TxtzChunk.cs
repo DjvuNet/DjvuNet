@@ -33,7 +33,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public TxtzChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public TxtzChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {

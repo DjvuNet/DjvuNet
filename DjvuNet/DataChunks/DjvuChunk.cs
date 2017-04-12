@@ -36,7 +36,7 @@ namespace DjvuNet.DataChunks
                 if (_InfoQueried)
                     return _Info;
                 else if (Children != null)
-                    _Info = (InfoChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Info);
+                    _Info = (InfoChunk)Children.FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Info);
 
                 _InfoQueried = true;
                 return _Info;
@@ -72,7 +72,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DjvuChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public DjvuChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
