@@ -24,10 +24,10 @@ namespace DjvuNet.DataChunks.Tests
                 DirmChunk dirm = ((DjvmChunk)document.RootForm).Dirm;
 
                 Assert.NotNull(dirm);
-                DirmComponent[] components = dirm.Components;
+                var components = dirm.Components;
 
                 Assert.NotNull(components);
-                Assert.Equal<int>(31, components.Length);
+                Assert.Equal<int>(31, components.Count);
             }
         }
 
@@ -43,10 +43,10 @@ namespace DjvuNet.DataChunks.Tests
 
                 Assert.NotNull(dirm);
 
-                DirmComponent[] components = dirm.Components;
+                var components = dirm.Components;
 
                 Assert.NotNull(components);
-                Assert.Equal<int>(112, components.Length);
+                Assert.Equal<int>(112, components.Count);
             }
         }
 
@@ -71,7 +71,7 @@ namespace DjvuNet.DataChunks.Tests
                     Assert.True(dirm.IsBundled ? doc.Data.Dirm.DocumentType == "bundled" : doc.Data.Dirm.DocumentType == "indirect");
 
                     var components = dirm.Components;
-                    Assert.Equal<int>(components.Length, doc.Data.Dirm.FileCount);
+                    Assert.Equal<int>(components.Count, doc.Data.Dirm.FileCount);
                 }
             }
         }

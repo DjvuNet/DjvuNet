@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class BGjpChunk : IFFChunk
+    public class BGjpChunk : IffChunk
     {
         #region Private Members
 
@@ -64,7 +64,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public BGjpChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public BGjpChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -74,7 +74,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(DjvuReader reader)
+        protected override void ReadChunkData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
 

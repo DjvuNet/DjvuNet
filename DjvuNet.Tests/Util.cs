@@ -23,7 +23,7 @@ namespace DjvuNet.Tests
         public static void VerifyDjvuDocumentCtor(int pageCount, DjvuDocument document)
         {
             VerifyDjvuDocument(pageCount, document);
-            Assert.False(document.Disposed);
+            Assert.False(document.IsDisposed);
             if (pageCount > 1)
                 Assert.NotNull(document.Directory);
             Assert.NotNull(document.ActivePage);
@@ -36,7 +36,7 @@ namespace DjvuNet.Tests
             Assert.NotNull(document.FirstPage);
             Assert.NotNull(document.LastPage);
             if (pageCount > 0)
-                Assert.Equal<int>(pageCount, document.Pages.Length);
+                Assert.Equal<int>(pageCount, document.Pages.Count);
         }
 
     }

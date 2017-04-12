@@ -24,7 +24,7 @@ namespace DjvuNet.DataChunks
         private List<ThumChunk> _Thumbnails;
         private List<DjvuChunk> _Pages;
 
-        private List<IFFChunk> _Files;
+        private List<IffChunk> _Files;
 
         #region Public Properties
 
@@ -51,7 +51,7 @@ namespace DjvuNet.DataChunks
                     return _dirmData;
                 else if (Children != null)
                 {
-                    _dirmData = (DirmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Dirm);
+                    _dirmData = (DirmChunk)Children.FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Dirm);
                     return _dirmData;
                 }
                 else
@@ -114,7 +114,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        public IReadOnlyList<IFFChunk> Files
+        public IReadOnlyList<IffChunk> Files
         {
             get
             {
@@ -124,10 +124,10 @@ namespace DjvuNet.DataChunks
                 {
                     _Files = Children.Where( x =>
                         x.ChunkType == ChunkType.Djvu || x.ChunkType == ChunkType.Djvi ||
-                        x.ChunkType == ChunkType.Thum || x.ChunkType == ChunkType.Navm).ToList<IFFChunk>();
+                        x.ChunkType == ChunkType.Thum || x.ChunkType == ChunkType.Navm).ToList<IffChunk>();
                 }
                 else
-                    _Files = new List<IFFChunk>();
+                    _Files = new List<IffChunk>();
 
                 return _Files;
             }
@@ -147,7 +147,7 @@ namespace DjvuNet.DataChunks
                 else
                 {
                     if (Children != null && Children.Length > 0)
-                        _NavmData = (NavmChunk)Children.FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Navm);
+                        _NavmData = (NavmChunk)Children.FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Navm);
                     return _NavmData;
                 }
             }
@@ -157,7 +157,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DjvmChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public DjvmChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {

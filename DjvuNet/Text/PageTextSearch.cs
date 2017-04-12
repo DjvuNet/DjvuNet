@@ -29,13 +29,13 @@ namespace DjvuNet.Text
 
         #region Constructors
 
-        public PageTextSearch(DjvuPage page, TextZone[] items)
+        public PageTextSearch(IDjvuPage page, TextZone[] items)
             : base(page)
         {
             TextItems = items.Select(x => new PageTextItem(page, this, x)).ToArray();
         }
 
-        public PageTextSearch(DjvuPage page, PageTextItem[] items)
+        public PageTextSearch(IDjvuPage page, PageTextItem[] items)
             : base(page)
         {
             TextItems = items;

@@ -40,7 +40,7 @@ namespace DjvuNet
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjvuPage : INotifyPropertyChanged, IDisposable
+    public class DjvuPage : INotifyPropertyChanged, IDisposable, IDjvuPage
     {
         
         #region Private Members
@@ -65,12 +65,12 @@ namespace DjvuNet
 
         #region Thumbnail
 
-        private TH44Chunk _thumbnail;
+        private ThumChunk _thumbnail;
 
         /// <summary>
         /// Gets the thumbnail for the page
         /// </summary>
-        public TH44Chunk Thumbnail
+        public ThumChunk Thumbnail
         {
             get { return _thumbnail; }
 
@@ -111,21 +111,21 @@ namespace DjvuNet
 
         #region IncludedItems
 
-        private DjviChunk[] _includedItems;
+        private List<DjviChunk> _Includes;
 
         /// <summary>
         /// Gets the included items
         /// </summary>
-        public DjviChunk[] IncludedItems
+        public IReadOnlyList<DjviChunk> Includes
         {
-            get { return _includedItems; }
+            get { return _Includes; }
 
             internal set
             {
-                if (_includedItems != value)
+                if (_Includes != value)
                 {
-                    _includedItems = value;
-                    OnPropertyChanged(nameof(IncludedItems));
+                    _Includes = (List<DjviChunk>) value;
+                    OnPropertyChanged(nameof(Includes));
                 }
             }
         }
@@ -169,7 +169,7 @@ namespace DjvuNet
                 if (_info == null)
                 {
                     var chunk = PageForm.Children
-                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Info);
+                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Info);
                     _info = chunk as InfoChunk;
                     if (_info != null)
                         OnPropertyChanged(nameof(Info));
@@ -279,7 +279,7 @@ namespace DjvuNet
                 {
                     // Get the first chunk if present
                     var chunk = (SjbzChunk)PageForm.Children
-                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.Sjbz);
+                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Sjbz);
 
                     if (chunk != null)
                     {
@@ -308,7 +308,7 @@ namespace DjvuNet
                 if (_foregroundIWPixelMap == null)
                 {
                     var chunk = (FG44Chunk)PageForm.Children
-                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.FG44);
+                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.FG44);
 
                     if (chunk != null)
                     {
@@ -337,7 +337,7 @@ namespace DjvuNet
                 if (_backgroundIWPixelMap == null)
                 {
                     var chunk = (BG44Chunk)PageForm.Children
-                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.BG44);
+                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.BG44);
 
                     if (chunk != null)
                     {
@@ -368,7 +368,7 @@ namespace DjvuNet
                     DjvmChunk root = Document.RootForm as DjvmChunk;
                     // TODO - verify if tests or this code is failing to handle palette correctly
                     FGbzChunk result = (FGbzChunk)PageForm.Children
-                        .FirstOrDefault<IFFChunk>(x => x.ChunkType == ChunkType.FGbz);
+                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.FGbz);
 
                     _foregroundPalette = result?.Palette;
                     if (_foregroundPalette != null)
@@ -551,13 +551,13 @@ namespace DjvuNet
         #region Constructors
 
         public DjvuPage(int pageNumber, DjvuDocument document, DirmComponent header, 
-            TH44Chunk thumbnail, DjviChunk[] includedItems, DjvuChunk form)
+            ThumChunk thumbnail, List<DjviChunk> includedItems, DjvuChunk form)
         {
             PageNumber = pageNumber;
             Document = document;
             Header = header;
             Thumbnail = thumbnail;
-            IncludedItems = includedItems;
+            Includes = includedItems;
             PageForm = form;
             PropertyChanged += DjvuPage_PropertyChanged;
 
@@ -737,7 +737,8 @@ namespace DjvuNet
         public System.Drawing.Bitmap ExtractThumbnailImage()
         {
             if (Thumbnail != null)
-                return Thumbnail.Image;
+                return ((TH44Chunk)Thumbnail.Children
+                    .Where(x => x.ChunkType == ChunkType.TH44).First()).Image;
 
             var result = BuildImage();
             var scaleAmount = (double)128 / result.Width;
@@ -937,9 +938,9 @@ namespace DjvuNet
         /// </returns>
         public unsafe System.Drawing.Bitmap BuildImage(int subsample = 1)
         {
-            ///
-            /// TODO Fix image components size mismatches.
-            ///
+            //
+            // TODO Fix image components size mismatches.
+            //
 
             Verify.SubsampleRange(subsample);
 

@@ -8,6 +8,6 @@ namespace DjvuNet.Parser
 {
     public interface IAbstractDocumentTree
     {
-        IDocumentRootElement RootForm { get; }
+        IDjvuRootElement RootForm { get; }
     }
 }

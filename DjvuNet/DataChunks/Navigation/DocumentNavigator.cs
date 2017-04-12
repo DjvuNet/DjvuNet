@@ -46,9 +46,9 @@ namespace DjvuNet.DataChunks.Navigation
         {
             List<Bookmark> bookmarks = new List<Bookmark>();
 
-            for (int x = 0; x < document.Pages.Length; x++)
+            for (int x = 0; x < document.Pages.Count; x++)
             {
-                DjvuPage page = document.Pages[x];
+                IDjvuPage page = document.Pages[x];
                 int pageNum = x + 1;
                 bookmarks.Add(new Bookmark(document, null, 
                     string.Format("Page {0}", pageNum), string.Format("#{0}", pageNum), new Bookmark[0]));

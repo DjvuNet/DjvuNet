@@ -8,7 +8,7 @@ namespace DjvuNet.Parser
 {
     public class AbstractDocumentTree : IAbstractDocumentTree
     {
-        public IDocumentRootElement RootForm
+        public IDjvuRootElement RootForm
         {
             get
             {

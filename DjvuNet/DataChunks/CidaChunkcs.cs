@@ -13,7 +13,7 @@ namespace DjvuNet.DataChunks
     /// CIDa chunk was supported till version 3.23 - 2002 July.
     /// Function is unknown and all it's content is skipped.
     /// </summary>
-    public class CidaChunk : IFFChunk
+    public class CidaChunk : IffChunk
     {
         #region Private Members
 
@@ -34,7 +34,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public CidaChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public CidaChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -48,7 +48,7 @@ namespace DjvuNet.DataChunks
         /// Skip the data bytes per IFF specification
         /// </summary>
         /// <param name="reader"></param>
-        protected override void ReadChunkData(DjvuReader reader)
+        protected override void ReadChunkData(IDjvuReader reader)
         {
             reader.Position += Length;
         }

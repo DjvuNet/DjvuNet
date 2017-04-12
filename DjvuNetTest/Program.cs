@@ -99,7 +99,7 @@ namespace DjvuNetTest
         }
 
         private static void BenchmarkBuildPageImageCall(int testsToSkip, long[] elapsed, int i, int docNo, 
-            Stopwatch watch, string fileName, DjvuPage page, int imageNo = 1)
+            Stopwatch watch, string fileName, IDjvuPage page, int imageNo = 1)
         {
             watch.Restart();
             using (System.Drawing.Bitmap bmp = page.BuildPageImage())

@@ -14,7 +14,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class InfoChunk : IFFChunk
+    public class InfoChunk : IffChunk
     {
         #region Public Properties
 
@@ -94,7 +94,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public InfoChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public InfoChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -104,7 +104,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(DjvuReader reader)
+        protected override void ReadChunkData(IDjvuReader reader)
         {
             Width = reader.ReadUInt16BigEndian();
             Height = reader.ReadUInt16BigEndian();

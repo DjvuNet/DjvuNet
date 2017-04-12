@@ -14,7 +14,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class SmmrChunk : IFFChunk
+    public class SmmrChunk : IffChunk
     {
         #region Public Properties
 
@@ -31,7 +31,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public SmmrChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public SmmrChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -41,7 +41,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(DjvuReader reader)
+        protected override void ReadChunkData(IDjvuReader reader)
         {
             // Need to figure out the decoding for the MMR format
             throw new NotImplementedException();
