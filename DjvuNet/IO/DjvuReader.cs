@@ -19,16 +19,16 @@ namespace DjvuNet
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjvuReader : BinaryReader
+    public class DjvuReader : BinaryReader, IDjvuReader
     {
         #region Private Members
 
         /// <summary>
         /// Full path to the djvu file
         /// </summary>
-        private readonly string _location;
+        private readonly string _Location;
 
-        internal Encoding _currentEncoding;
+        internal Encoding _CurrentEncoding;
 
         #endregion Private Members
 
@@ -92,7 +92,7 @@ namespace DjvuNet
         public DjvuReader(string location)
             : base(new FileStream(location, FileMode.Open, FileAccess.Read, FileShare.Read))
         {
-            _location = location;
+            _Location = location;
         }
 
         #endregion Constructors
@@ -338,10 +338,10 @@ namespace DjvuNet
                 byte[] test = stream.GetBuffer();
                 if (enc == null)
                 {
-                    if (_currentEncoding != null)
-                        enc = _currentEncoding;
+                    if (_CurrentEncoding != null)
+                        enc = _CurrentEncoding;
                     else
-                        enc = _currentEncoding = new UTF8Encoding();
+                        enc = _CurrentEncoding = new UTF8Encoding();
                 }
                 return enc.GetString(test, 0, length);
             }
@@ -478,8 +478,8 @@ namespace DjvuNet
             // TODO Get rid of not properly synchronized clones or synchronize readers
 
             // Do a deep clone with new BaseStream
-            if (_location != null)
-                newReader = new DjvuReader(_location);
+            if (_Location != null)
+                newReader = new DjvuReader(_Location);
             else
             {
                 MemoryStream stream = new MemoryStream((int)BaseStream.Length);

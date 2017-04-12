@@ -68,12 +68,12 @@ namespace DjvuNet.Tests
                 {
                     throw new AggregateException(
                         $"Text_Theory001 error with test file {filePath}\nExpected page count:" + 
-                        $" {pageCount}\nResult page count: {document.Pages.Length}", ex);
+                        $" {pageCount}\nResult page count: {document.Pages.Count}", ex);
                 }
             }
         }
 
-        private static void TestPageText(string expectedValue, DjvuPage page)
+        private static void TestPageText(string expectedValue, IDjvuPage page)
         {
             var text = page.Text;
             if (expectedValue != null)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Moq;
 using Xunit;
 
 namespace DjvuNet.Tests
@@ -414,6 +415,132 @@ namespace DjvuNet.Tests
             using (DjvuDocument document = new DjvuDocument($"{Util.RepoRoot}artifacts\\test030C.djvu"))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
+            }
+        }
+
+        [Fact]
+        public void IsDjvuDocument_String001()
+        {
+            string errorPath = "xyzzyx";
+            Assert.Throws<FileNotFoundException>(() => DjvuDocument.IsDjvuDocument(errorPath));
+        }
+
+        [Fact]
+        public void IsDjvuDocument_String002()
+        {
+            string errorPath = " ";
+            Assert.Throws<ArgumentException>("filePath", () => DjvuDocument.IsDjvuDocument(errorPath));
+        }
+
+        [Fact]
+        public void IsDjvuDocument_String003()
+        {
+            string errorPath = null;
+            Assert.Throws<ArgumentNullException>("filePath", () => DjvuDocument.IsDjvuDocument(errorPath));
+        }
+
+        [Fact]
+        public void IsDjvuDocument_String004()
+        {
+            string filePath = Path.GetTempFileName() + "1.djvu";
+            FileStream fs = null;
+            try
+            {
+                try
+                {
+                    fs = File.Create(filePath);
+                    fs.Write(DjvuDocument.MagicBuffer, 0, DjvuDocument.MagicBuffer.Length);
+                    fs.Write(DjvuDocument.MagicBuffer, 0, DjvuDocument.MagicBuffer.Length);
+                    fs.WriteByte(0x4e);
+                    fs.Flush();
+                }
+                finally
+                {
+                    fs.Close();
+                }
+
+                bool result = DjvuDocument.IsDjvuDocument(filePath);
+                Assert.True(result);
+            }
+            finally
+            {
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+        }
+
+        [Fact]
+        public void IsDjvuDocument_String005()
+        {
+            string filePath = Path.GetTempFileName() + "2.djvu";
+            FileStream fs = null;
+            try
+            {
+                try
+                {
+                    fs = File.Create(filePath);
+                    byte[] buffer = new byte[DjvuDocument.MagicBuffer.Length];
+                    Buffer.BlockCopy(DjvuDocument.MagicBuffer, 0, buffer, 0, buffer.Length);
+                    Array.Reverse(buffer);
+                    fs.Write(buffer, 0, buffer.Length);
+                    fs.Write(buffer, 0, buffer.Length);
+                    fs.WriteByte(0x4e);
+                    fs.Flush();
+                }
+                finally
+                {
+                    fs.Close();
+                }
+
+                bool result = DjvuDocument.IsDjvuDocument(filePath);
+                Assert.False(result);
+            }
+            finally
+            {
+                if (File.Exists(filePath))
+                    File.Delete(filePath);
+            }
+        }
+
+        [Fact]
+        public void IsDjvuDocument_Stream001()
+        {
+            Stream stream = null;
+            Assert.Throws<ArgumentNullException>("stream", () => DjvuDocument.IsDjvuDocument(stream));
+        }
+
+        [Fact]
+        public void IsDjvuDocument_Stream002()
+        {
+            StreamMock stream = new StreamMock();
+            Assert.Throws<ArgumentException>("stream", () => DjvuDocument.IsDjvuDocument(stream));
+
+        }
+
+        [Fact]
+        public void IsDjvuDocument_Stream003()
+        {
+            byte[] buffer = DjvuDocument.MagicBuffer;
+            byte[] target = new byte[buffer.Length * 3];
+            Buffer.BlockCopy(buffer, 0, target, 0, buffer.Length);
+            using (MemoryStream stream = new MemoryStream(target))
+            {
+                bool result = DjvuDocument.IsDjvuDocument(stream);
+                Assert.True(result);
+            }
+        }
+
+        [Fact]
+        public void IsDjvuDocument_Stream004()
+        {
+            byte[] buffer = DjvuDocument.MagicBuffer;
+            byte[] target = new byte[buffer.Length * 3];
+            Buffer.BlockCopy(buffer, 0, target, 0, buffer.Length);
+            target[2] = (byte)(target[2] - 0x01);
+            using (MemoryStream stream = new MemoryStream(target))
+            {
+                bool result = DjvuDocument.IsDjvuDocument(stream);
+                Assert.False(result);
             }
         }
     }

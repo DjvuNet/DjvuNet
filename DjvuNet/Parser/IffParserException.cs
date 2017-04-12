@@ -11,13 +11,13 @@ namespace DjvuNet
     /// IFFParserException is thrown to indicate an error in parsing IFF 85 formatting
     /// of DjVu file which is not related to DjVu specific formatting.
     /// </summary>
-    public class IFFParserException : System.FormatException
+    public class IffParserException : System.FormatException
     {
 
         /// <summary>
         /// Initializes a new instance of the DjvuNet.IFFParserException class.
         /// </summary>
-        public IFFParserException()
+        public IffParserException()
         {
         }
 
@@ -28,7 +28,7 @@ namespace DjvuNet
         /// <parameter name="message">
         /// The message that describes the error.
         /// </param>
-        public IFFParserException(string message) : base(message)
+        public IffParserException(string message) : base(message)
         {
         }
 
@@ -44,7 +44,7 @@ namespace DjvuNet
         /// parameter is not a null reference (Nothing in Visual Basic), the current exception
         /// is raised in a catch block that handles the inner exception.
         /// </param>    
-        public IFFParserException(string message, Exception innerException)
+        public IffParserException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
@@ -58,7 +58,7 @@ namespace DjvuNet
         /// <parameter name="context">
         /// The contextual information about the source or destination.
         /// </parameter>    
-        protected IFFParserException(SerializationInfo info, StreamingContext context):
+        protected IffParserException(SerializationInfo info, StreamingContext context):
             base (info, context)
         {
         }

@@ -10,6 +10,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)DjvuJsonDocument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mocks\IStream.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Mocks\StreamMock.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SynchronizedBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestExecution\AppVeyorTestManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestExecution\ITestManager.cs" />

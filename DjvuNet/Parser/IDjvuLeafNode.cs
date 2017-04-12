@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
-
-namespace DjvuNet.Parser
+namespace DjvuNet
 {
-    public interface IDocumentElement : IDocumentNode
+    interface IDjvuLeafNode : IDjvuNode
     {
     }
 }
