@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 
 
-namespace DjvuNet.Parser
+namespace DjvuNet
 {
-    public interface IDocumentRootElement : IDocumentElement
+    public interface IDjvuRootElement : IDjvuElement
     {
     }
+
 }

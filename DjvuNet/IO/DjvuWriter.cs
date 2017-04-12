@@ -8,16 +8,16 @@ using DjvuNet.Compression;
 
 namespace DjvuNet
 {
-    public class DjvuWriter : BinaryWriter
+    public class DjvuWriter : BinaryWriter, IDjvuWriter
     {
         #region Private Members
 
         /// <summary>
         /// Full path to the djvu file
         /// </summary>
-        private readonly string _location;
+        private readonly string _Location;
 
-        internal Encoding _currentEncoding;
+        internal Encoding _CurrentEncoding;
 
         #endregion Private Members
 
@@ -60,7 +60,7 @@ namespace DjvuNet
         public DjvuWriter(string filePath)
             : base(GetFile(filePath))
         {
-            _location = filePath;
+            _Location = filePath;
         }
 
         #endregion Constructors
