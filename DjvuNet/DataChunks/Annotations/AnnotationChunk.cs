@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks.Annotations
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class AnnotationChunk : IffChunk
+    public abstract class AnnotationChunk : DjvuNode
     {
         #region Private Members
 
@@ -56,7 +56,7 @@ namespace DjvuNet.DataChunks.Annotations
 
         #region Constructors
 
-        public AnnotationChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public AnnotationChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -76,7 +76,7 @@ namespace DjvuNet.DataChunks.Annotations
         /// Reads in the chunk data
         /// </summary>
         /// <param name="reader"></param>
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadChunkData(IDjvuReader reader)
         {
             // Save the current position for delayed decoding
             _dataLocation = reader.Position;

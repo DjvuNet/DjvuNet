@@ -95,7 +95,7 @@
     <Compile Include="DataChunks\BG44Chunk.cs" />
     <Compile Include="DataChunks\BGjpChunk.cs" />
     <Compile Include="DataChunks\CidaChunkcs.cs" />
-    <Compile Include="DataChunks\IffChunk.cs" />
+    <Compile Include="DataChunks\DjvuNode.cs" />
     <Compile Include="DataChunks\Navigation\DocumentNavigator.cs" />
     <Compile Include="DataChunks\Navigation\Interfaces\INavigation.cs" />
     <Compile Include="DataChunks\UnknownChunk.cs" />

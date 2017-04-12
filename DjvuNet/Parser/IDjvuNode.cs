@@ -13,11 +13,15 @@ namespace DjvuNet
 
         string ChunkID { get; }
 
-        long Offset { get; set; }
+        long DataOffset { get; set; }
+
+        long NodeOffset { get; set; }
 
         long Length { get; set; }
 
         void Initialize();
+
+        void Initialize(IDjvuReader reader);
 
         bool IsInitialized { get; }
 
@@ -25,12 +29,14 @@ namespace DjvuNet
 
         string Name { get; }
 
-        IDjvuNode Parent { get; set; }
+        IDjvuElement Parent { get; set; }
         
         IDjvuRootElement RootElement { get; set; }
         
         IDjvuDocument Document { get; }
         
-        IDjvuReader Reader { get; } 
+        IDjvuReader Reader { get; }
+
+        void ReadChunkData(IDjvuReader reader); 
     }
 }

@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class NavmChunk : IffChunk, INavigation
+    public class NavmChunk : DjvuNode, INavigation
     {
         #region Private Members
 
@@ -65,7 +65,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public NavmChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public NavmChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -75,7 +75,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadChunkData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
 

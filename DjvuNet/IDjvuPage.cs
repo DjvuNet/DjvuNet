@@ -43,7 +43,7 @@ namespace DjvuNet
 
         bool IsPageImageCached { get; set; }
 
-        FormChunk PageForm { get; }
+        DjvuFormElement PageForm { get; }
 
         int PageNumber { get; }
 

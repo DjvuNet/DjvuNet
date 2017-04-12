@@ -65,12 +65,12 @@ namespace DjvuNet
             }
         }
 
-        private FormChunk _rootForm;
+        private DjvuFormElement _rootForm;
 
         /// <summary>
         /// Gets the root form in the document
         /// </summary>
-        public FormChunk RootForm
+        public DjvuFormElement RootForm
         {
             get { return _rootForm; }
 
@@ -533,15 +533,15 @@ namespace DjvuNet
             }
         }
 
-        public List<T> GetRootFormChildren<T>() where T : IffChunk
+        public List<T> GetRootFormChildren<T>() where T : DjvuNode
         {
             if (RootForm.ChunkType == ChunkType.Djvu)
                 return new List<T>(new T[] { RootForm as T });
 
             string id = typeof(T).Name.Replace("Chunk", null);
-            ChunkType chunkType = IffChunk.GetChunkType(id);
-            return RootForm.Children.Where<IffChunk>(x => x.ChunkType == chunkType)
-                .ToList<IffChunk>().ConvertAll<T>(x => { return (T)x; });
+            ChunkType chunkType = DjvuNode.GetChunkType(id);
+            return RootForm.Children.Where<IDjvuNode>(x => x.ChunkType == chunkType)
+                .ToList<IDjvuNode>().ConvertAll<T>(x => { return (T)x; });
         }
 
         /// <summary>
@@ -603,9 +603,9 @@ namespace DjvuNet
         /// <param name="reader"></param>
         internal void DecodeRootForm(DjvuReader reader)
         {
-            _rootForm = FormChunk.GetRootForm(reader, null, this);
+            _rootForm = DjvuFormElement.GetRootForm(reader, null, this);
             _rootForm.Initialize(reader);
-            foreach (IffChunk chunk in _rootForm.Children)
+            foreach (IDjvuNode chunk in _rootForm.Children)
                 chunk.Initialize(reader);
         }
 

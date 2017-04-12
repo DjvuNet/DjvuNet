@@ -11,7 +11,7 @@ namespace DjvuNet.DataChunks.Text
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class TextChunk : IffChunk
+    public abstract class TextChunk : DjvuNode
     {
         #region Private Members
 
@@ -126,7 +126,7 @@ namespace DjvuNet.DataChunks.Text
 
         #region Constructors
 
-        public TextChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public TextChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -146,7 +146,7 @@ namespace DjvuNet.DataChunks.Text
         /// Read the chunk data
         /// </summary>
         /// <param name="reader"></param>
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadChunkData(IDjvuReader reader)
         {
             // Save the current position for delayed decoding
             _dataLocation = reader.Position;

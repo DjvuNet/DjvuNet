@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class FGbzChunk : IffChunk
+    public class FGbzChunk : DjvuNode
     {
         #region Private Members
 
@@ -86,7 +86,7 @@ namespace DjvuNet.DataChunks
         {
         }
 
-        public FGbzChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public FGbzChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -96,7 +96,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadChunkData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
             _firstByte = reader.ReadByte();

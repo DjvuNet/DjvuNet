@@ -17,7 +17,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class SjbzChunk : IffChunk
+    public class SjbzChunk : DjvuNode
     {
         #region Private Members
 
@@ -66,7 +66,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public SjbzChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public SjbzChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -76,7 +76,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadChunkData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
 
@@ -112,11 +112,11 @@ namespace DjvuNet.DataChunks
                        
                         // TODO - verify selection strategy which seems slow and not taking into account dictionary names 
                         var includeForm = Document.GetRootFormChildren<DjviChunk>()
-                            .Where(x => x.Children.FirstOrDefault<IffChunk>(d => d.ChunkType == ChunkType.Djbz) != null)
+                            .Where(x => x.Children.FirstOrDefault<IDjvuNode>(d => d.ChunkType == ChunkType.Djbz) != null)
                             .FirstOrDefault<DjviChunk>();
                         
                         var includeItem = includeForm.Children
-                            .Where<IffChunk>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
+                            .Where<IDjvuNode>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
 
                         if (includeItem != null)
                         {

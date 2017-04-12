@@ -14,7 +14,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjvuChunk : FormChunk
+    public class DjvuChunk : DjvuFormElement
     {
 
         private InfoChunk _Info;
@@ -36,7 +36,7 @@ namespace DjvuNet.DataChunks
                 if (_InfoQueried)
                     return _Info;
                 else if (Children != null)
-                    _Info = (InfoChunk)Children.FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Info);
+                    _Info = (InfoChunk)Children.FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Info);
 
                 _InfoQueried = true;
                 return _Info;
@@ -72,7 +72,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DjvuChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public DjvuChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
