@@ -134,12 +134,12 @@ namespace DjvuNet
 
         #region PageForm
 
-        private FormChunk _pageForm;
+        private DjvuFormElement _pageForm;
 
         /// <summary>
         /// Gets the form chunk for the page
         /// </summary>
-        public FormChunk PageForm
+        public DjvuFormElement PageForm
         {
             get { return _pageForm; }
 
@@ -169,7 +169,7 @@ namespace DjvuNet
                 if (_info == null)
                 {
                     var chunk = PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Info);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Info);
                     _info = chunk as InfoChunk;
                     if (_info != null)
                         OnPropertyChanged(nameof(Info));
@@ -279,7 +279,7 @@ namespace DjvuNet
                 {
                     // Get the first chunk if present
                     var chunk = (SjbzChunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Sjbz);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Sjbz);
 
                     if (chunk != null)
                     {
@@ -308,7 +308,7 @@ namespace DjvuNet
                 if (_foregroundIWPixelMap == null)
                 {
                     var chunk = (FG44Chunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.FG44);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.FG44);
 
                     if (chunk != null)
                     {
@@ -337,7 +337,7 @@ namespace DjvuNet
                 if (_backgroundIWPixelMap == null)
                 {
                     var chunk = (BG44Chunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.BG44);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.BG44);
 
                     if (chunk != null)
                     {
@@ -368,7 +368,7 @@ namespace DjvuNet
                     DjvmChunk root = Document.RootForm as DjvmChunk;
                     // TODO - verify if tests or this code is failing to handle palette correctly
                     FGbzChunk result = (FGbzChunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.FGbz);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.FGbz);
 
                     _foregroundPalette = result?.Palette;
                     if (_foregroundPalette != null)

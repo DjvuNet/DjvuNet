@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DirmChunk : IffChunk
+    public class DirmChunk : DjvuNode
     {
         #region Private Members
 
@@ -82,7 +82,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DirmChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public DirmChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -92,9 +92,9 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadChunkData(IDjvuReader reader)
         {
-            reader.Position = Offset;
+            reader.Position = DataOffset;
             byte flagByte = reader.ReadByte();
 
             // B[7]
@@ -130,7 +130,7 @@ namespace DjvuNet.DataChunks
 
             _dataLocation = reader.Position;
             _isInitialized = false;
-            _compressedSectionLength = (int)(Length - (reader.Position - Offset - 12));
+            _compressedSectionLength = (int)(Length - (reader.Position - DataOffset - 12));
 
             // Skip the bytes since this section is delayed read
             reader.Position += _compressedSectionLength;

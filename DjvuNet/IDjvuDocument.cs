@@ -35,13 +35,13 @@ namespace DjvuNet
 
         IDjvuPage PreviousPage { get; }
 
-        FormChunk RootForm { get; }
+        DjvuFormElement RootForm { get; }
 
         event PropertyChangedEventHandler PropertyChanged;
 
         void Dispose();
 
-        List<T> GetRootFormChildren<T>() where T : IffChunk;
+        List<T> GetRootFormChildren<T>() where T : DjvuNode;
 
         void Load(string filePath, int identifier = 0);
     }

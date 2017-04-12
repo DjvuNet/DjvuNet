@@ -14,8 +14,15 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class IffChunk : IDjvuNode
+    public abstract class DjvuNode : IDjvuNode
     {
+        /// <summary>
+        /// Holds a value indicating constant for each Node difference
+        /// between DataOffset and NodeOffset. Most nodes will have it
+        /// at 8 bytes, while FORM type nodes (elements) will have 12 bytes.
+        /// </summary>
+        protected virtual int OffsetDiff { get { return 8; } }
+
         #region Public Properties
 
         /// <summary>
@@ -32,7 +39,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the parent for the IFF chunk
         /// </summary>
-        public IDjvuNode Parent { get; set; }
+        public virtual IDjvuElement Parent { get; set; }
 
         /// <summary>
         /// Gets the length of the chunk data
@@ -45,9 +52,15 @@ namespace DjvuNet.DataChunks
         public string ChunkID { get; internal set; }
 
         /// <summary>
-        /// Gets the offset to the start of the chunk data
+        /// Gets the offset in the file to the start of the chunk data
         /// </summary>
-        public long Offset { get; set; }
+        public virtual long DataOffset { get; set; }
+
+        /// <summary>
+        /// Gets the offset in the file to the start of the chunk.
+        /// The difference 
+        /// </summary>
+        public virtual long NodeOffset { get; set; }
 
         /// <summary>
         /// Gets the name of the chunk
@@ -58,10 +71,19 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// True if the chunk is a sub form chunk, false otherwise
         /// </summary>
-        public bool IsFormChunk (ChunkType type)
+        public static bool IsFormChunk(ChunkType type)
         {
-            return type == ChunkType.Djvu || type == ChunkType.Djvi || 
-                    type == ChunkType.Thum || type == ChunkType.Djvm || type == ChunkType.Form;
+            switch (type)
+            {
+                case ChunkType.Djvu:
+                case ChunkType.Djvi:
+                case ChunkType.Thum:
+                case ChunkType.Djvm:
+                case ChunkType.Form:
+                    return true;
+                default:
+                    return false;
+            }
         }
         
         /// <summary>
@@ -73,25 +95,57 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public bool IsRootFormChild(ChunkType type)
+        public static bool IsRootFormChild(ChunkType type, ChunkType rootType = ChunkType.Djvm)
         {
+            if (rootType == ChunkType.Djvm)
+            {
+                switch (type)
+                {
+                    case ChunkType.Djvu:
+                    case ChunkType.Djvi:
+                    case ChunkType.Thum:
+                    case ChunkType.Form:
+                    case ChunkType.Dirm:
+                    case ChunkType.Navm:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+            else if (rootType == ChunkType.Djvu)
+            {
+                switch (type)
+                {
+                    case ChunkType.Djvu:
+                    case ChunkType.Djvi:
+                    case ChunkType.Djvm:
+                    case ChunkType.Thum:
+                    case ChunkType.Form:
+                    case ChunkType.Dirm:
+                    case ChunkType.Navm:
+                        return false;
+                }
+            }
+
+            // TODO Implement other single file docs??? 
+
             // DJVM form is the only chunk type which is always in document root
             if (type == ChunkType.Djvm) return false;
 
             return IsFormChunk(type) || type == ChunkType.Dirm || 
-                type == ChunkType.Navm;
+                type == ChunkType.Navm ;
         }
+
+        public virtual bool IsInitialized { get; internal set; }
+
+        public virtual byte[] ChunkData { get; set; }
+
+        public IDjvuRootElement RootElement { get; set; }
 
         /// <summary>
         /// Gets the root Djvu document for the form
         /// </summary>
         public IDjvuDocument Document { get; internal set; }
-
-        public bool IsInitialized { get; internal set; }
-
-        public virtual byte[] ChunkData { get; set; }
-
-        public IDjvuRootElement RootElement { get; set; }
 
         #endregion Public Properties
 
@@ -100,7 +154,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// IFFChunk parameterless constructor mainly used for testing
         /// </summary>
-        protected IffChunk() { }
+        protected DjvuNode() { }
 
         /// <summary>
         /// IFFChunk constructor
@@ -110,7 +164,7 @@ namespace DjvuNet.DataChunks
         /// <param name="document"></param>
         /// <param name="chunkID"></param>
         /// <param name="length"></param>
-        public IffChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document, 
+        public DjvuNode(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document, 
             string chunkID = "", long length = 0)
         {
             Reader = reader;
@@ -118,7 +172,7 @@ namespace DjvuNet.DataChunks
             Document = document;
             Length = length;
             ChunkID = chunkID;
-            Offset = reader.Position;
+            DataOffset = reader.Position;
         }
 
         public virtual void Initialize()
@@ -132,7 +186,7 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         public virtual void Initialize(IDjvuReader reader)
         {
-            reader.Position = Offset;
+            reader.Position = DataOffset;
             ReadChunkData(reader);
             IsInitialized = true;
         }
@@ -158,11 +212,11 @@ namespace DjvuNet.DataChunks
         /// Builds the appropriate chunk for the ID
         /// </summary>
         /// <returns></returns>
-        public static IffChunk BuildIFFChunk(IDjvuReader reader, IDjvuDocument rootDocument, 
-            IffChunk parent, ChunkType chunkType,
+        public static IDjvuNode BuildIffChunk(IDjvuReader reader, IDjvuDocument rootDocument,
+            IDjvuElement parent, ChunkType chunkType,
             string chunkID = "", long length = 0)
         {
-            IffChunk result = null;
+            IDjvuNode result = null;
 
             switch (chunkType)
             {
@@ -248,7 +302,7 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <typeparam name="TItem"></typeparam>
         /// <returns></returns>
-        public TItem[] GetChildrenItems<TItem>() where TItem : IffChunk
+        public TItem[] GetChildrenItems<TItem>() where TItem : DjvuNode
         {
             return GetChildrenItems<TItem>(this);
         }
@@ -259,7 +313,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         public override string ToString()
         {
-            return $"{this.GetType().Name} {{ Name: {Name}; ID: {ChunkID} Offset: {Offset} Length: {Length} }}";
+            return $"{this.GetType().Name} {{ Name: {Name}; ID: {ChunkID} Offset: {DataOffset} Length: {Length} }}";
         }
 
         #endregion Public Methods
@@ -270,7 +324,7 @@ namespace DjvuNet.DataChunks
         /// Reads the data for the chunk
         /// </summary>
         /// <param name="reader"></param>
-        protected abstract void ReadChunkData(IDjvuReader reader);
+        public abstract void ReadChunkData(IDjvuReader reader);
 
         #endregion Protected Methods
 
@@ -282,7 +336,7 @@ namespace DjvuNet.DataChunks
         /// <typeparam name="T"></typeparam>
         /// <param name="page"></param>
         /// <returns></returns>
-        internal T[] GetChildrenItems<T>(IffChunk page) where T : IffChunk
+        internal T[] GetChildrenItems<T>(IDjvuNode page) where T : DjvuNode
         {
             // Check if this is a thumbnail
             if (page is T)
@@ -291,15 +345,15 @@ namespace DjvuNet.DataChunks
             }
 
             // No items if not form
-            if (page is FormChunk == false)
+            if (page is DjvuFormElement == false)
             {
                 return new T[0];
             }
 
             List<T> results = new List<T>();
-            FormChunk form = (FormChunk)page;
+            DjvuFormElement form = (DjvuFormElement)page;
 
-            foreach (IffChunk chunk in form.Children)
+            foreach (IDjvuNode chunk in form.Children)
             {
                 results.AddRange(GetChildrenItems<T>(chunk));
             }

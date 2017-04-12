@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class TH44Chunk : IffChunk
+    public class TH44Chunk : DjvuNode
     {
         #region Private Members
 
@@ -85,7 +85,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public TH44Chunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public TH44Chunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -96,7 +96,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadChunkData(IDjvuReader reader)
         {
             // Save the data location for reading later
             _dataLocation = reader.Position;
