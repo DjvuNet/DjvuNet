@@ -17,7 +17,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class UnknownChunk : IFFChunk
+    public class UnknownChunk : IffChunk
     {
         #region Public Properties
 
@@ -37,7 +37,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the raw chunk data
         /// </summary>
-        public DjvuReader Data
+        public IDjvuReader Data
         {
             get
             {
@@ -54,7 +54,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public UnknownChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public UnknownChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -69,7 +69,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(DjvuReader reader)
+        protected override void ReadChunkData(IDjvuReader reader)
         {
             // Skip the data bytes which are delayed read
             reader.Position += Length;

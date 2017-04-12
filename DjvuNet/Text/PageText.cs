@@ -24,7 +24,7 @@ namespace DjvuNet.Text
         /// <summary>
         /// Gets the page for the text items
         /// </summary>
-        public DjvuPage Page { get; internal set; }
+        public IDjvuPage Page { get; internal set; }
 
         #endregion Page
 
@@ -32,7 +32,7 @@ namespace DjvuNet.Text
 
         #region Constructors
 
-        public PageText(DjvuPage page)
+        public PageText(IDjvuPage page)
         {
             Page = page;
         }

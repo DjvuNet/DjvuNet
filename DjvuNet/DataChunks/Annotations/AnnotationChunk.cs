@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks.Annotations
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class AnnotationChunk : IFFChunk
+    public abstract class AnnotationChunk : IffChunk
     {
         #region Private Members
 
@@ -56,7 +56,7 @@ namespace DjvuNet.DataChunks.Annotations
 
         #region Constructors
 
-        public AnnotationChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public AnnotationChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -70,13 +70,13 @@ namespace DjvuNet.DataChunks.Annotations
         /// Gets the reader for the annotation data
         /// </summary>
         /// <returns></returns>
-        protected abstract DjvuReader GetAnnotationDataReader(long position);
+        protected abstract IDjvuReader GetAnnotationDataReader(long position);
 
         /// <summary>
         /// Reads in the chunk data
         /// </summary>
         /// <param name="reader"></param>
-        protected override void ReadChunkData(DjvuReader reader)
+        protected override void ReadChunkData(IDjvuReader reader)
         {
             // Save the current position for delayed decoding
             _dataLocation = reader.Position;
@@ -96,7 +96,7 @@ namespace DjvuNet.DataChunks.Annotations
         {
             if (Length == 0) return new Annotation[0];
 
-            using (DjvuReader reader = GetAnnotationDataReader(_dataLocation))
+            using (IDjvuReader reader = GetAnnotationDataReader(_dataLocation))
             {
                 // Decode the annotation text
                 string annotationText = reader.ReadUnknownLengthString();

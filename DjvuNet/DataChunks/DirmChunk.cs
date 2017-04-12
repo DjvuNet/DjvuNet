@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DirmChunk : IFFChunk
+    public class DirmChunk : IffChunk
     {
         #region Private Members
 
@@ -37,17 +37,11 @@ namespace DjvuNet.DataChunks
 
         #endregion ChunkType
 
-        #region IsBundled
-
         /// <summary>
         /// True if the document is bundled, false otherwise
         /// </summary>
         //[DataMember]
         public bool IsBundled { get; internal set; }
-
-        #endregion IsBundled
-
-        #region Version
 
         /// <summary>
         /// Gets the version of the dirm information
@@ -55,23 +49,21 @@ namespace DjvuNet.DataChunks
         //[DataMember]
         public int Version { get; internal set; }
 
-        #endregion Version
-
         #region Components
 
-        private DirmComponent[] _components;
+        private List<DirmComponent> _components;
 
         /// <summary>
         /// Gets the dirm components
         /// </summary>
-        public DirmComponent[] Components
+        public IReadOnlyList<DirmComponent> Components
         {
             get
             {
                 if (_isInitialized == false)
                 {
                     using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
-                        ReadCompressedData(reader, _components.Length, _compressedSectionLength);
+                        ReadCompressedData(reader, _components.Count, _compressedSectionLength);
                 }
 
                 return _components;
@@ -80,7 +72,7 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_components != value)
-                    _components = value;
+                    _components = (List<DirmComponent>) value;
             }
         }
 
@@ -90,7 +82,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DirmChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public DirmChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -100,7 +92,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(DjvuReader reader)
+        protected override void ReadChunkData(IDjvuReader reader)
         {
             reader.Position = Offset;
             byte flagByte = reader.ReadByte();
@@ -125,15 +117,15 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="count"></param>
-        internal void ReadComponentData(DjvuReader reader, int count)
+        internal void ReadComponentData(IDjvuReader reader, int count)
         {
-            List<DirmComponent> components = new List<DirmComponent>(count);
+            _components = new List<DirmComponent>(count);
 
             // Read the offsets for the components
             for (int x = 0; x < count; x++)
             {
                 int offset = (int) reader.ReadUInt32BigEndian();
-                components.Add(new DirmComponent(offset));
+                _components.Add(new DirmComponent(offset));
             }
 
             _dataLocation = reader.Position;
@@ -142,8 +134,6 @@ namespace DjvuNet.DataChunks
 
             // Skip the bytes since this section is delayed read
             reader.Position += _compressedSectionLength;
-
-            _components = components.ToArray();
         }
 
         /// <summary>
@@ -152,7 +142,7 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         /// <param name="count"></param>
         /// <param name="compressedSectionLength"></param>
-        internal unsafe void ReadCompressedData(DjvuReader reader, int count, int compressedSectionLength)
+        internal void ReadCompressedData(IDjvuReader reader, int count, int compressedSectionLength)
         {
             long prevPos = reader.Position;
 

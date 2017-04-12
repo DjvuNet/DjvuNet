@@ -32,7 +32,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public AntzChunk(DjvuReader reader, IFFChunk parent, DjvuDocument document,
+        public AntzChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -42,7 +42,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override DjvuReader GetAnnotationDataReader(long position)
+        protected override IDjvuReader GetAnnotationDataReader(long position)
         {
             return Reader.CloneReader(position).GetBZZEncodedReader(Length);
         }
