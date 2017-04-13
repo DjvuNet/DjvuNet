@@ -1001,7 +1001,7 @@ namespace DjvuNet.DjvuLibre
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int RenderDjvuPage(
             IntPtr page,
-            ref RenderMode mode,
+            RenderMode mode,
             ref DjvuRectangle pageRectangle,
             ref DjvuRectangle renderRectangle,
             IntPtr pixelFormat,
@@ -1031,7 +1031,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="args"></param>
         [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_create",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
-        internal static extern void CreateDjvuFormat(FormatStyle style, int numberOfArgs, IntPtr args);
+        internal static extern IntPtr CreateDjvuFormat(FormatStyle style, int numberOfArgs, IntPtr args);
 
         //  DDJVUAPI void
         //  ddjvu_format_set_row_order(ddjvu_format_t* format, int top_to_bottom);
