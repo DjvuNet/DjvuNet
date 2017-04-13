@@ -222,5 +222,63 @@ namespace DjvuNet.DjvuLibre
             return text;
         }
 
+        public IntPtr RenderPage(RenderMode mode)
+        {
+            DjvuRectangle targetRect = new DjvuRectangle
+            {
+                X = 0,
+                Y = 0,
+                Height = (uint)Height,
+                Width = (uint)Width
+            };
+
+            return RenderPage(mode, ref targetRect);
+        }
+
+        public IntPtr RenderPage(RenderMode mode, ref DjvuRectangle targetRect)
+        {
+            IntPtr format = NativeMethods.CreateDjvuFormat(FormatStyle.BGR24, 0, IntPtr.Zero);
+            NativeMethods.SetDjvuFormatRowOrder(format, 1);
+            NativeMethods.SetDjvuFormatYDirection(format, 1);
+            NativeMethods.SetDjvuFormatDitherBits(format, 24);
+
+            DjvuRectangle pageRect = new DjvuRectangle
+            {
+                X = 0,
+                Y = 0,
+                Height = (uint) Height,
+                Width = (uint) Width
+            };
+
+            IntPtr buffer = DjvuMarshal.AllocHGlobal((uint)(Width * 3 * Height));
+            int result = 0;
+
+            try
+            {
+                result = NativeMethods.RenderDjvuPage(Page, mode, ref pageRect, ref targetRect,
+                    format, (uint)Width * 3, buffer);
+
+                if (result == 0)
+                    throw new DjvuLibreException(
+                        $"Failed to render image at this time - result: {result}. Try later again.");
+            }
+            catch(Exception ex)
+            {
+                DjvuMarshal.FreeHGlobal(buffer);
+                buffer = IntPtr.Zero;
+                NativeMethods.ReleaseDjvuFormat(format);
+                format = IntPtr.Zero;
+
+                string message = "Error while rendering page. Check InnerException message for details.";
+
+                if (ex is DjvuLibreException)
+                    throw new DjvuLibreException(message, ex);
+
+                throw new AggregateException(message, ex); 
+            }
+
+            return buffer;
+        }
+
     }
 }
