@@ -37,6 +37,6 @@ namespace DjvuNet
         
         IDjvuReader Reader { get; }
 
-        void ReadChunkData(IDjvuReader reader); 
+        void ReadData(IDjvuReader reader); 
     }
 }

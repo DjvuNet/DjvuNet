@@ -104,7 +104,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             Width = reader.ReadUInt16BigEndian();
             Height = reader.ReadUInt16BigEndian();

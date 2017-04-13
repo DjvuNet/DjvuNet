@@ -178,7 +178,7 @@ namespace DjvuNet.DataChunks
         public override void Initialize(IDjvuReader reader)
         {
             reader.Position = DataOffset + 4;
-            ReadChunkData(reader);
+            ReadData(reader);
         }
 
         #region Public Methods
@@ -197,7 +197,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             if (Length > 0)
             {

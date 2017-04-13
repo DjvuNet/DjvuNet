@@ -47,7 +47,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             if (Length > 0)
             {

@@ -187,7 +187,7 @@ namespace DjvuNet.DataChunks
         public virtual void Initialize(IDjvuReader reader)
         {
             reader.Position = DataOffset;
-            ReadChunkData(reader);
+            ReadData(reader);
             IsInitialized = true;
         }
 
@@ -324,7 +324,7 @@ namespace DjvuNet.DataChunks
         /// Reads the data for the chunk
         /// </summary>
         /// <param name="reader"></param>
-        public abstract void ReadChunkData(IDjvuReader reader);
+        public abstract void ReadData(IDjvuReader reader);
 
         #endregion Protected Methods
 

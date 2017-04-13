@@ -41,7 +41,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             // Need to figure out the decoding for the MMR format
             throw new NotImplementedException();

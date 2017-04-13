@@ -76,7 +76,7 @@ namespace DjvuNet.DataChunks.Annotations
         /// Reads in the chunk data
         /// </summary>
         /// <param name="reader"></param>
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             // Save the current position for delayed decoding
             _dataLocation = reader.Position;

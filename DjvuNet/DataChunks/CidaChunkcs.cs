@@ -48,7 +48,7 @@ namespace DjvuNet.DataChunks
         /// Skip the data bytes per IFF specification
         /// </summary>
         /// <param name="reader"></param>
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             reader.Position += Length;
         }

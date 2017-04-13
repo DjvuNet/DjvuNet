@@ -42,9 +42,9 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
-            base.ReadChunkData(reader);
+            base.ReadData(reader);
         }
 
 

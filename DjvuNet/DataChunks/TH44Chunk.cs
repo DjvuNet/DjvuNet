@@ -96,7 +96,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        public override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             // Save the data location for reading later
             _dataLocation = reader.Position;
