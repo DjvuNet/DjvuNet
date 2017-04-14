@@ -989,39 +989,67 @@ namespace DjvuNet
                         int maskHeight = mask.Height;
                         int maskWidth = mask.Width;
 
-                        Debug.WriteLine($"Height of data: {bgndHeight} = {maskHeight} = {fgndHeight}");
-                        Debug.WriteLine($"Width of data:  {bgndWidth} = {maskWidth} = {fgndWidth}");
+                        Debug.WriteLine($"Height of data: Background {bgndHeight} = Mask {maskHeight} = Foreground {fgndHeight}");
+                        Debug.WriteLine($"Width of data: Background {bgndWidth} = Mask {maskWidth} = Foreground {fgndWidth}");
+
+                        int maskbgnH = maskHeight / bgndHeight;
+                        int maskfgnH = maskHeight / fgndHeight;
+
+                        int maskbgnW = maskWidth / bgndWidth;
+                        int maskfgnW = maskWidth / fgndWidth;
+
+                        Debug.WriteLine($"Ratios Heights: Mask/Bgnd {(double)maskHeight / (double)bgndHeight}, Mask/Fgnd {(double)maskHeight / (double)fgndHeight}");
+                        Debug.WriteLine($"Ratios Widths: Mask/Bgnd {(double)maskWidth / (double)bgndWidth}, Mask/Fgnd {(double)maskWidth / (double)fgndWidth}");
 
                         //Parallel.For(
                         //    0,
                         //    height,
                         //    y =>
                         //    {
-                        for (int y = 0; y < bgndHeight && y < maskHeight && y < fgndHeight; y++)
+                        ;
+                        for (int y = 0, yf = 0, yb = 0; y < maskHeight  && yb < bgndHeight && yf < fgndHeight; y++)
                         {
-                            byte* maskRow = (byte*)maskData.Scan0 + (y * maskData.Stride);
-                            uint* backgroundRow = (uint*)(backgroundData.Scan0 + (y * backgroundData.Stride));
-                            uint* foregroundRow = (uint*)(foregroundData.Scan0 + (y * foregroundData.Stride));
+                            byte* maskRow = (byte*) maskData.Scan0 + (y * maskData.Stride);
+                            uint* backgroundRow = (uint*)(backgroundData.Scan0 + (yb * backgroundData.Stride));
+                            uint* foregroundRow = (uint*)(foregroundData.Scan0 + (yf * foregroundData.Stride));
 
-                            for (int x = 0; x < bgndWidth && x < maskWidth && x < fgndWidth ; x++)
+                            for (int x = 0, xf = 0, xb = 0; x < bgndWidth && xb < maskWidth && xf < fgndWidth ; x++)
                             {
                                 // Check if the mask byte is set
                                 if (maskRow[x] > 0)
                                 {
                                     bool inverted = _isInverted == true;
 
-                                    uint xF = foregroundRow[x];
+                                    uint xF = foregroundRow[xf];
 
                                     if (inverted)
-                                        backgroundRow[x] = InvertColor(xF);
+                                        backgroundRow[xb] = InvertColor(xF);
                                     else
-                                        backgroundRow[x] = xF;
+                                        backgroundRow[xb] = xF;
                                 }
                                 else if (_isInverted == true)
                                 {
-                                    uint xB = backgroundRow[x];
-                                    backgroundRow[x] = InvertColor(xB);
+                                    uint xB = backgroundRow[xb];
+                                    backgroundRow[xb] = InvertColor(xB);
                                 }
+
+                                if (x > 0)
+                                {
+                                    if (x % maskbgnW == 0)
+                                        xb++;
+
+                                    if (x % maskfgnW == 0)
+                                        xf++;
+                                }
+                            }
+
+                            if (y > 0)
+                            {
+                                if (y % maskbgnH == 0)
+                                    yb++;
+
+                                if (y % maskfgnH == 0)
+                                    yf++;
                             }
                         }
                         //});
