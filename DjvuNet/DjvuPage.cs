@@ -948,19 +948,16 @@ namespace DjvuNet
 
                 Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Background: {stopWatch.ElapsedTicks}");
 
-                background.Save(System.IO.Path.Combine(@"E:\src\tools\sci\know\FKnowSci\external\DjvuNet\artifacts\data\dumps", "test003Cbgnd.png"));
                 stopWatch.Restart();                
 
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
                 {
                     Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Foreground: {stopWatch.ElapsedTicks}");
-                    foreground.Save(System.IO.Path.Combine(@"E:\src\tools\sci\know\FKnowSci\external\DjvuNet\artifacts\data\dumps", "test003Cfgnd.png"));
                     stopWatch.Restart();
 
                     using (System.Drawing.Bitmap mask = GetTextImage(subsample, false))
                     {
                         Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Mask: {stopWatch.ElapsedTicks}");
-                        foreground.Save(System.IO.Path.Combine(@"E:\src\tools\sci\know\FKnowSci\external\DjvuNet\artifacts\data\dumps", "test003Cmaskd.png"));
                         stopWatch.Restart();
 
                         _hasLoaded = true;
