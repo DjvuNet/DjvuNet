@@ -139,7 +139,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildImagen.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildImagen.png"));
 
                 }
             }
@@ -159,7 +159,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002CBuildImagen.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002CBuildImagen.png"));
 
                 }
             }
@@ -191,7 +191,7 @@ namespace DjvuNet.Tests
                     image.UnlockBits(data);
                     testImage.UnlockBits(testData);
 
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBuildImagen.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBuildImagen.png"));
 
                     //Assert.True(result);
                 }
@@ -212,7 +212,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildPageImagen.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildPageImagen.png"));
 
                 }
             }
@@ -232,7 +232,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002CBuildPageImagen.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002CBuildPageImagen.png"));
 
                 }
             }
@@ -264,8 +264,7 @@ namespace DjvuNet.Tests
                     image.UnlockBits(data);
                     testImage.UnlockBits(testData);
 
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBuildPageImagen.png"));
-
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBuildPageImagen.png"));
 
                     //Assert.True(result);
                 }
@@ -287,7 +286,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CFn.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CFn.png"));
                 }
             }
 
@@ -308,7 +307,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBn.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBn.png"));
                 }
             }
         }
@@ -328,7 +327,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CMn.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CMn.png"));
                 }
             }
 
