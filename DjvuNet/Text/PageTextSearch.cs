@@ -4,7 +4,7 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using DjvuNet.DataChunks.Text;
+using DjvuNet.DataChunks;
 using System.Linq;
 
 namespace DjvuNet.Text

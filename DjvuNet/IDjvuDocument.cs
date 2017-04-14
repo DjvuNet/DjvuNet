@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
 using DjvuNet.DataChunks;
-using DjvuNet.DataChunks.Navigation.Interfaces;
 
 namespace DjvuNet
 {

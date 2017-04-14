@@ -9,10 +9,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DjvuNet.DataChunks;
-using DjvuNet.DataChunks.Directory;
-
-using DjvuNet.DataChunks.Navigation;
-using DjvuNet.DataChunks.Navigation.Interfaces;
 
 namespace DjvuNet
 {

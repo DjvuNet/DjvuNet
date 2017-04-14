@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class FGjpChunk : DjvuNode
+    public class FGjpChunk : DjvuNode, IFGjpChunk
     {
         #region Private Members
 

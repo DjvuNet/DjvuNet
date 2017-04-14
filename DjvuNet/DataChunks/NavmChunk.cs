@@ -7,16 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using DjvuNet.DataChunks.Navigation;
-using DjvuNet.DataChunks.Navigation.Interfaces;
-
 namespace DjvuNet.DataChunks
 {
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class NavmChunk : DjvuNode, INavigation
+    public class NavmChunk : DjvuNode, INavigation, INavmChunk
     {
         #region Private Members
 

@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DjvuNet.DataChunks.Navigation
+namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.

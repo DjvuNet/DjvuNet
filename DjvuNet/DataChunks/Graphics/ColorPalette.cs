@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using DjvuNet.Graphics;
 
-namespace DjvuNet.DataChunks.Graphics
+namespace DjvuNet.DataChunks
 {
     public class ColorPalette
     {
