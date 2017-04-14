@@ -6,12 +6,12 @@ using System;
 using System.Text;
 
 
-namespace DjvuNet.DataChunks.Text
+namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class TextChunk : DjvuNode
+    public abstract class TextChunk : DjvuNode, ITextChunk
     {
         #region Private Members
 

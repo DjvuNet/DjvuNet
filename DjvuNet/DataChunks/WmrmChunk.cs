@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class WmrmChunk : DjvuNode
+    public class WmrmChunk : DjvuNode, IWmrmChunk
     {
         #region Private Members
 

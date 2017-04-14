@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using DjvuNet.DataChunks.Directory;
-
 using DjvuNet.JB2;
 
 namespace DjvuNet.DataChunks
@@ -17,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class SjbzChunk : DjvuNode
+    public class SjbzChunk : DjvuNode, ISjbzChunk
     {
         #region Private Members
 

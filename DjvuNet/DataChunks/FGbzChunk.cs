@@ -7,15 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using DjvuNet.DataChunks.Graphics;
-
 namespace DjvuNet.DataChunks
 {
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class FGbzChunk : DjvuNode
+    public class FGbzChunk : DjvuNode, IFGbzChunk
     {
         #region Private Members
 

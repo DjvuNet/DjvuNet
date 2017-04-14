@@ -2,9 +2,6 @@
 using System.ComponentModel;
 using System.Drawing;
 using DjvuNet.DataChunks;
-using DjvuNet.DataChunks.Directory;
-using DjvuNet.DataChunks.Graphics;
-using DjvuNet.DataChunks.Text;
 using DjvuNet.Graphics;
 using DjvuNet.JB2;
 using DjvuNet.Wavelet;
@@ -21,7 +18,7 @@ namespace DjvuNet
 
         int Height { get; }
 
-        IReadOnlyList<DjviChunk> Includes { get; }
+        IReadOnlyList<DjviChunk> IncludeFiles { get; }
 
         InfoChunk Info { get; }
 

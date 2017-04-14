@@ -14,7 +14,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class InfoChunk : DjvuNode
+    public class InfoChunk : DjvuNode, IInfoChunk
     {
         #region Public Properties
 

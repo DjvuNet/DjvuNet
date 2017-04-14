@@ -130,12 +130,14 @@
     <Compile Include="Compression\ZPTableTests.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationChunkTests.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationTests.cs" />
+    <Compile Include="DataChunks\BG44ChunkTests.cs" />
     <Compile Include="DataChunks\Directory\DirmComponentTests.cs" />
     <Compile Include="DataChunks\DirmChunkTests.cs" />
     <Compile Include="DataChunks\DjbzChunkTests.cs" />
     <Compile Include="DataChunks\DjviChunkTests.cs" />
     <Compile Include="DataChunks\DjvmChunkTests.cs" />
     <Compile Include="DataChunks\DjvuChunkTests.cs" />
+    <Compile Include="DataChunks\FG44ChunkTests.cs" />
     <Compile Include="DataChunks\FormChunkTests.cs" />
     <Compile Include="DataChunks\Graphics\ColorPaletteTests.cs" />
     <Compile Include="DataChunks\IFFChunkTests.cs" />
@@ -143,6 +145,8 @@
     <Compile Include="DataChunks\InfoChunkTests.cs" />
     <Compile Include="DataChunks\Navigation\BookmarkTests.cs" />
     <Compile Include="DataChunks\Navigation\DocumentNavigatorTests.cs" />
+    <Compile Include="DataChunks\NavmChunkTests.cs" />
+    <Compile Include="DataChunks\SjbzChunkTests.cs" />
     <Compile Include="DataChunks\TH44ChunkTests.cs" />
     <Compile Include="DataChunks\ThumChunkTests.cs" />
     <Compile Include="DataChunks\TxtaChunkTests.cs" />

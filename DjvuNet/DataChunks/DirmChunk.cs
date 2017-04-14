@@ -6,17 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DjvuNet.Compression;
-using DjvuNet.DataChunks.Directory;
-
 
 namespace DjvuNet.DataChunks
 {
 
-
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DirmChunk : DjvuNode
+    public class DirmChunk : DjvuNode, IDirmChunk
     {
         #region Private Members
 

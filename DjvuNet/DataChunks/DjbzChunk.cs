@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjbzChunk : DjvuNode
+    public class DjbzChunk : DjvuNode, IDjbzChunk
     {
         #region Private Members
 
@@ -72,19 +72,17 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Public Methods
 
         public override void ReadData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
-
-            // Skip the shape data which is delayed read
             reader.Position += Length;
         }
 
-        #endregion Protected Methods
+        #endregion Public Methods
 
-        #region Private Methods
+        #region Internal Methods
 
         internal JB2.JB2Dictionary DecodeShapeDictionary()
         {
@@ -97,6 +95,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Private Methods
+        #endregion Internal Methods
     }
 }

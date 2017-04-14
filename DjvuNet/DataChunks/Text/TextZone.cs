@@ -12,7 +12,7 @@ using System.Text;
 using DjvuNet.Extentions;
 using DjvuNet.Graphics;
 
-namespace DjvuNet.DataChunks.Text
+namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.

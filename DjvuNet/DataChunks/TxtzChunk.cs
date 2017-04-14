@@ -8,8 +8,6 @@ using System.Linq;
 using System.Text;
 using DjvuNet.Compression;
 
-using DjvuNet.DataChunks.Text;
-
 namespace DjvuNet.DataChunks
 {
 

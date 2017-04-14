@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class BG44Chunk : DjvuNode
+    public class BG44Chunk : DjvuNode, IBG44Chunk
     {
         #region Private Members
 
