@@ -473,7 +473,7 @@ namespace DjvuNet.Tests
 
                     image.UnlockBits(data);
                     testImage.UnlockBits(testData);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CImage003n.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CImage003n.png"));
 
                     //Assert.True(result);
                 }
