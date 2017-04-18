@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 
-namespace DjvuNet.Util
+namespace DjvuNet.Utilities
 {
     public static class Verify
     {

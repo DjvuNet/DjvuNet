@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.DataChunks.Tests
 {
-    public class IFFChunkTests
+    public class DjvuNodeTests
     {
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void IsFormChunkTest()

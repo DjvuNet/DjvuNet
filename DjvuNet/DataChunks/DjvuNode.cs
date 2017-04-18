@@ -15,6 +15,10 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public abstract class DjvuNode : IDjvuNode
     {
+
+        protected byte[] _ChunkData;
+        protected bool _IsDirty;
+
         /// <summary>
         /// Holds a value indicating constant for each Node difference
         /// between DataOffset and NodeOffset. Most nodes will have it
@@ -48,7 +52,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the chunk identifier
         /// </summary>
-        public string ChunkID { get; internal set; }
+        public string ChunkID { get; set; }
 
         /// <summary>
         /// Gets the offset in the file to the start of the chunk data
@@ -57,7 +61,6 @@ namespace DjvuNet.DataChunks
 
         /// <summary>
         /// Gets the offset in the file to the start of the chunk.
-        /// The difference 
         /// </summary>
         public virtual long NodeOffset { get; set; }
 
@@ -137,14 +140,46 @@ namespace DjvuNet.DataChunks
 
         public virtual bool IsInitialized { get; internal set; }
 
-        public virtual byte[] ChunkData { get; set; }
+        public virtual byte[] ChunkData
+        {
+            get
+            {
+                if (_ChunkData != null)
+                    return _ChunkData;
+                else
+                {
+                    // Read without side effects
+                    long prevPos = Reader.Position;
+                    Reader.Position = DataOffset;
+
+                    try
+                    {
+                        _ChunkData = Reader.ReadBytes((int)Length);
+                    }
+                    finally
+                    {
+                        Reader.Position = prevPos;
+                    }
+
+                    return _ChunkData;
+                }
+            }
+            set
+            {
+                if (_ChunkData != value)
+                {
+                    _ChunkData = value;
+                    _IsDirty = true;    
+                }
+            }
+        }
 
         public IDjvuRootElement RootElement { get; set; }
 
         /// <summary>
         /// Gets the root Djvu document for the form
         /// </summary>
-        public IDjvuDocument Document { get; internal set; }
+        public IDjvuDocument Document { get; set; }
 
         #endregion Public Properties
 
@@ -315,17 +350,39 @@ namespace DjvuNet.DataChunks
             return $"{this.GetType().Name} {{ Name: {Name}; ID: {ChunkID} Offset: {DataOffset} Length: {Length} }}";
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         /// <summary>
         /// Reads the data for the chunk
         /// </summary>
         /// <param name="reader"></param>
         public abstract void ReadData(IDjvuReader reader);
 
-        #endregion Protected Methods
+        /// <summary>
+        /// Writes node data using passed writer and advances 
+        /// writer position by the length of bytes written.
+        /// In the case writeHeader parameter is true node
+        /// first writes it's ID, than length in Big Endian
+        /// uint format followed by node data.
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="writeHeader"></param>
+        public virtual void WriteData(IDjvuWriter writer, bool writeHeader = true)
+        {
+            if (writer == null)
+                throw new ArgumentNullException(nameof(writer));
+
+            if (!(bool)writer.BaseStream?.CanWrite)
+                throw new ArgumentException("Writer cannot write.", nameof(writer));
+
+            if (writeHeader)
+            {
+                writer.WriteUTF8String(Name.ToUpper());
+                writer.WriteUInt32BigEndian((uint)ChunkData.Length);
+            }
+
+            writer.Write(ChunkData, 0, ChunkData.Length);
+        }
+
+        #endregion Public Methods
 
         #region Private Methods
 

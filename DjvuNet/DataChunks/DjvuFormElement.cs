@@ -18,7 +18,7 @@ namespace DjvuNet.DataChunks
     public abstract class DjvuFormElement : DjvuNode, IDjvuElement
     {
 
-        protected List<IDjvuNode> TempChildren;
+        protected List<IDjvuNode> _TempChildren;
 
         protected List<IDjvuNode> _Children;
 
@@ -60,9 +60,9 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the included items for the form
         /// </summary>
-        public InclChunk[] IncludedItems
+        public IReadOnlyList<InclChunk> IncludedItems
         {
-            get { return Children.Where(x => x is InclChunk).Cast<InclChunk>().ToArray(); }
+            get { return Children.Where(x => x.ChunkType == ChunkType.Incl).Cast<InclChunk>().ToList(); }
         }
 
         public IDjvuNode FirstChild
@@ -87,7 +87,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        public IDjvuNode PreviousSibling
+        public IDjvuElement PreviousSibling
         {
             get
             {
@@ -100,7 +100,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        public IDjvuNode NextSibling
+        public IDjvuElement NextSibling
         {
             get
             {
@@ -113,15 +113,19 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        public IDjvuNode FirstSibling
+        public IDjvuElement FirstSibling
         {
             get
             {
-                var parent = (IDjvuElement)Parent;
-                if (parent != null && parent.Children?.Count > 0)
-                    return parent.Children[0];
+                if (_FirstSibling != null)
+                    return _FirstSibling;
                 else
-                    return null;   
+                {
+                    var parent = Parent as IDjvuElement;
+                    if (parent != null && parent.Children?.Count > 0)
+                        _FirstSibling = (IDjvuElement) parent.Children[0];
+                    return _FirstSibling;
+                }   
             }
 
             set
@@ -130,15 +134,19 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        public IDjvuNode LastSibling
+        public IDjvuElement LastSibling
         {
             get
             {
-                var parent = (IDjvuElement)Parent;
-                if (parent != null && parent.Children?.Count > 0)
-                    return parent.Children[parent.Children.Count - 1];
+                if (_LastSibling != null)
+                    return _LastSibling;
                 else
-                    return null;
+                {
+                    var parent = (IDjvuElement)Parent;
+                    if (parent != null && parent.Children?.Count > 0)
+                        _LastSibling = (IDjvuElement) parent.Children[parent.Children.Count - 1];
+                    return _LastSibling;
+                }
             }
 
             set
@@ -155,6 +163,8 @@ namespace DjvuNet.DataChunks
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
+            _Children = new List<IDjvuNode>();
+            _TempChildren = new List<IDjvuNode>();
         }
 
         #endregion Constructors
@@ -162,7 +172,7 @@ namespace DjvuNet.DataChunks
         public static DjvuFormElement GetRootForm(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document)
         {
             string formStr = reader.ReadUTF8String(4);
-            // use of int in Djvu Format limits file size to 2 GB - should be long (int64)
+            // use of int in Djvu Format limits file read size to 2 GB - should be long (int64)
             int length = (int) reader.ReadUInt32BigEndian(); 
             string formType = reader.ReadUTF8String(4);
             reader.Position -= 4;
@@ -175,13 +185,13 @@ namespace DjvuNet.DataChunks
         }
 
 
+        #region Public Methods
+
         public override void Initialize(IDjvuReader reader)
         {
             reader.Position = DataOffset + 4;
             ReadData(reader);
         }
-
-        #region Public Methods
 
         /// <summary>
         /// Gets the string representation of the item
@@ -193,24 +203,41 @@ namespace DjvuNet.DataChunks
                 $" Length: {Length} Children: {Children?.Count} }}";
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
         public override void ReadData(IDjvuReader reader)
         {
             if (Length > 0)
-            {
                 ReadChildren(reader);
-            }
         }
 
-        protected void AddRootFormChild(DjvuFormElement form)
+        /// <summary>
+        /// Recursively writes element data and data of it's
+        /// children elements or nodes using supplied writer.
+        /// When writeHeader is true (default value) it writes
+        /// own header data (ID, Length) and asks it's children
+        /// to do the same. 
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="writeHeader"></param>
+        public override void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
+            if (writer == null)
+                throw new ArgumentNullException(nameof(writer));
 
+            if (!(bool)writer.BaseStream?.CanWrite)
+                throw new ArgumentException("Writer cannot write.", nameof(writer));
+
+            if (writeHeader)
+            {
+                writer.WriteUTF8String("FORM");
+                writer.WriteUInt32BigEndian((uint)Length);
+                writer.WriteUTF8String(Name);
+            }
+
+            foreach (IDjvuNode node in Children)
+                node.WriteData(writer, writeHeader);
         }
 
-        #endregion Protected Methods
+        #endregion Public Methods
 
         #region Private Methods
 
@@ -220,7 +247,7 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         internal void ReadChildren(IDjvuReader reader)
         {
-            TempChildren = new List<IDjvuNode>();
+            _TempChildren = new List<IDjvuNode>();
 
             long maxPosition = this.Length + DataOffset;
 
@@ -265,13 +292,13 @@ namespace DjvuNet.DataChunks
                 {
                     if (!IsRootFormChild(type))
                     {
-                        TempChildren.Add(chunk);
-                        TempChildren[TempChildren.Count - 1].Initialize(reader);
+                        _TempChildren.Add(chunk);
+                        _TempChildren[_TempChildren.Count - 1].Initialize(reader);
                         reader.Position = chunk.Length + chunk.DataOffset;
                     }
                     else
                     {
-                        Document.RootForm.TempChildren.Add(chunk);
+                        Document.RootForm._TempChildren.Add(chunk);
                         reader.Position = chunk.Length + chunk.DataOffset;
                         if (isFormChunk)
                             reader.Position -= 4;
@@ -279,8 +306,8 @@ namespace DjvuNet.DataChunks
                 }                
             }
 
-            Children = TempChildren;
-            TempChildren = null;
+            Children = _TempChildren;
+            _TempChildren = null;
         }
 
         /// <summary>

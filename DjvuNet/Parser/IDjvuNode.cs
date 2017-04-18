@@ -11,7 +11,7 @@ namespace DjvuNet
     {
         ChunkType ChunkType { get; }
 
-        string ChunkID { get; }
+        string ChunkID { get; set; }
 
         long DataOffset { get; set; }
 
@@ -33,10 +33,12 @@ namespace DjvuNet
         
         IDjvuRootElement RootElement { get; set; }
         
-        IDjvuDocument Document { get; }
+        IDjvuDocument Document { get; set; }
         
-        IDjvuReader Reader { get; }
+        IDjvuReader Reader { get; set; }
 
-        void ReadData(IDjvuReader reader); 
+        void ReadData(IDjvuReader reader);
+
+        void WriteData(IDjvuWriter writer, bool writeHeader); 
     }
 }
