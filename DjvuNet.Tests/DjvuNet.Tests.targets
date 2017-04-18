@@ -79,7 +79,7 @@
     </ArtifactsBuildRequired>
     <Message Importance="High" Text="Building Artifacts $(BuildArtifacts)" />
     <Exec Condition="$(BuildArtifacts)" 
-      Command="$(SolutionDir)Tools\7z h -scrcSHA256 -xr!.* $(SolutionDir)artifacts &gt; $(SolutionDir)artifacts.sha256">
+      Command="$(SolutionDir)Tools\7z h -scrcSHA256 -xr!.* -xr!dumps $(SolutionDir)artifacts &gt; $(SolutionDir)artifacts.sha256">
     </Exec>
   </Target>
 </Project>

@@ -14,13 +14,13 @@ namespace DjvuNet
 
         IDjvuNode LastChild { get; }
 
-        IDjvuNode PreviousSibling { get; }
+        IDjvuElement PreviousSibling { get; }
 
-        IDjvuNode NextSibling { get; }
+        IDjvuElement NextSibling { get; }
 
-        IDjvuNode FirstSibling { get; }
+        IDjvuElement FirstSibling { get; }
 
-        IDjvuNode LastSibling { get; }
+        IDjvuElement LastSibling { get; }
 
         int AddNode(IDjvuNode node);
 

@@ -137,10 +137,11 @@
     <Compile Include="DataChunks\DjviChunkTests.cs" />
     <Compile Include="DataChunks\DjvmChunkTests.cs" />
     <Compile Include="DataChunks\DjvuChunkTests.cs" />
+    <Compile Include="DataChunks\DjvuNodeTests.cs" />
     <Compile Include="DataChunks\FG44ChunkTests.cs" />
+    <Compile Include="DataChunks\FGbzChunkTests.cs" />
     <Compile Include="DataChunks\FormChunkTests.cs" />
     <Compile Include="DataChunks\Graphics\ColorPaletteTests.cs" />
-    <Compile Include="DataChunks\IFFChunkTests.cs" />
     <Compile Include="DataChunks\InclChunkTests.cs" />
     <Compile Include="DataChunks\InfoChunkTests.cs" />
     <Compile Include="DataChunks\Navigation\BookmarkTests.cs" />

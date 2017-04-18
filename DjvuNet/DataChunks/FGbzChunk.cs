@@ -92,27 +92,28 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Public Methods
 
         public override void ReadData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
-            _firstByte = reader.ReadByte();
+            _firstByte = (byte) reader.ReadByte();
+            reader.Position = _dataLocation;
 
             // Skip past the bytes which will be delayed read
             // account for already read byte
-            reader.Position += (Length - 1);
+            reader.Position += Length;
         }
 
-        #endregion Protected Methods
+        #endregion Public Methods
 
-        #region Private Methods
+        #region Internal Methods
 
         /// <summary>
         /// Decodes the data for the color palette contained by FGbz chunk
         /// </summary>
         /// <returns></returns>
-        private ColorPalette DecodePaletteData()
+        internal ColorPalette DecodePaletteData()
         {
             using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
             {
@@ -121,6 +122,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Private Methods
+        #endregion Internal Methods
     }
 }

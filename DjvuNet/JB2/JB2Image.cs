@@ -5,7 +5,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 
 using DjvuNet.Graphics;
-using DjvuNet.Util;
+using DjvuNet.Utilities;
 
 namespace DjvuNet.JB2
 {

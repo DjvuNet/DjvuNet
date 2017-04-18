@@ -28,7 +28,7 @@ using GRect = DjvuNet.Graphics.Rectangle;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
 using DjvuNet.Configuration;
-using DjvuNet.Util;
+using DjvuNet.Utilities;
 using System.Runtime.CompilerServices;
 
 namespace DjvuNet

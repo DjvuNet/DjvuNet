@@ -69,10 +69,43 @@ namespace DjvuNet.Tests
                 catch (Exception ex)
                 {
                     throw new AggregateException(
-                        $"Text_Theory001 error with test file {filePath}\nExpected page count:" + 
+                        $"Text_Theory001 error with test file {filePath}\nExpected page count:" +
                         $" {pageCount}\nResult page count: {document.Pages.Count}", ex);
                 }
+
+                if (filePath.EndsWith("031C.djvu"))
+                    DumpPageNodes(filePath, document);
             }
+        }
+
+        private static void DumpPageNodes(string filePath, DjvuDocument document)
+        {
+            try
+            {
+                string path = Path.GetDirectoryName(filePath);
+                string fileName = Path.GetFileNameWithoutExtension(filePath);
+                path = Path.Combine(path, "data");
+                var page = document.Pages[0];
+                var children = page.PageForm.Children;
+                Dictionary<string, int> dict = new Dictionary<string, int>();
+                foreach (IDjvuNode node in children)
+                {
+                    if (dict.ContainsKey(node.Name))
+                        continue;
+                    else
+                    {
+                        dict.Add(node.Name, 1);
+                        string file = Path.Combine(path, fileName + "_P01." + node.Name.ToLower());
+                        using (FileStream fs = File.Create(file))
+                        using (BinaryWriter writer = new BinaryWriter(fs))
+                        {
+                            byte[] buffer = node.ChunkData;
+                            writer.Write(buffer, 0, buffer.Length);
+                        }
+                    }
+                }
+            }
+            catch (Exception) { }
         }
 
         private static void TestPageText(string expectedValue, IDjvuPage page)
