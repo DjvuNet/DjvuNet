@@ -246,7 +246,7 @@ namespace DjvuNet.DataChunks
         /// Builds the appropriate chunk for the ID
         /// </summary>
         /// <returns></returns>
-        public static IDjvuNode BuildIffChunk(IDjvuReader reader, IDjvuDocument rootDocument,
+        public static IDjvuNode CreateDjvuNode(IDjvuReader reader, IDjvuDocument rootDocument,
             IDjvuElement parent, ChunkType chunkType,
             string chunkID = "", long length = 0)
         {

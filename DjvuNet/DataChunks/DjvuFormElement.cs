@@ -179,7 +179,7 @@ namespace DjvuNet.DataChunks
 
             ChunkType type = DjvuNode.GetChunkType(formType);
 
-            DjvuFormElement formObj = (DjvuFormElement)DjvuNode.BuildIffChunk(reader, document, parent, type, formType, length);
+            DjvuFormElement formObj = (DjvuFormElement)DjvuNode.CreateDjvuNode(reader, document, parent, type, formType, length);
 
             return formObj;
         }
@@ -286,7 +286,7 @@ namespace DjvuNet.DataChunks
                 // Reset the stream position
                 // reader.Position -= 4;
 
-                var chunk = DjvuNode.BuildIffChunk(reader, Document, this, type, id, length);
+                var chunk = DjvuNode.CreateDjvuNode(reader, Document, this, type, id, length);
 
                 if (chunk != null)
                 {
