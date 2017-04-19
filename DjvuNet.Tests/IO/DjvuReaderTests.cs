@@ -101,9 +101,6 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-
-
-
         public void DjvuReaderTest004()
         {
             Uri filePath = new Uri("https://upload.wikimedia.org/wikipedia/commons/6/69/Tain_Bo_Cuailnge.djvu");
@@ -497,7 +494,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(0, reader.Position);
                 Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
                 int result = reader.ReadInt24BigEndian();
-                Assert.Equal<int>(0x0080ff00, result);
+                Assert.Equal<int>(unchecked((int)0xff80ff00), result);
                 Assert.Equal<long>(3, reader.Position);
             }
         }
@@ -515,6 +512,40 @@ namespace DjvuNet.Tests
                 reader.Position = advanceReader;
                 int result = reader.ReadInt24BigEndian();
                 Assert.Equal<int>(0x000000ff, result);
+                Assert.Equal<long>(3 + advanceReader, reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadInt24BigEndianTest003()
+        {
+            byte[] buffer = new byte[] { 0xff, 0x00, 0xff, 0xff, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                int result = reader.ReadInt24BigEndian();
+                Assert.Equal<int>(-1, result);
+                Assert.Equal<long>(3 + advanceReader, reader.Position);
+            }
+        }
+
+        [Fact()]
+        public void ReadInt24BigEndianTest004()
+        {
+            byte[] buffer = new byte[] { 0xff, 0x00, 0x80, 0x00, 0xff, 0x01, 0x80, 0x01 };
+            using (MemoryStream memStream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(memStream))
+            {
+                Assert.Equal<long>(0, reader.Position);
+                Assert.Equal<long>(buffer.Length, reader.BaseStream.Length);
+                int advanceReader = 2;
+                reader.Position = advanceReader;
+                int result = reader.ReadInt24BigEndian();
+                Assert.Equal<int>(unchecked((int)0xff8000ff), result);
                 Assert.Equal<long>(3 + advanceReader, reader.Position);
             }
         }

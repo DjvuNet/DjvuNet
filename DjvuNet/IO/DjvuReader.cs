@@ -176,6 +176,8 @@ namespace DjvuNet
             byte[] buffer = new byte[4];
             Read(buffer, 1, 3);
             Array.Reverse(buffer);
+            if (buffer[2] >> 7 == 1)
+                buffer[3] = 0xff;
             return BitConverter.ToInt32(buffer, 0);
         }
 
