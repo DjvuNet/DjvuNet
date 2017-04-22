@@ -88,7 +88,7 @@ namespace DjvuNet.DataChunks
 
         internal JB2Image ReadCompressedImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 JB2Image image = new JB2Image();
                 JB2.JB2Dictionary includedDictionary = null;

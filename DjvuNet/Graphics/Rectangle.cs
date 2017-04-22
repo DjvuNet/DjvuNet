@@ -389,7 +389,7 @@ namespace DjvuNet.Graphics
 
         /// <summary> 
         /// Shift this rectangle (linear translation), if rectangle is empty linear
-        /// translation effectively is applied to a point on 2D plane.
+        /// translation is applied to a point (x,y) on 2D plane.
         /// </summary>
         /// <param name="dx">
         /// Horizontal translation distance dX.

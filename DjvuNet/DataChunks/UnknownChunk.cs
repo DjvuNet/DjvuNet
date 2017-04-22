@@ -25,14 +25,14 @@ namespace DjvuNet.DataChunks
 
         public override ChunkType ChunkType
         {
-            get { return ChunkType.Smmr; }
+            get { return ChunkType.Unknown; }
         }
 
         #endregion ChunkType
 
         #region Data
 
-        private DjvuReader _data;
+        private IDjvuReader _data;
 
         /// <summary>
         /// Gets the raw chunk data
@@ -85,10 +85,10 @@ namespace DjvuNet.DataChunks
         /// Extracts the raw data from the chunk
         /// </summary>
         /// <returns></returns>
-        private DjvuReader ExtractRawData()
+        private IDjvuReader ExtractRawData()
         {
             // Read the data in
-            return Reader.CloneReader(DataOffset + 4 + 4, Length);
+            return Reader.CloneReaderToMemory(DataOffset + 4 + 4, Length);
         }
 
         #endregion Private Methods

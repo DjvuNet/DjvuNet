@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
 using Moq;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -92,7 +93,7 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(reader.Position, positionSum);
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(FgbzTestData))]
         public void Palette_Theory(string testFile, DjvuJsonDocument doc)
         {
@@ -122,12 +123,5 @@ namespace DjvuNet.DataChunks.Tests
             }
 
         }
-
-        [Fact]
-        public void PaletteTest003()
-        {
-
-        }
-
     }
 }

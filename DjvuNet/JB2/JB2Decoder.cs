@@ -64,7 +64,7 @@ namespace DjvuNet.JB2
                 throw new DjvuFormatException("Image has no start record");
         }
 
-        public virtual void Init(BinaryReader gbs, JB2Dictionary zdict)
+        public virtual void Init(IBinaryReader gbs, JB2Dictionary zdict)
         {
             this._zdict = zdict;
             _zp = new ZPCodec(gbs.BaseStream);

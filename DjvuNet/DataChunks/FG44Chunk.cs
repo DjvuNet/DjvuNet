@@ -90,7 +90,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         internal IWPixelMap DecodeForegroundImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 IWPixelMap background = new IWPixelMap();
                 background.Decode(reader);

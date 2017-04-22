@@ -142,6 +142,7 @@
     <Compile Include="DataChunks\WmrmChunk.cs" />
     <Compile Include="Diagnostics\DjvuEventSource.cs" />
     <Compile Include="DjvuDocument.cs" />
+    <Compile Include="DjvuImage.cs" />
     <Compile Include="DjvuPage.cs" />
     <Compile Include="Extentions\ExtentionMethods.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
@@ -183,6 +184,7 @@
     <Compile Include="Text\PageText.cs" />
     <Compile Include="Text\PageTextItem.cs" />
     <Compile Include="Text\PageTextSearch.cs" />
+    <Compile Include="Util\GenericComparer.cs" />
     <Compile Include="Util\Verify.cs" />
     <Compile Include="Wavelet\IWBlock.cs" />
     <Compile Include="Wavelet\IWBucket.cs" />

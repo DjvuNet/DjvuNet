@@ -14,23 +14,27 @@ namespace DjvuNet
 
         IDjvuNode LastChild { get; }
 
-        IDjvuElement PreviousSibling { get; }
+        IDjvuNode PreviousSibling { get; }
 
-        IDjvuElement NextSibling { get; }
+        IDjvuNode NextSibling { get; }
 
-        IDjvuElement FirstSibling { get; }
+        IDjvuNode FirstSibling { get; }
 
-        IDjvuElement LastSibling { get; }
+        IDjvuNode LastSibling { get; }
 
-        int AddNode(IDjvuNode node);
+        int AddChild(IDjvuNode node);
 
         void ClearChildren();
 
-        void InsertNode(IDjvuNode node, int index);
+        bool ContainsChild(IDjvuNode node);
 
-        bool RemoveNode(IDjvuNode node);
+        bool ContainsChild(IDjvuNode node, IEqualityComparer<IDjvuNode> comparer);
 
-        void RemoveNodeAt(int index);
+        int InsertChild(int index, IDjvuNode node);
+
+        bool RemoveChild(IDjvuNode node);
+
+        int RemoveChildAt(int index);
 
 
     }

@@ -1,9 +1,12 @@
-﻿using System;
+﻿using DjvuNet;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using Moq;
 using Xunit;
+using DjvuNet.DataChunks;
+using System.Linq;
 
 namespace DjvuNet.Tests
 {
@@ -105,7 +108,7 @@ namespace DjvuNet.Tests
                 document = new DjvuDocument(filePath);
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
             }
-            catch(Exception error)
+            catch (Exception error)
             {
                 Util.FailOnException(error, $"\nDjvuDocument_ctor failed. File: {filePath}, Page count: {pageCount}");
             }
@@ -122,7 +125,7 @@ namespace DjvuNet.Tests
         public void ctor001()
         {
             int pageCount = Util.GetTestDocumentPageCount(1);
-            using(DjvuDocument document = Util.GetTestDocument(1, out pageCount))
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
                 Util.VerifyDjvuDocumentCtor(pageCount, document);
             }
@@ -541,6 +544,88 @@ namespace DjvuNet.Tests
             {
                 bool result = DjvuDocument.IsDjvuDocument(stream);
                 Assert.False(result);
+            }
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void DjvuDocumentTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void DjvuDocumentTest1()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void DjvuDocumentTest2()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void DisposeTest()
+        {
+            DjvuDocument document = null;
+            int pageCount = 0;
+
+            try
+            {
+                document = Util.GetTestDocument(2, out pageCount);
+            }
+            finally
+            {
+                document?.Dispose();
+                Assert.True(document.IsDisposed);
+                Assert.Empty(document.Pages);
+            }
+        }
+
+        [Fact()]
+        public void LoadTest()
+        {
+            DjvuDocument document = null;
+            document = new DjvuDocument();
+            string testFile = Util.GetTestFilePath(2);
+            try
+            {
+                document.Load(testFile);
+                Assert.NotNull(document.Pages);
+                Assert.NotEmpty(document.Pages);
+            }
+            finally
+            {
+                document?.Dispose();
+            }
+        }
+
+        [Fact()]
+        public void GetRootFormChildrenTest001()
+        {
+            int pageCount = 0;
+            using(DjvuDocument document = Util.GetTestDocument(2, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                DirmChunk node = document.GetRootFormChildren<DirmChunk>().FirstOrDefault();
+                Assert.NotNull(node);
+                Assert.IsType<DirmChunk>(node);
+            }
+        }
+
+        [Fact()]
+        public void GetRootFormChildrenTest002()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                var nodes = document.GetRootFormChildren<DjvuChunk>().ToList();
+                Assert.NotNull(nodes);
+                Assert.Equal<int>(pageCount, nodes.Count);
             }
         }
     }

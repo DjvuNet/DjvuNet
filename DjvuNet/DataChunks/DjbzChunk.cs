@@ -86,7 +86,7 @@ namespace DjvuNet.DataChunks
 
         internal JB2.JB2Dictionary DecodeShapeDictionary()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 JB2.JB2Dictionary dictionary = new JB2Dictionary();
                 dictionary.Decode(reader);

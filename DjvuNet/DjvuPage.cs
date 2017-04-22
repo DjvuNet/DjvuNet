@@ -44,10 +44,12 @@ namespace DjvuNet
         /// <summary>
         /// True if the page has been previously loaded, false otherwise
         /// </summary>
-        private bool _hasLoaded = false;
+        private bool _hasLoaded;
 
         private object _loadingLock = new object();
-        private bool _isBackgroundDecoded = false;
+        private bool _isBackgroundDecoded;
+
+        private DjvuImage _Image;
 
         #endregion Private Members
 
@@ -84,12 +86,12 @@ namespace DjvuNet
 
         #region Document
 
-        private DjvuDocument _document;
+        private IDjvuDocument _document;
 
         /// <summary>
         /// Gets the document the page belongs to
         /// </summary>
-        public DjvuDocument Document
+        public IDjvuDocument Document
         {
             get { return _document; }
 
@@ -555,6 +557,7 @@ namespace DjvuNet
             Thumbnail = thumbnail;
             IncludeFiles = includedItems;
             PageForm = form;
+            _Image = new DjvuImage(this);
             PropertyChanged += DjvuPage_PropertyChanged;
 
             if (Info == null)
@@ -1485,7 +1488,7 @@ namespace DjvuNet
                 }
                 else if (iwPixelMap == null && jb2image == null)
                 {
-                    result = CreateBlankImage(Brushes.Black, Width / subsample, Height / subsample);
+                    result = DjvuImage.CreateBlankImage(Brushes.Black, Width / subsample, Height / subsample);
                 }
 
                 return resizeImage == true ? ResizeImage(result, Width / subsample, Height / subsample) : result;
@@ -1520,7 +1523,7 @@ namespace DjvuNet
             BG44Chunk[] backgrounds = PageForm.GetChildrenItems<BG44Chunk>();
 
             if ((backgrounds == null || backgrounds.Length == 0) && width > 0 && height > 0)
-                return CreateBlankImage(Brushes.White, width, height);
+                return DjvuImage.CreateBlankImage(Brushes.White, width, height);
 
             // Get the composite background image
             Wavelet.IWPixelMap backgroundMap = null;
@@ -1552,25 +1555,6 @@ namespace DjvuNet
             }
             else
                 return result;
-        }
-
-        /// <summary>
-        /// Creates a blank image with the given color
-        /// </summary>
-        /// <param name="imageColor"></param>
-        /// <returns></returns>
-        internal System.Drawing.Bitmap CreateBlankImage(Brush imageColor, int width, int height)
-        {
-            if (Info == null)
-                return null;
-
-            System.Drawing.Bitmap newBackground = new System.Drawing.Bitmap(Width, Height);
-
-            // Fill the whole image with white
-            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newBackground))
-                g.FillRegion(imageColor, new Region(new System.Drawing.Rectangle(0, 0, width, height)));
-
-            return newBackground;
         }
 
         #endregion Private Methods

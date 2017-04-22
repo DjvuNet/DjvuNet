@@ -92,7 +92,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         private JB2Image ReadCompressedWatermarkImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 JB2Image image = new JB2Image();
                 image.Decode(reader);

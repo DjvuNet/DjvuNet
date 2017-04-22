@@ -140,7 +140,7 @@ namespace DjvuNet.DataChunks
         /// Gets the reader for the text data
         /// </summary>
         /// <returns></returns>
-        protected abstract DjvuReader GetTextDataReader(long position);
+        protected abstract IDjvuReader GetTextDataReader(long position);
 
         /// <summary>
         /// Read the chunk data
@@ -162,7 +162,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Decodes the compressed data if needed
         /// </summary>
-        private void DecodeIfNeeded()
+        internal void DecodeIfNeeded()
         {
             if (_isDecoded == false)
             {
@@ -173,11 +173,11 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Reads the compressed text data
         /// </summary>
-        private void ReadCompressedTextData()
+        internal void ReadCompressedTextData()
         {
             if (Length == 0) return;
 
-            using (DjvuReader reader = GetTextDataReader(_dataLocation))
+            using (IDjvuReader reader = GetTextDataReader(_dataLocation))
             {
                 _textLength = (int) reader.ReadUInt24BigEndian();
                 byte[] textBytes = reader.ReadBytes(_textLength);

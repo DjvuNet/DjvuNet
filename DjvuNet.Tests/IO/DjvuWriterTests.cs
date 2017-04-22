@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using DjvuNet.Compression;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.Tests
 {
@@ -323,7 +324,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(UInt24TestData))]
         public void WriteUInt24BigEndian_Theory(uint test)
         {
@@ -340,7 +341,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(Int24TestData))]
         public void WriteInt24BigEndian_Theory(int test)
         {
@@ -359,7 +360,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(UInt24TestData))]
         public void WriteUInt24Test(uint test)
         {
@@ -375,7 +376,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(Int24TestData))]
         public void WriteInt24_Theory(int test)
         {
@@ -393,7 +394,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(Int16TestData))]
         public void WriteInt16BigEndian_Theory(short test)
         {
@@ -410,7 +411,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(Int32TestData))]
         public void WriteInt32BigEndian_Theory(int test)
         {
@@ -427,7 +428,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(Int64TestData))]
         public void WriteInt64BigEndianTest(long test)
         {
@@ -444,7 +445,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(UInt16TestData))]
         public void WriteUInt16BigEndian_Theory(ushort test)
         {
@@ -461,7 +462,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(UInt32TestData))]
         public void WriteUInt32BigEndianTest(uint test)
         {
@@ -478,7 +479,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(UInt64TestData))]
         public void WriteUInt64BigEndian_Theory(ulong test)
         {
@@ -495,7 +496,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(StringTestData))]
         public void WriteUTF8String_Theory(string testString)
         {
@@ -516,7 +517,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(StringTestData))]
         public void WriteUTF7String_Theory(string testString)
         {
@@ -537,7 +538,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(StringTestData))]
         public void WriteString_Theory(String testString)
         {
@@ -558,7 +559,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(StringEncodingTestData))]
         public void WriteStringEncoding_Theory(String testString, Encoding encoding)
         {

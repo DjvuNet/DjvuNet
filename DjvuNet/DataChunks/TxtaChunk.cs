@@ -40,9 +40,9 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override DjvuReader GetTextDataReader(long position)
+        protected override IDjvuReader GetTextDataReader(long position)
         {
-            return Reader.CloneReader(position, Length);
+            return Reader.CloneReaderToMemory(position, Length);
         }
 
         #endregion Protected Methods

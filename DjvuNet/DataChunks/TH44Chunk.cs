@@ -98,10 +98,7 @@ namespace DjvuNet.DataChunks
 
         public override void ReadData(IDjvuReader reader)
         {
-            // Save the data location for reading later
             _dataLocation = reader.Position;
-
-            //Skip the thumbnail bytes which are delayed read
             reader.Position += Length;
         }
 
@@ -115,7 +112,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         internal IWPixelMap DecodeThumbnailImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 IWPixelMap thumbnail = new IWPixelMap();
                 thumbnail.Decode(reader);

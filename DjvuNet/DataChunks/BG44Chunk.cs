@@ -80,7 +80,7 @@ namespace DjvuNet.DataChunks
         /// <param name="backgroundMap"></param>
         public IWPixelMap ProgressiveDecodeBackground(IWPixelMap backgroundMap)
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 backgroundMap.Decode(reader);
             }
@@ -95,8 +95,6 @@ namespace DjvuNet.DataChunks
         public override void ReadData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
-
-            // Skip the data since it will be delay read
             reader.Position += Length;
         }
 
@@ -108,9 +106,9 @@ namespace DjvuNet.DataChunks
         /// Decodes the background image for this chunk
         /// </summary>
         /// <returns></returns>
-        private IWPixelMap DecodeBackgroundImage()
+        internal IWPixelMap DecodeBackgroundImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 IWPixelMap background = new IWPixelMap();
                 background.Decode(reader);

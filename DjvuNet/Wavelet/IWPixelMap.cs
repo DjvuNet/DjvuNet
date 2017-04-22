@@ -82,7 +82,7 @@ namespace DjvuNet.Wavelet
         #region Public Methods
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual void Decode(BinaryReader bs)
+        public virtual void Decode(IBinaryReader bs)
         {
             if (_ycodec == null)
             {
