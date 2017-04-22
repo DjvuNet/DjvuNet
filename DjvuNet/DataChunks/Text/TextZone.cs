@@ -164,7 +164,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public TextZone(DjvuReader reader, TextZone parent, TextZone sibling, TextChunk chunkParent)
+        public TextZone(IDjvuReader reader, TextZone parent, TextZone sibling, TextChunk chunkParent)
         {
             Parent = parent;
             ChunkParent = chunkParent;
@@ -240,7 +240,7 @@ namespace DjvuNet.DataChunks
         /// Decodes the data for the zone
         /// </summary>
         /// <param name="reader"></param>
-        private void DecodeZoneData(DjvuReader reader, TextZone sibling, TextChunk chunkParent)
+        internal void DecodeZoneData(IDjvuReader reader, TextZone sibling, TextChunk chunkParent)
         {
             ZoneType = (ZoneTypes)reader.ReadByte();
             X = reader.ReadUInt16BigEndian() - 0x8000;

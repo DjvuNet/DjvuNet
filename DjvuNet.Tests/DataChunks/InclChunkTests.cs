@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
 using Moq;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -38,7 +39,7 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
-        [Theory]
+        [DjvuTheory]
         [MemberData(nameof(InclTestData))]
         public void InclChunk_Theory(string testFile, DjvuJsonDocument doc)
         {

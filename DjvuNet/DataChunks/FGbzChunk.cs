@@ -115,7 +115,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         internal ColorPalette DecodePaletteData()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 // Read in the palette data
                 return new ColorPalette(reader, this);

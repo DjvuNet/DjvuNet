@@ -10,15 +10,17 @@ namespace DjvuNet
 
         long Position { get; set; }
 
-        DjvuReader CloneReader(long position);
+        IDjvuReader CloneReader(long position);
 
-        DjvuReader CloneReader(long position, long length);
+        IDjvuReader CloneReader(long position, long length);
+
+        IDjvuReader CloneReaderToMemory(long position, long length);
 
         BzzReader GetBZZEncodedReader();
 
         BzzReader GetBZZEncodedReader(long length);
 
-        DjvuReader GetFixedLengthStream(long length);
+        IDjvuReader GetFixedLengthStream(long length);
 
         Image GetJPEGImage(long length);
 

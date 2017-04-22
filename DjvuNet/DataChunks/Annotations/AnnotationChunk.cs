@@ -78,10 +78,7 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         public override void ReadData(IDjvuReader reader)
         {
-            // Save the current position for delayed decoding
             _dataLocation = reader.Position;
-
-            // Advance the reader
             reader.Position += Length;
         }
 
@@ -92,7 +89,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Reads the compressed annotation data
         /// </summary>
-        private Annotation[] ReadAnnotationData()
+        internal Annotation[] ReadAnnotationData()
         {
             if (Length == 0) return new Annotation[0];
 
@@ -109,7 +106,7 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        private Annotation[] DecodeAnnotationText(string text)
+        internal Annotation[] DecodeAnnotationText(string text)
         {
             return Annotation
                 .BreakIntoAnnotationPieces(text)

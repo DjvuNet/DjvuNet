@@ -59,7 +59,7 @@ namespace DjvuNet.DataChunks
             {
                 if (_isInitialized == false)
                 {
-                    using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+                    using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
                         ReadCompressedData(reader, _components.Count, _compressedSectionLength);
                 }
 

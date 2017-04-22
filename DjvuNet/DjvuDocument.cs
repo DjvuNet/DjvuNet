@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DjvuNet.DataChunks;
+using DjvuNet.Parser;
 
 namespace DjvuNet
 {
@@ -405,8 +406,8 @@ namespace DjvuNet
             for (int i = 0; i < _Pages?.Count; i++)
             {
                 _Pages[i]?.Dispose();
-                _Pages[i] = null;
             }
+            _Pages.Clear();
 
             _Disposed = true;
         }
@@ -535,7 +536,7 @@ namespace DjvuNet
                 return new List<T>(new T[] { RootForm as T });
 
             string id = typeof(T).Name.Replace("Chunk", null);
-            ChunkType chunkType = DjvuNode.GetChunkType(id);
+            ChunkType chunkType = DjvuParser.GetChunkType(id);
             return RootForm.Children.Where<IDjvuNode>(x => x.ChunkType == chunkType)
                 .ToList<IDjvuNode>().ConvertAll<T>(x => { return (T)x; });
         }
@@ -599,7 +600,7 @@ namespace DjvuNet
         /// <param name="reader"></param>
         internal void DecodeRootForm(DjvuReader reader)
         {
-            _rootForm = DjvuFormElement.GetRootForm(reader, null, this);
+            _rootForm = DjvuParser.GetRootForm(reader, null, this);
             _rootForm.Initialize(reader);
             foreach (IDjvuNode chunk in _rootForm.Children)
                 chunk.Initialize(reader);

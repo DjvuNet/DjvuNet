@@ -12,7 +12,7 @@ namespace DjvuNet
     {
         bool Disposed { get; }
 
-        DjvuDocument Document { get; }
+        IDjvuDocument Document { get; }
 
         DirmComponent Header { get; }
 

@@ -17,7 +17,11 @@ namespace DjvuNet
 
         long NodeOffset { get; set; }
 
+        uint OffsetDiff { get; }
+
         long Length { get; set; }
+
+        bool IsDirty { get; set; }
 
         void Initialize();
 

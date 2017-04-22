@@ -41,6 +41,12 @@ namespace DjvuNet.DataChunks
 
         public Annotation(string text)
         {
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
+
+            if (String.IsNullOrWhiteSpace(text))
+                throw new ArgumentException("Text cannot be empty or white space.", nameof(text));
+
             DecodeText(text);
         }
 
@@ -93,7 +99,7 @@ namespace DjvuNet.DataChunks
         /// <param name="text"></param>
         /// <param name="start"></param>
         /// <returns></returns>
-        private static int FindAnnotationEnd(string text, int start)
+        internal static int FindAnnotationEnd(string text, int start)
         {
             int parenCount = 0;
 
@@ -126,7 +132,7 @@ namespace DjvuNet.DataChunks
         /// Decodes the text of the annotation
         /// </summary>
         /// <param name="text"></param>
-        private void DecodeText(string text)
+        internal void DecodeText(string text)
         {
             string[] parameters = BreakIntoParameterPieces(text);
 
@@ -142,7 +148,7 @@ namespace DjvuNet.DataChunks
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        private string[] BreakIntoParameterPieces(string text)
+        internal string[] BreakIntoParameterPieces(string text)
         {
             // Skip the opening and closing parens
             text = text.Trim();
@@ -167,7 +173,8 @@ namespace DjvuNet.DataChunks
                     }
                     else if (start != -1 && isInString == false)
                     {
-                        pieces.Add(text.Substring(start, pos - start));
+                        int shift = (pos == text.Length - 1) ? 1 : 0;
+                        pieces.Add(text.Substring(start, pos - start + shift));
                         start = -1;
                     }
                 }

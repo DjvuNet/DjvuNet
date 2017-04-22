@@ -88,7 +88,7 @@ namespace DjvuNet.DataChunks
 
         private Image DecodeImageData()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation))
+            using (IDjvuReader reader = Reader.CloneReader(_dataLocation))
             {
                 return reader.GetJPEGImage(Length);
             }

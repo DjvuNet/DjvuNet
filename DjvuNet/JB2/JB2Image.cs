@@ -204,7 +204,7 @@ namespace DjvuNet.JB2
             return retval;
         }
 
-        public override void Decode(BinaryReader gbs, JB2Dictionary zdict)
+        public override void Decode(IBinaryReader gbs, JB2Dictionary zdict)
         {
             Init();
 

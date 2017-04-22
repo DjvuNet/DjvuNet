@@ -13,71 +13,6 @@ namespace DjvuNet.DataChunks.Tests
     public class DjvuNodeTests
     {
         [Fact()]
-        public void IsFormChunkTest()
-        {
-            Assert.True(DjvuNode.IsFormChunk(ChunkType.Djvi));
-            Assert.True(DjvuNode.IsFormChunk(ChunkType.Djvm));
-            Assert.True(DjvuNode.IsFormChunk(ChunkType.Djvu));
-            Assert.True(DjvuNode.IsFormChunk(ChunkType.Thum));
-            Assert.True(DjvuNode.IsFormChunk(ChunkType.Form));
-
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Anta));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Antz));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.BG44));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.BGjp));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Cida));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Dirm));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Djbz));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.FG44));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.FGbz));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.FGjp));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Incl));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Info));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Navm));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Sjbz));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Smmr));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Text));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.TH44));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Txta));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Txtz));
-
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.Unknown));
-            Assert.False(DjvuNode.IsFormChunk(ChunkType.WMRM));
-        }
-
-        [Fact()]
-        public void IsRootFormChildTest()
-        {
-            Assert.True(DjvuNode.IsRootFormChild(ChunkType.Dirm));
-            Assert.True(DjvuNode.IsRootFormChild(ChunkType.Djvi));
-            Assert.True(DjvuNode.IsRootFormChild(ChunkType.Djvu));
-            Assert.True(DjvuNode.IsRootFormChild(ChunkType.Navm));
-            Assert.True(DjvuNode.IsRootFormChild(ChunkType.Thum));
-            Assert.True(DjvuNode.IsRootFormChild(ChunkType.Form));
-
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Djvm));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Anta));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Antz));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.BG44));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.BGjp));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Cida));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Djbz));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.FG44));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.FGbz));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.FGjp));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Incl));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Info));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Sjbz));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Smmr));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Text));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.TH44));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Txta));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Txtz));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.Unknown));
-            Assert.False(DjvuNode.IsRootFormChild(ChunkType.WMRM));
-        }
-
-        [Fact()]
         public void InitializeTest()
         {
             Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
@@ -127,19 +62,13 @@ namespace DjvuNet.DataChunks.Tests
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void BuildIffChunkTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ReadDataTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
         [Fact()]
-        public void WriteDataTest()
+        public void WriteDataTest001()
         {
             Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
             Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
@@ -147,15 +76,70 @@ namespace DjvuNet.DataChunks.Tests
             using (MemoryStream stream = new MemoryStream(4096))
             using (DjvuWriter writer = new DjvuWriter(stream))
             {
+                string chunkID = "FORM";
+                string startOfChunkData = "Start of ChunkData";
+                string endOfChunkData = "End of ChunkData";
 
                 nodeMock.Object.DataOffset = 1024;
                 nodeMock.Object.Length = 2048;
                 nodeMock.Object.Reader = readerMock.Object;
                 nodeMock.Setup<ChunkType>(x => x.ChunkType).Returns(ChunkType.Form);
-                nodeMock.Object.ChunkID = "DTID";
+                nodeMock.Object.ChunkID = chunkID;
+
+                byte[] buffer = new byte[nodeMock.Object.Length];
+                byte[] startData = Encoding.ASCII.GetBytes(startOfChunkData);
+                Buffer.BlockCopy(startData, 0, buffer, 0, startData.Length);
+                byte[] endOfData = Encoding.ASCII.GetBytes(endOfChunkData);
+                Buffer.BlockCopy(endOfData, 0, buffer, buffer.Length - endOfData.Length, endOfData.Length);
+
+                nodeMock.Setup<byte[]>(x => x.ChunkData).Returns(buffer);
+
+                nodeMock.Object.WriteData(writer);
+
+                byte[] testBuffer = stream.GetBuffer();
+
+                string nodeName = Encoding.UTF8.GetString(testBuffer, 0, 4);
+                Assert.False(String.IsNullOrWhiteSpace(nodeName));
+                Assert.Equal<string>(chunkID, nodeName);
+
+                byte[] lengthBytes = new byte[4];
+                Buffer.BlockCopy(testBuffer, 4, lengthBytes, 0, 4);
+                Array.Reverse(lengthBytes);
+                uint dataLength = BitConverter.ToUInt32(lengthBytes, 0);
+                Assert.Equal<uint>((uint)nodeMock.Object.Length, dataLength);
+
+                string startOfData = Encoding.ASCII.GetString(testBuffer, 8, startData.Length);
+                Assert.False(String.IsNullOrWhiteSpace(startOfData));
+                Assert.Equal<string>(startOfChunkData, startOfData);
+
+                string endData = Encoding.ASCII.GetString(testBuffer, 8 + (int)nodeMock.Object.Length - endOfData.Length, endOfData.Length);
+                Assert.False(String.IsNullOrWhiteSpace(endData));
+                Assert.Equal<string>(endOfChunkData, endData);
+            }
+        }
+
+        [Fact()]
+        public void WriteDataTest002()
+        {
+            Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
+            Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
+
+            using (MemoryStream stream = new MemoryStream(4096))
+            using (DjvuWriter writer = new DjvuWriter(stream))
+            {
+                string chunkID = "FORM";
+
+                nodeMock.Object.DataOffset = 1024;
+                nodeMock.Object.Length = 2048;
+                nodeMock.Object.Reader = readerMock.Object;
+                nodeMock.Setup<ChunkType>(x => x.ChunkType).Returns(ChunkType.Form);
+                nodeMock.Object.ChunkID = chunkID;
 
                 byte[] buffer = new byte[nodeMock.Object.Length];
                 nodeMock.Setup<byte[]>(x => x.ChunkData).Returns(buffer);
+
+                Assert.Throws<ArgumentNullException>("writer", () => nodeMock.Object.WriteData(null));
+
             }
         }
     }

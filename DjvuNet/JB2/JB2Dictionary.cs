@@ -93,7 +93,7 @@ namespace DjvuNet.JB2
         #region Public Methods
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Decode(BinaryReader pool)
+        public void Decode(IBinaryReader pool)
         {
             Decode(pool, null);
         }
@@ -109,7 +109,7 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual void Decode(BinaryReader gbs, JB2Dictionary zdict)
+        public virtual void Decode(IBinaryReader gbs, JB2Dictionary zdict)
         {
             Init();
             JB2Decoder codec = new JB2Decoder();

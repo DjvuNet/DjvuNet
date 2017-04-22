@@ -6,20 +6,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.DataChunks.Tests
 {
     public class InfoChunkTests
     {
 
-        [Theory]
+        [DjvuTheory]
         [ClassData(typeof(DjvuJsonDataSource))]
         public void InfoChunk_Theory(DjvuJsonDocument doc, int index)
         {
-            // Skip document where json dump is incomplete
-            if (index == 63)
-                return;
-
             int pageCount = 0;
             using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(index, out pageCount))
             {

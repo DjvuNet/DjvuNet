@@ -129,8 +129,15 @@ namespace DjvuNet
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
-        public DjvuReader GetFixedLengthStream(long length)
+        public IDjvuReader GetFixedLengthStream(long length)
         {
+            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)), false);
+            return new DjvuReader(mem);
+        }
+
+        public IDjvuReader CloneReaderToMemory(long position, long length)
+        {
+            Position = position;
             MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)), false);
             return new DjvuReader(mem);
         }
@@ -473,7 +480,7 @@ namespace DjvuNet
         /// Clones the reader for parallel reading at the given position
         /// </summary>
         /// <returns></returns>
-        public DjvuReader CloneReader(long position)
+        public IDjvuReader CloneReader(long position)
         {
             DjvuReader newReader = null;
 
@@ -495,11 +502,13 @@ namespace DjvuNet
         /// <summary>
         /// Clones the reader for parallel reading at the given position
         /// </summary>
+        /// <param name="position"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public DjvuReader CloneReader(long position, long length)
+        public IDjvuReader CloneReader(long position, long length)
         {
             // TODO Get rid of not properly synchronized clones or synchronize readers
-            DjvuReader newReader = CloneReader(position);
+            IDjvuReader newReader = CloneReader(position);
             return newReader.GetFixedLengthStream(checked((int)length));
         }
 
@@ -510,8 +519,5 @@ namespace DjvuNet
 
         #endregion Public Methods
 
-        #region Private Methods
-
-        #endregion Private Methods
     }
 }

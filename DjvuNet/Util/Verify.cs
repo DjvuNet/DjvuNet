@@ -16,7 +16,7 @@ namespace DjvuNet.Utilities
             if (subsample < SubsambpleMin || subsample > SubsampleMax)
                 throw new ArgumentException(
                     $"Argument is outside of allowed values expected from {SubsambpleMin} to {SubsampleMax}" +
-                    $" actual value {subsample}");
+                    $" actual value {subsample}", nameof(subsample));
         }
     }
 }

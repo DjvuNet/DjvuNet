@@ -6,6 +6,7 @@ using DPixelMap = DjvuNet.Graphics.PixelMap;
 using Xunit;
 using System.IO;
 using System.Drawing.Imaging;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.Tests
 {
@@ -54,8 +55,8 @@ namespace DjvuNet.Tests
         }
 
 
-        [Theory]
-        [MemberData("TextContentData")]
+        [DjvuTheory]
+        [MemberData(nameof(TextContentData))]
         public void Text_Theory001(string filePath, int pageCount, int testPage, string expectedValue)
         {
             using (DjvuDocument document = new DjvuDocument(filePath))
@@ -73,8 +74,8 @@ namespace DjvuNet.Tests
                         $" {pageCount}\nResult page count: {document.Pages.Count}", ex);
                 }
 
-                if (filePath.EndsWith("031C.djvu"))
-                    DumpPageNodes(filePath, document);
+                //if (filePath.EndsWith("031C.djvu"))
+                //    DumpPageNodes(filePath, document);
             }
         }
 

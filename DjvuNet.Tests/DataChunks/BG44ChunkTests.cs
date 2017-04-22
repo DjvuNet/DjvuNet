@@ -1,31 +1,87 @@
-﻿using Xunit;
-using DjvuNet.DataChunks;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.DataChunks;
+using DjvuNet.Tests;
+using DjvuNet.Tests.Xunit;
+using DjvuNet.Wavelet;
+using Moq;
+using Xunit;
 
 namespace DjvuNet.DataChunks.Tests
 {
     public class BG44ChunkTests
     {
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+
+        public static IEnumerable<object[]> BG44TestData
+        {
+            get
+            {
+                List<object[]> retVal = new List<object[]>();
+
+                string dataDir = Path.Combine(Util.RepoRoot, "artifacts", "data");
+                DirectoryInfo directory = new DirectoryInfo(dataDir);
+                FileInfo[] files = directory.GetFiles("*.bg44");
+
+                foreach (FileInfo f in files)
+                    retVal.Add(new object[] { f.FullName, f.Length});
+
+                return retVal;
+            }
+        }
+
+        [Fact()]
         public void BG44ChunkTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
+            readerMock.Setup(x => x.Position).Returns(1024);
+
+            BG44Chunk unk = new BG44Chunk(readerMock.Object, null, null, null, 0);
+            Assert.Equal<ChunkType>(ChunkType.BG44, unk.ChunkType);
+            Assert.Equal<string>(ChunkType.BG44.ToString(), unk.Name);
+            Assert.Equal<long>(1024, unk.DataOffset);
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ProgressiveDecodeBackgroundTest()
+        [DjvuTheory]
+        [MemberData(nameof(BG44TestData))]
+        public void ProgressiveDecodeBackgroundTest(string file, long length)
         {
-            Assert.True(false, "This test needs an implementation");
+            using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (IDjvuReader reader = new DjvuReader(fs))
+            {
+                BG44Chunk unk = new BG44Chunk(reader, null, null, "BG44", length);
+                unk.Initialize();
+                IWPixelMap map = new IWPixelMap();
+                IWPixelMap result = unk.ProgressiveDecodeBackground(map);
+                Assert.Same(result, map);
+                using (Bitmap bitmap = map.GetPixmap().ToImage())
+                {
+                    //string path = Path.Combine(
+                    //    Util.RepoRoot, "artifacts", "data", "dumps", 
+                    //    Path.GetFileNameWithoutExtension(file) + "_bg44.png");
+                    //bitmap.Save(path);
+                }
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void ReadDataTest()
         {
-            Assert.True(false, "This test needs an implementation");
-        }
+            Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
+            readerMock.SetupProperty<long>(x => x.Position);
+            IDjvuReader reader = readerMock.Object;
+            reader.Position = 1024;
+
+            BG44Chunk unk = new BG44Chunk(readerMock.Object, null, null, null, 1024);
+            Assert.Equal<ChunkType>(ChunkType.BG44, unk.ChunkType);
+            Assert.Equal<string>(ChunkType.BG44.ToString(), unk.Name);
+            Assert.Equal<long>(1024, unk.DataOffset);
+
+            unk.ReadData(reader);
+            Assert.Equal<long>(2048, reader.Position);        }
     }
 }

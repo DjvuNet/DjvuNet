@@ -28,6 +28,7 @@ artifacts/
 
 # Helper projects
 # DjvuNet.Build/
+DjvuNet.DjvuLibre.Helper/
 
 # Code generated during build
 /*/Properties/AssemblyInfoCommon.cs

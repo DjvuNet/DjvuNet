@@ -136,7 +136,7 @@ namespace DjvuNet.Tests
             using(DjvuReader reader = new DjvuReader(Util.GetTestFilePath(1)))
             {
                 long length = 4096;
-                DjvuReader rf = reader.GetFixedLengthStream(length);
+                IDjvuReader rf = reader.GetFixedLengthStream(length);
                 Assert.NotNull(rf);
                 Assert.Equal<long>(length, rf.BaseStream.Length);
                 Assert.False(rf.BaseStream.CanWrite);
