@@ -20,6 +20,14 @@
     <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\' != '' And
                                    HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\')"
                     Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\**\*.pdb" />
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\' != '' And
+                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\') And 
+                                   $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
+                Include="$(ProjectDir)..\deps\$(PlatformTarget)\$(Configuration)\jpeg62.dll" />
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\' != '' And
+                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\') And 
+                                   $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
+            Include="$(ProjectDir)..\deps\$(PlatformTarget)\$(Configuration)\jpeg.pdb" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(ContentDjvuLibreFiles)' != '' And
