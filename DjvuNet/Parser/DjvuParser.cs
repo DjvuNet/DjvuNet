@@ -103,6 +103,12 @@ namespace DjvuNet.Parser
                 case ChunkType.TH44:
                     result = new TH44Chunk(reader, parent, rootDocument, chunkID, length);
                     break;
+                case ChunkType.BM44:
+                    result = new BM44Chunk(reader, parent, rootDocument, chunkID, length);
+                    break;
+                case ChunkType.PM44:
+                    result = new PM44Chunk(reader, parent, rootDocument, chunkID, length);
+                    break;
                 case ChunkType.WMRM:
                     result = new WmrmChunk(reader, parent, rootDocument, chunkID, length);
                     break;

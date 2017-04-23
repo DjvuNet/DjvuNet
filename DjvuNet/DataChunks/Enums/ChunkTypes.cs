@@ -140,6 +140,16 @@ namespace DjvuNet.DataChunks
         Cida,
 
         /// <summary>
+        /// Gray scale image wavelet encoded chunk 
+        /// </summary>
+        BM44,
+
+        /// <summary>
+        /// Color image wavelet encoded chunk
+        /// </summary>
+        PM44,
+
+        /// <summary>
         /// Abstract TextChunk type
         /// </summary>
         Text = int.MaxValue,
