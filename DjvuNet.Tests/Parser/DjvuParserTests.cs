@@ -42,6 +42,8 @@ namespace DjvuNet.Parser.Tests
                 retVal.Add(new object[] { null, null, null, ChunkType.Txta, "TXTA", 21 });
                 retVal.Add(new object[] { null, null, null, ChunkType.Txtz, "TXTZ", 22 });
                 retVal.Add(new object[] { null, null, null, ChunkType.WMRM, "WMRM", 23 });
+                retVal.Add(new object[] { null, null, null, ChunkType.BM44, "BM44", 24 });
+                retVal.Add(new object[] { null, null, null, ChunkType.PM44, "PM44", 25 });
 
                 return retVal;
             }
@@ -108,7 +110,8 @@ namespace DjvuNet.Parser.Tests
             Assert.False(DjvuParser.IsFormChunk(ChunkType.TH44));
             Assert.False(DjvuParser.IsFormChunk(ChunkType.Txta));
             Assert.False(DjvuParser.IsFormChunk(ChunkType.Txtz));
-
+            Assert.False(DjvuParser.IsFormChunk(ChunkType.BM44));
+            Assert.False(DjvuParser.IsFormChunk(ChunkType.PM44));
             Assert.False(DjvuParser.IsFormChunk(ChunkType.Unknown));
             Assert.False(DjvuParser.IsFormChunk(ChunkType.WMRM));
         }
@@ -127,6 +130,8 @@ namespace DjvuNet.Parser.Tests
             Assert.False(DjvuParser.IsRootFormChild(ChunkType.Anta));
             Assert.False(DjvuParser.IsRootFormChild(ChunkType.Antz));
             Assert.False(DjvuParser.IsRootFormChild(ChunkType.BG44));
+            Assert.False(DjvuParser.IsRootFormChild(ChunkType.BM44));
+            Assert.False(DjvuParser.IsRootFormChild(ChunkType.PM44));
             Assert.False(DjvuParser.IsRootFormChild(ChunkType.BGjp));
             Assert.False(DjvuParser.IsRootFormChild(ChunkType.Cida));
             Assert.False(DjvuParser.IsRootFormChild(ChunkType.Djbz));

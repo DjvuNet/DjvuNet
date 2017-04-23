@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DataChunks;
+using DjvuNet.Graphics;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Wavelet;
@@ -48,7 +49,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(BG44TestData))]
-        public void ProgressiveDecodeBackgroundTest(string file, long length)
+        public void ProgressiveDecodeBackground_Theory(string file, long length)
         {
             using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (IDjvuReader reader = new DjvuReader(fs))
@@ -58,12 +59,31 @@ namespace DjvuNet.DataChunks.Tests
                 IWPixelMap map = new IWPixelMap();
                 IWPixelMap result = unk.ProgressiveDecodeBackground(map);
                 Assert.Same(result, map);
-                using (Bitmap bitmap = map.GetPixmap().ToImage())
+                using (System.Drawing.Bitmap bitmap = map.GetPixmap().ToImage())
                 {
                     //string path = Path.Combine(
                     //    Util.RepoRoot, "artifacts", "data", "dumps", 
                     //    Path.GetFileNameWithoutExtension(file) + "_bg44.png");
                     //bitmap.Save(path);
+                }
+            }
+        }
+
+        [Fact]
+        public void ImageDecodeTest035()
+        {
+            string file = Path.Combine(Util.RepoRoot, "artifacts", "data", "test035C_P01.bg44");
+            using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (IDjvuReader reader = new DjvuReader(fs))
+            {
+                BG44Chunk unk = new BG44Chunk(reader, null, null, "BG44", fs.Length);
+                unk.Initialize();
+                IWPixelMap map = new IWPixelMap();
+                IWPixelMap result = unk.ProgressiveDecodeBackground(map);
+                PixelMap pixMap = result.GetPixmap();
+                using(var bmp = pixMap.ToImage())
+                {
+                    var format = bmp.PixelFormat;
                 }
             }
         }
@@ -82,6 +102,7 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);
-            Assert.Equal<long>(2048, reader.Position);        }
+            Assert.Equal<long>(2048, reader.Position);
+        }
     }
 }
