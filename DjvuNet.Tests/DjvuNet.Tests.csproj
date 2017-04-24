@@ -115,11 +115,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Compression\BSInputStreamTests.cs" />
-    <Compile Include="Compression\BzzReaderTests.cs" />
-    <Compile Include="Compression\MutableValueTests.cs" />
-    <Compile Include="Compression\ZPCodecTests.cs" />
-    <Compile Include="Compression\ZPTableTests.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationChunkTests.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationTests.cs" />
     <Compile Include="DataChunks\AntaChunkTests.cs" />
@@ -156,27 +151,14 @@
     <Compile Include="DjvuDocumentTests.cs" />
     <Compile Include="DjvuImageTests.cs" />
     <Compile Include="Extentions\ExtentionMethodsTests.cs" />
-    <Compile Include="Graphics\BitmapTests.cs" />
-    <Compile Include="Graphics\MapTests.cs" />
-    <Compile Include="Graphics\PixelMapScalerTests.cs" />
-    <Compile Include="Graphics\PixelMapTests.cs" />
-    <Compile Include="Graphics\PixelReferenceTests.cs" />
-    <Compile Include="Graphics\PixelTests.cs" />
-    <Compile Include="Graphics\RectangleTests.cs" />
     <Compile Include="IO\DjvuReaderTests.cs" />
     <Compile Include="IO\DjvuWriterTests.cs" />
-    <Compile Include="JB2\JB2BlitTests.cs" />
-    <Compile Include="JB2\JB2DecoderTests.cs" />
-    <Compile Include="JB2\JB2DictionaryTests.cs" />
-    <Compile Include="JB2\JB2ImageTests.cs" />
-    <Compile Include="JB2\JB2ShapeTests.cs" />
     <Compile Include="Parser\DjvuFormatExceptionTests.cs" />
     <Compile Include="Parser\DjvuParserTests.cs" />
     <Compile Include="Parser\IffParserExceptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DjvuPageTests.cs" />
     <Compile Include="Util.cs" />
-    <Compile Include="UtilJsonTests.cs" />
     <Compile Include="Util\GenericComparerTests.cs" />
     <Compile Include="Util\VerifyTests.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />

@@ -129,7 +129,26 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compression\BSInputStreamTests.cs" />
+    <Compile Include="Compression\BzzReaderTests.cs" />
+    <Compile Include="Compression\MutableValueTests.cs" />
+    <Compile Include="Compression\ZPCodecTests.cs" />
+    <Compile Include="Compression\ZPTableTests.cs" />
+    <Compile Include="Graphics\BitmapTests.cs" />
+    <Compile Include="Graphics\MapTests.cs" />
+    <Compile Include="Graphics\PixelMapScalerTests.cs" />
+    <Compile Include="Graphics\PixelMapTests.cs" />
+    <Compile Include="Graphics\PixelReferenceTests.cs" />
+    <Compile Include="Graphics\PixelTests.cs" />
+    <Compile Include="Graphics\RectangleTests.cs" />
+    <Compile Include="JB2\JB2BlitTests.cs" />
+    <Compile Include="JB2\JB2DecoderTests.cs" />
+    <Compile Include="JB2\JB2DictionaryTests.cs" />
+    <Compile Include="JB2\JB2ImageTests.cs" />
+    <Compile Include="JB2\JB2ShapeTests.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
+    <Compile Include="Util.cs" />
+    <Compile Include="UtilJsonTests.cs" />
     <Compile Include="Wavelet\IWBlockTests.cs" />
     <Compile Include="Wavelet\IWBucketTests.cs" />
     <Compile Include="Wavelet\IWCodecTests.cs" />
@@ -142,6 +161,7 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

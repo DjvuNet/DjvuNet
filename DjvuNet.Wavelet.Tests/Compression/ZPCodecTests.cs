@@ -12,6 +12,22 @@ namespace DjvuNet.Compression.Tests
 {
     public class ZPCodecTests
     {
+        public static byte[] BzzCompressedTestBuffer
+        {
+            get
+            {
+                string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
+                using (FileStream stream = File.OpenRead(Path.Combine(Util.RepoRoot, bzzFile)))
+                {
+                    byte[] buffer = new byte[stream.Length];
+                    int countRead = stream.Read(buffer, 0, buffer.Length);
+                    if (countRead != buffer.Length)
+                        throw new IOException($"Unable to read file with test data: {bzzFile}");
+                    return buffer;
+                }
+            }
+        }
+
         [Fact()]
         public void ZPCodecTest001()
         {
@@ -23,7 +39,7 @@ namespace DjvuNet.Compression.Tests
         [Fact()]
         public void ZPCodecTest002()
         {
-            byte[] buffer = DjvuReaderTests.BzzCompressedTestBuffer;
+            byte[] buffer = BzzCompressedTestBuffer;
             using(MemoryStream stream = new MemoryStream(buffer, false))
             {
                 ZPCodec codec = new ZPCodec(stream);
