@@ -4,76 +4,48 @@ using DjvuNet.Graphics;
 namespace DjvuNet.Wavelet
 {
     /// <summary>
-    /// This class represents structured wavelette data.
+    /// This class represents structured wavelet data.
     /// </summary>
     public sealed class IWMap
     {
-        #region Public Variables
-
-        #region Bh
+        #region Public Fields
 
         /// <summary>
         /// Gets or sets the Bh value
         /// </summary>
         public int Bh;
 
-        #endregion Bh
-
-        #region Blocks
-
         /// <summary>
         /// Gets or sets the blocks
         /// </summary>
         public IWBlock[] Blocks;
-
-        #endregion Blocks
-
-        #region Bw
 
         /// <summary>
         /// Gets or sets the Bw value
         /// </summary>
         public int Bw;
 
-        #endregion Bw
-
-        #region Ih
-
         /// <summary>
         /// Gets or sets the Ih value
         /// </summary>
         public int Ih;
-
-        #endregion Ih
-
-        #region Iw
 
         /// <summary>
         /// Gets or sets the Iw value
         /// </summary>
         public int Iw;
 
-        #endregion Iw
-
-        #region Nb
-
         /// <summary>
         /// Gets or sets the Nb value
         /// </summary>
         public int Nb;
-
-        #endregion Nb
-
-        #region Top
 
         /// <summary>
         /// Gets or sets the top value
         /// </summary>
         public int Top;
 
-        #endregion Top
-
-        #endregion Public Variables
+        #endregion Public Fields
 
         #region Constructors
 
@@ -114,18 +86,14 @@ namespace DjvuNet.Wavelet
                 for (int i = 0; i < Nb; i++)
                     retval.Blocks[i] = Blocks[i].Duplicate();
             }
-            catch (Exception)
+            catch
             {
             }
 
             return retval;
         }
 
-        #endregion Public Methods
-
-        #region Private Methods
-
-        private static void Backward(short[] p, int pidx, int w, int h, int rowsize, int begin, int end)
+        public static void Backward(short[] p, int pidx, int w, int h, int rowsize, int begin, int end)
         {
             for (int scale = begin >> 1; scale >= end; scale >>= 1)
             {
@@ -137,7 +105,7 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        private static void BackwardFilter(short[] p, int pidx, int b, int e, int z, int s)
+        public static void BackwardFilter(short[] p, int pidx, int b, int e, int z, int s)
         {
             int s3 = 3 * s;
 
@@ -220,7 +188,7 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        private int GetBucketCount()
+        public int GetBucketCount()
         {
             int buckets = 0;
 
@@ -443,7 +411,7 @@ namespace DjvuNet.Wavelet
             return this;
         }
 
-        private void Slashres(int res)
+        public void Slashres(int res)
         {
             int minbucket = 1;
 
@@ -462,6 +430,6 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        #endregion Private Methods
+        #endregion Public Methods
     }
 }
