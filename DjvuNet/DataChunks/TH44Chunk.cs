@@ -73,7 +73,7 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_image == null)
-                    _image = Thumbnail.GetPixmap().ToImage();
+                    _image = Thumbnail.GetPixelMap().ToImage();
 
                 return _image;
             }

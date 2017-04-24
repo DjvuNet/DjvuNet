@@ -392,7 +392,7 @@ namespace DjvuNet
             {
                 if (_foregroundPixelMap == null)
                 {
-                    _foregroundPixelMap = ForegroundIWPixelMap.GetPixmap();
+                    _foregroundPixelMap = ForegroundIWPixelMap.GetPixelMap();
                     if (_foregroundPixelMap != null)
                         OnPropertyChanged(nameof(ForegroundPixelMap));
                 }
@@ -799,19 +799,19 @@ namespace DjvuNet
 
                 if (subsample == red)
                 {
-                    pMap = bgIWPixmap.GetPixmap(1, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(1, rect, retval);
                 }
                 else if (subsample == (2 * red))
                 {
-                    pMap = bgIWPixmap.GetPixmap(2, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(2, rect, retval);
                 }
                 else if (subsample == (4 * red))
                 {
-                    pMap = bgIWPixmap.GetPixmap(4, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(4, rect, retval);
                 }
                 else if (subsample == (8 * red))
                 {
-                    pMap = bgIWPixmap.GetPixmap(8, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(8, rect, retval);
                 }
                 else if ((red * 4) == (subsample * 3))
                 {
@@ -829,7 +829,7 @@ namespace DjvuNet
                     if (xrect.Top > iwHeight)
                         xrect.Top = iwHeight;
 
-                    GPixmap iwPMap = bgIWPixmap.GetPixmap(1, xrect, null);
+                    GPixmap iwPMap = bgIWPixmap.GetPixelMap(1, xrect, null);
                     pMap = (retval != null) ? retval : new GPixmap();
                     pMap.Downsample43(iwPMap, nrect);
                 }
@@ -850,7 +850,7 @@ namespace DjvuNet
                     mapScaler.SetVertRatio(red * po2, subsample);
 
                     GRect xrect = mapScaler.GetRequiredRect(rect);
-                    GPixmap iwPMap = bgIWPixmap.GetPixmap(po2, xrect, null);
+                    GPixmap iwPMap = bgIWPixmap.GetPixelMap(po2, xrect, null);
                     pMap = (retval != null) ? retval : new GPixmap();
 
                     mapScaler.Scale(xrect, iwPMap, rect, pMap);
@@ -1480,7 +1480,7 @@ namespace DjvuNet
                 var iwPixelMap = ForegroundIWPixelMap;
                 if (iwPixelMap != null)
                 {
-                    result = ForegroundIWPixelMap.GetPixmap().ToImage();
+                    result = ForegroundIWPixelMap.GetPixelMap().ToImage();
                 }
                 else if ((jb2image = ForegroundJB2Image) != null)
                 {
@@ -1545,7 +1545,7 @@ namespace DjvuNet
                 _isBackgroundDecoded = true;
             }
 
-            Bitmap result = backgroundMap.GetPixmap().ToImage();
+            Bitmap result = backgroundMap.GetPixelMap().ToImage();
 
             if (resizeImage)
             {
