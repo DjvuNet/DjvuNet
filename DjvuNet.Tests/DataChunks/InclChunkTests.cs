@@ -62,7 +62,7 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.False(chunk.IsInitialized);
                 // Support multiple INCL chunks in single DjvuChunk
                 var testChunk = doc.Data.Pages[0].Children
-                    .Where(x => x.ID == "INCL" && x.Name == chunk.Name)
+                    .Where(x => x.ID == "INCL" && x.Name == chunk.IncludeID)
                     .FirstOrDefault<DjvuJsonDocument.Chunk>();
                 Assert.NotNull(testChunk);
                 Assert.Equal<string>(testChunk.Name, chunk.IncludeID);

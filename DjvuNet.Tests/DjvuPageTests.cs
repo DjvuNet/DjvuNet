@@ -20,7 +20,7 @@ namespace DjvuNet.Tests
             {
                 var retVal = new List<object[]>();
 
-                for(int i = 1; i < 77; i++)
+                for(int i = 1; i <= 77; i++)
                 {
                     string pageText = "";
                     string path = null;
@@ -75,7 +75,7 @@ namespace DjvuNet.Tests
                 }
 
                 //if (filePath.EndsWith("031C.djvu"))
-                //  DumpPageNodes(filePath, document);   
+                //DumpPageNodes(filePath, document);
             }
         }
 
@@ -97,7 +97,7 @@ namespace DjvuNet.Tests
                     {
                         dict.Add(node.Name, 0);
                     }
-                    string nameExt = node.Name == "BG44" ? $"_P01_{dict[node.Name]}." : "_P01.";
+                    string nameExt = node.Name == "BG44" || node.Name == "Incl" ? $"_P01_{dict[node.Name]}." : "_P01.";
                     string file = Path.Combine(path, fileName + nameExt + node.Name.ToLower());
                     using (FileStream fs = File.Create(file))
                     using (BinaryWriter writer = new BinaryWriter(fs))
@@ -107,7 +107,9 @@ namespace DjvuNet.Tests
                     }
                 }
             }
-            catch (Exception) { }
+            catch
+            {
+            }
         }
 
         private static void TestPageText(string expectedValue, IDjvuPage page)
