@@ -60,9 +60,11 @@ namespace DjvuNet.DataChunks.Tests
             {
                 InclChunk chunk = new InclChunk(reader, parent, document, "INCL", buffer.Length);
                 Assert.False(chunk.IsInitialized);
+                // Support multiple INCL chunks in single DjvuChunk
                 var testChunk = doc.Data.Pages[0].Children
-                    .Where(x => x.ID == "INCL")
+                    .Where(x => x.ID == "INCL" && x.Name == chunk.Name)
                     .FirstOrDefault<DjvuJsonDocument.Chunk>();
+                Assert.NotNull(testChunk);
                 Assert.Equal<string>(testChunk.Name, chunk.IncludeID);
             }
         }
