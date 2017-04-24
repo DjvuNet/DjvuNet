@@ -18,7 +18,7 @@ namespace DjvuNet.Tests.Xunit
         private string _RowName;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Called by the deserializer; should only be called by deriving classes for deserialization purposes")]
+        [Obsolete("Use for deserialization only.")]
         public DjvuNamedDataRowTestCase()
         {
             _MessageSink = new NullMessageSink();

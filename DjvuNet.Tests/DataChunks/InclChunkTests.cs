@@ -39,7 +39,11 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
+#if _APPVEYOR
+        [Theory]
+#else 
         [DjvuTheory]
+#endif
         [MemberData(nameof(InclTestData))]
         public void InclChunk_Theory(string testFile, DjvuJsonDocument doc)
         {

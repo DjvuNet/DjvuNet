@@ -55,7 +55,11 @@ namespace DjvuNet.Tests
         }
 
 
+#if _APPVEYOR
+        [Theory]
+#else 
         [DjvuTheory]
+#endif
         [MemberData(nameof(TextContentData))]
         public void Text_Theory001(string filePath, int pageCount, int testPage, string expectedValue)
         {
