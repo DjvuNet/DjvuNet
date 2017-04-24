@@ -37,12 +37,12 @@ namespace DjvuNet.DataChunks
 
         #region Thumbnail
 
-        private IWPixelMap _thumbnail;
+        private IInterWavePixelMap _thumbnail;
 
         /// <summary>
         /// Gets the thumbnail image
         /// </summary>
-        public IWPixelMap Thumbnail
+        public IInterWavePixelMap Thumbnail
         {
             get
             {
@@ -110,11 +110,11 @@ namespace DjvuNet.DataChunks
         /// Decodes the thumbnail image for this chunk
         /// </summary>
         /// <returns></returns>
-        internal IWPixelMap DecodeThumbnailImage()
+        internal IInterWavePixelMap DecodeThumbnailImage()
         {
             using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
-                IWPixelMap thumbnail = new IWPixelMap();
+                IInterWavePixelMap thumbnail = new InterWavePixelMap();
                 thumbnail.Decode(reader);
 
                 return thumbnail;

@@ -11,7 +11,7 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class AnnotationChunkTests
     {
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void AnnotationChunkTest()
         {
             Mock<AnnotationChunk> annoMock = new Mock<AnnotationChunk> { CallBase = true };

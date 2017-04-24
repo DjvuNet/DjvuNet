@@ -23,6 +23,27 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
+        [Fact()]
+        public void ChunkTypeTest()
+        {
+            Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
+            readerMock.Setup(x => x.Position).Returns(1024);
+            BM44Chunk unk = new BM44Chunk(readerMock.Object, null, null, null, 0);
+            Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void DecodeImageTest()
+        {
+
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void ImageTest()
+        {
+
+        }
+
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ProgressiveDecodeBackgroundTest()
         {
@@ -45,5 +66,6 @@ namespace DjvuNet.DataChunks.Tests
             unk.ReadData(reader);
             Assert.Equal<long>(2048, reader.Position);
         }
+
     }
 }

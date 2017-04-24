@@ -294,12 +294,12 @@ namespace DjvuNet
 
         #region ForegroundIWPixelMap
 
-        private Wavelet.IWPixelMap _foregroundIWPixelMap;
+        private Wavelet.IInterWavePixelMap _foregroundIWPixelMap;
 
         /// <summary>
         /// Gets the Foreground pixel map
         /// </summary>
-        public Wavelet.IWPixelMap ForegroundIWPixelMap
+        public Wavelet.IInterWavePixelMap ForegroundIWPixelMap
         {
             get
             {
@@ -323,12 +323,12 @@ namespace DjvuNet
 
         #region BackgroundIWPixelMap
 
-        private Wavelet.IWPixelMap _backgroundIWPixelMap;
+        private Wavelet.IInterWavePixelMap _backgroundIWPixelMap;
 
         /// <summary>
         /// Gets the background pixel map
         /// </summary>
-        public Wavelet.IWPixelMap BackgroundIWPixelMap
+        public Wavelet.IInterWavePixelMap BackgroundIWPixelMap
         {
             get
             {
@@ -782,7 +782,7 @@ namespace DjvuNet
                 gamma_correction = 10D;
             }
 
-            IWPixelMap bgIWPixmap = BackgroundIWPixelMap;
+            IInterWavePixelMap bgIWPixmap = BackgroundIWPixelMap;
 
             if (bgIWPixmap != null)
             {
@@ -1179,7 +1179,7 @@ namespace DjvuNet
                 return false;
 
             // There is no need to synchronize since we won't access data which could be updated.
-            IWPixelMap bgIWPixmap = (IWPixelMap)BackgroundIWPixelMap;
+            IInterWavePixelMap bgIWPixmap = (IInterWavePixelMap)BackgroundIWPixelMap;
             int bgred = 0;
 
             if (bgIWPixmap != null)
@@ -1332,7 +1332,7 @@ namespace DjvuNet
                 }
 
                 // Three layer model.
-                IWPixelMap fgIWPixmap = ForegroundIWPixelMap;
+                IInterWavePixelMap fgIWPixmap = ForegroundIWPixelMap;
 
                 if (fgIWPixmap != null)
                 {
@@ -1526,7 +1526,7 @@ namespace DjvuNet
                 return DjvuImage.CreateBlankImage(Brushes.White, width, height);
 
             // Get the composite background image
-            Wavelet.IWPixelMap backgroundMap = null;
+            Wavelet.IInterWavePixelMap backgroundMap = null;
 
             lock (_loadingLock)
             {

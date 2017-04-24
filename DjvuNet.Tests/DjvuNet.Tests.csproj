@@ -121,6 +121,7 @@
     <Compile Include="DataChunks\AntzChunkTests.cs" />
     <Compile Include="DataChunks\BG44ChunkTests.cs" />
     <Compile Include="DataChunks\BM44ChunkTests.cs" />
+    <Compile Include="DataChunks\BM44FormTests.cs" />
     <Compile Include="DataChunks\CidaChunkTests.cs" />
     <Compile Include="DataChunks\Directory\DirmComponentTests.cs" />
     <Compile Include="DataChunks\DirmChunkTests.cs" />
@@ -140,6 +141,7 @@
     <Compile Include="DataChunks\Navigation\DocumentNavigatorTests.cs" />
     <Compile Include="DataChunks\NavmChunkTests.cs" />
     <Compile Include="DataChunks\PM44ChunkTests.cs" />
+    <Compile Include="DataChunks\PM44FormTests.cs" />
     <Compile Include="DataChunks\SjbzChunkTests.cs" />
     <Compile Include="DataChunks\SmmrChunkTests.cs" />
     <Compile Include="DataChunks\TH44ChunkTests.cs" />

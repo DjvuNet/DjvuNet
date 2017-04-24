@@ -60,8 +60,8 @@ namespace DjvuNet.DataChunks.Tests
             {
                 BG44Chunk unk = new BG44Chunk(reader, null, null, "BG44", length);
                 unk.Initialize();
-                IWPixelMap map = new IWPixelMap();
-                IWPixelMap result = unk.ProgressiveDecodeBackground(map);
+                InterWavePixelMap map = new InterWavePixelMap();
+                IInterWavePixelMap result = unk.ProgressiveDecodeBackground(map);
                 Assert.Same(result, map);
                 using (System.Drawing.Bitmap bitmap = map.GetPixelMap().ToImage())
                 {
@@ -84,8 +84,8 @@ namespace DjvuNet.DataChunks.Tests
             {
                 BG44Chunk unk = new BG44Chunk(reader, null, null, "BG44", fs.Length);
                 unk.Initialize();
-                IWPixelMap map = new IWPixelMap();
-                IWPixelMap result = unk.ProgressiveDecodeBackground(map);
+                InterWavePixelMap map = new InterWavePixelMap();
+                IInterWavePixelMap result = unk.ProgressiveDecodeBackground(map);
                 PixelMap pixMap = result.GetPixelMap();
                 using(var bmp = pixMap.ToImage())
                 {

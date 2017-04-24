@@ -6,9 +6,9 @@ namespace DjvuNet.DataChunks
     {
         ChunkType ChunkType { get; }
 
-        IWPixelMap Image { get; }
+        IInterWavePixelMap Image { get; }
 
-        IWPixelMap ProgressiveDecodeBackground(IWPixelMap pixelMap);
+        IInterWavePixelMap ProgressiveDecodeBackground(IInterWavePixelMap pixelMap);
 
         void ReadData(IDjvuReader reader);
     }
