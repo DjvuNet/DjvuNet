@@ -6,7 +6,7 @@ namespace DjvuNet.Wavelet
     /// <summary>
     /// This class represents structured wavelet data.
     /// </summary>
-    public class IWBlock
+    public class InterWaveBlock : IInterWaveBlock
     {
         #region Variables
 
@@ -31,16 +31,16 @@ namespace DjvuNet.Wavelet
         /// <returns>
         /// The newly created copy
         /// </returns>
-        public IWBlock Duplicate()
+        public InterWaveBlock Duplicate()
         {
-            IWBlock retval = null;
+            InterWaveBlock retval = null;
 
             try
             {
-                retval = new IWBlock { PData = this.PData };
+                retval = new InterWaveBlock { PData = this.PData };
 
                 short[][][] pdata = (short[][][])this.PData.Clone();
-                ((IWBlock)retval).PData = pdata;
+                ((InterWaveBlock)retval).PData = pdata;
 
                 for (int i = 0; i < pdata.Length; i++)
                 {

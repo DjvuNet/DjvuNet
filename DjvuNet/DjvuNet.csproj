@@ -102,6 +102,7 @@
     <Compile Include="DataChunks\DjvuNode.cs" />
     <Compile Include="DataChunks\IBG44Chunk.cs" />
     <Compile Include="DataChunks\IBM44Chunk.cs" />
+    <Compile Include="DataChunks\IBM44Form.cs" />
     <Compile Include="DataChunks\IDirmChunk.cs" />
     <Compile Include="DataChunks\IDjbzChunk.cs" />
     <Compile Include="DataChunks\IFG44Chunk.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="DataChunks\IInfoChunk.cs" />
     <Compile Include="DataChunks\INavmChunk.cs" />
     <Compile Include="DataChunks\IPM44Chunk.cs" />
+    <Compile Include="DataChunks\IPM44Form.cs" />
     <Compile Include="DataChunks\ISjbzChunk.cs" />
     <Compile Include="DataChunks\ITH44Chunk.cs" />
     <Compile Include="DataChunks\IWmrmChunk.cs" />
@@ -185,6 +187,11 @@
     <Compile Include="Parser\IDjvuRootElement.cs" />
     <Compile Include="Parser\IffParserException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Wavelet\InterWaveBlock.cs" />
+    <Compile Include="Wavelet\InterWaveBucket.cs" />
+    <Compile Include="Wavelet\InterWaveCodec.cs" />
+    <Compile Include="Wavelet\InterWaveMap.cs" />
+    <Compile Include="Wavelet\InterWavePixelMap.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Text\PageText.cs" />
@@ -192,11 +199,10 @@
     <Compile Include="Text\PageTextSearch.cs" />
     <Compile Include="Util\GenericComparer.cs" />
     <Compile Include="Util\Verify.cs" />
-    <Compile Include="Wavelet\IWBlock.cs" />
-    <Compile Include="Wavelet\IWBucket.cs" />
-    <Compile Include="Wavelet\IWCodec.cs" />
-    <Compile Include="Wavelet\IWMap.cs" />
-    <Compile Include="Wavelet\IWPixelMap.cs" />
+    <Compile Include="Wavelet\IInterWaveBlock.cs" />
+    <Compile Include="Wavelet\IInterWaveCodec.cs" />
+    <Compile Include="Wavelet\IInterWaveMap.cs" />
+    <Compile Include="Wavelet\IInterWavePixelMap.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

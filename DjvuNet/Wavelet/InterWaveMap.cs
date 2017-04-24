@@ -6,7 +6,7 @@ namespace DjvuNet.Wavelet
     /// <summary>
     /// This class represents structured wavelet data.
     /// </summary>
-    public sealed class IWMap
+    public sealed class InterWaveMap : IInterWaveMap
     {
         #region Public Fields
 
@@ -18,7 +18,7 @@ namespace DjvuNet.Wavelet
         /// <summary>
         /// Gets or sets the blocks
         /// </summary>
-        public IWBlock[] Blocks;
+        public InterWaveBlock[] Blocks;
 
         /// <summary>
         /// Gets or sets the Bw value
@@ -50,11 +50,11 @@ namespace DjvuNet.Wavelet
         #region Constructors
 
         /// <summary> Creates a new Map object.</summary>
-        public IWMap()
+        public InterWaveMap()
         {
         }
 
-        public IWMap(int w, int h)
+        public InterWaveMap(int w, int h)
         {
             Init(w, h);
         }
@@ -63,16 +63,16 @@ namespace DjvuNet.Wavelet
 
         #region Public Methods
 
-        public IWMap Duplicate()
+        public InterWaveMap Duplicate()
         {
-            IWMap retval = null;
+            InterWaveMap retval = null;
 
             try
             {
-                retval = new IWMap
+                retval = new InterWaveMap
                 {
                     Bh = Bh,
-                    Blocks = (IWBlock[])Blocks.Clone(),
+                    Blocks = (InterWaveBlock[])Blocks.Clone(),
                     Bw = Bw,
                     Ih = Ih,
                     Iw = Iw,
@@ -209,7 +209,7 @@ namespace DjvuNet.Wavelet
             short[] data16 = new short[Bw * Bh];
             short[] liftblock = new short[1024];
             int pidx = 0;
-            IWBlock[] block = Blocks;
+            InterWaveBlock[] block = Blocks;
             int blockidx = 0;
             int ppidx = 0;
 
@@ -326,7 +326,7 @@ namespace DjvuNet.Wavelet
                      bx < work.Left;
                      bx += boxsize, bidx++, rdata += boxsize)
                 {
-                    IWBlock block = Blocks[bidx];
+                    InterWaveBlock block = Blocks[bidx];
                     int mlevel = nlevel;
 
                     if ((nlevel > 2) &&
@@ -396,17 +396,17 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        public IWMap Init(int w, int h)
+        public InterWaveMap Init(int w, int h)
         {
             Iw = w;
             Ih = h;
             Bw = ((w + 32) - 1) & unchecked((int)0xffffffe0);
             Bh = ((h + 32) - 1) & unchecked((int)0xffffffe0);
             Nb = (Bw * Bh) / 1024;
-            Blocks = new IWBlock[Nb];
+            Blocks = new InterWaveBlock[Nb];
 
             for (int i = 0; i < Blocks.Length; i++)
-                Blocks[i] = new IWBlock();
+                Blocks[i] = new InterWaveBlock();
 
             return this;
         }

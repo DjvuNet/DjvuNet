@@ -23,6 +23,6 @@ namespace DjvuNet.Interfaces
         /// data to decode
         /// </param>
         /// <throws>  IOException if an error occurs </throws>
-        void Decode(IBinaryReader pool);
+        void Decode(IBinaryReader reader);
     }
 }
