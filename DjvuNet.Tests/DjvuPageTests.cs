@@ -75,7 +75,7 @@ namespace DjvuNet.Tests
                 }
 
                 //if (filePath.EndsWith("031C.djvu"))
-                //    DumpPageNodes(filePath, document);
+                //  DumpPageNodes(filePath, document);   
             }
         }
 
@@ -92,17 +92,18 @@ namespace DjvuNet.Tests
                 foreach (IDjvuNode node in children)
                 {
                     if (dict.ContainsKey(node.Name))
-                        continue;
+                        dict[node.Name] += 1;
                     else
                     {
-                        dict.Add(node.Name, 1);
-                        string file = Path.Combine(path, fileName + "_P01." + node.Name.ToLower());
-                        using (FileStream fs = File.Create(file))
-                        using (BinaryWriter writer = new BinaryWriter(fs))
-                        {
-                            byte[] buffer = node.ChunkData;
-                            writer.Write(buffer, 0, buffer.Length);
-                        }
+                        dict.Add(node.Name, 0);
+                    }
+                    string nameExt = node.Name == "BG44" ? $"_P01_{dict[node.Name]}." : "_P01.";
+                    string file = Path.Combine(path, fileName + nameExt + node.Name.ToLower());
+                    using (FileStream fs = File.Create(file))
+                    using (BinaryWriter writer = new BinaryWriter(fs))
+                    {
+                        byte[] buffer = node.ChunkData;
+                        writer.Write(buffer, 0, buffer.Length);
                     }
                 }
             }
@@ -368,7 +369,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void ExtractThumbnailImage001()
+        public void ExtractThumbnailImage010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -434,7 +435,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void GetTextForLocation001()
+        public void GetTextForLocation010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -451,7 +452,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void Image001()
+        public void Image010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -467,7 +468,23 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void InvertImage001()
+        public void Image001()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                var page = document.FirstPage;
+
+                var image = page.Image;
+                Assert.NotNull(image);
+                Assert.IsType<Bitmap>(image);
+            }
+        }
+
+        [Fact]
+        public void InvertImage010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
