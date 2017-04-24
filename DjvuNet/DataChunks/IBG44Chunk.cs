@@ -4,8 +4,8 @@ namespace DjvuNet.DataChunks
 {
     public interface IBG44Chunk : IDjvuNode
     {
-        IWPixelMap BackgroundImage { get; }
+        IInterWavePixelMap BackgroundImage { get; }
 
-        IWPixelMap ProgressiveDecodeBackground(IWPixelMap backgroundMap);
+        IInterWavePixelMap ProgressiveDecodeBackground(IInterWavePixelMap backgroundMap);
     }
 }

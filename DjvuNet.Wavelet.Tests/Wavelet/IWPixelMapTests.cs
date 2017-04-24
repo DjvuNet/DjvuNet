@@ -16,10 +16,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void DecodeTest()
         {
-            Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

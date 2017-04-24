@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.DataChunks
 {
-    public class PM44Form : DjvuFormElement
+    public class PM44Form : DjvuFormElement, IPM44Form
     {
         public override ChunkType ChunkType { get { return ChunkType.PM44Form; } }
 

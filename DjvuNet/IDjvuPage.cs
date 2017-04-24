@@ -42,9 +42,9 @@ namespace DjvuNet
 
         void Preload();
 
-        IWPixelMap BackgroundIWPixelMap { get; }
+        IInterWavePixelMap BackgroundIWPixelMap { get; }
 
-        IWPixelMap ForegroundIWPixelMap { get; }
+        IInterWavePixelMap ForegroundIWPixelMap { get; }
 
         JB2Image ForegroundJB2Image { get; }
 

@@ -36,12 +36,12 @@ namespace DjvuNet.DataChunks
 
         #region BackgroundImage
 
-        private IWPixelMap _backgroundImage;
+        private IInterWavePixelMap _backgroundImage;
 
         /// <summary>
         /// Gets the background image for the chunk
         /// </summary>
-        public IWPixelMap BackgroundImage
+        public IInterWavePixelMap BackgroundImage
         {
             get
             {
@@ -78,7 +78,7 @@ namespace DjvuNet.DataChunks
         /// Progressively decodes the background image
         /// </summary>
         /// <param name="backgroundMap"></param>
-        public IWPixelMap ProgressiveDecodeBackground(IWPixelMap backgroundMap)
+        public IInterWavePixelMap ProgressiveDecodeBackground(IInterWavePixelMap backgroundMap)
         {
             using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
@@ -106,11 +106,11 @@ namespace DjvuNet.DataChunks
         /// Decodes the background image for this chunk
         /// </summary>
         /// <returns></returns>
-        internal IWPixelMap DecodeBackgroundImage()
+        internal IInterWavePixelMap DecodeBackgroundImage()
         {
             using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
-                IWPixelMap background = new IWPixelMap();
+                IInterWavePixelMap background = new InterWavePixelMap();
                 background.Decode(reader);
 
                 return background;
