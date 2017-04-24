@@ -150,13 +150,13 @@
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="UtilJsonTests.cs" />
-    <Compile Include="Wavelet\IWBlockTests.cs" />
-    <Compile Include="Wavelet\IWBucketTests.cs" />
-    <Compile Include="Wavelet\IWCodecTests.cs" />
-    <Compile Include="Wavelet\IWMapTests.cs" />
-    <Compile Include="Wavelet\IWPixelMapTests.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Wavelet\InterWaveBlockTests.cs" />
+    <Compile Include="Wavelet\InterWaveBucketTests.cs" />
+    <Compile Include="Wavelet\InterWaveCodecTests.cs" />
+    <Compile Include="Wavelet\InterWaveMapTests.cs" />
+    <Compile Include="Wavelet\InterWavePixelMapTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
