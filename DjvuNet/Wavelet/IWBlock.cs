@@ -1,15 +1,16 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Wavelet
 {
     /// <summary>
-    /// This class represents structured wavelette data.
+    /// This class represents structured wavelet data.
     /// </summary>
     public class IWBlock
     {
         #region Variables
 
-        private static readonly short[] Zigzagloc = BuildZigZagData();
+        private readonly short[] Zigzagloc = BuildZigZagData();
 
         /// <summary>
         /// The data structure for this block
@@ -58,7 +59,7 @@ namespace DjvuNet.Wavelet
                     }
                 }
             }
-            catch (Exception)
+            catch
             {
             }
 
@@ -77,6 +78,7 @@ namespace DjvuNet.Wavelet
         /// </param>
         /// <returns> the requested block
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short[] GetBlock(int n)
         {
             int nms = n >> 4;
@@ -93,6 +95,7 @@ namespace DjvuNet.Wavelet
         /// </param>
         /// <returns> the requested block
         /// </returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short[] GetInitializedBlock(int n)
         {
             int nms = n >> 4;
@@ -114,7 +117,8 @@ namespace DjvuNet.Wavelet
         /// </param>
         /// <returns> the data value
         /// </returns>
-        private short GetValue(int n)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public short GetValue(int n)
         {
             short[] d = GetBlock(n >> 4);
             return (short)((d != null) ? (int)d[n & 0xf] : 0);
@@ -129,20 +133,24 @@ namespace DjvuNet.Wavelet
         /// <param name="val">
         /// new value
         /// </param>
-        private void SetValue(int n, int val)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetValue(int n, int val)
         {
             short[] d = GetInitializedBlock(n >> 4);
             d[n & 0xf] = (short)val;
         }
 
-        /// <summary> Write a liftblock
-        ///
+        /// <summary> 
+        /// Write a liftblock
         /// </summary>
-        /// <param name="coeff">an array
+        /// <param name="coeff">
+        /// An array of block wavelet coefficients
         /// </param>
-        /// <param name="bmin">start position
+        /// <param name="bmin">
+        /// Start position
         /// </param>
-        /// <param name="bmax">end position
+        /// <param name="bmax">
+        /// End position
         /// </param>
         public void WriteLiftBlock(short[] coeff, int bmin, int bmax)
         {
@@ -174,6 +182,7 @@ namespace DjvuNet.Wavelet
         /// </summary>
         /// <param name="n">position to zero
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearBlock(int n)
         {
             int nms = n >> 4;
@@ -183,11 +192,7 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        #endregion Methods
-
-        #region Private Methods
-
-        private static short[] BuildZigZagData()
+        public static short[] BuildZigZagData()
         {
             return new short[]
                        {

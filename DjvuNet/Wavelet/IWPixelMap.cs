@@ -12,194 +12,165 @@ namespace DjvuNet.Wavelet
     /// </summary>
     public class IWPixelMap : ICodec
     {
-        #region Protected Members
+        #region Private Fields
 
-        private IWCodec _cbcodec;
-        private IWMap _cbmap;
+        private IWCodec _CbCodec;
+        private IWMap _CbMap;
         private int _cbytes;
-        private int _crcbDelay = 10;
-        private bool _crcbHalf;
-        private IWCodec _crcodec;
-        private IWMap _crmap;
-        private int _cserial;
-        private int _cslice;
-        private IWCodec _ycodec;
-        private IWMap _ymap;
+        private int _CrCbDelay = 10;
+        private bool _CrCbHalf;
+        private IWCodec _CrCodec;
+        private IWMap _CrMap;
+        private int _CSerial;
+        private int _CSlice;
+        private IWCodec _YCodec;
+        private IWMap _YMap;
 
-        #endregion Protected Members
+        #endregion Private Fields
 
         #region Public Properties
 
-        //public const int CRCBfull = 5;
-        //public const int CRCBhalf = 3;
-        //public const int CRCBMode = 1;
-        //public const int CRCBnone = 2;
-        //public const int CRCBnormal = 4;
-
-        //public static readonly float[][] rgb_to_ycc = new[]
-        //                                                  {
-        //                                                      new[] {0.304348F, 0.608696F, 0.086956F},
-        //                                                      new[] {0.463768F, -0.405797F, -0.057971F},
-        //                                                      new[] {-0.173913F, -0.347826F, 0.521739F}
-        //                                                  };
-
-        #region Height
-
-        public virtual int Height
+        public int Height
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (_ymap != null) ? _ymap.Ih : 0; }
+            get { return (_YMap != null) ? _YMap.Ih : 0; }
         }
 
-        #endregion Height
-
-        #region Width
-
-        public virtual int Width
+        public int Width
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (_ymap != null) ? _ymap.Iw : 0; }
+            get { return (_YMap != null) ? _YMap.Iw : 0; }
         }
 
-        #endregion Width
-
-        #region ImageData
-
-        public virtual bool ImageData
+        public bool ImageData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return true; }
         }
 
-        #endregion ImageData
-
         #endregion Public Properties
 
         #region Constructors
+
+        public IWPixelMap() { }
 
         #endregion Constructors
 
         #region Public Methods
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual void Decode(IBinaryReader bs)
+        public void Decode(IBinaryReader reader)
         {
-            if (_ycodec == null)
+            if (_YCodec == null)
             {
-                _cslice = _cserial = 0;
-                _ymap = null;
+                _CSlice = _CSerial = 0;
+                _YMap = null;
             }
 
-            byte serial = bs.ReadByte();
-            if (serial != _cserial)
-                throw new DjvuFormatException("Chunk does not bear expected serial number");
+            byte serial = reader.ReadByte();
+            byte slices = reader.ReadByte();
 
-            int nslices = _cslice + bs.ReadByte();
+            if (serial != _CSerial)
+                throw new DjvuFormatException(
+                    $"{nameof(IWPixelMap)} received out of order data. Expected serial number {_CSerial}, actual {serial}");
 
-            if (_cserial == 0)
+            int nslices = _CSlice + slices;
+
+            if (_CSerial == 0)
             {
-                int major = bs.ReadByte();
-                int minor = bs.ReadByte();
+                int major = reader.ReadByte();
+                int minor = reader.ReadByte();
 
-                if ((major & 0x7f) != 1)
-                    throw new DjvuFormatException("File has been compressed with an incompatible Codec");
+                if ((major & 0x7f) != IWCodec.MajorVersion)
+                    throw new DjvuFormatException("File has been compressed with an incompatible codec");
 
-                if (minor > 2)
-                    throw new DjvuFormatException("File has been compressed with a more recent Codec");
+                if (minor > IWCodec.MinorVersion)
+                    throw new DjvuFormatException("File has been compressed with a more recent codec");
 
-                //int header3size = 5;
+                int w = (reader.ReadByte() << 8);
+                w |= reader.ReadByte();
 
-                //if (minor < 2)
-                //{
-                //    header3size = 4;
-                //}
+                int h = (reader.ReadByte() << 8);
+                h |= reader.ReadByte();
 
-                int w = (bs.ReadByte() << 8);
-                w |= bs.ReadByte();
+                int crcbDelay = 0;
 
-                int h = (bs.ReadByte() << 8);
-                h |= bs.ReadByte();
-                _crcbDelay = 0;
-                _crcbHalf = false;
-
-                int b = bs.ReadByte();
+                if ((major & 0x7f) == 1 && minor >= 2)
+                {
+                    crcbDelay = reader.ReadByte();
+                    if (minor >= 2)
+                        _CrCbDelay = (crcbDelay & 0x7f);
+                }
 
                 if (minor >= 2)
-                    _crcbDelay = 0x7f & b;
-
-                if (minor >= 2)
-                    _crcbHalf = ((0x80 & b) == 0);
+                    _CrCbHalf = ((crcbDelay & 0x80) != 0 ? false : true);
 
                 if ((major & 0x80) != 0)
-                    _crcbDelay = -1;
+                    _CrCbDelay = -1;
 
-                _ymap = new IWMap().Init(w, h);
-                _ycodec = new IWCodec().Init(_ymap);
+                _YMap = new IWMap().Init(w, h);
+                _YCodec = new IWCodec().Init(_YMap);
 
-                if (_crcbDelay >= 0)
+                if (_CrCbDelay >= 0)
                 {
-                    _cbmap = new IWMap().Init(w, h);
-                    _crmap = new IWMap().Init(w, h);
-                    _cbcodec = new IWCodec().Init(_cbmap);
-                    _crcodec = new IWCodec().Init(_crmap);
+                    _CbMap = new IWMap().Init(w, h);
+                    _CrMap = new IWMap().Init(w, h);
+                    _CbCodec = new IWCodec().Init(_CbMap);
+                    _CrCodec = new IWCodec().Init(_CrMap);
                 }
             }
 
-            ZPCodec zp = new ZPCodec().Initializa(bs.BaseStream);
+            ZPCodec zp = new ZPCodec().Initializa(reader.BaseStream);
 
-            for (int flag = 1; (flag != 0) && (_cslice < nslices); _cslice++)
+            for (int flag = 1; flag != 0 && _CSlice < nslices; _CSlice++)
             {
-                flag = _ycodec.CodeSlice(zp);
+                flag = _YCodec.CodeSlice(zp);
 
-                if ((_crcodec != null) && (_cbcodec != null) && (_crcbDelay <= _cslice))
+                if (_CrCodec != null && _CbCodec != null && _CrCbDelay <= _CSlice)
                 {
-                    flag |= _cbcodec.CodeSlice(zp);
-                    flag |= _crcodec.CodeSlice(zp);
+                    flag |= _CbCodec.CodeSlice(zp);
+                    flag |= _CrCodec.CodeSlice(zp);
                 }
             }
 
-            _cserial++;
-
-            //    return nslices;
-        }
-
-        public virtual void CloseCodec()
-        {
-            _ycodec = _crcodec = _cbcodec = null;
-            _cslice = _cbytes = _cserial = 0;
-
-            GC.Collect();
+            _CSerial++;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual Graphics.PixelMap GetPixmap()
+        public void CloseCodec()
         {
-            if (_ymap == null)
+            _YCodec = _CrCodec = _CbCodec = null;
+            _CSlice = _cbytes = _CSerial = 0;
+        }
+
+        public PixelMap GetPixelMap()
+        {
+            if (_YMap == null)
                 return null;
 
-            int w = _ymap.Iw;
-            int h = _ymap.Ih;
+            int w = _YMap.Iw;
+            int h = _YMap.Ih;
             int pixsep = 3;
             int rowsep = w * pixsep;
             sbyte[] bytes = new sbyte[h * rowsep];
 
-            _ymap.Image(0, bytes, rowsep, pixsep, false);
+            _YMap.Image(0, bytes, rowsep, pixsep, false);
 
-            if ((_crmap != null) && (_cbmap != null) && (_crcbDelay >= 0))
+            if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
-                _cbmap.Image(1, bytes, rowsep, pixsep, _crcbHalf);
-                _crmap.Image(2, bytes, rowsep, pixsep, _crcbHalf);
+                _CbMap.Image(1, bytes, rowsep, pixsep, _CrCbHalf);
+                _CrMap.Image(2, bytes, rowsep, pixsep, _CrCbHalf);
             }
 
             // Convert image to RGB
-            Graphics.PixelMap ppm = new Graphics.PixelMap().Init(bytes, h, w);
-            PixelReference pixel = ppm.CreateGPixelReference(0);
+            PixelMap pixelMap = new PixelMap().Init(bytes, h, w);
+            PixelReference pixel = pixelMap.CreateGPixelReference(0);
 
             for (int i = 0; i < h; )
             {
                 pixel.SetOffset(i++, 0);
 
-                if ((_crmap != null) && (_cbmap != null) && (_crcbDelay >= 0))
+                if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
                     pixel.Ycc2Rgb(w);
                 else
                 {
@@ -208,17 +179,16 @@ namespace DjvuNet.Wavelet
                 }
             }
 
-            return ppm;
+            return pixelMap;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual Graphics.PixelMap GetPixmap(int subsample, Rectangle rect, Graphics.PixelMap retval)
+        public PixelMap GetPixelMap(int subsample, Rectangle rect, PixelMap retval)
         {
-            if (_ymap == null)
+            if (_YMap == null)
                 return null;
 
             if (retval == null)
-                retval = new Graphics.PixelMap();
+                retval = new PixelMap();
 
             int w = rect.Width;
             int h = rect.Height;
@@ -226,12 +196,12 @@ namespace DjvuNet.Wavelet
             int rowsep = w * pixsep;
             sbyte[] bytes = retval.Init(h, w, null).Data;
 
-            _ymap.Image(subsample, rect, 0, bytes, rowsep, pixsep, false);
+            _YMap.Image(subsample, rect, 0, bytes, rowsep, pixsep, false);
 
-            if ((_crmap != null) && (_cbmap != null) && (_crcbDelay >= 0))
+            if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
-                _cbmap.Image(subsample, rect, 1, bytes, rowsep, pixsep, _crcbHalf);
-                _crmap.Image(subsample, rect, 2, bytes, rowsep, pixsep, _crcbHalf);
+                _CbMap.Image(subsample, rect, 1, bytes, rowsep, pixsep, _CrCbHalf);
+                _CrMap.Image(subsample, rect, 2, bytes, rowsep, pixsep, _CrCbHalf);
             }
 
             PixelReference pixel = retval.CreateGPixelReference(0);            
@@ -240,7 +210,7 @@ namespace DjvuNet.Wavelet
             {
                 pixel.SetOffset(i++, 0);
 
-                if ((_crmap != null) && (_cbmap != null) && (_crcbDelay >= 0))
+                if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
                     pixel.Ycc2Rgb(w);
                 else
                 {
@@ -251,24 +221,6 @@ namespace DjvuNet.Wavelet
 
             return retval;
         }
-
-        ///// <summary> Set the CRCB Delay
-        /////
-        ///// </summary>
-        ///// <param name="value">the new CRCB delay value.
-        /////
-        ///// </param>
-        ///// <returns> the CRCB delay value
-        ///// </returns>
-        //public virtual int SetCrcbDelay(int value_Renamed)
-        //{
-        //    if (value_Renamed >= 0)
-        //    {
-        //        CrcbDelay = value_Renamed;
-        //    }
-
-        //    return CrcbDelay;
-        //}
 
         #endregion Public Methods
     }

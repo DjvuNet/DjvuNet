@@ -4,6 +4,9 @@ namespace DjvuNet.Wavelet
 {
     public sealed class IWCodec
     {
+        public const byte MajorVersion = 0x01;
+        public const byte MinorVersion = 0x02;
+
         #region Private Members
 
         private readonly sbyte[] _bucketstate;
@@ -23,20 +26,22 @@ namespace DjvuNet.Wavelet
         //private const int NEW = 4;
         //private const int UNK = 8;
 
-        private static readonly int[] IwQuant = new[]
-                                                      {
-                                                          0x10000, 0x20000, 0x20000, 0x40000, 0x40000, 0x40000, 0x80000,
-                                                          0x80000, 0x80000, 0x100000, 0x100000, 0x100000, 0x200000,
-                                                          0x100000, 0x100000, 0x200000
-                                                      };
+        private readonly int[] IwQuant = 
+            new[]
+            {
+                0x10000, 0x20000, 0x20000, 0x40000, 0x40000, 0x40000, 0x80000,
+                0x80000, 0x80000, 0x100000, 0x100000, 0x100000, 0x200000,
+                0x100000, 0x100000, 0x200000
+            };
 
-        private static readonly IWBucket[] Bandbuckets = new[]
-                                                            {
-                                                                new IWBucket(0, 1), new IWBucket(1, 1), new IWBucket(2, 1),
-                                                                new IWBucket(3, 1), new IWBucket(4, 4), new IWBucket(8, 4),
-                                                                new IWBucket(12, 4), new IWBucket(16, 16), new IWBucket(32, 16),
-                                                                new IWBucket(48, 16)
-                                                            };
+        private readonly IWBucket[] Bandbuckets = 
+            new[]
+            {
+                new IWBucket(0, 1), new IWBucket(1, 1), new IWBucket(2, 1),
+                new IWBucket(3, 1), new IWBucket(4, 4), new IWBucket(8, 4),
+                new IWBucket(12, 4), new IWBucket(16, 16), new IWBucket(32, 16),
+                new IWBucket(48, 16)
+            };
 
         #endregion Private Members
 
@@ -104,7 +109,7 @@ namespace DjvuNet.Wavelet
             return 1;
         }
 
-        private void DecodeBuckets(ZPCodec zp, int bit, int band, IWBlock blk, int fbucket, int nbucket)
+        public void DecodeBuckets(ZPCodec zp, int bit, int band, IWBlock blk, int fbucket, int nbucket)
         {
             int thres = _quantHi[band];
             int bbstate = 0;
@@ -373,7 +378,7 @@ namespace DjvuNet.Wavelet
             return this;
         }
 
-        private int IsNullSlice(int bit, int band)
+        public int IsNullSlice(int bit, int band)
         {
             if (band == 0)
             {
@@ -402,7 +407,7 @@ namespace DjvuNet.Wavelet
             return 0;
         }
 
-        private int NextQuant()
+        public int NextQuant()
         {
             int flag = 0;
 

@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace DjvuNet.Wavelet
@@ -50,6 +51,7 @@ namespace DjvuNet.Wavelet
 
         #region Constructors
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IWBucket(int start, int size)
         {
             Start = start;
