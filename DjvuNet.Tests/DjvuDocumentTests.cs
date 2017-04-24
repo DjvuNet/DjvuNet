@@ -7,6 +7,7 @@ using Moq;
 using Xunit;
 using DjvuNet.DataChunks;
 using System.Linq;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.Tests
 {
@@ -91,14 +92,22 @@ namespace DjvuNet.Tests
             }
         }
 
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [MemberData(nameof(DjvuArtifacts))]
         public void IsDjvuDocument_String_Theory(string filePath, int pageCount)
         {
             Assert.True(DjvuDocument.IsDjvuDocument(filePath));
         }
 
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [MemberData(nameof(DjvuArtifacts))]
         public void ctor_Theory(string filePath, int pageCount)
         {

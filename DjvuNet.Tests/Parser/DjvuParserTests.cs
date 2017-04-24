@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DataChunks;
 using Moq;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.Parser.Tests
 {
@@ -67,7 +68,11 @@ namespace DjvuNet.Parser.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [MemberData(nameof(NodeTestData))]
         public void CreateDjvuNode_Theory(IDjvuReader reader, IDjvuDocument rootDocument,
             IDjvuElement parent, ChunkType chunkType,

@@ -60,7 +60,7 @@ namespace DjvuNet
 
         bool IsPageImageCached { get; set; }
 
-        ThumChunk Thumbnail { get; }
+        IThumChunk Thumbnail { get; }
 
         System.Drawing.Bitmap ThumbnailImage { get; set; }
 
