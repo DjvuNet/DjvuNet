@@ -2,7 +2,7 @@ using DjvuNet.Compression;
 
 namespace DjvuNet.Wavelet
 {
-    public sealed class IWCodec
+    public sealed class InterWaveCodec : IInterWaveCodec
     {
         public const byte MajorVersion = 0x01;
         public const byte MinorVersion = 0x02;
@@ -19,7 +19,7 @@ namespace DjvuNet.Wavelet
         private readonly int[] _quantLo;
         private int _curband;
         private int _curbit;
-        private IWMap _map;
+        private InterWaveMap _map;
 
         //private const int ZERO = 1;
         //private const int ACTIVE = 2;
@@ -34,13 +34,13 @@ namespace DjvuNet.Wavelet
                 0x100000, 0x100000, 0x200000
             };
 
-        private readonly IWBucket[] Bandbuckets = 
+        private readonly InterWaveBucket[] Bandbuckets = 
             new[]
             {
-                new IWBucket(0, 1), new IWBucket(1, 1), new IWBucket(2, 1),
-                new IWBucket(3, 1), new IWBucket(4, 4), new IWBucket(8, 4),
-                new IWBucket(12, 4), new IWBucket(16, 16), new IWBucket(32, 16),
-                new IWBucket(48, 16)
+                new InterWaveBucket(0, 1), new InterWaveBucket(1, 1), new InterWaveBucket(2, 1),
+                new InterWaveBucket(3, 1), new InterWaveBucket(4, 4), new InterWaveBucket(8, 4),
+                new InterWaveBucket(12, 4), new InterWaveBucket(16, 16), new InterWaveBucket(32, 16),
+                new InterWaveBucket(48, 16)
             };
 
         #endregion Private Members
@@ -48,7 +48,7 @@ namespace DjvuNet.Wavelet
         #region Constructors
 
         /// <summary> Creates a new Codec object.</summary>
-        public IWCodec()
+        public InterWaveCodec()
         {
             _ctxStart = new MutableValue<sbyte>[32];
 
@@ -109,7 +109,7 @@ namespace DjvuNet.Wavelet
             return 1;
         }
 
-        public void DecodeBuckets(ZPCodec zp, int bit, int band, IWBlock blk, int fbucket, int nbucket)
+        public void DecodeBuckets(ZPCodec zp, int bit, int band, InterWaveBlock blk, int fbucket, int nbucket)
         {
             int thres = _quantHi[band];
             int bbstate = 0;
@@ -340,7 +340,7 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        public IWCodec Init(IWMap map)
+        public InterWaveCodec Init(InterWaveMap map)
         {
             this._map = map;
 

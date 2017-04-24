@@ -8,23 +8,23 @@ using DjvuNet.Interfaces;
 namespace DjvuNet.Wavelet
 {
     /// <summary>
-    /// This class represents structured wavelette data.
+    /// This class represents structured wavelet data.
     /// </summary>
-    public class IWPixelMap : ICodec
+    public class InterWavePixelMap : ICodec, IInterWavePixelMap
     {
         #region Private Fields
 
-        private IWCodec _CbCodec;
-        private IWMap _CbMap;
+        private InterWaveCodec _CbCodec;
+        private InterWaveMap _CbMap;
         private int _cbytes;
         private int _CrCbDelay = 10;
         private bool _CrCbHalf;
-        private IWCodec _CrCodec;
-        private IWMap _CrMap;
+        private InterWaveCodec _CrCodec;
+        private InterWaveMap _CrMap;
         private int _CSerial;
         private int _CSlice;
-        private IWCodec _YCodec;
-        private IWMap _YMap;
+        private InterWaveCodec _YCodec;
+        private InterWaveMap _YMap;
 
         #endregion Private Fields
 
@@ -52,7 +52,7 @@ namespace DjvuNet.Wavelet
 
         #region Constructors
 
-        public IWPixelMap() { }
+        public InterWavePixelMap() { }
 
         #endregion Constructors
 
@@ -72,7 +72,7 @@ namespace DjvuNet.Wavelet
 
             if (serial != _CSerial)
                 throw new DjvuFormatException(
-                    $"{nameof(IWPixelMap)} received out of order data. Expected serial number {_CSerial}, actual {serial}");
+                    $"{nameof(IInterWavePixelMap)} received out of order data. Expected serial number {_CSerial}, actual {serial}");
 
             int nslices = _CSlice + slices;
 
@@ -81,10 +81,10 @@ namespace DjvuNet.Wavelet
                 int major = reader.ReadByte();
                 int minor = reader.ReadByte();
 
-                if ((major & 0x7f) != IWCodec.MajorVersion)
+                if ((major & 0x7f) != InterWaveCodec.MajorVersion)
                     throw new DjvuFormatException("File has been compressed with an incompatible codec");
 
-                if (minor > IWCodec.MinorVersion)
+                if (minor > InterWaveCodec.MinorVersion)
                     throw new DjvuFormatException("File has been compressed with a more recent codec");
 
                 int w = (reader.ReadByte() << 8);
@@ -108,15 +108,15 @@ namespace DjvuNet.Wavelet
                 if ((major & 0x80) != 0)
                     _CrCbDelay = -1;
 
-                _YMap = new IWMap().Init(w, h);
-                _YCodec = new IWCodec().Init(_YMap);
+                _YMap = new InterWaveMap(w, h);
+                _YCodec = new InterWaveCodec().Init(_YMap);
 
                 if (_CrCbDelay >= 0)
                 {
-                    _CbMap = new IWMap().Init(w, h);
-                    _CrMap = new IWMap().Init(w, h);
-                    _CbCodec = new IWCodec().Init(_CbMap);
-                    _CrCodec = new IWCodec().Init(_CrMap);
+                    _CbMap = new InterWaveMap(w, h);
+                    _CrMap = new InterWaveMap(w, h);
+                    _CbCodec = new InterWaveCodec().Init(_CbMap);
+                    _CrCodec = new InterWaveCodec().Init(_CrMap);
                 }
             }
 

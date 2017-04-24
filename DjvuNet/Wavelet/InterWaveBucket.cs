@@ -16,7 +16,7 @@ namespace DjvuNet.Wavelet
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class IWBucket
+    public class InterWaveBucket
     {
         #region Public Fields
 
@@ -52,7 +52,7 @@ namespace DjvuNet.Wavelet
         #region Constructors
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IWBucket(int start, int size)
+        public InterWaveBucket(int start, int size)
         {
             Start = start;
             Size = size;
