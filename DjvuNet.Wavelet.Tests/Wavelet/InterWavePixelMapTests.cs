@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.Wavelet.Tests
 {
-    public class IWPixelMapTests
+    public class InterWavePixelMapTests
     {
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void IWPixelMapTest()

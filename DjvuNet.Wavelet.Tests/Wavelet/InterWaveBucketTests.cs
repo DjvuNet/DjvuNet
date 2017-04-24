@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.Wavelet.Tests
 {
-    public class IWBucketTests
+    public class InterWaveBucketTests
     {
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void IWBucketTest()

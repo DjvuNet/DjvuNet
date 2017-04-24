@@ -8,10 +8,10 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.Wavelet.Tests
 {
-    public class IWCodecTests
+    public class InterWaveCodecTests
     {
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void IWCodecTest()
+        public void InterWaveCodecTest()
         {
             Assert.True(false, "This test needs an implementation");
         }

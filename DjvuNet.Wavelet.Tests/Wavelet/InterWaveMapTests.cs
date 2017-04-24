@@ -8,8 +8,20 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.Wavelet.Tests
 {
-    public class IWBlockTests
+    public class InterWaveMapTests
     {
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void InterWaveMapTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void IWMapTest1()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void DuplicateTest()
         {
@@ -17,43 +29,43 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void GetBlockTest()
+        public void BackwardTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void GetInitializedBlockTest()
+        public void BackwardFilterTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void GetValueTest()
+        public void GetBucketCountTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void SetValueTest()
+        public void ImageTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void WriteLiftBlockTest()
+        public void ImageTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ClearBlockTest()
+        public void InitTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void BuildZigZagDataTest()
+        public void SlashresTest()
         {
             Assert.True(false, "This test needs an implementation");
         }
