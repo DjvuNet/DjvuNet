@@ -106,8 +106,14 @@ namespace DjvuNet.Parser
                 case ChunkType.BM44:
                     result = new BM44Chunk(reader, parent, rootDocument, chunkID, length);
                     break;
+                case ChunkType.BM44Form:
+                    result = new BM44Form(reader, parent, rootDocument, chunkID, length);
+                    break;
                 case ChunkType.PM44:
                     result = new PM44Chunk(reader, parent, rootDocument, chunkID, length);
+                    break;
+                case ChunkType.PM44Form:
+                    result = new PM44Form(reader, parent, rootDocument, chunkID, length);
                     break;
                 case ChunkType.WMRM:
                     result = new WmrmChunk(reader, parent, rootDocument, chunkID, length);
@@ -165,6 +171,8 @@ namespace DjvuNet.Parser
                 case ChunkType.Djvi:
                 case ChunkType.Thum:
                 case ChunkType.Djvm:
+                case ChunkType.BM44Form:
+                case ChunkType.PM44Form:
                 case ChunkType.Form:
                     return true;
                 default:
@@ -209,6 +217,26 @@ namespace DjvuNet.Parser
                     case ChunkType.Form:
                     case ChunkType.Dirm:
                     case ChunkType.Navm:
+                        return false;
+                }
+            }
+            else if (rootType == ChunkType.BM44Form)
+            {
+                switch (type)
+                {
+                    case ChunkType.BM44:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+            else if (rootType == ChunkType.PM44Form)
+            {
+                switch (type)
+                {
+                    case ChunkType.PM44:
+                        return true;
+                    default:
                         return false;
                 }
             }

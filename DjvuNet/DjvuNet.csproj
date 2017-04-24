@@ -96,6 +96,7 @@
     <Compile Include="DataChunks\BG44Chunk.cs" />
     <Compile Include="DataChunks\BGjpChunk.cs" />
     <Compile Include="DataChunks\BM44Chunk.cs" />
+    <Compile Include="DataChunks\BM44Form.cs" />
     <Compile Include="DataChunks\CidaChunkcs.cs" />
     <Compile Include="DataChunks\DjvuFormElement.cs" />
     <Compile Include="DataChunks\DjvuNode.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="DataChunks\Navigation\DocumentNavigator.cs" />
     <Compile Include="DataChunks\Navigation\Interfaces\INavigation.cs" />
     <Compile Include="DataChunks\PM44Chunk.cs" />
+    <Compile Include="DataChunks\PM44Form.cs" />
     <Compile Include="DataChunks\Text\ITextChunk.cs" />
     <Compile Include="DataChunks\UnknownChunk.cs" />
     <Compile Include="DataChunks\Navigation\Bookmark.cs" />

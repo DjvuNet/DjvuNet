@@ -26,7 +26,7 @@ namespace DjvuNet.DataChunks.Tests
 
                 string dataDir = Path.Combine(Util.RepoRoot, "artifacts", "data");
                 DirectoryInfo directory = new DirectoryInfo(dataDir);
-                FileInfo[] files = directory.GetFiles("*.bg44");
+                FileInfo[] files = directory.GetFiles("*_0.bg44");
 
                 foreach (FileInfo f in files)
                     retVal.Add(new object[] { f.FullName, f.Length});
@@ -61,10 +61,10 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.Same(result, map);
                 using (System.Drawing.Bitmap bitmap = map.GetPixmap().ToImage())
                 {
-                    //string path = Path.Combine(
-                    //    Util.RepoRoot, "artifacts", "data", "dumps", 
-                    //    Path.GetFileNameWithoutExtension(file) + "_bg44.png");
-                    //bitmap.Save(path);
+                    string path = Path.Combine(
+                        Util.RepoRoot, "artifacts", "data", "dumps",
+                        Path.GetFileNameWithoutExtension(file) + "_bg44.png"); 
+                    bitmap.Save(path);
                 }
             }
         }
@@ -72,7 +72,7 @@ namespace DjvuNet.DataChunks.Tests
         [Fact]
         public void ImageDecodeTest035()
         {
-            string file = Path.Combine(Util.RepoRoot, "artifacts", "data", "test035C_P01.bg44");
+            string file = Path.Combine(Util.RepoRoot, "artifacts", "data", "test035C_P01_0.bg44");
             using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (IDjvuReader reader = new DjvuReader(fs))
             {
