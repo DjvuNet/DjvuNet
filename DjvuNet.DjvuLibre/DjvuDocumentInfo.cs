@@ -305,7 +305,7 @@ namespace DjvuNet.DjvuLibre
 
         public string GetPageText(int pageNumber)
         {
-            throw new NotImplementedException();
+            return String.Empty;
         }
     }
 }

@@ -59,7 +59,7 @@ namespace DjvuNet.DataChunks.Tests
                 IWPixelMap map = new IWPixelMap();
                 IWPixelMap result = unk.ProgressiveDecodeBackground(map);
                 Assert.Same(result, map);
-                using (System.Drawing.Bitmap bitmap = map.GetPixmap().ToImage())
+                using (System.Drawing.Bitmap bitmap = map.GetPixelMap().ToImage())
                 {
                     string path = Path.Combine(
                         Util.RepoRoot, "artifacts", "data", "dumps",
@@ -80,7 +80,7 @@ namespace DjvuNet.DataChunks.Tests
                 unk.Initialize();
                 IWPixelMap map = new IWPixelMap();
                 IWPixelMap result = unk.ProgressiveDecodeBackground(map);
-                PixelMap pixMap = result.GetPixmap();
+                PixelMap pixMap = result.GetPixelMap();
                 using(var bmp = pixMap.ToImage())
                 {
                     var format = bmp.PixelFormat;
