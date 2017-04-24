@@ -18,7 +18,7 @@ namespace DjvuNet.Tests.Xunit
         int _RowNumber;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        [Obsolete("Called by the deserializer; should only be called by deriving classes for deserialization purposes")]
+        [Obsolete("Use for deserialization only.")]
         public DjvuDataRowTestCase()
         {
             _MessageSink = new NullMessageSink();
@@ -135,9 +135,9 @@ namespace DjvuNet.Tests.Xunit
         protected override string GetUniqueID()
         {
             return 
-                $"{TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name};" + 
-                $"{TestMethod.TestClass.Class.Name};" + 
-                $"{TestMethod.Method.Name};{_AttributeNumber}/{_RowNumber}";
+                $"{TestMethod.TestClass.Class.Name}:" + 
+                $"{TestMethod.Method.Name};{_AttributeNumber}/{_RowNumber}:" +
+                $"{TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name};";
         }
 
         /// <inheritdoc/>

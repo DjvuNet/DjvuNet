@@ -47,7 +47,11 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
+#if _APPVEYOR
+        [Theory]
+#else 
         [DjvuTheory]
+#endif
         [MemberData(nameof(BG44TestData))]
         public void ProgressiveDecodeBackground_Theory(string file, long length)
         {
@@ -61,10 +65,12 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.Same(result, map);
                 using (System.Drawing.Bitmap bitmap = map.GetPixelMap().ToImage())
                 {
+#if !_APPVEYOR
                     string path = Path.Combine(
                         Util.RepoRoot, "artifacts", "data", "dumps",
                         Path.GetFileNameWithoutExtension(file) + "_bg44.png"); 
                     bitmap.Save(path);
+#endif
                 }
             }
         }

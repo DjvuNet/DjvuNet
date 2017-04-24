@@ -33,7 +33,11 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
+#if _APPVEYOR
+        [Theory]
+#else 
         [DjvuTheory]
+#endif
         [MemberData(nameof(NavmTestData))]
         public void NavmChunk_Theory(string djvuFile, DjvuJsonDocument doc)
         {
