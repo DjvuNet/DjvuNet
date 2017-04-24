@@ -115,6 +115,7 @@
     <Compile Include="DataChunks\IPM44Form.cs" />
     <Compile Include="DataChunks\ISjbzChunk.cs" />
     <Compile Include="DataChunks\ITH44Chunk.cs" />
+    <Compile Include="DataChunks\IThumChunk.cs" />
     <Compile Include="DataChunks\IWmrmChunk.cs" />
     <Compile Include="DataChunks\Navigation\DocumentNavigator.cs" />
     <Compile Include="DataChunks\Navigation\Interfaces\INavigation.cs" />

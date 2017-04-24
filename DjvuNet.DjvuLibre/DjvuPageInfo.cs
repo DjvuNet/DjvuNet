@@ -176,7 +176,7 @@ namespace DjvuNet.DjvuLibre
                     try
                     {
                         miniexp = NativeMethods.GetDjvuPageAnnotation(_DocumentInfo.Document, Number);
-                        _Annotation = ExtractTextFromMiniexp(miniexp);
+                        _Annotation = ExtractTextFromMiniexp(_DocumentInfo.Document, miniexp);
                     }
                     finally
                     {
@@ -192,7 +192,7 @@ namespace DjvuNet.DjvuLibre
             }
         }
 
-        internal static string ExtractTextFromMiniexp(IntPtr miniexp, int count = 0)
+        internal static string ExtractTextFromMiniexp(IntPtr document, IntPtr miniexp, int count = 0)
         {
             string text = null;
 
@@ -205,18 +205,27 @@ namespace DjvuNet.DjvuLibre
 
             for (int i = 0; i < count; i++)
             {
-                IntPtr element = NativeMethods.MiniexpItem(i, miniexp);
-                int count2 = NativeMethods.MiniexpLength(element);
-
-                text = ExtractTextFromMiniexp(element, count2);
-                if (!String.IsNullOrWhiteSpace(text))
-                    return text;
-
-                if (NativeMethods.IsMiniexpString(element))
+                IntPtr element = IntPtr.Zero;
+                try
                 {
-                    text = NativeMethods.GetMiniexpString(miniexp);
+                    element = NativeMethods.MiniexpItem(i, miniexp);
+                    int count2 = NativeMethods.MiniexpLength(element);
+
+                    text = ExtractTextFromMiniexp(document, element, count2);
                     if (!String.IsNullOrWhiteSpace(text))
                         return text;
+
+                    if (NativeMethods.IsMiniexpString(element))
+                    {
+                        text = NativeMethods.GetMiniexpString(miniexp);
+                        if (!String.IsNullOrWhiteSpace(text))
+                            return text;
+                    }
+                }
+                finally
+                {
+                    if (element != IntPtr.Zero)
+                        NativeMethods.ReleaseDjvuMiniexp(document, element);
                 }
             }
             return text;

@@ -63,12 +63,12 @@ namespace DjvuNet
 
         #region Thumbnail
 
-        private ThumChunk _thumbnail;
+        private IThumChunk _thumbnail;
 
         /// <summary>
         /// Gets the thumbnail for the page
         /// </summary>
-        public ThumChunk Thumbnail
+        public IThumChunk Thumbnail
         {
             get { return _thumbnail; }
 
@@ -548,8 +548,8 @@ namespace DjvuNet
 
         #region Constructors
 
-        public DjvuPage(int pageNumber, DjvuDocument document, DirmComponent header, 
-            ThumChunk thumbnail, List<DjviChunk> includedItems, DjvuChunk form)
+        public DjvuPage(int pageNumber, IDjvuDocument document, DirmComponent header, 
+            ThumChunk thumbnail, List<DjviChunk> includedItems, DjvuFormElement form)
         {
             PageNumber = pageNumber;
             Document = document;

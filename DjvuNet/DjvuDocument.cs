@@ -549,19 +549,28 @@ namespace DjvuNet
             if (Pages == null)
                 _Pages = new List<IDjvuPage>();
 
-            if (RootForm.ChunkType == ChunkType.Djvm)
+            switch (RootForm.ChunkType)
             {
-                DjvmChunk root = (DjvmChunk) RootForm;
-                Queue<ThumChunk> thumbnails = new Queue<ThumChunk>(root.Thumbnails);
-
-                _Includes = (List<DjviChunk>)root.Includes;
-
-                foreach (DjvuChunk page in root.Pages)
-                    AddPage(thumbnails, page);
+                case ChunkType.Djvm:
+                    {
+                        DjvmChunk root = (DjvmChunk)RootForm;
+                        Queue<ThumChunk> thumbnails = new Queue<ThumChunk>(root.Thumbnails);
+                        _Includes = (List<DjviChunk>)root.Includes;
+                        foreach (DjvuChunk page in root.Pages)
+                            AddPage(thumbnails, page);
+                    }
+                    break;
+                case ChunkType.Djvu:
+                    AddPage(null, (DjvuChunk)RootForm);
+                    break;
+                case ChunkType.BM44Form:
+                case ChunkType.PM44Form:
+                    AddPage(RootForm);
+                    break;
+                default:
+                    throw new DjvuFormatException($"Unsupported root form type {RootForm.GetType()}");
             }
-            else if (RootForm.ChunkType == ChunkType.Djvu)
-                AddPage(null, (DjvuChunk)RootForm);
-
+            
             OnPropertyChanged(nameof(Pages));
 		}
 
@@ -569,6 +578,12 @@ namespace DjvuNet
         {
             ThumChunk thumbnail = thumbnails != null && thumbnails.Count > 0 ? thumbnails.Dequeue() : null;
             DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, thumbnail, _Includes, page);
+            _Pages.Add(newPage);
+        }
+
+        internal void AddPage(DjvuFormElement page)
+        {
+            DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, null, _Includes, page);
             _Pages.Add(newPage);
         }
 
