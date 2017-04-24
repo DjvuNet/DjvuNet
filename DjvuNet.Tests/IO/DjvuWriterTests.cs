@@ -350,7 +350,7 @@ namespace DjvuNet.Tests
 #else 
         [DjvuTheory]
 #endif
-        [MemberData(nameof(UInt24TestData))]
+        [MemberData(nameof(Int24TestData))]
         public void WriteInt24BigEndian_Theory(int test)
         {
             DjvuWriter writer = null;
@@ -393,7 +393,7 @@ namespace DjvuNet.Tests
 #else 
         [DjvuTheory]
 #endif
-        [MemberData(nameof(UInt24TestData))]
+        [MemberData(nameof(Int24TestData))]
         public void WriteInt24_Theory(int test)
         {
             DjvuWriter writer = null;

@@ -12,7 +12,12 @@ namespace DjvuNet.DataChunks.Tests
 {
     public class DjvuChunkTests
     {
+
+#if _APPVEYOR
+        [Theory]
+#else 
         [DjvuTheory]
+#endif
         [ClassData(typeof(DjvuJsonDataSource))]
         public void DjvuChunk_Theory(DjvuJsonDocument doc, int index)
         {

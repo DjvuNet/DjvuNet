@@ -51,7 +51,11 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
+#if _APPVEYOR
+        [Theory]
+#else 
         [DjvuTheory]
+#endif
         [ClassData(typeof(DjvuJsonDataSource))]
         public void DirmChunk_Theory(DjvuJsonDocument doc, int index)
         {
