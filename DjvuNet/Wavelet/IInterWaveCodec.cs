@@ -4,9 +4,9 @@ namespace DjvuNet.Wavelet
 {
     public interface IInterWaveCodec
     {
-        int CodeSlice(ZPCodec zp);
+        int CodeSlice(IDataCoder coder);
 
-        void DecodeBuckets(ZPCodec zp, int bit, int band, InterWaveBlock blk, int fbucket, int nbucket);
+        void DecodeBuckets(IDataCoder coder, int bit, int band, InterWaveBlock blk, int fbucket, int nbucket);
 
         InterWaveCodec Init(InterWaveMap map);
 

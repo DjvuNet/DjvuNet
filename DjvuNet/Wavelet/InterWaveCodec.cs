@@ -79,7 +79,7 @@ namespace DjvuNet.Wavelet
 
         #region Public Methods
 
-        public int CodeSlice(ZPCodec zp)
+        public int CodeSlice(IDataCoder coder)
         {
             if (_CurrentBitPlane < 0)
                 return 0;
@@ -90,7 +90,7 @@ namespace DjvuNet.Wavelet
                 {
                     int fbucket = Bandbuckets[_CurrentBand].Start;
                     int nbucket = Bandbuckets[_CurrentBand].Size;
-                    DecodeBuckets(zp, _CurrentBitPlane, _CurrentBand, _Map.Blocks[blockno], fbucket, nbucket);
+                    DecodeBuckets(coder, _CurrentBitPlane, _CurrentBand, _Map.Blocks[blockno], fbucket, nbucket);
                 }
             }
 
@@ -109,7 +109,7 @@ namespace DjvuNet.Wavelet
             return 1;
         }
 
-        public void DecodeBuckets(ZPCodec zp, int bit, int band, InterWaveBlock blk, int fbucket, int nbucket)
+        public void DecodeBuckets(IDataCoder coder, int bit, int band, InterWaveBlock blk, int fbucket, int nbucket)
         {
             int thres = _QuantHigh[band];
             int bbstate = 0;
@@ -154,10 +154,10 @@ namespace DjvuNet.Wavelet
             }
             else if ((bbstate & 8) != 0)
             {
-                if (zp.Decoder(_ctxRoot) != 0)
-                {
+                byte value = unchecked((byte) _ctxRoot.Value);
+                if (coder.Decoder(ref value) != 0)
                     bbstate |= 4;
-                }
+                _ctxRoot.Value = unchecked((sbyte)value);
             }
 
             if ((bbstate & 4) != 0)
@@ -196,8 +196,10 @@ namespace DjvuNet.Wavelet
                         if (((bbstate & 2) != 0))
                             ctx |= 4;
 
-                        if (zp.Decoder(_ctxBucket[band][ctx]) != 0)
+                        byte value = unchecked((byte)_ctxBucket[band][ctx].Value);
+                        if (coder.Decoder(ref value) != 0)
                             _BucketState[buckno] |= 4;
+                        _ctxBucket[band][ctx].Value = unchecked((sbyte)value);
                     }
                 }
             }
@@ -257,18 +259,20 @@ namespace DjvuNet.Wavelet
                                 if (((_BucketState[buckno] & 2) != 0))
                                     ctx |= 8;
 
-                                if (zp.Decoder(_ctxStart[ctx]) != 0)
+                                byte value = unchecked((byte)_ctxStart[ctx].Value);
+                                if (coder.Decoder(ref value) != 0)
                                 {
                                     cstate[cidx + i] |= 4;
 
                                     int halfthres = thres >> 1;
                                     int coeff = (thres + halfthres) - (halfthres >> 2);
 
-                                    if (zp.IWDecoder() != 0)
+                                    if (coder.IWDecoder() != 0)
                                         pcoeff[i] = (short)(-coeff);
                                     else
                                         pcoeff[i] = (short)coeff;
                                 }
+                                _ctxStart[ctx].Value = unchecked((sbyte)value);
 
                                 //if (!DjVuOptions.NOCTX_EXPECT)
                                 {
@@ -313,14 +317,16 @@ namespace DjvuNet.Wavelet
                                 {
                                     coeff += (thres >> 2);
 
-                                    if (zp.Decoder(_ctxMant) != 0)
+                                    byte value = unchecked((byte)_ctxMant.Value);
+                                    if (coder.Decoder(ref value) != 0)
                                         coeff += (thres >> 1);
                                     else
                                         coeff = (coeff - thres) + (thres >> 1);
+                                    _ctxMant.Value = unchecked((sbyte)value);
                                 }
                                 else
                                 {
-                                    if (zp.IWDecoder() != 0)
+                                    if (coder.IWDecoder() != 0)
                                         coeff += (thres >> 1);
                                     else
                                         coeff = (coeff - thres) + (thres >> 1);
