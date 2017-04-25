@@ -19,11 +19,8 @@ namespace DjvuNet.JB2
 
         #region Protected Members
 
-#if !NATIVE_TYPES
-        protected MutableValue<sbyte> ZpBitHolder = new MutableValue<sbyte>();
-#else
         protected byte ZpBitHolder;
-#endif
+
         #endregion Protected Members
 
         #region Constructors
@@ -80,29 +77,14 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override bool CodeBit(bool ignored, MutableValue<sbyte> ctx)
         {
-#if !NATIVE_TYPES
-             int value = _zp.Decoder(ctx);
-            return (value != 0);
-        }
-#else
             byte ctxVal = unchecked((byte)ctx.Value);
             int value = _zp.Decoder(ref ctxVal);
             ctx.Value = (sbyte) ctxVal;
             return (value != 0);
         }
-#endif
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if !NATIVE_TYPES
-        protected override int CodeBit(bool ignored, sbyte[] array, int offset)
-        {
-            ZpBitHolder.Value = array[offset];
-            int retval = _zp.Decoder(ZpBitHolder);
-            array[offset] = ZpBitHolder.Value;
-            return retval;
-        }
-#else
         protected override int CodeBit(bool ignored, sbyte[] array, int offset)
         {
             ZpBitHolder = unchecked((byte )array[offset]);
@@ -110,7 +92,6 @@ namespace DjvuNet.JB2
             array[offset] = unchecked((sbyte)ZpBitHolder);
             return retval;
         }
-#endif
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected virtual int CodeNum(int low, int high, MutableValue<int> ctx)

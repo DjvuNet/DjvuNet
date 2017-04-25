@@ -560,18 +560,11 @@ namespace DjvuNet.Compression
             if (z > d)
                 z = d;
 #endif
-
-#if !NATIVE_TYPES
-            ctx = Down[ctx.Value & 0xff];
-            z = 0x10000 - z;
-            _subend += z;
-            AValue += (int) z;
-#else
             ctx = Down[ctx];
             z = 0x10000 - z;
             _subend += z;
             AValue += z;
-#endif            
+          
             while (AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_subend >> 15)));
