@@ -398,8 +398,8 @@ namespace DjvuNet.Tests
                 Assert.IsType<BzzReader>(bzzReader);
                 Assert.IsType<BSInputStream>(bzzReader.BaseStream);
                 BSInputStream bsStream = bzzReader.BaseStream as BSInputStream;
-                Assert.NotNull(bsStream.ZpCoder?.InputStream);
-                Assert.IsType<FileStream>(bsStream.ZpCoder.InputStream);
+                Assert.NotNull(bsStream.Coder?.DataStream);
+                Assert.IsType<FileStream>(bsStream.Coder.DataStream);
             }
         }
 
@@ -415,8 +415,8 @@ namespace DjvuNet.Tests
                 Assert.IsType<BzzReader>(bzzReader);
                 Assert.IsType<BSInputStream>(bzzReader.BaseStream);
                 BSInputStream bsStream = bzzReader.BaseStream as BSInputStream;
-                Assert.NotNull(bsStream.ZpCoder?.InputStream);
-                Assert.IsType<MemoryStream>(bsStream.ZpCoder.InputStream);
+                Assert.NotNull(bsStream.Coder?.DataStream);
+                Assert.IsType<MemoryStream>(bsStream.Coder.DataStream);
             }
         }
 
@@ -446,8 +446,8 @@ namespace DjvuNet.Tests
                 Assert.IsType<BzzReader>(bzzReader);
                 Assert.IsType<BSInputStream>(bzzReader.BaseStream);
                 BSInputStream bsStream = bzzReader.BaseStream as BSInputStream;
-                Assert.NotNull(bsStream.ZpCoder?.InputStream);
-                Assert.IsType<MemoryStream>(bsStream.ZpCoder.InputStream);
+                Assert.NotNull(bsStream.Coder?.DataStream);
+                Assert.IsType<MemoryStream>(bsStream.Coder.DataStream);
             }
         }
 

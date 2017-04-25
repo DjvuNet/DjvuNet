@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using DjvuNet.Compression;
+using DjvuNet.Configuration;
 using DjvuNet.Graphics;
 using DjvuNet.Interfaces;
 
@@ -120,16 +121,16 @@ namespace DjvuNet.Wavelet
                 }
             }
 
-            ZPCodec zp = new ZPCodec().Initializa(reader.BaseStream);
+            IDataCoder coder = DjvuSettings.Current.CoderFactory.CreateCoder(reader.BaseStream, false);
 
             for (int flag = 1; flag != 0 && _CSlice < nslices; _CSlice++)
             {
-                flag = _YCodec.CodeSlice(zp);
+                flag = _YCodec.CodeSlice(coder);
 
                 if (_CrCodec != null && _CbCodec != null && _CrCbDelay <= _CSlice)
                 {
-                    flag |= _CbCodec.CodeSlice(zp);
-                    flag |= _CrCodec.CodeSlice(zp);
+                    flag |= _CbCodec.CodeSlice(coder);
+                    flag |= _CrCodec.CodeSlice(coder);
                 }
             }
 

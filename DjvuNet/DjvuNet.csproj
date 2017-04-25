@@ -67,7 +67,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;NATIVE_TYPES</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -84,8 +84,12 @@
     <Compile Include="Compression\BSInputStream.cs" />
     <Compile Include="Compression\BzzReader.cs" />
     <Compile Include="Compression\BzzWriter.cs" />
+    <Compile Include="Compression\CodecFactory.cs" />
+    <Compile Include="Compression\IDataCoder.cs" />
     <Compile Include="Compression\MutableValue.cs" />
     <Compile Include="Compression\ZPCodec.cs" />
+    <Compile Include="Compression\IDataCoderFactory.cs" />
+    <Compile Include="Compression\ZPCoderFactory.cs" />
     <Compile Include="Compression\ZPTable.cs" />
     <Compile Include="Configuration\DjvuSettings.cs" />
     <Compile Include="DataChunks\Annotations\Annotation.cs" />

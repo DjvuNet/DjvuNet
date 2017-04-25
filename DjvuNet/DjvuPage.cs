@@ -949,18 +949,18 @@ namespace DjvuNet
 
                 System.Drawing.Bitmap background = GetBackgroundImage(subsample, false);
 
-                Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Background: {stopWatch.ElapsedTicks}");
+                Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Background: {stopWatch.ElapsedTicks}");
 
                 stopWatch.Restart();                
 
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
                 {
-                    Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Foreground: {stopWatch.ElapsedTicks}");
+                    Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Foreground: {stopWatch.ElapsedTicks}");
                     stopWatch.Restart();
 
                     using (System.Drawing.Bitmap mask = GetTextImage(subsample, false))
                     {
-                        Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Mask: {stopWatch.ElapsedTicks}");
+                        Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Mask: {stopWatch.ElapsedTicks}");
                         stopWatch.Restart();
 
                         _hasLoaded = true;
@@ -1058,7 +1058,7 @@ namespace DjvuNet
                         foreground.UnlockBits(foregroundData);
                         background.UnlockBits(backgroundData);
 
-                        Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Return Background: {stopWatch.ElapsedTicks}");
+                        Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Return Background: {stopWatch.ElapsedTicks}");
 
                         return background;
                     }

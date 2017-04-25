@@ -71,10 +71,9 @@ namespace DjvuNet.DataChunks
 
         public override void ReadData(IDjvuReader reader)
         {
-            // Skip the data bytes which are delayed read
             reader.Position += Length;
 
-            Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo , $"Creating unknown chunk for ID: {ChunkID}");
+            Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo , $"Creating unknown chunk for ID: {ChunkID}");
         }
 
         #endregion Protected Methods

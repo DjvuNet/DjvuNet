@@ -43,7 +43,7 @@ namespace DjvuNet.Compression.Tests
             using(MemoryStream stream = new MemoryStream(buffer, false))
             {
                 ZPCodec codec = new ZPCodec(stream);
-                Assert.NotNull(codec.InputStream);
+                Assert.NotNull(codec.DataStream);
             }
         }
 
