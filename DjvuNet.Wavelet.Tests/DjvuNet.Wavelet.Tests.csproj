@@ -129,6 +129,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compression\BlockSortTests.cs" />
     <Compile Include="Compression\BSInputStreamTests.cs" />
     <Compile Include="Compression\BzzReaderTests.cs" />
     <Compile Include="Compression\MutableValueTests.cs" />
