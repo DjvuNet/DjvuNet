@@ -8,34 +8,34 @@ namespace DjvuNet.Compression
     /// <summary> 
     /// This class decodes a bzz encoded InputStream.
     /// </summary>
-    public sealed class BSInputStream : MemoryStream
+    public class BSInputStream : MemoryStream
     {
         #region Private Members
 
         /// <summary>
         /// Minimum block size
         /// </summary>
-        private const int MINBLOCK = 10;
+        protected const int MINBLOCK = 10;
 
         /// <summary>
         /// Maximum block size
         /// </summary>
-        private const int MAXBLOCK = 4096;
+        protected const int MAXBLOCK = 4096;
 
         /// <summary>
         /// Sorting threshold
         /// </summary>
-        private const int FREQMAX = 4;
+        protected const int FREQMAX = 4;
 
         /// <summary>
         /// Sorting threshold
         /// </summary>
-        private const int CTXIDS = 3;
+        protected const int CTXIDS = 3;
 
         /// <summary>
         /// Sorting threshold
         /// </summary>
-        private static readonly sbyte[] MTF = new sbyte[256];
+        protected static readonly sbyte[] MTF = new sbyte[256];
 
         /// <summary>
         /// Decoder to use
@@ -45,32 +45,34 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Values being decoded
         /// </summary>
-        private byte[] _ctx = new byte[300];
+        protected byte[] _ctx = new byte[300];
 
         /// <summary>
         /// Decoded data
         /// </summary>
-        private byte[] _data;
+        protected byte[] _data;
 
         /// <summary>
         /// True if the EOF has been read
         /// </summary>
-        private bool _eof;
+        protected bool _eof;
 
         /// <summary>
         /// Block size of the data
         /// </summary>
-        private int _blocksize;
+        protected int _blocksize;
 
         /// <summary>
         /// Offset into the data
         /// </summary>
-        private int _bptr = 0;
+        protected int _bptr = 0;
 
         /// <summary>
         /// Size of the data read
         /// </summary>
-        private int _size = 0;
+        protected int _size = 0;
+
+        protected long _offset;
 
         #endregion Private Members
 

@@ -81,11 +81,15 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Compression\BlockSort.cs" />
     <Compile Include="Compression\BSInputStream.cs" />
     <Compile Include="Compression\BzzReader.cs" />
     <Compile Include="Compression\BzzWriter.cs" />
     <Compile Include="Compression\CodecFactory.cs" />
+    <Compile Include="Compression\IBlockSort.cs" />
     <Compile Include="Compression\IDataCoder.cs" />
+    <Compile Include="Compression\IDataTransform.cs" />
+    <Compile Include="Compression\IDataTransformFactory.cs" />
     <Compile Include="Compression\MutableValue.cs" />
     <Compile Include="Compression\ZPCodec.cs" />
     <Compile Include="Compression\IDataCoderFactory.cs" />
