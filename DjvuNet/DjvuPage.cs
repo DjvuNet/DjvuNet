@@ -30,6 +30,7 @@ using Rectangle = System.Drawing.Rectangle;
 using DjvuNet.Configuration;
 using DjvuNet.Utilities;
 using System.Runtime.CompilerServices;
+using System.IO;
 
 namespace DjvuNet
 {
@@ -737,7 +738,7 @@ namespace DjvuNet
         {
             if (Thumbnail != null)
                 return ((TH44Chunk)Thumbnail.Children
-                    .Where(x => x.ChunkType == ChunkType.TH44).First()).Image;
+                    .Where(x => x.ChunkType == ChunkType.TH44).First()).Image.ToImage();
 
             var result = BuildImage();
             var scaleAmount = (double)128 / result.Width;
