@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using DjvuNet.Compression;
 
 namespace DjvuNet
@@ -22,7 +21,7 @@ namespace DjvuNet
 
         IDjvuReader GetFixedLengthStream(long length);
 
-        Image GetJPEGImage(long length);
+        byte[] GetJPEGImage(long length);
 
         short ReadInt16BigEndian();
 

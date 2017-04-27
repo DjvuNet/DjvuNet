@@ -4,7 +4,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+//using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -118,10 +118,9 @@ namespace DjvuNet
 
         #region Public Methods
 
-        public Image GetJPEGImage(long length)
+        public byte[] GetJPEGImage(long length)
         {
-            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)));
-            return Image.FromStream(mem);
+            return ReadBytes(checked((int)length));
         }
 
         /// <summary>
