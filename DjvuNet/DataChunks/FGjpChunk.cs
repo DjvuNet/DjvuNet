@@ -3,10 +3,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 
 
 namespace DjvuNet.DataChunks
@@ -36,12 +32,12 @@ namespace DjvuNet.DataChunks
 
         #region ForegroundImage
 
-        private Image _foregroundImage;
+        private byte[] _foregroundImage;
 
         /// <summary>
         /// Gets the foreground image for this chunk
         /// </summary>
-        public Image ForegroundImage
+        public byte[] ForegroundImage
         {
             get
             {
@@ -86,7 +82,7 @@ namespace DjvuNet.DataChunks
 
         #region Private Methods
 
-        private Image DecodeImageData()
+        private byte[] DecodeImageData()
         {
             using (IDjvuReader reader = Reader.CloneReader(_dataLocation))
             {

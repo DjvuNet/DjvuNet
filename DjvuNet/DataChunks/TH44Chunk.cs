@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
+using DjvuNet.Graphics;
 using DjvuNet.Wavelet;
 
 namespace DjvuNet.DataChunks
@@ -63,17 +63,17 @@ namespace DjvuNet.DataChunks
 
         #region Image
 
-        private System.Drawing.Bitmap _image;
+        private PixelMap _image;
 
         /// <summary>
         /// Gets the image of the thumbnail
         /// </summary>
-        public System.Drawing.Bitmap Image
+        public PixelMap Image
         {
             get
             {
                 if (_image == null)
-                    _image = Thumbnail.GetPixelMap().ToImage();
+                    _image = Thumbnail.GetPixelMap();
 
                 return _image;
             }

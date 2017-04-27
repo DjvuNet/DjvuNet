@@ -1,11 +1,12 @@
-﻿using System.Drawing;
+﻿using DjvuNet.Graphics;
 using DjvuNet.Wavelet;
 
 namespace DjvuNet.DataChunks
 {
     public interface ITH44Chunk : IDjvuNode
     {
-        Bitmap Image { get; }
+        PixelMap Image { get; }
+
         IInterWavePixelMap Thumbnail { get; }
     }
 }
