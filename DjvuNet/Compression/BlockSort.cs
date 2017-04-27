@@ -29,7 +29,7 @@ namespace DjvuNet.Compression
 
         public BlockSort(byte[] pdata, int psize)
         {
-            if (_Size <= 0 || _Size >= 0x1000000)
+            if (psize <= 0 || psize >= 0x1000000)
                 throw new ArgumentOutOfRangeException(nameof(_Size));
 
             _Size = psize;

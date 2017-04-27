@@ -47,6 +47,94 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
+        [Fact()]
+        public void ZPCodecTest003()
+        {
+            ZPCodec codec = new ZPCodec();
+            Assert.True(codec.DjvuCompat);
+            Assert.False(codec.Encoding);
+        }
+
+        [Fact()]
+        public void ZPCodecTest004()
+        {
+            ZPCodec codec = new ZPCodec();
+            Assert.True(codec.DjvuCompat);
+            Assert.False(codec.Encoding);
+            ZPTable[] table = codec.CreateDefaultTable();
+            for(int i = 0; i < table.Length; i++)
+            {
+                var row = table[i];
+                Assert.Equal<uint>(row.PValue, codec.PArray[i]);
+                Assert.Equal<uint>(row.MValue, codec.MArray[i]);
+                Assert.Equal<uint>(row.Down, codec.Down[i]);
+                Assert.Equal<uint>(row.Up, codec.Up[i]);
+            }
+        }
+
+        [Fact()]
+        public void ZPCodecTest005()
+        {
+            ZPCodec codec = new ZPCodec(null, true);
+            Assert.True(codec.DjvuCompat);
+            Assert.True(codec.Encoding);
+        }
+
+        [Fact()]
+        public void ZPCodecTest006()
+        {
+            ZPCodec codec = new ZPCodec(null, true, false);
+            Assert.False(codec.DjvuCompat);
+            Assert.True(codec.Encoding);
+        }
+
+        [Fact()]
+        public void ZPCodecTest007()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                ZPCodec codec = new ZPCodec(stream, true, false);
+                Assert.NotNull(codec.DataStream);
+                Assert.Same(stream, codec.DataStream);
+                Assert.False(codec.DjvuCompat);
+                Assert.True(codec.Encoding);
+            }
+        }
+
+        [Fact()]
+        public void ZPCodecTest008()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                ZPCodec codec = new ZPCodec(stream, false, false);
+                Assert.NotNull(codec.DataStream);
+                Assert.Same(stream, codec.DataStream);
+                Assert.False(codec.DjvuCompat);
+                Assert.False(codec.Encoding);
+            }
+        }
+
+        [Fact()]
+        public void DefaultTable001()
+        {
+            ZPCodec codec = new ZPCodec();
+            Assert.True(codec.DjvuCompat);
+            Assert.False(codec.Encoding);
+            ZPTable[] table = codec.CreateDefaultTable();
+            ZPTable[] defaultTable = codec.DefaultTable;
+            Assert.NotSame(table, codec.DefaultTable);
+            Assert.Same(defaultTable, codec.DefaultTable);
+            for (int i = 0; i < table.Length; i++)
+            {
+                var row = table[i];
+                var defRow = defaultTable[i];
+                Assert.Equal<uint>(row.PValue, defRow.PValue);
+                Assert.Equal<uint>(row.MValue, defRow.MValue);
+                Assert.Equal<uint>(row.Down, defRow.Down);
+                Assert.Equal<uint>(row.Up, defRow.Up);
+            }
+        }
+
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void IWDecoderTest()
         {

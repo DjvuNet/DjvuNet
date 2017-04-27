@@ -82,6 +82,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compression\BlockSort.cs" />
+    <Compile Include="Compression\BSBaseStream.cs" />
+    <Compile Include="Compression\BSOutputStream.cs" />
+    <Compile Include="Compression\IBSBaseStream.cs" />
     <Compile Include="Compression\BSInputStream.cs" />
     <Compile Include="Compression\BzzReader.cs" />
     <Compile Include="Compression\BzzWriter.cs" />
@@ -109,6 +112,7 @@
     <Compile Include="DataChunks\DjvuFormElement.cs" />
     <Compile Include="DataChunks\DjvuNode.cs" />
     <Compile Include="DataChunks\IBG44Chunk.cs" />
+    <Compile Include="DataChunks\IBGjpChunk.cs" />
     <Compile Include="DataChunks\IBM44Chunk.cs" />
     <Compile Include="DataChunks\IBM44Form.cs" />
     <Compile Include="DataChunks\IDirmChunk.cs" />
