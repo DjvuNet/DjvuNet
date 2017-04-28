@@ -1,0 +1,534 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet", "DjvuNet\DjvuNet.csproj", "{E681B178-E5F8-4782-89C8-F32720B1464A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNetTest", "DjvuNetTest\DjvuNetTest.csproj", "{192F4E63-6ED7-410F-A372-0B54C6CDF987}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Tests", "DjvuNet.Tests\DjvuNet.Tests.csproj", "{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}"
+	ProjectSection(SolutionItems) = preProject
+		artifacts\ErrorFiles.json = artifacts\ErrorFiles.json
+		artifacts\test001C.djvu = artifacts\test001C.djvu
+		artifacts\test001C.json = artifacts\test001C.json
+		artifacts\test002C.djvu = artifacts\test002C.djvu
+		artifacts\test002C.json = artifacts\test002C.json
+		artifacts\test003C.djvu = artifacts\test003C.djvu
+		artifacts\test003C.json = artifacts\test003C.json
+		artifacts\test004C.djvu = artifacts\test004C.djvu
+		artifacts\test004C.json = artifacts\test004C.json
+		artifacts\test005C.djvu = artifacts\test005C.djvu
+		artifacts\test005C.json = artifacts\test005C.json
+		artifacts\test006C.djvu = artifacts\test006C.djvu
+		artifacts\test006C.json = artifacts\test006C.json
+		artifacts\test007C.djvu = artifacts\test007C.djvu
+		artifacts\test007C.json = artifacts\test007C.json
+		artifacts\test008C.djvu = artifacts\test008C.djvu
+		artifacts\test008C.json = artifacts\test008C.json
+		artifacts\test009C.djvu = artifacts\test009C.djvu
+		artifacts\test009C.json = artifacts\test009C.json
+		artifacts\test010C.djvu = artifacts\test010C.djvu
+		artifacts\test010C.json = artifacts\test010C.json
+		artifacts\test011C.djvu = artifacts\test011C.djvu
+		artifacts\test011C.json = artifacts\test011C.json
+		artifacts\test012C.djvu = artifacts\test012C.djvu
+		artifacts\test012C.json = artifacts\test012C.json
+		artifacts\test013C.djvu = artifacts\test013C.djvu
+		artifacts\test013C.json = artifacts\test013C.json
+		artifacts\test014C.djvu = artifacts\test014C.djvu
+		artifacts\test014C.json = artifacts\test014C.json
+		artifacts\test015C.djvu = artifacts\test015C.djvu
+		artifacts\test015C.json = artifacts\test015C.json
+		artifacts\test016C.djvu = artifacts\test016C.djvu
+		artifacts\test016C.json = artifacts\test016C.json
+		artifacts\test017C.djvu = artifacts\test017C.djvu
+		artifacts\test017C.json = artifacts\test017C.json
+		artifacts\test018C.djvu = artifacts\test018C.djvu
+		artifacts\test018C.json = artifacts\test018C.json
+		artifacts\test019C.djvu = artifacts\test019C.djvu
+		artifacts\test019C.json = artifacts\test019C.json
+		artifacts\test020C.djvu = artifacts\test020C.djvu
+		artifacts\test020C.json = artifacts\test020C.json
+		artifacts\test021C.djvu = artifacts\test021C.djvu
+		artifacts\test021C.json = artifacts\test021C.json
+		artifacts\test022C.djvu = artifacts\test022C.djvu
+		artifacts\test022C.json = artifacts\test022C.json
+		artifacts\test023C.djvu = artifacts\test023C.djvu
+		artifacts\test023C.json = artifacts\test023C.json
+		artifacts\test024C.djvu = artifacts\test024C.djvu
+		artifacts\test024C.json = artifacts\test024C.json
+		artifacts\test025C.djvu = artifacts\test025C.djvu
+		artifacts\test025C.json = artifacts\test025C.json
+		artifacts\test026C.djvu = artifacts\test026C.djvu
+		artifacts\test026C.json = artifacts\test026C.json
+		artifacts\test027C.djvu = artifacts\test027C.djvu
+		artifacts\test027C.json = artifacts\test027C.json
+		artifacts\test028C.djvu = artifacts\test028C.djvu
+		artifacts\test028C.json = artifacts\test028C.json
+		artifacts\test029C.djvu = artifacts\test029C.djvu
+		artifacts\test029C.json = artifacts\test029C.json
+		artifacts\test030C.djvu = artifacts\test030C.djvu
+		artifacts\test030C.json = artifacts\test030C.json
+		artifacts\test031C.djvu = artifacts\test031C.djvu
+		artifacts\test031C.json = artifacts\test031C.json
+		artifacts\test032C.djvu = artifacts\test032C.djvu
+		artifacts\test032C.json = artifacts\test032C.json
+		artifacts\test033C.djvu = artifacts\test033C.djvu
+		artifacts\test033C.json = artifacts\test033C.json
+		artifacts\test034C.djvu = artifacts\test034C.djvu
+		artifacts\test034C.json = artifacts\test034C.json
+		artifacts\test035C.djvu = artifacts\test035C.djvu
+		artifacts\test035C.json = artifacts\test035C.json
+		artifacts\test036C.djvu = artifacts\test036C.djvu
+		artifacts\test036C.json = artifacts\test036C.json
+		artifacts\test037C.djvu = artifacts\test037C.djvu
+		artifacts\test037C.json = artifacts\test037C.json
+		artifacts\test038C.djvu = artifacts\test038C.djvu
+		artifacts\test038C.json = artifacts\test038C.json
+		artifacts\test039C.djvu = artifacts\test039C.djvu
+		artifacts\test039C.json = artifacts\test039C.json
+		artifacts\test040C.djvu = artifacts\test040C.djvu
+		artifacts\test040C.json = artifacts\test040C.json
+		artifacts\test041C.djvu = artifacts\test041C.djvu
+		artifacts\test041C.json = artifacts\test041C.json
+		artifacts\test042C.djvu = artifacts\test042C.djvu
+		artifacts\test042C.json = artifacts\test042C.json
+		artifacts\test043C.djvu = artifacts\test043C.djvu
+		artifacts\test043C.json = artifacts\test043C.json
+		artifacts\test044C.djvu = artifacts\test044C.djvu
+		artifacts\test044C.json = artifacts\test044C.json
+		artifacts\test045C.djvu = artifacts\test045C.djvu
+		artifacts\test045C.json = artifacts\test045C.json
+		artifacts\test046C.djvu = artifacts\test046C.djvu
+		artifacts\test046C.json = artifacts\test046C.json
+		artifacts\test047C.djvu = artifacts\test047C.djvu
+		artifacts\test047C.json = artifacts\test047C.json
+		artifacts\test048C.djvu = artifacts\test048C.djvu
+		artifacts\test048C.json = artifacts\test048C.json
+		artifacts\test049C.djvu = artifacts\test049C.djvu
+		artifacts\test049C.json = artifacts\test049C.json
+		artifacts\test050C.djvu = artifacts\test050C.djvu
+		artifacts\test050C.json = artifacts\test050C.json
+		artifacts\test051C.djvu = artifacts\test051C.djvu
+		artifacts\test051C.json = artifacts\test051C.json
+		artifacts\test052C.djvu = artifacts\test052C.djvu
+		artifacts\test052C.json = artifacts\test052C.json
+		artifacts\test053C.djvu = artifacts\test053C.djvu
+		artifacts\test053C.json = artifacts\test053C.json
+		artifacts\test054C.djvu = artifacts\test054C.djvu
+		artifacts\test054C.json = artifacts\test054C.json
+		artifacts\test055C.djvu = artifacts\test055C.djvu
+		artifacts\test055C.json = artifacts\test055C.json
+		artifacts\test056C.djvu = artifacts\test056C.djvu
+		artifacts\test056C.json = artifacts\test056C.json
+		artifacts\test057C.djvu = artifacts\test057C.djvu
+		artifacts\test057C.json = artifacts\test057C.json
+		artifacts\test058C.djvu = artifacts\test058C.djvu
+		artifacts\test058C.json = artifacts\test058C.json
+		artifacts\test059C.djvu = artifacts\test059C.djvu
+		artifacts\test059C.json = artifacts\test059C.json
+		artifacts\test060C.djvu = artifacts\test060C.djvu
+		artifacts\test060C.json = artifacts\test060C.json
+		artifacts\test061C.djvu = artifacts\test061C.djvu
+		artifacts\test061C.json = artifacts\test061C.json
+		artifacts\test062C.djvu = artifacts\test062C.djvu
+		artifacts\test062C.json = artifacts\test062C.json
+		artifacts\test063C.djvu = artifacts\test063C.djvu
+		artifacts\test063C.json = artifacts\test063C.json
+		artifacts\test064C.djvu = artifacts\test064C.djvu
+		artifacts\test064C.json = artifacts\test064C.json
+		artifacts\test065C.djvu = artifacts\test065C.djvu
+		artifacts\test065C.json = artifacts\test065C.json
+		artifacts\test066C.djvu = artifacts\test066C.djvu
+		artifacts\test066C.json = artifacts\test066C.json
+		artifacts\test067C.djvu = artifacts\test067C.djvu
+		artifacts\test067C.json = artifacts\test067C.json
+		artifacts\test068C.djvu = artifacts\test068C.djvu
+		artifacts\test068C.json = artifacts\test068C.json
+		artifacts\test069C.djvu = artifacts\test069C.djvu
+		artifacts\test069C.json = artifacts\test069C.json
+		artifacts\test070C.djvu = artifacts\test070C.djvu
+		artifacts\test070C.json = artifacts\test070C.json
+		artifacts\test071C.djvu = artifacts\test071C.djvu
+		artifacts\test071C.json = artifacts\test071C.json
+		artifacts\test072C.djvu = artifacts\test072C.djvu
+		artifacts\test072C.json = artifacts\test072C.json
+		artifacts\test073C.djvu = artifacts\test073C.djvu
+		artifacts\test073C.json = artifacts\test073C.json
+		artifacts\test074C.djvu = artifacts\test074C.djvu
+		artifacts\test074C.json = artifacts\test074C.json
+		artifacts\test075C.djvu = artifacts\test075C.djvu
+		artifacts\test075C.json = artifacts\test075C.json
+		artifacts\test076C.djvu = artifacts\test076C.djvu
+		artifacts\test076C.json = artifacts\test076C.json
+		artifacts\test077C.djvu = artifacts\test077C.djvu
+		artifacts\test077C.json = artifacts\test077C.json
+		artifacts\testE001.djvu = artifacts\testE001.djvu
+		artifacts\testE001.json = artifacts\testE001.json
+		artifacts\testE002.djvu = artifacts\testE002.djvu
+		artifacts\testE002.json = artifacts\testE002.json
+		artifacts\testE003.djvu = artifacts\testE003.djvu
+		artifacts\testE003.json = artifacts\testE003.json
+		artifacts\testE004.djvu = artifacts\testE004.djvu
+		artifacts\testE004.json = artifacts\testE004.json
+		artifacts\testE005.djvu = artifacts\testE005.djvu
+		artifacts\testE005.json = artifacts\testE005.json
+		artifacts\testE006.djvu = artifacts\testE006.djvu
+		artifacts\testE006.json = artifacts\testE006.json
+		artifacts\testE007.djvu = artifacts\testE007.djvu
+		artifacts\testE007.json = artifacts\testE007.json
+		artifacts\testE008.djvu = artifacts\testE008.djvu
+		artifacts\testE008.json = artifacts\testE008.json
+		artifacts\testE009.djvu = artifacts\testE009.djvu
+		artifacts\testE010.djvu = artifacts\testE010.djvu
+		artifacts\testE011.djvu = artifacts\testE011.djvu
+		artifacts\testE012.djvu = artifacts\testE012.djvu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specs", "Specs", "{0E66E677-173D-4071-8615-2F0D69E97EFA}"
+	ProjectSection(SolutionItems) = preProject
+		Specs\1998_compression.djvu = Specs\1998_compression.djvu
+		Specs\1998_lossy_masked.djvu = Specs\1998_lossy_masked.djvu
+		Specs\1998_zcoder.djvu = Specs\1998_zcoder.djvu
+		Specs\2000_compression_system.djvu = Specs\2000_compression_system.djvu
+		Specs\2001_compression_overview.djvu = Specs\2001_compression_overview.djvu
+		Specs\2001_doc_browsing.djvu = Specs\2001_doc_browsing.djvu
+		Specs\2001_efficient_compression.djvu = Specs\2001_efficient_compression.djvu
+		Specs\2002_electronic_publishing.djvu = Specs\2002_electronic_publishing.djvu
+		Specs\2002_segmentation_scheme.djvu = Specs\2002_segmentation_scheme.djvu
+		Specs\DjVu3Spec.djvu = Specs\DjVu3Spec.djvu
+		Specs\DjVu3Spec.pdf = Specs\DjVu3Spec.pdf
+		Specs\DjVu_Tech_Primer.djvu = Specs\DjVu_Tech_Primer.djvu
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{79CE4EAD-3414-4E10-B9B0-F0BF675DF9D6}"
+	ProjectSection(SolutionItems) = preProject
+		Templates\AssemblyInfoCommon.Template.cs = Templates\AssemblyInfoCommon.Template.cs
+		Templates\UtilRoot.Template.cs = Templates\UtilRoot.Template.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\7z.exe = Tools\7z.exe
+		Tools\nuget.exe = Tools\nuget.exe
+	EndProjectSection
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared.Tests", "DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.shproj", "{B7EF5575-5932-4EA7-B250-E7DA238D60A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Helper.Tests", "DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj", "{4FEC9875-D7E6-47BD-A13A-5C1944464545}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{508EA7BC-4576-4C24-877B-7D7EE4369DA0}"
+	ProjectSection(SolutionItems) = preProject
+		.appveyor.yml = .appveyor.yml
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		artifacts.sha256 = artifacts.sha256
+		BUILD.bat = BUILD.bat
+		DjvuNet.Tests.runsettings = DjvuNet.Tests.runsettings
+		DjvuNetBuild.props = DjvuNetBuild.props
+		DjvuNetBuild.targets = DjvuNetBuild.targets
+		library.version = library.version
+		..\LICENSE.md = ..\LICENSE.md
+		README.md = README.md
+		Snk.snk = Snk.snk
+	EndProjectSection
+EndProject
+Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "DjvuNet.Build", "DjvuNet.Build\DjvuNet.Build.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared", "DjvuNet.Shared\DjvuNet.Shared.shproj", "{61B8CB33-F13A-4309-A137-895017B28E31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.DjvuLibre", "DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj", "{9B255F5A-716A-4A26-A140-525FDE3FA8F7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.DjvuLibre.Tests", "DjvuNet.DjvuLibre.Tests\DjvuNet.DjvuLibre.Tests.csproj", "{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C} = {AAA67337-AABD-4D04-A3CC-0A7F341F216C}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "System.Attributes", "System.Attributes\System.Attributes.csproj", "{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdjvulibre", "DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj", "{AAA67337-AABD-4D04-A3CC-0A7F341F216C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deps", "deps", "{022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{24379D70-5866-45DA-9DF1-E1182F3C8D64}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{D69E081C-83D4-4A0F-8667-E10AAF614902}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{FB072A68-F276-4CAC-9FE2-9BFA99A509FE}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x86\include\jconfig.h = deps\x86\include\jconfig.h
+		deps\x86\include\jerror.h = deps\x86\include\jerror.h
+		deps\x86\include\jmorecfg.h = deps\x86\include\jmorecfg.h
+		deps\x86\include\jpeglib.h = deps\x86\include\jpeglib.h
+		deps\x86\include\tiff.h = deps\x86\include\tiff.h
+		deps\x86\include\tiffconf.h = deps\x86\include\tiffconf.h
+		deps\x86\include\tiffio.h = deps\x86\include\tiffio.h
+		deps\x86\include\tiffio.hxx = deps\x86\include\tiffio.hxx
+		deps\x86\include\tiffvers.h = deps\x86\include\tiffvers.h
+		deps\x86\include\turbojpeg.h = deps\x86\include\turbojpeg.h
+		deps\x86\include\zlib.h = deps\x86\include\zlib.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{61D3B80C-4A7B-4C27-870B-A893443ACA39}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x86\Debug\jpeg.lib = deps\x86\Debug\jpeg.lib
+		deps\x86\Debug\jpeg.pdb = deps\x86\Debug\jpeg.pdb
+		deps\x86\Debug\jpeg62.dll = deps\x86\Debug\jpeg62.dll
+		deps\x86\Debug\tiffd.dll = deps\x86\Debug\tiffd.dll
+		deps\x86\Debug\tiffd.lib = deps\x86\Debug\tiffd.lib
+		deps\x86\Debug\tiffd.pdb = deps\x86\Debug\tiffd.pdb
+		deps\x86\Debug\zlibd.lib = deps\x86\Debug\zlibd.lib
+		deps\x86\Debug\zlibd.pdb = deps\x86\Debug\zlibd.pdb
+		deps\x86\Debug\zlibd1.dll = deps\x86\Debug\zlibd1.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{8597CB2A-5ED0-4B9E-B86A-16A4795C5146}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x86\Release\jpeg.lib = deps\x86\Release\jpeg.lib
+		deps\x86\Release\jpeg.pdb = deps\x86\Release\jpeg.pdb
+		deps\x86\Release\jpeg62.dll = deps\x86\Release\jpeg62.dll
+		deps\x86\Release\tiff.dll = deps\x86\Release\tiff.dll
+		deps\x86\Release\tiff.lib = deps\x86\Release\tiff.lib
+		deps\x86\Release\tiff.pdb = deps\x86\Release\tiff.pdb
+		deps\x86\Release\zlib.lib = deps\x86\Release\zlib.lib
+		deps\x86\Release\zlib.pdb = deps\x86\Release\zlib.pdb
+		deps\x86\Release\zlib1.dll = deps\x86\Release\zlib1.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{C1AEB7FA-E6F9-465F-8189-00EF56D72C6E}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x64\include\jconfig.h = deps\x64\include\jconfig.h
+		deps\x64\include\jerror.h = deps\x64\include\jerror.h
+		deps\x64\include\jmorecfg.h = deps\x64\include\jmorecfg.h
+		deps\x64\include\jpeglib.h = deps\x64\include\jpeglib.h
+		deps\x64\include\tiff.h = deps\x64\include\tiff.h
+		deps\x64\include\tiffconf.h = deps\x64\include\tiffconf.h
+		deps\x64\include\tiffio.h = deps\x64\include\tiffio.h
+		deps\x64\include\tiffio.hxx = deps\x64\include\tiffio.hxx
+		deps\x64\include\tiffvers.h = deps\x64\include\tiffvers.h
+		deps\x64\include\turbojpeg.h = deps\x64\include\turbojpeg.h
+		deps\x64\include\zlib.h = deps\x64\include\zlib.h
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{C20C859D-FADB-4380-8107-89FE6D8F1CFD}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x64\Release\jpeg.lib = deps\x64\Release\jpeg.lib
+		deps\x64\Release\jpeg.pdb = deps\x64\Release\jpeg.pdb
+		deps\x64\Release\jpeg62.dll = deps\x64\Release\jpeg62.dll
+		deps\x64\Release\tiff.dll = deps\x64\Release\tiff.dll
+		deps\x64\Release\tiff.lib = deps\x64\Release\tiff.lib
+		deps\x64\Release\tiff.pdb = deps\x64\Release\tiff.pdb
+		deps\x64\Release\zlib.lib = deps\x64\Release\zlib.lib
+		deps\x64\Release\zlib.pdb = deps\x64\Release\zlib.pdb
+		deps\x64\Release\zlib1.dll = deps\x64\Release\zlib1.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{D8B6CB0B-9D06-429E-B902-F1C70925E3AD}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x64\Debug\jpeg.lib = deps\x64\Debug\jpeg.lib
+		deps\x64\Debug\jpeg.pdb = deps\x64\Debug\jpeg.pdb
+		deps\x64\Debug\jpeg62.dll = deps\x64\Debug\jpeg62.dll
+		deps\x64\Debug\tiffd.dll = deps\x64\Debug\tiffd.dll
+		deps\x64\Debug\tiffd.lib = deps\x64\Debug\tiffd.lib
+		deps\x64\Debug\tiffd.pdb = deps\x64\Debug\tiffd.pdb
+		deps\x64\Debug\zlibd.lib = deps\x64\Debug\zlibd.lib
+		deps\x64\Debug\zlibd.pdb = deps\x64\Debug\zlibd.pdb
+		deps\x64\Debug\zlibd1.dll = deps\x64\Debug\zlibd1.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{847DB819-B1AD-435D-B460-73E06303C477}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x86\Debug\static\jpeg.lib = deps\x86\Debug\static\jpeg.lib
+		deps\x86\Debug\static\tiff.lib = deps\x86\Debug\static\tiff.lib
+		deps\x86\Debug\static\zlib.lib = deps\x86\Debug\static\zlib.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{35A32C1F-2570-4DB2-9EA2-9455EA724C02}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x64\Debug\static\jpeg.lib = deps\x64\Debug\static\jpeg.lib
+		deps\x64\Debug\static\tiffd.lib = deps\x64\Debug\static\tiffd.lib
+		deps\x64\Debug\static\zlibd.lib = deps\x64\Debug\static\zlibd.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{A52C9873-4D9B-4CD1-A74C-21BEC3F5D013}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x64\Release\static\jpeg.lib = deps\x64\Release\static\jpeg.lib
+		deps\x64\Release\static\tiff.lib = deps\x64\Release\static\tiff.lib
+		deps\x64\Release\static\zlib.lib = deps\x64\Release\static\zlib.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "share", "share", "{60A232E8-EBC3-4574-B6F0-92CCCAEAF503}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{384245D7-CAE8-4E63-AFFC-922D923ECB73}"
+	ProjectSection(SolutionItems) = preProject
+		deps\x86\Release\static\jpeg.lib = deps\x86\Release\static\jpeg.lib
+		deps\x86\Release\static\tiff.lib = deps\x86\Release\static\tiff.lib
+		deps\x86\Release\static\zlib.lib = deps\x86\Release\static\zlib.lib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{73C6055A-2FF4-4852-B3F0-402D6EB5B8B9}"
+	ProjectSection(SolutionItems) = preProject
+		artifacts\data\DjvuNet.pdb = artifacts\data\DjvuNet.pdb
+		artifacts\data\DjvuNet.pdb.bz = artifacts\data\DjvuNet.pdb.bz
+		artifacts\data\LibGit2Sharp.pdb = artifacts\data\LibGit2Sharp.pdb
+		artifacts\data\LibGit2Sharp.pdb.bz = artifacts\data\LibGit2Sharp.pdb.bz
+		artifacts\data\pdfium.dll = artifacts\data\pdfium.dll
+		artifacts\data\pdfium.dll.bz = artifacts\data\pdfium.dll.bz
+		artifacts\data\test002C.xml = artifacts\data\test002C.xml
+		artifacts\data\test003C.png = artifacts\data\test003C.png
+		artifacts\data\test003C.xml = artifacts\data\test003C.xml
+		artifacts\data\test003CB.png = artifacts\data\test003CB.png
+		artifacts\data\test003CF.png = artifacts\data\test003CF.png
+		artifacts\data\test003CHT.png = artifacts\data\test003CHT.png
+		artifacts\data\test003CS.png = artifacts\data\test003CS.png
+		artifacts\data\test032-1.bg4 = artifacts\data\test032-1.bg4
+		artifacts\data\test032-1.fg4 = artifacts\data\test032-1.fg4
+		artifacts\data\test032-1.sjbz = artifacts\data\test032-1.sjbz
+		artifacts\data\testbzz.bz = artifacts\data\testbzz.bz
+		artifacts\data\testbzz.obz = artifacts\data\testbzz.obz
+		artifacts\data\testbzznbmo.bz = artifacts\data\testbzznbmo.bz
+		artifacts\data\testbzznbmo.obz = artifacts\data\testbzznbmo.obz
+		artifacts\data\testbzznbmont.bz = artifacts\data\testbzznbmont.bz
+		artifacts\data\testbzznbmont.obz = artifacts\data\testbzznbmont.obz
+		artifacts\data\tests_exec.log.bz = artifacts\data\tests_exec.log.bz
+		artifacts\data\tests_exec.log.zip = artifacts\data\tests_exec.log.zip
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
+		DjvuNet.Shared\DjvuNet.Shared.projitems*{61b8cb33-f13a-4309-a137-895017b28e31}*SharedItemsImports = 13
+		DjvuNet.Shared\DjvuNet.Shared.projitems*{75de07a6-854c-4ec8-9beb-24b8efe42634}*SharedItemsImports = 4
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{b7ef5575-5932-4ea7-b250-e7da238d60a9}*SharedItemsImports = 13
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{ec13a71d-dec3-4597-aee1-38c4c40f6650}*SharedItemsImports = 4
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{f7ddb3f7-f251-4b2e-aeec-810118877e6f}*SharedItemsImports = 4
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|Any CPU.ActiveCfg = Release|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|Any CPU.Build.0 = Release|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x64.ActiveCfg = Debug|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x64.Build.0 = Debug|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x86.ActiveCfg = Debug|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Debug|x86.Build.0 = Debug|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|Any CPU.ActiveCfg = Release|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|Any CPU.Build.0 = Release|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x64.ActiveCfg = Release|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x64.Build.0 = Release|x64
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x86.ActiveCfg = Release|x86
+		{E681B178-E5F8-4782-89C8-F32720B1464A}.Release|x86.Build.0 = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|Any CPU.ActiveCfg = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|Any CPU.Build.0 = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x64.ActiveCfg = Debug|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x64.Build.0 = Debug|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x86.ActiveCfg = Debug|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Debug|x86.Build.0 = Debug|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|Any CPU.ActiveCfg = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|Any CPU.Build.0 = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x64.ActiveCfg = Release|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x64.Build.0 = Release|x64
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x86.ActiveCfg = Release|x86
+		{192F4E63-6ED7-410F-A372-0B54C6CDF987}.Release|x86.Build.0 = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|Any CPU.ActiveCfg = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|Any CPU.Build.0 = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x64.ActiveCfg = Debug|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x64.Build.0 = Debug|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x86.ActiveCfg = Debug|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Debug|x86.Build.0 = Debug|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|Any CPU.ActiveCfg = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|Any CPU.Build.0 = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x64.ActiveCfg = Release|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x64.Build.0 = Release|x64
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x86.ActiveCfg = Release|x86
+		{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}.Release|x86.Build.0 = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|Any CPU.ActiveCfg = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|Any CPU.Build.0 = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x64.ActiveCfg = Debug|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x64.Build.0 = Debug|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x86.ActiveCfg = Debug|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Debug|x86.Build.0 = Debug|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|Any CPU.ActiveCfg = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|Any CPU.Build.0 = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x64.ActiveCfg = Release|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x64.Build.0 = Release|x64
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x86.ActiveCfg = Release|x86
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545}.Release|x86.Build.0 = Release|x86
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x64.ActiveCfg = Release|Any CPU
+		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x86.ActiveCfg = Release|Any CPU
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|Any CPU.ActiveCfg = Release|x86
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x64.ActiveCfg = Debug|x64
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x64.Build.0 = Debug|x64
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x86.ActiveCfg = Debug|x86
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Debug|x86.Build.0 = Debug|x86
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|Any CPU.ActiveCfg = Release|x86
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x64.ActiveCfg = Release|x64
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x64.Build.0 = Release|x64
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x86.ActiveCfg = Release|x86
+		{9B255F5A-716A-4A26-A140-525FDE3FA8F7}.Release|x86.Build.0 = Release|x86
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|Any CPU.ActiveCfg = Release|x86
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x64.ActiveCfg = Debug|x64
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x64.Build.0 = Debug|x64
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x86.ActiveCfg = Debug|x86
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Debug|x86.Build.0 = Debug|x86
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|Any CPU.ActiveCfg = Release|x86
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x64.ActiveCfg = Release|x64
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x64.Build.0 = Release|x64
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x86.ActiveCfg = Release|x86
+		{EC13A71D-DEC3-4597-AEE1-38C4C40F6650}.Release|x86.Build.0 = Release|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Debug|Any CPU.ActiveCfg = Release|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Debug|Any CPU.Build.0 = Release|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Debug|x64.ActiveCfg = Debug|x64
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Debug|x64.Build.0 = Debug|x64
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Debug|x86.ActiveCfg = Debug|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Debug|x86.Build.0 = Debug|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Release|Any CPU.ActiveCfg = Release|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Release|Any CPU.Build.0 = Release|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Release|x64.ActiveCfg = Release|x64
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Release|x64.Build.0 = Release|x64
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Release|x86.ActiveCfg = Release|x86
+		{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}.Release|x86.Build.0 = Release|x86
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|Any CPU.ActiveCfg = Release|Win32
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x64.ActiveCfg = Debug|x64
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x64.Build.0 = Debug|x64
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x86.ActiveCfg = Debug|Win32
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Debug|x86.Build.0 = Debug|Win32
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|Any CPU.ActiveCfg = Release|Win32
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x64.ActiveCfg = Release|x64
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x64.Build.0 = Release|x64
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x86.ActiveCfg = Release|Win32
+		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{24379D70-5866-45DA-9DF1-E1182F3C8D64} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
+		{D69E081C-83D4-4A0F-8667-E10AAF614902} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
+		{FB072A68-F276-4CAC-9FE2-9BFA99A509FE} = {24379D70-5866-45DA-9DF1-E1182F3C8D64}
+		{61D3B80C-4A7B-4C27-870B-A893443ACA39} = {24379D70-5866-45DA-9DF1-E1182F3C8D64}
+		{8597CB2A-5ED0-4B9E-B86A-16A4795C5146} = {24379D70-5866-45DA-9DF1-E1182F3C8D64}
+		{C1AEB7FA-E6F9-465F-8189-00EF56D72C6E} = {D69E081C-83D4-4A0F-8667-E10AAF614902}
+		{C20C859D-FADB-4380-8107-89FE6D8F1CFD} = {D69E081C-83D4-4A0F-8667-E10AAF614902}
+		{D8B6CB0B-9D06-429E-B902-F1C70925E3AD} = {D69E081C-83D4-4A0F-8667-E10AAF614902}
+		{847DB819-B1AD-435D-B460-73E06303C477} = {61D3B80C-4A7B-4C27-870B-A893443ACA39}
+		{35A32C1F-2570-4DB2-9EA2-9455EA724C02} = {D8B6CB0B-9D06-429E-B902-F1C70925E3AD}
+		{A52C9873-4D9B-4CD1-A74C-21BEC3F5D013} = {C20C859D-FADB-4380-8107-89FE6D8F1CFD}
+		{60A232E8-EBC3-4574-B6F0-92CCCAEAF503} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
+		{384245D7-CAE8-4E63-AFFC-922D923ECB73} = {8597CB2A-5ED0-4B9E-B86A-16A4795C5146}
+		{73C6055A-2FF4-4852-B3F0-402D6EB5B8B9} = {DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}
+	EndGlobalSection
+EndGlobal

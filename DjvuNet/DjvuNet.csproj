@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E681B178-E5F8-4782-89C8-F32720B1464A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DjvuNet</RootNamespace>
+    <AssemblyName>DjvuNet</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <Import Project="$(ProjectDir)../DjvuNetBuild.props" />
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Compression\BSInputStream.cs" />
+    <Compile Include="Compression\BzzReader.cs" />
+    <Compile Include="Compression\BzzWriter.cs" />
+    <Compile Include="Compression\MutableValue.cs" />
+    <Compile Include="Compression\ZPCodec.cs" />
+    <Compile Include="Compression\ZPTable.cs" />
+    <Compile Include="Configuration\DjvuSettings.cs" />
+    <Compile Include="DataChunks\Annotations\Annotation.cs" />
+    <Compile Include="DataChunks\Annotations\AnnotationChunk.cs" />
+    <Compile Include="DataChunks\AntaChunk.cs" />
+    <Compile Include="DataChunks\AntzChunk.cs" />
+    <Compile Include="DataChunks\BG44Chunk.cs" />
+    <Compile Include="DataChunks\BGjpChunk.cs" />
+    <Compile Include="DataChunks\CidaChunkcs.cs" />
+    <Compile Include="DataChunks\IffChunk.cs" />
+    <Compile Include="DataChunks\Navigation\DocumentNavigator.cs" />
+    <Compile Include="DataChunks\Navigation\Interfaces\INavigation.cs" />
+    <Compile Include="DataChunks\UnknownChunk.cs" />
+    <Compile Include="DataChunks\Navigation\Bookmark.cs" />
+    <Compile Include="DataChunks\Enums\ChunkTypes.cs" />
+    <Compile Include="DataChunks\Graphics\ColorPalette.cs" />
+    <Compile Include="DataChunks\DirmChunk.cs" />
+    <Compile Include="DataChunks\Directory\DirmComponent.cs" />
+    <Compile Include="DataChunks\DjbzChunk.cs" />
+    <Compile Include="DataChunks\DjviChunk.cs" />
+    <Compile Include="DataChunks\DjvmChunk.cs" />
+    <Compile Include="DataChunks\DjvuChunk.cs" />
+    <Compile Include="DataChunks\Enums\ZoneTypes.cs" />
+    <Compile Include="DataChunks\FG44Chunk.cs" />
+    <Compile Include="DataChunks\FGbzChunk.cs" />
+    <Compile Include="DataChunks\FGjpChunk.cs" />
+    <Compile Include="DataChunks\FormChunk.cs" />
+    <Compile Include="DataChunks\InclChunk.cs" />
+    <Compile Include="DataChunks\InfoChunk.cs" />
+    <Compile Include="DataChunks\NavmChunk.cs" />
+    <Compile Include="DataChunks\Enums\PageRotations.cs" />
+    <Compile Include="DataChunks\SjbzChunk.cs" />
+    <Compile Include="DataChunks\SmmrChunk.cs" />
+    <Compile Include="DataChunks\Text\TextChunk.cs" />
+    <Compile Include="DataChunks\Text\TextZone.cs" />
+    <Compile Include="DataChunks\TH44Chunk.cs" />
+    <Compile Include="DataChunks\ThumChunk.cs" />
+    <Compile Include="DataChunks\TxtaChunk.cs" />
+    <Compile Include="DataChunks\TxtzChunk.cs" />
+    <Compile Include="DataChunks\WmrmChunk.cs" />
+    <Compile Include="Diagnostics\DjvuEventSource.cs" />
+    <Compile Include="DjvuDocument.cs" />
+    <Compile Include="DjvuPage.cs" />
+    <Compile Include="Extentions\ExtentionMethods.cs" />
+    <Compile Include="Graphics\Bitmap.cs" />
+    <Compile Include="Graphics\Map.cs" />
+    <Compile Include="Graphics\Pixel.cs" />
+    <Compile Include="Graphics\PixelMapScaler.cs" />
+    <Compile Include="Graphics\PixelReference.cs" />
+    <Compile Include="Graphics\PixelMap.cs" />
+    <Compile Include="Graphics\Rectangle.cs" />
+    <Compile Include="IO\DjvuReader.cs" />
+    <Compile Include="IO\DjvuWriter.cs" />
+    <Compile Include="IO\IDjvuWriter.cs" />
+    <Compile Include="IO\IBinaryReader.cs" />
+    <Compile Include="IDjvuDocument.cs" />
+    <Compile Include="IDjvuPage.cs" />
+    <Compile Include="IO\IBinaryWriter.cs" />
+    <Compile Include="IO\IDjvuReader.cs" />
+    <Compile Include="Interfaces\ICodec.cs" />
+    <Compile Include="JB2\JB2Blit.cs" />
+    <Compile Include="JB2\JB2Codec.cs" />
+    <Compile Include="JB2\JB2Decoder.cs" />
+    <Compile Include="JB2\JB2Dictionary.cs" />
+    <Compile Include="JB2\JB2Image.cs" />
+    <Compile Include="JB2\JB2Item.cs" />
+    <Compile Include="JB2\JB2Shape.cs" />
+    <Compile Include="Parser\AbstractDocumentTree.cs" />
+    <Compile Include="Parser\DjvuFormatException.cs" />
+    <Compile Include="Parser\DjvuParser.cs" />
+    <Compile Include="Parser\IAbstractDocumentTree.cs" />
+    <Compile Include="Parser\IDjvuElement.cs" />
+    <Compile Include="Parser\IDjvuLeafNode.cs" />
+    <Compile Include="Parser\IDjvuNode.cs" />
+    <Compile Include="Parser\IDjvuParser.cs" />
+    <Compile Include="Parser\IDjvuRootElement.cs" />
+    <Compile Include="Parser\IffParserException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.cs" />
+    <Compile Include="Text\PageText.cs" />
+    <Compile Include="Text\PageTextItem.cs" />
+    <Compile Include="Text\PageTextSearch.cs" />
+    <Compile Include="Util\Verify.cs" />
+    <Compile Include="Wavelet\IWBlock.cs" />
+    <Compile Include="Wavelet\IWBucket.cs" />
+    <Compile Include="Wavelet\IWCodec.cs" />
+    <Compile Include="Wavelet\IWMap.cs" />
+    <Compile Include="Wavelet\IWPixelMap.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="LICENSE.md" />
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Edition\" />
+    <Folder Include="Export\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
+      <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
+      <Name>System.Attributes</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(ProjectDir)../DjvuNetBuild.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
