@@ -54,7 +54,7 @@ install:
 
 before_build:
     - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-    - appveyor-retry nuget restore -DisableParallelProcessing  -verbosity detailed
+    - appveyor-retry nuget restore -DisableParallelProcessing  -verbosity detailed  c:\projects\djvunet\DjvuNet.sln
 
 build:
     project: DjvuNet.sln
