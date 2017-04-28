@@ -193,7 +193,7 @@ namespace DjvuNet.DataChunks
             // Search the children for the text
             return Children.SelectMany(x => x.SearchForText(text)).ToArray();
         }
-
+#if !NETSTANDARD2_0
         /// <summary>
         /// Returns the text zones that are contained within the rectangle
         /// </summary>
@@ -231,7 +231,7 @@ namespace DjvuNet.DataChunks
             // Search the children for the text
             return Children.SelectMany(x => x.SearchForText(rectangle)).ToArray();
         }
-
+#endif
         #endregion Public Methods
 
         #region Private Methods

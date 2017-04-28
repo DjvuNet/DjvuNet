@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>System</RootNamespace>
+    <AssemblyName>System.Attributes</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
+
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25227-01" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DjvuNet.Shared\DjvuNet.Shared.shproj" />
+  </ItemGroup>
+
+  <Import Project="..\DjvuNet.Shared\DjvuNet.Shared.projitems" Label="Shared" />
+
+</Project>
