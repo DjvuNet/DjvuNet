@@ -6,12 +6,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.DataChunks.Tests
 {
     public class DjvuChunkTests
     {
+
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [ClassData(typeof(DjvuJsonDataSource))]
         public void DjvuChunk_Theory(DjvuJsonDocument doc, int index)
         {

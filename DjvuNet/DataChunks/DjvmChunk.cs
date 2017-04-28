@@ -18,13 +18,13 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjvmChunk : FormChunk
+    public class DjvmChunk : DjvuFormElement
     {
         private List<DjviChunk> _Includes;
         private List<ThumChunk> _Thumbnails;
         private List<DjvuChunk> _Pages;
 
-        private List<IffChunk> _Files;
+        private List<IDjvuNode> _Files;
 
         #region Public Properties
 
@@ -51,7 +51,7 @@ namespace DjvuNet.DataChunks
                     return _dirmData;
                 else if (Children != null)
                 {
-                    _dirmData = (DirmChunk)Children.FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Dirm);
+                    _dirmData = (DirmChunk)Children.FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Dirm);
                     return _dirmData;
                 }
                 else
@@ -114,7 +114,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        public IReadOnlyList<IffChunk> Files
+        public IReadOnlyList<IDjvuNode> Files
         {
             get
             {
@@ -124,10 +124,10 @@ namespace DjvuNet.DataChunks
                 {
                     _Files = Children.Where( x =>
                         x.ChunkType == ChunkType.Djvu || x.ChunkType == ChunkType.Djvi ||
-                        x.ChunkType == ChunkType.Thum || x.ChunkType == ChunkType.Navm).ToList<IffChunk>();
+                        x.ChunkType == ChunkType.Thum || x.ChunkType == ChunkType.Navm).ToList<IDjvuNode>();
                 }
                 else
-                    _Files = new List<IffChunk>();
+                    _Files = new List<IDjvuNode>();
 
                 return _Files;
             }
@@ -146,8 +146,8 @@ namespace DjvuNet.DataChunks
                     return _NavmData;
                 else
                 {
-                    if (Children != null && Children.Length > 0)
-                        _NavmData = (NavmChunk)Children.FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Navm);
+                    if (Children != null && Children.Count > 0)
+                        _NavmData = (NavmChunk)Children.FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Navm);
                     return _NavmData;
                 }
             }
@@ -157,7 +157,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DjvmChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public DjvmChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {

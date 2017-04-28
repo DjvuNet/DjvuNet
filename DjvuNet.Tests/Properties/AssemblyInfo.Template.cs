@@ -14,3 +14,7 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("f7ddb3f7-f251-4b2e-aeec-810118877e6f")]
 
+internal class AssemblyData
+{
+    public const string Name = "DjvuNet.Tests";
+}

@@ -19,7 +19,7 @@ namespace DjvuNet.JB2
 
         #region Protected Members
 
-        protected MutableValue<sbyte> ZpBitHolder = new MutableValue<sbyte>();
+        protected byte ZpBitHolder;
 
         #endregion Protected Members
 
@@ -34,7 +34,7 @@ namespace DjvuNet.JB2
             // Nothing
         }
 
-        #endregion Constructors
+#endregion Constructors
 
         #region Public Methods
 
@@ -64,7 +64,7 @@ namespace DjvuNet.JB2
                 throw new DjvuFormatException("Image has no start record");
         }
 
-        public virtual void Init(BinaryReader gbs, JB2Dictionary zdict)
+        public virtual void Init(IBinaryReader gbs, JB2Dictionary zdict)
         {
             this._zdict = zdict;
             _zp = new ZPCodec(gbs.BaseStream);
@@ -77,16 +77,19 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override bool CodeBit(bool ignored, MutableValue<sbyte> ctx)
         {
-            int value = _zp.Decoder(ctx);
+            byte ctxVal = unchecked((byte)ctx.Value);
+            int value = _zp.Decoder(ref ctxVal);
+            ctx.Value = (sbyte) ctxVal;
             return (value != 0);
         }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override int CodeBit(bool ignored, sbyte[] array, int offset)
         {
-            ZpBitHolder.Value = array[offset];
-            int retval = _zp.Decoder(ZpBitHolder);
-            array[offset] = ZpBitHolder.Value;
+            ZpBitHolder = unchecked((byte )array[offset]);
+            int retval = _zp.Decoder(ref ZpBitHolder);
+            array[offset] = unchecked((sbyte)ZpBitHolder);
             return retval;
         }
 
@@ -255,6 +258,6 @@ namespace DjvuNet.JB2
             return result;
         }
 
-        #endregion Protected Methods
+#endregion Protected Methods
     }
 }

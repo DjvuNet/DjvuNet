@@ -48,7 +48,7 @@ namespace DjvuNet
             : base(message, innerException)
         {
         }
-
+#if !NETSTANDARD2_0
         /// <summary>
         /// Initializes a new instance of the DjvuNet.IFFParserException class with serialized data.
         /// </summary>   
@@ -62,5 +62,6 @@ namespace DjvuNet
             base (info, context)
         {
         }
+#endif
     }
 }

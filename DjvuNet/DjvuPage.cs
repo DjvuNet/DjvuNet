@@ -13,16 +13,12 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
-
 using DjvuNet.DataChunks;
-
-using DjvuNet.DataChunks.Directory;
-using DjvuNet.DataChunks.Text;
 using DjvuNet.Graphics;
 using DjvuNet.JB2;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
-using ColorPalette = DjvuNet.DataChunks.Graphics.ColorPalette;
+using ColorPalette = DjvuNet.DataChunks.ColorPalette;
 using GBitmap = DjvuNet.Graphics.Bitmap;
 using GMap = DjvuNet.Graphics.Map;
 using GPixel = DjvuNet.Graphics.Pixel;
@@ -32,8 +28,9 @@ using GRect = DjvuNet.Graphics.Rectangle;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
 using DjvuNet.Configuration;
-using DjvuNet.Util;
+using DjvuNet.Utilities;
 using System.Runtime.CompilerServices;
+using System.IO;
 
 namespace DjvuNet
 {
@@ -48,10 +45,12 @@ namespace DjvuNet
         /// <summary>
         /// True if the page has been previously loaded, false otherwise
         /// </summary>
-        private bool _hasLoaded = false;
+        private bool _hasLoaded;
 
         private object _loadingLock = new object();
-        private bool _isBackgroundDecoded = false;
+        private bool _isBackgroundDecoded;
+
+        private DjvuImage _Image;
 
         #endregion Private Members
 
@@ -65,12 +64,12 @@ namespace DjvuNet
 
         #region Thumbnail
 
-        private ThumChunk _thumbnail;
+        private IThumChunk _thumbnail;
 
         /// <summary>
         /// Gets the thumbnail for the page
         /// </summary>
-        public ThumChunk Thumbnail
+        public IThumChunk Thumbnail
         {
             get { return _thumbnail; }
 
@@ -88,12 +87,12 @@ namespace DjvuNet
 
         #region Document
 
-        private DjvuDocument _document;
+        private IDjvuDocument _document;
 
         /// <summary>
         /// Gets the document the page belongs to
         /// </summary>
-        public DjvuDocument Document
+        public IDjvuDocument Document
         {
             get { return _document; }
 
@@ -116,7 +115,7 @@ namespace DjvuNet
         /// <summary>
         /// Gets the included items
         /// </summary>
-        public IReadOnlyList<DjviChunk> Includes
+        public IReadOnlyList<DjviChunk> IncludeFiles
         {
             get { return _Includes; }
 
@@ -125,7 +124,7 @@ namespace DjvuNet
                 if (_Includes != value)
                 {
                     _Includes = (List<DjviChunk>) value;
-                    OnPropertyChanged(nameof(Includes));
+                    OnPropertyChanged(nameof(IncludeFiles));
                 }
             }
         }
@@ -134,12 +133,12 @@ namespace DjvuNet
 
         #region PageForm
 
-        private FormChunk _pageForm;
+        private DjvuFormElement _pageForm;
 
         /// <summary>
         /// Gets the form chunk for the page
         /// </summary>
-        public FormChunk PageForm
+        public DjvuFormElement PageForm
         {
             get { return _pageForm; }
 
@@ -169,7 +168,7 @@ namespace DjvuNet
                 if (_info == null)
                 {
                     var chunk = PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Info);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Info);
                     _info = chunk as InfoChunk;
                     if (_info != null)
                         OnPropertyChanged(nameof(Info));
@@ -224,12 +223,12 @@ namespace DjvuNet
 
         #region Text
 
-        private DataChunks.Text.TextChunk _textChunk;
+        private DataChunks.TextChunk _textChunk;
 
         /// <summary>
         /// Gets the text chunk for the page
         /// </summary>
-        public DataChunks.Text.TextChunk TextChunk
+        public DataChunks.TextChunk TextChunk
         {
             get
             {
@@ -279,7 +278,7 @@ namespace DjvuNet
                 {
                     // Get the first chunk if present
                     var chunk = (SjbzChunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.Sjbz);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Sjbz);
 
                     if (chunk != null)
                     {
@@ -296,19 +295,19 @@ namespace DjvuNet
 
         #region ForegroundIWPixelMap
 
-        private Wavelet.IWPixelMap _foregroundIWPixelMap;
+        private Wavelet.IInterWavePixelMap _foregroundIWPixelMap;
 
         /// <summary>
         /// Gets the Foreground pixel map
         /// </summary>
-        public Wavelet.IWPixelMap ForegroundIWPixelMap
+        public Wavelet.IInterWavePixelMap ForegroundIWPixelMap
         {
             get
             {
                 if (_foregroundIWPixelMap == null)
                 {
                     var chunk = (FG44Chunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.FG44);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.FG44);
 
                     if (chunk != null)
                     {
@@ -325,19 +324,19 @@ namespace DjvuNet
 
         #region BackgroundIWPixelMap
 
-        private Wavelet.IWPixelMap _backgroundIWPixelMap;
+        private Wavelet.IInterWavePixelMap _backgroundIWPixelMap;
 
         /// <summary>
         /// Gets the background pixel map
         /// </summary>
-        public Wavelet.IWPixelMap BackgroundIWPixelMap
+        public Wavelet.IInterWavePixelMap BackgroundIWPixelMap
         {
             get
             {
                 if (_backgroundIWPixelMap == null)
                 {
                     var chunk = (BG44Chunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.BG44);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.BG44);
 
                     if (chunk != null)
                     {
@@ -368,7 +367,7 @@ namespace DjvuNet
                     DjvmChunk root = Document.RootForm as DjvmChunk;
                     // TODO - verify if tests or this code is failing to handle palette correctly
                     FGbzChunk result = (FGbzChunk)PageForm.Children
-                        .FirstOrDefault<IffChunk>(x => x.ChunkType == ChunkType.FGbz);
+                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.FGbz);
 
                     _foregroundPalette = result?.Palette;
                     if (_foregroundPalette != null)
@@ -394,7 +393,7 @@ namespace DjvuNet
             {
                 if (_foregroundPixelMap == null)
                 {
-                    _foregroundPixelMap = ForegroundIWPixelMap.GetPixmap();
+                    _foregroundPixelMap = ForegroundIWPixelMap.GetPixelMap();
                     if (_foregroundPixelMap != null)
                         OnPropertyChanged(nameof(ForegroundPixelMap));
                 }
@@ -550,15 +549,16 @@ namespace DjvuNet
 
         #region Constructors
 
-        public DjvuPage(int pageNumber, DjvuDocument document, DirmComponent header, 
-            ThumChunk thumbnail, List<DjviChunk> includedItems, DjvuChunk form)
+        public DjvuPage(int pageNumber, IDjvuDocument document, DirmComponent header, 
+            ThumChunk thumbnail, List<DjviChunk> includedItems, DjvuFormElement form)
         {
             PageNumber = pageNumber;
             Document = document;
             Header = header;
             Thumbnail = thumbnail;
-            Includes = includedItems;
+            IncludeFiles = includedItems;
             PageForm = form;
+            _Image = new DjvuImage(this);
             PropertyChanged += DjvuPage_PropertyChanged;
 
             if (Info == null)
@@ -699,7 +699,7 @@ namespace DjvuNet
 
             if (newWidth <= 0 || newHeight <= 0)
                 throw new ArgumentException(
-                    $"Invalid new image dimensions with: {newWidth}, height: {newHeight}", 
+                    $"Invalid new image dimensions width: {newWidth}, height: {newHeight}", 
                     nameof(newWidth) + " " + nameof(newHeight));
 
             // Resize the image
@@ -738,7 +738,7 @@ namespace DjvuNet
         {
             if (Thumbnail != null)
                 return ((TH44Chunk)Thumbnail.Children
-                    .Where(x => x.ChunkType == ChunkType.TH44).First()).Image;
+                    .Where(x => x.ChunkType == ChunkType.TH44).First()).Image.ToImage();
 
             var result = BuildImage();
             var scaleAmount = (double)128 / result.Width;
@@ -783,7 +783,7 @@ namespace DjvuNet
                 gamma_correction = 10D;
             }
 
-            IWPixelMap bgIWPixmap = BackgroundIWPixelMap;
+            IInterWavePixelMap bgIWPixmap = BackgroundIWPixelMap;
 
             if (bgIWPixmap != null)
             {
@@ -800,19 +800,19 @@ namespace DjvuNet
 
                 if (subsample == red)
                 {
-                    pMap = bgIWPixmap.GetPixmap(1, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(1, rect, retval);
                 }
                 else if (subsample == (2 * red))
                 {
-                    pMap = bgIWPixmap.GetPixmap(2, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(2, rect, retval);
                 }
                 else if (subsample == (4 * red))
                 {
-                    pMap = bgIWPixmap.GetPixmap(4, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(4, rect, retval);
                 }
                 else if (subsample == (8 * red))
                 {
-                    pMap = bgIWPixmap.GetPixmap(8, rect, retval);
+                    pMap = bgIWPixmap.GetPixelMap(8, rect, retval);
                 }
                 else if ((red * 4) == (subsample * 3))
                 {
@@ -830,7 +830,7 @@ namespace DjvuNet
                     if (xrect.Top > iwHeight)
                         xrect.Top = iwHeight;
 
-                    GPixmap iwPMap = bgIWPixmap.GetPixmap(1, xrect, null);
+                    GPixmap iwPMap = bgIWPixmap.GetPixelMap(1, xrect, null);
                     pMap = (retval != null) ? retval : new GPixmap();
                     pMap.Downsample43(iwPMap, nrect);
                 }
@@ -851,7 +851,7 @@ namespace DjvuNet
                     mapScaler.SetVertRatio(red * po2, subsample);
 
                     GRect xrect = mapScaler.GetRequiredRect(rect);
-                    GPixmap iwPMap = bgIWPixmap.GetPixmap(po2, xrect, null);
+                    GPixmap iwPMap = bgIWPixmap.GetPixelMap(po2, xrect, null);
                     pMap = (retval != null) ? retval : new GPixmap();
 
                     mapScaler.Scale(xrect, iwPMap, rect, pMap);
@@ -950,17 +950,18 @@ namespace DjvuNet
 
                 System.Drawing.Bitmap background = GetBackgroundImage(subsample, false);
 
-                Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Background: {stopWatch.ElapsedTicks}");
+                Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Background: {stopWatch.ElapsedTicks}");
+
                 stopWatch.Restart();                
 
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
                 {
-                    Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Foreground: {stopWatch.ElapsedTicks}");
+                    Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Foreground: {stopWatch.ElapsedTicks}");
                     stopWatch.Restart();
 
                     using (System.Drawing.Bitmap mask = GetTextImage(subsample, false))
                     {
-                        Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Mask: {stopWatch.ElapsedTicks}");
+                        Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Mask: {stopWatch.ElapsedTicks}");
                         stopWatch.Restart();
 
                         _hasLoaded = true;
@@ -989,39 +990,67 @@ namespace DjvuNet
                         int maskHeight = mask.Height;
                         int maskWidth = mask.Width;
 
-                        Debug.WriteLine($"Height of data: {bgndHeight} = {maskHeight} = {fgndHeight}");
-                        Debug.WriteLine($"Width of data:  {bgndWidth} = {maskWidth} = {fgndWidth}");
+                        Debug.WriteLine($"Height of data: Background {bgndHeight} = Mask {maskHeight} = Foreground {fgndHeight}");
+                        Debug.WriteLine($"Width of data: Background {bgndWidth} = Mask {maskWidth} = Foreground {fgndWidth}");
+
+                        int maskbgnH = maskHeight / bgndHeight;
+                        int maskfgnH = maskHeight / fgndHeight;
+
+                        int maskbgnW = maskWidth / bgndWidth;
+                        int maskfgnW = maskWidth / fgndWidth;
+
+                        Debug.WriteLine($"Ratios Heights: Mask/Bgnd {(double)maskHeight / (double)bgndHeight}, Mask/Fgnd {(double)maskHeight / (double)fgndHeight}");
+                        Debug.WriteLine($"Ratios Widths: Mask/Bgnd {(double)maskWidth / (double)bgndWidth}, Mask/Fgnd {(double)maskWidth / (double)fgndWidth}");
 
                         //Parallel.For(
                         //    0,
                         //    height,
                         //    y =>
                         //    {
-                        for (int y = 0; y < bgndHeight && y < maskHeight && y < fgndHeight; y++)
+                        ;
+                        for (int y = 0, yf = 0, yb = 0; y < maskHeight  && yb < bgndHeight && yf < fgndHeight; y++)
                         {
-                            byte* maskRow = (byte*)maskData.Scan0 + (y * maskData.Stride);
-                            uint* backgroundRow = (uint*)(backgroundData.Scan0 + (y * backgroundData.Stride));
-                            uint* foregroundRow = (uint*)(foregroundData.Scan0 + (y * foregroundData.Stride));
+                            byte* maskRow = (byte*) maskData.Scan0 + (y * maskData.Stride);
+                            uint* backgroundRow = (uint*)(backgroundData.Scan0 + (yb * backgroundData.Stride));
+                            uint* foregroundRow = (uint*)(foregroundData.Scan0 + (yf * foregroundData.Stride));
 
-                            for (int x = 0; x < bgndWidth && x < maskWidth && x < fgndWidth ; x++)
+                            for (int x = 0, xf = 0, xb = 0; x < bgndWidth && xb < maskWidth && xf < fgndWidth ; x++)
                             {
                                 // Check if the mask byte is set
                                 if (maskRow[x] > 0)
                                 {
                                     bool inverted = _isInverted == true;
 
-                                    uint xF = foregroundRow[x];
+                                    uint xF = foregroundRow[xf];
 
                                     if (inverted)
-                                        backgroundRow[x] = InvertColor(xF);
+                                        backgroundRow[xb] = InvertColor(xF);
                                     else
-                                        backgroundRow[x] = xF;
+                                        backgroundRow[xb] = xF;
                                 }
                                 else if (_isInverted == true)
                                 {
-                                    uint xB = backgroundRow[x];
-                                    backgroundRow[x] = InvertColor(xB);
+                                    uint xB = backgroundRow[xb];
+                                    backgroundRow[xb] = InvertColor(xB);
                                 }
+
+                                if (x > 0)
+                                {
+                                    if (x % maskbgnW == 0)
+                                        xb++;
+
+                                    if (x % maskfgnW == 0)
+                                        xf++;
+                                }
+                            }
+
+                            if (y > 0)
+                            {
+                                if (y % maskbgnH == 0)
+                                    yb++;
+
+                                if (y % maskfgnH == 0)
+                                    yf++;
                             }
                         }
                         //});
@@ -1030,7 +1059,7 @@ namespace DjvuNet
                         foreground.UnlockBits(foregroundData);
                         background.UnlockBits(backgroundData);
 
-                        Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo, $"Return Background: {stopWatch.ElapsedTicks}");
+                        Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Return Background: {stopWatch.ElapsedTicks}");
 
                         return background;
                     }
@@ -1066,19 +1095,12 @@ namespace DjvuNet
         {
             Verify.SubsampleRange(subsample);
 
-            retval =
-               IsColor
-                  ? (GMap)GetPixelMap(
-                        segment,
-                        subsample,
-                        0.0D,
-                        (retval is GPixmap) ? (GPixmap)retval : null)
-                  : (GMap)GetBitmap(
-                        segment,
-                        subsample,
-                        1,
-                        ((retval is GBitmap) ? (GBitmap)retval : null)
-                    );
+            if (IsColor)
+                retval = GetPixelMap(segment, subsample, 0.0D,
+                    (retval is GPixmap) ? (GPixmap)retval : null);
+            else
+                retval = GetBitmap(segment, subsample, 1,
+                        (retval is GBitmap) ? (GBitmap)retval : null);
 
             return retval;
         }
@@ -1158,7 +1180,7 @@ namespace DjvuNet
                 return false;
 
             // There is no need to synchronize since we won't access data which could be updated.
-            IWPixelMap bgIWPixmap = (IWPixelMap)BackgroundIWPixelMap;
+            IInterWavePixelMap bgIWPixmap = (IInterWavePixelMap)BackgroundIWPixelMap;
             int bgred = 0;
 
             if (bgIWPixmap != null)
@@ -1185,7 +1207,7 @@ namespace DjvuNet
             int width = Info.Width;
             int height = Info.Height;
 
-            if ((width <= 0) || (height <= 0))
+            if (width <= 0 || height <= 0)
                 return false;
 
             double gamma_correction = 1.0D;
@@ -1223,16 +1245,12 @@ namespace DjvuNet
                     }
 
                     GPixmap colors =
-                      new GPixmap().Init(
-                        1,
-                        fgPalette.PaletteColors.Length,
-                        null);
+                      new GPixmap().Init(1, fgPalette.PaletteColors.Length, null);
+
                     GPixelReference color = colors.CreateGPixelReference(0);
 
                     for (int i = 0; i < colors.ImageWidth; color.IncOffset())
-                    {
                         fgPalette.IndexToColor(i++, color);
-                    }
 
                     colors.ApplyGammaCorrection(gamma_correction);
 
@@ -1241,7 +1259,7 @@ namespace DjvuNet
                     while (components.Count > 0)
                     {
                         int lastx = 0;
-                        int colorindex = fgPalette.BlitColors[((int)components[0])];
+                        int colorindex = fgPalette.BlitColors[components[0]];
                         GRect comprect = new GRect();
                         compset = new List<int>();
 
@@ -1265,8 +1283,7 @@ namespace DjvuNet
 
                                 comprect.Recthull(comprect, xrect);
                                 compset.Add(components[pos]);
-                                components.RemoveAt(0);
-
+                                components.RemoveAt(pos);
                             }
                             else
                             {
@@ -1285,12 +1302,8 @@ namespace DjvuNet
                             continue;
                         }
 
-                        //        bm   = getBitmap(comprect, subsample, 1);
                         bm = new GBitmap();
-                        bm.Init(
-                          comprect.Height,
-                          comprect.Width,
-                          0);
+                        bm.Init(comprect.Height, comprect.Width, 0);
                         bm.Grays = 1 + (subsample * subsample);
 
                         int rxmin = comprect.XMin * subsample;
@@ -1320,13 +1333,13 @@ namespace DjvuNet
                 }
 
                 // Three layer model.
-                IWPixelMap fgIWPixmap = ForegroundIWPixelMap;
+                IInterWavePixelMap fgIWPixmap = ForegroundIWPixelMap;
 
                 if (fgIWPixmap != null)
                 {
                     GBitmap bm = GetBitmap(rect, subsample, 1, null);
 
-                    if ((bm != null) && (pm != null))
+                    if (bm != null && pm != null)
                     {
                         GPixmap fgPixmap = ForegroundPixelMap;
                         int w = fgPixmap.ImageWidth;
@@ -1334,10 +1347,8 @@ namespace DjvuNet
                         int red = ComputeRed(width, height, w, h);
 
                         //          if((red < 1) || (red > 12))
-                        if ((red < 1) || (red > 16))
-                        {
+                        if (red < 1 || red > 16)
                             return false;
-                        }
                         //
                         //          int supersample = (red <= subsample)
                         //            ? 1
@@ -1464,9 +1475,22 @@ namespace DjvuNet
 
             lock (_loadingLock)
             {
-                var result = ForegroundIWPixelMap == null
-                                 ? CreateBlankImage(Brushes.Black, Width / subsample, Height / subsample)
-                                 : ForegroundIWPixelMap.GetPixmap().ToImage();
+                Bitmap result = null;
+
+                JB2Image jb2image = null;
+                var iwPixelMap = ForegroundIWPixelMap;
+                if (iwPixelMap != null)
+                {
+                    result = ForegroundIWPixelMap.GetPixelMap().ToImage();
+                }
+                else if ((jb2image = ForegroundJB2Image) != null)
+                {
+                    result = jb2image.GetBitmap().ToImage();
+                }
+                else if (iwPixelMap == null && jb2image == null)
+                {
+                    result = DjvuImage.CreateBlankImage(Brushes.Black, Width / subsample, Height / subsample);
+                }
 
                 return resizeImage == true ? ResizeImage(result, Width / subsample, Height / subsample) : result;
             }
@@ -1500,10 +1524,10 @@ namespace DjvuNet
             BG44Chunk[] backgrounds = PageForm.GetChildrenItems<BG44Chunk>();
 
             if ((backgrounds == null || backgrounds.Length == 0) && width > 0 && height > 0)
-                return CreateBlankImage(Brushes.White, width, height);
+                return DjvuImage.CreateBlankImage(Brushes.White, width, height);
 
             // Get the composite background image
-            Wavelet.IWPixelMap backgroundMap = null;
+            Wavelet.IInterWavePixelMap backgroundMap = null;
 
             lock (_loadingLock)
             {
@@ -1522,7 +1546,7 @@ namespace DjvuNet
                 _isBackgroundDecoded = true;
             }
 
-            Bitmap result = backgroundMap.GetPixmap().ToImage();
+            Bitmap result = backgroundMap.GetPixelMap().ToImage();
 
             if (resizeImage)
             {
@@ -1532,25 +1556,6 @@ namespace DjvuNet
             }
             else
                 return result;
-        }
-
-        /// <summary>
-        /// Creates a blank image with the given color
-        /// </summary>
-        /// <param name="imageColor"></param>
-        /// <returns></returns>
-        internal System.Drawing.Bitmap CreateBlankImage(Brush imageColor, int width, int height)
-        {
-            if (Info == null)
-                return null;
-
-            System.Drawing.Bitmap newBackground = new System.Drawing.Bitmap(Width, Height);
-
-            // Fill the whole image with white
-            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(newBackground))
-                g.FillRegion(imageColor, new Region(new System.Drawing.Rectangle(0, 0, width, height)));
-
-            return newBackground;
         }
 
         #endregion Private Methods

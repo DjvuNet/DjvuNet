@@ -48,6 +48,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -57,15 +58,17 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -75,6 +78,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -110,61 +114,57 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <Choose>
-    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
-      <ItemGroup>
-        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-      </ItemGroup>
-    </When>
-    <Otherwise />
-  </Choose>
   <ItemGroup>
-    <Compile Include="Compression\BSInputStreamTests.cs" />
-    <Compile Include="Compression\BzzReaderTests.cs" />
-    <Compile Include="Compression\MutableValueTests.cs" />
-    <Compile Include="Compression\ZPCodecTests.cs" />
-    <Compile Include="Compression\ZPTableTests.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationChunkTests.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationTests.cs" />
+    <Compile Include="DataChunks\AntaChunkTests.cs" />
+    <Compile Include="DataChunks\AntzChunkTests.cs" />
+    <Compile Include="DataChunks\BG44ChunkTests.cs" />
+    <Compile Include="DataChunks\BM44ChunkTests.cs" />
+    <Compile Include="DataChunks\BM44FormTests.cs" />
+    <Compile Include="DataChunks\CidaChunkTests.cs" />
     <Compile Include="DataChunks\Directory\DirmComponentTests.cs" />
     <Compile Include="DataChunks\DirmChunkTests.cs" />
     <Compile Include="DataChunks\DjbzChunkTests.cs" />
     <Compile Include="DataChunks\DjviChunkTests.cs" />
     <Compile Include="DataChunks\DjvmChunkTests.cs" />
     <Compile Include="DataChunks\DjvuChunkTests.cs" />
-    <Compile Include="DataChunks\FormChunkTests.cs" />
+    <Compile Include="DataChunks\DjvuFormElementTests.cs" />
+    <Compile Include="DataChunks\DjvuNodeTests.cs" />
+    <Compile Include="DataChunks\FG44ChunkTests.cs" />
+    <Compile Include="DataChunks\FGbzChunkTests.cs" />
+    <Compile Include="DataChunks\FGjpChunkTests.cs" />
     <Compile Include="DataChunks\Graphics\ColorPaletteTests.cs" />
-    <Compile Include="DataChunks\IFFChunkTests.cs" />
     <Compile Include="DataChunks\InclChunkTests.cs" />
     <Compile Include="DataChunks\InfoChunkTests.cs" />
     <Compile Include="DataChunks\Navigation\BookmarkTests.cs" />
     <Compile Include="DataChunks\Navigation\DocumentNavigatorTests.cs" />
+    <Compile Include="DataChunks\NavmChunkTests.cs" />
+    <Compile Include="DataChunks\PM44ChunkTests.cs" />
+    <Compile Include="DataChunks\PM44FormTests.cs" />
+    <Compile Include="DataChunks\SjbzChunkTests.cs" />
+    <Compile Include="DataChunks\SmmrChunkTests.cs" />
     <Compile Include="DataChunks\TH44ChunkTests.cs" />
     <Compile Include="DataChunks\ThumChunkTests.cs" />
     <Compile Include="DataChunks\TxtaChunkTests.cs" />
     <Compile Include="DataChunks\TxtzChunkTests.cs" />
+    <Compile Include="DataChunks\UnknownChunkTests.cs" />
+    <Compile Include="DataChunks\WmrmChunkTests.cs" />
     <Compile Include="DjvuDocumentTests.cs" />
-    <Compile Include="DjvuReaderTests.cs" />
+    <Compile Include="DjvuImageTests.cs" />
     <Compile Include="Extentions\ExtentionMethodsTests.cs" />
-    <Compile Include="Graphics\BitmapTests.cs" />
-    <Compile Include="Graphics\MapTests.cs" />
-    <Compile Include="Graphics\PixelMapScalerTests.cs" />
-    <Compile Include="Graphics\PixelMapTests.cs" />
-    <Compile Include="Graphics\PixelReferenceTests.cs" />
-    <Compile Include="Graphics\PixelTests.cs" />
-    <Compile Include="Graphics\RectangleTests.cs" />
-    <Compile Include="JB2\JB2BlitTests.cs" />
-    <Compile Include="JB2\JB2DecoderTests.cs" />
-    <Compile Include="JB2\JB2DictionaryTests.cs" />
-    <Compile Include="JB2\JB2ImageTests.cs" />
-    <Compile Include="JB2\JB2ShapeTests.cs" />
+    <Compile Include="IO\DjvuReaderTests.cs" />
+    <Compile Include="IO\DjvuWriterTests.cs" />
+    <Compile Include="Parser\DjvuFormatExceptionTests.cs" />
+    <Compile Include="Parser\DjvuParserTests.cs" />
+    <Compile Include="Parser\IffParserExceptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DjvuPageTests.cs" />
     <Compile Include="Util.cs" />
-    <Compile Include="UtilJsonTests.cs" />
+    <Compile Include="Util\GenericComparerTests.cs" />
+    <Compile Include="Util\VerifyTests.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
-    <Compile Include="Tests\AnnotationTests.cs" />
     <Compile Include="Text\PageTextItemTests.cs" />
     <Compile Include="Text\PageTextSearchTests.cs" />
     <Compile Include="Text\PageTextTests.cs" />

@@ -389,7 +389,7 @@ namespace DjvuNet.Graphics
 
         /// <summary> 
         /// Shift this rectangle (linear translation), if rectangle is empty linear
-        /// translation effectively is applied to a point on 2D plane.
+        /// translation is applied to a point (x,y) on 2D plane.
         /// </summary>
         /// <param name="dx">
         /// Horizontal translation distance dX.
@@ -405,7 +405,7 @@ namespace DjvuNet.Graphics
             Bottom += dy;
             Top += dy;
         }
-
+#if !NETSTANDARD2_0
         /// <summary>
         /// Implicit conversion to <typeparamref name="System.Drawing.Rectangle">
         /// System.Drawing.Rectangle</typeparamref>
@@ -418,7 +418,7 @@ namespace DjvuNet.Graphics
         {
             return new System.Drawing.Rectangle(rect.Left, rect.Top, rect.Width, rect.Height);
         }
-
-        #endregion Public Methods
+#endif
+#endregion Public Methods
     }
 }

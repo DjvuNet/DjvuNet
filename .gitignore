@@ -28,6 +28,7 @@ artifacts/
 
 # Helper projects
 # DjvuNet.Build/
+DjvuNet.DjvuLibre.Helper/
 
 # Code generated during build
 /*/Properties/AssemblyInfoCommon.cs
@@ -35,6 +36,9 @@ artifacts/
 
 # External dependencies directory with repositories
 [Ee]xternal/
+
+# DDjVuLibre native library
+DjvuLibre/
 
 # Visual Studio 2015 cache/options directory
 .vs/

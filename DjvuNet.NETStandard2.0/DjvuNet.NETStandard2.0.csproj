@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$(ProjectDir)../DjvuNetBuild.props" />
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>DjvuNet</RootNamespace>
+  </PropertyGroup>
+    <PropertyGroup>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
+  <PropertyGroup>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
+
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25227-01" />
+  </ItemGroup>
+
+    <ItemGroup>
+      <Compile Include="..\DjvuNet\**\*.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.cs" />
+      <Compile Remove="..\DjvuNet\Properties\AssemblyInfoCommon.cs" />
+      <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.Template.cs" />
+      <Compile Remove="Properties\AssemblyInfo.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Include="Properties\AssemblyInfo.cs" />
+      <Content Include="Properties\AssemblyInfo.Template.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
+    </ItemGroup>
+    <Import Project="$(ProjectDir)../DjvuNetBuild.targets" />
+</Project>

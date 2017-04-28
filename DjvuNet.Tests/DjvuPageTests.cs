@@ -4,6 +4,9 @@ using System.Drawing;
 using System.Threading;
 using DPixelMap = DjvuNet.Graphics.PixelMap;
 using Xunit;
+using System.IO;
+using System.Drawing.Imaging;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.Tests
 {
@@ -17,7 +20,7 @@ namespace DjvuNet.Tests
             {
                 var retVal = new List<object[]>();
 
-                for(int i = 1; i < 77; i++)
+                for(int i = 1; i <= 77; i++)
                 {
                     string pageText = "";
                     string path = null;
@@ -52,8 +55,12 @@ namespace DjvuNet.Tests
         }
 
 
+#if _APPVEYOR
         [Theory]
-        [MemberData("TextContentData")]
+#else 
+        [DjvuTheory]
+#endif
+        [MemberData(nameof(TextContentData))]
         public void Text_Theory001(string filePath, int pageCount, int testPage, string expectedValue)
         {
             using (DjvuDocument document = new DjvuDocument(filePath))
@@ -67,9 +74,45 @@ namespace DjvuNet.Tests
                 catch (Exception ex)
                 {
                     throw new AggregateException(
-                        $"Text_Theory001 error with test file {filePath}\nExpected page count:" + 
+                        $"Text_Theory001 error with test file {filePath}\nExpected page count:" +
                         $" {pageCount}\nResult page count: {document.Pages.Count}", ex);
                 }
+
+                //if (filePath.EndsWith("031C.djvu"))
+                //DumpPageNodes(filePath, document);
+            }
+        }
+
+        private static void DumpPageNodes(string filePath, DjvuDocument document)
+        {
+            try
+            {
+                string path = Path.GetDirectoryName(filePath);
+                string fileName = Path.GetFileNameWithoutExtension(filePath);
+                path = Path.Combine(path, "data");
+                var page = document.Pages[0];
+                var children = page.PageForm.Children;
+                Dictionary<string, int> dict = new Dictionary<string, int>();
+                foreach (IDjvuNode node in children)
+                {
+                    if (dict.ContainsKey(node.Name))
+                        dict[node.Name] += 1;
+                    else
+                    {
+                        dict.Add(node.Name, 0);
+                    }
+                    string nameExt = node.Name == "BG44" || node.Name == "Incl" ? $"_P01_{dict[node.Name]}." : "_P01.";
+                    string file = Path.Combine(path, fileName + nameExt + node.Name.ToLower());
+                    using (FileStream fs = File.Create(file))
+                    using (BinaryWriter writer = new BinaryWriter(fs))
+                    {
+                        byte[] buffer = node.ChunkData;
+                        writer.Write(buffer, 0, buffer.Length);
+                    }
+                }
+            }
+            catch
+            {
             }
         }
 
@@ -88,7 +131,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_Text001()
+        public void Text001()
         {
             string expectedValue = "Can Ann fan the lad?";
             int pageCount = 0;
@@ -106,7 +149,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_Text003()
+        public void Text003()
         {
             string expectedValue = "This book grew out of a graduate course on 3-manifolds taught at Emory";
             int pageCount = 0;
@@ -124,71 +167,27 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_BuildImage001()
+        public void BuildImage001()
         {
             int pageCount = 0;
-            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
 
-                var image = page.BuildImage();
-                Assert.NotNull(image);
-                Assert.IsType<Bitmap>(image);
+                using (var image = page.BuildImage())
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildImagen.png"));
+
+                }
             }
         }
 
         [Fact]
-        public void DjvuPage_BuildImage002()
-        {
-            int pageCount = 0;
-            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
-            {
-                Util.VerifyDjvuDocument(pageCount, document);
-
-                var page = document.FirstPage;
-
-                var image = page.BuildImage();
-                Assert.NotNull(image);
-                Assert.IsType<Bitmap>(image);
-            }
-        }
-
-        [Fact]
-        public void DjvuPage_BuildImage003()
-        {
-            int pageCount = 0;
-            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
-            {
-                Util.VerifyDjvuDocument(pageCount, document);
-
-                var page = document.FirstPage;
-
-                var image = page.BuildImage();
-                Assert.NotNull(image);
-                Assert.IsType<Bitmap>(image);
-            }
-        }
-
-        [Fact]
-        public void DjvuPage_BuildPageImage001()
-        {
-            int pageCount = 0;
-            using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
-            {
-                Util.VerifyDjvuDocument(pageCount, document);
-
-                var page = document.FirstPage;
-
-                var image = page.BuildPageImage();
-                Assert.NotNull(image);
-                Assert.IsType<Bitmap>(image);
-            }
-        }
-
-        [Fact]
-        public void DjvuPage_BuildPageImage002()
+        public void BuildImage002()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
@@ -197,14 +196,18 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                var image = page.BuildPageImage();
-                Assert.NotNull(image);
-                Assert.IsType<Bitmap>(image);
+                using (var image = page.BuildImage())
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002CBuildImagen.png"));
+
+                }
             }
         }
 
         [Fact]
-        public void DjvuPage_BuildPageImage003()
+        public void BuildImage003()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
@@ -212,15 +215,167 @@ namespace DjvuNet.Tests
                 Util.VerifyDjvuDocument(pageCount, document);
 
                 var page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png");
 
-                var image = page.BuildPageImage();
-                Assert.NotNull(image);
-                Assert.IsType<Bitmap>(image);
+                using (var image = page.BuildImage())
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBuildImagen.png"));
+
+                    //Assert.True(result);
+                }
             }
         }
 
         [Fact]
-        public void DjvuPage_ExtractThumbnailImage001()
+        public void BuildPageImage001()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                var page = document.FirstPage;
+
+                using (var image = page.BuildPageImage())
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildPageImagen.png"));
+
+                }
+            }
+        }
+
+        [Fact]
+        public void BuildPageImage002()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                var page = document.FirstPage;
+
+                using (var image = page.BuildPageImage())
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002CBuildPageImagen.png"));
+
+                }
+            }
+        }
+
+        [Fact]
+        public void BuildPageImage003()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                IDjvuPage page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png");
+
+                using (var image = page.BuildPageImage())
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBuildPageImagen.png"));
+
+                    //Assert.True(result);
+                }
+            }
+        }
+
+        [Fact]
+        public void GetForegroundImage003()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                DjvuPage page = document.FirstPage as DjvuPage;
+                Assert.NotNull(page);
+
+                using (var image = page.GetForegroundImage(1))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CFn.png"));
+                }
+            }
+
+        }
+
+        [Fact]
+        public void GetBackgroundImage003()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                DjvuPage page = document.FirstPage as DjvuPage;
+                Assert.NotNull(page);
+
+                using (var image = page.GetBackgroundImage(1))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBn.png"));
+                }
+            }
+        }
+
+        [Fact]
+        public void GetTextImage003()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                DjvuPage page = document.FirstPage as DjvuPage;
+                Assert.NotNull(page);
+
+                using (var image = page.GetTextImage(1))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CMn.png"));
+                }
+            }
+
+        }
+
+        [Fact]
+        public void ExtractThumbnailImage010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -229,14 +384,16 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                var image = page.ExtractThumbnailImage();
-                Assert.NotNull(image);
-                Assert.IsType<Bitmap>(image);
+                using (var image = page.ExtractThumbnailImage())
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                }
             }
         }
 
         [Fact]
-        public void DjvuPage_GetBgPixmap001()
+        public void GetBgPixmap001()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
@@ -259,7 +416,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_GetBitmapList001()
+        public void GetBitmapList001()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
@@ -284,7 +441,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_GetTextForLocation001()
+        public void GetTextForLocation010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -301,7 +458,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_Image001()
+        public void Image010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -317,7 +474,23 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_InvertImage001()
+        public void Image001()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                var page = document.FirstPage;
+
+                var image = page.Image;
+                Assert.NotNull(image);
+                Assert.IsType<Bitmap>(image);
+            }
+        }
+
+        [Fact]
+        public void InvertImage010()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -329,12 +502,43 @@ namespace DjvuNet.Tests
                 var image = page.Image;
                 Assert.NotNull(image);
                 Assert.IsType<Bitmap>(image);
-
             }
         }
 
         [Fact]
-        public void DjvuPage_GetPixelMap001()
+        public void Image003()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                IDjvuPage page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png");
+
+                using (var image = page.Image)
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CImage003n.png"));
+
+                    //Assert.True(result);
+                }
+            }
+        }
+
+        [Fact]
+        public void GetPixelMap001()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(10, out pageCount))
@@ -351,7 +555,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_GetPixelMap002()
+        public void GetPixelMap002()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
@@ -369,7 +573,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void DjvuPage_GetPixelMap003()
+        public void GetPixelMap003()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(3, out pageCount))
@@ -424,8 +628,8 @@ namespace DjvuNet.Tests
         }
 
 
-        [Fact(/*Skip = "DjvuNet bug prevents clean pass and test is to general to track the bug."*/)]
-        public void DjvuPage_Preload001()
+        [Fact()]
+        public void Preload001()
         {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(1, out pageCount))

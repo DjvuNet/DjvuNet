@@ -17,7 +17,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class UnknownChunk : IffChunk
+    public class UnknownChunk : DjvuNode
     {
         #region Public Properties
 
@@ -25,14 +25,14 @@ namespace DjvuNet.DataChunks
 
         public override ChunkType ChunkType
         {
-            get { return ChunkType.Smmr; }
+            get { return ChunkType.Unknown; }
         }
 
         #endregion ChunkType
 
         #region Data
 
-        private DjvuReader _data;
+        private IDjvuReader _data;
 
         /// <summary>
         /// Gets the raw chunk data
@@ -54,7 +54,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public UnknownChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public UnknownChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -69,12 +69,11 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
-            // Skip the data bytes which are delayed read
             reader.Position += Length;
 
-            Trace.WriteLineIf(DjvuSettings.LogLevel.TraceInfo , $"Creating unknown chunk for ID: {ChunkID}");
+            Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo , $"Creating unknown chunk for ID: {ChunkID}");
         }
 
         #endregion Protected Methods
@@ -85,10 +84,10 @@ namespace DjvuNet.DataChunks
         /// Extracts the raw data from the chunk
         /// </summary>
         /// <returns></returns>
-        private DjvuReader ExtractRawData()
+        private IDjvuReader ExtractRawData()
         {
             // Read the data in
-            return Reader.CloneReader(Offset + 4 + 4, Length);
+            return Reader.CloneReaderToMemory(DataOffset + 4 + 4, Length);
         }
 
         #endregion Private Methods

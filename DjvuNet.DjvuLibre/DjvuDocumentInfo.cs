@@ -289,23 +289,30 @@ namespace DjvuNet.DjvuLibre
         public string GetDocumentAnnotation()
         {
             IntPtr miniexp = IntPtr.Zero;
-
-            miniexp = NativeMethods.GetDjvuDocumentAnnotation(Document, 1);
-            if (miniexp != IntPtr.Zero)
+            try
             {
-                // TODO - improve data extraction from miniexp - only part is recovered now
-                string result = DjvuPageInfo.ExtractTextFromMiniexp(miniexp);
-                if (result == null)
-                    return String.Empty;
-                else
-                    return result;
+                miniexp = NativeMethods.GetDjvuDocumentAnnotation(Document, 1);
+                if (miniexp != IntPtr.Zero)
+                {
+                    // TODO - improve data extraction from miniexp - only part is recovered now
+                    string result = DjvuPageInfo.ExtractTextFromMiniexp(Document, miniexp);
+                    if (result == null)
+                        return String.Empty;
+                    else
+                        return result;
+                }
+                return null;
             }
-            return null;
+            finally
+            {
+                if (miniexp != IntPtr.Zero)
+                    NativeMethods.ReleaseDjvuMiniexp(Document, miniexp);
+            }
         }
 
         public string GetPageText(int pageNumber)
         {
-            throw new NotImplementedException();
+            return String.Empty;
         }
     }
 }

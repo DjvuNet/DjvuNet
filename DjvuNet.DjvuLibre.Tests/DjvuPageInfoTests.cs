@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DjvuLibre;
@@ -700,6 +704,127 @@ namespace DjvuNet.DjvuLibre.Tests
                     Assert.Equal<string>(expected, text);
                 }
             }
+        }
+
+        [DllImport("NtDll.dll", EntryPoint = "RtlMoveMemory")]
+        public static extern void CopyMemory(IntPtr Destination, IntPtr Source, uint Length);
+
+        [Fact]
+        public void RenderPage_RenderMode003Image()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                Assert.Equal<int>(101, pageCount);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+                IntPtr buffer = page.RenderPage(RenderMode.ColorOnly);
+
+                using (Bitmap bmp = new Bitmap(page.Width, page.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png")))
+                {
+                    PixelFormat pf = testBmp.PixelFormat;
+                    Assert.Equal<PixelFormat>(PixelFormat.Format24bppRgb, pf);
+
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                    CopyMemory(data.Scan0, buffer, (uint)(bmp.Width * bmp.Height * 3));
+                    DjvuMarshal.FreeHGlobal(buffer);
+
+                    BitmapData testData = testBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    testBmp.UnlockBits(testData);
+                    bmp.UnlockBits(data);
+
+                    Assert.True(result);
+
+                }
+            }
+        }
+
+        [Fact]
+        public void RenderPage_RenderMode003BackgroundImage()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                Assert.Equal<int>(101, pageCount);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+                IntPtr buffer = page.RenderPage(RenderMode.Background);
+
+                using (Bitmap bmp = new Bitmap(page.Width, page.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test003CB.png")))
+                {
+                    PixelFormat pf = testBmp.PixelFormat;
+                    Assert.Equal<PixelFormat>(PixelFormat.Format24bppRgb, pf);
+
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                    CopyMemory(data.Scan0, buffer, (uint)(bmp.Width * bmp.Height * 3));
+                    DjvuMarshal.FreeHGlobal(buffer);
+
+                    BitmapData testData = testBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    testBmp.UnlockBits(testData);
+                    bmp.UnlockBits(data);
+
+                    Assert.True(result);
+
+                }
+            }
+
+        }
+
+        [Fact]
+        public void RenderPage_RenderMode003ForegroundImage()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                Assert.Equal<int>(101, pageCount);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+                IntPtr buffer = page.RenderPage(RenderMode.Foreground);
+
+                using (Bitmap bmp = new Bitmap(page.Width, page.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test003CF.png")))
+                {
+                    PixelFormat pf = testBmp.PixelFormat;
+                    Assert.Equal<PixelFormat>(PixelFormat.Format24bppRgb, pf);
+
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                    CopyMemory(data.Scan0, buffer, (uint)(bmp.Width * bmp.Height * 3));
+                    DjvuMarshal.FreeHGlobal(buffer);
+
+                    BitmapData testData = testBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    testBmp.UnlockBits(testData);
+                    bmp.UnlockBits(data);
+
+                    Assert.True(result);
+                }
+            }
+
         }
     }
 }

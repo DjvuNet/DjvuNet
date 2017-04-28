@@ -19,5 +19,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilJson.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilRoot.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuDataRowTestCase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuNamedDataRowTestCase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuTheoryAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuTheoryDiscoverer.cs" />
   </ItemGroup>
 </Project>

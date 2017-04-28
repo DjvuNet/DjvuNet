@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using DjvuNet.DataChunks.Directory;
-
 using DjvuNet.JB2;
 
 namespace DjvuNet.DataChunks
@@ -17,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class SjbzChunk : IffChunk
+    public class SjbzChunk : DjvuNode, ISjbzChunk
     {
         #region Private Members
 
@@ -66,7 +64,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public SjbzChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public SjbzChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -76,7 +74,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
 
@@ -88,40 +86,35 @@ namespace DjvuNet.DataChunks
 
         #region Private Methods
 
-        private JB2Image ReadCompressedImage()
+        internal JB2Image ReadCompressedImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
                 JB2Image image = new JB2Image();
-
                 JB2.JB2Dictionary includedDictionary = null;
-
                 DjvuChunk djvuChunk = Parent as DjvuChunk;
 
                 if (djvuChunk != null)
                 {
-                    InclChunk[] includes = djvuChunk.IncludedItems;
+                    var includes = djvuChunk.IncludedItems;
 
-                    if (includes != null && includes.Length > 0)
+                    if (includes?.Count > 0)
                     {
-                        string includeID = includes.FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Incl)?.IncludeID;
-                        DirmComponent component = null;
+                        string includeID = includes
+                            .FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Incl)?.IncludeID;
                         DjvmChunk root = Document.RootForm as DjvmChunk;
-                        if (root != null)
-                             component = root.Dirm.Components.Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
+                        DirmComponent component = root?.Dirm.Components
+                            .Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
                        
-                        // TODO - verify selection strategy which seems slow and not taking into account dictionary names 
-                        var includeForm = Document.GetRootFormChildren<DjviChunk>()
-                            .Where(x => x.Children.FirstOrDefault<IffChunk>(d => d.ChunkType == ChunkType.Djbz) != null)
+                        var includeForm = 
+                            root.Includes
+                            .Where(x =>  x.DataOffset == (component.Offset + 12))
                             .FirstOrDefault<DjviChunk>();
                         
-                        var includeItem = includeForm.Children
-                            .Where<IffChunk>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
+                        var djbzItem = includeForm?.Children
+                            .Where<IDjvuNode>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
 
-                        if (includeItem != null)
-                        {
-                            includedDictionary = includeItem.ShapeDictionary;
-                        }
+                        includedDictionary = djbzItem?.ShapeDictionary;
                     }
                 }
 

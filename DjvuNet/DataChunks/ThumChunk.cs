@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class ThumChunk : FormChunk
+    public class ThumChunk : DjvuFormElement, IThumChunk
     {
         #region Public Properties
 
@@ -32,7 +32,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public ThumChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public ThumChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -42,9 +42,9 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
-            base.ReadChunkData(reader);
+            base.ReadData(reader);
         }
 
 

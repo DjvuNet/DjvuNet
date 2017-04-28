@@ -78,7 +78,7 @@ namespace DjvuNet
 
         #region Public Methods
 
-        public long WriteJPEGImage(byte[] image)
+        public void WriteJPEGImage(byte[] image)
         {
             throw new NotImplementedException();
         }
@@ -109,7 +109,9 @@ namespace DjvuNet
         /// <returns></returns>
         public void WriteUInt24BigEndian(uint value)
         {
-
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 1, 3);
         }
 
         /// <summary>
@@ -118,6 +120,9 @@ namespace DjvuNet
         /// <returns></returns>
         public void WriteInt24BigEndian(int value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 1, 3);
         }
 
         /// <summary>
@@ -126,7 +131,8 @@ namespace DjvuNet
         /// <returns></returns>
         public void WriteUInt24(uint value)
         {
-
+            byte[] buffer = BitConverter.GetBytes(value);
+            Write(buffer, 0, 3);
         }
 
         /// <summary>
@@ -135,119 +141,110 @@ namespace DjvuNet
         /// <returns></returns>
         public void WriteInt24(int value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Write(buffer, 0, 3);
         }
 
-        /// <summary>
-        /// Reads a 2-sbyte signed integer from the current stream and advances 
-        /// the current position of the stream by two bytes.
-        /// </summary>
-        /// <returns>
-        /// A 2-sbyte signed integer read from the current stream.
-        /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">
-        /// The end of the stream is reached. 
-        /// </exception>
-        /// <exception cref="T:System.ObjectDisposedException">
-        /// The stream is closed. 
-        /// </exception>
-        /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
-        /// <filterpriority>2</filterpriority>
         public void WriteInt16BigEndian(short value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 0, 2);
         }
 
-        /// <summary>
-        /// Reads a 4-sbyte signed integer from the current stream and advances the current position of the stream by four bytes.
-        /// </summary>
-        /// <returns>
-        /// A 4-sbyte signed integer read from the current stream.
-        /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
         public void WriteInt32BigEndian(int value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 0, 4);
         }
 
-        /// <summary>
-        /// Reads an 8-sbyte signed integer from the current stream and advances the current position of the stream by eight bytes.
-        /// </summary>
-        /// <returns>
-        /// An 8-sbyte signed integer read from the current stream.
-        /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
         public void WriteInt64BigEndian(long value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 0, 8);
         }
 
-        /// <summary>
-        /// Reads a 2-sbyte unsigned integer from the current stream using little-endian encoding and advances the position of the stream by two bytes.
-        /// </summary>
-        /// <returns>
-        /// A 2-sbyte unsigned integer read from this stream.
-        /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
         public void WriteUInt16BigEndian(ushort value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 0, 2);
         }
 
-        /// <summary>
-        /// Reads a 4-sbyte unsigned integer from the current stream and advances the position of the stream by four bytes.
-        /// </summary>
-        /// <returns>
-        /// A 4-sbyte unsigned integer read from this stream.
-        /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">The end of the stream is reached. </exception><exception cref="T:System.ObjectDisposedException">The stream is closed. </exception><exception cref="T:System.IO.IOException">An I/O error occurs. </exception><filterpriority>2</filterpriority>
         public void WriteUInt32BigEndian(uint value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 0, 4);
         }
 
         /// <summary>
-        /// Reads an 8-sbyte unsigned integer from the current stream and advances 
-        /// the position of the stream by eight bytes.
+        /// Writes UInt64 in Big Endian order.
         /// </summary>
-        /// <returns>
-        /// An 8-sbyte unsigned integer read from this stream.
-        /// </returns>
-        /// <exception cref="T:System.IO.EndOfStreamException">
-        /// The end of the stream is reached. 
-        /// </exception>
-        /// <exception cref="T:System.IO.IOException">
-        /// An I/O error occurs. 
-        /// </exception>
-        /// <exception cref="T:System.ObjectDisposedException">
-        /// The stream is closed. 
-        /// </exception>
-        /// <filterpriority>2</filterpriority>
+        /// <param name="value"></param>
         public void WriteUInt64BigEndian(ulong value)
         {
+            byte[] buffer = BitConverter.GetBytes(value);
+            Array.Reverse(buffer);
+            Write(buffer, 0, 8);
         }
 
         /// <summary>
-        /// Reads the bytes into a UTF8 string
+        /// Writes the bytes of a UTF8 string without BOM.
         /// </summary>
-        /// <param name="length"></param>
         /// <returns></returns>
         public long WriteUTF8String(string value)
         {
-            throw new NotImplementedException();
+            UTF8Encoding encoding = new UTF8Encoding(false);
+            return WriteString(value, encoding);
         }
 
         /// <summary>
-        /// Reads the bytes into a UTF7 string
+        /// Writes all bytes of a UTF7 string.
         /// </summary>
-        /// <param name="length"></param>
         /// <returns></returns>
         public long WriteUTF7String(string value)
         {
-            throw new NotImplementedException();
+            UTF7Encoding encoding = new UTF7Encoding(true);
+            return WriteString(value, encoding);
         }
 
         /// <summary>
-        /// Reads a string which terminates at EOS
+        /// Writes a Unicode UTF-16 encoded string.
         /// </summary>
         /// <returns></returns>
         public long WriteString(string value, bool skipBOM = true)
         {
-            throw new NotImplementedException();
+            UnicodeEncoding encoding = null;
+            if (skipBOM)
+                encoding = new UnicodeEncoding(false, false);
+            else
+                encoding = new UnicodeEncoding(false, true);
+
+            return WriteString(value, encoding);
+        }
+
+        /// <summary>
+        /// Writes bytes of the string using passed encoder. 
+        /// Encoders may emit BOM if not created with parameters
+        /// explicitly asking not to do that.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="encoding"></param>
+        /// <returns>Number of bytes written.</returns>
+        public long WriteString(string value, Encoding encoding)
+        {
+            if (value == null)
+                throw new ArgumentNullException(nameof(value));
+
+            if (encoding == null)
+                throw new ArgumentNullException(nameof(encoding));
+
+            byte[] buffer = encoding.GetBytes(value);
+            Write(buffer, 0, buffer.Length);
+            return buffer.Length;
         }
 
         /// <summary>

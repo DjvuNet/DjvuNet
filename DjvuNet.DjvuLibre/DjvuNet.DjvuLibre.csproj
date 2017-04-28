@@ -75,6 +75,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="DjvuLibreException.cs" />
     <Compile Include="Enums\DjvuJobStatus.cs" />
     <Compile Include="Enums\FormatStyle.cs" />
     <Compile Include="Interop\DjvuMarshal.cs" />
@@ -113,7 +114,7 @@
     <None Include="LICENSE.md" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" >
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
       <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
       <Name>System.Attributes</Name>
     </ProjectReference>

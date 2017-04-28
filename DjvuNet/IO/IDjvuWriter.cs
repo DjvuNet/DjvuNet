@@ -1,4 +1,5 @@
 ﻿using DjvuNet.Compression;
+using System.Text;
 
 namespace DjvuNet
 {
@@ -26,9 +27,11 @@ namespace DjvuNet
 
         void WriteInt64BigEndian(long value);
 
-        long WriteJPEGImage(byte[] image);
+        void WriteJPEGImage(byte[] image);
 
         long WriteString(string value, bool skipBOM = true);
+
+        long WriteString(string value, Encoding encoding);
 
         void WriteUInt16BigEndian(ushort value);
 

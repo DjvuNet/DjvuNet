@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using DjvuNet.DataChunks.Navigation;
-using DjvuNet.DataChunks.Navigation.Interfaces;
-
 namespace DjvuNet.DataChunks
 {
 
@@ -13,7 +10,7 @@ namespace DjvuNet.DataChunks
     /// CIDa chunk was supported till version 3.23 - 2002 July.
     /// Function is unknown and all it's content is skipped.
     /// </summary>
-    public class CidaChunk : IffChunk
+    public class CidaChunk : DjvuNode
     {
         #region Private Members
 
@@ -34,7 +31,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public CidaChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public CidaChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -48,7 +45,7 @@ namespace DjvuNet.DataChunks
         /// Skip the data bytes per IFF specification
         /// </summary>
         /// <param name="reader"></param>
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             reader.Position += Length;
         }

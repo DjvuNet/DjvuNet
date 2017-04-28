@@ -6,17 +6,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using DjvuNet.Compression;
-using DjvuNet.DataChunks.Directory;
-
 
 namespace DjvuNet.DataChunks
 {
 
-
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DirmChunk : IffChunk
+    public class DirmChunk : DjvuNode, IDirmChunk
     {
         #region Private Members
 
@@ -62,7 +59,7 @@ namespace DjvuNet.DataChunks
             {
                 if (_isInitialized == false)
                 {
-                    using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+                    using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
                         ReadCompressedData(reader, _components.Count, _compressedSectionLength);
                 }
 
@@ -82,7 +79,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DirmChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public DirmChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -92,9 +89,9 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
-            reader.Position = Offset;
+            reader.Position = DataOffset;
             byte flagByte = reader.ReadByte();
 
             // B[7]
@@ -130,7 +127,7 @@ namespace DjvuNet.DataChunks
 
             _dataLocation = reader.Position;
             _isInitialized = false;
-            _compressedSectionLength = (int)(Length - (reader.Position - Offset - 12));
+            _compressedSectionLength = (int)(Length - (reader.Position - DataOffset - 12));
 
             // Skip the bytes since this section is delayed read
             reader.Position += _compressedSectionLength;

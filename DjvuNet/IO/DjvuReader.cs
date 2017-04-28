@@ -4,7 +4,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
+//using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -118,10 +118,9 @@ namespace DjvuNet
 
         #region Public Methods
 
-        public Image GetJPEGImage(long length)
+        public byte[] GetJPEGImage(long length)
         {
-            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)));
-            return Image.FromStream(mem);
+            return ReadBytes(checked((int)length));
         }
 
         /// <summary>
@@ -129,8 +128,15 @@ namespace DjvuNet
         /// </summary>
         /// <param name="length"></param>
         /// <returns></returns>
-        public DjvuReader GetFixedLengthStream(long length)
+        public IDjvuReader GetFixedLengthStream(long length)
         {
+            MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)), false);
+            return new DjvuReader(mem);
+        }
+
+        public IDjvuReader CloneReaderToMemory(long position, long length)
+        {
+            Position = position;
             MemoryStream mem = new MemoryStream(ReadBytes(checked((int)length)), false);
             return new DjvuReader(mem);
         }
@@ -176,6 +182,8 @@ namespace DjvuNet
             byte[] buffer = new byte[4];
             Read(buffer, 1, 3);
             Array.Reverse(buffer);
+            if (buffer[2] >> 7 == 1)
+                buffer[3] = 0xff;
             return BitConverter.ToInt32(buffer, 0);
         }
 
@@ -471,7 +479,7 @@ namespace DjvuNet
         /// Clones the reader for parallel reading at the given position
         /// </summary>
         /// <returns></returns>
-        public DjvuReader CloneReader(long position)
+        public IDjvuReader CloneReader(long position)
         {
             DjvuReader newReader = null;
 
@@ -493,11 +501,13 @@ namespace DjvuNet
         /// <summary>
         /// Clones the reader for parallel reading at the given position
         /// </summary>
+        /// <param name="position"></param>
+        /// <param name="length"></param>
         /// <returns></returns>
-        public DjvuReader CloneReader(long position, long length)
+        public IDjvuReader CloneReader(long position, long length)
         {
             // TODO Get rid of not properly synchronized clones or synchronize readers
-            DjvuReader newReader = CloneReader(position);
+            IDjvuReader newReader = CloneReader(position);
             return newReader.GetFixedLengthStream(checked((int)length));
         }
 
@@ -508,8 +518,5 @@ namespace DjvuNet
 
         #endregion Public Methods
 
-        #region Private Methods
-
-        #endregion Private Methods
     }
 }
