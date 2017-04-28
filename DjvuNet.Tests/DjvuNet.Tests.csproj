@@ -1,0 +1,218 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" />
+  <Import Project="..\DjvuNetBuild.props" />
+  <Import Project="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DjvuNet.Tests</RootNamespace>
+    <AssemblyName>DjvuNet.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Castle.Core.4.0.0\lib\net45\Castle.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Moq, Version=4.7.8.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
+      <HintPath>..\packages\Moq.4.7.8\lib\net45\Moq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.abstractions.2.0.1\lib\net35\xunit.abstractions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.assert, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.assert.2.2.0\lib\netstandard1.1\xunit.assert.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.core, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.extensibility.core.2.2.0\lib\netstandard1.1\xunit.core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.execution.desktop, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\packages\xunit.extensibility.execution.2.2.0\lib\net452\xunit.execution.desktop.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+      </ItemGroup>
+    </When>
+    <Otherwise />
+  </Choose>
+  <ItemGroup>
+    <Compile Include="Compression\BSInputStreamTests.cs" />
+    <Compile Include="Compression\BzzReaderTests.cs" />
+    <Compile Include="Compression\MutableValueTests.cs" />
+    <Compile Include="Compression\ZPCodecTests.cs" />
+    <Compile Include="Compression\ZPTableTests.cs" />
+    <Compile Include="DataChunks\Annotations\AnnotationChunkTests.cs" />
+    <Compile Include="DataChunks\Annotations\AnnotationTests.cs" />
+    <Compile Include="DataChunks\Directory\DirmComponentTests.cs" />
+    <Compile Include="DataChunks\DirmChunkTests.cs" />
+    <Compile Include="DataChunks\DjbzChunkTests.cs" />
+    <Compile Include="DataChunks\DjviChunkTests.cs" />
+    <Compile Include="DataChunks\DjvmChunkTests.cs" />
+    <Compile Include="DataChunks\DjvuChunkTests.cs" />
+    <Compile Include="DataChunks\FormChunkTests.cs" />
+    <Compile Include="DataChunks\Graphics\ColorPaletteTests.cs" />
+    <Compile Include="DataChunks\IFFChunkTests.cs" />
+    <Compile Include="DataChunks\InclChunkTests.cs" />
+    <Compile Include="DataChunks\InfoChunkTests.cs" />
+    <Compile Include="DataChunks\Navigation\BookmarkTests.cs" />
+    <Compile Include="DataChunks\Navigation\DocumentNavigatorTests.cs" />
+    <Compile Include="DataChunks\TH44ChunkTests.cs" />
+    <Compile Include="DataChunks\ThumChunkTests.cs" />
+    <Compile Include="DataChunks\TxtaChunkTests.cs" />
+    <Compile Include="DataChunks\TxtzChunkTests.cs" />
+    <Compile Include="DjvuDocumentTests.cs" />
+    <Compile Include="DjvuReaderTests.cs" />
+    <Compile Include="Extentions\ExtentionMethodsTests.cs" />
+    <Compile Include="Graphics\BitmapTests.cs" />
+    <Compile Include="Graphics\MapTests.cs" />
+    <Compile Include="Graphics\PixelMapScalerTests.cs" />
+    <Compile Include="Graphics\PixelMapTests.cs" />
+    <Compile Include="Graphics\PixelReferenceTests.cs" />
+    <Compile Include="Graphics\PixelTests.cs" />
+    <Compile Include="Graphics\RectangleTests.cs" />
+    <Compile Include="JB2\JB2BlitTests.cs" />
+    <Compile Include="JB2\JB2DecoderTests.cs" />
+    <Compile Include="JB2\JB2DictionaryTests.cs" />
+    <Compile Include="JB2\JB2ImageTests.cs" />
+    <Compile Include="JB2\JB2ShapeTests.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DjvuPageTests.cs" />
+    <Compile Include="Util.cs" />
+    <Compile Include="UtilJsonTests.cs" />
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.cs" />
+    <Compile Include="Tests\AnnotationTests.cs" />
+    <Compile Include="Text\PageTextItemTests.cs" />
+    <Compile Include="Text\PageTextSearchTests.cs" />
+    <Compile Include="Text\PageTextTests.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj">
+      <Project>{9b255f5a-716a-4a26-a140-525fde3fa8f7}</Project>
+      <Name>DjvuNet.DjvuLibre</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DjvuNetTest\DjvuNetTest.csproj">
+      <Project>{192f4e63-6ed7-410f-a372-0b54c6cdf987}</Project>
+      <Name>DjvuNetTest</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj">
+      <Project>{e681b178-e5f8-4782-89c8-f32720b1464a}</Project>
+      <Name>DjvuNet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
+      <Project>{75de07a6-854c-4ec8-9beb-24b8efe42634}</Project>
+      <Name>System.Attributes</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="DjvuNet.Tests.targets">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="PublicKey.txt" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\DjvuNetBuild.targets" />
+  <Import Project="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
+  <Import Project="DjvuNet.Tests.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\xunit.runner.visualstudio.2.2.0\build\net20\xunit.runner.visualstudio.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  -->
+</Project>
