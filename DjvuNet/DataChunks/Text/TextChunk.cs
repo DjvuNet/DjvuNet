@@ -6,12 +6,12 @@ using System;
 using System.Text;
 
 
-namespace DjvuNet.DataChunks.Text
+namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class TextChunk : IffChunk
+    public abstract class TextChunk : DjvuNode, ITextChunk
     {
         #region Private Members
 
@@ -126,7 +126,7 @@ namespace DjvuNet.DataChunks.Text
 
         #region Constructors
 
-        public TextChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public TextChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -140,13 +140,13 @@ namespace DjvuNet.DataChunks.Text
         /// Gets the reader for the text data
         /// </summary>
         /// <returns></returns>
-        protected abstract DjvuReader GetTextDataReader(long position);
+        protected abstract IDjvuReader GetTextDataReader(long position);
 
         /// <summary>
         /// Read the chunk data
         /// </summary>
         /// <param name="reader"></param>
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             // Save the current position for delayed decoding
             _dataLocation = reader.Position;
@@ -162,7 +162,7 @@ namespace DjvuNet.DataChunks.Text
         /// <summary>
         /// Decodes the compressed data if needed
         /// </summary>
-        private void DecodeIfNeeded()
+        internal void DecodeIfNeeded()
         {
             if (_isDecoded == false)
             {
@@ -173,11 +173,11 @@ namespace DjvuNet.DataChunks.Text
         /// <summary>
         /// Reads the compressed text data
         /// </summary>
-        private void ReadCompressedTextData()
+        internal void ReadCompressedTextData()
         {
             if (Length == 0) return;
 
-            using (DjvuReader reader = GetTextDataReader(_dataLocation))
+            using (IDjvuReader reader = GetTextDataReader(_dataLocation))
             {
                 _textLength = (int) reader.ReadUInt24BigEndian();
                 byte[] textBytes = reader.ReadBytes(_textLength);

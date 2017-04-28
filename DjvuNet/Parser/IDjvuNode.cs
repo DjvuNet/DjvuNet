@@ -11,13 +11,21 @@ namespace DjvuNet
     {
         ChunkType ChunkType { get; }
 
-        string ChunkID { get; }
+        string ChunkID { get; set; }
 
-        long Offset { get; set; }
+        long DataOffset { get; set; }
+
+        long NodeOffset { get; set; }
+
+        uint OffsetDiff { get; }
 
         long Length { get; set; }
 
+        bool IsDirty { get; set; }
+
         void Initialize();
+
+        void Initialize(IDjvuReader reader);
 
         bool IsInitialized { get; }
 
@@ -25,12 +33,16 @@ namespace DjvuNet
 
         string Name { get; }
 
-        IDjvuNode Parent { get; set; }
+        IDjvuElement Parent { get; set; }
         
         IDjvuRootElement RootElement { get; set; }
         
-        IDjvuDocument Document { get; }
+        IDjvuDocument Document { get; set; }
         
-        IDjvuReader Reader { get; } 
+        IDjvuReader Reader { get; set; }
+
+        void ReadData(IDjvuReader reader);
+
+        void WriteData(IDjvuWriter writer, bool writeHeader); 
     }
 }

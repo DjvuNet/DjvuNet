@@ -12,7 +12,7 @@ using System.Text;
 using DjvuNet.Extentions;
 using DjvuNet.Graphics;
 
-namespace DjvuNet.DataChunks.Text
+namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.
@@ -164,7 +164,7 @@ namespace DjvuNet.DataChunks.Text
 
         #region Constructors
 
-        public TextZone(DjvuReader reader, TextZone parent, TextZone sibling, TextChunk chunkParent)
+        public TextZone(IDjvuReader reader, TextZone parent, TextZone sibling, TextChunk chunkParent)
         {
             Parent = parent;
             ChunkParent = chunkParent;
@@ -193,7 +193,7 @@ namespace DjvuNet.DataChunks.Text
             // Search the children for the text
             return Children.SelectMany(x => x.SearchForText(text)).ToArray();
         }
-
+#if !NETSTANDARD2_0
         /// <summary>
         /// Returns the text zones that are contained within the rectangle
         /// </summary>
@@ -231,7 +231,7 @@ namespace DjvuNet.DataChunks.Text
             // Search the children for the text
             return Children.SelectMany(x => x.SearchForText(rectangle)).ToArray();
         }
-
+#endif
         #endregion Public Methods
 
         #region Private Methods
@@ -240,7 +240,7 @@ namespace DjvuNet.DataChunks.Text
         /// Decodes the data for the zone
         /// </summary>
         /// <param name="reader"></param>
-        private void DecodeZoneData(DjvuReader reader, TextZone sibling, TextChunk chunkParent)
+        internal void DecodeZoneData(IDjvuReader reader, TextZone sibling, TextChunk chunkParent)
         {
             ZoneType = (ZoneTypes)reader.ReadByte();
             X = reader.ReadUInt16BigEndian() - 0x8000;

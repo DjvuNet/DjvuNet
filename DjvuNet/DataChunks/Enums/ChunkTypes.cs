@@ -22,9 +22,9 @@ namespace DjvuNet.DataChunks
         Form,
 
         /// <summary>
-        /// A multipage DjVu document. Composite chunk that contains the
+        /// A multi page DjVu document. Composite chunk that contains the
         /// DIRM chunk, possibly shared/included chunks and subsequent
-        /// FORM:DJVU chunks which make up a multipage document
+        /// FORM:DJVU chunks which make up a multi page document
         /// </summary>
         Djvm,
 
@@ -138,6 +138,37 @@ namespace DjvuNet.DataChunks
         /// Unsupported since version 3.23 - 2002 July
         /// </summary>
         Cida,
+
+        /// <summary>
+        /// Gray scale image wavelet encoded chunk 
+        /// </summary>
+        BM44,
+
+        /// <summary>
+        /// Form composite chunk for gray scale iw4 image file (FORM:BM44).
+        /// </summary>
+        BM44Form,
+
+        /// <summary>
+        /// Color image wavelet encoded chunk
+        /// </summary>
+        PM44,
+
+        /// <summary>
+        /// Form composite chunk for color iw4 image file (FORM:PM44).
+        /// </summary>
+        PM44Form,
+
+        /// <summary>
+        /// Reserved for future use.
+        /// Background image encoded in JPEG 2000 format
+        /// </summary>
+        BG2k,
+
+        /// <summary>
+        /// Foreground image encoded in JPEG 2000 format
+        /// </summary>
+        FG2k,
 
         /// <summary>
         /// Abstract TextChunk type

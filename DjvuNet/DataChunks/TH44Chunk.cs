@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
+using DjvuNet.Graphics;
 using DjvuNet.Wavelet;
 
 namespace DjvuNet.DataChunks
@@ -16,7 +16,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class TH44Chunk : IffChunk
+    public class TH44Chunk : DjvuNode, ITH44Chunk
     {
         #region Private Members
 
@@ -37,12 +37,12 @@ namespace DjvuNet.DataChunks
 
         #region Thumbnail
 
-        private IWPixelMap _thumbnail;
+        private IInterWavePixelMap _thumbnail;
 
         /// <summary>
         /// Gets the thumbnail image
         /// </summary>
-        public IWPixelMap Thumbnail
+        public IInterWavePixelMap Thumbnail
         {
             get
             {
@@ -63,17 +63,17 @@ namespace DjvuNet.DataChunks
 
         #region Image
 
-        private System.Drawing.Bitmap _image;
+        private PixelMap _image;
 
         /// <summary>
         /// Gets the image of the thumbnail
         /// </summary>
-        public System.Drawing.Bitmap Image
+        public PixelMap Image
         {
             get
             {
                 if (_image == null)
-                    _image = Thumbnail.GetPixmap().ToImage();
+                    _image = Thumbnail.GetPixelMap();
 
                 return _image;
             }
@@ -85,7 +85,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public TH44Chunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public TH44Chunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -96,12 +96,9 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
-            // Save the data location for reading later
             _dataLocation = reader.Position;
-
-            //Skip the thumbnail bytes which are delayed read
             reader.Position += Length;
         }
 
@@ -113,11 +110,11 @@ namespace DjvuNet.DataChunks
         /// Decodes the thumbnail image for this chunk
         /// </summary>
         /// <returns></returns>
-        internal IWPixelMap DecodeThumbnailImage()
+        internal IInterWavePixelMap DecodeThumbnailImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
-                IWPixelMap thumbnail = new IWPixelMap();
+                IInterWavePixelMap thumbnail = new InterWavePixelMap();
                 thumbnail.Decode(reader);
 
                 return thumbnail;

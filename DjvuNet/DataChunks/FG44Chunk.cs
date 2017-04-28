@@ -15,7 +15,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class FG44Chunk : IffChunk
+    public class FG44Chunk : DjvuNode, IFG44Chunk
     {
         #region Private Members
 
@@ -36,12 +36,12 @@ namespace DjvuNet.DataChunks
 
         #region ForegroundImage
 
-        private IWPixelMap _foregroundImage;
+        private IInterWavePixelMap _foregroundImage;
 
         /// <summary>
         /// Gets the Foreground image for the chunk
         /// </summary>
-        public IWPixelMap ForegroundImage
+        public IInterWavePixelMap ForegroundImage
         {
             get
             {
@@ -64,7 +64,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public FG44Chunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public FG44Chunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -72,17 +72,15 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Public Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
-
-            // Skip the data since it will be delay read
             reader.Position += Length;
         }
 
-        #endregion Protected Methods
+        #endregion Public Methods
 
         #region Private Methods
 
@@ -90,11 +88,11 @@ namespace DjvuNet.DataChunks
         /// Decodes the foreground image for this chunk
         /// </summary>
         /// <returns></returns>
-        private IWPixelMap DecodeForegroundImage()
+        internal IInterWavePixelMap DecodeForegroundImage()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
             {
-                IWPixelMap background = new IWPixelMap();
+                IInterWavePixelMap background = new InterWavePixelMap();
                 background.Decode(reader);
 
                 return background;

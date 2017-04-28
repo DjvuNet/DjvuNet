@@ -3,10 +3,6 @@
 // </copyright>
 
 using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 
 
 namespace DjvuNet.DataChunks
@@ -15,7 +11,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class BGjpChunk : IffChunk
+    public class BGjpChunk : DjvuNode, IBGjpChunk
     {
         #region Private Members
 
@@ -36,12 +32,12 @@ namespace DjvuNet.DataChunks
 
         #region BackgroundImage
 
-        private Image _backgroundImage;
+        private byte[] _backgroundImage;
 
         /// <summary>
         /// Gets the background image for this chunk
         /// </summary>
-        public Image BackgroundImage
+        public byte[] BackgroundImage
         {
             get
             {
@@ -64,7 +60,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public BGjpChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public BGjpChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -74,7 +70,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
 
@@ -86,9 +82,9 @@ namespace DjvuNet.DataChunks
 
         #region Private Methods
 
-        private Image DecodeImageData()
+        private byte[] DecodeImageData()
         {
-            using (DjvuReader reader = Reader.CloneReader(_dataLocation))
+            using (IDjvuReader reader = Reader.CloneReader(_dataLocation))
             {
                 return reader.GetJPEGImage(Length);
             }

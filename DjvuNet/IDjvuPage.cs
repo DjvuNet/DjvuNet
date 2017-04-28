@@ -2,9 +2,6 @@
 using System.ComponentModel;
 using System.Drawing;
 using DjvuNet.DataChunks;
-using DjvuNet.DataChunks.Directory;
-using DjvuNet.DataChunks.Graphics;
-using DjvuNet.DataChunks.Text;
 using DjvuNet.Graphics;
 using DjvuNet.JB2;
 using DjvuNet.Wavelet;
@@ -13,37 +10,19 @@ namespace DjvuNet
 {
     public interface IDjvuPage
     {
-        IWPixelMap BackgroundIWPixelMap { get; }
-
         bool Disposed { get; }
 
-        DjvuDocument Document { get; }
-
-        IWPixelMap ForegroundIWPixelMap { get; }
-
-        JB2Image ForegroundJB2Image { get; }
-
-        ColorPalette ForegroundPalette { get; }
-
-        PixelMap ForegroundPixelMap { get; }
+        IDjvuDocument Document { get; }
 
         DirmComponent Header { get; }
 
         int Height { get; }
 
-        System.Drawing.Bitmap Image { get; }
-
-        IReadOnlyList<DjviChunk> Includes { get; }
+        IReadOnlyList<DjviChunk> IncludeFiles { get; }
 
         InfoChunk Info { get; }
 
-        bool IsColor { get; }
-
-        bool IsInverted { get; set; }
-
-        bool IsPageImageCached { get; set; }
-
-        FormChunk PageForm { get; }
+        DjvuFormElement PageForm { get; }
 
         int PageNumber { get; }
 
@@ -51,23 +30,45 @@ namespace DjvuNet
 
         TextChunk TextChunk { get; }
 
-        ThumChunk Thumbnail { get; }
-
-        System.Drawing.Bitmap ThumbnailImage { get; set; }
-
         int Width { get; }
 
         event PropertyChangedEventHandler PropertyChanged;
+
+        void ClearImage();
+
+        void Dispose();
+
+        string GetTextForLocation(System.Drawing.Rectangle rect);
+
+        void Preload();
+
+        IInterWavePixelMap BackgroundIWPixelMap { get; }
+
+        IInterWavePixelMap ForegroundIWPixelMap { get; }
+
+        JB2Image ForegroundJB2Image { get; }
+
+        ColorPalette ForegroundPalette { get; }
+
+        PixelMap ForegroundPixelMap { get; }
+
+        System.Drawing.Bitmap Image { get; }
+
+        bool IsColor { get; }
+
+        bool IsInverted { get; set; }
+
+        bool IsPageImageCached { get; set; }
+
+        IThumChunk Thumbnail { get; }
+
+        System.Drawing.Bitmap ThumbnailImage { get; set; }
 
         Graphics.Bitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, System.Drawing.Bitmap retVal);
 
         System.Drawing.Bitmap BuildImage(int subsample = 1);
 
         System.Drawing.Bitmap BuildPageImage();
-
-        void ClearImage();
-
-        void Dispose();
 
         System.Drawing.Bitmap ExtractThumbnailImage();
 
@@ -80,10 +81,6 @@ namespace DjvuNet
         Map GetMap(Graphics.Rectangle segment, int subsample, Map retval);
 
         PixelMap GetPixelMap(Graphics.Rectangle rect, int subsample, double gamma, PixelMap retval);
-
-        string GetTextForLocation(System.Drawing.Rectangle rect);
-
-        void Preload();
 
         System.Drawing.Bitmap ResizeImage(int newWidth, int newHeight);
     }

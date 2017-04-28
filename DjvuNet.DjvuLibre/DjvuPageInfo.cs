@@ -176,7 +176,7 @@ namespace DjvuNet.DjvuLibre
                     try
                     {
                         miniexp = NativeMethods.GetDjvuPageAnnotation(_DocumentInfo.Document, Number);
-                        _Annotation = ExtractTextFromMiniexp(miniexp);
+                        _Annotation = ExtractTextFromMiniexp(_DocumentInfo.Document, miniexp);
                     }
                     finally
                     {
@@ -192,7 +192,7 @@ namespace DjvuNet.DjvuLibre
             }
         }
 
-        internal static string ExtractTextFromMiniexp(IntPtr miniexp, int count = 0)
+        internal static string ExtractTextFromMiniexp(IntPtr document, IntPtr miniexp, int count = 0)
         {
             string text = null;
 
@@ -205,21 +205,88 @@ namespace DjvuNet.DjvuLibre
 
             for (int i = 0; i < count; i++)
             {
-                IntPtr element = NativeMethods.MiniexpItem(i, miniexp);
-                int count2 = NativeMethods.MiniexpLength(element);
-
-                text = ExtractTextFromMiniexp(element, count2);
-                if (!String.IsNullOrWhiteSpace(text))
-                    return text;
-
-                if (NativeMethods.IsMiniexpString(element))
+                IntPtr element = IntPtr.Zero;
+                try
                 {
-                    text = NativeMethods.GetMiniexpString(miniexp);
+                    element = NativeMethods.MiniexpItem(i, miniexp);
+                    int count2 = NativeMethods.MiniexpLength(element);
+
+                    text = ExtractTextFromMiniexp(document, element, count2);
                     if (!String.IsNullOrWhiteSpace(text))
                         return text;
+
+                    if (NativeMethods.IsMiniexpString(element))
+                    {
+                        text = NativeMethods.GetMiniexpString(miniexp);
+                        if (!String.IsNullOrWhiteSpace(text))
+                            return text;
+                    }
+                }
+                finally
+                {
+                    if (element != IntPtr.Zero)
+                        NativeMethods.ReleaseDjvuMiniexp(document, element);
                 }
             }
             return text;
+        }
+
+        public IntPtr RenderPage(RenderMode mode)
+        {
+            DjvuRectangle targetRect = new DjvuRectangle
+            {
+                X = 0,
+                Y = 0,
+                Height = (uint)Height,
+                Width = (uint)Width
+            };
+
+            return RenderPage(mode, ref targetRect);
+        }
+
+        public IntPtr RenderPage(RenderMode mode, ref DjvuRectangle targetRect)
+        {
+            IntPtr format = NativeMethods.CreateDjvuFormat(FormatStyle.BGR24, 0, IntPtr.Zero);
+            NativeMethods.SetDjvuFormatRowOrder(format, 1);
+            NativeMethods.SetDjvuFormatYDirection(format, 1);
+            NativeMethods.SetDjvuFormatDitherBits(format, 24);
+
+            DjvuRectangle pageRect = new DjvuRectangle
+            {
+                X = 0,
+                Y = 0,
+                Height = (uint) Height,
+                Width = (uint) Width
+            };
+
+            IntPtr buffer = DjvuMarshal.AllocHGlobal((uint)(Width * 3 * Height));
+            int result = 0;
+
+            try
+            {
+                result = NativeMethods.RenderDjvuPage(Page, mode, ref pageRect, ref targetRect,
+                    format, (uint)Width * 3, buffer);
+
+                if (result == 0)
+                    throw new DjvuLibreException(
+                        $"Failed to render image at this time - result: {result}. Try later again.");
+            }
+            catch(Exception ex)
+            {
+                DjvuMarshal.FreeHGlobal(buffer);
+                buffer = IntPtr.Zero;
+                NativeMethods.ReleaseDjvuFormat(format);
+                format = IntPtr.Zero;
+
+                string message = "Error while rendering page. Check InnerException message for details.";
+
+                if (ex is DjvuLibreException)
+                    throw new DjvuLibreException(message, ex);
+
+                throw new AggregateException(message, ex); 
+            }
+
+            return buffer;
         }
 
     }

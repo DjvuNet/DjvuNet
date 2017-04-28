@@ -9,10 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DjvuNet.DataChunks;
-using DjvuNet.DataChunks.Directory;
-
-using DjvuNet.DataChunks.Navigation;
-using DjvuNet.DataChunks.Navigation.Interfaces;
+using DjvuNet.Parser;
 
 namespace DjvuNet
 {
@@ -65,12 +62,12 @@ namespace DjvuNet
             }
         }
 
-        private FormChunk _rootForm;
+        private DjvuFormElement _rootForm;
 
         /// <summary>
         /// Gets the root form in the document
         /// </summary>
-        public FormChunk RootForm
+        public DjvuFormElement RootForm
         {
             get { return _rootForm; }
 
@@ -409,8 +406,8 @@ namespace DjvuNet
             for (int i = 0; i < _Pages?.Count; i++)
             {
                 _Pages[i]?.Dispose();
-                _Pages[i] = null;
             }
+            _Pages.Clear();
 
             _Disposed = true;
         }
@@ -533,15 +530,15 @@ namespace DjvuNet
             }
         }
 
-        public List<T> GetRootFormChildren<T>() where T : IffChunk
+        public List<T> GetRootFormChildren<T>() where T : DjvuNode
         {
             if (RootForm.ChunkType == ChunkType.Djvu)
                 return new List<T>(new T[] { RootForm as T });
 
             string id = typeof(T).Name.Replace("Chunk", null);
-            ChunkType chunkType = IffChunk.GetChunkType(id);
-            return RootForm.Children.Where<IffChunk>(x => x.ChunkType == chunkType)
-                .ToList<IffChunk>().ConvertAll<T>(x => { return (T)x; });
+            ChunkType chunkType = DjvuParser.GetChunkType(id);
+            return RootForm.Children.Where<IDjvuNode>(x => x.ChunkType == chunkType)
+                .ToList<IDjvuNode>().ConvertAll<T>(x => { return (T)x; });
         }
 
         /// <summary>
@@ -552,19 +549,28 @@ namespace DjvuNet
             if (Pages == null)
                 _Pages = new List<IDjvuPage>();
 
-            if (RootForm.ChunkType == ChunkType.Djvm)
+            switch (RootForm.ChunkType)
             {
-                DjvmChunk root = (DjvmChunk) RootForm;
-                Queue<ThumChunk> thumbnails = new Queue<ThumChunk>(root.Thumbnails);
-
-                _Includes = (List<DjviChunk>)root.Includes;
-
-                foreach (DjvuChunk page in root.Pages)
-                    AddPage(thumbnails, page);
+                case ChunkType.Djvm:
+                    {
+                        DjvmChunk root = (DjvmChunk)RootForm;
+                        Queue<ThumChunk> thumbnails = new Queue<ThumChunk>(root.Thumbnails);
+                        _Includes = (List<DjviChunk>)root.Includes;
+                        foreach (DjvuChunk page in root.Pages)
+                            AddPage(thumbnails, page);
+                    }
+                    break;
+                case ChunkType.Djvu:
+                    AddPage(null, (DjvuChunk)RootForm);
+                    break;
+                case ChunkType.BM44Form:
+                case ChunkType.PM44Form:
+                    AddPage(RootForm);
+                    break;
+                default:
+                    throw new DjvuFormatException($"Unsupported root form type {RootForm.GetType()}");
             }
-            else if (RootForm.ChunkType == ChunkType.Djvu)
-                AddPage(null, (DjvuChunk)RootForm);
-
+            
             OnPropertyChanged(nameof(Pages));
 		}
 
@@ -572,6 +578,12 @@ namespace DjvuNet
         {
             ThumChunk thumbnail = thumbnails != null && thumbnails.Count > 0 ? thumbnails.Dequeue() : null;
             DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, thumbnail, _Includes, page);
+            _Pages.Add(newPage);
+        }
+
+        internal void AddPage(DjvuFormElement page)
+        {
+            DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, null, _Includes, page);
             _Pages.Add(newPage);
         }
 
@@ -603,9 +615,9 @@ namespace DjvuNet
         /// <param name="reader"></param>
         internal void DecodeRootForm(DjvuReader reader)
         {
-            _rootForm = FormChunk.GetRootForm(reader, null, this);
+            _rootForm = DjvuParser.GetRootForm(reader, null, this);
             _rootForm.Initialize(reader);
-            foreach (IffChunk chunk in _rootForm.Children)
+            foreach (IDjvuNode chunk in _rootForm.Children)
                 chunk.Initialize(reader);
         }
 

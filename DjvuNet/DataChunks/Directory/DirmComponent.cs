@@ -4,7 +4,7 @@
 
 using System;
 
-namespace DjvuNet.DataChunks.Directory
+namespace DjvuNet.DataChunks
 {
     /// <summary>
     /// TODO: Update summary.

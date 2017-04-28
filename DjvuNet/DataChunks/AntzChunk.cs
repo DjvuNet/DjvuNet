@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DjvuNet.DataChunks.Annotations;
-
 
 namespace DjvuNet.DataChunks
 {
@@ -32,7 +30,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public AntzChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public AntzChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {

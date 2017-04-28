@@ -8,18 +8,34 @@ namespace DjvuNet
 {
     public interface IDjvuElement : IDjvuNode
     {
-        List<IDjvuNode> Children { get; set; }
+        IReadOnlyList<IDjvuNode> Children { get; }
 
-        IDjvuNode FirstChild { get; set; }
+        IDjvuNode FirstChild { get; }
 
-        IDjvuNode LastChild { get; set; }
+        IDjvuNode LastChild { get; }
 
-        IDjvuNode PreviousSibling { get; set; }
+        IDjvuNode PreviousSibling { get; }
 
-        IDjvuNode NextSibling { get; set; }
+        IDjvuNode NextSibling { get; }
 
-        IDjvuNode FirstSibling { get; set; }
+        IDjvuNode FirstSibling { get; }
 
-        IDjvuNode LastSibling { get; set; }
+        IDjvuNode LastSibling { get; }
+
+        int AddChild(IDjvuNode node);
+
+        void ClearChildren();
+
+        bool ContainsChild(IDjvuNode node);
+
+        bool ContainsChild(IDjvuNode node, IEqualityComparer<IDjvuNode> comparer);
+
+        int InsertChild(int index, IDjvuNode node);
+
+        bool RemoveChild(IDjvuNode node);
+
+        int RemoveChildAt(int index);
+
+
     }
 }

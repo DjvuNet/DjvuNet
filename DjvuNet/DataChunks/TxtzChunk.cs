@@ -8,8 +8,6 @@ using System.Linq;
 using System.Text;
 using DjvuNet.Compression;
 
-using DjvuNet.DataChunks.Text;
-
 namespace DjvuNet.DataChunks
 {
 
@@ -33,7 +31,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public TxtzChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public TxtzChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -43,7 +41,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override DjvuReader GetTextDataReader(long position)
+        protected override IDjvuReader GetTextDataReader(long position)
         {
             return Reader.CloneReader(position).GetBZZEncodedReader(Length);
         }

@@ -10,13 +10,13 @@ using System.Linq;
 using System.Text;
 
 
-namespace DjvuNet.DataChunks.Annotations
+namespace DjvuNet.DataChunks
 {
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public abstract class AnnotationChunk : IffChunk
+    public abstract class AnnotationChunk : DjvuNode, IAnnotationChunk
     {
         #region Private Members
 
@@ -56,7 +56,9 @@ namespace DjvuNet.DataChunks.Annotations
 
         #region Constructors
 
-        public AnnotationChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public AnnotationChunk() { }
+
+        public AnnotationChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -76,12 +78,9 @@ namespace DjvuNet.DataChunks.Annotations
         /// Reads in the chunk data
         /// </summary>
         /// <param name="reader"></param>
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
-            // Save the current position for delayed decoding
             _dataLocation = reader.Position;
-
-            // Advance the reader
             reader.Position += Length;
         }
 
@@ -92,7 +91,7 @@ namespace DjvuNet.DataChunks.Annotations
         /// <summary>
         /// Reads the compressed annotation data
         /// </summary>
-        private Annotation[] ReadAnnotationData()
+        internal Annotation[] ReadAnnotationData()
         {
             if (Length == 0) return new Annotation[0];
 
@@ -109,7 +108,7 @@ namespace DjvuNet.DataChunks.Annotations
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        private Annotation[] DecodeAnnotationText(string text)
+        internal Annotation[] DecodeAnnotationText(string text)
         {
             return Annotation
                 .BreakIntoAnnotationPieces(text)

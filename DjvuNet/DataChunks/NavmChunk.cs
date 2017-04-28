@@ -7,16 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using DjvuNet.DataChunks.Navigation;
-using DjvuNet.DataChunks.Navigation.Interfaces;
-
 namespace DjvuNet.DataChunks
 {
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class NavmChunk : IffChunk, INavigation
+    public class NavmChunk : DjvuNode, INavigation, INavmChunk
     {
         #region Private Members
 
@@ -65,7 +62,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public NavmChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public NavmChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -75,7 +72,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
             _dataLocation = reader.Position;
 

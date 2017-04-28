@@ -14,7 +14,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class InclChunk : IffChunk
+    public class InclChunk : DjvuNode, IInclChunk
     {
         #region Public Properties
 
@@ -29,10 +29,30 @@ namespace DjvuNet.DataChunks
 
         #region IncludeID
 
+        private string _IncludeID;
+
         /// <summary>
         /// Gets the ID of the element to include
         /// </summary>
-        public string IncludeID { get; internal set; }
+        public string IncludeID
+        {
+            get
+            {
+                if (_IncludeID != null)
+                    return _IncludeID;
+                else
+                {
+                    ReadData(Reader);
+                    if (_IncludeID == null)
+                        _IncludeID = String.Empty;
+                    return _IncludeID;
+                }
+            }
+            set
+            {
+                _IncludeID = value;
+            }
+        }
 
         #endregion IncludeID
 
@@ -40,7 +60,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public InclChunk(IDjvuReader reader, IffChunk parent, IDjvuDocument document,
+        public InclChunk(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
@@ -50,9 +70,12 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override void ReadChunkData(IDjvuReader reader)
+        public override void ReadData(IDjvuReader reader)
         {
+            long prevPos = reader.Position;
+            reader.Position = DataOffset;
             IncludeID = reader.ReadUTF8String(Length);
+            reader.Position = prevPos;
         }
 
         #endregion Protected Methods
