@@ -26,10 +26,7 @@ namespace DjvuNet.Tests.Xunit
         {
             var skipReason = factAttribute.GetNamedArgument<string>("Skip");
             if (skipReason != null)
-                return new[] 
-                {
-                    CreateTestCaseForSkip(discoveryOptions, testMethod, factAttribute, skipReason)
-                };
+                return CreateTestCasesForSkip(discoveryOptions, testMethod, factAttribute, skipReason);
 
             if (discoveryOptions.PreEnumerateTheoriesOrDefault())
             {
@@ -85,7 +82,6 @@ namespace DjvuNet.Tests.Xunit
                                     skipReason != null ?
                                         CreateTestCaseForSkippedDataRow(discoveryOptions, testMethod, factAttribute, x, skipReason) :
                                         CreateTestCaseForDataRow(discoveryOptions, testMethod, factAttribute, index, i)));
-
                         }
                     }
 
@@ -105,21 +101,43 @@ namespace DjvuNet.Tests.Xunit
                 }
             }
 
-            return new[] { CreateTestCaseForTheory(discoveryOptions, testMethod, factAttribute) };
+            return CreateTestCasesForTheory(discoveryOptions, testMethod, factAttribute);
+        }
+
+        protected virtual IEnumerable<IXunitTestCase> CreateTestCasesForTheory(
+            ITestFrameworkDiscoveryOptions discoveryOptions, 
+            ITestMethod testMethod, IAttributeInfo theoryAttribute)
+        {
+            return new[] { CreateTestCaseForTheory(discoveryOptions, testMethod, theoryAttribute) };
+        }
+
+        protected virtual IEnumerable<IXunitTestCase> CreateTestCasesForSkip(
+            ITestFrameworkDiscoveryOptions discoveryOptions, 
+            ITestMethod testMethod, IAttributeInfo theoryAttribute, string skipReason)
+        {
+            return new[] { CreateTestCaseForSkip(discoveryOptions, testMethod, theoryAttribute, skipReason) };
         }
 
         protected virtual IXunitTestCase CreateTestCaseForSkip(
             ITestFrameworkDiscoveryOptions discoveryOptions, 
             ITestMethod testMethod, IAttributeInfo factAttribute, string skipReason)
         {
-            return new XunitTestCase(_MessageSink, discoveryOptions.MethodDisplayOrDefault(), testMethod, null);
+            return new XunitTestCase(_MessageSink, discoveryOptions.MethodDisplayOrDefault(), testMethod);
         }
 
         protected virtual IXunitTestCase CreateTestCaseForTheory(
             ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestMethod testMethod, IAttributeInfo factAttribute, string skipReason = null)
         {
-            return new XunitTestCase(_MessageSink, discoveryOptions.MethodDisplayOrDefault(), testMethod, null);
+            return new XunitTheoryTestCase(MessageSink, discoveryOptions.MethodDisplayOrDefault(), testMethod);
+        }
+
+        protected virtual IEnumerable<IXunitTestCase> CreateTestCasesForSkippedDataRow(
+            ITestFrameworkDiscoveryOptions discoveryOptions, 
+            ITestMethod testMethod, IAttributeInfo theoryAttribute, 
+            object[] dataRow, string skipReason)
+        {
+            return new[] { CreateTestCaseForSkippedDataRow(discoveryOptions, testMethod, theoryAttribute, dataRow, skipReason) };
         }
 
         protected virtual IXunitTestCase CreateTestCaseForSkippedDataRow(

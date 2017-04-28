@@ -17,14 +17,22 @@ namespace DjvuNet.Compression
 
         }
 
-        public BzzWriter(Stream stream, int blockSize = 4096) : base(new BSOutputStream(stream, blockSize))
+        public BzzWriter(Stream stream, int blockSize = 4096) 
+            : base(new BSOutputStream(stream, blockSize))
         {
 
         }
 
-        public BzzWriter(string filePath, int blockSize = 4096) : base(new BSOutputStream(GetFile(filePath), blockSize))
+        public BzzWriter(string filePath, int blockSize = 4096) 
+            : base(new BSOutputStream(GetFile(filePath), blockSize))
         {
 
         }
+
+        public override void Flush()
+        {
+            base.Flush();
+        }
+
     }
 }

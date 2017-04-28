@@ -35,6 +35,7 @@ namespace DjvuNet.Compression
         {
             Flush();
             EncodeRaw(Coder, 24, 0);
+            Coder.Dispose();
             base.Close();
         }
 
@@ -291,6 +292,7 @@ namespace DjvuNet.Compression
 
                 _Size = BlockOffset + 1;
                 Encode();
+                Coder.Flush();
             }
 
             _Size = BlockOffset = 0;

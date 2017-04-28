@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Compression
 {
-    public class ZPCodec : IDataCoder
+    public class ZPCodec : IDataCoder, IDisposable
     {
         #region Protected Fields
 
@@ -125,6 +125,33 @@ namespace DjvuNet.Compression
                 }
             }
         }
+
+        #region IDisposable Implementation
+
+        protected bool _Disposed;
+
+        public bool Disposed { get { return _Disposed; } }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected void Dispose(bool disposing)
+        {
+            if (!_Disposed && Encoding)
+                Flush();
+
+            _Disposed = true;
+        }
+
+        ~ZPCodec()
+        {
+            Dispose(false);
+        }
+
+        #endregion IDisposable Implementation
 
         #region IDataCoder Implementation
 
@@ -449,7 +476,7 @@ namespace DjvuNet.Compression
             }
         }
 
-        internal void FlushEncoder()
+        public void Flush()
         {
             if (_Subend > 0x8000)
                 _Subend = 0x10000;

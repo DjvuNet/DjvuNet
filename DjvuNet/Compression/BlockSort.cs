@@ -25,12 +25,26 @@ namespace DjvuNet.Compression
         private int[] _Posn;
         private int[] _Rank;
 
-        public BlockSort() { }
+        public BlockSort()
+        {
+            _Data = new byte[0];
+            _Posn = new int[0];
+            _Rank = new int[0];
+        }
 
         public BlockSort(byte[] pdata, int psize)
         {
             if (psize <= 0 || psize >= 0x1000000)
-                throw new ArgumentOutOfRangeException(nameof(_Size));
+                throw new ArgumentOutOfRangeException(nameof(psize));
+
+            if (pdata == null)
+                throw new ArgumentNullException(nameof(pdata));
+
+            if (pdata.Length == 0)
+                throw new ArgumentOutOfRangeException(nameof(pdata));
+
+            if (pdata.Length < psize)
+                throw new ArgumentOutOfRangeException(nameof(psize));
 
             _Size = psize;
             _Data = pdata;
@@ -44,6 +58,12 @@ namespace DjvuNet.Compression
 
             if (_Size <= 0)
                 throw new InvalidOperationException();
+
+            if (_Data == null)
+                throw new InvalidOperationException();
+
+            if (_Data.Length <= 1 || _Size <= 1)
+                return;
 
             if (!(_Data[_Size - 1] == 0))
                 throw new InvalidOperationException();
@@ -173,40 +193,52 @@ namespace DjvuNet.Compression
 
             while (true)
             {
-                r1 = _Rank[p1 + depth]; r2 = _Rank[p2 + depth];
-                p1 += twod; p2 += twod;
+                r1 = _Rank[p1 + depth];
+                r2 = _Rank[p2 + depth];
+                p1 += twod;
+                p2 += twod;
 
                 if (r1 != r2)
                     return (r1 > r2);
 
-                r1 = _Rank[p1]; r2 = _Rank[p2];
+                r1 = _Rank[p1];
+                r2 = _Rank[p2];
                 if (r1 != r2)
                     return (r1 > r2);
 
-                r1 = _Rank[p1 + depth]; r2 = _Rank[p2 + depth];
-                p1 += twod; p2 += twod;
+                r1 = _Rank[p1 + depth];
+                r2 = _Rank[p2 + depth];
+                p1 += twod;
+                p2 += twod;
                 if (r1 != r2)
                     return (r1 > r2);
 
-                r1 = _Rank[p1]; r2 = _Rank[p2];
+                r1 = _Rank[p1];
+                r2 = _Rank[p2];
                 if (r1 != r2)
                     return (r1 > r2);
 
-                r1 = _Rank[p1 + depth]; r2 = _Rank[p2 + depth];
-                p1 += twod; p2 += twod;
+                r1 = _Rank[p1 + depth];
+                r2 = _Rank[p2 + depth];
+                p1 += twod;
+                p2 += twod;
                 if (r1 != r2)
                     return (r1 > r2);
 
-                r1 = _Rank[p1]; r2 = _Rank[p2];
+                r1 = _Rank[p1];
+                r2 = _Rank[p2];
                 if (r1 != r2)
                     return (r1 > r2);
 
-                r1 = _Rank[p1 + depth]; r2 = _Rank[p2 + depth];
-                p1 += twod; p2 += twod;
+                r1 = _Rank[p1 + depth];
+                r2 = _Rank[p2 + depth];
+                p1 += twod;
+                p2 += twod;
                 if (r1 != r2)
                     return (r1 > r2);
 
-                r1 = _Rank[p1]; r2 = _Rank[p2];
+                r1 = _Rank[p1];
+                r2 = _Rank[p2];
                 if (r1 != r2)
                     return (r1 > r2);
             };
@@ -657,9 +689,6 @@ namespace DjvuNet.Compression
             // Initialize frequency array
             int[] lo = new int[256];
             int[] hi = new int[256];
-
-            for (i = 0; i < 256; i++)
-                hi[i] = lo[i] = 0;
 
             // Count occurences
             for (i = 0; i < _Size - 1; i++)

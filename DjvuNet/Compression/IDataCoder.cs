@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace DjvuNet.Compression
 {
-    public interface IDataCoder
+    public interface IDataCoder : IDisposable
     {
         ZPTable[] DefaultTable { get; }
 
@@ -23,6 +24,8 @@ namespace DjvuNet.Compression
         void Encoder(int bit, ref byte ctx);
 
         void EncoderNoLearn(int bit, ref byte ctx);
+
+        void Flush();
 
         int IWDecoder();
 
