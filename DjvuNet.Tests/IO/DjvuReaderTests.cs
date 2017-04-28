@@ -34,19 +34,7 @@ namespace DjvuNet.Tests
             get
             {
                 string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
-                return ReadFileToEnd(bzzFile);
-            }
-        }
-
-        public static byte[] ReadFileToEnd(string bzzFile)
-        {
-            using (FileStream stream = File.OpenRead(Path.Combine(Util.RepoRoot, bzzFile)))
-            {
-                byte[] buffer = new byte[stream.Length];
-                int countRead = stream.Read(buffer, 0, buffer.Length);
-                if (countRead != buffer.Length)
-                    throw new IOException($"Unable to read file with test data: {bzzFile}");
-                return buffer;
+                return Util.ReadFileToEnd(bzzFile);
             }
         }
 
@@ -55,7 +43,7 @@ namespace DjvuNet.Tests
             get
             {
                 string txtFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
-                byte[] buffer = ReadFileToEnd(txtFile);
+                byte[] buffer = Util.ReadFileToEnd(txtFile);
                 // Skip BOM
                 return Encoding.UTF8.GetString(buffer, 3, buffer.Length - 3);
             }
