@@ -33,12 +33,12 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets or sets the A Value for the item
         /// </summary>
-        internal uint AValue;
+        internal uint _AValue;
 
         /// <summary>
         /// Gets the Ffzt data
         /// </summary>
-        internal sbyte[] Ffzt;
+        internal sbyte[] _Ffzt;
 
         #endregion Internal Properties
 
@@ -47,22 +47,22 @@ namespace DjvuNet.Compression
         /// <summary>
         /// Gets or sets the down values for the item
         /// </summary>
-        public byte[] Down;
+        public byte[] _Down;
 
         /// <summary>
         /// Gets or sets the up values for the item
         /// </summary>
-        public byte[] Up;
+        public byte[] _Up;
 
         /// <summary>
         /// Gets or sets the M Array values for the item
         /// </summary>
-        public uint[] MArray;
+        public uint[] _MArray;
 
         /// <summary>
         /// Gets or sets the P Array values for the item
         /// </summary>
-        public uint[] PArray;
+        public uint[] _PArray;
 
         #endregion Public Properties
 
@@ -96,13 +96,13 @@ namespace DjvuNet.Compression
                     FFZT[i]++;
             }
 
-            Ffzt = new sbyte[FFZT.Length];
-            Buffer.BlockCopy(FFZT, 0, Ffzt, 0, Ffzt.Length);
+            _Ffzt = new sbyte[FFZT.Length];
+            Buffer.BlockCopy(FFZT, 0, _Ffzt, 0, _Ffzt.Length);
 
-            Down = new byte[_ArraySize];
-            Up = new byte[_ArraySize];
-            MArray = new uint[_ArraySize];
-            PArray = new uint[_ArraySize];
+            _Down = new byte[_ArraySize];
+            _Up = new byte[_ArraySize];
+            _MArray = new uint[_ArraySize];
+            _PArray = new uint[_ArraySize];
 
             NewTable(DefaultTable);
 
@@ -111,16 +111,16 @@ namespace DjvuNet.Compression
 
                 for (int j = 0; j < 256; j++)
                 {
-                    ushort a = (ushort)(0x10000 - PArray[j]);
+                    ushort a = (ushort)(0x10000 - _PArray[j]);
 
                     while (a >= 0x8000)
                         a = (ushort)(a << 1);
 
-                    if (MArray[j] > 0 && a + PArray[j] >= 0x8000 && a >= MArray[j])
+                    if (_MArray[j] > 0 && a + _PArray[j] >= 0x8000 && a >= _MArray[j])
                     {
                         byte x = DefaultTable[j].Down;
                         byte y = DefaultTable[x].Down;
-                        Down[j] = y;
+                        _Down[j] = y;
                     }
                 }
             }
@@ -192,13 +192,13 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int IWDecoder()
         {
-            return DecodeSubSimple(0, 0x8000 + ((AValue + AValue + AValue) >> 3));
+            return DecodeSubSimple(0, 0x8000 + ((_AValue + _AValue + _AValue) >> 3));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IWEncoder(bool bit)
         {
-            uint z = 0x8000 + ((AValue + AValue + AValue) >> 3);
+            uint z = 0x8000 + ((_AValue + _AValue + _AValue) >> 3);
             if (bit)
                 EncodeLpsSimple((uint)z);
             else
@@ -208,26 +208,26 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Decoder()
         {
-            return DecodeSubSimple(0, 0x8000 + (AValue >> 1));
+            return DecodeSubSimple(0, 0x8000 + (_AValue >> 1));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Encoder(int bit)
         {
             if (bit != 0)
-                EncodeLpsSimple((uint)(0x8000 + (AValue >> 1)));
+                EncodeLpsSimple((uint)(0x8000 + (_AValue >> 1)));
             else
-                EncodeMpsSimple((uint)(0x8000 + (AValue >> 1)));
+                EncodeMpsSimple((uint)(0x8000 + (_AValue >> 1)));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int Decoder(ref byte ctx)
         {
-            uint z = AValue + PArray[ctx];
+            uint z = _AValue + _PArray[ctx];
 
             if (z <= _Fence)
             {
-                AValue = z;
+                _AValue = z;
                 return ctx & 1;
             }
             else
@@ -237,23 +237,23 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Encoder(int bit, ref byte ctx)
         {
-            uint z = AValue + PArray[ctx];
+            uint z = _AValue + _PArray[ctx];
 
             if (bit != (ctx & 1))
                 EncodeLps(ref ctx, z);
             else if (z >= 0x8000)
                 EncodeMps(ref ctx, z);
             else
-                AValue = z;
+                _AValue = z;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int DecoderNoLearn(ref byte ctx)
         {
-            uint z = AValue + PArray[ctx];
+            uint z = _AValue + _PArray[ctx];
             if (z <= _Fence)
             {
-                AValue = z;
+                _AValue = z;
                 return (ctx & 1);
             }
 
@@ -263,13 +263,13 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void EncoderNoLearn(int bit, ref byte ctx)
         {
-            uint z = AValue + PArray[ctx];
+            uint z = _AValue + _PArray[ctx];
             if (bit != (ctx & 1))
                 EncodeLpsNolearn(z);
             else if (z >= 0x8000)
                 EncodeMpsNolearn(z);
             else
-                AValue = z;
+                _AValue = z;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -278,10 +278,10 @@ namespace DjvuNet.Compression
             for (int i = 0; i < _ArraySize; i++)
             {
                 ZPTable z = table[i];
-                PArray[i] = z.PValue;
-                MArray[i] = z.MValue;
-                Up[i] = z.Up;
-                Down[i] = z.Down;
+                _PArray[i] = z.PValue;
+                _MArray[i] = z.MValue;
+                _Up[i] = z.Up;
+                _Down[i] = z.Down;
             }
         }
 
@@ -295,13 +295,13 @@ namespace DjvuNet.Compression
             int sz = 0;
             int lo = (mps != 0 ? 1 : 2);
 
-            while (PArray[lo + sz + sz + 2] < PArray[lo + sz + sz]) sz += 1;
+            while (_PArray[lo + sz + sz + 2] < _PArray[lo + sz + sz]) sz += 1;
 
             // Bisection
             while (sz > 1)
             {
                 int nsz = sz >> 1;
-                float nplps = P2PlPs((ushort)PArray[lo + nsz + nsz]);
+                float nplps = P2PlPs((ushort)_PArray[lo + nsz + nsz]);
                 if (nplps < plps)
                     sz = nsz;
                 else
@@ -312,8 +312,8 @@ namespace DjvuNet.Compression
             }
 
             // Choose closest one
-            float f1 = P2PlPs((ushort)PArray[lo]) - plps;
-            float f2 = plps - P2PlPs((ushort)PArray[lo + 2]);
+            float f1 = P2PlPs((ushort)_PArray[lo]) - plps;
+            float f2 = plps - P2PlPs((ushort)_PArray[lo + 2]);
 
             return (byte)((f1 < f2) ? lo : lo + 2);
         }
@@ -327,7 +327,7 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z>>1);
 #else
-            uint d = 0x6000 + ((z + AValue) >> 2);
+            uint d = 0x6000 + ((z + _AValue) >> 2);
             if (z > d) 
                 z = d;
 #endif
@@ -337,14 +337,14 @@ namespace DjvuNet.Compression
             {
                 /* LPS branch */
                 z = 0x10000 - z;
-                AValue = AValue + z;
+                _AValue = _AValue + z;
                 _Code = _Code + z;
                 /* LPS adaptation */
-                ctx = Down[ctx];
+                ctx = _Down[ctx];
                 /* LPS renormalization */
-                int shift = FFZ(AValue);
+                int shift = FFZ(_AValue);
                 _SCount -= (byte)shift;
-                AValue = (ushort)(AValue << shift);
+                _AValue = (ushort)(_AValue << shift);
                 _Code = (ushort)(_Code << shift) | ((_Buffer >> _SCount) & ((1u << shift) - 1));
 #if ZPCODEC_BITCOUNT
                 bitcount += shift;
@@ -360,11 +360,11 @@ namespace DjvuNet.Compression
             else
             {
                 /* MPS adaptation */
-                if (AValue >= MArray[ctx])
-                    ctx = Up[ctx];
+                if (_AValue >= _MArray[ctx])
+                    ctx = _Up[ctx];
                 /* MPS renormalization */
                 _SCount -= 1;
-                AValue = (ushort)(z << 1);
+                _AValue = (ushort)(z << 1);
                 _Code = (ushort)(_Code << 1) | ((_Buffer >> _SCount) & 1);
 #if ZPCODEC_BITCOUNT
                 _bitcount += 1;
@@ -386,7 +386,7 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = 0x6000 + ((z + AValue) >> 2);
+            uint d = 0x6000 + ((z + _AValue) >> 2);
             if (z > d)
                 z = d;
 #endif
@@ -395,12 +395,12 @@ namespace DjvuNet.Compression
             {
                 /* LPS branch */
                 z = 0x10000 - z;
-                AValue += z;
+                _AValue += z;
                 _Code += z;
                 /* LPS renormalization */
-                int shift = FFZ(AValue);
+                int shift = FFZ(_AValue);
                 _SCount -= (byte)shift;
-                AValue = (ushort)(AValue << shift);
+                _AValue = (ushort)(_AValue << shift);
                 _Code = (ushort)((int)_Code << shift) | ((_Buffer >> _SCount) & ((1u << shift) - 1));
 #if ZPCODEC_BITCOUNT
                 _bitcount += shift;
@@ -417,7 +417,7 @@ namespace DjvuNet.Compression
             {
                 /* MPS renormalization */
                 _SCount -= 1;
-                AValue = (ushort)(z << 1);
+                _AValue = (ushort)(z << 1);
                 _Code = (ushort)(_Code << 1) | ((_Buffer >> _SCount) & 1);
 #if ZPCODEC_BITCOUNT
                 _bitcount += 1;
@@ -439,12 +439,12 @@ namespace DjvuNet.Compression
             {
                 /* LPS branch */
                 z = 0x10000 - z;
-                AValue += z;
+                _AValue += z;
                 _Code += z;
                 /* LPS renormalization */
-                int shift = FFZ(AValue);
+                int shift = FFZ(_AValue);
                 _SCount -= (byte)shift;
-                AValue = (ushort)(AValue << shift);
+                _AValue = (ushort)(_AValue << shift);
                 _Code = (ushort)(_Code << shift) | ((_Buffer >> _SCount) & ((1u << shift) - 1));
 #if ZPCODEC_BITCOUNT
                 _bitcount += shift;
@@ -461,7 +461,7 @@ namespace DjvuNet.Compression
             {
                 /* MPS renormalization */
                 _SCount -= 1;
-                AValue = (ushort)(z << 1);
+                _AValue = (ushort)(z << 1);
                 _Code = (ushort)(_Code << 1) | ((_Buffer >> _SCount) & 1);
 #if ZPCODEC_BITCOUNT
                 _bitcount += 1;
@@ -566,19 +566,19 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = 0x6000 + ((z + (uint)AValue) >> 2);
+            uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
             if (z > d)
                 z = d;
 #endif
-            if (AValue >= MArray[ctx])
-                ctx = Up[ctx];
-            AValue = z;
+            if (_AValue >= _MArray[ctx])
+                ctx = _Up[ctx];
+            _AValue = z;
 
-            if (AValue >= 0x8000)
+            if (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
                 _Subend = (ushort)(_Subend << 1);
-                AValue = (ushort)(AValue << 1);
+                _AValue = (ushort)(_AValue << 1);
             }
         }
 
@@ -588,33 +588,33 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = (uint)(0x6000 + ((z + AValue) >> 2));
+            uint d = (uint)(0x6000 + ((z + _AValue) >> 2));
             if (z > d)
                 z = d;
 #endif
-            ctx = Down[ctx];
+            ctx = _Down[ctx];
             z = 0x10000 - z;
             _Subend += z;
-            AValue += z;
+            _AValue += z;
           
-            while (AValue >= 0x8000)
+            while (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
                 _Subend = (ushort)(_Subend << 1);
-                AValue = (ushort)(AValue << 1);
+                _AValue = (ushort)(_AValue << 1);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal void EncodeMpsSimple(uint z)
         {
-            AValue = z;
+            _AValue = z;
             
-            if (AValue >= 0x8000)
+            if (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
                 _Subend = (ushort)(_Subend << 1);
-                AValue = (ushort)(AValue << 1);
+                _AValue = (ushort)(_AValue << 1);
             }
         }
 
@@ -623,13 +623,13 @@ namespace DjvuNet.Compression
         {
             z = 0x10000 - z;
             _Subend += z;
-            AValue += z;
+            _AValue += z;
             
-            while (AValue >= 0x8000)
+            while (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
                 _Subend = (ushort)(_Subend << 1);
-                AValue = (ushort)(AValue << 1);
+                _AValue = (ushort)(_AValue << 1);
             }
         }
 
@@ -640,17 +640,17 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = 0x6000 + ((z + (uint)AValue) >> 2);
+            uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
             if (z > d)
                 z = d;
 #endif
-            AValue = z;
+            _AValue = z;
 
-            while (AValue >= 0x8000)
+            while (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
                 _Subend = (ushort)(_Subend << 1);
-                AValue = (ushort)(AValue << 1);
+                _AValue = (ushort)(_AValue << 1);
             }
         }
 
@@ -661,19 +661,19 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = 0x6000 + ((z + (uint)AValue) >> 2);
+            uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
             if (z > d)
                 z = d;
 #endif
             z = 0x10000 - z;
             _Subend += z;
-            AValue += z;
+            _AValue += z;
 
-            while (AValue >= 0x8000)
+            while (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
                 _Subend = (ushort)(_Subend << 1);
-                AValue = (ushort)(AValue << 1);
+                _AValue = (ushort)(_AValue << 1);
             }
         }
 
@@ -697,7 +697,7 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int FFZ(uint x)
         {
-            return ((unchecked((int)0xffffffffL) & x) < 65280L) ? Ffzt[0xff & (x >> 8)] : (Ffzt[0xff & x] + 8);
+            return ((unchecked((int)0xffffffffL) & x) < 65280L) ? _Ffzt[0xff & (x >> 8)] : (_Ffzt[0xff & x] + 8);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

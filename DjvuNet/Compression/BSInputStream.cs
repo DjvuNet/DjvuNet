@@ -13,6 +13,10 @@ namespace DjvuNet.Compression
 
         #region Properties
 
+        public override bool CanWrite => false;
+
+        public override bool CanRead => true;
+
         public override long Length
         {
             get
@@ -64,11 +68,15 @@ namespace DjvuNet.Compression
         /// <summary>
         /// TODO documentation
         /// </summary>
-        /// <param name="input"></param>
+        /// <param name="dataStream"></param>
         /// <returns></returns>
-        public override BSBaseStream Init(Stream input)
+        public override BSBaseStream Init(Stream dataStream)
         {
-            Coder = DjvuSettings.Current.CoderFactory.CreateCoder(input, false);
+            if (!dataStream.CanRead)
+                throw new ArgumentException("Stream was not readable.", nameof(dataStream));
+
+            BaseStream = dataStream;
+            Coder = DjvuSettings.Current.CoderFactory.CreateCoder(dataStream, false);
             return this;
         }
 
@@ -153,7 +161,7 @@ namespace DjvuNet.Compression
 
             while (n < m)
             {
-                int b = Coder.Decoder(ref _Context[ctxoff + n]);
+                int b = Coder.Decoder(ref _Cxt[ctxoff + n]);
                 n = (n << 1) | b;
             }
 
@@ -222,7 +230,7 @@ namespace DjvuNet.Compression
                 {
                     default:
 
-                        if (Coder.Decoder(ref _Context[ctxoff + ctxid]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + ctxid]) != 0)
                         {
                             mtfno = 0;
                             _Data[i] = mtf[mtfno];
@@ -232,7 +240,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += CTXIDS;
 
-                        if (Coder.Decoder(ref _Context[ctxoff + ctxid]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + ctxid]) != 0)
                         {
                             mtfno = 1;
                             _Data[i] = mtf[mtfno];
@@ -242,7 +250,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += CTXIDS;
 
-                        if (Coder.Decoder(ref _Context[ctxoff + 0]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + 0]) != 0)
                         {
                             mtfno = 2 + DecodeBinary(ctxoff + 1, 1);
                             _Data[i] = mtf[mtfno];
@@ -252,7 +260,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 1);
 
-                        if (Coder.Decoder(ref _Context[ctxoff + 0]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + 0]) != 0)
                         {
                             mtfno = 4 + DecodeBinary(ctxoff + 1, 2);
                             _Data[i] = mtf[mtfno];
@@ -262,7 +270,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 3);
 
-                        if (Coder.Decoder(ref _Context[ctxoff + 0]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + 0]) != 0)
                         {
                             mtfno = 8 + DecodeBinary(ctxoff + 1, 3);
                             _Data[i] = mtf[mtfno];
@@ -272,7 +280,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 7);
 
-                        if (Coder.Decoder(ref _Context[ctxoff + 0]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + 0]) != 0)
                         {
                             mtfno = 16 + DecodeBinary(ctxoff + 1, 4);
                             _Data[i] = mtf[mtfno];
@@ -282,7 +290,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 15);
 
-                        if (Coder.Decoder(ref _Context[ctxoff + 0]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + 0]) != 0)
                         {
                             mtfno = 32 + DecodeBinary(ctxoff + 1, 5);
                             _Data[i] = mtf[mtfno];
@@ -292,7 +300,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 31);
 
-                        if (Coder.Decoder(ref _Context[ctxoff + 0]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + 0]) != 0)
                         {
                             mtfno = 64 + DecodeBinary(ctxoff + 1, 6);
                             _Data[i] = mtf[mtfno];
@@ -302,7 +310,7 @@ namespace DjvuNet.Compression
 
                         ctxoff += (1 + 63);
 
-                        if (Coder.Decoder(ref _Context[ctxoff + 0]) != 0)
+                        if (Coder.Decoder(ref _Cxt[ctxoff + 0]) != 0)
                         {
                             mtfno = 128 + DecodeBinary(ctxoff + 1, 7);
                             _Data[i] = mtf[mtfno];
@@ -425,6 +433,11 @@ namespace DjvuNet.Compression
             }
 
             return n - m;
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            throw new IOException("Unsupported operation.");
         }
 
         #endregion Private Methods

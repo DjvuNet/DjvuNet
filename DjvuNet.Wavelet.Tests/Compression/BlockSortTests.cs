@@ -153,9 +153,9 @@ namespace DjvuNet.Compression.Tests
         {
             int markpos = 13;
             byte[] buffer = Util.ReadFileToEnd(Path.Combine(Util.RepoRoot, "artifacts", "data", "testhello.obz"));
-            byte[] data = new byte[14];
+            byte[] data = new byte[1024];
             Buffer.BlockCopy(buffer, 0, data, 0, buffer.Length);
-            BlockSort.BlockSortData(data, data.Length, ref markpos);
+            BlockSort.BlockSortData(data, buffer.Length + 1, ref markpos);
 
             byte[] expected = new byte[] { 0x0a, 0x0d, 0x20, 0x21, 0x6f, 0x7a, 0x00, 0x20, 0x48, 0x65, 0x6c, 0x6c, 0x7a, 0x62 };
             for (int i = 0; i < expected.Length; i++)
