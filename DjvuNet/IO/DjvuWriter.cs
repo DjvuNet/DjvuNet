@@ -88,10 +88,10 @@ namespace DjvuNet
         /// Gets an encoding writer for the BZZ data
         /// </summary>
         /// <returns></returns>
-        public BzzWriter GetBZZEncodedWriter(long length = 4096)
+        public BzzWriter GetBZZEncodedWriter(long length = 4096, int blockSize = 4096)
         {
             MemoryStream memStream = new MemoryStream((int)length);
-            return new BzzWriter(new BSInputStream(memStream));
+            return new BzzWriter(new BSOutputStream(memStream, blockSize));
         }
 
         /// <summary>
@@ -100,7 +100,7 @@ namespace DjvuNet
         /// <returns></returns>
         public BzzWriter GetBZZEncodedWriter()
         {
-            return new BzzWriter(new BSInputStream(BaseStream));
+            return GetBZZEncodedWriter(4096);
         }
 
         /// <summary>

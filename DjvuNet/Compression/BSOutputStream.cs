@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.Configuration;
 
@@ -10,6 +11,20 @@ namespace DjvuNet.Compression
 {
     public class BSOutputStream : BSBaseStream
     {
+        public override bool CanRead => false;
+
+        public override bool CanSeek => false;
+
+        public override bool CanWrite => true;
+
+        public override long Position
+        {
+            get => base.Position;
+            set => throw new IOException("Unsupported operation.");
+        }
+
+        protected virtual long PositionInput { get; set; }
+
         #region Constructors
 
         /// <summary>
@@ -24,12 +39,31 @@ namespace DjvuNet.Compression
         /// TODO docs
         /// </summary>
         /// <param name="input"></param>
-        public BSOutputStream(Stream input, int blockSize) : base (input)
+        public BSOutputStream(Stream input, int blockSize = 1024) : base (input)
         {
             SetBlockSize(blockSize);
         }
 
         #endregion Constructors
+
+        public override BSBaseStream Init(Stream dataStream)
+        {
+            if (!dataStream.CanWrite)
+                throw new ArgumentException("Stream was not writable.", nameof(dataStream));
+
+            BaseStream = dataStream;
+            Coder = DjvuSettings.Current.CoderFactory.CreateCoder(dataStream, true);
+            return this;
+        }
+
+        protected void SetBlockSize(int blockSize)
+        {
+            int encoding = (blockSize < MinBlock) ? MinBlock : blockSize;
+            if (encoding > MaxBlock)
+                throw new ArgumentException("Block size exceeds maximum value.", nameof(blockSize));
+
+            _BlockSize = 1024 * 1024;
+        }
 
         public override void Close()
         {
@@ -42,6 +76,7 @@ namespace DjvuNet.Compression
         internal static void EncodeRaw(IDataCoder coder, int bits, int x)
         {
             int n = 1;
+            int count = 0;
             int m = (1 << bits);
             while (n < m)
             {
@@ -49,6 +84,7 @@ namespace DjvuNet.Compression
                 int b = (x >> bits);
                 coder.Encoder(b);
                 n = (n << 1) | b;
+                count++;
             }
         }
 
@@ -117,7 +153,8 @@ namespace DjvuNet.Compression
             {
                 // Get MTF data
                 int c = _Data[i];
-                int ctxid = CTXIDS - 1;
+                int ctxid = CTXIDS - 1; 
+
                 if (ctxid > mtfno)
                     ctxid = mtfno;
 
@@ -129,9 +166,10 @@ namespace DjvuNet.Compression
                 // Encode using ZPCoder
                 int b;
                 b = (mtfno == 0) ? 1 : 0;
+
                 int cx = 0;
 
-                Coder.Encoder(b, ref _Context[ctxid]);
+                Coder.Encoder(b, ref _Cxt[ctxid]);
 
                 if (b != 0)
                     goto rotate;
@@ -140,7 +178,7 @@ namespace DjvuNet.Compression
 
                 b = (mtfno == 1) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[ctxid + cx]);
+                Coder.Encoder(b, ref _Cxt[ctxid + cx]);
 
                 if (b != 0)
                     goto rotate;
@@ -148,11 +186,11 @@ namespace DjvuNet.Compression
                 cx += CTXIDS;
                 b = (mtfno < 4) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[cx]);
+                Coder.Encoder(b, ref _Cxt[cx]);
 
                 if (b != 0)
                 {
-                    EncodeBinary(Coder, _Data, 1, mtfno - 2, cx + 1);
+                    EncodeBinary(Coder, _Cxt, 1, mtfno - 2, cx + 1);
                     goto rotate;
                 }
 
@@ -160,66 +198,66 @@ namespace DjvuNet.Compression
 
                 b = (mtfno < 8) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[cx]);
+                Coder.Encoder(b, ref _Cxt[cx]);
 
                 if (b != 0)
                 {
-                    EncodeBinary(Coder, _Data, 2, mtfno - 4, cx + 1);
+                    EncodeBinary(Coder, _Cxt, 2, mtfno - 4, cx + 1);
                     goto rotate;
                 }
 
                 cx += 1 + 3;
                 b = (mtfno < 16) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[cx]);
+                Coder.Encoder(b, ref _Cxt[cx]);
 
                 if (b != 0)
                 {
-                    EncodeBinary(Coder, _Data, 3, mtfno - 8, cx + 1);
+                    EncodeBinary(Coder, _Cxt, 3, mtfno - 8, cx + 1);
                     goto rotate;
                 }
 
                 cx += 1 + 7;
                 b = (mtfno < 32) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[cx]);
+                Coder.Encoder(b, ref _Cxt[cx]);
 
                 if (b != 0)
                 {
-                    EncodeBinary(Coder, _Data, 4, mtfno - 16, cx + 1);
+                    EncodeBinary(Coder, _Cxt, 4, mtfno - 16, cx + 1);
                     goto rotate;
                 }
 
                 cx += 1 + 15;
                 b = (mtfno < 64) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[cx]);
+                Coder.Encoder(b, ref _Cxt[cx]);
 
                 if (b != 0)
                 {
-                    EncodeBinary(Coder, _Data, 5, mtfno - 32, cx + 1);
+                    EncodeBinary(Coder, _Cxt, 5, mtfno - 32, cx + 1);
                     goto rotate;
                 }
 
                 cx += 1 + 31;
                 b = (mtfno < 128) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[cx]);
+                Coder.Encoder(b, ref _Cxt[cx]);
 
                 if (b != 0)
                 {
-                    EncodeBinary(Coder, _Data, 6, mtfno - 64, cx + 1);
+                    EncodeBinary(Coder, _Cxt, 6, mtfno - 64, cx + 1);
                     goto rotate;
                 }
 
                 cx += 1 + 63;
                 b = (mtfno < 256) ? 1 : 0;
 
-                Coder.Encoder(b, ref _Context[cx]);
+                Coder.Encoder(b, ref _Cxt[cx]);
 
                 if (b != 0)
                 {
-                    EncodeBinary(Coder, _Data, 7, mtfno - 128, cx + 1);
+                    EncodeBinary(Coder, _Cxt, 7, mtfno - 128, cx + 1);
                     goto rotate;
                 }
 
@@ -265,23 +303,9 @@ namespace DjvuNet.Compression
             }
         }
 
-        public override BSBaseStream Init(Stream input)
-        {
-            Coder = DjvuSettings.Current.CoderFactory.CreateCoder(input, true);
-            return this;
-        }
-
-        private void SetBlockSize(int blockSize)
-        {
-            int encoding = (blockSize < MinBlock) ? MinBlock : blockSize;
-            if (encoding > MaxBlock)
-                throw new ArgumentException("Block size exceeds maximum value.", nameof(blockSize));
-
-            _BlockSize = 1024 * 1024;
-        }
-
         public override void Flush()
         {
+            BlockOffset = (int) _Offset % _BlockSize;
             if (BlockOffset > 0)
             {
                 if (!(BlockOffset < _BlockSize))
@@ -296,6 +320,11 @@ namespace DjvuNet.Compression
             }
 
             _Size = BlockOffset = 0;
+        }
+
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return base.FlushAsync(cancellationToken);
         }
 
         public override void Write(byte[] buffer, int offset, int sz)
@@ -320,7 +349,8 @@ namespace DjvuNet.Compression
                 if (bytes > sz)
                     bytes = sz;
 
-                Buffer.BlockCopy(buffer, copied, _Data, BlockOffset, bytes);
+                for (int i = offset, j = 0; j < bytes; i++, j++)
+                    _Data[BlockOffset + j] = buffer[i];
 
                 BlockOffset = (BlockOffset + bytes);
                 sz = (sz - bytes);
@@ -330,6 +360,36 @@ namespace DjvuNet.Compression
                 if (BlockOffset + 1 >= _BlockSize)
                     Flush();
             }
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            throw new IOException("Unsupported operation.");
+        }
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            throw new IOException("Unsupported operation.");
+        }
+
+        public override int ReadByte()
+        {
+            throw new IOException("Unsupported operation.");
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            throw new IOException("Unsupported operation.");
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return base.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override void WriteByte(byte value)
+        {
+            base.WriteByte(value);
         }
     }
 }
