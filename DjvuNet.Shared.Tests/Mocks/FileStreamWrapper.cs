@@ -37,7 +37,7 @@ namespace DjvuNet.Tests.Mocks
 
         public override long Position
         {
-            get => 0;
+            get { return 0; }
             set
             {
                 long x = value;
