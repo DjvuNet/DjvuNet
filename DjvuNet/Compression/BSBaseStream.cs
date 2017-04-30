@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.Compression
 {
-    public abstract class BSBaseStream : MemoryStream
+    public abstract class BSBaseStream : Stream
     {
 
         protected const int Overflow = 32;
@@ -42,10 +42,12 @@ namespace DjvuNet.Compression
         /// </summary>
         internal IDataCoder Coder;
 
+        public Stream BaseStream { get; protected set; }
+
         /// <summary>
         /// Values being coded
         /// </summary>
-        protected byte[] _Context = new byte[300];
+        protected byte[] _Cxt = new byte[300];
 
         /// <summary>
         /// Decoded data
@@ -63,6 +65,7 @@ namespace DjvuNet.Compression
         protected int _BlockSize;
 
         private int _BlockOffset;
+
         /// <summary>
         /// Offset into the data
         /// </summary>
@@ -82,146 +85,45 @@ namespace DjvuNet.Compression
 
         protected long _Offset;
 
+        public override bool CanRead
+        {
+            get { return BaseStream != null ? BaseStream.CanRead : false; }
+        }
+
+        public override bool CanSeek
+        {
+            get { return BaseStream != null ? BaseStream.CanSeek : false; }
+        }
+
+        public override bool CanWrite
+        {
+            get { return BaseStream != null ? BaseStream.CanWrite : false; }
+        }
+
+        public override long Length
+        {
+            get { return BaseStream != null ? BaseStream.Length : 0; }
+        }
+
+        public override long Position
+        {
+            get { return BaseStream != null ? BaseStream.Position : 0; }
+            set
+            {
+                if (BaseStream != null)
+                    BaseStream.Position = value;
+                else
+                    throw new InvalidOperationException();
+            }
+        }
+
 
         /// <summary>
         /// TODO docs
         /// </summary>
         public BSBaseStream() : base()
         {
-            Init((MemoryStream)this);
-        }
-
-        public BSBaseStream(int capacity) : base(capacity)
-        {
-            Init((MemoryStream)this);
-        }
-
-        public BSBaseStream(byte[] buffer) : base(buffer)
-        {
-            Init((MemoryStream)this);
-        }
-
-        //
-        // Summary:
-        //     Initializes a new non-resizable instance of the System.IO.MemoryStream class
-        //     based on the specified byte array with the System.IO.MemoryStream.CanWrite property
-        //     set as specified.
-        //
-        // Parameters:
-        //   buffer:
-        //     The array of unsigned bytes from which to create this stream.
-        //
-        //   writable:
-        //     The setting of the System.IO.MemoryStream.CanWrite property, which determines
-        //     whether the stream supports writing.
-        //
-        // Exceptions:
-        //   T:System.ArgumentNullException:
-        //     buffer is null.
-        public BSBaseStream(byte[] buffer, bool writable) : base(buffer, writable)
-        {
-            Init((MemoryStream)this);
-        }
-        //
-        // Summary:
-        //     Initializes a new non-resizable instance of the System.IO.MemoryStream class
-        //     based on the specified region (index) of a byte array.
-        //
-        // Parameters:
-        //   buffer:
-        //     The array of unsigned bytes from which to create this stream.
-        //
-        //   index:
-        //     The index into buffer at which the stream begins.
-        //
-        //   count:
-        //     The length of the stream in bytes.
-        //
-        // Exceptions:
-        //   T:System.ArgumentNullException:
-        //     buffer is null.
-        //
-        //   T:System.ArgumentOutOfRangeException:
-        //     index or count is less than zero.
-        //
-        //   T:System.ArgumentException:
-        //     The buffer length minus index is less than count.
-        public BSBaseStream(byte[] buffer, int index, int count) : base(buffer, index, count)
-        {
-            Init((MemoryStream)this);
-        }
-        //
-        // Summary:
-        //     Initializes a new non-resizable instance of the System.IO.MemoryStream class
-        //     based on the specified region of a byte array, with the System.IO.MemoryStream.CanWrite
-        //     property set as specified.
-        //
-        // Parameters:
-        //   buffer:
-        //     The array of unsigned bytes from which to create this stream.
-        //
-        //   index:
-        //     The index in buffer at which the stream begins.
-        //
-        //   count:
-        //     The length of the stream in bytes.
-        //
-        //   writable:
-        //     The setting of the System.IO.MemoryStream.CanWrite property, which determines
-        //     whether the stream supports writing.
-        //
-        // Exceptions:
-        //   T:System.ArgumentNullException:
-        //     buffer is null.
-        //
-        //   T:System.ArgumentOutOfRangeException:
-        //     index or count are negative.
-        //
-        //   T:System.ArgumentException:
-        //     The buffer length minus index is less than count.
-        public BSBaseStream(byte[] buffer, int index, int count, bool writable) 
-            : base(buffer, index, count, writable)
-        {
-            Init((MemoryStream)this);
-        }
-        //
-        // Summary:
-        //     Initializes a new instance of the System.IO.MemoryStream class based on the specified
-        //     region of a byte array, with the System.IO.MemoryStream.CanWrite property set
-        //     as specified, and the ability to call System.IO.MemoryStream.GetBuffer set as
-        //     specified.
-        //
-        // Parameters:
-        //   buffer:
-        //     The array of unsigned bytes from which to create this stream.
-        //
-        //   index:
-        //     The index into buffer at which the stream begins.
-        //
-        //   count:
-        //     The length of the stream in bytes.
-        //
-        //   writable:
-        //     The setting of the System.IO.MemoryStream.CanWrite property, which determines
-        //     whether the stream supports writing.
-        //
-        //   publiclyVisible:
-        //     true to enable System.IO.MemoryStream.GetBuffer, which returns the unsigned byte
-        //     array from which the stream was created; otherwise, false.
-        //
-        // Exceptions:
-        //   T:System.ArgumentNullException:
-        //     buffer is null.
-        //
-        //   T:System.ArgumentOutOfRangeException:
-        //     index or count is negative.
-        //
-        //   T:System.ArgumentException:
-        //     The buffer length minus index is less than count.
-        public BSBaseStream(byte[] buffer, int index, int count, bool writable, bool publiclyVisible) 
-            : base(buffer, index, count, writable, publiclyVisible)
-        {
-            Init((MemoryStream)this);
+            Init(new MemoryStream());
         }
 
         /// <summary>
@@ -234,5 +136,21 @@ namespace DjvuNet.Compression
         }
 
         public abstract BSBaseStream Init(Stream input);
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            if (BaseStream != null)
+                return BaseStream.Seek(offset, origin);
+            else
+                throw new InvalidOperationException();
+        }
+
+        public override void SetLength(long value)
+        {
+            if (BaseStream != null)
+                BaseStream.SetLength(value);
+            else
+                throw new InvalidOperationException();
+        }
     }
 }
