@@ -65,10 +65,10 @@ namespace DjvuNet.Compression.Tests
             for(int i = 0; i < table.Length; i++)
             {
                 var row = table[i];
-                Assert.Equal<uint>(row.PValue, codec.PArray[i]);
-                Assert.Equal<uint>(row.MValue, codec.MArray[i]);
-                Assert.Equal<uint>(row.Down, codec.Down[i]);
-                Assert.Equal<uint>(row.Up, codec.Up[i]);
+                Assert.Equal<uint>(row.PValue, codec._PArray[i]);
+                Assert.Equal<uint>(row.MValue, codec._MArray[i]);
+                Assert.Equal<uint>(row.Down, codec._Down[i]);
+                Assert.Equal<uint>(row.Up, codec._Up[i]);
             }
         }
 

@@ -13,7 +13,7 @@ namespace DjvuNet
 
         BzzWriter GetBZZEncodedWriter();
 
-        BzzWriter GetBZZEncodedWriter(long length = 4096);
+        BzzWriter GetBZZEncodedWriter(long length = 4096, int blockSize = 4096);
 
         string ToString();
 

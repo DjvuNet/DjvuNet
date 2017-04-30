@@ -34,5 +34,17 @@ namespace DjvuNet.Compression
             base.Flush();
         }
 
+        public override void Write(string value)
+        {
+            Write(value, new UTF8Encoding(false));
+        }
+
+        private void Write(string value, Encoding encoding)
+        {
+            byte[] buffer = new byte[encoding.GetByteCount(value) + 1];
+            encoding.GetBytes(value.ToCharArray(), 0, value.Length, buffer, 0);
+            base.Write(buffer, 0, buffer.Length);
+        }
+
     }
 }
