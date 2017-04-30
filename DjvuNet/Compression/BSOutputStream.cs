@@ -19,8 +19,8 @@ namespace DjvuNet.Compression
 
         public override long Position
         {
-            get => base.Position;
-            set => throw new IOException("Unsupported operation.");
+            get { return base.Position; }
+            set { throw new IOException("Unsupported operation."); }
         }
 
         protected virtual long PositionInput { get; set; }
