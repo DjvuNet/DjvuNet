@@ -127,6 +127,14 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact()]
+        public void BlockSortTest007()
+        {
+            BlockSort bSort = new BlockSort(new byte[] { 5 }, 1);
+            int markerpos = 1;
+            bSort.Sort(ref markerpos);
+        }
+
+        [Fact()]
         public void BlockSortDataTest001()
         {
             int markpos = 0;

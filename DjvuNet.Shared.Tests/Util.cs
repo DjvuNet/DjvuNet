@@ -102,7 +102,17 @@ namespace DjvuNet.Tests
         {
             get { return Path.Combine(Util.RepoRoot, "artifacts", "data"); }
         }
-        
+
+        public static void AssertBufferEqal(byte[] buffer, byte[] refBuffer)
+        {
+            Assert.True(refBuffer.Length == buffer.Length,
+                $"Output length mismatch. Expected: {refBuffer.Length}, actual: {buffer.Length}");
+
+            for (int i = 0; i < refBuffer.Length; i++)
+                Assert.True(refBuffer[i] == buffer[i],
+                    $"Binary data diff at index: {i}, expected: {refBuffer[i]}, actual: {buffer[i]}");
+        }
+
 
         public static List<String> TestUnicodeStrings
         {

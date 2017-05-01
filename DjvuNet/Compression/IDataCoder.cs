@@ -19,6 +19,8 @@ namespace DjvuNet.Compression
 
         int DecoderNoLearn(ref byte ctx);
 
+        bool Disposed { get; }
+
         void Encoder(int bit);
 
         void Encoder(int bit, ref byte ctx);

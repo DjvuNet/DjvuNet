@@ -141,6 +141,44 @@ namespace DjvuNet.Compression.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
+        [Fact()]
+        public void DecoderNoLearn001()
+        {
+
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "test043C.json.bzz");
+            byte[] testBuffer = Util.ReadFileToEnd(filePath);
+            using (MemoryStream readStream = new MemoryStream(testBuffer))
+            using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
+            {
+                byte[] result = new byte[testBuffer.Length];
+                int readBytes = reader.Read(result, 0, result.Length/2);
+                BSInputStream bsStream = reader.BaseStream as BSInputStream;
+                Assert.NotNull(bsStream);
+
+                byte ctx = 0x79;
+                int decoded = bsStream.Coder.DecoderNoLearn(ref ctx);
+            }
+        }
+
+        [Fact()]
+        public void DecoderNoLearn002()
+        {
+
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "test043C.json.bzz");
+            byte[] testBuffer = Util.ReadFileToEnd(filePath);
+            using (MemoryStream readStream = new MemoryStream(testBuffer))
+            using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
+            {
+                byte[] result = new byte[testBuffer.Length];
+                int readBytes = reader.Read(result, 0, result.Length / 2);
+                BSInputStream bsStream = reader.BaseStream as BSInputStream;
+                Assert.NotNull(bsStream);
+
+                byte ctx = 0x01;
+                int decoded = bsStream.Coder.DecoderNoLearn(ref ctx);
+            }
+        }
+
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void DecodeSubTest()
         {
@@ -171,6 +209,65 @@ namespace DjvuNet.Compression.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
+        [Fact()]
+        public void DisposeTest001()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
+            string outFilePath = filePath + ".bz3";
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 4096))
+                {
+                    writer.Write(buffer, 0, buffer.Length / 2);
+                    bytesWritten = stream.Position;
+                    Assert.False(writer.Coder.Disposed);
+                    writer.Coder.Dispose();
+                    Assert.True(writer.Coder.Disposed);
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
+        [Fact()]
+        public void EncoderNoLearn001()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
+            string outFilePath = filePath + ".bz3";
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 4096))
+                {
+                    writer.Write(buffer, 0, buffer.Length/2);
+                    bytesWritten = stream.Position;
+                    byte ctx = 0x01;
+                    writer.Coder.EncoderNoLearn(1, ref ctx);
+                    ctx = 0x01;
+                    writer.Coder.EncoderNoLearn(0, ref ctx);
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void FFZTest()
         {
@@ -183,6 +280,34 @@ namespace DjvuNet.Compression.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
+        [Fact()]
+        public void IWEncoderTest001()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
+            string outFilePath = filePath + ".bz3";
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 4096))
+                {
+                    writer.Write(buffer, 0, buffer.Length / 2);
+                    bytesWritten = stream.Position;
+                    writer.Coder.IWEncoder(false);
+                    writer.Coder.IWEncoder(true);
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void NewZPTableTest()
         {
@@ -193,6 +318,70 @@ namespace DjvuNet.Compression.Tests
         public void PreloadTest()
         {
             Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void StateTest001()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "DjvuNet.pdb");
+            string outFilePath = filePath + ".bz3";
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+
+                byte[] data = new byte[buffer.Length + 32];
+                Buffer.BlockCopy(buffer, 0, data, 0, buffer.Length);
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 4096))
+                {
+                    writer.Write(data, 0, 4096);
+                    byte state = writer.Coder.State(0.2f);
+                    Assert.Equal(22, state);
+                    writer.Write(data, 0, buffer.Length - 4096);
+                    bytesWritten = stream.Position;
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
+        [Fact()]
+        public void StateTest002()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
+            string outFilePath = filePath + ".bz3";
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+
+                byte[] data = new byte[buffer.Length + 32];
+                Buffer.BlockCopy(buffer, 0, data, 0, buffer.Length);
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 4096))
+                {
+                    writer.Write(data, 0, 8);
+                    byte state = writer.Coder.State(0.5f);
+                    Assert.Equal(2, state);
+                    writer.Write(data, 0, buffer.Length - 8);
+                    bytesWritten = stream.Position;
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
         }
     }
 }
