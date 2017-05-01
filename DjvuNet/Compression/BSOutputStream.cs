@@ -62,7 +62,7 @@ namespace DjvuNet.Compression
             if (encoding > MaxBlock)
                 throw new ArgumentException("Block size exceeds maximum value.", nameof(blockSize));
 
-            _BlockSize = 1024 * 1024;
+            _BlockSize = encoding * 1024;
         }
 
         public override void Close()
@@ -305,7 +305,6 @@ namespace DjvuNet.Compression
 
         public override void Flush()
         {
-            BlockOffset = (int) _Offset % _BlockSize;
             if (BlockOffset > 0)
             {
                 if (!(BlockOffset < _BlockSize))
@@ -316,7 +315,6 @@ namespace DjvuNet.Compression
 
                 _Size = BlockOffset + 1;
                 Encode();
-                Coder.Flush();
             }
 
             _Size = BlockOffset = 0;
@@ -324,7 +322,7 @@ namespace DjvuNet.Compression
 
         public override Task FlushAsync(CancellationToken cancellationToken)
         {
-            return base.FlushAsync(cancellationToken);
+            return Task.Run(() => Flush());
         }
 
         public override void Write(byte[] buffer, int offset, int sz)
@@ -349,8 +347,8 @@ namespace DjvuNet.Compression
                 if (bytes > sz)
                     bytes = sz;
 
-                for (int i = offset, j = 0; j < bytes; i++, j++)
-                    _Data[BlockOffset + j] = buffer[i];
+                for (int i = offset + (int) _Offset, j = 0; j < bytes; i++, j++)
+                    _Data[j] = buffer[i];
 
                 BlockOffset = (BlockOffset + bytes);
                 sz = (sz - bytes);

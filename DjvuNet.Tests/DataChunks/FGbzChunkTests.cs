@@ -1,11 +1,8 @@
 ﻿using Xunit;
-using DjvuNet.DataChunks;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DjvuNet.Tests;
 using Moq;
 using DjvuNet.Tests.Xunit;
