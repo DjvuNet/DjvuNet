@@ -55,7 +55,7 @@ if not exist .\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj (
 
 @echo,
 @echo Restoring nuget packages
-call %cd%\Tools\nuget.exe restore  -verbosity detailed 
+call %cd%\Tools\nuget.exe restore DjvuNet.sln  -verbosity detailed 
 
 if not %ERRORLEVEL%==0 (
     @echo:
@@ -87,6 +87,7 @@ if not defined _Test (
 
 set _DjvuNet_Tests=DjvuNet.Tests\bin\%_MSB_Platform%\%_MSB_Configuration%\DjvuNet.Tests.dll
 set _DjvuNet_DjvuLibre_Tests=DjvuNet.DjvuLibre.Tests\bin\%_MSB_Platform%\%_MSB_Configuration%\DjvuNet.DjvuLibre.Tests.dll
+set _DjvuNet_Wavelet_Tests=DjvuNet.Wavelet.Tests\bin\%_MSB_Platform%\%_MSB_Configuration%\DjvuNet.Wavelet.Tests.dll
 if %_MSB_Platform%==x86 set _xUnit_console=%cd%\packages\xunit.runner.console.2.2.0\tools\xunit.console.x86.exe 
 if %_MSB_Platform%==x64 set _xUnit_console=%cd%\packages\xunit.runner.console.2.2.0\tools\xunit.console.exe
 set _Test_Options=-notrait "Category=Skip" -nologo -diagnostics
@@ -104,7 +105,15 @@ if not %ERRORLEVEL%==0 set _DjvuNet_Tests_Error=true
 @echo:
 call %_xUnit_console% %_DjvuNet_DjvuLibre_Tests%  %_Test_Options%
 
+if not %ERRORLEVEL%==0 set _DjvuNet_DjvuLibre_Tests_Error=true
+
+@echo:
+@echo Running tests from DjvuNet.Wavelet.Tests.dll assembly with console %_xUnit_console% options %_Test_Options%
+@echo:
+call %_xUnit_console% %_DjvuNet_Wavelet_Tests%  %_Test_Options%
+
 if %_DjvuNet_Tests_Error%==true goto test_error
+if %_DjvuNet_DjvuLibre_Tests_Error%==true goto test_error
 if not %ERRORLEVEL%==0 goto test_error
 goto test_success
 

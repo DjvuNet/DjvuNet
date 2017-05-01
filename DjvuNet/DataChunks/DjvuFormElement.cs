@@ -241,6 +241,8 @@ namespace DjvuNet.DataChunks
             if (writer == null)
                 throw new ArgumentNullException(nameof(writer));
 
+            AdjustAlignment(writer);
+
             if (writeHeader)
             {
                 writer.WriteUTF8String("FORM");
@@ -254,7 +256,10 @@ namespace DjvuNet.DataChunks
             }
 
             foreach (IDjvuNode node in Children)
+            {
+                AdjustAlignment(writer);
                 node.WriteData(writer, writeHeader);
+            }
         }
 
         /// <summary>

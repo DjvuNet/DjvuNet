@@ -202,6 +202,8 @@ namespace DjvuNet.DataChunks
             if (writer == null)
                 throw new ArgumentNullException(nameof(writer));
 
+            AdjustAlignment(writer);
+
             if (writeHeader)
             {
                 writer.WriteUTF8String(Name.ToUpper());
@@ -209,6 +211,12 @@ namespace DjvuNet.DataChunks
             }
 
             writer.Write(ChunkData, 0, (int)Length);
+        }
+
+        internal static void AdjustAlignment(IDjvuWriter writer)
+        {
+            if (writer.Position % 2 == 1)
+                writer.Write((byte)0x00);
         }
 
         #endregion Public Methods

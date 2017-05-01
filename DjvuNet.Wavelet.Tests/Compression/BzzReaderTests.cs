@@ -71,5 +71,24 @@ namespace DjvuNet.Compression.Tests
                 Assert.Equal(expected, testResult);
             }
         }
+
+        [Fact()]
+        public void ReadTest001()
+        {
+
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "test042C.djvu.2048.bzz");
+            string testFilePath = Path.Combine(Util.ArtifactsPath, "test042C.djvu");
+            byte[] testBuffer = Util.ReadFileToEnd(filePath);
+            byte[] expectedBuffer = Util.ReadFileToEnd(testFilePath);
+            using (MemoryStream readStream = new MemoryStream(testBuffer))
+            using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
+            {
+                byte[] result = new byte[expectedBuffer.Length];
+                int readBytes = reader.Read(result, 0, result.Length);
+                Assert.Equal(readBytes, result.Length);
+                for (int i = 0; i < result.Length; i++)
+                    Assert.Equal(expectedBuffer[i], result[i]);
+            }
+        }
     }
 }
