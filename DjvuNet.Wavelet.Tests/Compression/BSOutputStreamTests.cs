@@ -133,46 +133,16 @@ namespace DjvuNet.Compression.Tests
         {
             UTF8Encoding encoding = new UTF8Encoding(false);
             string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
-            byte[] buffer = Util.ReadFileToEnd(filePath);
-            filePath = filePath.Replace(".obz", ".bz3");
-
-            string testText = "Hello bzz! \r\n";
-            string sourceText = new UTF8Encoding(false).GetString(buffer);
-            Assert.Equal(testText, sourceText);
-
-            byte[] data = new byte[buffer.Length + 32];
-            Buffer.BlockCopy(buffer, 0, data, 0, buffer.Length);
-            long bytesWritten = 0;
-
-            using (Stream stream = new FileStream(
-                filePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-            using (BSOutputStream writer = new BSOutputStream(stream, 4096))
-            {
-                writer.Write(data, 0, buffer.Length);
-                bytesWritten = stream.Position;
-            }
-
-            byte[] testBuffer = Util.ReadFileToEnd(filePath);
-
-            using (MemoryStream readStream = new MemoryStream(testBuffer))
-            using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
-            {
-
-                string testResult = reader.ReadUTF8String(testText.Length);
-                Assert.False(String.IsNullOrWhiteSpace(testResult));
-                Assert.Equal(testText, testResult);
-            }
-        }
-
-        [Fact()]
-        public void WriteTest002()
-        {
-            string filePath = Path.Combine(Util.ArtifactsDataPath, "DjvuNet.pdb");
             string outFilePath = filePath + ".bz3";
 
             try
             {
+
                 byte[] buffer = Util.ReadFileToEnd(filePath);
+
+                string testText = "Hello bzz! \r\n";
+                string sourceText = new UTF8Encoding(false).GetString(buffer);
+                Assert.Equal(testText, sourceText);
 
                 byte[] data = new byte[buffer.Length + 32];
                 Buffer.BlockCopy(buffer, 0, data, 0, buffer.Length);
@@ -192,6 +162,91 @@ namespace DjvuNet.Compression.Tests
                 using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
                 {
 
+                    string testResult = reader.ReadUTF8String(testText.Length);
+                    Assert.False(String.IsNullOrWhiteSpace(testResult));
+                    Assert.Equal(testText, testResult);
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
+        [Fact()]
+        public void WriteTest002()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "DjvuNet.pdb");
+            string outFilePath = filePath + ".bz3";
+            string refFilePath = filePath + ".bzz";
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+
+                byte[] data = new byte[buffer.Length + 32];
+                Buffer.BlockCopy(buffer, 0, data, 0, buffer.Length);
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 4096))
+                {
+                    writer.Write(data, 0, buffer.Length);
+                    bytesWritten = stream.Position;
+                }
+
+                byte[] testBuffer = Util.ReadFileToEnd(outFilePath);
+                byte[] refBuffer = Util.ReadFileToEnd(refFilePath);
+                Util.AssertBufferEqal(testBuffer, refBuffer);
+
+                using (MemoryStream readStream = new MemoryStream(testBuffer))
+                using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
+                {
+                    byte[] testResult = reader.ReadBytes(buffer.Length);
+                    Assert.NotNull(testResult);
+                    Util.AssertBufferEqal(testResult, buffer);
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
+        [Fact()]
+        public void WriteTest003()
+        {
+            string filePath = Path.Combine(Util.ArtifactsPath, "test042C.djvu");
+            string outFilePath = Path.Combine(Util.ArtifactsDataPath, Path.GetFileName(filePath) + ".2048.bz3");
+            string refFilePath = Path.Combine(Util.ArtifactsDataPath, Path.GetFileName(filePath) + ".2048.bzz");
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+
+                byte[] data = new byte[buffer.Length + 32];
+                Buffer.BlockCopy(buffer, 0, data, 0, buffer.Length);
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 2048))
+                {
+                    writer.Write(data, 0, buffer.Length);
+                    bytesWritten = stream.Position;
+                }
+
+                byte[] testBuffer = Util.ReadFileToEnd(outFilePath);
+                byte[] refBuffer = Util.ReadFileToEnd(refFilePath);
+                Util.AssertBufferEqal(testBuffer, refBuffer);
+
+                using (MemoryStream readStream = new MemoryStream(testBuffer))
+                using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
+                {
+
                     byte[] testResult = reader.ReadBytes(buffer.Length);
                     Assert.NotNull(testResult);
                     Assert.Equal(buffer.Length, testResult.Length);
@@ -206,7 +261,92 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
+        [Fact()]
+        public void WriteTest004()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "LLVMMCJIT.lib");
+            string outFilePath = Path.Combine(Util.ArtifactsDataPath, Path.GetFileName(filePath) + ".2048.bz3");
+            string refFilePath = Path.Combine(Util.ArtifactsDataPath, Path.GetFileName(filePath) + ".2048.bzz");
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 2048))
+                {
+                    writer.Write(buffer, 0, buffer.Length);
+                    bytesWritten = stream.Position;
+                }
+
+                byte[] outputBuffer = Util.ReadFileToEnd(outFilePath);
+                byte[] refBuffer = Util.ReadFileToEnd(refFilePath);
+
+                Util.AssertBufferEqal(outputBuffer, refBuffer);
+
+                using (FileStream readStream = new FileStream(outFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
+                {
+                    byte[] testResult = reader.ReadBytes(buffer.Length);
+                    Assert.NotNull(testResult);
+                    Util.AssertBufferEqal(testResult, buffer);
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
+        [Fact()]
+        public void WriteTest005()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "LLVMTarget.pdb");
+            string outFilePath = Path.Combine(Util.ArtifactsDataPath, Path.GetFileName(filePath) + ".2048.bz3");
+            string refFilePath = Path.Combine(Util.ArtifactsDataPath, Path.GetFileName(filePath) + ".2048.bzz");
+
+            try
+            {
+                byte[] buffer = Util.ReadFileToEnd(filePath);
+
+                long bytesWritten = 0;
+
+                using (Stream stream = new FileStream(
+                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (BSOutputStream writer = new BSOutputStream(stream, 2048))
+                {
+                    writer.Write(buffer, 0, buffer.Length);
+                    bytesWritten = stream.Position;
+                }
+
+                byte[] outputBuffer = Util.ReadFileToEnd(outFilePath);
+                byte[] refBuffer = Util.ReadFileToEnd(refFilePath);
+                Util.AssertBufferEqal(outputBuffer, refBuffer);
+
+                using (FileStream readStream = new FileStream(outFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
+                {
+                    byte[] testResult = reader.ReadBytes(buffer.Length);
+                    Assert.NotNull(testResult);
+                    Util.AssertBufferEqal(testResult, buffer);
+                }
+            }
+            finally
+            {
+                if (File.Exists(outFilePath))
+                    File.Delete(outFilePath);
+            }
+        }
+
+#if _APPVEYOR
+        [Theory]
+#else 
         [DjvuTheory]
+#endif
         [MemberData(nameof(WriteTestData))]
         public void Write_Theory(string fileName, string filePath, string outFilePath)
         {

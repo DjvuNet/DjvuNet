@@ -288,9 +288,9 @@ namespace DjvuNet.Compression
         public byte State(float prob1)
         {
             // Return a state representing 'prob1' in the steady chain
-            // FixMe: This is quite slow! 
             int mps = (prob1 <= 0.5 ? 0 : 1);
             float plps = (float)(mps != 0 ? 1.0 - prob1 : prob1);
+
             // Locate steady chain (ordered, decreasing)
             int sz = 0;
             int lo = (mps != 0 ? 1 : 2);

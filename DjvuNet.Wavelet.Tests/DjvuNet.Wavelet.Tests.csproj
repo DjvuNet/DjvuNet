@@ -131,6 +131,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Compression\BlockSortTests.cs" />
+    <Compile Include="Compression\BSBaseStreamTests.cs" />
     <Compile Include="Compression\BSInputStreamTests.cs" />
     <Compile Include="Compression\BSOutputStreamTests.cs" />
     <Compile Include="Compression\BzzReaderTests.cs" />

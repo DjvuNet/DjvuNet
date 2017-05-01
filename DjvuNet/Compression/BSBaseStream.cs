@@ -42,7 +42,7 @@ namespace DjvuNet.Compression
         /// </summary>
         internal IDataCoder Coder;
 
-        public Stream BaseStream { get; protected set; }
+        public Stream BaseStream { get; internal set; }
 
         /// <summary>
         /// Values being coded
