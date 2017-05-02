@@ -4,9 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>DjvuNet</RootNamespace>
   </PropertyGroup>
-    <PropertyGroup>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -14,7 +11,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
 
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25227-01" />
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25301-02" />
   </ItemGroup>
 
     <ItemGroup>
