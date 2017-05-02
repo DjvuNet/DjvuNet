@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(ProjectDir)../DjvuNetBuild.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>DjvuNet</RootNamespace>
@@ -36,5 +36,5 @@
     <ItemGroup>
       <ProjectReference Include="..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
     </ItemGroup>
-    <Import Project="$(ProjectDir)../DjvuNetBuild.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 </Project>

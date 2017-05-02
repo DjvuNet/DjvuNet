@@ -1,4 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -6,18 +7,27 @@
     <AssemblyName>System.Attributes</AssemblyName>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
 
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25227-01" />
+    <Compile Remove="Properties\AssemblyInfo.Template.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet.Shared\DjvuNet.Shared.shproj" />
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
   </ItemGroup>
 
-  <Import Project="..\DjvuNet.Shared\DjvuNet.Shared.projitems" Label="Shared" />
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25227-01" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.Shared\DjvuNet.Shared.projitems" Label="Shared" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 
 </Project>
