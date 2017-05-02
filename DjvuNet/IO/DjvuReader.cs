@@ -118,6 +118,25 @@ namespace DjvuNet
 
         #region Public Methods
 
+        public byte[] ReadToEnd()
+        {
+            byte[] buffer = new byte[4096];
+            using (MemoryStream stream = new MemoryStream())
+            {
+                int count = Read(buffer, 0, buffer.Length);
+                while (count > 0)
+                {
+                    stream.Write(buffer, 0, count);
+                    count = Read(buffer, 0, buffer.Length);
+                }
+
+                buffer = new byte[stream.Position];
+                Buffer.BlockCopy(stream.GetBuffer(), 0, buffer, 0, buffer.Length);
+            }
+
+            return buffer;
+        }
+
         public byte[] GetJPEGImage(long length)
         {
             return ReadBytes(checked((int)length));

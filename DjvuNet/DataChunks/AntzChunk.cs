@@ -42,7 +42,7 @@ namespace DjvuNet.DataChunks
 
         protected override IDjvuReader GetAnnotationDataReader(long position)
         {
-            return Reader.CloneReader(position).GetBZZEncodedReader(Length);
+            return Reader.CloneReaderToMemory(position, Length).GetBZZEncodedReader(Length);
         }
 
         #endregion Protected Methods

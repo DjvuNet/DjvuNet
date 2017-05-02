@@ -24,7 +24,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the list of document bookmarks
         /// </summary>
-        public Bookmark[] Bookmarks { get; internal set; }
+        public IReadOnlyList<IBookmark> Bookmarks { get; internal set; }
 
         #endregion Bookmarks
 
@@ -32,7 +32,7 @@ namespace DjvuNet.DataChunks
 
         #region Constructors
 
-        public DocumentNavigator(DjvuDocument document)
+        public DocumentNavigator(IDjvuDocument document)
         {
             BuildNavigation(document);
         }
@@ -41,7 +41,7 @@ namespace DjvuNet.DataChunks
 
         #region Private Methods
 
-        private void BuildNavigation(DjvuDocument document)
+        internal void BuildNavigation(IDjvuDocument document)
         {
             List<Bookmark> bookmarks = new List<Bookmark>();
 
@@ -49,11 +49,11 @@ namespace DjvuNet.DataChunks
             {
                 IDjvuPage page = document.Pages[x];
                 int pageNum = x + 1;
-                bookmarks.Add(new Bookmark(document, null, 
+                bookmarks.Add(new Bookmark(document, null, null, 
                     string.Format("Page {0}", pageNum), string.Format("#{0}", pageNum), new Bookmark[0]));
             }
 
-            Bookmarks = bookmarks.ToArray();
+            Bookmarks = bookmarks;
         }
 
         #endregion Private Methods

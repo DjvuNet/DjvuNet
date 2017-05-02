@@ -20,13 +20,14 @@ namespace DjvuNet.DataChunks.Tests
             {
                 List<object[]> retVal = new List<object[]>();
 
-                foreach(DjvuJsonDocument doc in DjvuNet.Tests.UtilJson.JsonDocuments)
+                string[] files = System.IO.Directory.GetFiles(Util.ArtifactsDataPath, "*.navm");
+                foreach (string f in files)
                 {
-                    retVal.Add(new object[]
-                    {
-                        doc.DocumentFile.Replace("json", "djvu"),
-                        doc
-                    });
+                    // TODO verify DjvuLibre handling of that file navm chunk
+                    if (f.EndsWith("test053C.navm"))
+                        continue;
+
+                    retVal.Add(new object[] { f });
                 }
 
                 return retVal;
@@ -39,17 +40,86 @@ namespace DjvuNet.DataChunks.Tests
         [DjvuTheory]
 #endif
         [MemberData(nameof(NavmTestData))]
-        public void NavmChunk_Theory(string djvuFile, DjvuJsonDocument doc)
+        public void NavmChunk_Theory(string file)
         {
-            using(DjvuDocument document = new DjvuDocument(djvuFile))
+            Mock<IDjvuDocument> docMock = new Mock<IDjvuDocument>();
+            List<IDjvuPage> pages = new List<IDjvuPage>();
+            docMock.Setup(x => x.Pages).Returns(pages);
+            for (int i = 0; i < 300; i++)
             {
-                Util.VerifyDjvuDocument(doc.Data.Pages.Length, document);
-                IDjvuElement rootForm = document.RootForm;
-                var navm = rootForm.Children.Where(x => x.ChunkType == ChunkType.Navm).FirstOrDefault() as NavmChunk;
-                if (navm != null)
-                {
-                    
-                }
+                Mock<IDjvuPage> pageMock = new Mock<IDjvuPage>();
+                pageMock.Setup(x => x.PageNumber).Returns(i + 1);
+                pages.Add(pageMock.Object);
+            }
+
+            Mock<DjvuFormElement> parentMock = new Mock<DjvuFormElement> { CallBase = true };
+
+            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                NavmChunk unk = new NavmChunk(reader, parentMock.Object, docMock.Object, "NAVM", stream.Length);
+                Assert.Equal<ChunkType>(ChunkType.Navm, unk.ChunkType);
+                Assert.Equal(stream.Length, unk.Length);
+
+                var bookmarks = unk.Bookmarks;
+                Assert.NotNull(bookmarks);
+
+                foreach(var b in bookmarks)
+                    Assert.NotNull(b.Children);
+            }
+        }
+
+        [Fact]
+        public void InvalidBookmarkFormat()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "test053C.navm");
+            Mock<IDjvuDocument> docMock = new Mock<IDjvuDocument>();
+            List<IDjvuPage> pages = new List<IDjvuPage>();
+            docMock.Setup(x => x.Pages).Returns(pages);
+            for (int i = 0; i < 300; i++)
+            {
+                Mock<IDjvuPage> pageMock = new Mock<IDjvuPage>();
+                pageMock.Setup(x => x.PageNumber).Returns(i + 1);
+                pages.Add(pageMock.Object);
+            }
+
+            Mock<DjvuFormElement> parentMock = new Mock<DjvuFormElement> { CallBase = true };
+
+            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                NavmChunk unk = new NavmChunk(reader, parentMock.Object, docMock.Object, "NAVM", stream.Length);
+                Assert.Equal<ChunkType>(ChunkType.Navm, unk.ChunkType);
+                Assert.Equal(stream.Length, unk.Length);
+
+                Assert.Throws<InvalidOperationException>(() => unk.Bookmarks);
+            }
+        }
+
+        [Fact]
+        public void BookmarkOutOfRange()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "test002C.navm");
+            Mock<IDjvuDocument> docMock = new Mock<IDjvuDocument>();
+            List<IDjvuPage> pages = new List<IDjvuPage>();
+            docMock.Setup(x => x.Pages).Returns(pages);
+            for (int i = 0; i < 3; i++)
+            {
+                Mock<IDjvuPage> pageMock = new Mock<IDjvuPage>();
+                pageMock.Setup(x => x.PageNumber).Returns(i + 1);
+                pages.Add(pageMock.Object);
+            }
+
+            Mock<DjvuFormElement> parentMock = new Mock<DjvuFormElement> { CallBase = true };
+
+            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                NavmChunk unk = new NavmChunk(reader, parentMock.Object, docMock.Object, "NAVM", stream.Length);
+                Assert.Equal<ChunkType>(ChunkType.Navm, unk.ChunkType);
+                Assert.Equal(stream.Length, unk.Length);
+
+                Assert.Throws<InvalidOperationException>(() => unk.Bookmarks);
             }
         }
 

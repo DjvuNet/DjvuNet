@@ -8,7 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using DjvuNet.Extentions;
 using DjvuNet.Graphics;
 
@@ -275,7 +274,7 @@ namespace DjvuNet.DataChunks
         /// Gets the text which occurs before the word
         /// </summary>
         /// <returns></returns>
-        private string GetPreTextData()
+        internal string GetPreTextData()
         {
             StringBuilder result = new StringBuilder();
 
@@ -302,7 +301,7 @@ namespace DjvuNet.DataChunks
         /// Gets the text which occurs after the word
         /// </summary>
         /// <returns></returns>
-        private string GetPostTextData()
+        internal string GetPostTextData()
         {
             StringBuilder result = new StringBuilder();
 
@@ -327,7 +326,7 @@ namespace DjvuNet.DataChunks
             return result.ToString().Trim();
         }
 
-        private string GetTextData()
+        internal string GetTextData()
         {
             if (ZoneType == ZoneTypes.Word)
             {
@@ -352,7 +351,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Resolves the zone offsets for the location and text
         /// </summary>
-        private void ResolveOffsets(TextZone parent, TextZone sibling)
+        internal void ResolveOffsets(TextZone parent, TextZone sibling)
         {
             if (parent == null && sibling == null) return;
 
@@ -364,12 +363,14 @@ namespace DjvuNet.DataChunks
             }
             else
             {
-                if (sibling.ZoneType == ZoneTypes.Page || sibling.ZoneType == ZoneTypes.Paragraph || sibling.ZoneType == ZoneTypes.Line)
+                if (sibling.ZoneType == ZoneTypes.Page || sibling.ZoneType == ZoneTypes.Paragraph 
+                    || sibling.ZoneType == ZoneTypes.Line)
                 {
                     X += sibling.Rectangle.Right;
                     Y = sibling.Rectangle.Bottom - (Y + Height);
                 }
-                else if (sibling.ZoneType == ZoneTypes.Column || sibling.ZoneType == ZoneTypes.Word || sibling.ZoneType == ZoneTypes.Character)
+                else if (sibling.ZoneType == ZoneTypes.Column || sibling.ZoneType == ZoneTypes.Word 
+                    || sibling.ZoneType == ZoneTypes.Character)
                 {
                     X += sibling.Rectangle.Left;
                     Y += sibling.Rectangle.Bottom;
