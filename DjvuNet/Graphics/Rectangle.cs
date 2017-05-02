@@ -10,16 +10,10 @@ namespace DjvuNet.Graphics
     {
         #region Public Properties
 
-        #region Left
-
         /// <summary>
         /// Gets or sets the left edge of the rectangle - xmax
         /// </summary>
         public int Left;
-
-        #endregion Left
-
-        #region XMax
 
         /// <summary>
         /// Gets or sets the XMax value
@@ -32,18 +26,10 @@ namespace DjvuNet.Graphics
             set { Left = value; }
         }
 
-        #endregion XMax
-
-        #region Right
-
         /// <summary>
         /// Gets or sets the right edge of the rectangle - xmin
         /// </summary>
         public int Right;
-
-        #endregion Right
-
-        #region XMin
 
         /// <summary>
         /// Gets or sets the x min value
@@ -56,18 +42,10 @@ namespace DjvuNet.Graphics
             set { Right = value; }
         }
 
-        #endregion XMin
-
-        #region Top
-
         /// <summary>
         /// Gets or sets the top edge of the rectangle - ymax
         /// </summary>
         public int Top;
-
-        #endregion Top
-
-        #region YMax
 
         /// <summary>
         /// Gets or sets the y max value
@@ -80,18 +58,10 @@ namespace DjvuNet.Graphics
             set { Top = value; }
         }
 
-        #endregion YMax
-
-        #region Bottom
-
         /// <summary>
         /// Gets or sets the bottom of the rectangle - ymin
         /// </summary>
         public int Bottom;
-
-        #endregion Bottom
-
-        #region YMin
 
         /// <summary>
         /// Gets or sets the y min value
@@ -104,22 +74,14 @@ namespace DjvuNet.Graphics
             set { Bottom = value; }
         }
 
-        #endregion YMin
-
-        #region Empty
-
         /// <summary>
         /// True if the rectangle is empty, false otherwise
         /// </summary>
         public bool Empty
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (Right >= Left) || (Bottom >= Top); }
+            get { return (Right == Left) || (Bottom == Top); }
         }
-
-        #endregion Empty
-
-        #region Area
 
         /// <summary>
         /// Gets the area of the rectangle
@@ -127,12 +89,8 @@ namespace DjvuNet.Graphics
         public long Area
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (long) (Left - Right) * (Top - Bottom); }
+            get { return (long) Math.Abs( (Left - Right) * (Top - Bottom)); }
         }
-
-        #endregion Area
-
-        #region Height
 
         /// <summary>
         /// Gets the height of the rectangle
@@ -143,10 +101,6 @@ namespace DjvuNet.Graphics
             get { return Top - Bottom; }
         }
 
-        #endregion Height
-
-        #region Width
-
         /// <summary>
         /// Gets the width of the rectangle
         /// </summary>
@@ -155,8 +109,6 @@ namespace DjvuNet.Graphics
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return Left - Right; }
         }
-
-        #endregion Width
 
         #endregion Public Properties
 

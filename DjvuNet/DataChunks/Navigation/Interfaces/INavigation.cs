@@ -20,6 +20,6 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the list of document bookmarks
         /// </summary>
-        Bookmark[] Bookmarks { get; }
+        IReadOnlyList<IBookmark> Bookmarks { get; }
     }
 }

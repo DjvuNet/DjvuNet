@@ -130,6 +130,7 @@
     <Compile Include="DataChunks\IThumChunk.cs" />
     <Compile Include="DataChunks\IWmrmChunk.cs" />
     <Compile Include="DataChunks\Navigation\DocumentNavigator.cs" />
+    <Compile Include="DataChunks\Navigation\IBookmark.cs" />
     <Compile Include="DataChunks\Navigation\Interfaces\INavigation.cs" />
     <Compile Include="DataChunks\PM44Chunk.cs" />
     <Compile Include="DataChunks\PM44Form.cs" />

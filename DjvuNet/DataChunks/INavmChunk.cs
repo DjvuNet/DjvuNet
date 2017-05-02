@@ -1,8 +1,10 @@
 ﻿
+using System.Collections.Generic;
+
 namespace DjvuNet.DataChunks
 {
     public interface INavmChunk : IDjvuNode
     {
-        Bookmark[] Bookmarks { get; }
+        IReadOnlyList<IBookmark> Bookmarks { get; }
     }
 }

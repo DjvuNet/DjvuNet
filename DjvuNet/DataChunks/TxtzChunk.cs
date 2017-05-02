@@ -41,7 +41,7 @@ namespace DjvuNet.DataChunks
 
         #region Protected Methods
 
-        protected override IDjvuReader GetTextDataReader(long position)
+        internal override IDjvuReader GetTextDataReader(long position)
         {
             return Reader.CloneReader(position).GetBZZEncodedReader(Length);
         }
