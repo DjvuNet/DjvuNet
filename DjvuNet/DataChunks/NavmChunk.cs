@@ -15,11 +15,6 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class NavmChunk : DjvuNode, INavigation, INavmChunk
     {
-        #region Private Members
-
-        private long _dataLocation = 0;
-
-        #endregion Private Members
 
         #region Public Properties
 
@@ -34,12 +29,12 @@ namespace DjvuNet.DataChunks
 
         #region Bookmarks
 
-        private Bookmark[] _bookmarks = null;
+        private List<IBookmark> _bookmarks = null;
 
         /// <summary>
         /// Gets the list of document bookmarks
         /// </summary>
-        public Bookmark[] Bookmarks
+        public IReadOnlyList<IBookmark> Bookmarks
         {
             get
             {
@@ -52,7 +47,7 @@ namespace DjvuNet.DataChunks
             private set
             {
                 if (_bookmarks != value)
-                    _bookmarks = value;
+                    _bookmarks = (List<IBookmark>)value;
             }
         }
 
@@ -70,44 +65,36 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Methods
 
         public override void ReadData(IDjvuReader reader)
         {
-            _dataLocation = reader.Position;
-
-            // Skip past the navigation data which will be delayed read
+            DataOffset = reader.Position;
             reader.Position += Length;
         }
-
-        #endregion Protected Methods
-
-        #region Private Methods
 
         /// <summary>
         /// Reads in the bookmark data
         /// </summary>
         /// <returns></returns>
-        private Bookmark[] ReadBookmarkData()
+        internal List<IBookmark> ReadBookmarkData()
         {
-            using (IDjvuReader reader = Reader.CloneReader(_dataLocation))
+            using (IDjvuReader reader = Reader.CloneReader(DataOffset))
             {
                 IDjvuReader decompressor = reader.GetBZZEncodedReader(Length);
-
                 int totalBookmarks = decompressor.ReadUInt16BigEndian();
 
-                List<Bookmark> bookmarks = new List<Bookmark>();
+                List<IBookmark> bookmarks = new List<IBookmark>();
 
+                // TODO improve parsing - slow while condition
                 // Read in all the bookmarks
                 while (bookmarks.Count + bookmarks.Sum(x => x.TotalBookmarks) != totalBookmarks)
-                {
-                    bookmarks.Add(new Bookmark(decompressor, Document, null));
-                }
+                    bookmarks.Add(new Bookmark(decompressor, Document, this, null));
 
-                return bookmarks.ToArray();
+                return bookmarks;
             }
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

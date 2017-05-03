@@ -39,7 +39,7 @@ namespace DjvuNet.DataChunks
                 return _textLength;
             }
 
-            private set
+            internal set
             {
                 if (_textLength != value)
                     _textLength = value;
@@ -65,7 +65,7 @@ namespace DjvuNet.DataChunks
                 return _text;
             }
 
-            private set
+            internal set
             {
                 if (_text != value)
                     _text = value;
@@ -89,7 +89,7 @@ namespace DjvuNet.DataChunks
                 return _version;
             }
 
-            private set
+            internal set
             {
                 if (_version != value)
                     _version = (byte) value;
@@ -113,7 +113,7 @@ namespace DjvuNet.DataChunks
                 return _zone;
             }
 
-            private set
+            internal set
             {
                 if (_zone != value)
                     _zone = value;
@@ -134,13 +134,13 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Methods
 
         /// <summary>
         /// Gets the reader for the text data
         /// </summary>
         /// <returns></returns>
-        protected abstract IDjvuReader GetTextDataReader(long position);
+        internal abstract IDjvuReader GetTextDataReader(long position);
 
         /// <summary>
         /// Read the chunk data
@@ -148,10 +148,7 @@ namespace DjvuNet.DataChunks
         /// <param name="reader"></param>
         public override void ReadData(IDjvuReader reader)
         {
-            // Save the current position for delayed decoding
             _dataLocation = reader.Position;
-
-            // Advance the reader
             reader.Position += Length;
         }
 
@@ -164,10 +161,8 @@ namespace DjvuNet.DataChunks
         /// </summary>
         internal void DecodeIfNeeded()
         {
-            if (_isDecoded == false)
-            {
+            if (!_isDecoded)
                 ReadCompressedTextData();
-            }
         }
 
         /// <summary>
@@ -175,21 +170,22 @@ namespace DjvuNet.DataChunks
         /// </summary>
         internal void ReadCompressedTextData()
         {
-            if (Length == 0) return;
-
-            using (IDjvuReader reader = GetTextDataReader(_dataLocation))
+            if (Length > 0)
             {
-                _textLength = (int) reader.ReadUInt24BigEndian();
-                byte[] textBytes = reader.ReadBytes(_textLength);
-                _text = Encoding.UTF8.GetString(textBytes);
-                _version = reader.ReadByte();
+                using (IDjvuReader reader = GetTextDataReader(_dataLocation))
+                {
+                    int length = (int)reader.ReadUInt24BigEndian();
+                    byte[] textBytes = reader.ReadBytes(length);
+                    Text = Encoding.UTF8.GetString(textBytes);
+                    TextLength = _text.Length;
+                    Version = reader.ReadByte();
 
-                _zone = new TextZone(reader, null, null, this);
+                    Zone = new TextZone(reader, null, null, this);
+                }
             }
-
             _isDecoded = true;
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }
