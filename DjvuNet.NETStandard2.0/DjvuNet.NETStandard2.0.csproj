@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="$(ProjectDir)../DjvuNetBuild.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>DjvuNet</RootNamespace>
   </PropertyGroup>
-    <PropertyGroup>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -14,7 +11,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
 
   <ItemGroup>
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25227-01" />
+    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25301-02" />
   </ItemGroup>
 
     <ItemGroup>
@@ -36,5 +33,5 @@
     <ItemGroup>
       <ProjectReference Include="..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
     </ItemGroup>
-    <Import Project="$(ProjectDir)../DjvuNetBuild.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 </Project>

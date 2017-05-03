@@ -93,12 +93,12 @@ namespace DjvuNet.DataChunks
         /// </summary>
         internal Annotation[] ReadAnnotationData()
         {
-            if (Length == 0) return new Annotation[0];
+            if (Length == 0)
+                return new Annotation[0];
 
             using (IDjvuReader reader = GetAnnotationDataReader(_dataLocation))
             {
-                // Decode the annotation text
-                string annotationText = reader.ReadUnknownLengthString();
+                string annotationText = new UTF8Encoding(false).GetString(reader.ReadToEnd());
                 return DecodeAnnotationText(annotationText);
             }
         }

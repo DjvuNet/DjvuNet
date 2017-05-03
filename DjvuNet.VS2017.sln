@@ -11,6 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Tests", "DjvuNet.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}"
 	ProjectSection(SolutionItems) = preProject
+		artifacts\.gitignore = artifacts\.gitignore
 		artifacts\ErrorFiles.json = artifacts\ErrorFiles.json
 		artifacts\test001C.djvu = artifacts\test001C.djvu
 		artifacts\test001C.json = artifacts\test001C.json
@@ -863,6 +864,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Attributes.NETStanda
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.NETStandard2.0", "DjvuNet.NETStandard2.0\DjvuNet.NETStandard2.0.csproj", "{758E1C55-12EC-4C96-8B5C-DADD5003EB3A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{CFCDECEB-E43D-439A-BABA-CFA152D09A70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Artifacts.Build", "build\tools\DjvuNet.Artifacts.Build\DjvuNet.Artifacts.Build.csproj", "{8971D9F4-82A4-4ABC-8A6E-B15097972011}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{28AC0A0B-0FBC-41BC-920E-D48ADB98A22D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{3194DEF2-0E8D-4AED-91AA-0E43B883AAE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Bzz", "Utilities\DjvuNet.Bzz\DjvuNet.Bzz.csproj", "{1DB249CA-99B3-45D1-B045-AE9434115D9B}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{29ae50f0-477d-4445-8fa1-80a7ea22fb88}*SharedItemsImports = 4
@@ -1001,6 +1012,30 @@ Global
 		{758E1C55-12EC-4C96-8B5C-DADD5003EB3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{758E1C55-12EC-4C96-8B5C-DADD5003EB3A}.Release|x64.ActiveCfg = Release|x64
 		{758E1C55-12EC-4C96-8B5C-DADD5003EB3A}.Release|x86.ActiveCfg = Release|x86
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Debug|x64.Build.0 = Debug|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Debug|x86.Build.0 = Debug|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x64.ActiveCfg = Release|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x64.Build.0 = Release|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x86.ActiveCfg = Release|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x86.Build.0 = Release|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|x64.Build.0 = Debug|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|x86.Build.0 = Debug|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x64.ActiveCfg = Release|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x64.Build.0 = Release|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.ActiveCfg = Release|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1020,5 +1055,8 @@ Global
 		{60A232E8-EBC3-4574-B6F0-92CCCAEAF503} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
 		{384245D7-CAE8-4E63-AFFC-922D923ECB73} = {8597CB2A-5ED0-4B9E-B86A-16A4795C5146}
 		{73C6055A-2FF4-4852-B3F0-402D6EB5B8B9} = {DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011} = {28AC0A0B-0FBC-41BC-920E-D48ADB98A22D}
+		{28AC0A0B-0FBC-41BC-920E-D48ADB98A22D} = {CFCDECEB-E43D-439A-BABA-CFA152D09A70}
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B} = {3194DEF2-0E8D-4AED-91AA-0E43B883AAE6}
 	EndGlobalSection
 EndGlobal

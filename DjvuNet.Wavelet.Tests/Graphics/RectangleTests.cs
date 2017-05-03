@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Xunit;
 using DjvuNet.Graphics;
 
@@ -9,7 +10,7 @@ namespace DjvuNet.Graphics.Tests
     {
 
         [Fact]
-        public void Rectangle_Clear001()
+        public void Clear001()
         {
             var target1 = new Rectangle(0, 0, 0, 0);
             Assert.True(target1.Empty);
@@ -34,7 +35,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Rectangle_ContainsRect001()
+        public void ContainsRect001()
         {
             var target1 = new Rectangle(0, 0, 0, 0);
             Assert.True(target1.Empty);
@@ -61,7 +62,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Rectangle_ContainsXY001()
+        public void ContainsXY001()
         {
             var target1 = new Rectangle(0, 0, 0, 0);
             Assert.True(target1.Empty);
@@ -98,7 +99,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Rectangle_Duplicate001()
+        public void Duplicate001()
         {
             var target1 = new Rectangle(0, 0, 0, 0);
             Assert.True(target1.Empty);
@@ -124,7 +125,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Rectangle_Empty001()
+        public void Empty001()
         {
             var target1 = new Rectangle(0, 0, 0, 0);
             Assert.True(target1.Empty);
@@ -137,7 +138,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Rectangle_Equals001()
+        public void Equals001()
         {
             Rectangle rect1 = null;
             Rectangle rect2 = null;
@@ -154,7 +155,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Rectangle_Equals002()
+        public void Equals002()
         {
             Rectangle rect1 = null;
             Rectangle rect2 = null;
@@ -173,7 +174,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Rectangle_Equals003()
+        public void Equals003()
         {
             Rectangle rect1 = null;
             Rectangle rect2 = null;
@@ -191,10 +192,32 @@ namespace DjvuNet.Graphics.Tests
             Assert.False(target1.Equals(rect1), "Bigger rectangle is not equal to original one.");
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void RectangleTest()
+        [Fact()]
+        public void AreaTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            Rectangle rect = new Rectangle
+            {
+                Left = 0,
+                Bottom = 0,
+                Right = 100,
+                Top = 1000,
+            };
+
+            Assert.Equal(100 * 1000, rect.Area);
+        }
+
+        [Fact()]
+        public void AreaTest002()
+        {
+            Rectangle rect = new Rectangle
+            {
+                Left = -11,
+                Bottom = -200,
+                Right = 100,
+                Top = 1000,
+            };
+
+            Assert.Equal((1000 + 200) * (11 + 100), rect.Area);
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
@@ -203,40 +226,21 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void DuplicateTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ClearTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ContainsTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void ContainsTest1()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void EqualsTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void GetHashCodeTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            Dictionary<Rectangle, int> dict = new Dictionary<Rectangle, int>();
+            for(int i = 0; i < 100; i++)
+            {
+                dict.Add(
+                    new Rectangle
+                    {
+                        Top = (i * 2 + 1) * 2,
+                        Right = (i * 3 + 2) * 3,
+                        Left = 0,
+                        Bottom = 0,
+                    }, i);
+            }
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

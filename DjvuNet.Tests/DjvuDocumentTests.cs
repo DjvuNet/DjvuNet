@@ -86,9 +86,11 @@ namespace DjvuNet.Tests
             {
                 int j = i + 1;
                 retVal.Add(
-                    new object[] {
+                    new object[] 
+                    {
                         Util.GetTestFilePath(i),
-                        Util.GetTestDocumentPageCount(i) });
+                        Util.GetTestDocumentPageCount(i)
+                    });
             }
         }
 
@@ -431,6 +433,101 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
+        public void ctor077()
+        {
+            int pageCount = Util.GetTestDocumentPageCount(77);
+            string file = Util.GetTestFilePath(77);
+            using (DjvuDocument document = new DjvuDocument(file, 77))
+            {
+                Util.VerifyDjvuDocumentCtor(pageCount, document);
+                Assert.Equal(77, document.Identifier);
+                Assert.False(String.IsNullOrWhiteSpace(document.Name));
+                Assert.StartsWith(file, document.Location);
+                Assert.False(document.IsInverted);
+                Assert.NotNull(document.NextPage);
+                // TODO change list logic - if first page is current
+                // than previous page should be null
+                //Assert.Null(document.PreviousPage);
+            }
+        }
+
+        [Fact]
+        public void Properties003()
+        {
+            int pageCount = Util.GetTestDocumentPageCount(3);
+            string file = Util.GetTestFilePath(3);
+            int identifier = 3;
+            using (DjvuDocument document = new DjvuDocument(file, identifier))
+            {
+                Util.VerifyDjvuDocumentCtor(pageCount, document);
+                Assert.Equal(identifier, document.Identifier);
+                Assert.False(String.IsNullOrWhiteSpace(document.Name));
+                Assert.StartsWith(file, document.Location);
+                Assert.False(document.IsInverted);
+                Assert.NotNull(document.NextPage);
+
+                // TODO change list logic - if first page is current
+                // than previous page should be null
+                //Assert.Null(document.PreviousPage);
+
+                string testLocation = "http:://web.site";
+
+                document.IsInverted = true;
+                Assert.True(document.IsInverted);
+
+                document.Location = testLocation;
+                Assert.Equal(testLocation, document.Location);
+
+                document.Identifier = int.MinValue;
+                Assert.Equal(int.MinValue, document.Identifier);
+
+                var includes = document.Includes;
+                Assert.NotNull(includes);
+                Assert.Equal(11, includes.Count);
+            }
+        }
+
+        [Fact]
+        public void Properties023()
+        {
+            int pageCount = Util.GetTestDocumentPageCount(23);
+            string file = Util.GetTestFilePath(23);
+            int identifier = 23;
+            using (DjvuDocument document = new DjvuDocument(file, identifier))
+            {
+                var includes = document.Includes;
+                Assert.NotNull(includes);
+                Assert.Equal(2, includes.Count);
+
+                Util.VerifyDjvuDocumentCtor(pageCount, document);
+                Assert.Equal(identifier, document.Identifier);
+                Assert.False(String.IsNullOrWhiteSpace(document.Name));
+                Assert.StartsWith(file, document.Location);
+                Assert.False(document.IsInverted);
+                Assert.NotNull(document.NextPage);
+
+                // TODO change list logic - if first page is current
+                // than previous page should be null
+                //Assert.Null(document.PreviousPage);
+
+                string testLocation = "http:://web.site";
+
+                document.IsInverted = true;
+                Assert.True(document.IsInverted);
+
+                document.Location = testLocation;
+                Assert.Equal(testLocation, document.Location);
+
+                document.Identifier = int.MinValue;
+                Assert.Equal(int.MinValue, document.Identifier);
+
+                string testName = "Test Name";
+                document.Name = testName;
+                Assert.Equal(testName, document.Name);
+            }
+        }
+
+        [Fact]
         public void IsDjvuDocument_String001()
         {
             string errorPath = "xyzzyx";
@@ -556,22 +653,40 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void DjvuDocumentTest()
+        [Fact()]
+        public void LoadTest004()
         {
-            Assert.True(false, "This test needs an implementation");
+            string file = Util.GetTestFilePath(4);
+            using(DjvuDocument document = new DjvuDocument())
+            {
+                int hash = file.GetHashCode();
+                document.Load(file, hash);
+                Assert.Equal(hash, document.Identifier);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void DjvuDocumentTest1()
+        [Fact()]
+        public void LoadTest027()
         {
-            Assert.True(false, "This test needs an implementation");
+            string file = Util.GetTestFilePath(27);
+            using (DjvuDocument document = new DjvuDocument())
+            {
+                int hash = file.GetHashCode();
+                document.Load(file, hash);
+                Assert.Equal(hash, document.Identifier);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void DjvuDocumentTest2()
+        [Fact()]
+        public void LoadTest039()
         {
-            Assert.True(false, "This test needs an implementation");
+            string file = Util.GetTestFilePath(39);
+            using (DjvuDocument document = new DjvuDocument())
+            {
+                int hash = file.GetHashCode();
+                document.Load(file, hash);
+                Assert.Equal(hash, document.Identifier);
+            }
         }
 
         [Fact()]

@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using DjvuNet.DataChunks;
 
 namespace DjvuNet
 {
-    public interface IDjvuDocument
+    public interface IDjvuDocument : IDisposable
     {
         IDjvuPage ActivePage { get; set; }
 

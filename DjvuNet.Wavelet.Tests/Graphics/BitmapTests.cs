@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Tests;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -16,10 +17,16 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void DuplicateTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            int pageCount = 0;
+            using(DjvuDocument doc = Util.GetTestDocument(1, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, doc);
+                IDjvuPage page = doc.FirstPage;
+
+            }
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

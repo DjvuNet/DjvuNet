@@ -33,6 +33,8 @@ namespace DjvuNet
 
         long ReadInt64BigEndian();
 
+        byte[] ReadToEnd();
+
         ushort ReadUInt16BigEndian();
 
         uint ReadUInt24();
