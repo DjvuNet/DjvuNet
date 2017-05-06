@@ -142,5 +142,78 @@ namespace DjvuNet.DataChunks.Tests
 
             }
         }
+
+        [Fact()]
+        public void ChunkDataTest001()
+        {
+            Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
+
+            byte[] data = new byte[4096];
+            for (int i = 0; i < data.Length; i++)
+                data[i] = (byte)(i % 256);
+
+            using (MemoryStream stream = new MemoryStream(data))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                DjvuNode node = nodeMock.Object;
+                node.Reader = reader;
+                node.Length = data.Length;
+                byte[] chunkData = node.ChunkData;
+
+                Assert.Equal(data.Length, chunkData.Length);
+                for (int i = 0; i < data.Length; i++)
+                    Assert.Equal(data[i], chunkData[i]);
+            }
+        }
+
+        [Fact()]
+        public void ChunkDataTest002()
+        {
+            Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
+
+            byte[] data = new byte[4096];
+            for (int i = 0; i < data.Length; i++)
+                data[i] = (byte)(i % 256);
+
+            using (MemoryStream stream = new MemoryStream(data))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                DjvuNode node = nodeMock.Object;
+                node.Reader = reader;
+                node.Length = 0;
+                byte[] chunkData = node.ChunkData;
+
+                Assert.NotNull(chunkData);
+                Assert.Equal(0, chunkData.Length);
+            }
+        }
+
+        [Fact()]
+        public void ChunkDataTest003()
+        {
+            Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
+
+            byte[] data = new byte[4096];
+            for (int i = 0; i < data.Length; i++)
+                data[i] = (byte)(i % 256);
+
+            using (MemoryStream stream = new MemoryStream(data))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                DjvuNode node = nodeMock.Object;
+                node.Reader = reader;
+                node.Length = 0;
+                byte[] chunkData = node.ChunkData;
+
+                Assert.NotNull(chunkData);
+                Assert.Equal(0, chunkData.Length);
+
+                node.ChunkData = data;
+                chunkData = node.ChunkData;
+                Assert.Equal(data.Length, chunkData.Length);
+                for (int i = 0; i < data.Length; i++)
+                    Assert.Equal(data[i], chunkData[i]);
+            }
+        }
     }
 }

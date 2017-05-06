@@ -13,27 +13,26 @@ namespace DjvuNet.Tests
 {
     public class DjvuReaderTests
     {
-        public static byte[] BzzCompressedTestBuffer
+        public static byte[] BzzCompressedTestBuffer(string fileName)
         {
-            get
+            string bzzFile = Path.Combine(Util.ArtifactsDataPath, fileName);
+            using (FileStream stream = File.OpenRead(Path.Combine(Util.RepoRoot, bzzFile)))
             {
-                string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
-                using (FileStream stream = File.OpenRead(Path.Combine(Util.RepoRoot, bzzFile)))
-                {
-                    byte[] buffer = new byte[stream.Length];
-                    int countRead = stream.Read(buffer, 0, buffer.Length);
-                    if (countRead != buffer.Length)
-                        throw new IOException($"Unable to read file with test data: {bzzFile}");
-                    return buffer;
-                }
+                byte[] buffer = new byte[stream.Length];
+                int countRead = stream.Read(buffer, 0, buffer.Length);
+                if (countRead != buffer.Length)
+                    throw new IOException($"Unable to read file with test data: {bzzFile}");
+                return buffer;
             }
         }
+
+        //public static byte[] Bzz
 
         public static byte[] OriginalBzzTestBuffer
         {
             get
             {
-                string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
+                string bzzFile = Path.Combine(Util.ArtifactsDataPath, "testbzz.obz");
                 return Util.ReadFileToEnd(bzzFile);
             }
         }
@@ -42,7 +41,7 @@ namespace DjvuNet.Tests
         {
             get
             {
-                string txtFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
+                string txtFile = Path.Combine(Util.ArtifactsDataPath, "testbzz.obz");
                 byte[] buffer = Util.ReadFileToEnd(txtFile);
                 // Skip BOM
                 return Encoding.UTF8.GetString(buffer, 3, buffer.Length - 3);
@@ -112,10 +111,10 @@ namespace DjvuNet.Tests
            });
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void GetJPEGImageTest()
+        [Fact()]
+        public void GetWebStreamTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            Assert.Throws<ArgumentNullException>("urlStr", () => DjvuReader.GetWebStream(null));
         }
 
         [Fact()]
@@ -132,11 +131,35 @@ namespace DjvuNet.Tests
             }
         }
 
+        [Fact()]
+        public void LengthTest001()
+        {
+            using (MemoryStream stream = new MemoryStream(4096))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                Assert.Equal(stream.Length, reader.Length);
+                stream.SetLength(short.MaxValue);
+                Assert.Equal(reader.Length, short.MaxValue);
+            }
+        }
+
+        [Fact()]
+        public void LengthTest002()
+        {
+            WebClient client = new WebClient();
+            using (Stream stream = client.OpenRead(
+                "https://upload.wikimedia.org/wikipedia/commons/6/69/Tain_Bo_Cuailnge.djvu"))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                Assert.Equal(-1, reader.Length);
+            }
+        }
+
         [Fact]
         public void ReadStringBytesTest001()
         {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
-            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer, false))
+            byte[] bzzBuffer = BzzCompressedTestBuffer("testbzz.bz");
+            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer("testbzz.bz"), false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
                 byte[] origBuffer = OriginalBzzTestBuffer;
@@ -158,8 +181,8 @@ namespace DjvuNet.Tests
         [Fact]
         public void ReadStringBytesTest002()
         {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
-            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer, false))
+            byte[] bzzBuffer = BzzCompressedTestBuffer("testbzz.bz");
+            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer("testbzz.bz"), false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
                 byte[] origBuffer = OriginalBzzTestBuffer;
@@ -363,9 +386,62 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
+        public void CheckEncodingSignatureTest010()
+        {
+            // No Encoding Scheme Signature
+            byte[] buffer = new byte[] { 0x39, 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+            int bufferLength = buffer.Length + 4;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                Assert.Throws<ArgumentException> ("buffer", 
+                    () => DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength));
+            }
+        }
+
+        [Fact()]
+        public void ReadStringBytes001()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "testbzz.obz");
+            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                Encoding enc;
+                int read;
+                using(MemoryStream resultStream = reader.ReadStringBytes(out enc, out read))
+                {
+                    Assert.NotNull(enc);
+                    // Check if BOM was skipped
+                    Assert.Equal(stream.Position - 3, read);
+                    string testResult = enc.GetString(resultStream.GetBuffer(), 0, read);
+                    Assert.NotNull(testResult);
+                }
+            }
+        }
+
+        [Fact()]
+        public void ReadStringBytes002()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "testbzz.obz");
+            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                Encoding enc;
+                int read;
+                using (MemoryStream resultStream = reader.ReadStringBytes(out enc, out read, false))
+                {
+                    // Assert.NotNull(enc);
+                    // Check if BOM was not skipped
+                    Assert.Equal(stream.Position, read);
+                    string testResult = new UTF8Encoding(false).GetString(resultStream.GetBuffer(), 0, read);
+                    Assert.NotNull(testResult);
+                }
+            }
+        }
+
+        [Fact()]
         public void GetBZZEncodedReaderTest001()
         {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            byte[] bzzBuffer = BzzCompressedTestBuffer("testbzz.bz");
             using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
@@ -394,7 +470,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void GetBZZEncodedReaderTest003()
         {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            byte[] bzzBuffer = BzzCompressedTestBuffer("testbzz.bz");
             using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
@@ -411,7 +487,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void GetBZZEncodedReaderTest004()
         {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            byte[] bzzBuffer = BzzCompressedTestBuffer("testbzz.bz");
             using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
@@ -425,7 +501,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void GetBZZEncodedReaderTest005()
         {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
+            byte[] bzzBuffer = BzzCompressedTestBuffer("testbzz.bz");
             using (MemoryStream memStream = new MemoryStream(bzzBuffer, false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
@@ -844,14 +920,14 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUnknownLengthStringTest001()
+        public void ReadNullTerminatedStringTest001()
         {
-            byte[] bzzBuffer = BzzCompressedTestBuffer;
-            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer, false))
+            byte[] bzzBuffer = BzzCompressedTestBuffer("testbzznbmont.bz");
+            using (MemoryStream memStream = new MemoryStream(BzzCompressedTestBuffer("testbzznbmont.bz"), false))
             using (DjvuReader reader = new DjvuReader(memStream))
             {
                 BzzReader bzzReader = reader.GetBZZEncodedReader();
-                String result = bzzReader.ReadUnknownLengthString();
+                String result = bzzReader.ReadNullTerminatedString();
 
                 Assert.NotNull(result);
                 Assert.False(String.IsNullOrWhiteSpace(result));
@@ -859,7 +935,9 @@ namespace DjvuNet.Tests
                 Assert.True(result.Contains("Test start - bzz format encoding"));
                 Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
                 Assert.True(result.Contains("Test end bzz format encoding"));
-                string expected = OriginalBzzTestString;
+                byte[] buffer = Util.ReadFileToEnd(Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.obz"));
+                string expected = new UTF8Encoding(false).GetString(buffer, 0, buffer.Length - 1);
+                Assert.False(String.IsNullOrWhiteSpace(expected));
 
                 for (int i = 0; i < expected.Length; i++)
                 {
@@ -872,39 +950,41 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ReadUnknownLengthStringTest002()
+        public void ReadNullTerminatedStringTest002()
         {
-            string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
+            string bzzFile = Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.bz");
             using (DjvuReader reader = new DjvuReader(bzzFile))
             {
                 BzzReader bzzReader = reader.GetBZZEncodedReader();
-                string result = bzzReader.ReadUnknownLengthString();
+                string result = bzzReader.ReadNullTerminatedString();
 
                 Assert.NotNull(result);
                 Assert.False(String.IsNullOrWhiteSpace(result));
                 Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
 
-                string expected = OriginalBzzTestString;
-                Assert.NotNull(expected);
-                Assert.False(String.IsNullOrWhiteSpace(expected));
+                byte[] buffer = Util.ReadFileToEnd(Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.obz"));
+                string expectedResult = new UTF8Encoding(false).GetString(buffer, 0, buffer.Length - 1);
+                Assert.False(String.IsNullOrWhiteSpace(expectedResult));
 
-                Assert.Equal<string>(expected, result);
+                Assert.Equal<string>(expectedResult, result);
             }
         }
 
         [Fact()]
-        public void ReadUnknownLengthStringTest003()
+        public void ReadNullTerminatedStringTest003()
         {
-            string bzzFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.bz");
-            string origTextFile = Path.Combine(Util.RepoRoot, "artifacts", "data", "testbzz.obz");
+            string bzzFile = Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.bz");
+            string origTextFile = Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.obz");
             using (DjvuReader reader = new DjvuReader(bzzFile))
             {
                 BzzReader bzzReader = reader.GetBZZEncodedReader();
-                string result = bzzReader.ReadUnknownLengthString();
+                string result = bzzReader.ReadNullTerminatedString();
 
                 Assert.False(String.IsNullOrWhiteSpace(result));
 
-                string expectedResult = OriginalBzzTestString;
+                byte[] buffer = Util.ReadFileToEnd(origTextFile);
+                // Skip last null
+                string expectedResult = new UTF8Encoding(false).GetString(buffer, 0, buffer.Length - 1);
                 Assert.False(String.IsNullOrWhiteSpace(expectedResult));
 
                 Assert.Equal<int>(expectedResult.Length, result.Length);
@@ -912,7 +992,66 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void CloneReaderTest()
+        public void ReadNullTerminatedStringTest004()
+        {
+            string textFile = Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.obz");
+            using (DjvuReader reader = new DjvuReader(textFile))
+            {
+                reader._CurrentEncoding = null;
+                string result = reader.ReadNullTerminatedString(false);
+                long length = reader.BaseStream.Length;
+                reader.Position = 0;
+                byte[] buffer = reader.ReadBytes((int)length);
+
+                Assert.False(String.IsNullOrWhiteSpace(result));
+
+                string expectedResult = OriginalBzzTestString;
+                Assert.False(String.IsNullOrWhiteSpace(expectedResult));
+
+                Assert.Equal(new UTF8Encoding(false).GetString(buffer).Length, result.Length);
+            }
+        }
+
+        [Fact()]
+        public void ReadNullTerminatedStringTest005()
+        {
+            string textFile = Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.obz");
+            using (DjvuReader reader = new DjvuReader(textFile))
+            {
+                reader._CurrentEncoding = new UTF8Encoding(false);
+                string result = reader.ReadNullTerminatedString(false);
+                long length = reader.BaseStream.Length;
+                reader.Position = 0;
+                byte[] buffer = reader.ReadBytes((int)length);
+
+                Assert.False(String.IsNullOrWhiteSpace(result));
+
+                string expectedResult = OriginalBzzTestString;
+                Assert.False(String.IsNullOrWhiteSpace(expectedResult));
+
+                Assert.Equal(new UTF8Encoding(false).GetString(buffer).Length, result.Length);
+            }
+        }
+
+        [Fact()]
+        public void ReadToEndTest()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "testbzz.obz");
+            using(DjvuReader reader = new DjvuReader(file))
+            {
+                byte[] buffer = reader.ReadToEnd();
+                Assert.Equal(reader.BaseStream.Length, buffer.Length);
+                FileStream stream = reader.BaseStream as FileStream;
+                stream.Position = 0;
+                byte[] testBuffer = new byte[stream.Length];
+                stream.Read(testBuffer, 0, testBuffer.Length);
+                Util.AssertBufferEqal(testBuffer, buffer);
+            }
+            
+        }
+
+        [Fact()]
+        public void CloneReaderTest001()
         {
             using (DjvuReader reader = new DjvuReader(Util.GetTestFilePath(1)))
             {
@@ -924,7 +1063,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void CloneReaderTest1()
+        public void CloneReaderTest002()
         {
             using (DjvuReader reader = new DjvuReader(Util.GetTestFilePath(1)))
             {
@@ -938,18 +1077,51 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void ToStringTest()
+        public void CloneReaderTest003()
         {
-            int length = 1024 * 1024;
-            using (MemoryStream stream = new MemoryStream(new byte[length]))
+            using(MemoryStream stream = new MemoryStream())
             using (DjvuReader reader = new DjvuReader(stream))
             {
+                stream.SetLength(4096);
+                var reader2 = reader.CloneReader(reader.BaseStream.Length / 2);
+                Assert.NotNull(reader2);
+                Assert.NotSame(reader, reader2);
+                Assert.NotSame(reader.BaseStream, reader2.BaseStream);
+                Assert.Equal<long>(reader.BaseStream.Length / 2, reader2.BaseStream.Position);
+                Assert.Equal(reader.BaseStream.Length, reader2.BaseStream.Length);
+                Assert.IsType<MemoryStream>(reader2.BaseStream);
+            }
+        }
+
+        [Fact()]
+        public void CloneReaderToMemoryTest1()
+        {
+            using (DjvuReader reader = new DjvuReader(Util.GetTestFilePath(1)))
+            {
+                long length = 4096;
+                var reader2 = reader.CloneReaderToMemory(reader.BaseStream.Length / 2, length);
+                Assert.NotNull(reader2);
+                Assert.NotSame(reader, reader2);
+                Assert.Equal<long>(0, reader2.BaseStream.Position);
+                Assert.Equal<long>(length, reader2.BaseStream.Length);
+                Assert.IsType<MemoryStream>(reader2.BaseStream);
+            }
+        }
+
+        [Fact()]
+        public void ToStringTest()
+        {
+            int length = 0x17539;
+            using (MemoryStream stream = new MemoryStream())
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                stream.SetLength(length);
                 string result = reader.ToString();
                 Assert.NotNull(result);
-                Assert.True(result.Contains("DjvuReader"));
-                Assert.True(result.Contains("MemoryStream"));
-                Assert.True(result.Contains("Position: 0x0"));
-                Assert.True(result.Contains("Length: 0x100000"));
+                Assert.True(result.Contains("DjvuReader"), $"Contains DjvuReader\nActual: \"{result}\"");
+                Assert.True(result.Contains("MemoryStream"), $"Contains MemoryStream\nActual: \"{result}\"");
+                Assert.True(result.Contains("Position: 0x0"), $"Contains Position: 0x0\nActual: \"{result}\"");
+                Assert.True(result.Contains($"Length: 0x{length.ToString("x")}"), $"Contains Length: 0x100000\nActual: \"{result}\"");
             }
         }
     }

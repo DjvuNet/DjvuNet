@@ -18,8 +18,8 @@ namespace DjvuNet.DataChunks.Tests
             readerMock.Setup(x => x.Position).Returns(1024);
 
             WmrmChunk unk = new WmrmChunk(readerMock.Object, null, null, null, 0);
-            Assert.Equal<ChunkType>(ChunkType.WMRM, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.WMRM.ToString(), unk.Name);
+            Assert.Equal<ChunkType>(ChunkType.Wmrm, unk.ChunkType);
+            Assert.Equal<string>(ChunkType.Wmrm.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -32,8 +32,8 @@ namespace DjvuNet.DataChunks.Tests
             reader.Position = 1024;
 
             WmrmChunk unk = new WmrmChunk(readerMock.Object, null, null, null, 1024);
-            Assert.Equal<ChunkType>(ChunkType.WMRM, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.WMRM.ToString(), unk.Name);
+            Assert.Equal<ChunkType>(ChunkType.Wmrm, unk.ChunkType);
+            Assert.Equal<string>(ChunkType.Wmrm.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);

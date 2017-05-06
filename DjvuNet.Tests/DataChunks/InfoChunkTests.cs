@@ -36,14 +36,25 @@ namespace DjvuNet.DataChunks.Tests
                     {
                         var pageJson = doc.Data.Pages[i];
                         var infoJson = pageJson.Children[0];
+                        try
+                        {
+                            Assert.Equal<int>(infoJson.Dpi.Value, info.DPI);
+                            Assert.Equal<double>(infoJson.Gamma.Value, Math.Round(info.Gamma, 3));
+                            Assert.Equal<int>(infoJson.Height.Value, info.Height);
+                            Assert.Equal<int>(infoJson.Width.Value, info.Width);
 
-                        Assert.Equal<int>(infoJson.Dpi.Value, info.DPI);
-                        Assert.Equal<double>(infoJson.Gamma.Value, Math.Round(info.Gamma, 3));
-                        Assert.Equal<int>(infoJson.Height.Value, info.Height);
-                        Assert.Equal<int>(infoJson.Width.Value, info.Width);
-                        //Assert.Equal<double>(
-                        //    Math.Round(infoJson.Version.Value, 3), 
-                        //    Math.Round((double)((long)info.MajorVersion << 8 & (long)info.MinorVersion), 3));
+                            var major = info.MajorVersion;
+                            var minor = info.MinorVersion;
+                            var rotation = info.PageRotation;
+                            var minorJson = (int) (infoJson.Version.HasValue ? infoJson.Version.Value : 0);
+                            Assert.Equal(0, major);
+                            Assert.Equal(minorJson, minor);
+                        }
+                        catch (Exception e)
+                        {
+                            throw new AggregateException(
+                                $"Validation InfoChunk value mismatch Document index: {index}, page: {i + 1}", e);
+                        }
                     }
                 }
             }

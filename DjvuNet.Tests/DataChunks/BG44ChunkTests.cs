@@ -66,17 +66,17 @@ namespace DjvuNet.DataChunks.Tests
                 using (System.Drawing.Bitmap bitmap = map.GetPixelMap().ToImage())
                 {
 #if !_APPVEYOR
-                    string path = Path.Combine(
-                        Util.RepoRoot, "artifacts", "data", "dumps",
-                        Path.GetFileNameWithoutExtension(file) + "_bg44.png"); 
-                    bitmap.Save(path);
+                    //string path = Path.Combine(
+                    //    Util.RepoRoot, "artifacts", "data", "dumps",
+                    //    Path.GetFileNameWithoutExtension(file) + "_bg44.png"); 
+                    //bitmap.Save(path);
 #endif
                 }
             }
         }
 
         [Fact]
-        public void ImageDecodeTest035()
+        public void ImageTest035()
         {
             string file = Path.Combine(Util.RepoRoot, "artifacts", "data", "test035C_P01_0.bg44");
             using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -85,12 +85,11 @@ namespace DjvuNet.DataChunks.Tests
                 BG44Chunk unk = new BG44Chunk(reader, null, null, "BG44", fs.Length);
                 unk.Initialize();
                 InterWavePixelMap map = new InterWavePixelMap();
-                IInterWavePixelMap result = unk.ProgressiveDecodeBackground(map);
+                IInterWavePixelMap result = unk.BackgroundImage;
                 PixelMap pixMap = result.GetPixelMap();
-                using(var bmp = pixMap.ToImage())
-                {
-                    var format = bmp.PixelFormat;
-                }
+                unk.BackgroundImage = map;
+                Assert.NotSame(result, unk.BackgroundImage);
+                Assert.Same(map, unk.BackgroundImage);
             }
         }
 

@@ -16,7 +16,6 @@ namespace DjvuNet.DataChunks
         #region Private Members
 
         private bool _isDecoded = false;
-        private long _dataLocation = 0;
 
         #endregion Private Members
 
@@ -143,20 +142,6 @@ namespace DjvuNet.DataChunks
         internal abstract IDjvuReader GetTextDataReader(long position);
 
         /// <summary>
-        /// Read the chunk data
-        /// </summary>
-        /// <param name="reader"></param>
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-            reader.Position += Length;
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
-        /// <summary>
         /// Decodes the compressed data if needed
         /// </summary>
         internal void DecodeIfNeeded()
@@ -172,7 +157,7 @@ namespace DjvuNet.DataChunks
         {
             if (Length > 0)
             {
-                using (IDjvuReader reader = GetTextDataReader(_dataLocation))
+                using (IDjvuReader reader = GetTextDataReader(DataOffset))
                 {
                     int length = (int)reader.ReadUInt24BigEndian();
                     byte[] textBytes = reader.ReadBytes(length);

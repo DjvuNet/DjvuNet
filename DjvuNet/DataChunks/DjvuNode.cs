@@ -82,17 +82,24 @@ namespace DjvuNet.DataChunks
                     return _ChunkData;
                 else
                 {
-                    // Read without side effects
-                    long prevPos = Reader.Position;
-                    Reader.Position = DataOffset;
+                    if (Length > 0)
+                    {
+                        // Read without side effects
+                        long prevPos = Reader.Position;
+                        Reader.Position = DataOffset;
 
-                    try
-                    {
-                        _ChunkData = Reader.ReadBytes((int)Length);
+                        try
+                        {
+                            _ChunkData = Reader.ReadBytes((int)Length);
+                        }
+                        finally
+                        {
+                            Reader.Position = prevPos;
+                        }
                     }
-                    finally
+                    else
                     {
-                        Reader.Position = prevPos;
+                        _ChunkData = new byte[0];
                     }
 
                     return _ChunkData;
@@ -103,7 +110,8 @@ namespace DjvuNet.DataChunks
                 if (_ChunkData != value)
                 {
                     _ChunkData = value;
-                    _IsDirty = true;    
+                    _IsDirty = true;
+                    Length = _ChunkData == null ? 0 : _ChunkData.Length;
                 }
             }
         }
@@ -186,7 +194,11 @@ namespace DjvuNet.DataChunks
         /// Reads the data for the chunk
         /// </summary>
         /// <param name="reader"></param>
-        public abstract void ReadData(IDjvuReader reader);
+        public virtual void ReadData(IDjvuReader reader)
+        {
+            DataOffset = reader.Position;
+            reader.Position += Length;
+        }
 
         /// <summary>
         /// Writes node data using passed writer and advances 
@@ -210,7 +222,15 @@ namespace DjvuNet.DataChunks
                 writer.WriteUInt32BigEndian((uint)Length);
             }
 
-            writer.Write(ChunkData, 0, (int)Length);
+            writer.Write(ChunkData, 0, ChunkData.Length);
+        }
+
+        public virtual long GetDataLength()
+        {
+            if (ChunkData != null)
+                return ChunkData.Length;
+            else
+                return Length;
         }
 
         internal static void AdjustAlignment(IDjvuWriter writer)

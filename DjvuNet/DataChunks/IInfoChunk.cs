@@ -7,7 +7,7 @@
         int Height { get; }
         byte MajorVersion { get; }
         byte MinorVersion { get; }
-        PageRotations PageRotation { get; }
+        PageRotation PageRotation { get; }
         int Width { get; }
     }
 }

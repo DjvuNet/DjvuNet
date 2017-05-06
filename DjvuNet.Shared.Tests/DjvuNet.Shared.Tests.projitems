@@ -6,13 +6,44 @@
     <SharedGUID>b7ef5575-5932-4ea7-b250-e7da238d60a9</SharedGUID>
   </PropertyGroup>
   <PropertyGroup Label="Configuration">
-    <Import_RootNamespace>DjvuNet.Tests</Import_RootNamespace>
+    <Import_RootNamespace>DjvuNet</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)DjvuJsonDocument.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mocks\FileStreamWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mocks\IStream.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Mocks\StreamMock.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Anta.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Antz.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BG44.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BM44.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\BM44Form.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Cida.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Dirm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Djbz.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DjviForm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DjvmForm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DjvuDoc.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DjvuDocConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\DjvuForm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ElementBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\FG44.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\FGbz.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Incl.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Info.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\JsonCreationConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Navm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\NodeBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\NodeBaseConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\PM44.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\PM44Form.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Sjbz.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Smmr.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\TH44.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\ThumForm.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Txta.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Txtz.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Serialization\Wmrm.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SynchronizedBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestExecution\AppVeyorTestManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestExecution\ITestManager.cs" />

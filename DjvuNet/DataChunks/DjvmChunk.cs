@@ -20,8 +20,8 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class DjvmChunk : DjvuFormElement
     {
-        private List<DjviChunk> _Includes;
-        private List<ThumChunk> _Thumbnails;
+        private List<IDjviChunk> _Includes;
+        private List<IThumChunk> _Thumbnails;
         private List<DjvuChunk> _Pages;
 
         private List<IDjvuNode> _Files;
@@ -36,7 +36,6 @@ namespace DjvuNet.DataChunks
         }
 
         #endregion ChunkType
-
 
         private DirmChunk _dirmData;
 
@@ -59,7 +58,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        public IReadOnlyList<DjviChunk> Includes
+        public IReadOnlyList<IDjviChunk> Includes
         {
             get
             {
@@ -68,8 +67,8 @@ namespace DjvuNet.DataChunks
                 else if (Children != null)
                 {
                     _Includes = Children.Select(
-                        (x) => x.ChunkType == ChunkType.Djvi ? x as DjviChunk : null)
-                        .Where(x => x != null).ToList<DjviChunk>();
+                        (x) => x.ChunkType == ChunkType.Djvi ? x as IDjviChunk : null)
+                        .Where(x => x != null).ToList<IDjviChunk>();
                     return _Includes;
                 }
                 else
@@ -78,7 +77,7 @@ namespace DjvuNet.DataChunks
         }
 
 
-        public IReadOnlyList<ThumChunk> Thumbnails
+        public IReadOnlyList<IThumChunk> Thumbnails
         {
             get
             {
@@ -87,8 +86,8 @@ namespace DjvuNet.DataChunks
                 else if (Children != null)
                 {
                     _Thumbnails = Children.Select(
-                        (x) => x.ChunkType == ChunkType.Thum ? x as ThumChunk : null)
-                        .Where(x => x != null).ToList<ThumChunk>();
+                        (x) => x.ChunkType == ChunkType.Thum ? x as IThumChunk : null)
+                        .Where(x => x != null).ToList<IThumChunk>();
                     return _Thumbnails;
                 }
                 else
@@ -124,7 +123,7 @@ namespace DjvuNet.DataChunks
                 {
                     _Files = Children.Where( x =>
                         x.ChunkType == ChunkType.Djvu || x.ChunkType == ChunkType.Djvi ||
-                        x.ChunkType == ChunkType.Thum || x.ChunkType == ChunkType.Navm).ToList<IDjvuNode>();
+                        x.ChunkType == ChunkType.Thum ).ToList<IDjvuNode>();
                 }
                 else
                     _Files = new List<IDjvuNode>();

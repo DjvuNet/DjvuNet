@@ -234,6 +234,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		..\LICENSE.md = ..\LICENSE.md
 		README.md = README.md
 		Snk.snk = Snk.snk
+		TEST.bat = TEST.bat
 	EndProjectSection
 EndProject
 Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "DjvuNet.Build", "DjvuNet.Build\DjvuNet.Build.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"

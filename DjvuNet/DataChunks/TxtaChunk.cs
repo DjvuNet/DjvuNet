@@ -38,13 +38,13 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Methods
 
         internal override IDjvuReader GetTextDataReader(long position)
         {
             return Reader.CloneReaderToMemory(position, Length);
         }
 
-        #endregion Protected Methods
+        #endregion Methods
     }
 }
