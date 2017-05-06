@@ -492,8 +492,8 @@ namespace DjvuNet.DataChunks.Tests
         public void WriteDataTest004()
         {
             Mock<DjvuFormElement> formMock = new Mock<DjvuFormElement> { CallBase = true };
-
             Assert.Throws<ArgumentNullException>("writer", () => formMock.Object.WriteData(null, true));
         }
+
     }
 }

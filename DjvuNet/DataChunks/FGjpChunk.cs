@@ -13,24 +13,13 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class FGjpChunk : DjvuNode, IFGjpChunk
     {
-        #region Private Members
 
-        private long _dataLocation = 0;
-
-        #endregion Private Members
-
-        #region Public Properties
-
-        #region ChunkType
+        #region Properties
 
         public override ChunkType ChunkType
         {
             get { return ChunkType.FGjp; }
         }
-
-        #endregion ChunkType
-
-        #region ForegroundImage
 
         private byte[] _foregroundImage;
 
@@ -47,16 +36,14 @@ namespace DjvuNet.DataChunks
                 return _foregroundImage;
             }
 
-            private set
+            internal set
             {
                 if (_foregroundImage != value)
                     _foregroundImage = value;
             }
         }
 
-        #endregion ForegroundImage
-
-        #endregion Public Properties
+        #endregion Properties
 
         #region Constructors
 
@@ -68,28 +55,16 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Methods
 
-        public override void ReadData(IDjvuReader reader)
+        internal byte[] DecodeImageData()
         {
-            _dataLocation = reader.Position;
-
-            // Skip past the data which will be delayed read
-            reader.Position += Length;
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
-        private byte[] DecodeImageData()
-        {
-            using (IDjvuReader reader = Reader.CloneReader(_dataLocation))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
-                return reader.GetJPEGImage(Length);
+                return reader.ReadBytes((int)Length);
             }
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

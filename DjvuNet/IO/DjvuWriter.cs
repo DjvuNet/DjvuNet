@@ -8,7 +8,7 @@ using DjvuNet.Compression;
 
 namespace DjvuNet
 {
-    public class DjvuWriter : BinaryWriter, IDjvuWriter
+    public partial class DjvuWriter : BinaryWriter, IDjvuWriter
     {
         #region Private Members
 
@@ -34,7 +34,7 @@ namespace DjvuNet
 
             set
             {
-                if (Position != value)
+                if (BaseStream.Position != value)
                 {
                     BaseStream.Position = value;
                 }
@@ -267,7 +267,7 @@ namespace DjvuNet
 
         public override string ToString()
         {
-            return $"{{{this.GetType().Name} {{ Position: 0x{Position:x}, Length: 0x{this.BaseStream?.Length:x} BaseStream: {BaseStream} }}}}";
+            return $"{{{this.GetType().Name} {{ Position: 0x{Position:x}, Length: 0x{BaseStream.Length:x} BaseStream: {BaseStream} }}}}";
         }
 
         #endregion Public Methods

@@ -64,12 +64,12 @@ namespace DjvuNet
 
         #region Thumbnail
 
-        private IThumChunk _thumbnail;
+        private ITH44Chunk _thumbnail;
 
         /// <summary>
         /// Gets the thumbnail for the page
         /// </summary>
-        public IThumChunk Thumbnail
+        public ITH44Chunk Thumbnail
         {
             get { return _thumbnail; }
 
@@ -110,12 +110,12 @@ namespace DjvuNet
 
         #region IncludedItems
 
-        private List<DjviChunk> _Includes;
+        private List<IDjviChunk> _Includes;
 
         /// <summary>
         /// Gets the included items
         /// </summary>
-        public IReadOnlyList<DjviChunk> IncludeFiles
+        public IReadOnlyList<IDjviChunk> IncludeFiles
         {
             get { return _Includes; }
 
@@ -123,7 +123,7 @@ namespace DjvuNet
             {
                 if (_Includes != value)
                 {
-                    _Includes = (List<DjviChunk>) value;
+                    _Includes = (List<IDjviChunk>) value;
                     OnPropertyChanged(nameof(IncludeFiles));
                 }
             }
@@ -550,7 +550,7 @@ namespace DjvuNet
         #region Constructors
 
         public DjvuPage(int pageNumber, IDjvuDocument document, DirmComponent header, 
-            ThumChunk thumbnail, List<DjviChunk> includedItems, DjvuFormElement form)
+            ITH44Chunk thumbnail, IReadOnlyList<IDjviChunk> includedItems, DjvuFormElement form)
         {
             PageNumber = pageNumber;
             Document = document;
@@ -561,9 +561,9 @@ namespace DjvuNet
             _Image = new DjvuImage(this);
             PropertyChanged += DjvuPage_PropertyChanged;
 
-            if (Info == null)
+            if (form.ChunkType != ChunkType.BM44Form && form.ChunkType != ChunkType.PM44Form && Info == null)
                 throw new DjvuFormatException(
-                    $"Page {PageNumber} from document {Document.Name} does not have associated Info chunk." + 
+                    $"Page {PageNumber} does not have associated Info chunk." + 
                     "Page is invalid and can not be displayed");
         }
 
@@ -595,6 +595,9 @@ namespace DjvuNet
 
         protected void Dispose(bool disposing)
         {
+            if (Disposed)
+                return;
+
             if (disposing)
             {
             }
@@ -734,11 +737,10 @@ namespace DjvuNet
         /// Extracts a thumbnail image for the page
         /// </summary>
         /// <returns></returns>
-        public System.Drawing.Bitmap ExtractThumbnailImage()
+        public Bitmap ExtractThumbnailImage()
         {
             if (Thumbnail != null)
-                return ((TH44Chunk)Thumbnail.Children
-                    .Where(x => x.ChunkType == ChunkType.TH44).First()).Image.ToImage();
+                return Thumbnail.Image.ToImage();
 
             var result = BuildImage();
             var scaleAmount = (double)128 / result.Width;
@@ -969,12 +971,12 @@ namespace DjvuNet
                         BitmapData backgroundData =
                             background.LockBits(new System.Drawing.Rectangle(0, 0, background.Width, background.Height),
                                                 ImageLockMode.ReadWrite, background.PixelFormat);
-                        int backgroundPixelSize = GetPixelSize(backgroundData);
+                        int backgroundPixelSize = GetPixelSize(backgroundData.PixelFormat);
 
                         BitmapData foregroundData =
                             foreground.LockBits(new System.Drawing.Rectangle(0, 0, foreground.Width, foreground.Height),
                                                 ImageLockMode.ReadOnly, foreground.PixelFormat);
-                        int foregroundPixelSize = GetPixelSize(foregroundData);
+                        int foregroundPixelSize = GetPixelSize(foregroundData.PixelFormat);
 
                         BitmapData maskData = mask.LockBits(new System.Drawing.Rectangle(0, 0, mask.Width, mask.Height),
                                                             ImageLockMode.ReadOnly, mask.PixelFormat);
@@ -1382,7 +1384,7 @@ namespace DjvuNet
             return 16;
         }
 
-        internal unsafe System.Drawing.Bitmap InvertImage(System.Drawing.Bitmap invertImage)
+        internal static unsafe System.Drawing.Bitmap InvertImage(System.Drawing.Bitmap invertImage)
         {
             if (invertImage == null)
                 return null;
@@ -1420,7 +1422,7 @@ namespace DjvuNet
         /// <param name="color"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal uint InvertColor(uint color)
+        internal static uint InvertColor(uint color)
         {
             return 0x00FFFFFFu ^ color;
         }
@@ -1431,7 +1433,7 @@ namespace DjvuNet
         /// <param name="color"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal int InvertColor(int color)
+        internal static int InvertColor(int color)
         {
             return 0x00FFFFFF ^ color;
         }
@@ -1442,9 +1444,9 @@ namespace DjvuNet
         /// <param name="data"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal int GetPixelSize(BitmapData data)
+        internal static int GetPixelSize(PixelFormat data)
         {
-            switch (data.PixelFormat)
+            switch (data)
             {
                 case PixelFormat.Format8bppIndexed:
                     return 1;
@@ -1455,13 +1457,19 @@ namespace DjvuNet
                     return 2;
                 case PixelFormat.Format24bppRgb:
                     return 3;
+                case PixelFormat.Canonical:
                 case PixelFormat.Format32bppArgb:
                 case PixelFormat.Format32bppPArgb:
                 case PixelFormat.Format32bppRgb:
                     return 4;
+                case PixelFormat.Format48bppRgb:
+                    return 6;
+                case PixelFormat.Format64bppArgb:
+                case PixelFormat.Format64bppPArgb:
+                    return 8;
             }
 
-            throw new DjvuFormatException("Unsupported image format: " + data.PixelFormat);
+            throw new DjvuFormatException("Unsupported image format: " + data);
         }
 
         /// <summary>

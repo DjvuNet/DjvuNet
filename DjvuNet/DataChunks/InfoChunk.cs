@@ -86,7 +86,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Gets the rotation for the page
         /// </summary>
-        public PageRotations PageRotation { get; internal set; }
+        public PageRotation PageRotation { get; internal set; }
 
         #endregion PageRotation
 
@@ -102,10 +102,12 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Methods
 
         public override void ReadData(IDjvuReader reader)
         {
+            DataOffset = reader.Position;
+
             Width = reader.ReadUInt16BigEndian();
             Height = reader.ReadUInt16BigEndian();
             MinorVersion = reader.ReadByte();
@@ -115,9 +117,9 @@ namespace DjvuNet.DataChunks
 
             byte flag = reader.ReadByte();
             // B[3..0]
-            PageRotation = (PageRotations)(flag & 0x07);
+            PageRotation = (PageRotation)(flag & 0x07);
         }
 
-        #endregion Protected Methods
+        #endregion Methods
     }
 }

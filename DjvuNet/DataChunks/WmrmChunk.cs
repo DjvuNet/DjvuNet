@@ -17,24 +17,12 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class WmrmChunk : DjvuNode, IWmrmChunk
     {
-        #region Private Members
-
-        private long _dataLocation = 0;
-
-        #endregion Private Members
-
-        #region Public Properties
-
-        #region ChunkType
+        #region Properties
 
         public override ChunkType ChunkType
         {
-            get { return ChunkType.WMRM; }
+            get { return ChunkType.Wmrm; }
         }
-
-        #endregion ChunkType
-
-        #region WatermarkImage
 
         private JB2Image _watermarkImage;
 
@@ -45,10 +33,13 @@ namespace DjvuNet.DataChunks
         {
             get
             {
-                if (_watermarkImage == null)
+                if (_watermarkImage != null)
+                    return _watermarkImage;
+                else
+                {
                     _watermarkImage = ReadCompressedWatermarkImage();
-
-                return _watermarkImage;
+                    return _watermarkImage;
+                }
             }
 
             internal set
@@ -58,9 +49,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion WatermarkImage
-
-        #endregion Public Properties
+        #endregion Properties
 
         #region Constructors
 
@@ -72,27 +61,15 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-
-            // Skip the data since it is delayed read
-            reader.Position += Length;
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
+        #region Methods
 
         /// <summary>
         /// Reads the image which is used to remove the watermark
         /// </summary>
         /// <returns></returns>
-        private JB2Image ReadCompressedWatermarkImage()
+        internal JB2Image ReadCompressedWatermarkImage()
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 JB2Image image = new JB2Image();
                 image.Decode(reader);
@@ -101,6 +78,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

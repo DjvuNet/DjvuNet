@@ -61,7 +61,11 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [MemberData(nameof(TextChunkTestData))]
         public void TxtzChunk_Theory(string file)
         {

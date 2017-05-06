@@ -68,7 +68,7 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Methods
 
         public override void ReadData(IDjvuReader reader)
         {
@@ -78,6 +78,6 @@ namespace DjvuNet.DataChunks
             reader.Position = prevPos;
         }
 
-        #endregion Protected Methods
+        #endregion Methods
     }
 }

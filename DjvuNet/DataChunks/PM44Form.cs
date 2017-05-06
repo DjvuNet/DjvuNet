@@ -20,6 +20,8 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
+        #region Methods
+
         public override void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
             if (writer == null)
@@ -40,5 +42,7 @@ namespace DjvuNet.DataChunks
             foreach (IDjvuNode node in Children)
                 node.WriteData(writer, writeHeader);
         }
+
+        #endregion Methods
     }
 }

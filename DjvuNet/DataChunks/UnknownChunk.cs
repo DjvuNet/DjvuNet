@@ -71,8 +71,7 @@ namespace DjvuNet.DataChunks
 
         public override void ReadData(IDjvuReader reader)
         {
-            reader.Position += Length;
-
+            base.ReadData(reader);
             Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo , $"Creating unknown chunk for ID: {ChunkID}");
         }
 

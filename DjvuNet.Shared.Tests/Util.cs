@@ -12,6 +12,10 @@ namespace DjvuNet.Tests
 {
     public static partial class Util
     {
+        private static string _ArtifactsPath;
+        private static string _ArtifactsDataPath;
+        private static string _ArtifactsJsonPath;
+
         private static SortedDictionary<int, Tuple<int, int, DocumentType, string> > _TestDocumentData;
 
         static Util()
@@ -95,12 +99,44 @@ namespace DjvuNet.Tests
 
         public static string ArtifactsPath
         {
-            get { return Path.Combine(Util.RepoRoot, "artifacts"); }
+            get
+            {
+                if (_ArtifactsPath != null)
+                    return _ArtifactsPath;
+                else
+                {
+                    _ArtifactsPath = Path.Combine(Util.RepoRoot, "artifacts");
+                    return _ArtifactsPath;
+                }
+            }
         }
 
         public static string ArtifactsDataPath
         {
-            get { return Path.Combine(Util.RepoRoot, "artifacts", "data"); }
+            get
+            {
+                if (_ArtifactsDataPath != null)
+                    return _ArtifactsDataPath;
+                else
+                {
+                    _ArtifactsDataPath = Path.Combine(ArtifactsPath, "data");
+                    return _ArtifactsDataPath;
+                }
+            }
+        }
+
+        public static string ArtifactsJsonPath
+        {
+            get
+            {
+                if (_ArtifactsJsonPath != null)
+                    return _ArtifactsJsonPath;
+                else
+                {
+                    _ArtifactsJsonPath = Path.Combine(ArtifactsPath, "json");
+                    return _ArtifactsJsonPath;
+                }
+            }
         }
 
         public static void AssertBufferEqal(byte[] buffer, byte[] refBuffer)
@@ -144,6 +180,28 @@ namespace DjvuNet.Tests
             }
         }
 
+        public static bool CompareImages(Bitmap image1, Bitmap image2)
+        {
+            if (image1 == null || image2 == null)
+                return false;
+
+            if (image1.PixelFormat != image2.PixelFormat)
+                return false;
+            if (image1.Width != image2.Width || image1.Height != image2.Height)
+                return false;
+
+            Rectangle rect = new Rectangle(0, 0, image1.Width, image1.Height);
+            BitmapData img1 = image1.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
+            BitmapData img2 = image2.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
+
+            bool result = CompareImagesInternal(img1, img2);
+
+            image1.UnlockBits(img1);
+            image2.UnlockBits(img2);
+
+            return result;
+        }
+
         public static bool CompareImages(BitmapData image1, BitmapData image2)
         {
             if (image1.PixelFormat != image2.PixelFormat)
@@ -151,6 +209,11 @@ namespace DjvuNet.Tests
             if (image1.Width != image2.Width || image1.Height != image2.Height)
                 return false;
 
+            return CompareImagesInternal(image1, image2);
+        }
+
+        private static bool CompareImagesInternal(BitmapData image1, BitmapData image2)
+        {
             if (Environment.Is64BitProcess)
                 return CompareImages64(image1, image2);
             else

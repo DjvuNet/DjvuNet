@@ -8,6 +8,7 @@ using Xunit;
 using DjvuNet.DataChunks;
 using System.Linq;
 using DjvuNet.Tests.Xunit;
+using System.ComponentModel;
 
 namespace DjvuNet.Tests
 {
@@ -35,7 +36,7 @@ namespace DjvuNet.Tests
         {
             get
             {
-                int maxTestNumber = 75;
+                int maxTestNumber = 77;
                 string filePathTempl = Util.GetTestFilePathTemplate();
 
                 List<object[]> retVal = new List<object[]>
@@ -127,9 +128,6 @@ namespace DjvuNet.Tests
             {
                 document?.Dispose();
             }
-
-            Thread.Yield();
-            Thread.Sleep(500);
         }
 
         [Fact]
@@ -612,6 +610,16 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
+        public void IsDjvuDocument_String006()
+        {
+            string errorPath = Path.GetTempFileName();
+            using (FileStream stream = new FileStream(errorPath, FileMode.Open, FileAccess.Read, FileShare.None))
+            {
+                Assert.Throws<AggregateException>(() => DjvuDocument.IsDjvuDocument(errorPath));
+            }
+        }
+
+        [Fact]
         public void IsDjvuDocument_Stream001()
         {
             Stream stream = null;
@@ -654,6 +662,38 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
+        public void IsDjvuDocument_Stream005()
+        {
+            using (MemoryStream stream = new MemoryStream(new byte[4]))
+            {
+                Assert.Equal(4, stream.Length);
+                Assert.False(DjvuDocument.IsDjvuDocument(stream));
+            }
+        }
+
+        [Fact()]
+        public void IsDjvuDocument_Stream006()
+        {
+            using (MemoryStream stream = new MemoryStream(DjvuDocument.MagicBuffer))
+            {
+                Assert.Equal(8, stream.Length);
+                Assert.False(DjvuDocument.IsDjvuDocument(stream));
+            }
+        }
+
+        [Fact()]
+        public void IsDjvuDocument_Stream007()
+        {
+            byte[] buffer = new byte[] { 0x41, 0x54, 0x26, 0x54, 0x46, 0x4f, 0x52, 0x4d, 0x41, 0x54, 0x26, 0x54, 0x46, 0x4f, 0x52, 0x4d };
+            using (MemoryStream stream = new MemoryStream(buffer))
+            {
+                Assert.Equal(16, stream.Length);
+                stream.Position = 10;
+                Assert.True(DjvuDocument.IsDjvuDocument(stream));
+            }
+        }
+
+        [Fact()]
         public void LoadTest004()
         {
             string file = Util.GetTestFilePath(4);
@@ -690,7 +730,39 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void DisposeTest()
+        public void LoadTest011iw4()
+        {
+            string file = Path.Combine(Util.ArtifactsPath, "img11.iw4");
+            using (DjvuDocument document = new DjvuDocument())
+            {
+                int hash = file.GetHashCode();
+                document.Load(file, hash);
+                Assert.Equal(hash, document.Identifier);
+                IDjvuPage page = document.ActivePage;
+
+                PM44Chunk pmChunk = page.PageForm.Children[0] as PM44Chunk;
+                Assert.IsType<PM44Chunk>(pmChunk);
+
+                var img = pmChunk.Image;
+                Assert.NotNull(img);
+
+                DjvuNet.Wavelet.InterWavePixelMap pixMap = new Wavelet.InterWavePixelMap();
+                pixMap = pmChunk.ProgressiveDecodeBackground(pixMap) as Wavelet.InterWavePixelMap;
+                Assert.NotNull(pixMap);
+
+                pmChunk = page.PageForm.Children[1] as PM44Chunk;
+                Assert.NotNull(pmChunk);
+
+                DjvuNet.Wavelet.InterWavePixelMap pixMap2 = new Wavelet.InterWavePixelMap();
+                Assert.Throws<DjvuFormatException>(() => pmChunk.ProgressiveDecodeBackground(pixMap2));
+
+                // This time call will not throw
+                pmChunk.ProgressiveDecodeBackground(pixMap);
+            }
+        }
+
+        [Fact()]
+        public void DisposeTest001()
         {
             DjvuDocument document = null;
             int pageCount = 0;
@@ -708,7 +780,27 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void LoadTest()
+        public void DisposeTest002()
+        {
+            DjvuDocument document = null;
+            int pageCount = 0;
+
+            try
+            {
+                document = Util.GetTestDocument(2, out pageCount);
+            }
+            finally
+            {
+                document.Dispose();
+                Assert.True(document.IsDisposed);
+                Assert.Empty(document.Pages);
+                // Test call to Dispose does not throw
+                document.Dispose();
+            }
+        }
+
+        [Fact()]
+        public void LoadTest002()
         {
             DjvuDocument document = null;
             document = new DjvuDocument();
@@ -750,6 +842,129 @@ namespace DjvuNet.Tests
                 var nodes = document.GetRootFormChildren<DjvuChunk>().ToList();
                 Assert.NotNull(nodes);
                 Assert.Equal<int>(pageCount, nodes.Count);
+            }
+        }
+
+        [Fact()]
+        public void BuildPageList001()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
+                readerMock.SetupProperty(x => x.Position);
+                IDjvuReader reader = readerMock.Object;
+                reader.Position = 0;
+                document.RootForm = new ThumChunk(reader, null, document, "THUM", 0);
+                Assert.Throws<DjvuFormatException>(() => document.BuildPageList());
+            }
+        }
+
+        [Fact()]
+        public void CheckDjvuHeader001()
+        {
+            byte[] buffer = new byte[] { 0x01, 0x07, 0x31, 0x67, 0xdf, 0xe4, 0x5f, 0x61 };
+            using (MemoryStream stream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                DjvuDocument doc = new DjvuDocument();
+                Assert.Throws<DjvuFormatException>(() => doc.CheckDjvuHeader(reader));
+            }
+        }
+
+        [Fact()]
+        public void CheckDjvuHeader002()
+        {
+            byte[] buffer = new byte[] { 0x41, 0x54, 0x26, 0x54, 0x46, 0x4f, 0x52, 0x4d };
+            using (MemoryStream stream = new MemoryStream(buffer))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                DjvuDocument doc = new DjvuDocument();
+                doc.CheckDjvuHeader(reader);
+            }
+        }
+
+        [Fact()]
+        public void GetRootFormChildren001()
+        {
+            int pageCount = 0;
+            using(DjvuDocument doc = Util.GetTestDocument(30, out pageCount))
+            {
+                DjvuChunk form = doc.GetRootFormChildren<DjvuChunk>().FirstOrDefault();
+                Assert.NotNull(form);
+                Assert.IsType<DjvuChunk>(form);
+            }
+        }
+
+        [Fact()]
+        public void OnPropertyChanged001()
+        {
+            int pageCount = 0;
+            using (DjvuDocument doc = Util.GetTestDocument(30, out pageCount))
+            {
+                bool called = false;
+                bool propertyMatched = false; 
+                doc.PropertyChanged += delegate (object sender, PropertyChangedEventArgs e) 
+                {
+                    called = true;
+                    if (e.PropertyName == "Identifier")
+                        propertyMatched = true;
+                };
+                doc.Identifier = doc.GetHashCode();
+
+                Assert.True(called);
+                Assert.True(propertyMatched);
+            }
+        }
+
+        [Fact()]
+        public void ActiveNextPreviousPageTest001()
+        {
+            int pageCount;
+            using (DjvuDocument doc = Util.GetTestDocument(2, out pageCount))
+            {
+                doc.ActivePage = doc.Pages[7];
+                Assert.Same(doc.PreviousPage, doc.Pages[6]);
+                Assert.Same(doc.NextPage, doc.Pages[8]);
+                Assert.Same(doc.ActivePage, doc.Pages[7]);
+            }
+        }
+
+        [Fact()]
+        public void CachePageImagesTest()
+        {
+            int pageCount;
+            using (DjvuDocument doc = Util.GetTestDocument(5, out pageCount))
+            {
+                doc.CachePageImages(doc.Pages);
+                var cached = doc.Pages.Where(p => p.IsPageImageCached == true).ToList();
+                Assert.NotNull(cached);
+                // TODO verify logic after method reimplementation
+                Assert.Equal(0, cached.Count);
+            }
+        }
+
+        [Fact()]
+        public void DirectoryTest001()
+        {
+            int pageCount;
+            using (DjvuDocument doc = Util.GetTestDocument(30, out pageCount))
+            {
+                Assert.Null(doc.Directory);
+                Assert.IsType<DjvuChunk>(doc.RootForm);
+            }
+        }
+
+        [Fact()]
+        public void DirectoryTest002()
+        {
+            int pageCount;
+            using (DjvuDocument doc = Util.GetTestDocument(5, out pageCount))
+            {
+                Assert.NotNull(doc.Directory);
+                Assert.IsType<DjvmChunk>(doc.RootForm);
             }
         }
     }

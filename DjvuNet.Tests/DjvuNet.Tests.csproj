@@ -119,6 +119,7 @@
     <Compile Include="DataChunks\AntaChunkTests.cs" />
     <Compile Include="DataChunks\AntzChunkTests.cs" />
     <Compile Include="DataChunks\BG44ChunkTests.cs" />
+    <Compile Include="DataChunks\BGjpChunkTests.cs" />
     <Compile Include="DataChunks\BM44ChunkTests.cs" />
     <Compile Include="DataChunks\BM44FormTests.cs" />
     <Compile Include="DataChunks\CidaChunkTests.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="Parser\IffParserExceptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DjvuPageTests.cs" />
+    <Compile Include="SerializationTests.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="Util\GenericComparerTests.cs" />
     <Compile Include="Util\VerifyTests.cs" />

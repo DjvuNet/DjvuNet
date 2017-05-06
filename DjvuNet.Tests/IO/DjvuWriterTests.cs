@@ -592,7 +592,7 @@ namespace DjvuNet.Tests
         [DjvuTheory]
 #endif
         [MemberData(nameof(StringTestData))]
-        public void WriteString_Theory(String testString)
+        public void WriteString_Theory01(String testString)
         {
             DjvuWriter writer = null;
 
@@ -604,6 +604,31 @@ namespace DjvuNet.Tests
                 byte[] testBuffer = new byte[length];
                 Buffer.BlockCopy(buffer, 0, testBuffer, 0, (int)length);
                 UnicodeEncoding encoding = new UnicodeEncoding(false, false);
+                string result = encoding.GetString(testBuffer);
+                Assert.Equal<string>(testString, result);
+                Assert.Equal<long>(length, stream.Position);
+                Assert.Equal<long>(stream.Position, writer.Position);
+            }
+        }
+
+#if _APPVEYOR
+        [Theory]
+#else
+        [DjvuTheory]
+#endif
+        [MemberData(nameof(StringTestData))]
+        public void WriteString_Theory02(String testString)
+        {
+            DjvuWriter writer = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            using (writer = new DjvuWriter(stream))
+            {
+                long length = writer.WriteString(testString, false);
+                byte[] buffer = stream.GetBuffer();
+                byte[] testBuffer = new byte[length];
+                Buffer.BlockCopy(buffer, 0, testBuffer, 0, (int)length);
+                UnicodeEncoding encoding = new UnicodeEncoding(false, true);
                 string result = encoding.GetString(testBuffer);
                 Assert.Equal<string>(testString, result);
                 Assert.Equal<long>(length, stream.Position);
@@ -703,6 +728,23 @@ namespace DjvuNet.Tests
                 Assert.Contains("Length: ", test);
                 Assert.Contains("BaseStream: ", test);
                 Assert.Contains(nameof(MemoryStream), test);
+            }
+        }
+
+        [Fact()]
+        public void PositionTest()
+        {
+            DjvuWriter writer = null;
+
+            using (MemoryStream stream = new MemoryStream())
+            using (writer = new DjvuWriter(stream))
+            {
+                Assert.Equal(0, writer.Position);
+                Assert.Equal(stream.Position, writer.Position);
+
+                writer.Position = 0x2048;
+                Assert.Equal(0x2048, writer.Position);
+                Assert.Equal(stream.Position, writer.Position);
             }
         }
     }

@@ -42,7 +42,7 @@ namespace DjvuNet.DataChunks
 
         protected override IDjvuReader GetAnnotationDataReader(long position)
         {
-            return Reader.CloneReader(position, Length);
+            return Reader.CloneReaderToMemory(position, Length);
         }
 
         #endregion Protected Methods
