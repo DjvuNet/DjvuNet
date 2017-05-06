@@ -22,5 +22,22 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<string>(ChunkType.Djbz.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
+
+        [Fact()]
+        public void ShapeDictionaryTest()
+        {
+            Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
+            readerMock.Setup(x => x.Position).Returns(1024);
+
+            DjbzChunk unk = new DjbzChunk(readerMock.Object, null, null, null, 0);
+            Assert.Equal<ChunkType>(ChunkType.Djbz, unk.ChunkType);
+            Assert.Equal<string>(ChunkType.Djbz.ToString(), unk.Name);
+            Assert.Equal<long>(1024, unk.DataOffset);
+
+            JB2.JB2Dictionary dictionary = new JB2.JB2Dictionary();
+            unk.ShapeDictionary = dictionary;
+            Assert.NotNull(unk.ShapeDictionary);
+            Assert.Same(dictionary, unk.ShapeDictionary);
+        }
     }
 }

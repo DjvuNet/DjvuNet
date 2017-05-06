@@ -18,24 +18,12 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class TH44Chunk : DjvuNode, ITH44Chunk
     {
-        #region Private Members
-
-        private long _dataLocation = 0;
-
-        #endregion Private Members
-
-        #region Public Properties
-
-        #region ChunkType
+        #region Properties
 
         public override ChunkType ChunkType
         {
             get { return ChunkType.TH44; }
         }
-
-        #endregion ChunkType
-
-        #region Thumbnail
 
         private IInterWavePixelMap _thumbnail;
 
@@ -46,22 +34,21 @@ namespace DjvuNet.DataChunks
         {
             get
             {
-                if (_thumbnail == null)
+                if (_thumbnail != null)
+                    return _thumbnail;
+                else
+                {
                     _thumbnail = DecodeThumbnailImage();
-
-                return _thumbnail;
+                    return _thumbnail;
+                }
             }
 
-            private set
+            internal set
             {
                 if (_thumbnail != value)
                     _thumbnail = value;
             }
         }
-
-        #endregion Thumbnail
-
-        #region Image
 
         private PixelMap _image;
 
@@ -72,16 +59,17 @@ namespace DjvuNet.DataChunks
         {
             get
             {
-                if (_image == null)
+                if (_image != null)
+                    return _image;
+                else
+                {
                     _image = Thumbnail.GetPixelMap();
-
-                return _image;
+                    return _image;
+                }
             }
         }
 
-        #endregion Image
-
-        #endregion Public Properties
+        #endregion Properties
 
         #region Constructors
 
@@ -89,22 +77,11 @@ namespace DjvuNet.DataChunks
             string chunkID = "", long length = 0)
             : base(reader, parent, document, chunkID, length)
         {
-            // Nothing
         }
 
         #endregion Constructors
 
-        #region Protected Methods
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-            reader.Position += Length;
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
+        #region Methods
 
         /// <summary>
         /// Decodes the thumbnail image for this chunk
@@ -112,7 +89,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         internal IInterWavePixelMap DecodeThumbnailImage()
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 IInterWavePixelMap thumbnail = new InterWavePixelMap();
                 thumbnail.Decode(reader);
@@ -121,6 +98,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

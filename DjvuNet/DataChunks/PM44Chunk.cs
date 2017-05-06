@@ -12,11 +12,6 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class PM44Chunk : DjvuNode, IPM44Chunk
     {
-        #region Private Members
-
-        private long _dataLocation;
-
-        #endregion Private Members
 
         #region Public Properties
 
@@ -29,7 +24,7 @@ namespace DjvuNet.DataChunks
 
         #endregion ChunkType
 
-        #region BackgroundImage
+        #region Image
 
         private IInterWavePixelMap _Image;
 
@@ -53,7 +48,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion BackgroundImage
+        #endregion Image
 
         #endregion Public Properties
 
@@ -67,7 +62,7 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Public Methods
+        #region Methods
 
         /// <summary>
         /// Progressively decodes the background image
@@ -75,22 +70,12 @@ namespace DjvuNet.DataChunks
         /// <param name="pixelMap"></param>
         public IInterWavePixelMap ProgressiveDecodeBackground(IInterWavePixelMap pixelMap)
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 pixelMap.Decode(reader);
             }
             return pixelMap;
         }
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-            reader.Position += Length;
-        }
-
-        #endregion Public Methods
-
-        #region Internal Methods
 
         /// <summary>
         /// Decodes the background image for this chunk
@@ -98,7 +83,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         internal IInterWavePixelMap DecodeImage()
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 IInterWavePixelMap pixelMap = new InterWavePixelMap();
                 pixelMap.Decode(reader);
@@ -106,6 +91,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Internal Methods
+        #endregion Methods
     }
 }

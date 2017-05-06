@@ -18,7 +18,7 @@ namespace DjvuNet
 
         int Height { get; }
 
-        IReadOnlyList<DjviChunk> IncludeFiles { get; }
+        IReadOnlyList<IDjviChunk> IncludeFiles { get; }
 
         InfoChunk Info { get; }
 
@@ -60,7 +60,7 @@ namespace DjvuNet
 
         bool IsPageImageCached { get; set; }
 
-        IThumChunk Thumbnail { get; }
+        ITH44Chunk Thumbnail { get; }
 
         System.Drawing.Bitmap ThumbnailImage { get; set; }
 

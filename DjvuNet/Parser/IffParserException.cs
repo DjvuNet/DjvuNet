@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 
 
@@ -11,6 +10,7 @@ namespace DjvuNet
     /// IFFParserException is thrown to indicate an error in parsing IFF 85 formatting
     /// of DjVu file which is not related to DjVu specific formatting.
     /// </summary>
+    [Serializable]
     public class IffParserException : System.FormatException
     {
 
@@ -58,7 +58,7 @@ namespace DjvuNet
         /// <parameter name="context">
         /// The contextual information about the source or destination.
         /// </parameter>    
-        protected IffParserException(SerializationInfo info, StreamingContext context):
+        protected IffParserException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context):
             base (info, context)
         {
         }

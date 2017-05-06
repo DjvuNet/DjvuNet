@@ -7,17 +7,17 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public enum PageRotations
+    public enum PageRotation
     {
         /// <summary>
         /// Normal page rotation 0 degrees
         /// </summary>
-        RightSideUp = 1,
+        RightSideUp = 0,
 
         /// <summary>
         /// Counter clockwise rotation 90 degrees
         /// </summary>
-        CounterClockwise = 6,
+        CounterClockwise = 1,
 
         /// <summary>
         /// Upside down page rotation 180 degrees
@@ -27,6 +27,6 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// Clockwise rotation 90 degrees
         /// </summary>
-        Clockwise = 6,
+        Clockwise = 3,
     }
 }

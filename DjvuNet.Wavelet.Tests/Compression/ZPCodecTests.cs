@@ -135,10 +135,61 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void IWDecoderTest()
+        [Fact()]
+        public void IWEncoderTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "testbzz.obz");
+            byte[] buffer = Util.ReadFileToEnd(filePath);
+
+            using (MemoryStream stream = new MemoryStream())
+            using (ZPCodec codec = new ZPCodec(stream, true, true))
+            {
+                Assert.True(codec.DjvuCompat);
+                Assert.True(codec.Encoding);
+                Assert.Same(stream, codec.DataStream);
+                Assert.Equal(0, stream.Position);
+
+                for (int b = 0; b < buffer.Length; b++)
+                {
+                    byte data = buffer[b];
+
+                    for (int i = 0; i < 8; i++)
+                    {
+                        bool value = ((data >> i) & 1) == 1;
+                        codec.IWEncoder(value);
+                    }
+                }
+
+                codec.Flush();
+                Assert.Equal(buffer.Length, stream.Position);
+            }
+        }
+
+        [Fact()]
+        public void IWEncoderTest002()
+        {
+            using (MemoryStream stream = new MemoryStream())
+            using (ZPCodec codec = new ZPCodec(stream, true, true))
+            {
+                Assert.True(codec.DjvuCompat);
+                Assert.True(codec.Encoding);
+                Assert.Same(stream, codec.DataStream);
+                Assert.Equal(0, stream.Position);
+
+                ulong hashLong = 0x0184b6730184b673;
+
+                for (int i = 0; i < 64; i++)
+                {
+                    bool value = ((hashLong >> i) & 1) == 1;
+                    codec.IWEncoder(value);
+                }
+
+                codec.Flush();
+                Assert.Equal(8, stream.Position);
+
+                ulong codedHash = BitConverter.ToUInt64(stream.GetBuffer(), 0);
+                Assert.Equal(0x7fde92317fde9231u, codedHash);
+            }
         }
 
         [Fact()]
@@ -268,44 +319,24 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void FFZTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            using (MemoryStream stream = new MemoryStream())
+            {
+                ZPCodec codec = new ZPCodec(stream, true, true);
+                Assert.True(codec.DjvuCompat);
+                Assert.True(codec.Encoding);
+                Assert.Same(stream, codec.DataStream);
+                // TODO Finish test implementation
+                sbyte[] ffzt = codec.FFZT;
+            }
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void InitTest()
         {
             Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact()]
-        public void IWEncoderTest001()
-        {
-            string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
-            string outFilePath = filePath + ".bz3";
-
-            try
-            {
-                byte[] buffer = Util.ReadFileToEnd(filePath);
-                long bytesWritten = 0;
-
-                using (Stream stream = new FileStream(
-                    outFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite))
-                using (BSOutputStream writer = new BSOutputStream(stream, 4096))
-                {
-                    writer.Write(buffer, 0, buffer.Length / 2);
-                    bytesWritten = stream.Position;
-                    writer.Coder.IWEncoder(false);
-                    writer.Coder.IWEncoder(true);
-                }
-            }
-            finally
-            {
-                if (File.Exists(outFilePath))
-                    File.Delete(outFilePath);
-            }
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

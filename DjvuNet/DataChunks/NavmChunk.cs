@@ -67,12 +67,6 @@ namespace DjvuNet.DataChunks
 
         #region Methods
 
-        public override void ReadData(IDjvuReader reader)
-        {
-            DataOffset = reader.Position;
-            reader.Position += Length;
-        }
-
         /// <summary>
         /// Reads in the bookmark data
         /// </summary>

@@ -9,14 +9,41 @@ namespace DjvuNet.Tests
 
     public partial class DjvuJsonDocument
     {
-        public class Chunk
+        public class ChunkBase
         {
-
             [JsonProperty("ID")]
             public string ID { get; set; }
 
+            [JsonProperty("Offset")]
+            public int Offset { get; set; }
+
             [JsonProperty("Size")]
             public int Size { get; set; }
+        }
+
+        public class Info : ChunkBase
+        {
+            [JsonProperty("Width")]
+            public int Width { get; set; }
+
+            [JsonProperty("Height")]
+            public int Height { get; set; }
+
+            [JsonProperty("Version")]
+            public int Version { get; set; }
+
+            [JsonProperty("Dpi")]
+            public int Dpi { get; set; }
+
+            [JsonProperty("Gamma")]
+            public double Gamma { get; set; }
+
+            [JsonProperty("Orientation")]
+            public int Orientation { get; set; }
+        }
+
+        public class Chunk : ChunkBase
+        {
 
             [JsonProperty("Description")]
             public string Description { get; set; }
@@ -52,14 +79,8 @@ namespace DjvuNet.Tests
 
     public partial class DjvuJsonDocument
     {
-        public class RootChild
+        public class RootChild : ChunkBase
         {
-
-            [JsonProperty("ID")]
-            public string ID { get; set; }
-
-            [JsonProperty("Size")]
-            public int Size { get; set; }
 
             [JsonProperty("Description")]
             public string Description { get; set; }
@@ -87,6 +108,7 @@ namespace DjvuNet.Tests
             private RootChild[] _Includes;
             private RootChild[] _Thumbnails;
             private RootChild _Dirm;
+            private RootChild _Navm;
 
             [JsonProperty("ID")]
             public string ID { get; set; }
@@ -96,6 +118,21 @@ namespace DjvuNet.Tests
 
             [JsonProperty("Children")]
             public RootChild[] Children { get; set; }
+
+            [JsonIgnore]
+            public RootChild Navm
+            {
+                get
+                {
+                    if (_Navm != null)
+                        return _Navm;
+                    else
+                    {
+                        _Navm = Children.Where((x) => x.ID == "NAVM").FirstOrDefault();
+                        return _Navm;
+                    }
+                }
+            }
 
             [JsonIgnore]
             public RootChild Dirm
@@ -136,7 +173,7 @@ namespace DjvuNet.Tests
                         return _Files;
                     else
                     {
-                        _Files = Children.Where((x) => x.ID != "DIRM").ToArray();
+                        _Files = Children.Where((x) => x.ID != "DIRM" && x.ID != "NAVM").ToArray();
                         return _Files;
                     }
                 }
@@ -170,6 +207,7 @@ namespace DjvuNet.Tests
                 }
             }
         }
+
     }
 
     public partial class DjvuJsonDocument

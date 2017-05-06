@@ -17,11 +17,6 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class SjbzChunk : DjvuNode, ISjbzChunk
     {
-        #region Private Members
-
-        private long _dataLocation = 0;
-
-        #endregion Private Members
 
         #region Public Properties
 
@@ -72,23 +67,11 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-
-            // Skip the data since it is delayed read
-            reader.Position += Length;
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
+        #region Methods
+ 
         internal JB2Image ReadCompressedImage()
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 JB2Image image = new JB2Image();
                 JB2.JB2Dictionary includedDictionary = null;
@@ -109,7 +92,7 @@ namespace DjvuNet.DataChunks
                         var includeForm = 
                             root.Includes
                             .Where(x =>  x.DataOffset == (component.Offset + 12))
-                            .FirstOrDefault<DjviChunk>();
+                            .FirstOrDefault<IDjviChunk>();
                         
                         var djbzItem = includeForm?.Children
                             .Where<IDjvuNode>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
@@ -124,6 +107,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

@@ -47,5 +47,56 @@ namespace DjvuNet.DataChunks.Tests
                 }
             }
         }
+
+        [Fact]
+        public void IncludesTest()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(2, out pageCount))
+            {
+                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.FirstPage;
+                DjvuChunk form = page.PageForm as DjvuChunk;
+                Assert.NotNull(form);
+
+                var includes = form.Includes;
+                Assert.NotNull(includes);
+                Assert.Equal(1, includes.Count);
+            }
+        }
+
+        [Fact]
+        public void DataTest()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(2, out pageCount))
+            {
+                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.FirstPage;
+                DjvuChunk form = page.PageForm as DjvuChunk;
+                Assert.NotNull(form);
+
+                var reader = form.Data;
+                Assert.NotNull(reader);
+                Assert.Equal(form.Length, reader.Length);
+            }
+        }
+
+        [Fact]
+        public void ExtractRawDataTest()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = DjvuNet.Tests.Util.GetTestDocument(2, out pageCount))
+            {
+                DjvuNet.Tests.Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.FirstPage;
+                DjvuChunk form = page.PageForm as DjvuChunk;
+                Assert.NotNull(form);
+
+                var reader = form.ExtractRawData();
+                Assert.NotNull(reader);
+                Assert.Equal(form.Length, reader.Length);
+            }
+        }
     }
 }

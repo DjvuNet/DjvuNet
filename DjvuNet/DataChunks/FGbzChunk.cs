@@ -61,13 +61,16 @@ namespace DjvuNet.DataChunks
         {
             get
             {
-                if (_palette == null)
+                if (_palette != null)
+                    return _palette;
+                else
+                {
                     _palette = DecodePaletteData();
-
-                return _palette;
+                    return _palette;
+                }
             }
 
-            private set
+            internal set
             {
                 if (_palette != value)
                     _palette = value;

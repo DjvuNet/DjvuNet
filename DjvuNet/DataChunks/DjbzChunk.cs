@@ -17,11 +17,6 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class DjbzChunk : DjvuNode, IDjbzChunk
     {
-        #region Private Members
-
-        private long _dataLocation = 0;
-
-        #endregion Private Members
 
         #region Public Properties
 
@@ -72,21 +67,11 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Public Methods
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-            reader.Position += Length;
-        }
-
-        #endregion Public Methods
-
-        #region Internal Methods
+        #region Methods
 
         internal JB2.JB2Dictionary DecodeShapeDictionary()
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 JB2.JB2Dictionary dictionary = new JB2Dictionary();
                 dictionary.Decode(reader);
@@ -95,6 +80,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Internal Methods
+        #endregion Methods
     }
 }

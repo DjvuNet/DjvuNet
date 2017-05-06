@@ -14,7 +14,7 @@ namespace DjvuNet.DataChunks
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjviChunk : DjvuFormElement
+    public class DjviChunk : DjvuFormElement, IDjviChunk
     {
         #region Public Properties
 

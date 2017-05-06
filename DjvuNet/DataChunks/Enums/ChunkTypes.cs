@@ -102,7 +102,7 @@ namespace DjvuNet.DataChunks
         /// <summary>
         /// JB2 data required to remove a watermark
         /// </summary>
-        WMRM,
+        Wmrm,
 
         /// <summary>
         /// Foreground Color JB2 Chunk.

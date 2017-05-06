@@ -39,7 +39,7 @@ namespace DjvuNet.Compression
         /// Reads UTF8 encoded, null terminated string.
         /// </summary>
         /// <returns></returns>
-        public string ReadNullTerminatedString(int bufferSize = 128)
+        public override string ReadNullTerminatedString(bool skipBOM = true, int bufferSize = 128)
         {
             try
             {

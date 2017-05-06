@@ -63,6 +63,40 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
+        public static IEnumerable<object[]> StringEncodingCrashTestData
+        {
+            get
+            {
+                List<object[]> retVal = new List<object[]>();
+
+                Encoding[] encodings = new Encoding[]
+                {
+                    new UnicodeEncoding(true, false),
+                    new UnicodeEncoding(true, true),
+                    new UTF32Encoding(true, false),
+                    new UTF32Encoding(true, true)
+                };
+
+                var data = StringTestData;
+
+                foreach (Encoding e in encodings)
+                {
+                    foreach (object[] o in data)
+                    {
+                        string testStr = (string) o[0];
+
+                        if (testStr.StartsWith("免去于革") || testStr.StartsWith("על-פי ")
+                            || testStr.StartsWith("ホテル近く") || testStr.StartsWith("Konservatiivipuolueen"))
+                            continue;
+
+                        retVal.Add(new object[] { e, testStr });
+                    }
+                }
+
+                return retVal;
+            }
+        }
+
         public static IEnumerable<object[]> BlockSortValidateData
         {
             get
@@ -170,7 +204,11 @@ namespace DjvuNet.Compression.Tests
                 Assert.Equal<byte>(expected[i], data[i]);
         }
 
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [MemberData(nameof(StringTestData))]
         public void BlockSortData_Theory01(string testStr)
         {
@@ -183,7 +221,11 @@ namespace DjvuNet.Compression.Tests
             BlockSort.BlockSortData(buffer, buffer.Length, ref markpos);
         }
 
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [MemberData(nameof(StringEncodingTestData))]
         public void BlockSortData_Theory02(Encoding enc, string testStr)
         {
@@ -191,12 +233,36 @@ namespace DjvuNet.Compression.Tests
             // text encodings - except for some Chinese samples 
             // (probably not enough 0x00s as these may be 4 byte unicode characters)
 
-            byte[] buffer = new byte[enc.GetByteCount(testStr) + 1];
-            byte[] byteStr = enc.GetBytes(testStr);
-            Buffer.BlockCopy(byteStr, 0, buffer, 0, byteStr.Length);
-            int markpos = byteStr.Length;
+            byte[] buffer;
+            int markpos;
+            PrepareTestData(enc, testStr, out buffer, out markpos);
 
             BlockSort.BlockSortData(buffer, buffer.Length, ref markpos);
+        }
+
+#if _APPVEYOR
+        [Theory, Trait("Category", "BugTrack")]
+#else
+        [DjvuTheory]
+#endif
+        [MemberData(nameof(StringEncodingCrashTestData))]
+        public void BlockSortData_Theory03(Encoding enc, string testStr)
+        {
+
+            byte[] buffer;
+            int markpos;
+            PrepareTestData(enc, testStr, out buffer, out markpos);
+
+            Assert.Throws<IndexOutOfRangeException>(
+                () => BlockSort.BlockSortData(buffer, buffer.Length, ref markpos));
+        }
+
+        private static void PrepareTestData(Encoding enc, string testStr, out byte[] buffer, out int markpos)
+        {
+            buffer = new byte[enc.GetByteCount(testStr) + 1];
+            byte[] byteStr = enc.GetBytes(testStr);
+            Buffer.BlockCopy(byteStr, 0, buffer, 0, byteStr.Length);
+            markpos = byteStr.Length;
         }
 
         [DjvuTheory]

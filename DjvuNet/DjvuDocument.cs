@@ -130,9 +130,9 @@ namespace DjvuNet
             }
         }
 
-        private List<DjviChunk> _Includes;
+        private List<IDjviChunk> _Includes;
 
-        public IReadOnlyList<DjviChunk> Includes
+        public IReadOnlyList<IDjviChunk> Includes
         {
             get
             {
@@ -141,7 +141,7 @@ namespace DjvuNet
                 else
                 {
                     _Includes = RootForm.ChunkType == ChunkType.Djvm ?
-                        (List<DjviChunk>)((DjvmChunk)RootForm).Includes : new List<DjviChunk>();
+                        (List<IDjviChunk>)((DjvmChunk)RootForm).Includes : new List<IDjviChunk>();
                     OnPropertyChanged(nameof(Includes));
                     return _Includes;
                 }
@@ -183,7 +183,7 @@ namespace DjvuNet
                     _activePage = value;
                     UpdateCurrentPages();
                     UpdateImageCache();
-                    OnPropertyChanged("ActivePage");
+                    OnPropertyChanged(nameof(ActivePage));
                 }
             }
         }
@@ -202,7 +202,7 @@ namespace DjvuNet
                 if (_isInverted != value)
                 {
                     _isInverted = value;
-                    OnPropertyChanged("IsInverted");
+                    OnPropertyChanged(nameof(IsInverted));
 
                     // Propagate value to children
                     Pages.ToList().ForEach(x => x.IsInverted = value);
@@ -400,14 +400,17 @@ namespace DjvuNet
             {
             }
 
-            _Reader?.Close();
-            _Reader = null;
+            if (_Reader != null)
+            {
+                _Reader.Close();
+                _Reader = null;
+            }
 
             for (int i = 0; i < _Pages?.Count; i++)
             {
                 _Pages[i]?.Dispose();
             }
-            _Pages.Clear();
+            _Pages?.Clear();
 
             _Disposed = true;
         }
@@ -523,7 +526,7 @@ namespace DjvuNet
             if (Navigation == null)
                 Navigation = new DocumentNavigator(this);
 
-            if (Pages?.Count > 0)
+            if (Pages != null && Pages.Count > 0)
             {
                 ActivePage = FirstPage = Pages[0];
                 LastPage = Pages[Pages.Count - 1];
@@ -547,15 +550,20 @@ namespace DjvuNet
 		internal void BuildPageList()
 		{
             if (Pages == null)
-                _Pages = new List<IDjvuPage>();
+                Pages = new List<IDjvuPage>();
 
             switch (RootForm.ChunkType)
             {
                 case ChunkType.Djvm:
                     {
                         DjvmChunk root = (DjvmChunk)RootForm;
-                        Queue<ThumChunk> thumbnails = new Queue<ThumChunk>(root.Thumbnails);
-                        _Includes = (List<DjviChunk>)root.Includes;
+                        Queue<ITH44Chunk> thumbnails = new Queue<ITH44Chunk>();
+                        foreach (IThumChunk t in root.Thumbnails)
+                        {
+                            foreach (ITH44Chunk th in t.Children)
+                                thumbnails.Enqueue(th);
+                        }
+
                         foreach (DjvuChunk page in root.Pages)
                             AddPage(thumbnails, page);
                     }
@@ -574,16 +582,16 @@ namespace DjvuNet
             OnPropertyChanged(nameof(Pages));
 		}
 
-        internal void AddPage(Queue<ThumChunk> thumbnails, DjvuChunk page)
+        internal void AddPage(Queue<ITH44Chunk> thumbnails, DjvuChunk page)
         {
-            ThumChunk thumbnail = thumbnails != null && thumbnails.Count > 0 ? thumbnails.Dequeue() : null;
-            DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, thumbnail, _Includes, page);
+            ITH44Chunk thumbnail = thumbnails != null && thumbnails.Count > 0 ? thumbnails.Dequeue() : null;
+            DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, thumbnail, Includes, page);
             _Pages.Add(newPage);
         }
 
         internal void AddPage(DjvuFormElement page)
         {
-            DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, null, _Includes, page);
+            DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, null, Includes, page);
             _Pages.Add(newPage);
         }
 
@@ -615,9 +623,9 @@ namespace DjvuNet
         /// <param name="reader"></param>
         internal void DecodeRootForm(DjvuReader reader)
         {
-            _rootForm = DjvuParser.GetRootForm(reader, null, this);
-            _rootForm.Initialize(reader);
-            foreach (IDjvuNode chunk in _rootForm.Children)
+            RootForm = DjvuParser.GetRootForm(reader, null, this);
+            RootForm.Initialize(reader);
+            foreach (IDjvuNode chunk in RootForm.Children)
                 chunk.Initialize(reader);
         }
 

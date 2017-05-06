@@ -25,20 +25,27 @@ namespace DjvuNet.DataChunks
             if (writer == null)
                 throw new ArgumentNullException(nameof(writer));
 
+            AdjustAlignment(writer);
+
             if (writeHeader)
             {
                 writer.WriteUTF8String("FORM");
 
                 uint length = 0;
                 foreach (IDjvuNode node in Children)
+                {
                     length += ((uint)node.Length + node.OffsetDiff);
+                }
 
                 writer.WriteUInt32BigEndian(length);
                 writer.WriteUTF8String("BM44");
             }
 
             foreach (IDjvuNode node in Children)
+            {
+                AdjustAlignment(writer);
                 node.WriteData(writer, writeHeader);
+            }
         }
     }
 }

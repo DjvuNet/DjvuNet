@@ -16,11 +16,14 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class DjvuChunk : DjvuFormElement
     {
+        #region Fields
 
         private InfoChunk _Info;
         private bool _InfoQueried;
 
         private List<InclChunk> _Includes;
+
+        #endregion Fields
 
         #region Public Properties
 
