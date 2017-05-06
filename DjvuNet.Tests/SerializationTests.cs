@@ -49,6 +49,11 @@ namespace DjvuNet.Tests
 
             string json = File.ReadAllText(filePath, new UTF8Encoding(false));
             DjvuDoc doc = JsonConvert.DeserializeObject<DjvuNet.Serialization.DjvuDoc>(json, converters);
+
+            Assert.NotNull(doc);
+            Assert.NotNull(doc.File);
+            Assert.NotNull(doc.DjvuData);
+
         }
     }
 }

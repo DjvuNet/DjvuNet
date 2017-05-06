@@ -341,12 +341,8 @@ namespace DjvuNet.Compression.Tests
                     File.Delete(outFilePath);
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(WriteTestData))]
         public void Write_Theory(string fileName, string filePath, string outFilePath)
         {

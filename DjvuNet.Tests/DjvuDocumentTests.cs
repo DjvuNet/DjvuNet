@@ -1,5 +1,4 @@
-﻿using DjvuNet;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -94,23 +93,15 @@ namespace DjvuNet.Tests
                     });
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(DjvuArtifacts))]
         public void IsDjvuDocument_String_Theory(string filePath, int pageCount)
         {
             Assert.True(DjvuDocument.IsDjvuDocument(filePath));
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(DjvuArtifacts))]
         public void ctor_Theory(string filePath, int pageCount)
         {
