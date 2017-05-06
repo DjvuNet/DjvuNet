@@ -78,7 +78,10 @@ namespace DjvuNet.Tests.Xunit
 
         static void Add<TKey, TValue>(IDictionary<TKey, List<TValue>> dictionary, TKey key, TValue value)
         {
-            (dictionary[key] ?? (dictionary[key] = new List<TValue>())).Add(value);
+            if (dictionary.ContainsKey(key))
+                dictionary[key].Add(value);
+            else
+                dictionary.Add(key, new List<TValue>(new TValue[] { value }));
         }
 
         static IEnumerable<IAttributeInfo> GetTraitAttributesData(ITestMethod testMethod)
