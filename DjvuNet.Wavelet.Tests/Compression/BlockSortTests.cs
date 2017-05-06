@@ -204,11 +204,7 @@ namespace DjvuNet.Compression.Tests
                 Assert.Equal<byte>(expected[i], data[i]);
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(StringTestData))]
         public void BlockSortData_Theory01(string testStr)
         {
@@ -220,12 +216,8 @@ namespace DjvuNet.Compression.Tests
 
             BlockSort.BlockSortData(buffer, buffer.Length, ref markpos);
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(StringEncodingTestData))]
         public void BlockSortData_Theory02(Encoding enc, string testStr)
         {
@@ -240,11 +232,7 @@ namespace DjvuNet.Compression.Tests
             BlockSort.BlockSortData(buffer, buffer.Length, ref markpos);
         }
 
-#if _APPVEYOR
-        [Theory, Trait("Category", "BugTrack")]
-#else
-        [DjvuTheory]
-#endif
+        [DjvuTheory, Trait("Category", "BugTrack")]
         [MemberData(nameof(StringEncodingCrashTestData))]
         public void BlockSortData_Theory03(Encoding enc, string testStr)
         {

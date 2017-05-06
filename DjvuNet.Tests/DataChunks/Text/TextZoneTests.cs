@@ -146,11 +146,8 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
+
         [DjvuTheory]
-#endif
         [MemberData(nameof(TextZoneData))]
         public void TextZone_Theory(string file)
         {
