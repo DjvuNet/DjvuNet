@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
+using System.IO;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -41,6 +42,8 @@ namespace DjvuNet.DataChunks.Tests
                         DjvuJsonDocument.RootChild r = thumbsJson[i];
                         Assert.Equal<int>(thum.Children.Count, r.Children.Length);
 
+                        //DumpTH44ChunkList(index, thum.Children, i);
+
                         for(int k = 0; k < thum.Children.Count; k++)
                         {
                             IDjvuNode th44 = thum.Children[k];
@@ -55,6 +58,23 @@ namespace DjvuNet.DataChunks.Tests
                 {
                     var thumbs = document.RootForm.Children.Where((x) => x.ChunkType == ChunkType.Thum).ToArray();
                     Assert.Equal<int>(0, thumbs.Length);
+                }
+            }
+        }
+
+        private void DumpTH44ChunkList(int docIndex, IReadOnlyList<IDjvuNode> th44List, int i)
+        {
+            string docFile = Util.GetTestFilePath(docIndex);
+            string fileName = Path.GetFileNameWithoutExtension(docFile);
+            string outFileTemplate = Path.Combine(Util.ArtifactsDataPath, fileName);
+
+            for(int k = 0; k < th44List.Count; k++)
+            {
+                TH44Chunk th = (TH44Chunk) th44List[k];
+                string file = outFileTemplate + "_" + (i+1).ToString("00") + "_" + (k+1).ToString("00") + ".th44";
+                using (FileStream outFile = new FileStream(file, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    outFile.Write(th.ChunkData, 0, th.ChunkData.Length);
                 }
             }
         }

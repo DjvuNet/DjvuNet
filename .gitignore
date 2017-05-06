@@ -25,14 +25,15 @@ bld/
 
 # Test related content
 artifacts/
+Test.bat
 
 # Helper projects
 # DjvuNet.Build/
 DjvuNet.DjvuLibre.Helper/
 
 # Code generated during build
-/*/Properties/AssemblyInfoCommon.cs
-/*/Properties/AssemblyInfo.cs
+/**/Properties/AssemblyInfoCommon.cs
+/**/Properties/AssemblyInfo.cs
 
 # External dependencies directory with repositories
 [Ee]xternal/

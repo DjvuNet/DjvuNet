@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 
 
 namespace DjvuNet
 {
+    [Serializable]
     public class DjvuFormatException : System.FormatException
     {
         //
@@ -57,7 +57,7 @@ namespace DjvuNet
         //
         //   context:
         //     The contextual information about the source or destination.
-        protected DjvuFormatException(SerializationInfo info, StreamingContext context):
+        protected DjvuFormatException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context):
             base (info, context)
         {
         }

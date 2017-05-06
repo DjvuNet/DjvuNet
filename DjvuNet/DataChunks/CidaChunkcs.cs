@@ -12,9 +12,6 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class CidaChunk : DjvuNode
     {
-        #region Private Members
-
-        #endregion Private Members
 
         #region Public Properties
 
@@ -39,17 +36,5 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
-
-        /// <summary>
-        /// Skip the data bytes per IFF specification
-        /// </summary>
-        /// <param name="reader"></param>
-        public override void ReadData(IDjvuReader reader)
-        {
-            reader.Position += Length;
-        }
-
-        #endregion ProtectedMethods
     }
 }

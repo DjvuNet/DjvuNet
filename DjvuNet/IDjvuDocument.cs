@@ -17,7 +17,7 @@ namespace DjvuNet
 
         int Identifier { get; }
 
-        IReadOnlyList<DjviChunk> Includes { get; }
+        IReadOnlyList<IDjviChunk> Includes { get; }
 
         bool IsInverted { get; set; }
 
@@ -38,8 +38,6 @@ namespace DjvuNet
         DjvuFormElement RootForm { get; }
 
         event PropertyChangedEventHandler PropertyChanged;
-
-        void Dispose();
 
         List<T> GetRootFormChildren<T>() where T : DjvuNode;
 

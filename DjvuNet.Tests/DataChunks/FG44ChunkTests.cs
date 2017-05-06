@@ -6,6 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
+using System.IO;
+using DjvuNet.Tests;
+using DjvuNet.Wavelet;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -37,6 +41,104 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);
-            Assert.Equal<long>(2048, reader.Position);        }
+            Assert.Equal<long>(2048, reader.Position);
+        }
+
+        [Fact()]
+        public void ForegroundImageTest()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "test037C_P01.fg44");
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                FG44Chunk unk = new FG44Chunk(reader, null, null, "FG44", stream.Length);
+                var img = unk.ForegroundImage;
+                Assert.NotNull(img);
+                Assert.NotEqual(0, img.Width);
+                Assert.NotEqual(0, img.Height);
+
+                InterWavePixelMap map = new InterWavePixelMap();
+                Assert.Equal(0, map.Width);
+                Assert.Equal(0, map.Height);
+
+                unk.ForegroundImage = map;
+
+                Assert.NotSame(img, map);
+
+                img = unk.ForegroundImage;
+                Assert.Same(img, map);
+                Assert.Equal(0, img.Width);
+                Assert.Equal(0, img.Height);
+            }
+        }
+
+        public static IEnumerable<object[]> FG44TestData
+        {
+            get
+            {
+                List<object[]> retVal = new List<object[]>();
+
+                string[] files = System.IO.Directory.GetFiles(Util.ArtifactsDataPath, "*.fg44");
+
+                foreach (string f in files)
+                {
+                    string fileName = Path.GetFileName(f);
+                    retVal.Add(new object[]
+                    {
+                        fileName,
+                        f
+                    });
+                }
+
+                return retVal;
+            }
+        }
+
+#if _APPVEYOR
+        [Theory]
+#else
+        [DjvuTheory]
+#endif
+        [MemberData(nameof(FG44TestData))]
+        public void FG44Chunk_Theory(string fileName, string filePath)
+        {
+            using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                FG44Chunk th = new FG44Chunk(reader, null, null, "FG44", stream.Length);
+                Assert.Equal<ChunkType>(ChunkType.FG44, th.ChunkType);
+                Assert.Equal(stream.Length, th.Length);
+
+                var image = th.ForegroundImage;
+                Assert.NotNull(image);
+                Assert.IsType<InterWavePixelMap>(image);
+                Assert.True(image.Width >= 0 && image.Height > 0);
+            }
+        }
+
+        public void ForegroundImageTest002()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "test037C_P01.fg44");
+            using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                FG44Chunk th = new FG44Chunk(reader, null, null, "FG44", stream.Length);
+                Assert.Equal<ChunkType>(ChunkType.FG44, th.ChunkType);
+                Assert.Equal(stream.Length, th.Length);
+
+                var image = th.ForegroundImage;
+                Assert.NotNull(image);
+                Assert.IsType<InterWavePixelMap>(image);
+                Assert.True(image.Width >= 0 && image.Height > 0);
+
+                InterWavePixelMap map = new InterWavePixelMap();
+                th.ForegroundImage = map;
+                var image2 = th.ForegroundImage;
+                Assert.NotNull(image2);
+                Assert.NotSame(image, image2);
+                Assert.Same(map, image2);
+                Assert.True(image2.Width == 0 && image2.Height == 0);
+            }
+        }
     }
 }

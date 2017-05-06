@@ -17,11 +17,6 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public class BG44Chunk : DjvuNode, IBG44Chunk
     {
-        #region Private Members
-
-        private long _dataLocation;
-
-        #endregion Private Members
 
         #region Public Properties
 
@@ -51,7 +46,7 @@ namespace DjvuNet.DataChunks
                 return _backgroundImage;
             }
 
-            private set
+            internal set
             {
                 if (_backgroundImage != value)
                     _backgroundImage = value;
@@ -72,7 +67,7 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Public Methods
+        #region Methods
 
         /// <summary>
         /// Progressively decodes the background image
@@ -80,7 +75,7 @@ namespace DjvuNet.DataChunks
         /// <param name="backgroundMap"></param>
         public IInterWavePixelMap ProgressiveDecodeBackground(IInterWavePixelMap backgroundMap)
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 backgroundMap.Decode(reader);
             }
@@ -88,27 +83,13 @@ namespace DjvuNet.DataChunks
             return backgroundMap;
         }
 
-        #endregion Public Methods
-
-        #region Protected Methods
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-            reader.Position += Length;
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
-
         /// <summary>
         /// Decodes the background image for this chunk
         /// </summary>
         /// <returns></returns>
         internal IInterWavePixelMap DecodeBackgroundImage()
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 IInterWavePixelMap background = new InterWavePixelMap();
                 background.Decode(reader);
@@ -117,6 +98,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

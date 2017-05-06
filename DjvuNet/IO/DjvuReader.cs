@@ -19,7 +19,7 @@ namespace DjvuNet
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public class DjvuReader : BinaryReader, IDjvuReader
+    public partial class DjvuReader : BinaryReader, IDjvuReader
     {
         #region Private Members
 
@@ -90,7 +90,7 @@ namespace DjvuNet
         }
 
         public DjvuReader(string location)
-            : base(new FileStream(location, FileMode.Open, FileAccess.Read, FileShare.Read))
+            : base(new FileStream(location, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
         {
             _Location = location;
         }
@@ -99,17 +99,17 @@ namespace DjvuNet
 
         #region Internal Methods
 
-        internal static Stream GetWebStream(Uri link)
+        internal static Stream GetWebStream(Uri urlStr)
         {
-            if (link == null)
-                throw new ArgumentNullException(nameof(link));
+            if (urlStr == null)
+                throw new ArgumentNullException(nameof(urlStr));
 
             WebClient client = new WebClient();
-            if (String.CompareOrdinal(link.Scheme, "file") == 0)
-                return client.OpenRead(link);
+            if (String.CompareOrdinal(urlStr.Scheme, "file") == 0)
+                return client.OpenRead(urlStr);
             else
             {
-                byte[] buffer = client.DownloadData(link);
+                byte[] buffer = client.DownloadData(urlStr);
                 return new MemoryStream(buffer, false);
             }
         }
@@ -135,11 +135,6 @@ namespace DjvuNet
             }
 
             return buffer;
-        }
-
-        public byte[] GetJPEGImage(long length)
-        {
-            return ReadBytes(checked((int)length));
         }
 
         /// <summary>
@@ -353,10 +348,10 @@ namespace DjvuNet
         }
 
         /// <summary>
-        /// Reads a string which terminates at EOS
+        /// Reads a string which terminates at null char
         /// </summary>
         /// <returns></returns>
-        public string ReadUnknownLengthString(bool skipBOM = true)
+        public virtual string ReadNullTerminatedString(bool skipBOM = true, int bufferSize = 1024)
         {
             Encoding enc = null;
             int length = 0;
@@ -368,7 +363,7 @@ namespace DjvuNet
                     if (_CurrentEncoding != null)
                         enc = _CurrentEncoding;
                     else
-                        enc = _CurrentEncoding = new UTF8Encoding();
+                        enc = _CurrentEncoding = new UTF8Encoding(false);
                 }
                 return enc.GetString(test, 0, length);
             }
@@ -428,7 +423,8 @@ namespace DjvuNet
                     nameof(count));
 
             if (buffer.Length < count)
-                throw new ArgumentException(nameof(buffer));
+                throw new ArgumentException(
+                    $"Buffer length is lower than value of {nameof(count)}", nameof(buffer));
 
             byte[] checkBuffer = new byte[4];
             Buffer.BlockCopy(buffer, 0, checkBuffer, 0, 4);
@@ -532,7 +528,7 @@ namespace DjvuNet
 
         public override string ToString()
         {
-            return $"{{{this.GetType().Name} {{ Position: 0x{Position:x}, Length: 0x{this.BaseStream?.Length:x} BaseStream: {BaseStream} }}}}";
+            return $"{{{this.GetType().Name} {{ Position: 0x{Position:x}, Length: 0x{BaseStream.Length:x} BaseStream: {BaseStream} }}}}";
         }
 
         #endregion Public Methods

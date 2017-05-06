@@ -247,9 +247,7 @@ namespace DjvuNet.DataChunks
             {
                 writer.WriteUTF8String("FORM");
 
-                uint length = 0;
-                foreach (IDjvuNode node in Children)
-                    length += ((uint)node.Length + node.OffsetDiff);
+                uint length = (uint) GetDataLength();
 
                 writer.WriteUInt32BigEndian(length);
                 writer.WriteUTF8String(Name);
@@ -260,6 +258,20 @@ namespace DjvuNet.DataChunks
                 AdjustAlignment(writer);
                 node.WriteData(writer, writeHeader);
             }
+        }
+
+        public override long GetDataLength()
+        {
+            uint length = 0;
+            foreach (IDjvuNode node in Children)
+            {
+                uint increment = ((uint)node.GetDataLength() + node.OffsetDiff);
+                length += (increment + increment % 2);
+            }
+
+            Length = length;
+
+            return length;
         }
 
         /// <summary>
@@ -337,8 +349,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         internal IDjvuReader ExtractRawData()
         {
-            // Read the data in
-            return Reader.CloneReader(DataOffset + 4 + 4, Length);
+            return Reader.CloneReader(DataOffset + 4, Length);
         }
 
         public int AddChild(IDjvuNode node)

@@ -23,6 +23,8 @@ namespace DjvuNet
 
         bool IsDirty { get; set; }
 
+        long GetDataLength();
+
         void Initialize();
 
         void Initialize(IDjvuReader reader);

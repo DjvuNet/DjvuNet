@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
+using System.IO;
+using DjvuNet.Tests;
+using DjvuNet.Wavelet;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -23,10 +26,56 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
+        public void DecodeImageTest()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
+            using (DjvuReader reader = new DjvuReader(file))
+            {
+                PM44Chunk unk = new PM44Chunk(reader, null, null, null, reader.Length);
+                Assert.Equal<ChunkType>(ChunkType.PM44, unk.ChunkType);
+                Assert.Equal<string>(ChunkType.PM44.ToString(), unk.Name);
+                Assert.Equal<long>(0, unk.DataOffset);
+                Assert.Equal<long>(reader.Length, unk.Length);
+
+                IInterWavePixelMap map = unk.DecodeImage();
+                Assert.NotNull(map);
+            }
+        }
+
+        [Fact()]
+        public void ImageTest()
+        {
+            string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
+            using (DjvuReader reader = new DjvuReader(file))
+            {
+                PM44Chunk unk = new PM44Chunk(reader, null, null, null, reader.Length);
+                Assert.Equal<ChunkType>(ChunkType.PM44, unk.ChunkType);
+                Assert.Equal<string>(ChunkType.PM44.ToString(), unk.Name);
+                Assert.Equal<long>(0, unk.DataOffset);
+                Assert.Equal<long>(reader.Length, unk.Length);
+
+                IInterWavePixelMap map = unk.Image;
+                Assert.NotNull(map);
+            }
+        }
+
+        [Fact()]
         public void ProgressiveDecodeBackgroundTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
+            using (DjvuReader reader = new DjvuReader(file))
+            {
+                PM44Chunk unk = new PM44Chunk(reader, null, null, null, reader.Length);
+                Assert.Equal<ChunkType>(ChunkType.PM44, unk.ChunkType);
+                Assert.Equal<string>(ChunkType.PM44.ToString(), unk.Name);
+                Assert.Equal<long>(0, unk.DataOffset);
+                Assert.Equal<long>(reader.Length, unk.Length);
+
+                InterWavePixelMap map = new InterWavePixelMap();
+                IInterWavePixelMap result = unk.ProgressiveDecodeBackground(map);
+                Assert.NotNull(map);
+            }
         }
 
         [Fact()]

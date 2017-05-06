@@ -117,6 +117,7 @@
     <Compile Include="DataChunks\IBM44Form.cs" />
     <Compile Include="DataChunks\IDirmChunk.cs" />
     <Compile Include="DataChunks\IDjbzChunk.cs" />
+    <Compile Include="DataChunks\IDjviChunk.cs" />
     <Compile Include="DataChunks\IFG44Chunk.cs" />
     <Compile Include="DataChunks\IFGbzChunk.cs" />
     <Compile Include="DataChunks\IFGjpChunk.cs" />

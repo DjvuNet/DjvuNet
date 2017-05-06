@@ -6,6 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
+using DjvuNet.Wavelet;
+using System.IO;
+using DjvuNet.Tests;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -32,22 +35,62 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void DecodeImageTest()
         {
+            string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
+            using (DjvuReader reader = new DjvuReader(file))
+            {
+                BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
+                Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
+                Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+                Assert.Equal<long>(0, unk.DataOffset);
+                Assert.Equal<long>(reader.Length, unk.Length);
 
+                IInterWavePixelMap map = unk.DecodeImage();
+                Assert.NotNull(map);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void ImageTest()
         {
+            string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
+            using (DjvuReader reader = new DjvuReader(file))
+            {
+                BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
+                Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
+                Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+                Assert.Equal<long>(0, unk.DataOffset);
+                Assert.Equal<long>(reader.Length, unk.Length);
 
+                IInterWavePixelMap map = unk.Image;
+                Assert.NotNull(map);
+                Assert.Same(map, unk.Image);
+
+                InterWavePixelMap testMap = new InterWavePixelMap();
+                unk.Image = testMap;
+                Assert.NotSame(map, unk.Image);
+                Assert.Same(testMap, unk.Image);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void ProgressiveDecodeBackgroundTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
+            using (DjvuReader reader = new DjvuReader(file))
+            {
+                BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
+                Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
+                Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+                Assert.Equal<long>(0, unk.DataOffset);
+                Assert.Equal<long>(reader.Length, unk.Length);
+
+                InterWavePixelMap map = new InterWavePixelMap();
+                IInterWavePixelMap result = unk.ProgressiveDecodeBackground(map);
+                Assert.NotNull(map);
+            }
         }
 
         [Fact()]

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
 using System.IO;
+using DjvuNet.Tests.Xunit;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -145,7 +146,11 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
+#if _APPVEYOR
         [Theory]
+#else 
+        [DjvuTheory]
+#endif
         [MemberData(nameof(TextZoneData))]
         public void TextZone_Theory(string file)
         {

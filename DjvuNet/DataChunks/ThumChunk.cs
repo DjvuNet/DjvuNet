@@ -39,15 +39,5 @@ namespace DjvuNet.DataChunks
         }
 
         #endregion Constructors
-
-        #region Protected Methods
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            base.ReadData(reader);
-        }
-
-
-        #endregion Protected Methods
     }
 }

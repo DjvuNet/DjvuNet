@@ -18,15 +18,8 @@ namespace DjvuNet.DataChunks
     /// </summary>
     public abstract class AnnotationChunk : DjvuNode, IAnnotationChunk
     {
-        #region Private Members
-
-        private long _dataLocation = 0;
-
-        #endregion Private Members
 
         #region Public Properties
-
-        #region Annotations
 
         private Annotation[] _annotations;
 
@@ -37,10 +30,13 @@ namespace DjvuNet.DataChunks
         {
             get
             {
-                if (_annotations == null)
+                if (_annotations != null)
+                    return _annotations;
+                else
+                {
                     _annotations = ReadAnnotationData();
-
-                return _annotations;
+                    return _annotations;
+                }
             }
 
             internal set
@@ -50,9 +46,7 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Annotations
-
-        #endregion Public Properties
+        #endregion Properties
 
         #region Constructors
 
@@ -66,27 +60,13 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Protected Methods
+        #region Methods
 
         /// <summary>
         /// Gets the reader for the annotation data
         /// </summary>
         /// <returns></returns>
         protected abstract IDjvuReader GetAnnotationDataReader(long position);
-
-        /// <summary>
-        /// Reads in the chunk data
-        /// </summary>
-        /// <param name="reader"></param>
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-            reader.Position += Length;
-        }
-
-        #endregion Protected Methods
-
-        #region Private Methods
 
         /// <summary>
         /// Reads the compressed annotation data
@@ -96,7 +76,7 @@ namespace DjvuNet.DataChunks
             if (Length == 0)
                 return new Annotation[0];
 
-            using (IDjvuReader reader = GetAnnotationDataReader(_dataLocation))
+            using (IDjvuReader reader = GetAnnotationDataReader(DataOffset))
             {
                 string annotationText = new UTF8Encoding(false).GetString(reader.ReadToEnd());
                 return DecodeAnnotationText(annotationText);
@@ -116,6 +96,6 @@ namespace DjvuNet.DataChunks
                 .ToArray();
         }
 
-        #endregion Private Methods
+        #endregion Methods
     }
 }

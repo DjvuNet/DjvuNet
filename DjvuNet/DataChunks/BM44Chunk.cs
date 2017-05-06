@@ -9,11 +9,6 @@ namespace DjvuNet.DataChunks
 {
     public class BM44Chunk : DjvuNode, IBM44Chunk
     {
-        #region Private Members
-
-        private long _dataLocation;
-
-        #endregion Private Members
 
         #region Public Properties
 
@@ -37,7 +32,7 @@ namespace DjvuNet.DataChunks
                 return _Image;
             }
 
-            private set
+            internal set
             {
                 if (_Image != value)
                     _Image = value;
@@ -56,7 +51,7 @@ namespace DjvuNet.DataChunks
 
         #endregion Constructors
 
-        #region Public Methods
+        #region Methods
 
         /// <summary>
         /// Progressively decodes the background image
@@ -64,22 +59,12 @@ namespace DjvuNet.DataChunks
         /// <param name="pixelMap"></param>
         public IInterWavePixelMap ProgressiveDecodeBackground(IInterWavePixelMap pixelMap)
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 pixelMap.Decode(reader);
             }
             return pixelMap;
         }
-
-        public override void ReadData(IDjvuReader reader)
-        {
-            _dataLocation = reader.Position;
-            reader.Position += Length;
-        }
-
-        #endregion Public Methods
-
-        #region Internal Methods
 
         /// <summary>
         /// Decodes the background image for this chunk
@@ -87,7 +72,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         internal IInterWavePixelMap DecodeImage()
         {
-            using (IDjvuReader reader = Reader.CloneReaderToMemory(_dataLocation, Length))
+            using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
                 IInterWavePixelMap pixelMap = new InterWavePixelMap();
                 pixelMap.Decode(reader);
@@ -95,6 +80,6 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        #endregion Internal Methods
+        #endregion Methods
     }
 }

@@ -17,8 +17,7 @@ namespace DjvuNet.DataChunks.Tests
             get
             {
                 List<object[]> retVal = new List<object[]>();
-                string directory = Path.Combine(Util.RepoRoot, "artifacts", "data");
-                string[] testFiles = System.IO.Directory.GetFiles(directory, "*.fgbz");
+                string[] testFiles = System.IO.Directory.GetFiles(Util.ArtifactsDataPath, "*.fgbz");
                 for(int i = 0; i < testFiles.Length; i++)
                 {
                     string testNoStr = Path.GetFileNameWithoutExtension(testFiles[i])
@@ -122,7 +121,33 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.Equal<int>((int)testChunk?.Version.Value, chunk.Version);
                 Assert.Equal<int>((int)testChunk.Colors.Value, (int) chunk.Palette?.PaletteColors?.Length);
             }
+        }
+        
+        [Fact()]
+        public void ColorPalette001()
+        {
+            string filePath = Path.Combine(Util.ArtifactsDataPath, "test003C_P01.fgbz");
+            using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (DjvuReader reader = new DjvuReader(stream))
+            {
+                FGbzChunk th = new FGbzChunk(reader, null, null, "FGBZ", stream.Length);
+                Assert.Equal<ChunkType>(ChunkType.FGbz, th.ChunkType);
+                Assert.Equal(stream.Length, th.Length);
 
+                var palette = th.Palette;
+                Assert.NotNull(palette);
+                Assert.IsType<ColorPalette>(palette);
+                Assert.False(th.HasShapeTableData);
+
+                reader.Position = 0;
+                var colPal = new ColorPalette(reader, th);
+                th.Palette = colPal;
+                var palette2 = th.Palette;
+                Assert.NotNull(palette2);
+                Assert.IsType<ColorPalette>(palette2);
+                Assert.NotSame(palette, palette2);
+                Assert.Same(palette2, colPal);
+            }
         }
     }
 }

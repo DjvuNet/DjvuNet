@@ -21,8 +21,6 @@ namespace DjvuNet
 
         IDjvuReader GetFixedLengthStream(long length);
 
-        byte[] GetJPEGImage(long length);
-
         short ReadInt16BigEndian();
 
         int ReadInt24();
@@ -45,7 +43,7 @@ namespace DjvuNet
 
         ulong ReadUInt64BigEndian();
 
-        string ReadUnknownLengthString(bool skipBOM = true);
+        string ReadNullTerminatedString(bool skipBOM = true, int bufferSize = 1024);
 
         string ReadUTF7String(long length);
 

@@ -32,12 +32,12 @@ namespace DjvuNet.Parser
         public static DjvuFormElement GetRootForm(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document)
         {
             string formStr = reader.ReadUTF8String(4);
-            // use of int in Djvu Format limits file read size to 2 GB - should be long (int64)
+            // use of uint in Djvu Format limits file read size to 4 GB - should be long (int64)
             int length = (int)reader.ReadUInt32BigEndian();
             string formType = reader.ReadUTF8String(4);
             reader.Position -= 4;
 
-            ChunkType type = DjvuParser.GetChunkType(formType);
+            ChunkType type = DjvuParser.GetFormType(formType);
 
             DjvuFormElement formObj = (DjvuFormElement)DjvuParser.CreateDjvuNode(reader, document, parent, type, formType, length);
 
@@ -115,7 +115,7 @@ namespace DjvuNet.Parser
                 case ChunkType.PM44Form:
                     result = new PM44Form(reader, parent, rootDocument, chunkID, length);
                     break;
-                case ChunkType.WMRM:
+                case ChunkType.Wmrm:
                     result = new WmrmChunk(reader, parent, rootDocument, chunkID, length);
                     break;
                 case ChunkType.FGbz:
@@ -158,6 +158,27 @@ namespace DjvuNet.Parser
             catch (ArgumentException) { } // Catch unsupported chunks i.e. "LTAnno"
 
             return ChunkType.Unknown;
+        }
+
+        public static ChunkType GetFormType(string ID)
+        {
+            switch (ID.ToUpper())
+            {
+                case "DJVM":
+                    return ChunkType.Djvm;
+                case "DJVU":
+                    return ChunkType.Djvu;
+                case "DJVI":
+                    return ChunkType.Djvi;
+                case "PM44":
+                    return ChunkType.PM44Form;
+                case "BM44":
+                    return ChunkType.BM44Form;
+                case "THUM":
+                    return ChunkType.Thum;
+                default:
+                    throw new ArgumentException(nameof(ID));
+            }
         }
 
         /// <summary>
