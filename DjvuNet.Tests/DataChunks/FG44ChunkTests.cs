@@ -94,11 +94,7 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else
         [DjvuTheory]
-#endif
         [MemberData(nameof(FG44TestData))]
         public void FG44Chunk_Theory(string fileName, string filePath)
         {

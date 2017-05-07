@@ -323,12 +323,8 @@ namespace DjvuNet.Tests
                 Assert.IsType<BzzWriter>(bzzWriter);
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(UInt24TestData))]
         public void WriteUInt24BigEndian_Theory(uint test)
         {
@@ -345,11 +341,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(Int24TestData))]
         public void WriteInt24BigEndian_Theory(int test)
         {
@@ -367,12 +359,8 @@ namespace DjvuNet.Tests
                 Assert.Equal<int>(test, BitConverter.ToInt32(testBuffer, 0));
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(UInt24TestData))]
         public void WriteUInt24_Theory(uint test)
         {
@@ -388,11 +376,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(Int24TestData))]
         public void WriteInt24_Theory(int test)
         {
@@ -410,11 +394,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(Int16TestData))]
         public void WriteInt16BigEndian_Theory(short test)
         {
@@ -430,12 +410,8 @@ namespace DjvuNet.Tests
                 Assert.Equal<Int16>(test, BitConverter.ToInt16(testBuffer, 0));
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(Int32TestData))]
         public void WriteInt32BigEndian_Theory(int test)
         {
@@ -451,12 +427,8 @@ namespace DjvuNet.Tests
                 Assert.Equal<int>(test, BitConverter.ToInt32(testBuffer, 0));
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(Int64TestData))]
         public void WriteInt64BigEndian_Theory(long test)
         {
@@ -473,11 +445,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(UInt16TestData))]
         public void WriteUInt16BigEndian_Theory(ushort test)
         {
@@ -494,11 +462,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(UInt32TestData))]
         public void WriteUInt32BigEndian_Theory(uint test)
         {
@@ -514,12 +478,8 @@ namespace DjvuNet.Tests
                 Assert.Equal<uint>(test, BitConverter.ToUInt32(testBuffer, 0));
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(UInt64TestData))]
         public void WriteUInt64BigEndian_Theory(ulong test)
         {
@@ -535,12 +495,8 @@ namespace DjvuNet.Tests
                 Assert.Equal<ulong>(test, BitConverter.ToUInt64(testBuffer, 0));
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(StringTestData))]
         public void WriteUTF8String_Theory(string testString)
         {
@@ -561,11 +517,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(StringTestData))]
         public void WriteUTF7String_Theory(string testString)
         {
@@ -586,11 +538,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(StringTestData))]
         public void WriteString_Theory01(String testString)
         {
@@ -611,11 +559,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else
         [DjvuTheory]
-#endif
         [MemberData(nameof(StringTestData))]
         public void WriteString_Theory02(String testString)
         {
@@ -635,12 +579,8 @@ namespace DjvuNet.Tests
                 Assert.Equal<long>(stream.Position, writer.Position);
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(StringEncodingTestData))]
         public void WriteStringEncoding_Theory(String testString, Encoding encoding)
         {

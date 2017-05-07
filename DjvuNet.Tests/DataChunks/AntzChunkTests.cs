@@ -47,11 +47,7 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(AntzTestData))]
         public void AntzChunk_Theory(string fileName, string filePath)
         {
