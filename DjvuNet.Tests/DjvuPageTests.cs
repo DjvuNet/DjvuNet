@@ -66,12 +66,7 @@ namespace DjvuNet.Tests
             }
         }
 
-
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(TextContentData))]
         public void Text_Theory001(string filePath, int pageCount, int testPage, string expectedValue)
         {
@@ -507,11 +502,7 @@ namespace DjvuNet.Tests
             }
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(SubsampleTestData))]
         public void GetBgPixmap_Theory(int subsample)
         {
@@ -621,23 +612,15 @@ namespace DjvuNet.Tests
                 return retVal;
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(PixelSizeTestData))]
         public void GetPixelSize_Theory(string name, int format)
         {
             int size = DjvuPage.GetPixelSize((PixelFormat)format);
         }
 
-#if _APPVEYOR
-        [Theory]
-#else
         [DjvuTheory]
-#endif
         [MemberData(nameof(PixelSizeTestThrows))]
         public void GetPixelSize_Theory2(string name, int format)
         {

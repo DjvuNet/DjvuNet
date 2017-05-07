@@ -89,11 +89,7 @@ namespace DjvuNet.DataChunks.Tests
             Assert.Equal<long>(reader.Position, positionSum);
         }
 
-#if _APPVEYOR
-        [Theory]
-#else 
         [DjvuTheory]
-#endif
         [MemberData(nameof(FgbzTestData))]
         public void Palette_Theory(string testFile, DjvuJsonDocument doc)
         {

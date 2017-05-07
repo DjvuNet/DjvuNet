@@ -33,12 +33,8 @@ namespace DjvuNet.DataChunks.Tests
                 return retVal;
             }
         }
-
-#if _APPVEYOR
-        [Theory]
-#else 
+ 
         [DjvuTheory]
-#endif
         [MemberData(nameof(NavmTestData))]
         public void NavmChunk_Theory(string file)
         {
