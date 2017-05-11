@@ -50,7 +50,7 @@ namespace DjvuNet
 
         ColorPalette ForegroundPalette { get; }
 
-        PixelMap ForegroundPixelMap { get; }
+        IPixelMap ForegroundPixelMap { get; }
 
         System.Drawing.Bitmap Image { get; }
 
@@ -64,7 +64,7 @@ namespace DjvuNet
 
         System.Drawing.Bitmap ThumbnailImage { get; set; }
 
-        Graphics.Bitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, System.Drawing.Bitmap retVal);
+        IBitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, System.Drawing.Bitmap retVal);
 
         System.Drawing.Bitmap BuildImage(int subsample = 1);
 
@@ -72,15 +72,15 @@ namespace DjvuNet
 
         System.Drawing.Bitmap ExtractThumbnailImage();
 
-        PixelMap GetBgPixmap(Graphics.Rectangle rect, int subsample, double gamma, PixelMap retval);
+        IPixelMap GetBgPixmap(Graphics.Rectangle rect, int subsample, double gamma, IPixelMap retval);
 
-        Graphics.Bitmap GetBitmap(Graphics.Rectangle rect, int subsample, int align, Graphics.Bitmap retval);
+        Graphics.IBitmap GetBitmap(Graphics.Rectangle rect, int subsample, int align, Graphics.IBitmap retval);
 
-        Graphics.Bitmap GetBitmapList(Graphics.Rectangle rect, int subsample, int align, List<int> components);
+        Graphics.IBitmap GetBitmapList(Graphics.Rectangle rect, int subsample, int align, List<int> components);
 
-        Map GetMap(Graphics.Rectangle segment, int subsample, Map retval);
+        IMap GetMap(Graphics.Rectangle segment, int subsample, IMap retval);
 
-        PixelMap GetPixelMap(Graphics.Rectangle rect, int subsample, double gamma, PixelMap retval);
+        IPixelMap GetPixelMap(Graphics.Rectangle rect, int subsample, double gamma, IPixelMap retval);
 
         System.Drawing.Bitmap ResizeImage(int newWidth, int newHeight);
     }

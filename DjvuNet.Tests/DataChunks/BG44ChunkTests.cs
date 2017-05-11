@@ -77,7 +77,7 @@ namespace DjvuNet.DataChunks.Tests
                 unk.Initialize();
                 InterWavePixelMap map = new InterWavePixelMap();
                 IInterWavePixelMap result = unk.BackgroundImage;
-                PixelMap pixMap = result.GetPixelMap();
+                var pixMap = result.GetPixelMap();
                 unk.BackgroundImage = map;
                 Assert.NotSame(result, unk.BackgroundImage);
                 Assert.Same(map, unk.BackgroundImage);

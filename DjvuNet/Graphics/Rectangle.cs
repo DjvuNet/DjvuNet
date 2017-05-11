@@ -6,7 +6,7 @@ namespace DjvuNet.Graphics
     /// <summary>
     /// A general class for rectangle shapes.
     /// </summary>
-    public class Rectangle
+    public class Rectangle : IEquatable<Rectangle>
     {
         #region Public Properties
 
@@ -315,7 +315,7 @@ namespace DjvuNet.Graphics
 
         }
 
-        private bool ProcessEmptyRect(Rectangle rect1, Rectangle rect2)
+        internal bool ProcessEmptyRect(Rectangle rect1, Rectangle rect2)
         {
             if (rect1.Empty)
             {
@@ -357,6 +357,31 @@ namespace DjvuNet.Graphics
             Bottom += dy;
             Top += dy;
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(Rectangle other)
+        {
+            return this == other;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Rectangle first, Rectangle second)
+        {
+            if (null != (object) first && null != (object) second)
+                return first.Left == second.Left && first.Top == second.Top && first.Width == second.Width && first.Height == second.Height;
+            else
+                return null == (object)first && null == (object)second;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Rectangle first, Rectangle second)
+        {
+            if (null != (object)first && null != (object)second)
+                return first.Left != second.Left || first.Top != second.Top || first.Width != second.Width || first.Height != second.Height;
+            else
+                return !(null == (object)first && null == (object)second);
+        }
+
 #if !NETSTANDARD2_0
         /// <summary>
         /// Implicit conversion to <typeparamref name="System.Drawing.Rectangle">

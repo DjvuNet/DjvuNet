@@ -11,33 +11,20 @@ namespace DjvuNet.JB2
 {
     public class JB2Image : JB2Dictionary
     {
-        #region Private Members
-
-        #endregion Private Members
 
         #region Public Properties
-
-        #region Height
 
         /// <summary>
         /// Gets or sets the height of the image
         /// </summary>
         public int Height;
 
-        #endregion Height
-
-        #region Width
-
         /// <summary>
         /// Gets or sets the width of the image
         /// </summary>
         public int Width;
 
-        #endregion Width
-
-        #region Blits
-
-        private List<JB2Blit> _blits;
+        private List<JB2Blit> _Blits;
 
         /// <summary>
         /// Gets the blits for the image
@@ -45,10 +32,8 @@ namespace DjvuNet.JB2
         public IReadOnlyList<JB2Blit> Blits
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _blits; }
+            get { return _Blits; }
         }
-
-        #endregion Blits
 
         #endregion Public Properties
 
@@ -56,7 +41,7 @@ namespace DjvuNet.JB2
 
         public JB2Image() : base()
         {
-            _blits = new List<JB2Blit>();
+            _Blits = new List<JB2Blit>();
         }
 
         #endregion Constructors
@@ -190,7 +175,7 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public JB2Blit GetBlit(int blitno)
         {
-            return (JB2Blit)_blits[blitno];
+            return (JB2Blit)_Blits[blitno];
         }
 
         public virtual int AddBlit(JB2Blit jb2Blit)
@@ -198,8 +183,8 @@ namespace DjvuNet.JB2
             if (jb2Blit.ShapeNumber >= ShapeCount)
                 throw new ArgumentException("Image bad shape", nameof(jb2Blit));
 
-            int retval = _blits.Count;
-            _blits.Add(jb2Blit);
+            int retval = _Blits.Count;
+            _Blits.Add(jb2Blit);
 
             return retval;
         }
@@ -216,7 +201,7 @@ namespace DjvuNet.JB2
         public override void Init()
         {
             Width = Height = 0;
-            _blits.Clear();
+            _Blits.Clear();
             base.Init();
         }
 

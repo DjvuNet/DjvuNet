@@ -19,11 +19,11 @@ using DjvuNet.JB2;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
 using ColorPalette = DjvuNet.DataChunks.ColorPalette;
-using GBitmap = DjvuNet.Graphics.Bitmap;
-using GMap = DjvuNet.Graphics.Map;
-using GPixel = DjvuNet.Graphics.Pixel;
-using GPixelReference = DjvuNet.Graphics.PixelReference;
-using GPixmap = DjvuNet.Graphics.PixelMap;
+using GBitmap = DjvuNet.Graphics.IBitmap;
+using GMap = DjvuNet.Graphics.IMap;
+using GPixel = DjvuNet.Graphics.IPixel;
+using GPixelReference = DjvuNet.Graphics.IPixelReference;
+using GPixmap = DjvuNet.Graphics.IPixelMap;
 using GRect = DjvuNet.Graphics.Rectangle;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
@@ -833,7 +833,7 @@ namespace DjvuNet
                         xrect.Top = iwHeight;
 
                     GPixmap iwPMap = bgIWPixmap.GetPixelMap(1, xrect, null);
-                    pMap = (retval != null) ? retval : new GPixmap();
+                    pMap = (retval != null) ? retval : new PixelMap();
                     pMap.Downsample43(iwPMap, nrect);
                 }
                 else
@@ -854,7 +854,7 @@ namespace DjvuNet
 
                     GRect xrect = mapScaler.GetRequiredRect(rect);
                     GPixmap iwPMap = bgIWPixmap.GetPixelMap(po2, xrect, null);
-                    pMap = (retval != null) ? retval : new GPixmap();
+                    pMap = (retval != null) ? retval : new PixelMap();
 
                     mapScaler.Scale(xrect, iwPMap, rect, pMap);
                 }
@@ -873,13 +873,14 @@ namespace DjvuNet
                 return null;
         }
 
-        public Graphics.Bitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, Bitmap retVal)
+        public GBitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, Bitmap retVal)
         {
+            // TODO verify use of seemingly excessive retVal parameter
             Verify.SubsampleRange(subsample);
             return GetBitmap(rect, subsample, align, null);
         }
 
-        public GPixmap GetPixelMap(GRect rect, int subsample, double gamma, PixelMap retval)
+        public GPixmap GetPixelMap(GRect rect, int subsample, double gamma, GPixmap retval)
         {
             Verify.SubsampleRange(subsample);
 
@@ -892,7 +893,7 @@ namespace DjvuNet
                 if (bg == null)
                 {
                     bg = (retval == null) ? new PixelMap() : retval;
-                    bg.Init(rect.Height, rect.Width, GPixel.WhitePixel);
+                    bg.Init(rect.Height, rect.Width, Pixel.WhitePixel);
                 }
                 if (Stencil(bg, rect, subsample, gamma))
                     retval = bg;
@@ -1093,7 +1094,7 @@ namespace DjvuNet
             return null;
         }
 
-        public Map GetMap(GRect segment, int subsample, GMap retval)
+        public GMap GetMap(GRect segment, int subsample, GMap retval)
         {
             Verify.SubsampleRange(subsample);
 
@@ -1202,7 +1203,7 @@ namespace DjvuNet
             return ((fgred >= 1) && (fgred <= 12));
         }
 
-        internal bool Stencil(PixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
+        internal bool Stencil(IPixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
         {
             Verify.SubsampleRange(subsample);
 
@@ -1247,7 +1248,7 @@ namespace DjvuNet
                     }
 
                     GPixmap colors =
-                      new GPixmap().Init(1, fgPalette.PaletteColors.Length, null);
+                      new PixelMap().Init(1, fgPalette.PaletteColors.Length, null);
 
                     GPixelReference color = colors.CreateGPixelReference(0);
 
@@ -1304,7 +1305,7 @@ namespace DjvuNet
                             continue;
                         }
 
-                        bm = new GBitmap();
+                        bm = new DjvuNet.Graphics.Bitmap();
                         bm.Init(comprect.Height, comprect.Width, 0);
                         bm.Grays = 1 + (subsample * subsample);
 
