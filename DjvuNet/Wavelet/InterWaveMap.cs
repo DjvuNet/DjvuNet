@@ -11,34 +11,34 @@ namespace DjvuNet.Wavelet
         #region Public Fields
 
         /// <summary>
-        /// Gets or sets the Bh value
+        /// Image height in blocks
         /// </summary>
-        public int Bh;
+        public int BlockHeight;
 
         /// <summary>
-        /// Gets or sets the blocks
+        /// Array of image blocks
         /// </summary>
         public InterWaveBlock[] Blocks;
 
         /// <summary>
-        /// Gets or sets the Bw value
+        /// Width of image in blocks
         /// </summary>
-        public int Bw;
+        public int BlockWidth;
 
         /// <summary>
-        /// Gets or sets the Ih value
+        /// Image height
         /// </summary>
-        public int Ih;
+        public int Height;
 
         /// <summary>
-        /// Gets or sets the Iw value
+        /// Image width
         /// </summary>
-        public int Iw;
+        public int Width;
 
         /// <summary>
         /// Gets or sets the Nb value
         /// </summary>
-        public int Nb;
+        public int BlockNumber;
 
         /// <summary>
         /// Gets or sets the top value
@@ -54,9 +54,9 @@ namespace DjvuNet.Wavelet
         {
         }
 
-        public InterWaveMap(int w, int h)
+        public InterWaveMap(int width, int height)
         {
-            Init(w, h);
+            Init(width, height);
         }
 
         #endregion Constructors
@@ -71,19 +71,19 @@ namespace DjvuNet.Wavelet
             {
                 retval = new InterWaveMap
                 {
-                    Bh = Bh,
+                    BlockHeight = BlockHeight,
                     Blocks = (InterWaveBlock[])Blocks.Clone(),
-                    Bw = Bw,
-                    Ih = Ih,
-                    Iw = Iw,
-                    Nb = Nb,
+                    BlockWidth = BlockWidth,
+                    Height = Height,
+                    Width = Width,
+                    BlockNumber = BlockNumber,
                     Top = Top
                 };
 
                 //IWBlock[] blocks = (IWBlock[])this.Blocks.Clone();
                 //((IWMap)retval).Blocks = blocks;
 
-                for (int i = 0; i < Nb; i++)
+                for (int i = 0; i < BlockNumber; i++)
                     retval.Blocks[i] = Blocks[i].Duplicate();
             }
             catch
@@ -192,7 +192,7 @@ namespace DjvuNet.Wavelet
         {
             int buckets = 0;
 
-            for (int blockno = 0; blockno < Nb; blockno++)
+            for (int blockno = 0; blockno < BlockNumber; blockno++)
             {
                 for (int buckno = 0; buckno < 64; buckno++)
                 {
@@ -206,46 +206,46 @@ namespace DjvuNet.Wavelet
 
         public void Image(int index, sbyte[] img8, int rowsize, int pixsep, bool fast)
         {
-            short[] data16 = new short[Bw * Bh];
+            short[] data16 = new short[BlockWidth * BlockHeight];
             short[] liftblock = new short[1024];
             int pidx = 0;
             InterWaveBlock[] block = Blocks;
             int blockidx = 0;
             int ppidx = 0;
 
-            for (int i = 0; i < Bh; i += 32, pidx += (32 * Bw))
+            for (int i = 0; i < BlockHeight; i += 32, pidx += (32 * BlockWidth))
             {
-                for (int j = 0; j < Bw; j += 32)
+                for (int j = 0; j < BlockWidth; j += 32)
                 {
                     block[blockidx].WriteLiftBlock(liftblock, 0, 64);
                     blockidx++;
 
                     ppidx = pidx + j;
 
-                    for (int ii = 0, p1idx = 0; ii++ < 32; p1idx += 32, ppidx += Bw)
+                    for (int ii = 0, p1idx = 0; ii++ < 32; p1idx += 32, ppidx += BlockWidth)
                         Array.Copy(liftblock, p1idx, data16, ppidx, 32);
                 }
             }
 
             if (fast)
             {
-                Backward(data16, 0, Iw, Ih, Bw, 32, 2);
+                Backward(data16, 0, Width, Height, BlockWidth, 32, 2);
                 pidx = 0;
 
-                for (int i = 0; i < Bh; i += 2, pidx += Bw)
+                for (int i = 0; i < BlockHeight; i += 2, pidx += BlockWidth)
                 {
-                    for (int jj = 0; jj < Bw; jj += 2, pidx += 2)
-                        data16[pidx + Bw] = data16[pidx + Bw + 1] = data16[pidx + 1] = data16[pidx];
+                    for (int jj = 0; jj < BlockWidth; jj += 2, pidx += 2)
+                        data16[pidx + BlockWidth] = data16[pidx + BlockWidth + 1] = data16[pidx + 1] = data16[pidx];
                 }
             }
             else
-                Backward(data16, 0, Iw, Ih, Bw, 32, 1);
+                Backward(data16, 0, Width, Height, BlockWidth, 32, 1);
 
             pidx = 0;
 
-            for (int i = 0, rowidx = index; i++ < Ih; rowidx += rowsize, pidx += Bw)
+            for (int i = 0, rowidx = index; i++ < Height; rowidx += rowsize, pidx += BlockWidth)
             {
-                for (int j = 0, pixidx = rowidx; j < Iw; pixidx += pixsep)
+                for (int j = 0, pixidx = rowidx; j < Width; pixidx += pixsep)
                 {
                     int x = (data16[pidx + (j++)] + 32) >> 6;
 
@@ -269,12 +269,12 @@ namespace DjvuNet.Wavelet
             int boxsize = 1 << nlevel;
 
             if (subsample != (32 >> nlevel))
-                throw new ArgumentException("(Map::image) Unsupported subsampling factor");
+                throw new ArgumentOutOfRangeException("(Map::image) Unsupported subsampling factor");
 
             if (rect.Empty)
-                throw new ArgumentException("(Map::image) Rectangle is empty");
+                throw new ArgumentException("(Map::image) Rectangle is empty", nameof(rect));
 
-            Rectangle irect = new Rectangle(0, 0, ((Iw + subsample) - 1) / subsample, ((Ih + subsample) - 1) / subsample);
+            Rectangle irect = new Rectangle(0, 0, ((Width + subsample) - 1) / subsample, ((Height + subsample) - 1) / subsample);
 
             if ((rect.Right < 0) || (rect.Bottom < 0) || (rect.Left > irect.Left) || (rect.Top > irect.Top))
                 throw new ArgumentException("(Map::image) Rectangle is out of bounds: " + rect.Right + "," + rect.Bottom +
@@ -313,7 +313,7 @@ namespace DjvuNet.Wavelet
 
             int dataw = work.Width;
             short[] data = new short[dataw * work.Height];
-            int blkw = Bw >> 5;
+            int blkw = BlockWidth >> 5;
             int lblock = ((work.Bottom >> nlevel) * blkw) + (work.Right >> nlevel);
 
             short[] liftblock = new short[1024];
@@ -396,14 +396,14 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        public InterWaveMap Init(int w, int h)
+        public InterWaveMap Init(int width, int height)
         {
-            Iw = w;
-            Ih = h;
-            Bw = ((w + 32) - 1) & unchecked((int)0xffffffe0);
-            Bh = ((h + 32) - 1) & unchecked((int)0xffffffe0);
-            Nb = (Bw * Bh) / 1024;
-            Blocks = new InterWaveBlock[Nb];
+            Width = width;
+            Height = height;
+            BlockWidth = ((width + 32) - 1) & unchecked((int)0xffffffe0);
+            BlockHeight = ((height + 32) - 1) & unchecked((int)0xffffffe0);
+            BlockNumber = (BlockWidth * BlockHeight) / 1024;
+            Blocks = new InterWaveBlock[BlockNumber];
 
             for (int i = 0; i < Blocks.Length; i++)
                 Blocks[i] = new InterWaveBlock();

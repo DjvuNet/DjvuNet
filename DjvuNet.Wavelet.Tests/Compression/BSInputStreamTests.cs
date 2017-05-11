@@ -5,15 +5,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace DjvuNet.Compression.Tests
 {
     public class BSInputStreamTests
     {
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void BSInputStreamTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            using(MemoryStream stream = new MemoryStream())
+            using (BSInputStream bsi = new BSInputStream(stream))
+            {
+                Assert.False(bsi.CanWrite);
+                Assert.True(bsi.CanRead);
+                Assert.IsType<BSInputStream>(bsi);
+            } 
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

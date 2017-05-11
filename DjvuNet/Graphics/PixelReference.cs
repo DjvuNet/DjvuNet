@@ -3,27 +3,75 @@ using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Graphics
 {
-    public class PixelReference : DjvuNet.Graphics.Pixel
+    public class PixelReference : IPixel, IPixelReference
     {
         #region Private Members
 
-        private readonly int _blueOffset;
-        private readonly int _greenOffset;
-        private readonly int _ncolors;
-        private readonly Map _parent;
-        private readonly int _redOffset;
+        private int _blueOffset;
+        private int _greenOffset;
+        private int _ncolors;
+        private IMap2 _parent;
+        private int _redOffset;
         private int _offset;
 
         #endregion Private Members
 
         #region Public Properties
 
+        public int ColorNumber
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _ncolors; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _ncolors = value; }
+        }
+
+        public int RedOffset
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _redOffset; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _redOffset = value; }
+        }
+
+        public int GreenOffset
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _greenOffset; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _greenOffset = value; }
+        }
+
+        public int BlueOffset
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _blueOffset; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _blueOffset = value; }
+        }
+
+        public IMap2 Parent
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _parent; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _parent = value; }
+        }
+
+        public int Offset
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _offset; }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _offset = value; }
+        }
+
         #region Blue
 
         /// <summary>
         /// Gets or sets the referenced blue value
         /// </summary>
-        public override sbyte Blue
+        public sbyte Blue
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _parent.Data[_offset + _blueOffset]; }
@@ -39,7 +87,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the referenced green value
         /// </summary>
-        public override sbyte Green
+        public sbyte Green
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _parent.Data[_offset + _greenOffset]; }
@@ -55,7 +103,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the referenced red value
         /// </summary>
-        public new sbyte Red
+        public sbyte Red
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _parent.Data[_offset + _redOffset]; }
@@ -79,21 +127,25 @@ namespace DjvuNet.Graphics
         /// <param name="offset">
         /// the initial pixel position to refer to
         /// </param>
-        public PixelReference(Map parent, int offset) : base()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public PixelReference(IMap2 parent, int offset)
         {
-            _parent = parent;
-            _ncolors = parent.BytesPerPixel;
+            Initialize(parent);
             _offset = offset * _ncolors;
-            _blueOffset = parent.BlueOffset;
-            _greenOffset = parent.GreenOffset;
-            _redOffset = parent.RedOffset;
         }
 
-        public PixelReference(Map parent, int row, int column) : base()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public PixelReference(IMap2 parent, int row, int column) : base()
+        {
+            Initialize(parent);
+            _offset = (parent.RowOffset(row) + column) * _ncolors;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Initialize(IMap2 parent)
         {
             _parent = parent;
-            _ncolors = parent.BytesPerPixel;
-            _offset = (parent.RowOffset(row) + column) * _ncolors;
+            ColorNumber = parent.BytesPerPixel;
             _blueOffset = parent.BlueOffset;
             _greenOffset = parent.GreenOffset;
             _redOffset = parent.RedOffset;
@@ -101,29 +153,30 @@ namespace DjvuNet.Graphics
 
         #endregion Constructors
 
-        #region Public Methods
+        #region Methods
 
-        /// <summary> Copy the pixel values.
-        ///
+        /// <summary> 
+        /// Copy pixel values from source.
         /// </summary>
-        /// <param name="ref">pixel to copy
+        /// <param name="ref">
+        /// Source
         /// </param>
-        public void SetPixels(PixelReference ref_Renamed, int length)
+        public void SetPixels(IPixelReference source, int length)
         {
-            if (ref_Renamed._ncolors != _ncolors || ref_Renamed._blueOffset != _blueOffset ||
-                ref_Renamed._greenOffset != _greenOffset || ref_Renamed._redOffset != _redOffset)
+            if (source.ColorNumber != _ncolors || source.BlueOffset != _blueOffset ||
+                source.GreenOffset != _greenOffset || source.RedOffset != _redOffset)
             {
                 while (length-- > 0)
                 {
-                    CopyFrom(ref_Renamed);
-                    ref_Renamed.IncOffset();
+                    CopyFrom(source);
+                    source.IncOffset();
                     IncOffset();
                 }
             }
             else
             {
-                Array.Copy(ref_Renamed._parent.Data, ref_Renamed._offset, _parent.Data, _offset, length * _ncolors);
-                ref_Renamed.IncOffset(length);
+                Array.Copy(source.Parent.Data, source.Offset, _parent.Data, _offset, length * _ncolors);
+                source.IncOffset(length);
                 IncOffset(length);
             }
         }
@@ -163,7 +216,7 @@ namespace DjvuNet.Graphics
         public void Ycc2Rgb(int count)
         {
             if ((_ncolors != 3) || _parent.IsRampNeeded)
-                throw new SystemException($"{nameof(Ycc2Rgb)} only legal with three colors");
+                throw new DjvuFormatException($"{nameof(Ycc2Rgb)} can be used only with three color based images.");
 
             while (count-- > 0)
             {
@@ -183,59 +236,73 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Set the blue, green, and red values of the current pixel.
-        ///
+        /// <summary> 
+        /// Set the blue, green, and red values of the current pixel.
         /// </summary>
-        /// <param name="blue">pixel value
+        /// <param name="blue">
+        /// Pixel value
         /// </param>
-        /// <param name="green">pixel value
+        /// <param name="green">
+        /// Pixel value
         /// </param>
-        /// <param name="red">pixel value
+        /// <param name="red">
+        /// Pixel value
         /// </param>
-        public override void SetBGR(int blue, int green, int red)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetBGR(int blue, int green, int red)
         {
             _parent.Data[_offset + _blueOffset] = (sbyte)blue;
             _parent.Data[_offset + _greenOffset] = (sbyte)green;
             _parent.Data[_offset + _redOffset] = (sbyte)red;
         }
 
-        public unsafe override void SetBGR(int color)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void SetBGR(int color)
         {
             sbyte* colorPtr = (sbyte*) &color;
-            colorPtr++;
-            _parent.Data[_offset + _blueOffset] = *colorPtr; colorPtr++;
-            _parent.Data[_offset + _greenOffset] = *colorPtr; colorPtr++;
             _parent.Data[_offset + _redOffset] = *colorPtr;
+            colorPtr++;
+            _parent.Data[_offset + _greenOffset] = *colorPtr;
+            colorPtr++;
+            _parent.Data[_offset + _blueOffset] = *colorPtr;
         }
 
-        /// <summary> Create a duplicate of this PixelReference.
-        ///
+        /// <summary> 
+        /// Create a duplicate of this PixelReference.
         /// </summary>
         /// <returns> the newly created PixelReference
         /// </returns>
-        public new PixelReference Duplicate()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IPixel Duplicate()
         {
             return new PixelReference(_parent, _offset);
         }
 
-        /// <summary> Fills an array of pixels from the specified values.
-        ///
+        /// <summary> 
+        /// Fills an array of pixels from the specified values.
         /// </summary>
-        /// <param name="x">the x-coordinate of the upper-left corner of the region of
+        /// <param name="x">
+        /// The x-coordinate of the upper-left corner of the region of
         /// pixels
         /// </param>
-        /// <param name="y">the y-coordinate of the upper-left corner of the region of
+        /// <param name="y">
+        /// The y-coordinate of the upper-left corner of the region of
         /// pixels
         /// </param>
-        /// <param name="w">the width of the region of pixels
+        /// <param name="w">
+        /// The width of the region of pixels
         /// </param>
-        /// <param name="h">the height of the region of pixels
+        /// <param name="h">
+        /// The height of the region of pixels
         /// </param>
-        /// <param name="pixels">the array of pixels
+        /// <param name="pixels">
+        /// The array of pixels
         /// </param>
-        /// <param name="off">the offset into the pixel array
+        /// <param name="off">
+        /// The offset into the pixel array
         /// </param>
-        /// <param name="scansize">the distance from one row of pixels to the next in the
+        /// <param name="scansize">
+        /// The distance from one row of pixels to the next in the
         /// array
         /// </param>
         public void FillRgbPixels(int x, int y, int w, int h, int[] pixels, int off, int scansize)
@@ -256,7 +323,7 @@ namespace DjvuNet.Graphics
             }
             else
             {
-                PixelReference ref_Renamed = _parent.CreateGPixelReference(0);
+                var ref_Renamed = _parent.CreateGPixelReference(0);
                 for (int y0 = yrev; y0-- > (yrev - h); off += scansize)
                 {
                     ref_Renamed.SetOffset(y0, x);
@@ -275,11 +342,12 @@ namespace DjvuNet.Graphics
             _offset += _ncolors;
         }
 
-        /// <summary> Skip past the specified number of pixels.  Care should be taken when stepping
+        /// <summary> 
+        /// Skip past the specified number of pixels. Care should be taken when stepping
         /// past the end of a row.
-        ///
         /// </summary>
-        /// <param name="offset">number of pixels to step past.
+        /// <param name="offset">
+        /// Number of pixels to step past.
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void IncOffset(int offset)
@@ -287,6 +355,73 @@ namespace DjvuNet.Graphics
             _offset += (_ncolors * offset);
         }
 
-        #endregion Public Methods
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IPixel ToPixel()
+        {
+            return new Pixel(Blue, Green, Red);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFrom(IPixel pixel)
+        {
+            Red = pixel.Red;
+            Green = pixel.Green;
+            Blue = pixel.Blue;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetGray(sbyte gray)
+        {
+            Red = gray;
+            Green = gray;
+            Blue = gray;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(IPixel other)
+        {
+            if (null != (object) other)
+                return Red == other.Red && Green == other.Green && Blue == other.Blue;
+            else
+                return false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(IPixelReference other)
+        {
+            if (null != (object)other)
+                return Red == other.Red && Green == other.Green && Blue == other.Blue;
+            else
+                return false;
+        }
+
+        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
+        //public bool Equals(PixelReference other)
+        //{
+        //    if (null != (object)other)
+        //        return Red == other.Red && Green == other.Green && Blue == other.Blue;
+        //    else
+        //        return false;
+        //}
+
+        #endregion Methods
+
+        #region Operators
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(PixelReference first, PixelReference second)
+        {
+            return first?.Red == second?.Red && first?.Green == second?.Green && first?.Blue == second?.Blue;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(PixelReference first, PixelReference second)
+        {
+            return first?.Red != second?.Red || first?.Green != second?.Green || first?.Blue != second?.Blue;
+        }
+
+        #endregion Operators
+
+
     }
 }

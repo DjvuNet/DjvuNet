@@ -5,21 +5,63 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Compression;
 
 namespace DjvuNet.Wavelet.Tests
 {
     public class InterWaveCodecTests
     {
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void InterWaveCodecTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            InterWaveCodec codec = new InterWaveCodec();
+            Assert.NotNull(codec._QuantHigh);
+            Assert.Equal(10, codec._QuantHigh.Length);
+            Assert.NotNull(codec._QuantLow);
+            Assert.Equal(16, codec._QuantLow.Length);
+            Assert.NotNull(codec._CoefficientState);
+            Assert.Equal(256, codec._CoefficientState.Length);
+            Assert.NotNull(codec._BucketState);
+            Assert.Equal(16, codec._BucketState.Length);
+            Assert.Equal(0, codec._CurrentBand);
+            Assert.Equal(1, codec._CurrentBitPlane);
+            Assert.NotNull(codec._ctxMant);
+            Assert.NotNull(codec._ctxRoot);
+
+            Assert.NotNull(codec._ctxStart);
+            Assert.Equal(32, codec._ctxStart.Length);
+
+            foreach (var s in codec._ctxStart)
+                Assert.NotNull(s);
+
+            Assert.NotNull(codec._ctxBucket);
+            Assert.Equal(10, codec._ctxBucket.Length);
+
+            foreach (var b in codec._ctxBucket)
+            {
+                Assert.NotNull(b);
+                Assert.Equal(8, b.Length);
+
+                foreach (var c in b)
+                    Assert.NotNull(c);
+            }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void CodeSliceTest()
+        [Fact()]
+        public void CodeSliceTest001()
         {
-            Assert.True(false, "This test needs an implementation");
+            InterWaveCodec codec = new InterWaveCodec();
+            codec._CurrentBitPlane = -1;
+            Assert.Equal(0, codec.CodeSlice(null));
+        }
+
+        [Fact()]
+        public void CodeSliceTest002()
+        {
+            InterWaveCodec codec = new InterWaveCodec();
+            ZPCodec coder = new ZPCodec();
+
+            Assert.Equal(1, codec.CodeSlice(coder));
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
@@ -28,10 +70,16 @@ namespace DjvuNet.Wavelet.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact()]
         public void InitTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            InterWaveMap map = new InterWaveMap(32, 32);
+            InterWaveCodec codec = new InterWaveCodec();
+            var test = codec.Init(map);
+
+            Assert.NotNull(test);
+            Assert.Same(codec, test);
+
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
@@ -40,10 +88,28 @@ namespace DjvuNet.Wavelet.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void NextQuantTest()
+        [Fact(Skip = "Time consuming benchmark test"), Trait("Category", "Skip")]
+        [Trait("Category", "Benchmark")]
+        public void NextQuantBenchmarkTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            InterWaveMap map = new InterWaveMap(32, 32);
+            InterWaveCodec codec = new InterWaveCodec();
+            var test = codec.Init(map);
+
+            for (int i = 0; i < 500000000; i++)
+                codec.NextQuant();
+        }
+
+        [Fact(Skip = "Time consuming benchmark test"), Trait("Category", "Skip")]
+        [Trait("Category", "Benchmark")]
+        public void NextQuantFastBenchmarkTest()
+        {
+            InterWaveMap map = new InterWaveMap(32, 32);
+            InterWaveCodec codec = new InterWaveCodec();
+            var test = codec.Init(map);
+
+            for (int i = 0; i < 500000000; i++)
+                codec.NextQuantFast();
         }
     }
 }

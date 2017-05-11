@@ -35,7 +35,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ContainsRect001()
+        public void ContainsTest001()
         {
             var target1 = new Rectangle(0, 0, 0, 0);
             Assert.True(target1.Empty);
@@ -59,6 +59,27 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(target4.Contains(target1));
             Assert.True(target4.Contains(target2));
             Assert.True(target4.Contains(target3));
+        }
+
+        [Fact()]
+        public void ContainsTest002()
+        {
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = 0,
+                Top = 0
+            };
+
+            Assert.False(rect2.Contains(rect1));
         }
 
         [Fact]
@@ -220,10 +241,88 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal((1000 + 200) * (11 + 100), rect.Area);
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void RectangleTest1()
+        [Fact()]
+        public void OpEqualityTest()
         {
-            Assert.True(false, "This test needs an implementation");
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Assert.True(rect1 == rect2);
+        }
+
+        [Fact()]
+        public void OpInequalityTest()
+        {
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Assert.False(rect1 != rect2);
+        }
+
+        [Fact()]
+        public void EqualsObjectTest001()
+        {
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Assert.True(rect1.Equals((object) rect2));
+        }
+
+        [Fact()]
+        public void EqualsObjectTest002()
+        {
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Assert.False(rect1.Equals((object)null));
         }
 
         [Fact()]
@@ -253,6 +352,81 @@ namespace DjvuNet.Graphics.Tests
         public void IntersectTest()
         {
             Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void ProcessEmptyRectangle001()
+        {
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rectEmpty = new Rectangle
+            {
+            };
+
+            Assert.True(rect1.ProcessEmptyRect(rect2, rectEmpty));
+        }
+
+        [Fact()]
+        public void ProcessEmptyRectangle002()
+        {
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rectEmpty = new Rectangle
+            {
+            };
+
+            Assert.True(rect1.ProcessEmptyRect(rectEmpty, rect2));
+        }
+
+        [Fact()]
+        public void ProcessEmptyRectangle003()
+        {
+            int width = 7;
+            int height = 5;
+
+            Rectangle rect1 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rect2 = new Rectangle
+            {
+                Left = width,
+                Top = height
+            };
+
+            Rectangle rectEmpty = new Rectangle
+            {
+            };
+
+            Assert.False(rect1.ProcessEmptyRect(rectEmpty, rectEmpty));
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

@@ -4,32 +4,26 @@ using System.Runtime.InteropServices;
 
 namespace DjvuNet.Graphics
 {
-    ///
-    /// TODO - break inheritance hierarchy with PixelReference
-    ///
 
     /// <summary>
     /// This class represents a single pixel.
     /// </summary>
     [StructLayout(LayoutKind.Explicit)]
-    public class Pixel : IEquatable<Pixel>
+    public unsafe struct Pixel : IEquatable<Pixel>, IPixel
     {
         #region Private Members
 
         [FieldOffset(0)]
-        private int _Color;
+        fixed sbyte _Color[3];
 
         [FieldOffset(0)]
-        private sbyte _Alpha;
+        sbyte _Blue;
 
         [FieldOffset(1)]
-        private sbyte _Blue;
+        sbyte _Green;
 
         [FieldOffset(2)]
-        private sbyte _Green;
-
-        [FieldOffset(3)]
-        private sbyte _Red;
+        sbyte _Red;
 
         #endregion Private Members
 
@@ -75,7 +69,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public static Pixel BluePixel
         {
-            get { return new Pixel(0, 0, -1); }
+            get { return new Pixel(-1, 0, 0); }
         }
 
         #endregion BluePixel
@@ -99,7 +93,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public static Pixel RedPixel
         {
-            get { return new Pixel(-1, 0, 0); }
+            get { return new Pixel(0, 0, -1); }
         }
 
         #endregion RedPixel
@@ -113,7 +107,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the blue value for the pixel
         /// </summary>
-        public virtual sbyte Blue
+        public sbyte Blue
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _Blue; }
@@ -128,7 +122,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the green value for the pixel
         /// </summary>
-        public virtual sbyte Green
+        public sbyte Green
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _Green; }
@@ -157,14 +151,12 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        protected Pixel()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Pixel(int color = 0)
         {
-            _Color = unchecked((int)0xff000000);
-        }
-
-        protected Pixel(int color)
-        {
-            _Color = color;
+            _Blue = unchecked((sbyte)(color >> 16));
+            _Green = unchecked((sbyte)(color >> 8));
+            _Red = unchecked((sbyte)(color));
         }
 
         /// <summary> Creates a new Pixel object.
@@ -177,9 +169,8 @@ namespace DjvuNet.Graphics
         /// <param name="red">pixel value
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Pixel(sbyte blue = -51, sbyte green = -51, sbyte red = -51)
+        public Pixel(sbyte blue, sbyte green = 0, sbyte red = 0)
         {
-            _Color = unchecked((int)0xff000000);
             _Blue = blue;
             _Green = green;
             _Red = red;
@@ -189,20 +180,21 @@ namespace DjvuNet.Graphics
 
         #region Public Methods
 
-        /// <summary> Create a clone of this pixel.
-        ///
+        /// <summary> 
+        /// Create a clone of this pixel.
         /// </summary>
-        /// <returns> the cloned pixel
+        /// <returns> 
+        /// The cloned pixel
         /// </returns>
-        public virtual Pixel Duplicate()
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public IPixel Duplicate()
         {
-            return new Pixel(this.GetHashCode());
+            return new Pixel(Blue, Green, Red);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString()
         {
-            return $"{{ {base.ToString()} Red: {Red} Green: {Green} Blue: {Blue} }}";
+            return $"{{ {GetType().Name} Red: {Red} Green: {Green} Blue: {Blue} }}";
         }
 
         /// <summary> Initialize a pixel with bgr values.
@@ -214,14 +206,16 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <param name="red">pixel value
         /// </param>
-        public virtual void SetBGR(int blue, int green, int red)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void SetBGR(int blue, int green, int red)
         {
             _Blue = (sbyte)blue;
             _Red = (sbyte)red;
             _Green = (sbyte)green;
         }
 
-        public unsafe virtual void SetBGR(int color)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe void SetBGR(int color)
         {
             sbyte* colorPtr = (sbyte*)&color;
             colorPtr++;
@@ -238,16 +232,11 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> true if red, green, and blue values are all equal
         /// </returns>
-        public override bool Equals(Object item)
+        public override bool Equals(object item)
         {
-            if (null != item)
-            {
-                Pixel other = item as Pixel;
-                if (null != other)
-                    return _Color == other._Color;
-                else
-                    return false;
-            }
+            var pix = item as IPixel;
+            if (pix != null)
+                return this == (Pixel) pix;
             else
                 return false;
         }
@@ -257,6 +246,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <param name="gray">pixel value
         /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetGray(sbyte gray)
         {
             _Blue = gray;
@@ -272,7 +262,10 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return _Color;
+            byte red = unchecked((byte)_Red);
+            byte green = unchecked((byte)_Green);
+
+            return (int)(0xff000000 | red << 16 | green << 8 | unchecked((byte)_Blue));
         }
 
         /// <summary>
@@ -281,20 +274,36 @@ namespace DjvuNet.Graphics
         /// <param name="pixel">
         /// pixel to copy
         /// </param>
-        public void CopyFrom(Pixel pixel)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyFrom(IPixel pixel)
         {
-            _Blue = pixel._Blue;
-            _Red = pixel._Red;
-            _Green = pixel._Green;
+            _Blue = pixel.Blue;
+            _Red = pixel.Red;
+            _Green = pixel.Green;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Pixel other)
         {
-            if (other != null)
-                return _Color == other._Color;
-            else
-                return false;
+            return this == other;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool Equals(IPixel other)
+        {
+            return this == (Pixel) other;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator ==(Pixel first, Pixel second)
+        {
+            return first.Red == second.Red && first.Green == second.Green && first.Blue == second.Blue;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool operator !=(Pixel first, Pixel second)
+        {
+            return first.Red != second.Red || first.Green != second.Green || first.Blue != second.Blue;
         }
 
         #endregion Public Methods
