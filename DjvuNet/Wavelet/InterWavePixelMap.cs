@@ -13,34 +13,34 @@ namespace DjvuNet.Wavelet
     /// </summary>
     public class InterWavePixelMap : ICodec, IInterWavePixelMap
     {
-        #region Private Fields
+        #region Internal Fields
 
-        private InterWaveCodec _CbCodec;
-        private InterWaveMap _CbMap;
-        private int _cbytes;
-        private int _CrCbDelay = 10;
-        private bool _CrCbHalf;
-        private InterWaveCodec _CrCodec;
-        private InterWaveMap _CrMap;
-        private int _CSerial;
-        private int _CSlice;
-        private InterWaveCodec _YCodec;
-        private InterWaveMap _YMap;
+        internal InterWaveCodec _CbCodec;
+        internal InterWaveMap _CbMap;
+        internal int _cbytes;
+        internal int _CrCbDelay = 10;
+        internal bool _CrCbHalf;
+        internal InterWaveCodec _CrCodec;
+        internal InterWaveMap _CrMap;
+        internal int _CSerial;
+        internal int _CSlice;
+        internal InterWaveCodec _YCodec;
+        internal InterWaveMap _YMap;
 
-        #endregion Private Fields
+        #endregion Internal Fields
 
         #region Public Properties
 
         public int Height
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (_YMap != null) ? _YMap.Ih : 0; }
+            get { return (_YMap != null) ? _YMap.Height : 0; }
         }
 
         public int Width
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (_YMap != null) ? _YMap.Iw : 0; }
+            get { return (_YMap != null) ? _YMap.Width : 0; }
         }
 
         public bool ImageData
@@ -144,13 +144,13 @@ namespace DjvuNet.Wavelet
             _CSlice = _cbytes = _CSerial = 0;
         }
 
-        public PixelMap GetPixelMap()
+        public IPixelMap GetPixelMap()
         {
             if (_YMap == null)
                 return null;
 
-            int w = _YMap.Iw;
-            int h = _YMap.Ih;
+            int w = _YMap.Width;
+            int h = _YMap.Height;
             int pixsep = 3;
             int rowsep = w * pixsep;
             sbyte[] bytes = new sbyte[h * rowsep];
@@ -164,8 +164,8 @@ namespace DjvuNet.Wavelet
             }
 
             // Convert image to RGB
-            PixelMap pixelMap = new PixelMap().Init(bytes, h, w);
-            PixelReference pixel = pixelMap.CreateGPixelReference(0);
+            IPixelMap pixelMap = new PixelMap().Init(bytes, h, w);
+            IPixelReference pixel = pixelMap.CreateGPixelReference(0);
 
             for (int i = 0; i < h; )
             {
@@ -183,7 +183,7 @@ namespace DjvuNet.Wavelet
             return pixelMap;
         }
 
-        public PixelMap GetPixelMap(int subsample, Rectangle rect, PixelMap retval)
+        public IPixelMap GetPixelMap(int subsample, Rectangle rect, IPixelMap retval)
         {
             if (_YMap == null)
                 return null;
@@ -205,7 +205,7 @@ namespace DjvuNet.Wavelet
                 _CrMap.Image(subsample, rect, 2, bytes, rowsep, pixsep, _CrCbHalf);
             }
 
-            PixelReference pixel = retval.CreateGPixelReference(0);            
+            IPixelReference pixel = retval.CreateGPixelReference(0);            
 
             for (int i = 0; i < h; )
             {

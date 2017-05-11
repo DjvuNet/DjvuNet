@@ -8,18 +8,24 @@ namespace DjvuNet.Wavelet
     /// </summary>
     public class InterWaveBlock : IInterWaveBlock
     {
-        #region Variables
+        #region Fields
 
-        private readonly short[] Zigzagloc = BuildZigZagData();
+        internal readonly short[] _Zigzagloc;
 
         /// <summary>
         /// The data structure for this block
         /// </summary>
-        private short[][][] PData = new short[][][] { null, null, null, null };
+        internal short[][][] _PData;
 
-        #endregion Variables
+        #endregion Fields
 
         #region Constructors
+
+        public InterWaveBlock()
+        {
+            _Zigzagloc = BuildZigZagData();
+            _PData = new short[4][][];
+        }
 
         #endregion Constructors
 
@@ -37,10 +43,10 @@ namespace DjvuNet.Wavelet
 
             try
             {
-                retval = new InterWaveBlock { PData = this.PData };
+                retval = new InterWaveBlock { _PData = this._PData };
 
-                short[][][] pdata = (short[][][])this.PData.Clone();
-                ((InterWaveBlock)retval).PData = pdata;
+                short[][][] pdata = (short[][][])this._PData.Clone();
+                ((InterWaveBlock)retval)._PData = pdata;
 
                 for (int i = 0; i < pdata.Length; i++)
                 {
@@ -66,10 +72,6 @@ namespace DjvuNet.Wavelet
             return retval;
         }
 
-        #endregion Public Methods
-
-        #region Methods
-
         /// <summary> Query a data block.
         ///
         /// </summary>
@@ -82,7 +84,7 @@ namespace DjvuNet.Wavelet
         public short[] GetBlock(int n)
         {
             int nms = n >> 4;
-            return (PData[nms] != null) ? PData[nms][n & 0xf] : null;
+            return (_PData[nms] != null) ? _PData[nms][n & 0xf] : null;
         }
 
         /// <summary> Query a data block.
@@ -99,23 +101,24 @@ namespace DjvuNet.Wavelet
         public short[] GetInitializedBlock(int n)
         {
             int nms = n >> 4;
-            if (PData[nms] == null)
-                PData[nms] = new short[16][];
+            if (_PData[nms] == null)
+                _PData[nms] = new short[16][];
 
             int nls = n & 0xf;
-            if (PData[nms][nls] == null)
-                PData[nms][nls] = new short[16];
+            if (_PData[nms][nls] == null)
+                _PData[nms][nls] = new short[16];
 
-            return PData[nms][nls];
+            return _PData[nms][nls];
         }
 
-        /// <summary> Query a data value.
-        ///
+        /// <summary> 
+        /// Query a data value.
         /// </summary>
-        /// <param name="n">position to query
-        ///
+        /// <param name="n">
+        /// Position to query
         /// </param>
-        /// <returns> the data value
+        /// <returns> 
+        /// The data value
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short GetValue(int n)
@@ -128,7 +131,7 @@ namespace DjvuNet.Wavelet
         /// Set a data value.
         /// </summary>
         /// <param name="n">
-        /// data location
+        /// Data location
         /// </param>
         /// <param name="val">
         /// new value
@@ -169,7 +172,7 @@ namespace DjvuNet.Wavelet
                 {
                     for (int n2 = 0; n2 < d.Length; )
                     {
-                        coeff[Zigzagloc[n]] = d[n2];
+                        coeff[_Zigzagloc[n]] = d[n2];
                         n2++;
                         n++;
                     }
@@ -177,18 +180,19 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        /// <summary> Zero a block of data
-        ///
+        /// <summary> 
+        /// Zero a block of data
         /// </summary>
-        /// <param name="n">position to zero
+        /// <param name="n">
+        /// Position to zero
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearBlock(int n)
         {
             int nms = n >> 4;
-            if (PData[nms] != null)
+            if (_PData[nms] != null)
             {
-                PData[nms][n & 0xf] = null;
+                _PData[nms][n & 0xf] = null;
             }
         }
 

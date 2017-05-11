@@ -5,38 +5,23 @@ namespace DjvuNet.JB2
 {
     public class JB2Shape : JB2Item
     {
-        #region Private Members
-
-        #endregion Private Members
 
         #region Public Properties
-
-        #region Parent
 
         /// <summary>
         /// Gets or sets the parent for the shape
         /// </summary>
         public int Parent;
 
-        #endregion Parent
-
-        #region UserData
-
         /// <summary>
         /// Gets or sets the user data for the shape
         /// </summary>
         public long UserData;
 
-        #endregion UserData
-
-        #region Bitmap
-
         /// <summary>
         /// Gets or sets the bitmap for the shape
         /// </summary>
-        public Bitmap Bitmap;
-
-        #endregion Bitmap
+        public IBitmap Bitmap;
 
         #endregion Public Properties
 
@@ -77,7 +62,7 @@ namespace DjvuNet.JB2
 
         public virtual JB2Shape Init(int parent)
         {
-            this.Parent = parent;
+            Parent = parent;
             Bitmap = new Bitmap();
             return this;
         }

@@ -386,7 +386,6 @@ namespace DjvuNet.Tests
                     //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CFn.png"));
                 }
             }
-
         }
 
         [Fact]
@@ -404,7 +403,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBn.png"));
+                    //image.Save(Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png"));
                 }
             }
         }
@@ -541,12 +540,11 @@ namespace DjvuNet.Tests
                 // subsample 0, align 0 - 10 gives ArgumentException
                 // subsample 12, align 0 gives NullReferenceException
                 // subsample 1 - 12, align 1, components list 1 - 5 or null is OK
-                DjvuNet.Graphics.Bitmap image = page.GetBitmapList(rect, 1, 1, null);
+                var image = page.GetBitmapList(rect, 1, 1, null);
                     //new List<int>(new int[] { 1, 2, 3, 4, 5 }));
                 Assert.NotNull(image);
 
-                DjvuNet.Graphics.Bitmap image2 = page.GetBitmapList(rect, 1, 1,
-                new List<int>(new int[] { 1, 2, 3, 4, 5 }));
+                var image2 = page.GetBitmapList(rect, 1, 1, new List<int>(new int[] { 1, 2, 3, 4, 5 }));
                 Assert.NotNull(image2);
             }
         }
@@ -561,8 +559,8 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                DjvuNet.Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, 0, 0);
-                DjvuNet.Graphics.Bitmap image = page.GetBitmapList(rect, 1, 1, null);
+                var rect = new Graphics.Rectangle(0, 0, 0, 0);
+                var image = page.GetBitmapList(rect, 1, 1, null);
                 Assert.NotNull(image);
 
             }
@@ -797,7 +795,7 @@ namespace DjvuNet.Tests
 
                         Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
                         Graphics.PixelMap map = new Graphics.PixelMap();
-                        DPixelMap result = null;
+                        Graphics.IPixelMap result = null;
 
                         result = page.GetPixelMap(rect, 1, 2.2, map);
 
@@ -821,7 +819,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        private void VerifyPixelMap(DPixelMap result)
+        private void VerifyPixelMap(DjvuNet.Graphics.IPixelMap result)
         {
             Assert.NotNull(result);
             Assert.IsType<DPixelMap>(result);
@@ -857,7 +855,7 @@ namespace DjvuNet.Tests
                 Util.VerifyDjvuDocument(pageCount, document);
                 IDjvuPage page = document.Pages[0];
                 Graphics.Rectangle rect = new Graphics.Rectangle(100, 0, 100, 100);
-                Graphics.Bitmap bitmap = page.BuildBitmap(rect, 1, 1, null);
+                var bitmap = page.BuildBitmap(rect, 1, 1, null);
                 Assert.NotNull(bitmap);
             }
         }

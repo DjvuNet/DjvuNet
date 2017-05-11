@@ -10,18 +10,13 @@ namespace DjvuNet.JB2
 {
     public class JB2Decoder : JB2Codec
     {
-        #region Private Members
+        #region Internal Fields
 
-        private JB2Dictionary _zdict;
-        private ZPCodec _zp;
+        internal JB2Dictionary _ZDict;
+        internal ZPCodec _Coder;
+        internal byte _ZpBitHolder;
 
-        #endregion Private Members
-
-        #region Protected Members
-
-        protected byte ZpBitHolder;
-
-        #endregion Protected Members
+        #endregion Internal Fields
 
         #region Constructors
 
@@ -31,14 +26,13 @@ namespace DjvuNet.JB2
         public JB2Decoder()
             : base(false)
         {
-            // Nothing
         }
 
-#endregion Constructors
+        #endregion Constructors
 
         #region Public Methods
 
-        public virtual void Code(JB2Image jim)
+        public void Code(JB2Image jim)
         {
             int rectype = StartOfData;
 
@@ -47,11 +41,11 @@ namespace DjvuNet.JB2
                 rectype = CodeRecordB(rectype, jim, null, null);
             } while (rectype != EndOfData);
 
-            if (!GotStartRecordP)
+            if (!_GotStartRecordP)
                 throw new DjvuFormatException("Image has no start record");
         }
 
-        public virtual void Code(JB2Dictionary jim)
+        public void Code(JB2Dictionary jim)
         {
             int rectype = StartOfData;
 
@@ -60,14 +54,14 @@ namespace DjvuNet.JB2
                 rectype = CodeRecordA(rectype, jim, null);
             } while (rectype != EndOfData);
 
-            if (!GotStartRecordP)
+            if (!_GotStartRecordP)
                 throw new DjvuFormatException("Image has no start record");
         }
 
-        public virtual void Init(IBinaryReader gbs, JB2Dictionary zdict)
+        public void Init(IBinaryReader gbs, JB2Dictionary zdict)
         {
-            this._zdict = zdict;
-            _zp = new ZPCodec(gbs.BaseStream);
+            this._ZDict = zdict;
+            _Coder = new ZPCodec(gbs.BaseStream);
         }
 
         #endregion Public Methods
@@ -78,7 +72,7 @@ namespace DjvuNet.JB2
         protected override bool CodeBit(bool ignored, MutableValue<sbyte> ctx)
         {
             byte ctxVal = unchecked((byte)ctx.Value);
-            int value = _zp.Decoder(ref ctxVal);
+            int value = _Coder.Decoder(ref ctxVal);
             ctx.Value = (sbyte) ctxVal;
             return (value != 0);
         }
@@ -87,9 +81,9 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override int CodeBit(bool ignored, sbyte[] array, int offset)
         {
-            ZpBitHolder = unchecked((byte )array[offset]);
-            int retval = _zp.Decoder(ref ZpBitHolder);
-            array[offset] = unchecked((sbyte)ZpBitHolder);
+            _ZpBitHolder = unchecked((byte )array[offset]);
+            int retval = _Coder.Decoder(ref _ZpBitHolder);
+            array[offset] = unchecked((sbyte)_ZpBitHolder);
             return retval;
         }
 
@@ -103,20 +97,20 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void CodeAbsoluteLocation(JB2Blit jblt, int rows, int columns)
         {
-            if (!GotStartRecordP)
+            if (!_GotStartRecordP)
                 throw new DjvuFormatException("Image no start");
 
-            int left = CodeNum(1, ImageColumns, AbsLocX);
-            int top = CodeNum(1, ImageRows, AbsLocY);
+            int left = CodeNum(1, _ImageColumns, _AbsLocX);
+            int top = CodeNum(1, _ImageRows, _AbsLocY);
             jblt.Bottom = top - rows;
             jblt.Left = left - 1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override void CodeAbsoluteMarkSize(Bitmap bm, int border)
+        protected override void CodeAbsoluteMarkSize(IBitmap bm, int border)
         {
-            int xsize = CodeNum(0, Bigpositive, AbsSizeX);
-            int ysize = CodeNum(0, Bigpositive, AbsSizeY);
+            int xsize = CodeNum(0, Bigpositive, _AbsSizeX);
+            int ysize = CodeNum(0, Bigpositive, _AbsSizeY);
 
             if ((xsize != (0xffff & xsize)) || (ysize != (0xffff & ysize)))
                 throw new DjvuFormatException("Image bad number");
@@ -124,7 +118,7 @@ namespace DjvuNet.JB2
             bm.Init(ysize, xsize, border);
         }
 
-        protected override void CodeBitmapByCrossCoding(Bitmap bm, Bitmap cbm, int xd2c, int dw, int dy,
+        protected override void CodeBitmapByCrossCoding(IBitmap bm, IBitmap cbm, int xd2c, int dw, int dy,
                                                                      int cy, int up1, int up0, int xup1, int xup0,
                                                                      int xdn1)
         {
@@ -134,8 +128,8 @@ namespace DjvuNet.JB2
 
                 for (int dx = 0; dx < dw; )
                 {
-                    int n = CodeBit(false, Cbitdist, context);
-                    bm.SetByteAt(up0 + dx++, n);
+                    int n = CodeBit(false, _CBitDist, context);
+                    bm.SetByteAt(up0 + dx++, (sbyte) n);
                     context = ShiftCrossContext(bm, cbm, context, n, up1, up0, xup1, xup0, xdn1, dx);
                 }
 
@@ -147,7 +141,7 @@ namespace DjvuNet.JB2
             }
         }
 
-        protected override void CodeBitmapDirectly(Bitmap bm, int dw, int dy, int up2, int up1, int up0)
+        protected override void CodeBitmapDirectly(IBitmap bm, int dw, int dy, int up2, int up1, int up0)
         {
             while (dy >= 0)
             {
@@ -155,9 +149,9 @@ namespace DjvuNet.JB2
 
                 for (int dx = 0; dx < dw; )
                 {
-                    int n = CodeBit(false, Bitdist, context);
+                    int n = CodeBit(false, _BitDist, context);
 
-                    bm.SetByteAt(up0 + dx++, n);
+                    bm.SetByteAt(up0 + dx++, (sbyte) n);
                     context = ShiftDirectContext(bm, context, n, up2, up1, up0, dx);
                 }
 
@@ -169,11 +163,11 @@ namespace DjvuNet.JB2
 
         protected override String CodeComment(String comment)
         {
-            int size = CodeNum(0, Bigpositive, DistCommentLength);
+            int size = CodeNum(0, Bigpositive, _DistCommentLength);
             byte[] combuf = new byte[size];
 
             for (int i = 0; i < combuf.Length; i++)
-                combuf[i] = (byte)CodeNum(0, 255, DistCommentByte);
+                combuf[i] = (byte)CodeNum(0, 255, _DistCommentByte);
 
             string result = Encoding.UTF8.GetString(combuf);
             return result;
@@ -181,8 +175,8 @@ namespace DjvuNet.JB2
 
         protected override void CodeImageSize(JB2Dictionary jim)
         {
-            int w = CodeNum(0, Bigpositive, ImageSizeDist);
-            int h = CodeNum(0, Bigpositive, ImageSizeDist);
+            int w = CodeNum(0, Bigpositive, _ImageSizeDist);
+            int h = CodeNum(0, Bigpositive, _ImageSizeDist);
 
             if ((w != 0) || (h != 0))
                 throw new DjvuFormatException("Image bad dict 2");
@@ -192,27 +186,27 @@ namespace DjvuNet.JB2
 
         protected override void CodeImageSize(JB2Image jim)
         {
-            ImageColumns = CodeNum(0, Bigpositive, ImageSizeDist);
-            ImageRows = CodeNum(0, Bigpositive, ImageSizeDist);
+            _ImageColumns = CodeNum(0, Bigpositive, _ImageSizeDist);
+            _ImageRows = CodeNum(0, Bigpositive, _ImageSizeDist);
 
-            if ((ImageColumns == 0) || (ImageRows == 0))
+            if ((_ImageColumns == 0) || (_ImageRows == 0))
                 throw new DjvuFormatException("Image with zero size");
 
-            jim.Width = ImageColumns;
-            jim.Height = ImageRows;
+            jim.Width = _ImageColumns;
+            jim.Height = _ImageRows;
             base.CodeImageSize(jim);
         }
 
         protected override void CodeInheritedShapeCount(JB2Dictionary jim)
         {
-            int size = CodeNum(0, Bigpositive, InheritedShapeCountDist);
+            int size = CodeNum(0, Bigpositive, _InheritedShapeCountDist);
             JB2Dictionary dict = jim.InheritedDictionary;
 
             if ((dict == null) && (size > 0))
             {
-                if (_zdict != null)
+                if (_ZDict != null)
                 {
-                    dict = _zdict;
+                    dict = _ZDict;
                     jim.InheritedDictionary = dict;
                 }
                 else
@@ -226,22 +220,22 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override int CodeMatchIndex(int index, JB2Dictionary ignored)
         {
-            int result = CodeNum(0, Lib2Shape.Count - 1, DistMatchIndex);
+            int result = CodeNum(0, _Lib2Shape.Count - 1, _DistMatchIndex);
             return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override int CodeRecordType(int ignored)
         {
-            int result = CodeNum(StartOfData, EndOfData, DistRecordType);
+            int result = CodeNum(StartOfData, EndOfData, _DistRecordType);
             return result;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override void CodeRelativeMarkSize(Bitmap bm, int cw, int ch, int border)
+        protected override void CodeRelativeMarkSize(IBitmap bm, int cw, int ch, int border)
         {
-            int xdiff = CodeNum(Bignegative, Bigpositive, RelSizeX);
-            int ydiff = CodeNum(Bignegative, Bigpositive, RelSizeY);
+            int xdiff = CodeNum(Bignegative, Bigpositive, _RelSizeX);
+            int ydiff = CodeNum(Bignegative, Bigpositive, _RelSizeY);
             int xsize = cw + xdiff;
             int ysize = ch + ydiff;
 
@@ -258,6 +252,6 @@ namespace DjvuNet.JB2
             return result;
         }
 
-#endregion Protected Methods
+        #endregion Protected Methods
     }
 }
