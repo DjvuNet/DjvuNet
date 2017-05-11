@@ -10,7 +10,7 @@ namespace DjvuNet.Graphics
     /// <summary>
     /// This is an abstract class for representing pixel maps.
     /// </summary>
-    public abstract class Map
+    public abstract class Map : IMap
     {
         #region Public Properties
 
@@ -34,19 +34,31 @@ namespace DjvuNet.Graphics
 
         #region ImageWidth
 
+        private int _width;
+
         /// <summary>
         /// Gets or sets the width of the image (ncolumns)
         /// </summary>
-        public int ImageWidth { get; set; }
+        public int ImageWidth
+        {
+            get { return _width; }
+            set { _width = Math.Abs(value); }
+        }
 
         #endregion ImageWidth
 
         #region ImageHeight
 
+        private int _height;
+
         /// <summary>
         /// Gets or sets the height of the image (nrows)
         /// </summary>
-        public int ImageHeight { get; set; }
+        public int ImageHeight
+        {
+            get { return _height; }
+            set { _height = Math.Abs(value); }
+        }
 
         #endregion ImageHeight
 
@@ -103,110 +115,64 @@ namespace DjvuNet.Graphics
         {
             Properties = Hashtable.Synchronized(new Hashtable());
             BytesPerPixel = ncolors;
-            this.IsRampNeeded = isRampNeeded;
-            this.RedOffset = redOffset;
-            this.GreenOffset = greenOffset;
-            this.BlueOffset = blueOffset;
+            IsRampNeeded = isRampNeeded;
+            RedOffset = redOffset;
+            GreenOffset = greenOffset;
+            BlueOffset = blueOffset;
         }
 
         #endregion Constructors
 
         #region Public Methods
 
-        /// <summary> Insert the reference map at the specified location.
-        ///
+        /// <summary> 
+        /// Fills an array of pixels from the specified values.
         /// </summary>
-        /// <param name="ref">map to insert
+        /// <param name="x">
+        /// The x-coordinate of the upper-left corner of the region of pixels
         /// </param>
-        /// <param name="dx">horizontal position to insert at
+        /// <param name="y">
+        /// The y-coordinate of the upper-left corner of the region of pixels
         /// </param>
-        /// <param name="dy">vertical position to insert at
+        /// <param name="w">
+        /// The width of the region of pixels
         /// </param>
-        public abstract void Fill(Map ref_Renamed, int dx, int dy);
-
-        /// <summary> Fills an array of pixels from the specified values.
-        ///
-        /// </summary>
-        /// <param name="x">the x-coordinate of the upper-left corner of the region of
-        /// pixels
+        /// <param name="h">
+        /// The height of the region of pixels
         /// </param>
-        /// <param name="y">the y-coordinate of the upper-left corner of the region of
-        /// pixels
+        /// <param name="pixels">
+        /// The array of pixels
         /// </param>
-        /// <param name="w">the width of the region of pixels
+        /// <param name="off">
+        /// The offset into the pixel array
         /// </param>
-        /// <param name="h">the height of the region of pixels
+        /// <param name="scansize">
+        /// The distance from one row of pixels to the next in the array
         /// </param>
-        /// <param name="pixels">the array of pixels
-        /// </param>
-        /// <param name="off">the offset into the pixel array
-        /// </param>
-        /// <param name="scansize">the distance from one row of pixels to the next in the
-        /// array
-        /// </param>
-        public virtual void FillRgbPixels(int x, int y, int w, int h, int[] pixels, int off, int scansize)
+        public void FillRgbPixels(int x, int y, int w, int h, int[] pixels, int off, int scansize)
         {
             CreateGPixelReference(0).FillRgbPixels(x, y, w, h, pixels, off, scansize);
         }
 
-        /// <summary> Shift the origin of the image by coping the pixel data.
-        ///
-        /// </summary>
-        /// <param name="dx">amount to shift the origin of the x-axis
-        /// </param>
-        /// <param name="dy">amount to shift the origin of the y-axis
-        /// </param>
-        /// <param name="retval">the image to copy the data into
-        ///
-        /// </param>
-        /// <returns> the translated image
-        /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
-        public abstract Map Translate(int dx, int dy, Map retval);
 
-        /// <summary> Query the start offset of a row.
-        ///
-        /// </summary>
-        /// <param name="row">the row to query
-        ///
-        /// </param>
-        /// <returns> the offset to the pixel data
-        /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
-        public virtual int RowOffset(int row)
-        {
-            return row * GetRowSize();
-        }
-
-        /// <summary> Query the getRowSize.
-        ///
-        /// </summary>
-        /// <returns> the getRowSize
-        /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
-        public virtual int GetRowSize()
-        {
-            return ImageWidth;
-        }
-
-        /// <summary> Create a PixelReference (a pixel iterator) that refers to this map
+        /// <summary> 
+        /// Create a PixelReference (a pixel iterator) that refers to this map
         /// starting at the specified offset.
-        ///
         /// </summary>
-        /// <param name="offset">position of the first pixel to reference
-        ///
+        /// <param name="offset">
+        /// Position of the first pixel to reference
         /// </param>
-        /// <returns> the newly created PixelReference
+        /// <returns> 
+        /// The newly created PixelReference
         /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
-        public virtual PixelReference CreateGPixelReference(int offset)
+        public IPixelReference CreateGPixelReference(int offset)
         {
-            return new PixelReference(this, offset);
+            return new PixelReference((IMap2)this, offset);
         }
 
-        /// <summary> Create a PixelReference (a pixel iterator) that refers to this map
+        /// <summary> 
+        /// Create a PixelReference (a pixel iterator) that refers to this map
         /// starting at the specified position.
-        ///
         /// </summary>
         /// <param name="row">initial vertical position
         /// </param>
@@ -215,22 +181,9 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the newly created PixelReference
         /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
-        public virtual PixelReference CreateGPixelReference(int row, int column)
+        public IPixelReference CreateGPixelReference(int row, int column)
         {
-            return new PixelReference(this, row, column);
-        }
-
-        /// <summary> Convert the pixel to 24 bit color.
-        ///
-        /// </summary>
-        /// <returns>
-        /// the converted pixel
-        /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
-        public virtual Pixel PixelRamp(PixelReference pixel)
-        {
-            return pixel;
+            return new PixelReference((IMap2)this, row, column);
         }
 
         /// <summary>
@@ -239,6 +192,8 @@ namespace DjvuNet.Graphics
         /// <returns></returns>
         public System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
         {
+            // TODO replace this code with efficient xplat memory copy
+            // perhaps it should be done inside CopyDataToBitmap
             byte[] byteData = new byte[Data.Length];
             Buffer.BlockCopy(Data, 0, byteData, 0, Data.Length);
 
@@ -257,7 +212,9 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// TODO create summary
+        /// Fast copy of managed pixel array data into System.Drawing.Bitmap image.
+        /// No checking of passed parameters, therefore, it is a caller responsibility
+        /// to provid valid parameter values.
         /// </summary>
         /// <param name="width"></param>
         /// <param name="height"></param>
@@ -265,22 +222,14 @@ namespace DjvuNet.Graphics
         /// <returns></returns>
         public static System.Drawing.Bitmap CopyDataToBitmap(int width, int height, byte[] data, PixelFormat format)
         {
-            //Here create the Bitmap to the know height, width and format
-            //PixelFormat.Format24bppRgb
             System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height, format);
 
-            //Create a BitmapData and Lock all pixels to be written
             BitmapData bmpData = bmp.LockBits(
                                  new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                                  ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-            //Copy the data from the byte array into BitmapData.Scan0
             Marshal.Copy(data, 0, bmpData.Scan0, data.Length);
-
-            //Unlock the pixels
             bmp.UnlockBits(bmpData);
-
-            //Return the bitmap
             return bmp;
         }
 

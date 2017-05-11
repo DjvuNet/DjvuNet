@@ -8,13 +8,7 @@ namespace DjvuNet.JB2
     /// </summary>
     public class JB2Blit
     {
-        #region Protected Members
-
-        #endregion Protected Members
-
         #region Public Properties
-
-        #region Bottom
 
         private int _bottom;
 
@@ -29,10 +23,6 @@ namespace DjvuNet.JB2
             set { _bottom = (short)value; }
         }
 
-        #endregion Bottom
-
-        #region Left
-
         private int _left;
 
         /// <summary>
@@ -46,16 +36,10 @@ namespace DjvuNet.JB2
             set { _left = (short)value; }
         }
 
-        #endregion Left
-
-        #region ShapeNumber
-
         /// <summary>
         /// Gets or sets the shape number of the blit
         /// </summary>
         public int ShapeNumber;
-
-        #endregion ShapeNumber
 
         #endregion Public Properties
 

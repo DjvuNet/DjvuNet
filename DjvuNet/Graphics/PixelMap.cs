@@ -11,7 +11,7 @@ namespace DjvuNet.Graphics
     /// <summary>
     /// This class represents 24 bit color image maps.
     /// </summary>
-    public class PixelMap : Map
+    public class PixelMap : Map, IPixelMap
     {
         #region Private Members
 
@@ -23,17 +23,17 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Identity color correction table. 
         /// </summary>
-        private static readonly int[] _ctableI = new int[256];
+        internal static readonly int[] IdentityGammaCorrection = new int[256];
 
         /// <summary>
         /// Cached color correction table. 
         /// </summary>
-        private static int[] _ctable = new int[256];
+        internal static int[] CachedGammaTable = new int[256];
 
         /// <summary> 
         /// The color correction subsample for the cached color table. 
         /// </summary>
-        private static double _lgamma = -1D;
+        internal static double CachedGamma = -1D;
 
         /// <summary>
         /// Used to quickly clip out of bounds values. 
@@ -63,23 +63,24 @@ namespace DjvuNet.Graphics
             for (int i = 1; i < _invmap.Length; i++)
                 _invmap[i] = 0x10000 / i;
 
-            for (int i = 0; i < _ctableI.Length; i++)
-                _ctableI[i] = i;
-
-            for (int i = 1; i < _multiplierRefArray.Length; )
-                _multiplierRefArray[i++] = null;
+            for (int i = 0; i < IdentityGammaCorrection.Length; i++)
+                IdentityGammaCorrection[i] = i;
         }
 
         /// <summary> Creates a new PixelMap object.</summary>
         public PixelMap()
             : base(3, 2, 1, 0, false)
         {
-            // Nothing
         }
 
         #endregion Constructors
 
         #region Public Methods
+
+        public IPixel GetPixelAt(int row, int column)
+        {
+            return CreateGPixelReference(row, column).ToPixel();
+        }
 
         /// <summary> 
         /// Fill the array with color correction constants.
@@ -90,22 +91,22 @@ namespace DjvuNet.Graphics
         /// <returns> 
         /// the new color correction table
         /// </returns>
-        public static int[] GetColorCorrection(double gamma)
+        public static int[] GetGammaCorrection(double gamma)
         {
             lock (_syncObject)
             {
                 if ((gamma < 0.10000000000000001D) || (gamma > 10D))
-                    throw new FormatException("Illegal gamma: " + gamma);
+                    throw new ArgumentOutOfRangeException(nameof(gamma), $"Gamma out of range: {gamma}");
 
                 int[] retval;
                 if ((gamma < 1.0009999999999999D) && (gamma > 0.999D))
-                    retval = _ctableI;
+                    retval = IdentityGammaCorrection;
                 else
                 {
-                    if (gamma != _lgamma)
+                    if (!(gamma > ( CachedGamma - 0.000000001000000001D) && gamma < (CachedGamma + 0.000000001000000001D)))
                     {
-                        _ctable = new int[256];
-                        for (int i = 0; i < _ctable.Length; i++)
+                        CachedGammaTable = new int[256];
+                        for (int i = 0; i < CachedGammaTable.Length; i++)
                         {
                             double x = i / 255D;
 
@@ -119,11 +120,11 @@ namespace DjvuNet.Graphics
                             //    x = System.Math.Pow(x, 1.0D / gamma);
                             //}
 
-                            _ctable[i] = (int)Math.Floor((255D * x) + 0.5D);
+                            CachedGammaTable[i] = (int)Math.Floor((255D * x) + 0.5D);
                         }
-                        _lgamma = gamma;
+                        CachedGamma = gamma;
                     }
-                    retval = _ctable;
+                    retval = CachedGammaTable;
                 }
                 return retval;
             }
@@ -141,7 +142,7 @@ namespace DjvuNet.Graphics
         /// <param name="ypos">
         /// vertical position
         /// </param>
-        public virtual void Attenuate(Bitmap bm, int xpos, int ypos)
+        public void Attenuate(IBitmap bm, int xpos, int ypos)
         {
             // Check
             // Compute number of rows and columns
@@ -172,7 +173,7 @@ namespace DjvuNet.Graphics
             int src = bm.RowOffset((ypos < 0) ? (-ypos) : 0) - ((xpos < 0) ? xpos : 0);
             int dst = RowOffset((ypos > 0) ? ypos : 0) + ((xpos > 0) ? xpos : 0);
 
-            PixelReference dstPixel = CreateGPixelReference(0);
+            IPixelReference dstPixel = CreateGPixelReference(0);
 
             // Loop over rows
             for (int y = 0; y < xrows; y++)
@@ -219,7 +220,7 @@ namespace DjvuNet.Graphics
         /// <param name="color">
         /// color to insert bitmap with
         /// </param>
-        public virtual void Blit(Bitmap bm, int xpos, int ypos, Pixel color)
+        public virtual void Blit(IBitmap bm, int xpos, int ypos, IPixel color)
         {
             // Check
             if (color == null)
@@ -261,7 +262,7 @@ namespace DjvuNet.Graphics
             int src = bm.RowOffset((ypos < 0) ? (-ypos) : 0) - ((xpos < 0) ? xpos : 0);
             int dst = ((ypos > 0) ? RowOffset(ypos) : 0) + ((xpos > 0) ? xpos : 0);
 
-            PixelReference dstPixel = CreateGPixelReference(dst);
+            IPixelReference dstPixel = CreateGPixelReference(dst);
 
             // Loop over rows
             for (int y = 0; y < xrows; y++)
@@ -299,14 +300,14 @@ namespace DjvuNet.Graphics
         /// Correct the colors with a gamma subsample normalized to 1.0 for no correction.
         /// </summary>
         /// <param name="gamma">
-        /// Color correction
+        /// Color gamma correction
         /// </param>
         public void ApplyGammaCorrection(double gamma)
         {
             if (((gamma > 0.999D) && (gamma < 1.0009999999999999D)))
                 return;
 
-            int[] gtable = GetColorCorrection(gamma);
+            int[] gtable = GetGammaCorrection(gamma);
 
             for (int i = 0; i < Data.Length; i++)
             {
@@ -314,28 +315,55 @@ namespace DjvuNet.Graphics
             }
         }
 
+        public Rectangle BoundingRectangle
+        {
+            get
+            {
+                return new Rectangle
+                {
+                    Left = 0,
+                    Bottom = 0,
+                    Right = ImageWidth,
+                    Top = ImageHeight
+                };
+            }
+        }
+
         /// <summary> 
         /// Fill this image from another source at reduced resolution.  Pixel
         /// averaging will be used.
         /// </summary>
-        /// <param name="src">image map to reduce
+        /// <param name="src">
+        /// Image source to reduce
         /// </param>
-        /// <param name="subsample">rate to subsample
+        /// <param name="subsample">
+        /// Subsample value
         /// </param>
-        /// <param name="pdr">target bounds
+        /// <param name="targetRect">
+        /// Target bounds
         /// </param>
-        public virtual void Downsample(Map src, int subsample, Rectangle pdr)
+        public void Downsample(IMap2 src, int subsample, Rectangle targetRect)
         {
-            Rectangle rect = new Rectangle(0, 0, ((src.ImageWidth + subsample) - 1) / subsample,
-                                   ((src.ImageHeight + subsample) - 1) / subsample);
+            Utilities.Verify.SubsampleRange(subsample);
 
-            if (pdr != null)
+            if (src == this && ((targetRect == null || targetRect == BoundingRectangle) && subsample == 1))
+                return;
+
+            Rectangle rect = BoundingRectangle;
+
+            if (targetRect != null)
             {
-                if ((pdr.Right < rect.Right) || (pdr.Bottom < rect.Bottom) || (pdr.Left > rect.Left) || (pdr.Top > rect.Top))
-                    throw new ArgumentException("Specified rectangle overflows destination PixelMap");
+                if ((targetRect.Right < rect.Right) || (targetRect.Bottom < rect.Bottom) || 
+                    (targetRect.Left > rect.Left) || (targetRect.Top > rect.Top))
+                    throw new ArgumentOutOfRangeException(nameof(targetRect),
+                        $"Specified rectangle overflows destination PixelMap {nameof(BoundingRectangle)}");
 
-                rect = pdr;
+                rect = targetRect;
             }
+            else
+                rect = new Rectangle(0, 0, ((src.ImageWidth + subsample) - 1) / subsample,
+                                       ((src.ImageHeight + subsample) - 1) / subsample);
+
 
             Init(rect.Height, rect.Width, null);
 
@@ -344,8 +372,8 @@ namespace DjvuNet.Graphics
             int sidx = src.RowOffset(sy);
             int didx = 0;
 
-            PixelReference sptr = src.CreateGPixelReference(0);
-            PixelReference dptr = CreateGPixelReference(0);
+            IPixelReference sptr = src.CreateGPixelReference(0);
+            IPixelReference dptr = CreateGPixelReference(0);
 
             for (int y = 0; y < ImageHeight; y++)
             {
@@ -385,7 +413,7 @@ namespace DjvuNet.Graphics
                         {
                             for (int rsx = lsx - sx; rsx-- > 0; sptr.IncOffset())
                             {
-                                Pixel pix = src.PixelRamp(sptr);
+                                IPixel pix = src.PixelRamp(sptr);
                                 r += pix.Red;
                                 g += pix.Green;
                                 b += pix.Blue;
@@ -411,34 +439,35 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Fill this image from another source at reduced resolution of 4 vertical
+        /// <summary> 
+        /// Fill this image from another source at reduced resolution of 4 vertical
         /// pixels to 3.  An extrapolating pixel averaging algorithm is used.
-        ///
         /// </summary>
-        /// <param name="src">image map to reduce
+        /// <param name="src">
+        /// Image map to reduce
         /// </param>
-        /// <param name="pdr">target bounds
-        ///
+        /// <param name="targetRect">
+        /// Target bounds
         /// </param>
-        /// <throws>  IllegalArgumentException if the target rectangle is out of bounds </throws>
-        public virtual void Downsample43(Map src, Rectangle pdr)
+        /// <throws>  
+        /// ArgumentException if the target rectangle is out of bounds 
+        /// </throws>
+        public virtual void Downsample43(IMap2 src, Rectangle targetRect)
         {
             int srcwidth = src.ImageWidth;
             int srcheight = src.ImageHeight;
-            //UPGRADE_WARNING: Data types in Visual C# might be different.  Verify the accuracy of narrowing conversions. "ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?index='!DefaultContextWindowIndex'&keyword='jlca1042'"
             int destwidth = (int)Math.Ceiling(srcwidth * 0.75D);
-            //UPGRADE_WARNING: Data types in Visual C# might be different.  Verify the accuracy of narrowing conversions. "ms-help://MS.VSCC.v80/dv_commoner/local/redirect.htm?index='!DefaultContextWindowIndex'&keyword='jlca1042'"
             int destheight = (int)Math.Ceiling(srcheight * 0.75D);
             Rectangle rect = new Rectangle(0, 0, destwidth, destheight);
 
-            if (pdr != null)
+            if (targetRect != null)
             {
-                if ((pdr.Right < rect.Right) || (pdr.Bottom < rect.Bottom) || (pdr.Left > rect.Left) || (pdr.Top > rect.Top))
-                    throw new ArgumentException("rectangle out of bounds" + "pdr=(" + pdr.Right + "," + pdr.Bottom + "," +
-                                                pdr.Left + "," + pdr.Top + "),rect=(" + rect.Right + "," + rect.Bottom +
+                if ((targetRect.Right < rect.Right) || (targetRect.Bottom < rect.Bottom) || (targetRect.Left > rect.Left) || (targetRect.Top > rect.Top))
+                    throw new ArgumentOutOfRangeException(nameof(targetRect), "Rectangle out of bounds" + "pdr=(" + targetRect.Right + "," + targetRect.Bottom + "," +
+                                                targetRect.Left + "," + targetRect.Top + "),rect=(" + rect.Right + "," + rect.Bottom +
                                                 "," + rect.Left + "," + rect.Top + ")");
 
-                rect = pdr;
+                rect = targetRect;
                 destwidth = rect.Width;
                 destheight = rect.Height;
             }
@@ -457,7 +486,7 @@ namespace DjvuNet.Graphics
             int sxz = rect.Right / 3;
             int dxz = rect.Right - (3 * sxz);
 
-            if (dxz < 0)
+            if (dxz < 0)   // always false what can be trivially derived from proceeding 2 loc
             {
                 sxz--;
                 dxz += 3;
@@ -466,13 +495,13 @@ namespace DjvuNet.Graphics
             sxz *= 4;
             sy *= 4;
 
-            PixelReference spix0 = src.CreateGPixelReference(0);
-            PixelReference spix1 = src.CreateGPixelReference(0);
-            PixelReference spix2 = src.CreateGPixelReference(0);
-            PixelReference spix3 = src.CreateGPixelReference(0);
-            PixelReference dpix0 = CreateGPixelReference(0);
-            PixelReference dpix1 = CreateGPixelReference(0);
-            PixelReference dpix2 = CreateGPixelReference(0);
+            var spix0 = src.CreateGPixelReference(0);
+            var spix1 = src.CreateGPixelReference(0);
+            var spix2 = src.CreateGPixelReference(0);
+            var spix3 = src.CreateGPixelReference(0);
+            var dpix0 = CreateGPixelReference(0);
+            var dpix1 = CreateGPixelReference(0);
+            var dpix2 = CreateGPixelReference(0);
             while (dy < destheight)
             {
                 spix0.SetOffset(sy++, sxz);
@@ -506,10 +535,10 @@ namespace DjvuNet.Graphics
                 int dx = dxz;
                 int sx = sxz;
 
-                Pixel pix0 = src.PixelRamp(spix0);
-                Pixel pix1 = src.PixelRamp(spix1);
-                Pixel pix2 = src.PixelRamp(spix2);
-                Pixel pix3 = src.PixelRamp(spix3);
+                var pix0 = src.PixelRamp(spix0);
+                var pix1 = src.PixelRamp(spix1);
+                var pix2 = src.PixelRamp(spix2);
+                var pix3 = src.PixelRamp(spix3);
                 while (dx < destwidth)
                 {
                     int s00b = pix0.Blue;
@@ -666,32 +695,35 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Insert the reference map at the specified location.
-        ///
+        /// <summary> 
+        /// Insert the reference map at the specified location.
         /// </summary>
-        /// <param name="ref">map to insert
+        /// <param name="source">
+        /// Map to insert
         /// </param>
-        /// <param name="dx">horizontal position to insert at
+        /// <param name="dx">
+        /// Horizontal position to insert at
         /// </param>
-        /// <param name="dy">vertical position to insert at
+        /// <param name="dy">
+        /// Vertical position to insert at
         /// </param>
-        public override void Fill(Map ref_Renamed, int dx, int dy)
+        public void Fill(IMap2 source, int dx, int dy)
         {
             int x0 = (dx > 0) ? dx : 0;
             int y0 = (dy > 0) ? dy : 0;
             int x1 = (dx < 0) ? (-dx) : 0;
             int y1 = (dy < 0) ? (-dy) : 0;
             int w0 = ImageWidth - x0;
-            int w1 = ref_Renamed.ImageWidth - x1;
+            int w1 = source.ImageWidth - x1;
             int w = (w0 < w1) ? w0 : w1;
             int h0 = ImageHeight - y0;
-            int h1 = ref_Renamed.ImageHeight - y1;
+            int h1 = source.ImageHeight - y1;
             int h = (h0 < h1) ? h0 : h1;
 
             if ((w > 0) && (h > 0))
             {
-                PixelReference pixel = CreateGPixelReference(0);
-                PixelReference refPixel = ref_Renamed.CreateGPixelReference(0);
+                var pixel = CreateGPixelReference(0);
+                var refPixel = source.CreateGPixelReference(0);
 
                 do
                 {
@@ -707,7 +739,7 @@ namespace DjvuNet.Graphics
                         int i = w;
                         do
                         {
-                            pixel.CopyFrom(ref_Renamed.PixelRamp(refPixel));
+                            pixel.CopyFrom(source.PixelRamp(refPixel));
                             pixel.IncOffset();
                             refPixel.IncOffset();
                         } while (--i > 0);
@@ -716,27 +748,30 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> Initialize this PixelMap to the specified size and fill in the specified color.
-        ///
+        /// <summary> 
+        /// Initialize this PixelMap to the specified size and fill in the specified color.
         /// </summary>
-        /// <param name="arows">number of rows
+        /// <param name="height">
+        /// Number of rows
         /// </param>
-        /// <param name="acolumns">number of columns
+        /// <param name="width">
+        /// Number of columns
         /// </param>
-        /// <param name="filler">fill color
-        ///
+        /// <param name="color">
+        /// Fill color
         /// </param>
-        /// <returns> the initialized PixelMap
+        /// <returns> 
+        /// The initialized PixelMap
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual PixelMap Init(int arows, int acolumns, Pixel filler)
+        public virtual IPixelMap Init(int height, int width, IPixel color)
         {
             //    boolean needFill=false;
-            if ((arows != ImageHeight) || (acolumns != ImageWidth))
+            if ((height != ImageHeight) || (width != ImageWidth))
             {
                 Data = null;
-                ImageHeight = arows;
-                ImageWidth = acolumns;
+                ImageHeight = height;
+                ImageWidth = width;
             }
 
             int npix = RowOffset(ImageHeight);
@@ -745,13 +780,12 @@ namespace DjvuNet.Graphics
             {
                 if (Data == null)
                     Data = new sbyte[npix * 3];
-                    //        needFill=true;
 
-                if (filler != null)
+                if (color != null)
                 {
-                    sbyte b = filler.Blue;
-                    sbyte g = filler.Green;
-                    sbyte r = filler.Red;
+                    sbyte b = color.Blue;
+                    sbyte g = color.Green;
+                    sbyte r = color.Red;
 
                     for (int i = 0; i < Data.Length; )
                     {
@@ -760,40 +794,35 @@ namespace DjvuNet.Graphics
                         Data[i++] = r;
                     }
                 }
-                //      else if(needFill)
-                //      {
-                //        for(int i = 0; i < data.length;)
-                //        {
-                //          data[i++] = -51;
-                //        }
-                //      }
             }
 
             return this;
         }
 
-        /// <summary> Initialize this PixelMap from a segment of another image map.
-        ///
+        /// <summary> 
+        /// Initialize this PixelMap from a segment of another image map.
         /// </summary>
-        /// <param name="ref">image map to initialize from
+        /// <param name="source">
+        /// Image map to initialize from
         /// </param>
-        /// <param name="rect">bounding rectangle to initialize from
-        ///
+        /// <param name="rect">
+        /// Bounding rectangle to initialize from
         /// </param>
-        /// <returns> the initialized PixelMap
+        /// <returns> 
+        /// The initialized PixelMap
         /// </returns>
-        public virtual PixelMap Init(Map ref_Renamed, Rectangle rect)
+        public IPixelMap Init(IMap2 source, Rectangle rect)
         {
             Init(rect.Height, rect.Width, ((null)));
 
-            Rectangle rect2 = new Rectangle(0, 0, ref_Renamed.ImageWidth, ref_Renamed.ImageHeight);
+            Rectangle rect2 = new Rectangle(0, 0, source.ImageWidth, source.ImageHeight);
             rect2.Intersect(rect2, rect);
             rect2.Translate(-rect.Right, -rect.Bottom);
 
             if (!rect2.Empty)
             {
-                PixelReference pixel = CreateGPixelReference(0);
-                PixelReference refPixel = ref_Renamed.CreateGPixelReference(0);
+                var pixel = CreateGPixelReference(0);
+                var refPixel = source.CreateGPixelReference(0);
 
                 for (int y = rect2.Bottom; y < rect2.Top; y++)
                 {
@@ -805,30 +834,31 @@ namespace DjvuNet.Graphics
                             pixel.CopyFrom(refPixel);
                     else
                         for (int x = rect2.Left - rect2.Right; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                            pixel.CopyFrom(ref_Renamed.PixelRamp(refPixel));
+                            pixel.CopyFrom(source.PixelRamp(refPixel));
                 }
             }
 
             return this;
         }
 
-        /// <summary> Initialize this PixelMap from another image map.
-        ///
+        /// <summary> 
+        /// Initialize this PixelMap from another image map.
         /// </summary>
-        /// <param name="ref">image map to initialize from
-        ///
+        /// <param name="source">
+        /// Image map to initialize from
         /// </param>
-        /// <returns> the initialized PixelMap
+        /// <returns> 
+        /// The initialized PixelMap
         /// </returns>
-        public virtual PixelMap Init(Map ref_Renamed)
+        public IPixelMap Init(IMap2 source)
         {
-            Init(ref_Renamed.ImageHeight, ref_Renamed.ImageWidth, ((null)));
+            Init(source.ImageHeight, source.ImageWidth, ((null)));
 
-            PixelReference pixel = CreateGPixelReference(0);
+            var pixel = CreateGPixelReference(0);
 
             if ((ImageHeight > 0) && (ImageWidth > 0))
             {
-                PixelReference refPixel = (ref_Renamed).CreateGPixelReference(0);
+                var refPixel = (source).CreateGPixelReference(0);
 
                 for (int y = 0; y < ImageHeight; y++)
                 {
@@ -840,11 +870,46 @@ namespace DjvuNet.Graphics
                             pixel.CopyFrom(refPixel);
                     else
                         for (int x = ImageWidth; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                            pixel.CopyFrom(ref_Renamed.PixelRamp(refPixel));
+                            pixel.CopyFrom(source.PixelRamp(refPixel));
                 }
             }
 
             return this;
+        }
+
+        /// <summary> 
+        /// Query the getRowSize.
+        /// </summary>
+        /// <returns> 
+        /// Row size in bytes.
+        /// </returns>
+        public int GetRowSize()
+        {
+            return ImageWidth;
+        }
+
+        /// <summary> Query the start offset of a row.
+        ///
+        /// </summary>
+        /// <param name="row">the row to query
+        ///
+        /// </param>
+        /// <returns> the offset to the pixel data
+        /// </returns>
+        public int RowOffset(int row)
+        {
+            return row * GetRowSize();
+        }
+
+        /// <summary> 
+        /// Convert the pixel to 24 bit color.
+        /// </summary>
+        /// <returns>
+        /// The converted pixel
+        /// </returns>
+        public IPixel PixelRamp(IPixelReference pixel)
+        {
+            return pixel.ToPixel();
         }
 
         /// <summary> 
@@ -869,10 +934,10 @@ namespace DjvuNet.Graphics
         /// color correction factor
         /// </param>
         /// <throws>  
-        /// IllegalArgumentException if the specified bounds are not contained in the page 
+        /// ArgumentException if the specified bounds are not contained in the page 
         /// </throws>
-        public unsafe virtual void Stencil(Bitmap mask, PixelMap foregroundMap, int supersample, int subsample, Rectangle bounds,
-                                    double gamma)
+        public unsafe virtual void Stencil(IBitmap mask, IPixelMap foregroundMap, int supersample, 
+            int subsample, Rectangle bounds, double gamma)
         {
             // Check arguments
             Rectangle rect = new Rectangle(0, 0, (foregroundMap.ImageWidth * supersample + subsample - 1) / subsample,
@@ -883,7 +948,8 @@ namespace DjvuNet.Graphics
                 if ((bounds.Right < rect.Right) || (bounds.Bottom < rect.Bottom) || (bounds.Left > rect.Left) ||
                     (bounds.Top > rect.Top))
                 {
-                    throw new ArgumentException("rectangle out of bounds" + "bounds=(" + bounds.Right + "," + bounds.Bottom +
+                    throw new ArgumentOutOfRangeException(nameof(bounds),
+                        "Rectangle out of bounds" + "bounds=(" + bounds.Right + "," + bounds.Bottom +
                                                 "," + bounds.Left + "," + bounds.Top + "),rect=(" + rect.Right + "," +
                                                 rect.Bottom + "," + rect.Left + "," + rect.Top + ")");
                 }
@@ -917,7 +983,7 @@ namespace DjvuNet.Graphics
                 multiplier[i] = (0x10000 * i) / maxgray;
 
             // Prepare color correction table
-            int[] gtable = GetColorCorrection(gamma);
+            int[] gtable = GetGammaCorrection(gamma);
 
             double ratioFg = supersample / (double)subsample;
             // Compute starting point in blown up foreground PixelMap
@@ -940,8 +1006,8 @@ namespace DjvuNet.Graphics
             }
 
             int fg = foregroundMap.RowOffset(fgy);
-            PixelReference fgx = foregroundMap.CreateGPixelReference(0);
-            PixelReference dst = CreateGPixelReference(0);
+            var fgx = foregroundMap.CreateGPixelReference(0);
+            var dst = CreateGPixelReference(0);
 
             // Loop over rows            
             for (int y = 0; y < xrows; y++)
@@ -1009,7 +1075,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the translated image
         /// </returns>
-        public override Map Translate(int dx, int dy, Map retval)
+        public IMap2 Translate(int dx, int dy, IMap2 retval)
         {
             if (!(retval is PixelMap) || (retval.ImageWidth != ImageWidth) || (retval.ImageHeight != ImageHeight))
                 retval = new PixelMap().Init(ImageHeight, ImageWidth, null);
@@ -1033,7 +1099,7 @@ namespace DjvuNet.Graphics
         /// </param>
         /// <returns> the initialized PixelMap
         /// </returns>
-        public virtual PixelMap Init(sbyte[] data, int arows, int acolumns)
+        public virtual IPixelMap Init(sbyte[] data, int arows, int acolumns)
         {
             ImageHeight = arows;
             ImageWidth = acolumns;
@@ -1046,10 +1112,11 @@ namespace DjvuNet.Graphics
 
         #region Protected Methods
 
-        /// <summary> Creates or retrieves a cached multiplier array to use when attenuating.
-        ///
+        /// <summary> 
+        /// Creates or retrieves a cached multiplier array to use when attenuating.
         /// </summary>
-        /// <returns> attenuation array
+        /// <returns> 
+        /// Attenuation array
         /// </returns>
         protected static int[] GetMultiplier(int maxgray)
         {

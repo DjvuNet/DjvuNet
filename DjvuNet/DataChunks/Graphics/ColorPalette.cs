@@ -74,7 +74,7 @@ namespace DjvuNet.DataChunks
         /// </param>
         /// <param name="p">DOCUMENT ME!
         /// </param>
-        public void IndexToColor(int index, DjvuNet.Graphics.Pixel p)
+        public void IndexToColor(int index, DjvuNet.Graphics.IPixel p)
         {
             p.CopyFrom(PaletteColors[index]);
         }

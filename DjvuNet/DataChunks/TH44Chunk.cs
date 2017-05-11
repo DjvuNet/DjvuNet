@@ -50,12 +50,12 @@ namespace DjvuNet.DataChunks
             }
         }
 
-        private PixelMap _image;
+        private IPixelMap _image;
 
         /// <summary>
         /// Gets the image of the thumbnail
         /// </summary>
-        public PixelMap Image
+        public IPixelMap Image
         {
             get
             {

@@ -169,6 +169,12 @@
     <Compile Include="DjvuPage.cs" />
     <Compile Include="Extentions\ExtentionMethods.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
+    <Compile Include="Graphics\IBitmap.cs" />
+    <Compile Include="Graphics\IMap.cs" />
+    <Compile Include="Graphics\IMap2.cs" />
+    <Compile Include="Graphics\IPixel.cs" />
+    <Compile Include="Graphics\IPixelMap.cs" />
+    <Compile Include="Graphics\IPixelReference.cs" />
     <Compile Include="Graphics\Map.cs" />
     <Compile Include="Graphics\Pixel.cs" />
     <Compile Include="Graphics\PixelMapScaler.cs" />
@@ -188,6 +194,7 @@
     <Compile Include="JB2\JB2Codec.cs" />
     <Compile Include="JB2\JB2Decoder.cs" />
     <Compile Include="JB2\JB2Dictionary.cs" />
+    <Compile Include="JB2\JB2Encoder.cs" />
     <Compile Include="JB2\JB2Image.cs" />
     <Compile Include="JB2\JB2Item.cs" />
     <Compile Include="JB2\JB2Shape.cs" />

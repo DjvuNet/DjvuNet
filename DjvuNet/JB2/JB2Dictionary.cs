@@ -9,24 +9,18 @@ namespace DjvuNet.JB2
 {
     public class JB2Dictionary : JB2Item, ICodec
     {
-        #region Private Variables
+        #region Internal Fields
 
-        private List<JB2Item> _shapes = new List<JB2Item>();
+        internal List<JB2Item> _Shapes;
 
-        #endregion Private Variables
+        #endregion Internal Fields
 
         #region Public Properties
-
-        #region Comment
 
         /// <summary>
         /// Gets or sets the string coded by the JB2 file
         /// </summary>
         public string Comment;
-
-        #endregion Comment
-
-        #region ImageData
 
         /// <summary>
         /// Query if this is image data.  Note that even though this data effects
@@ -38,10 +32,6 @@ namespace DjvuNet.JB2
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return false; }
         }
-
-        #endregion ImageData
-
-        #region InheritedDictionary
 
         private JB2Dictionary _inheritedDictionary;
 
@@ -60,18 +50,10 @@ namespace DjvuNet.JB2
             }
         }
 
-        #endregion InheritedDictionary
-
-        #region InheritedShapes
-
         /// <summary>
         /// Gets the total inherited shapes
         /// </summary>
         public int InheritedShapes;
-
-        #endregion InheritedShapes
-
-        #region ShapeCount
 
         /// <summary>
         /// Gets the total shape count
@@ -79,14 +61,18 @@ namespace DjvuNet.JB2
         public int ShapeCount
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return InheritedShapes + _shapes.Count; }
+            get { return InheritedShapes + _Shapes.Count; }
         }
-
-        #endregion ShapeCount
 
         #endregion Public Properties
 
         #region Constructors
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public JB2Dictionary() : base()
+        {
+            _Shapes = new List<JB2Item>();
+        }
 
         #endregion Constructors
 
@@ -103,8 +89,8 @@ namespace DjvuNet.JB2
             if (jb2Shape.Parent >= ShapeCount)
                 throw new ArgumentException("Image bad parent shape");
 
-            int retval = InheritedShapes + _shapes.Count;
-            _shapes.Add(jb2Shape);
+            int retval = InheritedShapes + _Shapes.Count;
+            _Shapes.Add(jb2Shape);
             return retval;
         }
 
@@ -123,7 +109,7 @@ namespace DjvuNet.JB2
             JB2Shape retval;
 
             if (shapeNum >= InheritedShapes)
-                retval = (JB2Shape)_shapes[shapeNum - InheritedShapes];
+                retval = (JB2Shape)_Shapes[shapeNum - InheritedShapes];
             else if (InheritedDictionary != null)
                 retval = InheritedDictionary.GetShape(shapeNum);
             else
@@ -136,7 +122,7 @@ namespace DjvuNet.JB2
         public virtual void Init()
         {
             InheritedDictionary = null;
-            _shapes.Clear();
+            _Shapes.Clear();
         }
 
         public virtual void SetInheritedDict(JB2Dictionary value, bool force)
@@ -150,7 +136,7 @@ namespace DjvuNet.JB2
 
             if (force == false)
             {
-                if (_shapes.Count > 0)
+                if (_Shapes.Count > 0)
                     throw new DjvuFormatException("Can not set image.");
 
                 if (InheritedDictionary != null)
