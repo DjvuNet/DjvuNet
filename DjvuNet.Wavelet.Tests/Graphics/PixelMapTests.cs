@@ -530,7 +530,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
 
-        [Fact()]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void Downsample43Test001()
         {
             var map = CreateInitVerifyPixelMap(512, 512, Pixel.BluePixel);
