@@ -10,7 +10,7 @@ namespace DjvuNet.Wavelet
 
         InterWaveCodec Init(InterWaveMap map);
 
-        int IsNullSlice(int bit, int band);
+        bool IsNullSlice(int bit, int band);
 
         int NextQuant();
     }
