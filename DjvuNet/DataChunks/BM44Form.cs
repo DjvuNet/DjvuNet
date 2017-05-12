@@ -18,7 +18,14 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public BM44Form(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base (writer, parent, length)
+        {
+        }
+
         #endregion Constructors
+
+        #region Methods
 
         public override void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
@@ -47,5 +54,7 @@ namespace DjvuNet.DataChunks
                 node.WriteData(writer, writeHeader);
             }
         }
+
+        #endregion Methods
     }
 }

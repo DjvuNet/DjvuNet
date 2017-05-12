@@ -38,6 +38,11 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public ThumChunk(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
     }
 }

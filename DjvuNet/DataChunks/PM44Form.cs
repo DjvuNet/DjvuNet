@@ -18,6 +18,11 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public PM44Form(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
 
         #region Methods
