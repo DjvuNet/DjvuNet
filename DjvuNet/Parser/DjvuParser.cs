@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using DjvuNet;
 using DjvuNet.DataChunks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Parser
 {
@@ -39,18 +40,107 @@ namespace DjvuNet.Parser
 
             ChunkType type = DjvuParser.GetFormType(formType);
 
-            DjvuFormElement formObj = (DjvuFormElement)DjvuParser.CreateDjvuNode(reader, document, parent, type, formType, length);
+            DjvuFormElement formObj = (DjvuFormElement)DjvuParser.CreateDecodedDjvuNode(reader, document, parent, type, formType, length);
 
             return formObj;
         }
 
+        public static IDjvuNode CreateEncodedDjvuNode(IDjvuWriter writer, IDjvuElement parent, ChunkType chunkType, long length)
+        {
+            IDjvuNode result = null;
 
+            switch (chunkType)
+            {
+                case ChunkType.Djvm:
+                    result = new DjvmChunk(writer, parent, length);
+                    break;
+                case ChunkType.Djvu:
+                    result = new DjvuChunk(writer, parent, length);
+                    break;
+                case ChunkType.Djvi:
+                    result = new DjviChunk(writer, parent, length);
+                    break;
+                case ChunkType.Thum:
+                    result = new ThumChunk(writer, parent, length);
+                    break;
+                case ChunkType.Dirm:
+                    result = new DirmChunk(writer, parent, length);
+                    break;
+                case ChunkType.Navm:
+                    result = new NavmChunk(writer, parent, length);
+                    break;
+                case ChunkType.Anta:
+                    result = new AntaChunk(writer, parent, length);
+                    break;
+                case ChunkType.Antz:
+                    result = new AntzChunk(writer, parent, length);
+                    break;
+                case ChunkType.Txta:
+                    result = new TxtaChunk(writer, parent, length);
+                    break;
+                case ChunkType.Txtz:
+                    result = new TxtzChunk(writer, parent, length);
+                    break;
+                case ChunkType.Djbz:
+                    result = new DjbzChunk(writer, parent, length);
+                    break;
+                case ChunkType.Sjbz:
+                    result = new SjbzChunk(writer, parent, length);
+                    break;
+                case ChunkType.FG44:
+                    result = new FG44Chunk(writer, parent, length);
+                    break;
+                case ChunkType.BG44:
+                    result = new BG44Chunk(writer, parent, length);
+                    break;
+                case ChunkType.TH44:
+                    result = new TH44Chunk(writer, parent, length);
+                    break;
+                case ChunkType.BM44:
+                    result = new BM44Chunk(writer, parent, length);
+                    break;
+                case ChunkType.BM44Form:
+                    result = new BM44Form(writer, parent, length);
+                    break;
+                case ChunkType.PM44:
+                    result = new PM44Chunk(writer, parent, length);
+                    break;
+                case ChunkType.PM44Form:
+                    result = new PM44Form(writer, parent, length);
+                    break;
+                case ChunkType.Wmrm:
+                    result = new WmrmChunk(writer, parent, length);
+                    break;
+                case ChunkType.FGbz:
+                    result = new FGbzChunk(writer, parent, length);
+                    break;
+                case ChunkType.Info:
+                    result = new InfoChunk(writer, parent, length);
+                    break;
+                case ChunkType.Incl:
+                    result = new InclChunk(writer, parent, length);
+                    break;
+                case ChunkType.BGjp:
+                    result = new BGjpChunk(writer, parent, length);
+                    break;
+                case ChunkType.FGjp:
+                    result = new FGjpChunk(writer, parent, length);
+                    break;
+                case ChunkType.Smmr:
+                    result = new SmmrChunk(writer, parent, length);
+                    break;
+                default:
+                    throw new DjvuInvalidOperationException($"Chunk type is not supported in encoding. ChunkType: {chunkType}");
+            }
+
+            return result;
+        }
 
         /// <summary>
         /// Builds the appropriate chunk for the ID
         /// </summary>
         /// <returns></returns>
-        public static IDjvuNode CreateDjvuNode(IDjvuReader reader, IDjvuDocument rootDocument,
+        public static IDjvuNode CreateDecodedDjvuNode(IDjvuReader reader, IDjvuDocument rootDocument,
             IDjvuElement parent, ChunkType chunkType,
             string chunkID = "", long length = 0)
         {
