@@ -79,6 +79,11 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public TH44Chunk(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
 
         #region Methods

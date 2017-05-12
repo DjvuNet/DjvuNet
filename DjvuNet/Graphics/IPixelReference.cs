@@ -1,6 +1,8 @@
-﻿namespace DjvuNet.Graphics
+﻿using System;
+
+namespace DjvuNet.Graphics
 {
-    public interface IPixelReference : IPixel
+    public interface IPixelReference : IPixel, IEquatable<IPixelReference>
     {
         int ColorNumber { get; }
 

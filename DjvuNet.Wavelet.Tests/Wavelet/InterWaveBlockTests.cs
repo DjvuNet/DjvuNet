@@ -54,8 +54,7 @@ namespace DjvuNet.Wavelet.Tests
             block._PData = null;
 
             var block2 = block.Duplicate();
-            Assert.NotNull(block2);
-            Assert.Null(block2._PData);
+            Assert.Null(block2);
         }
 
         [Fact()]
@@ -78,13 +77,11 @@ namespace DjvuNet.Wavelet.Tests
             for (int i = 0; i < pdata.Length; i++)
             {
                 short[][] pdatai = pdata[i];
-
                 Assert.Equal(16, pdatai.Length);
 
                 for (int j = 0; j < 16; j++)
                 {
                     short[] pdataij = pdatai[j];
-
                     Assert.Equal(16, pdataij.Length);
 
                     for (int k = 0; k < 16; k++)

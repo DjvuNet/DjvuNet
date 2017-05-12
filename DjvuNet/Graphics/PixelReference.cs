@@ -377,6 +377,16 @@ namespace DjvuNet.Graphics
             Blue = gray;
         }
 
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(IPixel other)
         {
