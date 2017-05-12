@@ -195,6 +195,12 @@ namespace DjvuNet.DataChunks
             InitializeInternal();
         }
 
+        public DjvuFormElement(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base (writer, parent, length)
+        {
+            InitializeInternal();
+        }
+
         protected virtual void InitializeInternal()
         {
             _Children = new List<IDjvuNode>();
@@ -319,7 +325,7 @@ namespace DjvuNet.DataChunks
                 // Reset the stream position
                 // reader.Position -= 4;
 
-                var chunk = DjvuParser.CreateDjvuNode(reader, Document, this, type, id, length);
+                var chunk = DjvuParser.CreateDecodedDjvuNode(reader, Document, this, type, id, length);
 
                 if (chunk != null)
                 {

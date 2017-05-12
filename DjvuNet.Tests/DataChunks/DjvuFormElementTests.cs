@@ -41,7 +41,7 @@ namespace DjvuNet.DataChunks.Tests
             readerMock.Setup<long>(x => x.Position).Returns(1024);
             reader = readerMock.Object;
 
-            IDjvuElement element = (IDjvuElement) DjvuParser.CreateDjvuNode(reader, null, null, ChunkType.Djvi, "DJVI", 127);
+            IDjvuElement element = (IDjvuElement) DjvuParser.CreateDecodedDjvuNode(reader, null, null, ChunkType.Djvi, "DJVI", 127);
             string result = element.ToString();
             Assert.False(String.IsNullOrWhiteSpace(result));
             Assert.Contains("ID: DJVI", result);

@@ -262,10 +262,10 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            byte red = unchecked((byte)_Red);
-            byte green = unchecked((byte)_Green);
-
-            return (int)(0xff000000 | red << 16 | green << 8 | unchecked((byte)_Blue));
+            uint red = unchecked((byte)_Red);
+            uint green = unchecked((byte)_Green);
+            uint mask = 0xff000000;
+            return (int)(mask | red << 16 | green << 8 | unchecked((byte)_Blue));
         }
 
         /// <summary>

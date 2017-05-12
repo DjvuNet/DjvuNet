@@ -36,6 +36,11 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public AntzChunk(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
 
         #region Protected Methods

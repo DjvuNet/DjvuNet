@@ -93,6 +93,11 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public FGbzChunk(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
 
         #region Public Methods

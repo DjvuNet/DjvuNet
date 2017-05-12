@@ -58,6 +58,11 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public AnnotationChunk(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
 
         #region Methods

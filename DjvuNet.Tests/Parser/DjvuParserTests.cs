@@ -81,7 +81,7 @@ namespace DjvuNet.Parser.Tests
                 reader = readerMock.Object;
             }
 
-            IDjvuNode node = DjvuParser.CreateDjvuNode(reader, rootDocument, parent, chunkType, chunkID, length);
+            IDjvuNode node = DjvuParser.CreateDecodedDjvuNode(reader, rootDocument, parent, chunkType, chunkID, length);
             Assert.NotNull(node);
             Assert.Equal<ChunkType>(chunkType, node.ChunkType);
             Assert.Equal<string>(chunkID, node.ChunkID);

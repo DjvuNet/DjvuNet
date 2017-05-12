@@ -2,49 +2,8 @@ using DjvuNet.Compression;
 
 namespace DjvuNet.Wavelet
 {
-    public sealed class InterWaveCodec : IInterWaveCodec
+    public class InterWaveCodec : InterWaveCodecBase, IInterWaveCodec
     {
-        public const byte MajorVersion = 0x01;
-        public const byte MinorVersion = 0x02;
-
-        #region Internal Fields
-
-        internal readonly sbyte[] _BucketState;
-        internal readonly sbyte[] _CoefficientState;
-        internal byte[][] _ctxBucket;
-        internal byte _ctxMant;
-        internal byte _ctxRoot;
-        internal byte[] _ctxStart;
-        internal readonly int[] _QuantHigh;
-        internal readonly int[] _QuantLow;
-        internal int _CurrentBand;
-        internal int _CurrentBitPlane;
-        internal InterWaveMap _Map;
-
-        //private const int ZERO = 1;
-        //private const int ACTIVE = 2;
-        //private const int NEW = 4;
-        //private const int UNK = 8;
-
-        internal readonly int[] IwQuant = 
-            new[]
-            {
-                0x10000, 0x20000, 0x20000, 0x40000, 0x40000, 0x40000, 0x80000,
-                0x80000, 0x80000, 0x100000, 0x100000, 0x100000, 0x200000,
-                0x100000, 0x100000, 0x200000
-            };
-
-        internal readonly InterWaveBucket[] Bandbuckets = 
-            new[]
-            {
-                new InterWaveBucket(0, 1), new InterWaveBucket(1, 1), new InterWaveBucket(2, 1),
-                new InterWaveBucket(3, 1), new InterWaveBucket(4, 4), new InterWaveBucket(8, 4),
-                new InterWaveBucket(12, 4), new InterWaveBucket(16, 16), new InterWaveBucket(32, 16),
-                new InterWaveBucket(48, 16)
-            };
-
-        #endregion Internal Fields
-
         #region Constructors
 
         /// <summary> 
@@ -52,11 +11,11 @@ namespace DjvuNet.Wavelet
         /// </summary>
         public InterWaveCodec()
         {
-            _ctxStart = new byte[32];
+            _CtxStart = new byte[32];
 
-            _ctxBucket = new byte[10][];
-            for (int i2 = 0; i2 < _ctxBucket.Length; i2++)
-                _ctxBucket[i2] = new byte[8];
+            _CtxBucket = new byte[10][];
+            for (int i2 = 0; i2 < _CtxBucket.Length; i2++)
+                _CtxBucket[i2] = new byte[8];
 
             _QuantHigh = new int[10];
             _QuantLow = new int[16];
@@ -74,17 +33,17 @@ namespace DjvuNet.Wavelet
         {
             if (_CurrentBitPlane >= 0)
             {
-                if (IsNullSlice(_CurrentBitPlane, _CurrentBand) == 0)
+                if (!IsNullSlice(_CurrentBitPlane, _CurrentBand))
                 {
                     for (int blockno = 0; blockno < _Map.BlockNumber; blockno++)
                     {
-                        int fbucket = Bandbuckets[_CurrentBand].Start;
-                        int nbucket = Bandbuckets[_CurrentBand].Size;
+                        int fbucket = _BandBuckets[_CurrentBand].Start;
+                        int nbucket = _BandBuckets[_CurrentBand].Size;
                         DecodeBuckets(coder, _CurrentBitPlane, _CurrentBand, _Map.Blocks[blockno], fbucket, nbucket);
                     }
                 }
 
-                if (++_CurrentBand >= Bandbuckets.Length)
+                if (++_CurrentBand >= _BandBuckets.Length)
                 {
                     _CurrentBand = 0;
                     _CurrentBitPlane++;
@@ -95,10 +54,8 @@ namespace DjvuNet.Wavelet
                         return 0;
                     }
                 }
-
                 return 1;
             }
-
             return 0;
         }
 
@@ -143,7 +100,7 @@ namespace DjvuNet.Wavelet
                 bbstate |= 4;
             else if ((bbstate & 8) != 0)
             {
-                if (coder.Decoder(ref _ctxRoot) != 0)
+                if (coder.Decoder(ref _CtxRoot) != 0)
                     bbstate |= 4;
             }
 
@@ -183,7 +140,7 @@ namespace DjvuNet.Wavelet
                         if ((bbstate & 2) != 0)
                             ctx |= 4;
 
-                        if (coder.Decoder(ref _ctxBucket[band][ctx]) != 0)
+                        if (coder.Decoder(ref _CtxBucket[band][ctx]) != 0)
                             _BucketState[buckno] |= 4;
                     }
                 }
@@ -244,7 +201,7 @@ namespace DjvuNet.Wavelet
                                 if (((_BucketState[buckno] & 2) != 0))
                                     ctx |= 8;
 
-                                if (coder.Decoder(ref _ctxStart[ctx]) != 0)
+                                if (coder.Decoder(ref _CtxStart[ctx]) != 0)
                                 {
                                     cstate[cidx + i] |= 4;
 
@@ -300,7 +257,7 @@ namespace DjvuNet.Wavelet
                                 {
                                     coeff += (thres >> 2);
 
-                                    if (coder.Decoder(ref _ctxMant) != 0)
+                                    if (coder.Decoder(ref _CtxMant) != 0)
                                         coeff += (thres >> 1);
                                     else
                                         coeff = (coeff - thres) + (thres >> 1);
@@ -329,7 +286,7 @@ namespace DjvuNet.Wavelet
             _Map = map;
 
             int i = 0;
-            int[] q = IwQuant;
+            int[] q = _IwQuant;
             int qidx = 0;
 
             // Ideal for 128/256 packed integer
@@ -362,11 +319,11 @@ namespace DjvuNet.Wavelet
             return this;
         }
 
-        public int IsNullSlice(int bit, int band)
+        public bool IsNullSlice(int bit, int band)
         {
             if (band == 0)
             {
-                int is_null = 1;
+                bool is_null = true;
 
                 for (int i = 0; i < 16; i++)
                 {
@@ -374,7 +331,10 @@ namespace DjvuNet.Wavelet
                     _CoefficientState[i] = 1;
 
                     if ((threshold > 0) && (threshold < 32768))
-                        is_null = _CoefficientState[i] = 0;
+                    {
+                        is_null = false;
+                        _CoefficientState[i] = 0;
+                    }
                 }
 
                 return is_null;
@@ -383,12 +343,12 @@ namespace DjvuNet.Wavelet
             int threshold2 = _QuantHigh[band];
 
             if ((threshold2 <= 0) || (threshold2 >= 32768))
-                return 1;
+                return true;
 
-            for (int i = 0; i < (Bandbuckets[band].Size << 4); i++)
+            for (int i = 0; i < (_BandBuckets[band].Size << 4); i++)
                 _CoefficientState[i] = 0;
 
-            return 0;
+            return false;
         }
 
         public int NextQuant()

@@ -167,6 +167,10 @@
     <Compile Include="DjvuDocument.cs" />
     <Compile Include="DjvuImage.cs" />
     <Compile Include="DjvuPage.cs" />
+    <Compile Include="Errors\DjvuArgumentException.cs" />
+    <Compile Include="Errors\DjvuArgumentNullException.cs" />
+    <Compile Include="Errors\DjvuArgumentOutOfRangeException.cs" />
+    <Compile Include="Errors\DjvuInvalidOperationException.cs" />
     <Compile Include="Extentions\ExtentionMethods.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
     <Compile Include="Graphics\IBitmap.cs" />
@@ -212,8 +216,14 @@
     <Compile Include="Wavelet\InterWaveBlock.cs" />
     <Compile Include="Wavelet\InterWaveBucket.cs" />
     <Compile Include="Wavelet\InterWaveCodec.cs" />
+    <Compile Include="Wavelet\InterWaveCodecBase.cs" />
+    <Compile Include="Wavelet\InterWaveEncoder.cs" />
+    <Compile Include="Wavelet\InterWaveEncoderSettings.cs" />
     <Compile Include="Wavelet\InterWaveMap.cs" />
     <Compile Include="Wavelet\InterWavePixelMap.cs" />
+    <Compile Include="Wavelet\InterWaveTransform.cs" />
+    <Compile Include="Wavelet\NativeMethods.cs" />
+    <Compile Include="Wavelet\YCrCbMode.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Text\PageText.cs" />

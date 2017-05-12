@@ -1,30 +1,42 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.Wavelet
 {
     /// <summary>
     /// This class represents structured wavelet data.
     /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
     public class InterWaveBlock : IInterWaveBlock
     {
         #region Fields
-
-        internal readonly short[] _Zigzagloc;
 
         /// <summary>
         /// The data structure for this block
         /// </summary>
         internal short[][][] _PData;
 
+        internal readonly short[] _Zigzagloc;
+
         #endregion Fields
+
+        #region Properties
+
+        public short[][][] PData
+        {
+            get { return _PData; }
+            internal set { _PData = value; }
+        }
+
+        #endregion Properties
 
         #region Constructors
 
         public InterWaveBlock()
         {
-            _Zigzagloc = BuildZigZagData();
             _PData = new short[4][][];
+            _Zigzagloc = BuildZigZagData();
         }
 
         #endregion Constructors
@@ -43,10 +55,7 @@ namespace DjvuNet.Wavelet
 
             try
             {
-                retval = new InterWaveBlock { _PData = this._PData };
-
                 short[][][] pdata = (short[][][])this._PData.Clone();
-                ((InterWaveBlock)retval)._PData = pdata;
 
                 for (int i = 0; i < pdata.Length; i++)
                 {
@@ -64,6 +73,8 @@ namespace DjvuNet.Wavelet
                         }
                     }
                 }
+
+                retval = new InterWaveBlock { PData = pdata };
             }
             catch
             {
@@ -177,6 +188,18 @@ namespace DjvuNet.Wavelet
                         n++;
                     }
                 }
+            }
+        }
+
+        public void read_liftblock(short[] coeff)
+        {
+            int n = 0;
+            for (int n1 = 0; n1 < 64; n1++)
+            {
+                short[] d = GetInitializedBlock(n1);
+
+                for (int n2 = 0; n2 < 16; n2++, n++)
+                    d[n2] = coeff[_Zigzagloc[n]];
             }
         }
 
