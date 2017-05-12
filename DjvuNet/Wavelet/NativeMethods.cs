@@ -10,7 +10,12 @@ namespace DjvuNet.Wavelet
     {
         public static unsafe void MoveMemory(void* dest, void* src, long length)
         {
-            throw new NotImplementedException();
+            CopyMemory(dest, src, (uint) length);
         }
+
+        private unsafe delegate void MemCopyDelegate(void* dest, void* src, long length);
+
+        [DllImport("NtDll.dll", EntryPoint = "RtlMoveMemory")]
+        private unsafe static extern void CopyMemory(void* dest, void* src, uint Length);
     }
 }

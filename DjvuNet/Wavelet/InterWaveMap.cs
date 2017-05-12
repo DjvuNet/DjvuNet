@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using DjvuNet.Graphics;
 
 namespace DjvuNet.Wavelet
@@ -62,6 +63,77 @@ namespace DjvuNet.Wavelet
         #endregion Constructors
 
         #region Public Methods
+
+        public unsafe void create(sbyte* img8, int imgrowsize, sbyte* msk8, int mskrowsize = 0)
+        {
+            int i, j;
+
+            // Allocate decomposition buffer
+            short[] bData16 = new short[BlockWidth * BlockHeight];
+            GCHandle pData16 = GCHandle.Alloc(bData16, GCHandleType.Pinned);
+            short* data16 = (short*) pData16.AddrOfPinnedObject();
+
+            // Copy pixels
+            short* p = data16;
+            sbyte* row = img8;
+
+            for (i = 0; i < Height; i++)
+            {
+                for (j = 0; j < Width; j++)
+                    *p++ = (short) (row[j] << InterWaveEncoder.iw_shift);
+
+                row += imgrowsize;
+
+                for (j = Width; j < BlockWidth; j++)
+                    *p++ = 0;
+            }
+
+            for (i = Height; i < BlockHeight; i++)
+                for (j = 0; j < BlockWidth; j++)
+                    *p++ = 0;
+
+            // Handle bitmask
+            if (msk8 != (sbyte*)0)
+            {
+                // Interpolate pixels below mask
+                InterWaveEncoder.interpolate_mask(data16, Width, Height, BlockWidth, msk8, mskrowsize);
+
+                // Multiscale iterative masked decomposition
+                InterWaveEncoder.forward_mask(data16, Width, Height, BlockWidth, 1, 32, msk8, mskrowsize);
+            }
+            else
+            {
+                // Perform traditional decomposition
+                InterWaveTransform.Forward(data16, Width, Height, BlockWidth, 1, 32);
+            }
+
+            // Copy coefficient into blocks
+            p = data16;
+            InterWaveBlock[] blocks = Blocks;
+
+            for (i = 0; i < BlockHeight; i += 32)
+            {
+                for (j = 0; j < BlockWidth; j += 32)
+                {
+
+                    short[] liftblock = new short[1024];
+                    GCHandle pLiftblock = GCHandle.Alloc(liftblock, GCHandleType.Pinned);
+
+                    // transfer coefficients at (p+j) into aligned block
+                    short* pp = p + j;
+                    short* pl = (short*) pLiftblock.AddrOfPinnedObject();
+
+                    for (int ii = 0; ii < 32; ii++, pp += BlockWidth)
+                        for (int jj = 0; jj < 32; jj++)
+                            *pl++ = pp[jj];
+
+                    // transfer into IW44Image::Block (apply zigzag and scaling)
+                    blocks[i*j].read_liftblock(liftblock);
+                }
+                // next row of blocks
+                p += 32 * BlockWidth;
+            }
+        }
 
         public InterWaveMap Duplicate()
         {

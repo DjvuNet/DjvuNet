@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using DjvuNet.Compression;
 using DjvuNet.Configuration;
 using DjvuNet.DataChunks;
@@ -264,14 +265,15 @@ namespace DjvuNet.Wavelet
         /// <param name="writer"></param>
         /// <param name="settings"></param>
         /// <returns></returns>
-        public DjvuFormElement EncodeImage(IDjvuWriter writer, int nchunks, InterWaveEncoderSettings[] settings)
+        public DjvuFormElement EncodeImage(IDjvuWriter writer, int nchunks, InterWaveEncoderSettings[] settings,
+            ChunkType formType = ChunkType.PM44Form, ChunkType nodeType = ChunkType.PM44)
         {
             if (_YCodec != null)
                 throw new DjvuInvalidOperationException($"Encoder already exists or left open from previous operation.");
 
             int flag = 1;
 
-            PM44Form form = (PM44Form) DjvuParser.CreateDecodedDjvuNode(null, null, null, ChunkType.PM44Form, "PM44", 0);
+            PM44Form form = (PM44Form)DjvuParser.CreateEncodedDjvuNode(writer, null, formType, 0);
 
             for (int i = 0; flag != 0 && i < nchunks; i++)
             {
@@ -282,7 +284,7 @@ namespace DjvuNet.Wavelet
                     data = new byte[stream.Position];
                     Buffer.BlockCopy(stream.GetBuffer(), 0, data, 0, data.Length);
                 }
-                PM44Chunk chunk = (PM44Chunk)DjvuParser.CreateEncodedDjvuNode(writer, form, ChunkType.PM44, data.Length);
+                PM44Chunk chunk = (PM44Chunk)DjvuParser.CreateEncodedDjvuNode(writer, form, nodeType, data.Length);
                 chunk.ChunkData = data;
                 form.AddChild(chunk);
             }
@@ -312,9 +314,96 @@ namespace DjvuNet.Wavelet
         /// <param name="bm"></param>
         /// <param name="mask"></param>
         /// <param name="mode"></param>
-        public void Init(PixelMap bm, Bitmap mask = null, YCrCbMode mode = YCrCbMode.Normal)
+        public unsafe void InitializeEncoder(PixelMap pm, Bitmap gmask = null, YCrCbMode crcbmode = YCrCbMode.Normal)
         {
-            throw new NotImplementedException();
+            /* Free */
+            CloseEncoder();
+            /* Create */
+            int w = pm.ImageWidth;
+            int h = pm.ImageHeight;
+            sbyte[] sBuffer = new sbyte[w * h];
+            GCHandle hBuffer = GCHandle.Alloc(sBuffer, GCHandleType.Pinned);
+            sbyte* buffer = (sbyte*) hBuffer.AddrOfPinnedObject();
+
+            // Create maps
+            InterWaveMap eymap = new InterWaveMap(w, h);
+            _YMap = eymap;
+
+            // Handle CRCB mode
+            switch (crcbmode)
+            {
+                case YCrCbMode.None:
+                    _CrCbHalf = true;
+                    _CrCbDelay = -1;
+                    break;
+                case YCrCbMode.Half:
+                    _CrCbHalf = true;
+                    _CrCbDelay = 10;
+                    break;
+                case YCrCbMode.Normal:
+                    _CrCbHalf = false;
+                    _CrCbDelay = 10;
+                    break;
+                case YCrCbMode.Full:
+                    _CrCbHalf = false;
+                    _CrCbDelay = 0;
+                    break;
+            }
+            // Prepare mask information
+            sbyte* msk8 = (sbyte*)0;
+            int mskrowsize = 0;
+
+            Bitmap mask = gmask;
+            if (mask != null)
+            {
+                //msk8 = (signed char const *)((*mask)[0]);
+                mskrowsize = mask.GetRowSize();
+            }
+
+            GCHandle hData = GCHandle.Alloc(pm.Data, GCHandleType.Pinned);
+            Pixel* pData = (Pixel*)hData.AddrOfPinnedObject();
+
+            // Fill buffer with luminance information
+            InterWaveTransform.RGB_to_Y(pData, w, h, pm.GetRowSize(), buffer, w);
+
+            if (_CrCbDelay < 0)
+            {
+                // Inversion for gray images
+                sbyte* e = buffer + w * h;
+                for (sbyte* b = buffer; b < e; b++)
+                    *b = (sbyte)(255 - *b);
+            }
+
+            // Create YMAP
+            eymap.create(buffer, w, msk8, mskrowsize);
+
+            // Create chrominance maps
+            if (_CrCbDelay >= 0)
+            {
+                InterWaveMap ecbmap = new InterWaveMap(w, h);
+                _CbMap = ecbmap;
+
+                InterWaveMap ecrmap = new InterWaveMap(w, h);
+                _CrMap = ecrmap;
+
+                // Process CB information
+                InterWaveTransform.RGB_to_Cb(pData, w, h, pm.GetRowSize(), buffer, w);
+                ecbmap.create(buffer, w, msk8, mskrowsize);
+
+                // Process CR information
+                InterWaveTransform.RGB_to_Cr(pData, w, h, pm.GetRowSize(), buffer, w);
+                ecrmap.create(buffer, w, msk8, mskrowsize);
+
+                // Perform chrominance reduction (CRCBhalf)
+                if (_CrCbHalf)
+                {
+                    ecbmap.Slashres(2);
+                    ecrmap.Slashres(2);
+                }
+            }
+
+            hData.Free();
+            hBuffer.Free();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
