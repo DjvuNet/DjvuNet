@@ -29,10 +29,15 @@ namespace DjvuNet.DataChunks
         public virtual uint OffsetDiff { get { return 8; } }
 
         /// <summary>
-        /// Gets the reader for the chunk data
+        /// Reader for deserializing the chunk data
         /// </summary>
         //[DataMember]
         public IDjvuReader Reader { get; set; }
+
+        /// <summary>
+        /// Writer for serializing chunk data
+        /// </summary>
+        public IDjvuWriter Writer { get; set; }
 
         /// <summary>
         /// Gets the chunk type
@@ -70,10 +75,19 @@ namespace DjvuNet.DataChunks
         //[DataMember]
         public virtual string Name { get { return ChunkType.ToString(); } }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public virtual bool IsDirty { get; set; }
 
+        /// <summary>
+        /// Tru if chunk was initialized
+        /// </summary>
         public virtual bool IsInitialized { get; internal set; }
 
+        /// <summary>
+        /// Binary node data
+        /// </summary>
         public virtual byte[] ChunkData
         {
             get
@@ -116,6 +130,9 @@ namespace DjvuNet.DataChunks
             }
         }
 
+        /// <summary>
+        /// Root DjvuFormElement
+        /// </summary>
         public virtual IDjvuRootElement RootElement { get; set; }
 
         /// <summary>
@@ -149,6 +166,13 @@ namespace DjvuNet.DataChunks
             Length = length;
             ChunkID = chunkID;
             DataOffset = reader.Position;
+        }
+
+        public DjvuNode(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+        {
+            Writer = writer;
+            Parent = parent;
+            Length = length;
         }
 
         public virtual void Initialize()

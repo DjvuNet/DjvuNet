@@ -65,10 +65,15 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public SjbzChunk(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
 
         #region Methods
- 
+
         internal JB2Image ReadCompressedImage()
         {
             using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))

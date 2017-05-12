@@ -34,6 +34,11 @@ namespace DjvuNet.DataChunks
         {
         }
 
+        public CidaChunk(IDjvuWriter writer, IDjvuElement parent, long length = 0)
+            : base(writer, parent, length)
+        {
+        }
+
         #endregion Constructors
 
     }
