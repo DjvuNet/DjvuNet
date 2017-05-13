@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using DjvuNet.Tests;
 using DjvuNet.Graphics;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Wavelet.Tests
 {
@@ -15,12 +16,6 @@ namespace DjvuNet.Wavelet.Tests
     {
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void InterWaveMapTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void IWMapTest1()
         {
             Assert.True(false, "This test needs an implementation");
         }
@@ -35,11 +30,11 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 var dyMap = map._YMap.Duplicate();
                 Assert.NotNull(dyMap);
@@ -59,11 +54,11 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 map._YMap.Blocks = null;
                 var dyMap = map._YMap.Duplicate();
@@ -101,15 +96,14 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 int result = map._YMap.GetBucketCount();
                 Assert.Equal(910, result);
-
             }
         }
 
@@ -127,9 +121,8 @@ namespace DjvuNet.Wavelet.Tests
                 Top = height
             };
 
-            InterWaveMap map = new InterWaveMap();
-            map.Init(width, height);
-            Assert.Throws<ArgumentOutOfRangeException>(
+            InterWaveMap map = new InterWaveMap(width, height);
+            Assert.Throws<DjvuArgumentOutOfRangeException>(
                 () => map.Image(subsample, rect, 1, new sbyte[width * height], width, 1, true));
         }
 
@@ -147,9 +140,8 @@ namespace DjvuNet.Wavelet.Tests
                 Top = height
             };
 
-            InterWaveMap map = new InterWaveMap();
-            map.Init(width, height);
-            Assert.Throws<ArgumentException>(
+            InterWaveMap map = new InterWaveMap(width, height);
+            Assert.Throws<DjvuArgumentException>(
                 () => map.Image(subsample, rect, 1, new sbyte[width * height], width, 1, true));
         }
 
@@ -168,9 +160,8 @@ namespace DjvuNet.Wavelet.Tests
                 Top = height
             };
 
-            InterWaveMap map = new InterWaveMap();
-            map.Init(width, height);
-            Assert.Throws<ArgumentException>(
+            InterWaveMap map = new InterWaveMap(width, height);
+            Assert.Throws<DjvuArgumentException>(
                 () => map.Image(subsample, rect, 1, new sbyte[width * height], width, 1, true));
         }
 
@@ -190,9 +181,8 @@ namespace DjvuNet.Wavelet.Tests
                 Top = height - 3
             };
 
-            InterWaveMap map = new InterWaveMap();
-            map.Init(width, height);
-            Assert.Throws<ArgumentException>(
+            InterWaveMap map = new InterWaveMap(width, height);
+            Assert.Throws<DjvuArgumentException>(
                 () => map.Image(subsample, rect, 1, new sbyte[width * height], width, 1, true));
         }
 
@@ -210,8 +200,7 @@ namespace DjvuNet.Wavelet.Tests
                 Top = height
             };
 
-            InterWaveMap map = new InterWaveMap();
-            map.Init(width, height);
+            InterWaveMap map = new InterWaveMap(width, height);
             map.Image(0, new sbyte[width * height], width, 1, true);
         }
 
@@ -230,8 +219,7 @@ namespace DjvuNet.Wavelet.Tests
                 Top = height
             };
 
-            InterWaveMap map = new InterWaveMap();
-            map.Init(width, height);
+            InterWaveMap map = new InterWaveMap(width, height);
             map.Image(subsample, rect, 1, new sbyte[width * height * 3], width, 1, true);
         }
 
@@ -250,15 +238,8 @@ namespace DjvuNet.Wavelet.Tests
                 Top = height
             };
 
-            InterWaveMap map = new InterWaveMap();
-            map.Init(width, height);
+            InterWaveMap map = new InterWaveMap(width, height);
             map.Image(subsample, rect, 1, new sbyte[width * height + 1], width, 1, true);
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void InitTest()
-        {
-            Assert.True(false, "This test needs an implementation");
         }
 
         [Fact()]
@@ -271,11 +252,11 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 map._YMap.Slashres(1);
             }
@@ -291,11 +272,11 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 map._YMap.Slashres(2);
             }
@@ -311,11 +292,11 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 map._YMap.Slashres(4);
             }
@@ -331,14 +312,20 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 map._YMap.Slashres(8);
             }
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void CreateTest()
+        {
+            Assert.True(false, "This test needs an implementation");
         }
     }
 }

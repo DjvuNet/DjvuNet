@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DjvuNet.DataChunks;
 using Moq;
 using DjvuNet.Tests.Xunit;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Parser.Tests
 {
@@ -52,6 +53,45 @@ namespace DjvuNet.Parser.Tests
             }
         }
 
+        public static IEnumerable<object[]> EncodedNodeTestData
+        {
+            get
+            {
+                List<object[]> retVal = new List<object[]>();
+
+                retVal.Add(new object[] { null, null, ChunkType.Anta, 1 });
+                retVal.Add(new object[] { null, null, ChunkType.Antz, 2 });
+                retVal.Add(new object[] { null, null, ChunkType.BG44, 3 });
+                retVal.Add(new object[] { null, null, ChunkType.BGjp, 4 });
+                retVal.Add(new object[] { null, null, ChunkType.Cida, 5 });
+                retVal.Add(new object[] { null, null, ChunkType.Dirm, 6 });
+                retVal.Add(new object[] { null, null, ChunkType.Djbz, 7 });
+                retVal.Add(new object[] { null, null, ChunkType.Djvi, 8 });
+                retVal.Add(new object[] { null, null, ChunkType.Djvm, 9 });
+                retVal.Add(new object[] { null, null, ChunkType.Djvu, 10 });
+                retVal.Add(new object[] { null, null, ChunkType.FG44, 11 });
+                retVal.Add(new object[] { null, null, ChunkType.FGbz, 12 });
+                retVal.Add(new object[] { null, null, ChunkType.FGjp, 13 });
+                retVal.Add(new object[] { null, null, ChunkType.Incl, 14 });
+                retVal.Add(new object[] { null, null, ChunkType.Info, 15 });
+                retVal.Add(new object[] { null, null, ChunkType.Navm, 16 });
+                retVal.Add(new object[] { null, null, ChunkType.Sjbz, 17 });
+                retVal.Add(new object[] { null, null, ChunkType.Smmr, 18 });
+                retVal.Add(new object[] { null, null, ChunkType.TH44, 19 });
+                retVal.Add(new object[] { null, null, ChunkType.Thum, 20 });
+                retVal.Add(new object[] { null, null, ChunkType.Txta, 21 });
+                retVal.Add(new object[] { null, null, ChunkType.Txtz, 22 });
+                retVal.Add(new object[] { null, null, ChunkType.Wmrm, 23 });
+                retVal.Add(new object[] { null, null, ChunkType.BM44, 24 });
+                retVal.Add(new object[] { null, null, ChunkType.PM44, 25 });
+                retVal.Add(new object[] { null, null, ChunkType.BM44Form, 26 });
+                retVal.Add(new object[] { null, null, ChunkType.PM44Form, 27 });
+                retVal.Add(new object[] { null, null, ChunkType.Unknown, 28 });
+
+                return retVal;
+            }
+        }
+
         public static IEnumerable<object[]> RootFormChildTestData
         {
             get
@@ -70,7 +110,7 @@ namespace DjvuNet.Parser.Tests
 
         [DjvuTheory]
         [MemberData(nameof(NodeTestData))]
-        public void CreateDjvuNode_Theory(IDjvuReader reader, IDjvuDocument rootDocument,
+        public void CreateDecodedDjvuNode_Theory(IDjvuReader reader, IDjvuDocument rootDocument,
             IDjvuElement parent, ChunkType chunkType,
             string chunkID = "", long length = 0)
         {
@@ -86,7 +126,7 @@ namespace DjvuNet.Parser.Tests
             Assert.Equal<ChunkType>(chunkType, node.ChunkType);
             Assert.Equal<string>(chunkID, node.ChunkID);
             Assert.Equal<long>(length, node.Length);
-            Assert.Equal<long>(reader.Position, node.DataOffset); 
+            Assert.Equal<long>(reader.Position, node.DataOffset);
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
@@ -169,5 +209,31 @@ namespace DjvuNet.Parser.Tests
             Assert.False(DjvuParser.IsRootFormChild(ChunkType.Wmrm));
         }
 
+        [DjvuTheory]
+        [MemberData(nameof(EncodedNodeTestData))]
+        public void CreateEncodedDjvuNode_Theory(IDjvuWriter writer, IDjvuElement parent, ChunkType chunkType, long length = 0)
+        {
+            if (writer == null)
+            {
+                Mock<IDjvuWriter> writerMock = new Mock<IDjvuWriter>();
+                writerMock.Setup<long>(x => x.Position).Returns(1024);
+                writer = writerMock.Object;
+            }
+
+            switch (chunkType)
+            {
+                case ChunkType.Cida:
+                case ChunkType.Unknown:
+                    Assert.Throws<DjvuInvalidOperationException>(
+                        () => DjvuParser.CreateEncodedDjvuNode(writer, parent, chunkType, length));
+                    break;
+                default:
+                    IDjvuNode node = DjvuParser.CreateEncodedDjvuNode(writer, parent, chunkType, length);
+                    Assert.NotNull(node);
+                    Assert.Equal<ChunkType>(chunkType, node.ChunkType);
+                    Assert.Equal<long>(length, node.Length);
+                    break;
+            }
+        }
     }
 }

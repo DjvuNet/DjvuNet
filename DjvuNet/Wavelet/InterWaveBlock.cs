@@ -8,7 +8,7 @@ namespace DjvuNet.Wavelet
     /// This class represents structured wavelet data.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public class InterWaveBlock : IInterWaveBlock
+    public unsafe class InterWaveBlock : IInterWaveBlock
     {
         #region Fields
 
@@ -17,7 +17,7 @@ namespace DjvuNet.Wavelet
         /// </summary>
         internal short[][][] _PData;
 
-        internal readonly short[] _Zigzagloc;
+        internal static short[] _Zigzagloc;
 
         #endregion Fields
 
@@ -36,7 +36,8 @@ namespace DjvuNet.Wavelet
         public InterWaveBlock()
         {
             _PData = new short[4][][];
-            _Zigzagloc = BuildZigZagData();
+            if (_Zigzagloc == null)
+                _Zigzagloc = BuildZigZagData();
         }
 
         #endregion Constructors
@@ -155,10 +156,10 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary> 
-        /// Write a liftblock
+        /// Write a liftblock. Implementation assumes all coeff buffer values are zeros.
         /// </summary>
         /// <param name="coeff">
-        /// An array of block wavelet coefficients
+        /// An array of block wavelet coefficients - function assumes all values are zeros
         /// </param>
         /// <param name="bmin">
         /// Start position
@@ -169,9 +170,6 @@ namespace DjvuNet.Wavelet
         public void WriteLiftBlock(short[] coeff, int bmin, int bmax)
         {
             int n = bmin << 4;
-
-            for (int i = 0; i < coeff.Length; i++)
-                coeff[i] = 0;
 
             for (int n1 = bmin; n1 < bmax; n1++)
             {
@@ -191,7 +189,7 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        public void read_liftblock(short[] coeff)
+        public void ReadLiftBlock(short[] coeff)
         {
             int n = 0;
             for (int n1 = 0; n1 < 64; n1++)
