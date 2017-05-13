@@ -737,14 +737,14 @@ namespace DjvuNet.Tests
                 var img = pmChunk.Image;
                 Assert.NotNull(img);
 
-                DjvuNet.Wavelet.InterWavePixelMap pixMap = new Wavelet.InterWavePixelMap();
-                pixMap = pmChunk.ProgressiveDecodeBackground(pixMap) as Wavelet.InterWavePixelMap;
+                var pixMap = new Wavelet.InterWavePixelMapDecoder();
+                pixMap = pmChunk.ProgressiveDecodeBackground(pixMap) as Wavelet.InterWavePixelMapDecoder;
                 Assert.NotNull(pixMap);
 
                 pmChunk = page.PageForm.Children[1] as PM44Chunk;
                 Assert.NotNull(pmChunk);
 
-                DjvuNet.Wavelet.InterWavePixelMap pixMap2 = new Wavelet.InterWavePixelMap();
+                var pixMap2 = new Wavelet.InterWavePixelMapDecoder();
                 Assert.Throws<DjvuFormatException>(() => pmChunk.ProgressiveDecodeBackground(pixMap2));
 
                 // This time call will not throw

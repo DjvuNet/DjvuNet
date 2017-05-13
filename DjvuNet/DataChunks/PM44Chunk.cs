@@ -90,7 +90,7 @@ namespace DjvuNet.DataChunks
         {
             using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
-                IInterWavePixelMap pixelMap = new InterWavePixelMap();
+                IInterWavePixelMap pixelMap = new InterWavePixelMapDecoder();
                 pixelMap.Decode(reader);
                 return pixelMap;
             }

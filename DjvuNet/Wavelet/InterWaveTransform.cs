@@ -134,7 +134,7 @@ namespace DjvuNet.Wavelet
                 for (int j = 0; j < w; j++, p2++, out2++)
                 {
                     Pixel pix = *p2;
-                    int y = rmul[(byte)pix.Red] + gmul[(byte)pix.Green] + bmul[(byte)pix.Blue] + 32768;
+                    int y = rmul[unchecked((byte)pix.Red)] + gmul[unchecked((byte)pix.Green)] + bmul[unchecked((byte)pix.Blue)] + 32768;
                     *out2 = (sbyte) ((y >> 16) - 128);
                 }
             }
@@ -166,7 +166,7 @@ namespace DjvuNet.Wavelet
                 sbyte* out2 = @out;
                 for (int j = 0; j < w; j++, p2++, out2++)
                 {
-                    int c = rmul[p2->Red] + gmul[p2->Green] + bmul[p2->Blue] + 32768;
+                    int c = rmul[unchecked((byte)p2->Red)] + gmul[unchecked((byte)p2->Green)] + bmul[unchecked((byte)p2->Blue)] + 32768;
                     *out2 = (sbyte) Max(-128, Min(127, c >> 16));
                 }
             }
@@ -198,7 +198,7 @@ namespace DjvuNet.Wavelet
                 sbyte* out2 = @out;
                 for (int j = 0; j < w; j++, p2++, out2++)
                 {
-                    int c = rmul[p2->Red] + gmul[p2->Green] + bmul[p2->Blue] + 32768;
+                    int c = rmul[unchecked((byte)p2->Red)] + gmul[unchecked((byte)p2->Green)] + bmul[unchecked((byte)p2->Blue)] + 32768;
                     *out2 = (sbyte) Max(-128, Min(127, c >> 16));
                 }
             }
