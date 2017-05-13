@@ -72,7 +72,7 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.Equal<long>(0, unk.DataOffset);
                 Assert.Equal<long>(reader.Length, unk.Length);
 
-                InterWavePixelMap map = new InterWavePixelMap();
+                var map = new InterWavePixelMapDecoder();
                 IInterWavePixelMap result = unk.ProgressiveDecodeBackground(map);
                 Assert.NotNull(map);
             }

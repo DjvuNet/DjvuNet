@@ -167,6 +167,7 @@
     <Compile Include="DjvuDocument.cs" />
     <Compile Include="DjvuImage.cs" />
     <Compile Include="DjvuPage.cs" />
+    <Compile Include="Errors\DjvuAggregateException.cs" />
     <Compile Include="Errors\DjvuArgumentException.cs" />
     <Compile Include="Errors\DjvuArgumentNullException.cs" />
     <Compile Include="Errors\DjvuArgumentOutOfRangeException.cs" />
@@ -216,11 +217,13 @@
     <Compile Include="Wavelet\ImageDataHeader.cs" />
     <Compile Include="Wavelet\ImageType.cs" />
     <Compile Include="Wavelet\InterWaveBitmap.cs" />
+    <Compile Include="Wavelet\InterWaveBitmapDecoder.cs" />
     <Compile Include="Wavelet\InterWaveBitmapEncoder.cs" />
     <Compile Include="Wavelet\InterWaveBlock.cs" />
     <Compile Include="Wavelet\InterWaveBucket.cs" />
     <Compile Include="Wavelet\InterWaveCodec.cs" />
     <Compile Include="Wavelet\InterWaveCodecBase.cs" />
+    <Compile Include="Wavelet\InterWaveDecoder.cs" />
     <Compile Include="Wavelet\InterWaveEncoder.cs" />
     <Compile Include="Wavelet\InterWaveEncoderSettings.cs" />
     <Compile Include="Wavelet\InterWaveImage.cs" />
@@ -228,6 +231,7 @@
     <Compile Include="Wavelet\InterWaveMapEncoder.cs" />
     <Compile Include="Wavelet\InterWavePixelMap.cs" />
     <Compile Include="Wavelet\InterWavePixelMapEncoder.cs" />
+    <Compile Include="Wavelet\InterWavePixelMapDecoder.cs" />
     <Compile Include="Wavelet\InterWaveTransform.cs" />
     <Compile Include="Wavelet\NativeMethods.cs" />
     <Compile Include="Wavelet\YCrCbMode.cs" />

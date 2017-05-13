@@ -27,7 +27,7 @@ namespace DjvuNet.Wavelet.Tests
             using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (DjvuReader reader = new DjvuReader(stream))
             {
-                InterWavePixelMap map = new InterWavePixelMap();
+                var map = new InterWavePixelMapDecoder();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
                 Assert.NotNull(map._YDecoder);
@@ -51,7 +51,7 @@ namespace DjvuNet.Wavelet.Tests
             using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (DjvuReader reader = new DjvuReader(stream))
             {
-                InterWavePixelMap map = new InterWavePixelMap();
+                var map = new InterWavePixelMapDecoder();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
                 Assert.NotNull(map._YDecoder);
@@ -93,7 +93,7 @@ namespace DjvuNet.Wavelet.Tests
             using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             using (DjvuReader reader = new DjvuReader(stream))
             {
-                InterWavePixelMap map = new InterWavePixelMap();
+                var map = new InterWavePixelMapDecoder();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
                 Assert.NotNull(map._YDecoder);
@@ -240,86 +240,6 @@ namespace DjvuNet.Wavelet.Tests
 
             InterWaveMap map = new InterWaveMap(width, height);
             map.Image(subsample, rect, 1, new sbyte[width * height + 1], width, 1, true);
-        }
-
-        [Fact()]
-        public void SlashresTest001()
-        {
-            string file = Path.Combine(Util.ArtifactsDataPath, "test002C_P01_0.bg44");
-            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (DjvuReader reader = new DjvuReader(stream))
-            {
-                InterWavePixelMap map = new InterWavePixelMap();
-                map.Decode(reader);
-                Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YDecoder);
-                Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbDecoder);
-                Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrDecoder);
-
-                map._YMap.Slashres(1);
-            }
-        }
-
-        [Fact()]
-        public void SlashresTest002()
-        {
-            string file = Path.Combine(Util.ArtifactsDataPath, "test002C_P01_0.bg44");
-            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (DjvuReader reader = new DjvuReader(stream))
-            {
-                InterWavePixelMap map = new InterWavePixelMap();
-                map.Decode(reader);
-                Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YDecoder);
-                Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbDecoder);
-                Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrDecoder);
-
-                map._YMap.Slashres(2);
-            }
-        }
-
-        [Fact()]
-        public void SlashresTest003()
-        {
-            string file = Path.Combine(Util.ArtifactsDataPath, "test002C_P01_0.bg44");
-            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (DjvuReader reader = new DjvuReader(stream))
-            {
-                InterWavePixelMap map = new InterWavePixelMap();
-                map.Decode(reader);
-                Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YDecoder);
-                Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbDecoder);
-                Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrDecoder);
-
-                map._YMap.Slashres(4);
-            }
-        }
-
-        [Fact()]
-        public void SlashresTest004()
-        {
-            string file = Path.Combine(Util.ArtifactsDataPath, "test002C_P01_0.bg44");
-            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using (DjvuReader reader = new DjvuReader(stream))
-            {
-                InterWavePixelMap map = new InterWavePixelMap();
-                map.Decode(reader);
-                Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YDecoder);
-                Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbDecoder);
-                Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrDecoder);
-
-                map._YMap.Slashres(8);
-            }
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

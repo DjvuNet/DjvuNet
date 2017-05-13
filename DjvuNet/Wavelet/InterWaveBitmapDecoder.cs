@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace DjvuNet.Wavelet
 {
-    public class InterWaveCodecBase
+    public class InterWaveBitmapDecoder : InterWaveBitmap
     {
-
     }
 }

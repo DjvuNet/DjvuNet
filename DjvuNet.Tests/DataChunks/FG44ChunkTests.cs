@@ -57,7 +57,7 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.NotEqual(0, img.Width);
                 Assert.NotEqual(0, img.Height);
 
-                InterWavePixelMap map = new InterWavePixelMap();
+                var map = new InterWavePixelMapDecoder();
                 Assert.Equal(0, map.Width);
                 Assert.Equal(0, map.Height);
 
@@ -107,7 +107,7 @@ namespace DjvuNet.DataChunks.Tests
 
                 var image = th.ForegroundImage;
                 Assert.NotNull(image);
-                Assert.IsType<InterWavePixelMap>(image);
+                Assert.IsType<InterWavePixelMapDecoder>(image);
                 Assert.True(image.Width >= 0 && image.Height > 0);
             }
         }
@@ -127,7 +127,7 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.IsType<InterWavePixelMap>(image);
                 Assert.True(image.Width >= 0 && image.Height > 0);
 
-                InterWavePixelMap map = new InterWavePixelMap();
+                var map = new InterWavePixelMapDecoder();
                 th.ForegroundImage = map;
                 var image2 = th.ForegroundImage;
                 Assert.NotNull(image2);

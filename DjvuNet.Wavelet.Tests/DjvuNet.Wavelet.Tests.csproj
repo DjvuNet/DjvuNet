@@ -154,6 +154,10 @@
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="UtilJsonTests.cs" />
+    <Compile Include="Wavelet\InterWaveDecoderTests.cs" />
+    <Compile Include="Wavelet\InterWaveMapEncoderTests.cs" />
+    <Compile Include="Wavelet\InterWavePixelMapDecoderTests.cs" />
+    <Compile Include="Wavelet\InterWavePixelMapEncoderTests.cs" />
     <Compile Include="Wavelet\InterWaveTransformTests.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
