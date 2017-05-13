@@ -7,6 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using DjvuNet.Tests;
+using DjvuNet.Graphics.Tests;
+using DjvuNet.Graphics;
 
 namespace DjvuNet.Wavelet.Tests
 {
@@ -28,11 +30,11 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
             }
         }
 
@@ -82,19 +84,19 @@ namespace DjvuNet.Wavelet.Tests
                 InterWavePixelMap map = new InterWavePixelMap();
                 map.Decode(reader);
                 Assert.NotNull(map._YMap);
-                Assert.NotNull(map._YCodec);
+                Assert.NotNull(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.NotNull(map._CbCodec);
+                Assert.NotNull(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.NotNull(map._CrCodec);
+                Assert.NotNull(map._CrDecoder);
 
                 map.CloseCodec();
                 Assert.NotNull(map._YMap);
-                Assert.Null(map._YCodec);
+                Assert.Null(map._YDecoder);
                 Assert.NotNull(map._CbMap);
-                Assert.Null(map._CbCodec);
+                Assert.Null(map._CbDecoder);
                 Assert.NotNull(map._CrMap);
-                Assert.Null(map._CrCodec);
+                Assert.Null(map._CrDecoder);
             }
         }
 
@@ -115,6 +117,34 @@ namespace DjvuNet.Wavelet.Tests
         {
             InterWavePixelMap map = new InterWavePixelMap();
             Assert.True(map.ImageData);
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void EncodeChunkTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void EncodeImageTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        public void CloseEncoderTest()
+        {
+            Assert.True(false, "This test needs an implementation");
+        }
+
+        [Fact()]
+        public void InitializeEncoderTest()
+        {
+            int width = 512;
+            int height = 256;
+            var pixMap = PixelMapTests.CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
+            InterWavePixelMap map = new InterWavePixelMap();
+            map.InitializeEncoder(pixMap);
         }
     }
 }

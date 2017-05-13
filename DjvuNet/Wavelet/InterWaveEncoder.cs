@@ -76,7 +76,7 @@ namespace DjvuNet.Wavelet
             }
             return FinishCodeSlice(zp);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -85,11 +85,127 @@ namespace DjvuNet.Wavelet
         /// <returns></returns>
         public bool IsNullSlice(int bit, int band)
         {
-            throw new NotImplementedException();
+            if (band == 0)
+            {
+                bool is_null = true;
+                for (int i = 0; i < 16; i++)
+                {
+                    int threshold = _QuantLow[i];
+                    _CoefficientState[i] = ZERO;
+
+                    if (threshold > 0 && threshold < 0x8000)
+                    {
+                        _CoefficientState[i] = UNK;
+                        is_null = false;
+                    }
+                }
+                return is_null;
+            }
+            else
+            {
+                int threshold = _QuantHigh[band];
+                return (!(threshold > 0 && threshold < 0x8000));
+            }
         }
 
         /// <summary>
-        /// 
+        /// Function computes the states prior to encoding the buckets
+        /// </summary>
+        /// <param name="band"></param>
+        /// <param name="fbucket"></param>
+        /// <param name="nbucket"></param>
+        /// <param name="blk"></param>
+        /// <param name="eblk"></param>
+        /// <returns></returns>
+        public unsafe int EncodePrepare(int band, int fbucket, int nbucket, InterWaveBlock blk, InterWaveBlock eblk)
+        {
+            int bbstate = 0;
+            // compute state of all coefficients in all buckets
+            if (band != 0)
+            {
+                // Band other than zero
+                int thres = _QuantHigh[band];
+                GCHandle hCoeffState = GCHandle.Alloc(_CoefficientState, GCHandleType.Pinned);
+                sbyte* cstate = (sbyte*) hCoeffState.AddrOfPinnedObject();
+
+                for (int buckno = 0; buckno < nbucket; buckno++, cstate += 16)
+                {
+                    short[] pcoeff = blk.GetBlock(fbucket + buckno);
+                    short[] epcoeff = eblk.GetBlock(fbucket + buckno);
+                    int bstatetmp = 0;
+                    if (null != pcoeff)
+                    {
+                        bstatetmp = UNK;
+                        // cstate[i] is not used and does not need initialization
+                    }
+                    else if (null != epcoeff)
+                    {
+                        for (int i = 0; i < 16; i++)
+                        {
+                            int cstatetmp = UNK;
+                            if ((int)(pcoeff[i]) >= thres || (int)(pcoeff[i]) <= -thres)
+                                cstatetmp = NEW | UNK;
+
+                            cstate[i] = (sbyte) cstatetmp;
+                            bstatetmp |= cstatetmp;
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < 16; i++)
+                        {
+                            int cstatetmp = UNK;
+
+                            if (epcoeff[i] != 0)
+                            {
+                                cstatetmp = ACTIVE;
+                            }
+                            else if ((int)(pcoeff[i]) >= thres || (int)(pcoeff[i]) <= -thres)
+                            {
+                                cstatetmp = NEW | UNK;
+                            }
+                            cstate[i] = (sbyte) cstatetmp;
+                            bstatetmp |= cstatetmp;
+                        }
+                    }
+                    _BucketState[buckno] = (sbyte) bstatetmp;
+                    bbstate |= bstatetmp;
+                }
+            }
+            else
+            {
+                // Band zero ( fbucket==0 implies band==zero and nbucket==1 )
+                short[] pcoeff = blk.GetInitializedBlock(0);
+                short[] epcoeff = eblk.GetInitializedBlock(0);
+
+                sbyte[] cstate = _CoefficientState;
+
+                for (int i = 0; i < 16; i++)
+                {
+                    int thres = _QuantLow[i];
+                    int cstatetmp = cstate[i];
+                    if (cstatetmp != ZERO)
+                    {
+                        cstatetmp = UNK;
+                        if (epcoeff[i] != 0)
+                        {
+                            cstatetmp = ACTIVE;
+                        }
+                        else if ((int)(pcoeff[i]) >= thres || (int)(pcoeff[i]) <= -thres)
+                        {
+                            cstatetmp = NEW | UNK;
+                        }
+                    }
+                    cstate[i] = (sbyte) cstatetmp;
+                    bbstate |= cstatetmp;
+                }
+                _BucketState[0] = (sbyte) bbstate;
+            }
+            return bbstate;
+        }
+
+        /// <summary>
+        /// Function codes a sequence of buckets in a given block
         /// </summary>
         /// <param name="zp"></param>
         /// <param name="bit"></param>
@@ -101,7 +217,164 @@ namespace DjvuNet.Wavelet
         public void EncodeBuckets(IDataCoder zp, int bit, int band,
             InterWaveBlock blk, InterWaveBlock eblk, int fbucket, int nbucket)
         {
-            throw new NotImplementedException();
+            // compute state of all coefficients in all buckets
+            int bbstate = EncodePrepare(band, fbucket, nbucket, blk, eblk);
+
+            // code root bit
+            if ((nbucket < 16) || (bbstate & ACTIVE) != 0)
+            {
+                bbstate |= NEW;
+            }
+            else if ((bbstate & UNK) != 0)
+            {
+                zp.Encoder((bbstate & NEW) != 0 ? 1 : 0, ref _CtxRoot);
+            }
+
+            // code bucket bits
+            if ((bbstate & NEW) != 0)
+                for (int buckno = 0; buckno < nbucket; buckno++)
+                {
+                    // Code bucket bit
+                    if ((_BucketState[buckno] & UNK) != 0)
+                    {
+                        // Context
+                        int ctx = 0;
+                        if (band > 0)
+                        {
+                            int k = (fbucket + buckno) << 2;
+                            short[] b = eblk.GetBlock(k >> 4);
+
+                            if (b != null)
+                            {
+                                k = k & 0xf;
+                                if (b[k] != 0)
+                                    ctx += 1;
+                                if (b[k + 1] != 0)
+                                    ctx += 1;
+                                if (b[k + 2] != 0)
+                                    ctx += 1;
+                                if (ctx < 3 && b[k + 3] != 0)
+                                    ctx += 1;
+                            }
+                        }
+
+                        if ((bbstate & ACTIVE) != 0)
+                            ctx |= 4;
+
+                        // Code
+                        zp.Encoder((_BucketState[buckno] & NEW) != 0 ? 1 : 0, ref _CtxBucket[band][ctx]);
+                    }
+                }
+
+            // code new active coefficient (with their sign)
+            if ((bbstate & NEW) != 0)
+            {
+                int thres = _QuantHigh[band];
+                sbyte[] cstate = _CoefficientState;
+
+                for (int buckno = 0, cidx = 0; buckno < nbucket; buckno++, cidx += 16)
+                {
+                    if ((_BucketState[buckno] & NEW) != 0)
+                    {
+                        int i;
+                        int gotcha = 0;
+                        const int maxgotcha = 7;
+
+                        for (i = 0; i < 16; i++)
+                        {
+                            if ((cstate[i + cidx] & UNK) != 0)
+                                gotcha += 1;
+                        }
+
+                        short[] pcoeff = blk.GetBlock(fbucket + buckno);
+                        short[] epcoeff = eblk.GetInitializedBlock(fbucket + buckno);
+
+                        // iterate within bucket
+                        for (i = 0; i < 16; i++)
+                        {
+                            if ((cstate[i] & UNK) != 0)
+                            {
+                                // Prepare context
+                                int ctx = 0;
+
+                                if (gotcha >= maxgotcha)
+                                    ctx = maxgotcha;
+                                else
+                                    ctx = gotcha;
+
+                                if ((_BucketState[buckno] & ACTIVE) != 0)
+                                    ctx |= 8;
+
+                                // Code
+                                zp.Encoder((cstate[i] & NEW) != 0 ? 1 : 0, ref _CtxStart[ctx]);
+
+                                if ((cstate[i] & NEW) != 0)
+                                {
+                                    // Code sign
+                                    zp.IWEncoder((pcoeff[i] < 0) ? true : false);
+
+                                    // Set encoder state
+                                    if (band == 0)
+                                        thres = _QuantLow[i];
+
+                                    epcoeff[i] = (short)(thres + (thres >> 1));
+                                }
+
+                                if ((cstate[i] & NEW) != 0)
+                                    gotcha = 0;
+                                else if (gotcha > 0)
+                                    gotcha -= 1;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // code mantissa bits
+            if ((bbstate & ACTIVE) != 0)
+            {
+                int thres = _QuantHigh[band];
+                sbyte[] cstate = _CoefficientState;
+
+                for (int buckno = 0, cidx = 0; buckno < nbucket; buckno++, cidx += 16)
+                {
+                    if ((_BucketState[buckno] & ACTIVE) != 0)
+                    {
+                        short[] pcoeff = blk.GetBlock(fbucket + buckno);
+                        short[] epcoeff = eblk.GetInitializedBlock(fbucket + buckno);
+
+                        for (int i = 0; i < 16; i++)
+                        {
+                            if ((cstate[i] & ACTIVE) != 0)
+                            {
+                                // get coefficient
+                                int coeff = pcoeff[i];
+                                int ecoeff = epcoeff[i];
+                                if (coeff < 0)
+                                    coeff = -coeff;
+
+                                // get band zero thresholds
+                                if (band == 0)
+                                    thres = _QuantLow[i];
+
+                                // compute mantissa bit
+                                int pix = 0;
+                                if (coeff >= ecoeff)
+                                    pix = 1;
+
+                                // encode second or lesser mantissa bit
+                                if (ecoeff <= 3 * thres)
+                                    zp.Encoder(pix, ref _CtxMant);
+                                else
+                                    zp.IWEncoder(!!(pix != 0));
+
+                                // adjust epcoeff
+                                epcoeff[i] = (short)(ecoeff - (pix != 0 ? 0 : thres) + (thres >> 1));
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -297,7 +570,7 @@ namespace DjvuNet.Wavelet
         /// <param name="rowsize"></param>
         /// <param name="mask8"></param>
         /// <param name="mskrowsize"></param>
-        public static unsafe void interpolate_mask(short* data16, int w, int h, int rowsize, sbyte* mask8, int mskrowsize)
+        public static unsafe void InterpolateMask(short* data16, int w, int h, int rowsize, sbyte* mask8, int mskrowsize)
         {
             int i, j;
             // count masked bits
@@ -418,7 +691,7 @@ namespace DjvuNet.Wavelet
         }
 
 
-        public static unsafe void forward_mask(short* data16, int w, int h, int rowsize, 
+        public static unsafe void ForwardMask(short* data16, int w, int h, int rowsize, 
             int begin, int end, sbyte* mask8, int mskrowsize)
         {
             int i, j;

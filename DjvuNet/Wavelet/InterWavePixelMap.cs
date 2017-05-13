@@ -15,25 +15,18 @@ namespace DjvuNet.Wavelet
     /// <summary>
     /// This class represents structured wavelet data.
     /// </summary>
-    public class InterWavePixelMap : ICodec, IInterWavePixelMap
+    public class InterWavePixelMap : InterWaveImage, ICodec, IInterWavePixelMap
     {
         #region Internal Fields
 
-        internal InterWaveCodec _CbCodec;
+        internal InterWaveCodec _CbDecoder;
         internal InterWaveEncoder _CbEncoder;
-        internal InterWaveMap _CbMap;
-        internal int _CBytes;
         internal int _CrCbDelay = 10;
         internal bool _CrCbHalf;
-        internal InterWaveCodec _CrCodec;
+        internal InterWaveCodec _CrDecoder;
         internal InterWaveEncoder _CrEncoder;
-        internal InterWaveMap _CrMap;
-        internal int _CSerial;
-        internal int _CSlice;
-        internal InterWaveCodec _YCodec;
+        internal InterWaveCodec _YDecoder;
         internal InterWaveEncoder _YEncoder;
-        internal InterWaveMap _YMap;
-        internal float db_frac;
 
         internal const float DecibelPrune = 5.0f;
 
@@ -71,7 +64,7 @@ namespace DjvuNet.Wavelet
 
         public void Decode(IBinaryReader reader)
         {
-            if (_YCodec == null)
+            if (_YDecoder == null)
             {
                 _CSlice = _CSerial = 0;
                 _YMap = null;
@@ -119,14 +112,14 @@ namespace DjvuNet.Wavelet
                     _CrCbDelay = -1;
 
                 _YMap = new InterWaveMap(w, h);
-                _YCodec = new InterWaveCodec().Init(_YMap);
+                _YDecoder = new InterWaveCodec().Init(_YMap);
 
                 if (_CrCbDelay >= 0)
                 {
                     _CbMap = new InterWaveMap(w, h);
                     _CrMap = new InterWaveMap(w, h);
-                    _CbCodec = new InterWaveCodec().Init(_CbMap);
-                    _CrCodec = new InterWaveCodec().Init(_CrMap);
+                    _CbDecoder = new InterWaveCodec().Init(_CbMap);
+                    _CrDecoder = new InterWaveCodec().Init(_CrMap);
                 }
             }
 
@@ -134,12 +127,12 @@ namespace DjvuNet.Wavelet
 
             for (int flag = 1; flag != 0 && _CSlice < nslices; _CSlice++)
             {
-                flag = _YCodec.CodeSlice(coder);
+                flag = _YDecoder.CodeSlice(coder);
 
-                if (_CrCodec != null && _CbCodec != null && _CrCbDelay <= _CSlice)
+                if (_CrDecoder != null && _CbDecoder != null && _CrCbDelay <= _CSlice)
                 {
-                    flag |= _CbCodec.CodeSlice(coder);
-                    flag |= _CrCodec.CodeSlice(coder);
+                    flag |= _CbDecoder.CodeSlice(coder);
+                    flag |= _CrDecoder.CodeSlice(coder);
                 }
             }
 
@@ -190,6 +183,7 @@ namespace DjvuNet.Wavelet
                 float estdb = -1.0f;
                 ZPCodec gzp = new ZPCodec(stream, true, true);
                 ZPCodec zp = gzp;
+
                 while (flag != 0)
                 {
                     if (settings.Decibels > 0 && estdb >= settings.Decibels)
@@ -206,7 +200,7 @@ namespace DjvuNet.Wavelet
                     if (flag != 0 && settings.Decibels > 0)
                     {
                         if (_YEncoder._CurrentBand == 0 || estdb >= settings.Decibels - DecibelPrune)
-                            estdb = _YEncoder.EstimateDecibel(db_frac);
+                            estdb = _YEncoder.EstimateDecibel(_dBFrac);
                     }
 
                     if (_CrEncoder != null && _CbEncoder != null && _CSlice + nslices >= _CrCbDelay)
@@ -214,6 +208,7 @@ namespace DjvuNet.Wavelet
                         flag |= _CbEncoder.CodeSlice(zp);
                         flag |= _CrEncoder.CodeSlice(zp);
                     }
+
                     nslices++;
                 }
             }
@@ -268,7 +263,7 @@ namespace DjvuNet.Wavelet
         public DjvuFormElement EncodeImage(IDjvuWriter writer, int nchunks, InterWaveEncoderSettings[] settings,
             ChunkType formType = ChunkType.PM44Form, ChunkType nodeType = ChunkType.PM44)
         {
-            if (_YCodec != null)
+            if (_YEncoder != null)
                 throw new DjvuInvalidOperationException($"Encoder already exists or left open from previous operation.");
 
             int flag = 1;
@@ -284,6 +279,7 @@ namespace DjvuNet.Wavelet
                     data = new byte[stream.Position];
                     Buffer.BlockCopy(stream.GetBuffer(), 0, data, 0, data.Length);
                 }
+
                 PM44Chunk chunk = (PM44Chunk)DjvuParser.CreateEncodedDjvuNode(writer, form, nodeType, data.Length);
                 chunk.ChunkData = data;
                 form.AddChild(chunk);
@@ -314,7 +310,7 @@ namespace DjvuNet.Wavelet
         /// <param name="bm"></param>
         /// <param name="mask"></param>
         /// <param name="mode"></param>
-        public unsafe void InitializeEncoder(PixelMap pm, Bitmap gmask = null, YCrCbMode crcbmode = YCrCbMode.Normal)
+        public unsafe void InitializeEncoder(IPixelMap pm, Bitmap gmask = null, YCrCbMode crcbmode = YCrCbMode.Normal)
         {
             /* Free */
             CloseEncoder();
@@ -326,7 +322,7 @@ namespace DjvuNet.Wavelet
             sbyte* buffer = (sbyte*) hBuffer.AddrOfPinnedObject();
 
             // Create maps
-            InterWaveMap eymap = new InterWaveMap(w, h);
+            InterWaveMapEncoder eymap = new InterWaveMapEncoder(w, h);
             _YMap = eymap;
 
             // Handle CRCB mode
@@ -349,14 +345,18 @@ namespace DjvuNet.Wavelet
                     _CrCbDelay = 0;
                     break;
             }
+
             // Prepare mask information
             sbyte* msk8 = (sbyte*)0;
             int mskrowsize = 0;
 
             Bitmap mask = gmask;
+            GCHandle hMask = default(GCHandle);
+
             if (mask != null)
             {
-                //msk8 = (signed char const *)((*mask)[0]);
+                hMask = GCHandle.Alloc(mask.Data, GCHandleType.Pinned);
+                msk8 = (sbyte*)hMask.AddrOfPinnedObject();
                 mskrowsize = mask.GetRowSize();
             }
 
@@ -364,7 +364,7 @@ namespace DjvuNet.Wavelet
             Pixel* pData = (Pixel*)hData.AddrOfPinnedObject();
 
             // Fill buffer with luminance information
-            InterWaveTransform.RGB_to_Y(pData, w, h, pm.GetRowSize(), buffer, w);
+            InterWaveTransform.Rgb2Y(pData, w, h, pm.GetRowSize(), buffer, w);
 
             if (_CrCbDelay < 0)
             {
@@ -375,24 +375,24 @@ namespace DjvuNet.Wavelet
             }
 
             // Create YMAP
-            eymap.create(buffer, w, msk8, mskrowsize);
+            eymap.Create(buffer, w, msk8, mskrowsize);
 
             // Create chrominance maps
             if (_CrCbDelay >= 0)
             {
-                InterWaveMap ecbmap = new InterWaveMap(w, h);
+                InterWaveMapEncoder ecbmap = new InterWaveMapEncoder(w, h);
                 _CbMap = ecbmap;
 
-                InterWaveMap ecrmap = new InterWaveMap(w, h);
+                InterWaveMapEncoder ecrmap = new InterWaveMapEncoder(w, h);
                 _CrMap = ecrmap;
 
                 // Process CB information
-                InterWaveTransform.RGB_to_Cb(pData, w, h, pm.GetRowSize(), buffer, w);
-                ecbmap.create(buffer, w, msk8, mskrowsize);
+                InterWaveTransform.Rgb2Cb(pData, w, h, pm.GetRowSize(), buffer, w);
+                ecbmap.Create(buffer, w, msk8, mskrowsize);
 
                 // Process CR information
-                InterWaveTransform.RGB_to_Cr(pData, w, h, pm.GetRowSize(), buffer, w);
-                ecrmap.create(buffer, w, msk8, mskrowsize);
+                InterWaveTransform.Rgb2Cr(pData, w, h, pm.GetRowSize(), buffer, w);
+                ecrmap.Create(buffer, w, msk8, mskrowsize);
 
                 // Perform chrominance reduction (CRCBhalf)
                 if (_CrCbHalf)
@@ -402,6 +402,9 @@ namespace DjvuNet.Wavelet
                 }
             }
 
+            if (hMask.IsAllocated)
+                hMask.Free();
+
             hData.Free();
             hBuffer.Free();
         }
@@ -409,7 +412,7 @@ namespace DjvuNet.Wavelet
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void CloseCodec()
         {
-            _YCodec = _CrCodec = _CbCodec = null;
+            _YDecoder = _CrDecoder = _CbDecoder = null;
             _CSlice = _CBytes = _CSerial = 0;
         }
 
