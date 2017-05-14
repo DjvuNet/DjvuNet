@@ -1,9 +1,10 @@
-﻿using DjvuNet.Compression;
+﻿using System;
 using System.Text;
+using DjvuNet.Compression;
 
 namespace DjvuNet
 {
-    public interface IDjvuWriter : IBinaryWriter
+    public interface IDjvuWriter : IBinaryWriter, IDisposable
     {
         long Position { get; set; }
 

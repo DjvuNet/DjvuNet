@@ -12,8 +12,5 @@ namespace DjvuNet.Wavelet
 
         void Image(int subsample, Rectangle rect, int index, sbyte[] img8, int rowsize, int pixsep, bool fast);
 
-        InterWaveMap Init(int w, int h);
-
-        void Slashres(int res);
     }
 }

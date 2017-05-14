@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -56,6 +57,25 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        public void PixelTest006()
+        {
+            Pixel pix = new Pixel(-1, -1, -1);
+            Assert.Equal("ff", pix.Blue.ToString("x2"));
+            Assert.Equal("ff", pix.Green.ToString("x2"));
+            Assert.Equal("ff", pix.Red.ToString("x2"));
+        }
+
+        [Fact()]
+        public void PixelTest007()
+        {
+            Pixel pix = new Pixel(-128, -128, -128);
+            Assert.Equal("80", pix.Blue.ToString("x2"));
+            Assert.Equal("80", pix.Green.ToString("x2"));
+            Assert.Equal("80", pix.Red.ToString("x2"));
+        }
+
+
+        [Fact()]
         public void DuplicateTest()
         {
             Pixel pix1 = new Pixel(-1, 0, -1);
@@ -69,6 +89,13 @@ namespace DjvuNet.Graphics.Tests
         {
             Pixel pix = new Pixel(-112, 54, -125);
             string result = pix.ToString();
+        }
+
+        [Fact()]
+        public void SizeOfPixelTest()
+        {
+            int size = Marshal.SizeOf<Pixel>();
+            Assert.Equal(3, size);
         }
 
         [Fact()]
@@ -216,6 +243,17 @@ namespace DjvuNet.Graphics.Tests
 
             pix1.Red = 0;
             Assert.Equal(0, pix1.Red);
+        }
+
+        [Fact()]
+        public void DefaultValueInArrayTest()
+        {
+            Pixel[] buffer = new Pixel[128];
+            for(int i = 0; i < buffer.Length; i++)
+            {
+                Pixel ipix = buffer[i];
+                Assert.Equal<Pixel>(Pixel.BlackPixel, ipix);
+            }
         }
     }
 }

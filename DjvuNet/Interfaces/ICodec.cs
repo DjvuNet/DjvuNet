@@ -3,7 +3,7 @@ using System.IO;
 
 namespace DjvuNet.Interfaces
 {
-    public interface ICodec
+    public interface IDecoder
     {
         /// <summary> 
         /// Query if this is image data.  Any data which will effects Map data should return true.

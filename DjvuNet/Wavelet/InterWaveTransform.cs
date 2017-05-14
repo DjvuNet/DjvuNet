@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Graphics;
@@ -20,7 +21,12 @@ namespace DjvuNet.Wavelet
             new float[] { -0.173913F, -0.347826F,  0.521739F }
         };
 
-        private static void filter_begin(int w, int h)
+        /// <summary>
+        /// Packed integer assembly functions initialization call.
+        /// </summary>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        private static void FilterBegin(int w, int h)
         {
 #if MMX
             //if (MMXControl::mmxflag < 0)
@@ -28,7 +34,10 @@ namespace DjvuNet.Wavelet
 #endif
         }
 
-        private static void filter_end()
+        /// <summary>
+        /// Packed integer assembly function exit routine.
+        /// </summary>
+        private static void FilterEnd()
         {
 #if MMX
             if (MMXControl::mmxflag > 0)
@@ -36,9 +45,23 @@ namespace DjvuNet.Wavelet
 #endif
         }
 
-        private static int min(int x, int y) { return (x < y) ? x : y; }
+        /// <summary>
+        /// Integer minimum function which should always be inlined.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Min(int x, int y) { return (x < y) ? x : y; }
 
-        private static int max(int x, int y) { return (x>y) ? x : y; }
+        /// <summary>
+        /// Integer maximum function which should always be inlined.
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int Max(int x, int y) { return (x > y) ? x : y; }
 
         /// <summary>
         /// Forward transform.
@@ -51,15 +74,15 @@ namespace DjvuNet.Wavelet
         /// <param name="end"></param>
         public static unsafe void Forward(short* p, int w, int h, int rowsize, int begin, int end)
         {
-            filter_begin(w, h);
+            FilterBegin(w, h);
 
             for (int scale = begin; scale < end; scale <<= 1)
             {
-                filter_fh(p, w, h, rowsize, scale);
-                filter_fv(p, w, h, rowsize, scale);
+                FilterFh(p, w, h, rowsize, scale);
+                FilterFv(p, w, h, rowsize, scale);
             }
 
-            filter_end();
+            FilterEnd();
         }
 
         /// <summary>
@@ -73,15 +96,15 @@ namespace DjvuNet.Wavelet
         /// <param name="end"></param>
         public static unsafe void Backward(short* p, int w, int h, int rowsize, int begin, int end)
         {
-            filter_begin(w, h);
+            FilterBegin(w, h);
 
             for (int scale = begin >> 1; scale >= end; scale >>= 1)
             {
-                filter_bv(p, w, h, rowsize, scale);
-                filter_bh(p, w, h, rowsize, scale);
+                FilterBv(p, w, h, rowsize, scale);
+                FilterBh(p, w, h, rowsize, scale);
             }
 
-            filter_end();
+            FilterEnd();
         }
 
         /// <summary>
@@ -93,7 +116,7 @@ namespace DjvuNet.Wavelet
         /// <param name="rowsize"></param>
         /// <param name="out"></param>
         /// <param name="outrowsize"></param>
-        public static unsafe void RGB_to_Y(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
+        public static unsafe void Rgb2Y(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
         {
             int[] rmul = new int[256];
             int[] gmul = new int[256];
@@ -110,7 +133,8 @@ namespace DjvuNet.Wavelet
                 sbyte* out2 = @out;
                 for (int j = 0; j < w; j++, p2++, out2++)
                 {
-                    int y = rmul[p2->Red] + gmul[p2->Green] + bmul[p2->Blue] + 32768;
+                    Pixel pix = *p2;
+                    int y = rmul[unchecked((byte)pix.Red)] + gmul[unchecked((byte)pix.Green)] + bmul[unchecked((byte)pix.Blue)] + 32768;
                     *out2 = (sbyte) ((y >> 16) - 128);
                 }
             }
@@ -125,7 +149,7 @@ namespace DjvuNet.Wavelet
         /// <param name="rowsize"></param>
         /// <param name="out"></param>
         /// <param name="outrowsize"></param>
-        public static unsafe void RGB_to_Cb(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
+        public static unsafe void Rgb2Cb(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
         {
             int[] rmul = new int[256];
             int[] gmul = new int[256];
@@ -142,8 +166,8 @@ namespace DjvuNet.Wavelet
                 sbyte* out2 = @out;
                 for (int j = 0; j < w; j++, p2++, out2++)
                 {
-                    int c = rmul[p2->Red] + gmul[p2->Green] + bmul[p2->Blue] + 32768;
-                    *out2 = (sbyte) max(-128, min(127, c >> 16));
+                    int c = rmul[unchecked((byte)p2->Red)] + gmul[unchecked((byte)p2->Green)] + bmul[unchecked((byte)p2->Blue)] + 32768;
+                    *out2 = (sbyte) Max(-128, Min(127, c >> 16));
                 }
             }
         }
@@ -157,7 +181,7 @@ namespace DjvuNet.Wavelet
         /// <param name="rowsize"></param>
         /// <param name="out"></param>
         /// <param name="outrowsize"></param>
-        public static unsafe void RGB_to_Cr(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
+        public static unsafe void Rgb2Cr(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
         {
             int[] rmul = new int[256];
             int[] gmul = new int[256];
@@ -174,8 +198,8 @@ namespace DjvuNet.Wavelet
                 sbyte* out2 = @out;
                 for (int j = 0; j < w; j++, p2++, out2++)
                 {
-                    int c = rmul[p2->Red] + gmul[p2->Green] + bmul[p2->Blue] + 32768;
-                    *out2 = (sbyte) max(-128, min(127, c >> 16));
+                    int c = rmul[unchecked((byte)p2->Red)] + gmul[unchecked((byte)p2->Green)] + bmul[unchecked((byte)p2->Blue)] + 32768;
+                    *out2 = (sbyte) Max(-128, Min(127, c >> 16));
                 }
             }
         }
@@ -188,7 +212,7 @@ namespace DjvuNet.Wavelet
         /// <param name="h"></param>
         /// <param name="rowsize"></param>
         /// <param name="scale"></param>
-        public static unsafe void filter_fv(short* p, int w, int h, int rowsize, int scale)
+        public static unsafe void FilterFv(short* p, int w, int h, int rowsize, int scale)
         {
             int y = 0;
             int s = scale * rowsize;
@@ -305,7 +329,7 @@ namespace DjvuNet.Wavelet
         /// <param name="h"></param>
         /// <param name="rowsize"></param>
         /// <param name="scale"></param>
-        public static unsafe void filter_fh(short* p, int w, int h, int rowsize, int scale)
+        public static unsafe void FilterFh(short* p, int w, int h, int rowsize, int scale)
         {
             int y = 0;
             int s = scale;
@@ -373,8 +397,15 @@ namespace DjvuNet.Wavelet
             }
         }
 
-
-        public static unsafe void filter_bv(short* p, int w, int h, int rowsize, int scale)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        /// <param name="rowsize"></param>
+        /// <param name="scale"></param>
+        public static unsafe void FilterBv(short* p, int w, int h, int rowsize, int scale)
         {
             int y = 0;
             int s = scale * rowsize;
@@ -482,8 +513,15 @@ namespace DjvuNet.Wavelet
             }
         }
 
-
-        public static unsafe void filter_bh(short* p, int w, int h, int rowsize, int scale)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        /// <param name="rowsize"></param>
+        /// <param name="scale"></param>
+        public static unsafe void FilterBh(short* p, int w, int h, int rowsize, int scale)
         {
             int y = 0;
             int s = scale;

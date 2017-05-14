@@ -7,7 +7,7 @@ using DjvuNet.Interfaces;
 
 namespace DjvuNet.JB2
 {
-    public class JB2Dictionary : JB2Item, ICodec
+    public class JB2Dictionary : JB2Item, IDecoder
     {
         #region Internal Fields
 

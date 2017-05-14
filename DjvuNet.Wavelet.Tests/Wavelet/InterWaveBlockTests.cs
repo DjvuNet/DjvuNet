@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.Wavelet.Tests
 {
@@ -32,7 +33,7 @@ namespace DjvuNet.Wavelet.Tests
                     short[] pdataij = pdata[i][j];
 
                     for (int k = 0; k < pdataij.Length; k++)
-                        pdataij[k] = unchecked((short)(((i * 256) + (j * 16) + k ) * growthSlope + baseVal));
+                        pdataij[k] = unchecked((short)(((i * 256) + (j * 16) + k) * growthSlope + baseVal));
                 }
             }
         }
@@ -42,7 +43,7 @@ namespace DjvuNet.Wavelet.Tests
         {
             InterWaveBlock block = new InterWaveBlock();
             Assert.NotNull(block._PData);
-            Assert.NotNull(block._Zigzagloc);
+            Assert.NotNull(InterWaveBlock._Zigzagloc);
         }
 
         [Fact()]
@@ -50,7 +51,7 @@ namespace DjvuNet.Wavelet.Tests
         {
             InterWaveBlock block = new InterWaveBlock();
             Assert.NotNull(block._PData);
-            Assert.NotNull(block._Zigzagloc);
+            Assert.NotNull(InterWaveBlock._Zigzagloc);
             block._PData = null;
 
             var block2 = block.Duplicate();
@@ -62,7 +63,7 @@ namespace DjvuNet.Wavelet.Tests
         {
             InterWaveBlock block = new InterWaveBlock();
             Assert.NotNull(block._PData);
-            Assert.NotNull(block._Zigzagloc);
+            Assert.NotNull(InterWaveBlock._Zigzagloc);
 
             short[][][] pdata = block._PData;
 
@@ -355,5 +356,42 @@ namespace DjvuNet.Wavelet.Tests
             for (int i = 0; i < testData.Length; i++)
                 Assert.Equal(testData[i], zigZag[i]);
         }
+
+        [Fact()]
+        public void PDataTest()
+        {
+            InterWaveBlock block = new InterWaveBlock();
+            short[][][] pdata = block.PData;
+            Assert.NotNull(pdata);
+            Assert.Equal(4, pdata.Length);
+
+            short[][][] pdata2 = new short[8][][];
+            block.PData = pdata2;
+
+            Assert.NotSame(pdata, pdata2);
+
+            pdata = block.PData;
+            Assert.Same(pdata, pdata2);
+        }
+
+        [Fact()]
+        public void ReadLiftBlockTest()
+        {
+            InterWaveBlock block = new InterWaveBlock();
+            short[] coeff = new short[1024];
+
+            for (short i = 0; i < coeff.Length; i++)
+                coeff[i] = (short)(i * 3 % 793);
+
+            block.ReadLiftBlock(coeff);
+        }
+
+        [Fact()]
+        public void SizeOfBlockTest()
+        {
+            Assert.Throws<ArgumentException>(() => Marshal.SizeOf<InterWaveBlock>());
+        }
+
+
     }
 }
