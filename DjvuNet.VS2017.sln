@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet", "DjvuNet\DjvuNet.csproj", "{E681B178-E5F8-4782-89C8-F32720B1464A}"
 EndProject
@@ -1022,8 +1022,8 @@ Global
 		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x64.ActiveCfg = Release|Any CPU
 		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x64.Build.0 = Release|Any CPU
-		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x86.ActiveCfg = Release|Any CPU
-		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x86.Build.0 = Release|Any CPU
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x86.ActiveCfg = Release|x86
+		{8971D9F4-82A4-4ABC-8A6E-B15097972011}.Release|x86.Build.0 = Release|x86
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -1034,8 +1034,8 @@ Global
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x64.ActiveCfg = Release|Any CPU
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x64.Build.0 = Release|Any CPU
-		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.ActiveCfg = Release|Any CPU
-		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.Build.0 = Release|Any CPU
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.ActiveCfg = Release|x86
+		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
