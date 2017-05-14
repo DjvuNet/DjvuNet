@@ -243,7 +243,7 @@ namespace DjvuNet.DataChunks
             if (writeHeader)
             {
                 writer.WriteUTF8String(Name.ToUpper());
-                writer.WriteUInt32BigEndian((uint)Length + 1);
+                writer.WriteUInt32BigEndian((uint)Length);
             }
 
             writer.Write(ChunkData, 0, ChunkData.Length);

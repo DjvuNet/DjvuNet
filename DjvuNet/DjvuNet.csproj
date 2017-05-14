@@ -2,7 +2,7 @@
 <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{E681B178-E5F8-4782-89C8-F32720B1464A}</ProjectGuid>
@@ -222,12 +222,12 @@
     <Compile Include="Wavelet\InterWaveBlock.cs" />
     <Compile Include="Wavelet\InterWaveBucket.cs" />
     <Compile Include="Wavelet\InterWaveCodec.cs" />
-    <Compile Include="Wavelet\InterWaveCodecBase.cs" />
     <Compile Include="Wavelet\InterWaveDecoder.cs" />
     <Compile Include="Wavelet\InterWaveEncoder.cs" />
     <Compile Include="Wavelet\InterWaveEncoderSettings.cs" />
     <Compile Include="Wavelet\InterWaveImage.cs" />
     <Compile Include="Wavelet\InterWaveMap.cs" />
+    <Compile Include="Wavelet\InterWaveMapDecoder.cs" />
     <Compile Include="Wavelet\InterWaveMapEncoder.cs" />
     <Compile Include="Wavelet\InterWavePixelMap.cs" />
     <Compile Include="Wavelet\InterWavePixelMapEncoder.cs" />

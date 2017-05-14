@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.Wavelet.Tests
 {
@@ -383,6 +384,12 @@ namespace DjvuNet.Wavelet.Tests
                 coeff[i] = (short)(i * 3 % 793);
 
             block.ReadLiftBlock(coeff);
+        }
+
+        [Fact()]
+        public void SizeOfBlockTest()
+        {
+            Assert.Throws<ArgumentException>(() => Marshal.SizeOf<InterWaveBlock>());
         }
 
 

@@ -144,9 +144,31 @@ namespace DjvuNet.Tests
             Assert.True(refBuffer.Length == buffer.Length,
                 $"Output length mismatch. Expected: {refBuffer.Length}, actual: {buffer.Length}");
 
-            for (int i = 0; i < refBuffer.Length; i++)
-                Assert.True(refBuffer[i] == buffer[i],
-                    $"Binary data diff at index: {i}, expected: {refBuffer[i]}, actual: {buffer[i]}");
+            unsafe
+            {
+                fixed(byte* buf = buffer, refbuf = refBuffer)
+                {
+                    int* pbuf = (int*) buf;
+                    int* pref = (int*)refbuf;
+
+                    int* end = pbuf + refBuffer.Length;
+
+                    int div = refBuffer.Length / sizeof(int);
+
+                    for (int i = 0; i < div; i++)
+                        Assert.Equal(*pbuf++, *pref++);
+
+                    int rem = refBuffer.Length % sizeof(int);
+
+                    if (rem > 0)
+                    {
+                        byte* bbuf = buf;
+                        byte* bref = refbuf;
+                        for (int i = 0; i < rem; i++)
+                            Assert.Equal(*bbuf++, *bref++);
+                    }
+                }
+            }
         }
 
 
