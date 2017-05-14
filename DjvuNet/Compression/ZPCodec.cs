@@ -711,6 +711,7 @@ namespace DjvuNet.Compression
             return this;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EncoderInitialize()
         {
             _Delay = 25;

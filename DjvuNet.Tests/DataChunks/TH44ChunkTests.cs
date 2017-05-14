@@ -81,7 +81,7 @@ namespace DjvuNet.DataChunks.Tests
 
                 Assert.NotSame(thumb, thumb2);
 
-                InterWavePixelMap map = new InterWavePixelMap();
+                var map = new InterWavePixelMapDecoder();
                 th.Thumbnail = map;
 
                 var thumb3 = th.Thumbnail;

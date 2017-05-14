@@ -14,7 +14,8 @@ namespace DjvuNet.Wavelet.Tests
         [Fact()]
         public void InterWaveCodecTest()
         {
-            InterWaveCodec codec = new InterWaveCodec();
+            InterWaveMap map = new InterWaveMap();
+            InterWaveCodec codec = new InterWaveCodec(map);
             Assert.NotNull(codec._QuantHigh);
             Assert.Equal(10, codec._QuantHigh.Length);
             Assert.NotNull(codec._QuantLow);
@@ -47,69 +48,6 @@ namespace DjvuNet.Wavelet.Tests
             }
         }
 
-        [Fact()]
-        public void CodeSliceTest001()
-        {
-            InterWaveCodec codec = new InterWaveCodec();
-            codec._CurrentBitPlane = -1;
-            Assert.Equal(0, codec.CodeSlice(null));
-        }
 
-        [Fact()]
-        public void CodeSliceTest002()
-        {
-            InterWaveCodec codec = new InterWaveCodec();
-            ZPCodec coder = new ZPCodec();
-
-            Assert.Equal(1, codec.CodeSlice(coder));
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void DecodeBucketsTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact()]
-        public void InitTest()
-        {
-            InterWaveMap map = new InterWaveMap(32, 32);
-            InterWaveCodec codec = new InterWaveCodec();
-            var test = codec.Init(map);
-
-            Assert.NotNull(test);
-            Assert.Same(codec, test);
-
-        }
-
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void IsNullSliceTest()
-        {
-            Assert.True(false, "This test needs an implementation");
-        }
-
-        [Fact(Skip = "Time consuming benchmark test"), Trait("Category", "Skip")]
-        [Trait("Category", "Benchmark")]
-        public void NextQuantBenchmarkTest()
-        {
-            InterWaveMap map = new InterWaveMap(32, 32);
-            InterWaveCodec codec = new InterWaveCodec();
-            var test = codec.Init(map);
-
-            for (int i = 0; i < 500000000; i++)
-                codec.NextQuant();
-        }
-
-        [Fact(Skip = "Time consuming benchmark test"), Trait("Category", "Skip")]
-        [Trait("Category", "Benchmark")]
-        public void NextQuantFastBenchmarkTest()
-        {
-            InterWaveMap map = new InterWaveMap(32, 32);
-            InterWaveCodec codec = new InterWaveCodec();
-            var test = codec.Init(map);
-
-            for (int i = 0; i < 500000000; i++)
-                codec.NextQuantFast();
-        }
     }
 }

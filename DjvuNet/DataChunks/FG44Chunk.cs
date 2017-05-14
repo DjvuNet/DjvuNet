@@ -77,7 +77,7 @@ namespace DjvuNet.DataChunks
         {
             using (IDjvuReader reader = Reader.CloneReaderToMemory(DataOffset, Length))
             {
-                IInterWavePixelMap background = new InterWavePixelMap();
+                IInterWavePixelMap background = new InterWavePixelMapDecoder();
                 background.Decode(reader);
 
                 return background;

@@ -34,18 +34,28 @@ namespace DjvuNet.DataChunks
 
             if (writeHeader)
             {
+                writer.WriteUTF8String("AT&T");
                 writer.WriteUTF8String("FORM");
 
                 uint length = 0;
-                foreach (IDjvuNode node in Children)
-                    length += ((uint)node.Length + node.OffsetDiff);
+                for (int i = 0; i < Children.Count; i++)
+                {
+                    IDjvuNode node = Children[i];
+                    uint tempLength = (uint)node.Length;
+                    length += (tempLength + node.OffsetDiff);
+                    if (i + 1 < Children.Count)
+                        length += tempLength % 2;
+                }
 
-                writer.WriteUInt32BigEndian(length);
+                writer.WriteUInt32BigEndian(length + 4);
                 writer.WriteUTF8String("PM44");
             }
 
-            foreach (IDjvuNode node in Children)
+            for (int i = 0; i < Children.Count; i++)
+            {
+                IDjvuNode node = Children[i];
                 node.WriteData(writer, writeHeader);
+            }
         }
 
         #endregion Methods
