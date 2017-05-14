@@ -62,7 +62,7 @@ namespace DjvuNet.DataChunks.Tests
             writerMock.Verify(x => x.WriteUTF8String("FORM"), Times.Once());
             writerMock.Verify(x => x.WriteUTF8String("PM44"), Times.Exactly(3));
             writerMock.Verify(x => x.WriteUInt32BigEndian((uint)buffer.Length), Times.Exactly(2));
-            writerMock.Verify(x => x.WriteUInt32BigEndian(((uint)buffer.Length + 8) * 2), Times.Exactly(1));
+            writerMock.Verify(x => x.WriteUInt32BigEndian(((uint)buffer.Length + 8) * 2 + 4), Times.Exactly(1));
             writerMock.Verify(x => x.Write(buffer, 0, buffer.Length), Times.Exactly(2));
         }
     }

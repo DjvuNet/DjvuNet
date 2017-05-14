@@ -69,7 +69,7 @@ namespace DjvuNet
 
         internal static FileStream GetFile(string filePath)
         {
-            FileStream stream = new FileStream(filePath, FileMode.OpenOrCreate, 
+            FileStream stream = new FileStream(filePath, FileMode.Create, 
                 FileAccess.ReadWrite, FileShare.ReadWrite);
             return stream;
         }

@@ -231,9 +231,6 @@ namespace DjvuNet.Graphics
             int bufw = required_red.Width;
             Pixel[] lbuffer = new Pixel[bufw + 2];
 
-            for (int i = 0; i < lbuffer.Length; )
-                lbuffer[i++] = new Pixel();
-
             try
             {
                 if ((_XShift > 0) || (_YShift > 0))
@@ -243,6 +240,10 @@ namespace DjvuNet.Graphics
                     _L1 = _L2 = -1;
                 }
 
+                IPixelReference upper = srcMap.CreateGPixelReference(0, 0);
+                IPixelReference lower = srcMap.CreateGPixelReference(0, 0);
+                IPixelReference dest = targetMap.CreateGPixelReference(0, 0);
+
                 // Loop on output lines
                 for (int y = targetRect.YMin; y < targetRect.YMax; y++)
                 {
@@ -251,8 +252,6 @@ namespace DjvuNet.Graphics
                         int fy = _VCoord[y];
                         int fy1 = fy >> FRACBITS;
                         int fy2 = fy1 + 1;
-                        IPixelReference upper;
-                        IPixelReference lower;
 
                         // Obtain upper and lower line in reduced image
                         if ((_XShift > 0) || (_YShift > 0))
@@ -270,10 +269,10 @@ namespace DjvuNet.Graphics
                             if (required_red.YMax <= fy2)
                                 fy2 = required_red.YMax - 1;
 
-                            lower =
-                              srcMap.CreateGPixelReference(fy1 - srcRect.YMin, dx);
-                            upper =
-                              srcMap.CreateGPixelReference(fy2 - srcRect.YMin, dx);
+                            lower.SetOffset(fy1 - srcRect.YMin, dx);
+                            // srcMap.CreateGPixelReference(fy1 - srcRect.YMin, dx);
+                            upper.SetOffset(fy2 - srcRect.YMin, dx);
+                             // srcMap.CreateGPixelReference(fy2 - srcRect.YMin, dx);
                         }
 
                         // Compute line
@@ -284,7 +283,7 @@ namespace DjvuNet.Graphics
                         {
                             for (int edest = idest + bufw; idest < edest; upper.IncOffset(), lower.IncOffset())
                             {
-                                Pixel dest = lbuffer[idest++];
+                                Pixel destPix = lbuffer[idest++];
 
                                 int color = 0;
                                 sbyte* colorPtr = (sbyte*)&color;
@@ -303,7 +302,9 @@ namespace DjvuNet.Graphics
                                 *colorPtr = lower.Red;
                                 *colorPtr += (sbyte)deltas[(256 + upper.Red) - *colorPtr];
 
-                                dest.SetBGR(*colorPtr);
+                                //Pixel d = (Pixel) lower.ToPixel();
+                                //destPix.SetBGR(d);
+                                destPix.SetBGR(*colorPtr);
                             }
                         }
                     }
@@ -315,17 +316,18 @@ namespace DjvuNet.Graphics
 
                         // lbuffer[bufw] = lbuffer[bufw];
                         int line = 1 - required_red.XMin;
-                        IPixelReference dest = targetMap.CreateGPixelReference(y - targetRect.YMin, 0);
+                        dest.SetOffset(y - targetRect.YMin, 0);
+                            //= targetMap.CreateGPixelReference(y - targetRect.YMin, 0);
 
-                        // Loop horizontally
-                        unsafe
+                    // Loop horizontally
+                    unsafe
                         {
                             for (int x = targetRect.XMin; x < targetRect.XMax; x++)
                             {
                                 int n = _HCoord[x];
-                                int lower = line + (n >> FRACBITS);
-                                Pixel lower0 = lbuffer[lower];
-                                Pixel lower1 = lbuffer[lower + 1];
+                                int lowerl = line + (n >> FRACBITS);
+                                Pixel lower0 = lbuffer[lowerl];
+                                Pixel lower1 = lbuffer[lowerl + 1];
                                 short[] deltas = interp[n & FRACMASK];
 
                                 int color = 0;

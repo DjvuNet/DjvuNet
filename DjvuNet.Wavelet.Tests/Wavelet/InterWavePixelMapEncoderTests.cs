@@ -56,7 +56,7 @@ namespace DjvuNet.Wavelet.Tests
         public void EncodeImageTest001()
         {
             string file = Path.Combine(Util.ArtifactsPath, "nasa001B.jpg");
-            string outFile = Path.Combine(Util.ArtifactsDataPath, "nasa001B.jpg.iw44");
+            string outFile = Path.Combine(Util.ArtifactsDataPath, "nasa001B.jpg.djvu");
             using (System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(file))
             {
                 int width = bmp.Width;
@@ -64,10 +64,11 @@ namespace DjvuNet.Wavelet.Tests
                 var pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
+                map._CrCbDelay = 0;
                 TestVerifyEncoderInitialization(pixMap, map);
 
                 int nchunks = 4;
-                int[] slices = new int[] { 80, 100, 111, 120 };
+                int[] slices = new int[] { 74, 15, 11, 7 };
 
                 InterWaveEncoderSettings[] settings = new InterWaveEncoderSettings[nchunks];
                 for (int i = 0; i < nchunks; i++)

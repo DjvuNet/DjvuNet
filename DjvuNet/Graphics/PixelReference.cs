@@ -249,22 +249,37 @@ namespace DjvuNet.Graphics
         /// Pixel value
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void SetBGR(int blue, int green, int red)
+        public unsafe void SetBGR(int blue, int green, int red)
         {
-            _parent.Data[_offset + _blueOffset] = (sbyte)blue;
-            _parent.Data[_offset + _greenOffset] = (sbyte)green;
-            _parent.Data[_offset + _redOffset] = (sbyte)red;
+            fixed (sbyte* pD = _parent.Data)
+            {
+                sbyte* pData = pD + _offset;
+                *pData++ = (sbyte)blue;
+                *pData++ = (sbyte)green;
+                *pData = (sbyte)red;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void SetBGR(int color)
         {
-            sbyte* colorPtr = (sbyte*) &color;
-            _parent.Data[_offset + _redOffset] = *colorPtr;
-            colorPtr++;
-            _parent.Data[_offset + _greenOffset] = *colorPtr;
-            colorPtr++;
-            _parent.Data[_offset + _blueOffset] = *colorPtr;
+            fixed (sbyte* pD = _parent.Data)
+            {
+                sbyte* pData = pD + 2 + _offset;
+                sbyte* pColor = (sbyte*)&color;
+                *pData-- = *pColor++;
+                *pData-- = *pColor++;
+                *pData = *pColor;
+            }
+        }
+
+        public unsafe void SetBGR(Pixel pixel)
+        {
+            fixed (sbyte* pD = _parent.Data)
+            {
+                Pixel* pData = (Pixel*) pD + _offset;
+                *pData = pixel;
+            }
         }
 
         /// <summary> 
