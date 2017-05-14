@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet;
 using DjvuNet.Graphics;
+using DjvuNet.Tests;
 using LibGit2Sharp;
 
 namespace DjvuNetTest
@@ -16,17 +17,16 @@ namespace DjvuNetTest
     {
         public static void Main(string[] args)
         {
-            Repository repo = new Repository("..\\..\\..\\");
+            Repository repo = new Repository(Util.RepoRoot);
             Commit cmt = repo.Commits.FirstOrDefault<Commit>();
             int testsToSkip = 0;
-            int testsNumber = 1;
+            int testsNumber = 5;
 
             string[] docs = new string[]
             {
-               DjvuNet.Tests.Util.GetTestFilePath(1),
-               DjvuNet.Tests.Util.GetTestFilePath(3),
-               //"..\\..\\..\\artifacts\\test032.djvu",
-               //"..\\..\\..\\artifacts\\test046.djvu",
+               //DjvuNet.Tests.Util.GetTestFilePath(1),
+               //DjvuNet.Tests.Util.GetTestFilePath(33),
+               DjvuNet.Tests.Util.GetTestFilePath(46),
             };
 
             long[] elapsed = new long[docs.Length * 3];
@@ -55,18 +55,18 @@ namespace DjvuNetTest
 
                 for (; i < (testsNumber + testsToSkip); i++)
                 {
+                    int topPos = Console.CursorTop;
                     Console.WriteLine($"Test cycle: {i + 1}");
 
                     TestPage(testsToSkip, docs, elapsed, i, docNo);
 
-                    Console.SetCursorPosition(0, Console.CursorTop - 4);
+                    Console.SetCursorPosition(0, topPos);
                 }
 
-                i -= testsToSkip;
                 Console.WriteLine("---------------------------------------------------------------------------------------------");
                 Console.WriteLine("                                                                                             ");
-                Console.WriteLine($"Total and average execution times in ticks after {i} warm tests                             ");
-                Console.WriteLine($"First {testsToSkip} results are discarded as a cold run                                     ");
+                Console.WriteLine($"Total and average execution times in ticks after {i} tests                             ");
+                Console.WriteLine($"First {testsToSkip} results are discarded as a cold run (test harness warmup)                                    ");
                 Console.WriteLine("                                                                                             ");
                 Console.WriteLine($"Document opened in      \t{elapsed[docNo*3 + 0]:000 000 000 000}\t\taverage {((double)elapsed[docNo*3 + 0] / i):000 000 000 000.00} ");
                 Console.WriteLine($"Image 1 - 1 generated in\t{elapsed[docNo*3 + 1]:000 000 000 000}\t\taverage {((double)elapsed[docNo*3 + 1] / i):000 000 000 000.00} ");
@@ -109,7 +109,7 @@ namespace DjvuNetTest
                 if (i + 1 > testsToSkip)
                     elapsed[docNo*3 + imageNo] += watch.ElapsedTicks;
 
-                bmp.Save(fileName + $"_{imageNo}.png", ImageFormat.Png);
+                //bmp.Save(fileName + $"_{imageNo}.png", ImageFormat.Png);
             }
         }
     }
