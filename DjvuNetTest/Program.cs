@@ -19,13 +19,13 @@ namespace DjvuNetTest
         {
             Repository repo = new Repository(Util.RepoRoot);
             Commit cmt = repo.Commits.FirstOrDefault<Commit>();
-            int testsToSkip = 0;
-            int testsNumber = 5;
+            int testsToSkip = 5;
+            int testsNumber = 50;
 
             string[] docs = new string[]
             {
-               //DjvuNet.Tests.Util.GetTestFilePath(1),
-               //DjvuNet.Tests.Util.GetTestFilePath(33),
+               DjvuNet.Tests.Util.GetTestFilePath(1),
+               DjvuNet.Tests.Util.GetTestFilePath(33),
                DjvuNet.Tests.Util.GetTestFilePath(46),
             };
 
@@ -63,9 +63,10 @@ namespace DjvuNetTest
                     Console.SetCursorPosition(0, topPos);
                 }
 
+                i -= testsToSkip;
                 Console.WriteLine("---------------------------------------------------------------------------------------------");
                 Console.WriteLine("                                                                                             ");
-                Console.WriteLine($"Total and average execution times in ticks after {i} tests                             ");
+                Console.WriteLine($"Total and average execution times in ticks after {i + testsToSkip} tests                             ");
                 Console.WriteLine($"First {testsToSkip} results are discarded as a cold run (test harness warmup)                                    ");
                 Console.WriteLine("                                                                                             ");
                 Console.WriteLine($"Document opened in      \t{elapsed[docNo*3 + 0]:000 000 000 000}\t\taverage {((double)elapsed[docNo*3 + 0] / i):000 000 000 000.00} ");

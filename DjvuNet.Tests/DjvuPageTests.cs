@@ -403,7 +403,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png"));
+                    image.Save(Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png"));
                 }
             }
         }
