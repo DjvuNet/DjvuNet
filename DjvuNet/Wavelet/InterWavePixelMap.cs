@@ -64,8 +64,10 @@ namespace DjvuNet.Wavelet
             if (_YMap == null)
                 return null;
 
+            int area = _YMap.Width * _YMap.Height;
+
             int w = _YMap.Width;
-            int h = _YMap.Height;
+            int h = _YMap.Height + 2;
             int pixsep = 3;
             int rowsep = w * pixsep;
             sbyte[] bytes = new sbyte[h * rowsep];
@@ -77,6 +79,9 @@ namespace DjvuNet.Wavelet
                 _CbMap.Image(1, bytes, rowsep, pixsep, _CrCbHalf);
                 _CrMap.Image(2, bytes, rowsep, pixsep, _CrCbHalf);
             }
+
+            //h = h - 3;
+            //w = area / h;
 
             // Convert image to RGB
             IPixelMap pixelMap = new PixelMap().Init(bytes, h, w);
