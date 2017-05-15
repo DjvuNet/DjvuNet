@@ -67,7 +67,7 @@ namespace DjvuNet.Wavelet
             int area = _YMap.Width * _YMap.Height;
 
             int w = _YMap.Width;
-            int h = _YMap.Height + 2;
+            int h = _YMap.Height;
             int pixsep = 3;
             int rowsep = w * pixsep;
             sbyte[] bytes = new sbyte[h * rowsep];
