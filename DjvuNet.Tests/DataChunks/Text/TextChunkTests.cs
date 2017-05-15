@@ -32,7 +32,7 @@ namespace DjvuNet.DataChunks.Tests
                     Assert.Equal(txtChunk.TextLength, txtChunk.Text.Length);
                 }
             }
-            catch(Exception ex)
+            catch
             {
 
             }
