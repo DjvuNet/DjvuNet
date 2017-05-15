@@ -23,8 +23,17 @@ bld/
 [Oo]bj/
 [Ll]og/
 
+# Unignore build tools - does not work lol
+![Bb]uild/tools/**/*.csproj
+![Bb]uild/tools/DjvuNet.Artifacts.Build/*.cs
+![Bb]uild/tools/**/*.config
+![Bb]uild/tools/**/*.props
+![Bb]uild/tools/**/*.targets
+
+
 # Test related content
 artifacts/
+artifacts/*
 Test.bat
 
 # Helper projects

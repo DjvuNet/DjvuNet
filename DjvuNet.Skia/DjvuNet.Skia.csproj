@@ -85,6 +85,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DjvuSkiaGraphics.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
