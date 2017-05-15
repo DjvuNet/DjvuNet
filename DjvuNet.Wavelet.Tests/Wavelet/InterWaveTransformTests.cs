@@ -10,7 +10,7 @@ namespace DjvuNet.Wavelet.Tests
 {
     public class InterWaveTransformTests
     {
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")] 
         public void ForwardTest()
         {
             Assert.True(false, "This test needs an implementation");
