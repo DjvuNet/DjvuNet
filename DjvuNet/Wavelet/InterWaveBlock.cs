@@ -171,6 +171,9 @@ namespace DjvuNet.Wavelet
         {
             int n = bmin << 4;
 
+            for (int i = 0; i < coeff.Length; i++)
+                coeff[i] = 0;
+
             for (int n1 = bmin; n1 < bmax; n1++)
             {
                 short[] d = GetBlock(n1);
