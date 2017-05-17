@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -57,19 +58,29 @@ namespace DjvuNet.DataChunks.Tests
                 BG44Chunk unk = new BG44Chunk(reader, null, null, "BG44", length);
                 unk.Initialize();
                 var map = new InterWavePixelMapDecoder();
-                IInterWavePixelMap result = unk.ProgressiveDecodeBackground(map);
+                var result = unk.ProgressiveDecodeBackground(map);
                 Assert.Same(result, map);
-                using (System.Drawing.Bitmap bitmap = map.GetPixelMap().ToImage())
+#if !_APPVEYOR
+                string dumpsDir = Path.Combine(Util.ArtifactsDataPath, "dumps");
+                if (!System.IO.Directory.Exists(dumpsDir))
+                    System.IO.Directory.CreateDirectory(dumpsDir);
+                using (System.Drawing.Bitmap image = map.GetPixelMap().ToImage())
                 {
 
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+                    string outFile = Path.Combine(dumpsDir, fileName + "_bg44.png");
+                    using (FileStream stream = new FileStream(outFile, FileMode.Create))
+                        image.Save(stream, ImageFormat.Png);
+
                 }
+#endif
             }
         }
 
         [Fact]
         public void ImageTest035()
         {
-            string file = Path.Combine(Util.RepoRoot, "artifacts", "data", "test035C_P01_0.bg44");
+            string file = Path.Combine(Util.ArtifactsDataPath, "test035C_P01_0.bg44");
             using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (IDjvuReader reader = new DjvuReader(fs))
             {

@@ -3,6 +3,7 @@ using System.Drawing;
 using Xunit;
 using DjvuNet.Graphics;
 using TUtil = DjvuNet.Tests.Util;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -70,20 +71,20 @@ namespace DjvuNet.Graphics.Tests
         [Fact]
         public void GetColorCorrection002()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("gamma", () => PixelMap.GetGammaCorrection(0.099));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("gamma", () => PixelMap.GetGammaCorrection(0.099));
         }
 
         [Fact]
         public void GetColorCorrection003()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("gamma", () => PixelMap.GetGammaCorrection(10.01));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("gamma", () => PixelMap.GetGammaCorrection(10.01));
         }
 
         [Fact]
         public void GetColorCorrection004()
         {
             int[] correction = PixelMap.GetGammaCorrection(1.0000);
-            Assert.Same(PixelMap.IdentityGammaCorrection, correction);
+            Assert.Same(PixelMap.IdentityGammaCorr, correction);
         }
 
         [Fact]
@@ -447,7 +448,7 @@ namespace DjvuNet.Graphics.Tests
                 Top = height,
             };
 
-            Assert.Throws<ArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
         }
 
         [Fact()]
@@ -468,7 +469,7 @@ namespace DjvuNet.Graphics.Tests
                 Top = height,
             };
 
-            Assert.Throws<ArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
         }
 
         [Fact()]
@@ -489,7 +490,7 @@ namespace DjvuNet.Graphics.Tests
                 Top = height,
             };
 
-            Assert.Throws<ArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
         }
 
         [Fact()]
@@ -510,7 +511,7 @@ namespace DjvuNet.Graphics.Tests
                 Top = height * 2,
             };
 
-            Assert.Throws<ArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
         }
 
         [Fact()]
@@ -546,7 +547,7 @@ namespace DjvuNet.Graphics.Tests
         {
             var map = CreateInitVerifyPixelMap(512, 512, Pixel.BluePixel);
             var map2 = CreateInitVerifyPixelMap(1024, 1024, Pixel.GreenPixel);
-            Assert.Throws<ArgumentOutOfRangeException>("targetRect", 
+            Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", 
                 () => map.Downsample43(map2, new Rectangle { Left = 0, Bottom = 0, Top = -100, Right = -2048}));
         }
 
@@ -729,7 +730,7 @@ namespace DjvuNet.Graphics.Tests
             IBitmap bmp = BitmapTests.CreateIntiFillVerifyBitmap(width, height, 0, -1);
             IPixelMap map = CreateInitVerifyPixelMap(width, height, color);
             IPixelMap map2 = CreateInitVerifyPixelMap(width, height, Pixel.BlackPixel);
-            Assert.Throws<ArgumentOutOfRangeException>("bounds", () => map.Stencil(bmp, map2, 1, 1, rect, 2.2));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("bounds", () => map.Stencil(bmp, map2, 1, 1, rect, 2.2));
         }
 
         [Fact()]

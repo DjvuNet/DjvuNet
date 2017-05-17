@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using DjvuNet.Errors;
 using DjvuNet.Parser;
 
 namespace DjvuNet.DataChunks
@@ -133,13 +134,13 @@ namespace DjvuNet.DataChunks
                 if (value != null)
                 {
                     if (Parent == null)
-                        throw new InvalidOperationException("Parent cannot be null for not null sibling.");
+                        throw new DjvuInvalidOperationException("Parent cannot be null for not null sibling.");
 
                     _FirstSibling = value;
                 }
                 else if (Parent != null)
                 {
-                    throw new InvalidOperationException("Parent has to be null if first sibling is null.");
+                    throw new DjvuInvalidOperationException("Parent has to be null if first sibling is null.");
                 }
                 else
                     _FirstSibling = value;
@@ -166,13 +167,13 @@ namespace DjvuNet.DataChunks
                 if (value != null)
                 {
                     if (Parent == null)
-                        throw new InvalidOperationException("Parent cannot be null for not null sibling.");
+                        throw new DjvuInvalidOperationException("Parent cannot be null for not null sibling.");
 
                     _LastSibling = value;
                 }
                 else if (Parent != null)
                 {
-                    throw new InvalidOperationException("Parent has to be null if first sibling is null.");
+                    throw new DjvuInvalidOperationException("Parent has to be null if first sibling is null.");
                 }
                 else
                     _LastSibling = value;
@@ -245,7 +246,7 @@ namespace DjvuNet.DataChunks
         public override void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
             if (writer == null)
-                throw new ArgumentNullException(nameof(writer));
+                throw new DjvuArgumentNullException(nameof(writer));
 
             AdjustAlignment(writer);
 

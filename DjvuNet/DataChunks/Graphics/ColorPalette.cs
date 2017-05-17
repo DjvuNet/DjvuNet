@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DjvuNet.Errors;
 using DjvuNet.Graphics;
 
 namespace DjvuNet.DataChunks
@@ -53,10 +54,10 @@ namespace DjvuNet.DataChunks
         public ColorPalette(IDjvuReader reader, IFGbzChunk parent)
         {
             if (reader == null)
-                throw new ArgumentNullException(nameof(reader));
+                throw new DjvuArgumentNullException(nameof(reader));
 
             if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
+                throw new DjvuArgumentNullException(nameof(parent));
 
             _parent = parent;
             ReadPaletteData(reader);

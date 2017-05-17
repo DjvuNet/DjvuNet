@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 
 using DjvuNet;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
@@ -74,7 +75,7 @@ namespace DjvuNet.Compression
             }
             catch (Exception err)
             {
-                throw new DjvuFormatException("Error while reading null terminated string.", err);
+                throw new DjvuAggregateException("Error while reading null terminated string.", err);
             }
         }
 

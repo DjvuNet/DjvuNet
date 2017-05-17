@@ -9,6 +9,7 @@ using Moq;
 using DjvuNet.Tests;
 using System.IO;
 using DjvuNet.Tests.Xunit;
+using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -88,7 +89,7 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.Equal<ChunkType>(ChunkType.Navm, unk.ChunkType);
                 Assert.Equal(stream.Length, unk.Length);
 
-                Assert.Throws<InvalidOperationException>(() => unk.Bookmarks);
+                Assert.Throws<DjvuFormatException>(() => unk.Bookmarks);
             }
         }
 
@@ -115,7 +116,7 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.Equal<ChunkType>(ChunkType.Navm, unk.ChunkType);
                 Assert.Equal(stream.Length, unk.Length);
 
-                Assert.Throws<InvalidOperationException>(() => unk.Bookmarks);
+                Assert.Throws<DjvuArgumentOutOfRangeException>(() => unk.Bookmarks);
             }
         }
 

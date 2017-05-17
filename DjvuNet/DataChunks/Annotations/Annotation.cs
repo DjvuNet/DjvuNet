@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks
 {
@@ -42,10 +43,10 @@ namespace DjvuNet.DataChunks
         public Annotation(string text)
         {
             if (text == null)
-                throw new ArgumentNullException(nameof(text));
+                throw new DjvuArgumentNullException(nameof(text));
 
             if (String.IsNullOrWhiteSpace(text))
-                throw new ArgumentException("Text cannot be empty or white space.", nameof(text));
+                throw new DjvuArgumentException("Text cannot be empty or white space.", nameof(text));
 
             DecodeText(text);
         }

@@ -8,6 +8,7 @@ using DjvuNet.DataChunks;
 using System.Linq;
 using DjvuNet.Tests.Xunit;
 using System.ComponentModel;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Tests
 {
@@ -520,21 +521,21 @@ namespace DjvuNet.Tests
         public void IsDjvuDocument_String001()
         {
             string errorPath = "xyzzyx";
-            Assert.Throws<FileNotFoundException>(() => DjvuDocument.IsDjvuDocument(errorPath));
+            Assert.Throws<DjvuFileNotFoundException>(() => DjvuDocument.IsDjvuDocument(errorPath));
         }
 
         [Fact]
         public void IsDjvuDocument_String002()
         {
             string errorPath = " ";
-            Assert.Throws<ArgumentException>("filePath", () => DjvuDocument.IsDjvuDocument(errorPath));
+            Assert.Throws<DjvuArgumentException>("filePath", () => DjvuDocument.IsDjvuDocument(errorPath));
         }
 
         [Fact]
         public void IsDjvuDocument_String003()
         {
             string errorPath = null;
-            Assert.Throws<ArgumentNullException>("filePath", () => DjvuDocument.IsDjvuDocument(errorPath));
+            Assert.Throws<DjvuArgumentNullException>("filePath", () => DjvuDocument.IsDjvuDocument(errorPath));
         }
 
         [Fact]
@@ -606,7 +607,7 @@ namespace DjvuNet.Tests
             string errorPath = Path.GetTempFileName();
             using (FileStream stream = new FileStream(errorPath, FileMode.Open, FileAccess.Read, FileShare.None))
             {
-                Assert.Throws<AggregateException>(() => DjvuDocument.IsDjvuDocument(errorPath));
+                Assert.Throws<DjvuAggregateException>(() => DjvuDocument.IsDjvuDocument(errorPath));
             }
         }
 
@@ -614,14 +615,14 @@ namespace DjvuNet.Tests
         public void IsDjvuDocument_Stream001()
         {
             Stream stream = null;
-            Assert.Throws<ArgumentNullException>("stream", () => DjvuDocument.IsDjvuDocument(stream));
+            Assert.Throws<DjvuArgumentNullException>("stream", () => DjvuDocument.IsDjvuDocument(stream));
         }
 
         [Fact]
         public void IsDjvuDocument_Stream002()
         {
             StreamMock stream = new StreamMock();
-            Assert.Throws<ArgumentException>("stream", () => DjvuDocument.IsDjvuDocument(stream));
+            Assert.Throws<DjvuArgumentException>("stream", () => DjvuDocument.IsDjvuDocument(stream));
 
         }
 

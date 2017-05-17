@@ -84,23 +84,23 @@ namespace DjvuNet.Graphics.Tests
         //    }
         //}
 
-        [Fact()]
-        public void ToImageTest002()
-        {
-            int width = 32;
-            int height = 32;
-            Pixel color = Pixel.BluePixel;
+        //[Fact()]
+        //public void ToImageTest002()
+        //{
+        //    int width = 32;
+        //    int height = 32;
+        //    Pixel color = Pixel.BluePixel;
 
-            IPixelMap map1 = PixelMapTests.CreateInitVerifyPixelMap(width, height, color);
-            map1.BytesPerPixel = 3;
-            using (System.Drawing.Bitmap bmp = map1.ToImage())
-            {
-                Assert.NotNull(bmp);
-                Assert.IsType<System.Drawing.Bitmap>(bmp);
-                Assert.Equal(width, bmp.Width);
-                Assert.Equal(height, bmp.Height);
-            }
-        }
+        //    IPixelMap map1 = PixelMapTests.CreateInitVerifyPixelMap(width, height, color);
+        //    map1.BytesPerPixel = 3;
+        //    using (System.Drawing.Bitmap bmp = map1.ToImage())
+        //    {
+        //        Assert.NotNull(bmp);
+        //        Assert.IsType<System.Drawing.Bitmap>(bmp);
+        //        Assert.Equal(width, bmp.Width);
+        //        Assert.Equal(height, bmp.Height);
+        //    }
+        //}
 
         [Fact()]
         public void ToImageTest003()
@@ -129,7 +129,7 @@ namespace DjvuNet.Graphics.Tests
 
             IPixelMap map1 = PixelMapTests.CreateInitVerifyPixelMap(width, height, color);
             map1.BytesPerPixel = 5;
-            Assert.Throws<FormatException>(() => map1.ToImage());
+            Assert.Throws<DjvuFormatException>(() => map1.ToImage());
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

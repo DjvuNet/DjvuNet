@@ -8,6 +8,7 @@ using System.Drawing.Imaging;
 using DjvuNet.Tests.Xunit;
 using Moq;
 using DjvuNet.DataChunks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Tests
 {
@@ -383,7 +384,11 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CFn.png"));
+#if !_APPVEYOR
+                    string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CFn.png");
+                    using (FileStream stream = new FileStream(file, FileMode.Create))
+                        image.Save(stream, ImageFormat.Png);
+#endif
                 }
             }
         }
@@ -403,7 +408,11 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png"));
+#if !_APPVEYOR
+                    string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png");
+                    using (FileStream stream = new FileStream(file, FileMode.Create))
+                        image.Save(stream, ImageFormat.Png);
+#endif
                 }
             }
         }
@@ -423,7 +432,11 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CMn.png"));
+#if !_APPVEYOR
+                    string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CMn.png");
+                    using (FileStream stream = new FileStream(file, FileMode.Create))
+                        image.Save(stream, ImageFormat.Png);
+#endif
                 }
             }
 
@@ -927,7 +940,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void ResizeImage002()
         {
-            Assert.Throws<ArgumentNullException>("srcImage", () => DjvuPage.ResizeImage(null, 128, 128));
+            Assert.Throws<DjvuArgumentNullException>("srcImage", () => DjvuPage.ResizeImage(null, 128, 128));
         }
 
         [Fact()]
@@ -935,7 +948,7 @@ namespace DjvuNet.Tests
         {
             using (System.Drawing.Bitmap bitmap = new Bitmap(128, 128))
             {
-                Assert.Throws<ArgumentException>(() => DjvuPage.ResizeImage(bitmap, -128, 128));
+                Assert.Throws<DjvuArgumentException>(() => DjvuPage.ResizeImage(bitmap, -128, 128));
             }
         }
 

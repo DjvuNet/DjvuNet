@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
@@ -113,7 +114,7 @@ namespace DjvuNet.Compression
                 if (BaseStream != null)
                     BaseStream.Position = value;
                 else
-                    throw new InvalidOperationException();
+                    throw new DjvuInvalidOperationException();
             }
         }
 
@@ -142,7 +143,7 @@ namespace DjvuNet.Compression
             if (BaseStream != null)
                 return BaseStream.Seek(offset, origin);
             else
-                throw new InvalidOperationException();
+                throw new DjvuInvalidOperationException();
         }
 
         public override void SetLength(long value)
@@ -150,7 +151,7 @@ namespace DjvuNet.Compression
             if (BaseStream != null)
                 BaseStream.SetLength(value);
             else
-                throw new InvalidOperationException();
+                throw new DjvuInvalidOperationException();
         }
     }
 }

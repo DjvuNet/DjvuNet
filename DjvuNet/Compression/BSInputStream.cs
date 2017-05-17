@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using DjvuNet.Configuration;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
@@ -73,7 +74,7 @@ namespace DjvuNet.Compression
         public override BSBaseStream Init(Stream dataStream)
         {
             if (!dataStream.CanRead)
-                throw new ArgumentException("Stream was not readable.", nameof(dataStream));
+                throw new DjvuArgumentException("Stream was not readable.", nameof(dataStream));
 
             BaseStream = dataStream;
             Coder = DjvuSettings.Current.CoderFactory.CreateCoder(dataStream, false);
@@ -182,7 +183,7 @@ namespace DjvuNet.Compression
                 return 0;
 
             if (_Size > MaxBlock * 1024)
-                throw new System.IO.IOException("ByteStream.corrupt");
+                throw new DjvuFormatException("ByteStream.corrupt");
 
             // Allocate
             if (_BlockSize < _Size)
@@ -364,7 +365,7 @@ namespace DjvuNet.Compression
             /////////////////////////////////
             ////////// Reconstruct the string
             if ((markerpos < 1) || (markerpos >= _Size))
-                throw new System.IO.IOException("ByteStream.corrupt");
+                throw new DjvuFormatException("ByteStream.corrupt");
 
             // Allocate pointers
             int[] pos = new int[_Size];
@@ -411,7 +412,7 @@ namespace DjvuNet.Compression
 
             // Free and check
             if (j2 != markerpos)
-                throw new System.IO.IOException("ByteStream.corrupt");
+                throw new DjvuFormatException("ByteStream.corrupt");
 
             return _Size;
         }
@@ -437,7 +438,7 @@ namespace DjvuNet.Compression
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            throw new IOException("Unsupported operation.");
+            throw new DjvuInvalidOperationException("Unsupported operation.");
         }
 
         #endregion Private Methods

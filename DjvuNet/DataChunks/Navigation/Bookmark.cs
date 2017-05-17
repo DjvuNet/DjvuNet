@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks
 {
@@ -115,12 +116,12 @@ namespace DjvuNet.DataChunks
             {
                 pageNumber--;
                 if (pageNumber < 0 || pageNumber >= Document.Pages.Count)
-                    throw new InvalidOperationException("Navigation URL is out of range: " + Url);
+                    throw new DjvuArgumentOutOfRangeException("Navigation URL is out of range: " + Url);
 
                 ReferencedPage = Document.Pages[pageNumber];
             }
             else
-                throw new InvalidOperationException("Navigation URL in unknown format: " + Url);
+                throw new DjvuFormatException("Navigation URL in unknown format: " + Url);
         }
 
         /// <summary>

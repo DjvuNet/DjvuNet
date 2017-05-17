@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks
 {
@@ -30,7 +31,7 @@ namespace DjvuNet.DataChunks
         public override void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
             if (writer == null)
-                throw new ArgumentNullException(nameof(writer));
+                throw new DjvuArgumentNullException(nameof(writer));
 
             if (writeHeader)
             {
