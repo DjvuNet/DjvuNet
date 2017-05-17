@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -67,7 +68,7 @@ namespace DjvuNet.Graphics
                 if (_grays != value)
                 {
                     if ((value < 2) || (value > 256))
-                        throw new ArgumentOutOfRangeException(nameof(value),
+                        throw new DjvuArgumentOutOfRangeException(nameof(value),
                             "Gray levels outside of range");
 
                     _grays = value;

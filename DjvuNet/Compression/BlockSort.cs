@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
@@ -35,16 +36,16 @@ namespace DjvuNet.Compression
         public BlockSort(byte[] pdata, int psize)
         {
             if (psize <= 0 || psize >= 0x1000000)
-                throw new ArgumentOutOfRangeException(nameof(psize));
+                throw new DjvuArgumentOutOfRangeException(nameof(psize));
 
             if (pdata == null)
-                throw new ArgumentNullException(nameof(pdata));
+                throw new DjvuArgumentNullException(nameof(pdata));
 
             if (pdata.Length == 0)
-                throw new ArgumentOutOfRangeException(nameof(pdata));
+                throw new DjvuArgumentOutOfRangeException(nameof(pdata));
 
             if (pdata.Length < psize)
-                throw new ArgumentOutOfRangeException(nameof(psize));
+                throw new DjvuArgumentOutOfRangeException(nameof(psize));
 
             _Size = psize;
             _Data = pdata;
@@ -57,16 +58,16 @@ namespace DjvuNet.Compression
             int lo, hi;
 
             if (_Size <= 0)
-                throw new InvalidOperationException();
+                throw new DjvuInvalidOperationException();
 
             if (_Data == null)
-                throw new InvalidOperationException();
+                throw new DjvuInvalidOperationException();
 
             if (_Data.Length <= 1 || _Size <= 1)
                 return;
 
             if (!(_Data[_Size - 1] == 0))
-                throw new InvalidOperationException();
+                throw new DjvuInvalidOperationException();
 
             // Step 1: Radix sort 
             int depth = 0;
@@ -165,7 +166,7 @@ namespace DjvuNet.Compression
             }
 
             if (!(markerpos >= 0 && markerpos < _Size))
-                throw new InvalidOperationException();
+                throw new DjvuInvalidOperationException();
  
         }
 
@@ -416,7 +417,7 @@ namespace DjvuNet.Compression
 
                     // -- process segments
                     if (!(sp + 2 < QuickSortStack))
-                        throw new InvalidOperationException(
+                        throw new DjvuInvalidOperationException(
                             $"Value of {nameof(sp)} variable outside of expected range: {sp}");
 
                     // ----- middle segment (=?) [l1, h1]
@@ -572,7 +573,7 @@ namespace DjvuNet.Compression
 
                     // -- process segments
                     if(!(sp + 3 < QuickSortStack))
-                        throw new InvalidOperationException(
+                        throw new DjvuInvalidOperationException(
                             $"Value of {nameof(sp)} variable outside of expected range: {sp}");
 
                     // ----- middle segment (=?) [l1, h1]
@@ -671,7 +672,7 @@ namespace DjvuNet.Compression
 
             // Fixup marker stuff
             if(!(_Data[_Size - 1] == 0))
-                throw new InvalidOperationException();
+                throw new DjvuInvalidOperationException();
 
             c1 = _Data[_Size - 2];
             _Posn[0] = _Size - 1;

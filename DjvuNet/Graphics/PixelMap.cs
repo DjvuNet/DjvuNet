@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -23,7 +23,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Identity color correction table. 
         /// </summary>
-        internal static readonly int[] IdentityGammaCorrection = new int[256];
+        internal static readonly int[] IdentityGammaCorr = new int[256];
 
         /// <summary>
         /// Cached color correction table. 
@@ -63,8 +63,8 @@ namespace DjvuNet.Graphics
             for (int i = 1; i < _invmap.Length; i++)
                 _invmap[i] = 0x10000 / i;
 
-            for (int i = 0; i < IdentityGammaCorrection.Length; i++)
-                IdentityGammaCorrection[i] = i;
+            for (int i = 0; i < IdentityGammaCorr.Length; i++)
+                IdentityGammaCorr[i] = i;
         }
 
         /// <summary> Creates a new PixelMap object.</summary>
@@ -96,11 +96,11 @@ namespace DjvuNet.Graphics
             lock (_syncObject)
             {
                 if ((gamma < 0.10000000000000001D) || (gamma > 10D))
-                    throw new ArgumentOutOfRangeException(nameof(gamma), $"Gamma out of range: {gamma}");
+                    throw new DjvuArgumentOutOfRangeException(nameof(gamma), $"Gamma out of range: {gamma}");
 
                 int[] retval;
                 if ((gamma < 1.0009999999999999D) && (gamma > 0.999D))
-                    retval = IdentityGammaCorrection;
+                    retval = IdentityGammaCorr;
                 else
                 {
                     if (!(gamma > ( CachedGamma - 0.000000001000000001D) && gamma < (CachedGamma + 0.000000001000000001D)))
@@ -355,7 +355,7 @@ namespace DjvuNet.Graphics
             {
                 if ((targetRect.Right < rect.Right) || (targetRect.Bottom < rect.Bottom) || 
                     (targetRect.Left > rect.Left) || (targetRect.Top > rect.Top))
-                    throw new ArgumentOutOfRangeException(nameof(targetRect),
+                    throw new DjvuArgumentOutOfRangeException(nameof(targetRect),
                         $"Specified rectangle overflows destination PixelMap {nameof(BoundingRectangle)}");
 
                 rect = targetRect;
@@ -450,7 +450,7 @@ namespace DjvuNet.Graphics
         /// Target bounds
         /// </param>
         /// <throws>  
-        /// ArgumentException if the target rectangle is out of bounds 
+        /// <see cref="DjvuNet.Errors.DjvuArgumentOutOfRangeException"/> if the target rectangle is out of bounds 
         /// </throws>
         public virtual void Downsample43(IMap2 src, Rectangle targetRect)
         {
@@ -463,7 +463,7 @@ namespace DjvuNet.Graphics
             if (targetRect != null)
             {
                 if ((targetRect.Right < rect.Right) || (targetRect.Bottom < rect.Bottom) || (targetRect.Left > rect.Left) || (targetRect.Top > rect.Top))
-                    throw new ArgumentOutOfRangeException(nameof(targetRect), "Rectangle out of bounds" + "pdr=(" + targetRect.Right + "," + targetRect.Bottom + "," +
+                    throw new DjvuArgumentOutOfRangeException(nameof(targetRect), "Rectangle out of bounds" + "pdr=(" + targetRect.Right + "," + targetRect.Bottom + "," +
                                                 targetRect.Left + "," + targetRect.Top + "),rect=(" + rect.Right + "," + rect.Bottom +
                                                 "," + rect.Left + "," + rect.Top + ")");
 
@@ -934,7 +934,7 @@ namespace DjvuNet.Graphics
         /// color correction factor
         /// </param>
         /// <throws>  
-        /// ArgumentException if the specified bounds are not contained in the page 
+        /// <see cref="DjvuNet.Errors.DjvuArgumentOutOfRangeException"/>  if the specified bounds are not contained in the page 
         /// </throws>
         public unsafe virtual void Stencil(IBitmap mask, IPixelMap foregroundMap, int supersample, 
             int subsample, Rectangle bounds, double gamma)
@@ -948,7 +948,7 @@ namespace DjvuNet.Graphics
                 if ((bounds.Right < rect.Right) || (bounds.Bottom < rect.Bottom) || (bounds.Left > rect.Left) ||
                     (bounds.Top > rect.Top))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(bounds),
+                    throw new DjvuArgumentOutOfRangeException(nameof(bounds),
                         "Rectangle out of bounds" + "bounds=(" + bounds.Right + "," + bounds.Bottom +
                                                 "," + bounds.Left + "," + bounds.Top + "),rect=(" + rect.Right + "," +
                                                 rect.Bottom + "," + rect.Left + "," + rect.Top + ")");

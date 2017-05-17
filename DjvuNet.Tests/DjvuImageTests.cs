@@ -1,12 +1,10 @@
-﻿using Xunit;
-using DjvuNet;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Moq;
 using System.Drawing;
+using DjvuNet;
+using DjvuNet.Errors;
+using Moq;
+using Xunit;
 
 namespace DjvuNet.Tests
 {
@@ -23,7 +21,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void DjvuImageTest002()
         {
-            Assert.Throws<ArgumentNullException>("page", () => new DjvuImage(null));
+            Assert.Throws<DjvuArgumentNullException>("page", () => new DjvuImage(null));
         }
 
         [Fact()]

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -157,7 +158,7 @@ namespace DjvuNet.Graphics.Tests
             int border = 0;
             sbyte color = 0;
             var bmp = CreateIntiFillVerifyBitmap(width, height, border, color);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => bmp.Grays = 1);
+            Assert.Throws<DjvuArgumentOutOfRangeException>("value", () => bmp.Grays = 1);
         }
 
         [Fact()]
@@ -168,7 +169,7 @@ namespace DjvuNet.Graphics.Tests
             int border = 0;
             sbyte color = 0;
             var bmp = CreateIntiFillVerifyBitmap(width, height, border, color);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => bmp.Grays = 257);
+            Assert.Throws<DjvuArgumentOutOfRangeException>("value", () => bmp.Grays = 257);
         }
 
         [Fact()]
@@ -543,7 +544,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(false, "This test needs an implementation");
         }
 
-        [Fact()]
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ComputeBoundingBoxTest()
         {
             

@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -216,7 +217,8 @@ namespace DjvuNet.Graphics
         public void Ycc2Rgb(int count)
         {
             if ((_ncolors != 3) || _parent.IsRampNeeded)
-                throw new DjvuFormatException($"{nameof(Ycc2Rgb)} can be used only with three color based images.");
+                throw new DjvuInvalidOperationException(
+                    $"Function {nameof(Ycc2Rgb)} can be used only with three color based images.");
 
             while (count-- > 0)
             {

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Errors;
 
 namespace DjvuNet
 {
@@ -21,7 +22,7 @@ namespace DjvuNet
         public DjvuImage(IDjvuPage page)
         {
             if (page == null)
-                throw new ArgumentNullException(nameof(page));
+                throw new DjvuArgumentNullException(nameof(page));
 
             _Page = page;
             _Document = page.Document;

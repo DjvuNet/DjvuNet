@@ -171,7 +171,10 @@
     <Compile Include="Errors\DjvuArgumentException.cs" />
     <Compile Include="Errors\DjvuArgumentNullException.cs" />
     <Compile Include="Errors\DjvuArgumentOutOfRangeException.cs" />
+    <Compile Include="Errors\DjvuEndOfStreamException.cs" />
+    <Compile Include="Errors\DjvuFileNotFoundException.cs" />
     <Compile Include="Errors\DjvuInvalidOperationException.cs" />
+    <Compile Include="Errors\DjvuNotSupportedException.cs" />
     <Compile Include="Extentions\ExtentionMethods.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
     <Compile Include="Graphics\IBitmap.cs" />
@@ -182,9 +185,11 @@
     <Compile Include="Graphics\IPixelReference.cs" />
     <Compile Include="Graphics\Map.cs" />
     <Compile Include="Graphics\Pixel.cs" />
+    <Compile Include="Graphics\Pixel3B.cs" />
     <Compile Include="Graphics\PixelMapScaler.cs" />
     <Compile Include="Graphics\PixelReference.cs" />
     <Compile Include="Graphics\PixelMap.cs" />
+    <Compile Include="Graphics\PixelYCC.cs" />
     <Compile Include="Graphics\Rectangle.cs" />
     <Compile Include="IO\DjvuReader.cs" />
     <Compile Include="IO\DjvuWriter.cs" />

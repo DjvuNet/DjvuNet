@@ -14,6 +14,7 @@ namespace DjvuNet.Compression.Tests
     public class BzzWriterTests
     {
         [Fact(Skip = "Bug in BzzWriter"), Trait("Category", "Skip")]
+        [Trait("Category", "Bugtrack")]
         public void BzzWriterTest001()
         {
             UTF8Encoding encoding = new UTF8Encoding(false);
@@ -45,6 +46,7 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact(Skip = "Bug in BzzWriter"), Trait("Category", "Skip")]
+        [Trait("Category", "Bugtrack")]
         public void BzzWriterTest002()
         {
             UTF8Encoding encoding = new UTF8Encoding(false);
@@ -60,6 +62,7 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact(Skip = "Bug in BzzWriter"), Trait("Category", "Skip")]
+        [Trait("Category", "Bugtrack")]
         public void BzzWriterTest003()
         {
             UTF8Encoding encoding = new UTF8Encoding(false);

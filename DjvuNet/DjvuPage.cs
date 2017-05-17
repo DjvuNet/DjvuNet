@@ -31,6 +31,7 @@ using DjvuNet.Configuration;
 using DjvuNet.Utilities;
 using System.Runtime.CompilerServices;
 using System.IO;
+using DjvuNet.Errors;
 
 namespace DjvuNet
 {
@@ -694,14 +695,14 @@ namespace DjvuNet
         public static System.Drawing.Bitmap ResizeImage(System.Drawing.Bitmap srcImage, int newWidth, int newHeight)
         {
             if (srcImage == null)
-                throw new ArgumentNullException(nameof(srcImage));
+                throw new DjvuArgumentNullException(nameof(srcImage));
 
             // Check if the image needs resizing
             if (srcImage.Width == newWidth && srcImage.Height == newHeight)
                 return srcImage;
 
             if (newWidth <= 0 || newHeight <= 0)
-                throw new ArgumentException(
+                throw new DjvuArgumentException(
                     $"Invalid new image dimensions width: {newWidth}, height: {newHeight}", 
                     nameof(newWidth) + " " + nameof(newHeight));
 
@@ -953,18 +954,24 @@ namespace DjvuNet
 
                 System.Drawing.Bitmap background = GetBackgroundImage(subsample, false);
 
-                Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Background: {stopWatch.ElapsedTicks}");
+                stopWatch.Stop();
+
+                // TODO ETW logging goes here
 
                 stopWatch.Restart();                
 
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
                 {
-                    Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Foreground: {stopWatch.ElapsedTicks}");
+                    stopWatch.Stop();
+                    // TODO ETW logging goes here
+
                     stopWatch.Restart();
 
                     using (System.Drawing.Bitmap mask = GetTextImage(subsample, false))
                     {
-                        Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Mask: {stopWatch.ElapsedTicks}");
+                        stopWatch.Stop();
+                        // TODO ETW logging goes here
+
                         stopWatch.Restart();
 
                         _hasLoaded = true;
@@ -1062,7 +1069,8 @@ namespace DjvuNet
                         foreground.UnlockBits(foregroundData);
                         background.UnlockBits(backgroundData);
 
-                        Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo, $"Return Background: {stopWatch.ElapsedTicks}");
+                        stopWatch.Stop();
+                        // TODO ETW logging goes here
 
                         return background;
                     }

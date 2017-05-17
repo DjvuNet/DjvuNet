@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DataChunks;
+using DjvuNet.Errors;
 using Xunit;
 
 namespace DjvuNet.DataChunks.Tests
@@ -14,21 +15,21 @@ namespace DjvuNet.DataChunks.Tests
         public void AnnotationTest001()
         {
             string test = null;
-            Assert.Throws<ArgumentNullException>("text", () => new Annotation(test));
+            Assert.Throws<DjvuArgumentNullException>("text", () => new Annotation(test));
         }
 
         [Fact()]
         public void AnnotationTest002()
         {
             string test = String.Empty;
-            Assert.Throws<ArgumentException>("text", () => new Annotation(test));
+            Assert.Throws<DjvuArgumentException>("text", () => new Annotation(test));
         }
 
         [Fact()]
         public void AnnotationTest003()
         {
             string test = "             ";
-            Assert.Throws<ArgumentException>("text", () => new Annotation(test));
+            Assert.Throws<DjvuArgumentException>("text", () => new Annotation(test));
         }
 
         [Fact()]

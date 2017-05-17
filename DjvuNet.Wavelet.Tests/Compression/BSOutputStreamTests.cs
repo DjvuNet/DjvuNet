@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression.Tests
 {
@@ -71,7 +72,7 @@ namespace DjvuNet.Compression.Tests
         public void BSOutputStreamTest003()
         {
             using (MemoryStream stream = new MemoryStream())
-            Assert.Throws<ArgumentException>("blockSize", () => new BSOutputStream(stream, 8192));
+            Assert.Throws<DjvuArgumentException>("blockSize", () => new BSOutputStream(stream, 8192));
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
@@ -103,7 +104,7 @@ namespace DjvuNet.Compression.Tests
         {
             byte[] buffer = new byte[16];
             using (MemoryStream stream = new MemoryStream(buffer, false))
-                Assert.Throws<ArgumentException>("dataStream", () => new BSOutputStream(stream).Init(stream));
+                Assert.Throws<DjvuArgumentException>("dataStream", () => new BSOutputStream(stream).Init(stream));
         }
 
         [Fact()]
@@ -216,7 +217,7 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
-        [Fact()]
+        [Fact(Skip = "Inefficient test of high entropy data"), Trait("Category", "Skip")]
         public void WriteTest003()
         {
             string filePath = Path.Combine(Util.ArtifactsPath, "test042C.djvu");
