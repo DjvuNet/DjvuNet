@@ -4,6 +4,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using DjvuNet.Errors;
+using DjvuNet.Wavelet;
 
 namespace DjvuNet.Graphics
 {
@@ -192,10 +194,6 @@ namespace DjvuNet.Graphics
         /// <returns></returns>
         public System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
         {
-            // TODO replace this code with efficient xplat memory copy
-            // perhaps it should be done inside CopyDataToBitmap
-            byte[] byteData = new byte[Data.Length];
-            Buffer.BlockCopy(Data, 0, byteData, 0, Data.Length);
 
             PixelFormat format = PixelFormat.Undefined;
 
@@ -203,33 +201,74 @@ namespace DjvuNet.Graphics
             else if (BytesPerPixel == 2) format = PixelFormat.Format16bppRgb555;
             else if (BytesPerPixel == 3) format = PixelFormat.Format24bppRgb;
             else if (BytesPerPixel == 4) format = PixelFormat.Format32bppArgb;
-            else throw new FormatException(string.Format("Unknown pixel format for byte count: {0}", BytesPerPixel));
+            else throw new DjvuFormatException($"Unknown pixel format for byte count: {BytesPerPixel}");
 
-            System.Drawing.Bitmap image = CopyDataToBitmap(ImageWidth, ImageHeight, byteData, format);
+            GCHandle hData = default(GCHandle);
+            System.Drawing.Bitmap image = null;
+            try
+            {
+                hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
+                image = CopyDataToBitmap(ImageWidth, ImageHeight, hData.AddrOfPinnedObject(), Data.Length, format);
+            }
+            catch(ArgumentException aex)
+            {
+                throw new DjvuAggregateException("Failed to copy data to Sytem.Drawing.Bitmap.", aex);
+            }
+            finally
+            {
+                if (hData.IsAllocated)
+                    hData.Free();
+            }
+
             image.RotateFlip(rotation);
 
             return image;
         }
+
+
 
         /// <summary>
         /// Fast copy of managed pixel array data into System.Drawing.Bitmap image.
         /// No checking of passed parameters, therefore, it is a caller responsibility
         /// to provid valid parameter values.
         /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
-        public static System.Drawing.Bitmap CopyDataToBitmap(int width, int height, byte[] data, PixelFormat format)
+        /// <param name="width">
+        /// Image width <see cref="System.Int32"/> in pixels
+        /// </param>
+        /// <param name="height">
+        /// Image height <see cref="System.Int32"/> in pixels
+        /// </param>
+        /// <param name="data">
+        /// Pointer <see cref="System.IntPtr"/> to buffer with image data
+        /// </param>
+        /// <param name="length">
+        /// Length <see cref="System.Int64"/> of buffer in bytes
+        /// </param>
+        /// <param name="format">
+        /// Format of image pixel expressed with <see cref="System.Drawing.Imaging.PixelFormat"/> enumeration
+        /// </param>
+        /// <returns>
+        /// <see cref="System.Drawing.Bitmap"/> created with data copied from Data buffer 
+        /// of this instance of <see cref="DjvuNet.Graphics.Map"/> 
+        /// </returns>
+        public static System.Drawing.Bitmap CopyDataToBitmap(
+            int width, int height, IntPtr data, long length, PixelFormat format)
         {
             System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height, format);
+            BitmapData bmpData = null;
 
-            BitmapData bmpData = bmp.LockBits(
-                                 new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
-                                 ImageLockMode.WriteOnly, bmp.PixelFormat);
+            try
+            {
+                bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
+                                     ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-            Marshal.Copy(data, 0, bmpData.Scan0, data.Length);
-            bmp.UnlockBits(bmpData);
+                NativeMethods.MoveMemory(bmpData.Scan0, data, length);
+            }
+            finally
+            {
+                bmp?.UnlockBits(bmpData);
+            }
+
             return bmp;
         }
 
