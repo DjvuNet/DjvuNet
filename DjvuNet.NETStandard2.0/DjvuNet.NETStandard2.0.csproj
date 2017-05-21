@@ -3,36 +3,41 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>DjvuNet</RootNamespace>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoreCompat.System.Drawing" Version="1.0.0-beta006" />
-    <PackageReference Include="NETStandard.Library.NETFramework" Version="2.0.0-preview2-25314-02" />
+    <Compile Include="..\DjvuNet\**\*.cs" />
   </ItemGroup>
 
-    <ItemGroup>
-      <Compile Include="..\DjvuNet\**\*.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.cs" />
+    <Compile Remove="..\DjvuNet\Properties\AssemblyInfoCommon.cs" />
+    <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.Template.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.cs" />
-      <Compile Remove="..\DjvuNet\Properties\AssemblyInfoCommon.cs" />
-      <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.Template.cs" />
-      <Compile Remove="Properties\AssemblyInfo.cs" />
-    </ItemGroup>
+  <ItemGroup>
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <Content Include="Properties\AssemblyInfo.cs" />
-      <Content Include="Properties\AssemblyInfo.Template.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CoreCompat\System.Drawing\src\CoreCompat.System.Drawing\CoreCompat.System.Drawing.csproj" />
+    <ProjectReference Include="..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
+  </ItemGroup>
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 </Project>
