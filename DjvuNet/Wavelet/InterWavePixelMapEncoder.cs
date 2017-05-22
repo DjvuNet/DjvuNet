@@ -49,7 +49,7 @@ namespace DjvuNet.Wavelet
             // Open
             if (_YEncoder == null)
             {
-                _CSlice = _CSerial = _CBytes = 0;
+                _CSlices = _CSerial = _CBytes = 0;
                 _YEncoder = new InterWaveEncoder(_YMap);
                 if (_CrMap != null && _CbMap != null)
                 {
@@ -61,11 +61,46 @@ namespace DjvuNet.Wavelet
             // Prepare zcodec slices
             int flag = 1;
             int nslices = 0;
-
+            
+            using (MemoryStream coderStream = new MemoryStream())
             {
+
+                float estdb = -1.0f;
+                ZPCodec zp = new ZPCodec(coderStream, true, true);
+
+                while (flag != 0)
+                {
+                    if (settings.Decibels > 0 && estdb >= settings.Decibels)
+                        break;
+
+                    if (settings.Bytes > 0 && coderStream.Position + _CBytes >= settings.Bytes)
+                        break;
+
+                    if (settings.Slices > 0 && nslices + _CSlices >= settings.Slices)
+                        break;
+
+                    flag = _YEncoder.CodeSlice(zp);
+
+                    if (flag != 0 && settings.Decibels > 0)
+                    {
+                        if (_YEncoder._CurrentBand == 0 || estdb >= settings.Decibels - DecibelPrune)
+                            estdb = _YEncoder.EstimateDecibel(_dBFrac);
+                    }
+
+                    if (_CrEncoder != null && _CbEncoder != null && _CSlices + nslices >= _CrCbDelay)
+                    {
+                        flag |= _CbEncoder.CodeSlice(zp);
+                        flag |= _CrEncoder.CodeSlice(zp);
+                    }
+
+                    nslices++;
+                }
+
+                zp.Flush();
+
                 // Write primary header
                 stream.WriteByte((byte)_CSerial);
-                stream.WriteByte((byte)nslices);
+                stream.WriteByte((byte)(nslices));
 
                 // Write extended header
                 if (_CSerial == 0)
@@ -91,55 +126,22 @@ namespace DjvuNet.Wavelet
                     stream.WriteByte(crCbDelay);
                 }
 
-                float estdb = -1.0f;
-                ZPCodec zp = new ZPCodec(stream, true, true);
-
-                while (flag != 0)
-                {
-                    if (settings.Decibels > 0 && estdb >= settings.Decibels)
-                        break;
-
-                    if (settings.Bytes > 0 && stream.Position + _CBytes >= settings.Bytes)
-                        break;
-
-                    if (settings.Slices > 0 && nslices + _CSlice >= settings.Slices)
-                        break;
-
-                    flag = _YEncoder.CodeSlice(zp);
-
-                    if (flag != 0 && settings.Decibels > 0)
-                    {
-                        if (_YEncoder._CurrentBand == 0 || estdb >= settings.Decibels - DecibelPrune)
-                            estdb = _YEncoder.EstimateDecibel(_dBFrac);
-                    }
-
-                    if (_CrEncoder != null && _CbEncoder != null && _CSlice + nslices >= _CrCbDelay)
-                    {
-                        flag |= _CbEncoder.CodeSlice(zp);
-                        flag |= _CrEncoder.CodeSlice(zp);
-                    }
-
-                    nslices++;
-                }
-
-                zp.Flush();
+                byte[] buffer = coderStream.GetBuffer();
+                stream.Write(buffer, 0, (int)coderStream.Position);
+                _CBytes += (int)coderStream.Position;
             }
 
-            // Write slices
-            //mbs.seek(0);
-            //gbs->copy(mbs);
-
-            // Return -> length is added for the second time ?
-            _CBytes += (int)stream.Position;
-            _CSlice += nslices;
+            _CSlices += nslices;
             _CSerial += 1;
             return flag;
         }
 
         /// <summary>
         /// Writes a color image into a DjVu IW44 file. This function creates a
-        /// composite PM44Form element composed of PM44 nodes. Data for each chunk is generated with
-        /// EncodeChunk using the corresponding parameters in array settings
+        /// composite Form element containing one or more IW44 encoded chunks. 
+        /// Data for each chunk is generated with a call to EncodeChunk method
+        /// while encoding is controlled by the corresponding parameters in an array
+        /// parameter settings.
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="settings"></param>
@@ -199,16 +201,6 @@ namespace DjvuNet.Wavelet
         {
             /* Free */
             CloseEncoder();
-            /* Create */
-            int w = pm.ImageWidth;
-            int h = pm.ImageHeight;
-            sbyte[] sBuffer = new sbyte[w * h];
-            GCHandle hBuffer = GCHandle.Alloc(sBuffer, GCHandleType.Pinned);
-            sbyte* buffer = (sbyte*)hBuffer.AddrOfPinnedObject();
-
-            // Create maps
-            InterWaveMapEncoder eymap = new InterWaveMapEncoder(w, h);
-            _YMap = eymap;
 
             // Handle CRCB mode
             switch (crcbmode)
@@ -232,7 +224,7 @@ namespace DjvuNet.Wavelet
             }
 
             // Prepare mask information
-            sbyte* msk8 = (sbyte*)0;
+            sbyte* msk8 = (sbyte*)IntPtr.Zero;
             int mskrowsize = 0;
 
             Bitmap mask = gmask;
@@ -245,53 +237,79 @@ namespace DjvuNet.Wavelet
                 mskrowsize = mask.GetRowSize();
             }
 
+            /* Create */
+            int width = pm.Width;
+            int height = pm.Height;
+            sbyte[] sYBuffer = new sbyte[width * height];
+            GCHandle hYBuffer = GCHandle.Alloc(sYBuffer, GCHandleType.Pinned);
+            sbyte* yBuffer = (sbyte*)hYBuffer.AddrOfPinnedObject();
+
+            // Create maps
+            InterWaveMapEncoder eymap = new InterWaveMapEncoder(width, height);
+            _YMap = eymap;
+
             GCHandle hData = GCHandle.Alloc(pm.Data, GCHandleType.Pinned);
             Pixel* pData = (Pixel*)hData.AddrOfPinnedObject();
-
-            // Fill buffer with luminance information
-            InterWaveTransform.Rgb2Y(pData, w, h, pm.GetRowSize(), buffer, w);
-
-            if (_CrCbDelay < 0)
-            {
-                // Inversion for gray images
-                sbyte* e = buffer + w * h;
-                for (sbyte* b = buffer; b < e; b++)
-                    *b = (sbyte)(255 - *b);
-            }
-
-            // Create YMAP
-            eymap.Create(buffer, w, msk8, mskrowsize);
 
             // Create chrominance maps
             if (_CrCbDelay >= 0)
             {
-                InterWaveMapEncoder ecbmap = new InterWaveMapEncoder(w, h);
+                sbyte[] sCbBuffer = new sbyte[width * height];
+                GCHandle hCbBuffer = GCHandle.Alloc(sCbBuffer, GCHandleType.Pinned);
+                sbyte* cbBuffer = (sbyte*)hCbBuffer.AddrOfPinnedObject();
+
+                sbyte[] sCrBuffer = new sbyte[width * height];
+                GCHandle hCrBuffer = GCHandle.Alloc(sCrBuffer, GCHandleType.Pinned);
+                sbyte* crBuffer = (sbyte*)hCrBuffer.AddrOfPinnedObject();
+
+                InterWaveMapEncoder ecbmap = new InterWaveMapEncoder(width, height);
                 _CbMap = ecbmap;
 
-                InterWaveMapEncoder ecrmap = new InterWaveMapEncoder(w, h);
+                InterWaveMapEncoder ecrmap = new InterWaveMapEncoder(width, height);
                 _CrMap = ecrmap;
 
-                // Process CB information
-                InterWaveTransform.Rgb2Cb(pData, w, h, pm.GetRowSize(), buffer, w);
-                ecbmap.Create(buffer, w, msk8, mskrowsize);
+                // Color space conversion from RGB to YCbCr and channel separation
+                InterWaveTransform.Rgb2YCbCr(pData, width, height, width * 3, yBuffer, cbBuffer, crBuffer, width);
 
-                // Process CR information
-                InterWaveTransform.Rgb2Cr(pData, w, h, pm.GetRowSize(), buffer, w);
-                ecrmap.Create(buffer, w, msk8, mskrowsize);
+                // Create YMap
+                eymap.Create(yBuffer, width, msk8, mskrowsize);
+                // Create CbMap
+                ecbmap.Create(cbBuffer, width, msk8, mskrowsize);
+                // Create CrMap
+                ecrmap.Create(crBuffer, width, msk8, mskrowsize);
 
-                // Perform chrominance reduction (CRCBhalf)
+                // Perform chrominance reduction (CrCbHalf)
                 if (_CrCbHalf)
                 {
                     ecbmap.Slashres(2);
                     ecrmap.Slashres(2);
                 }
+
+                if (hCbBuffer.IsAllocated)
+                    hCbBuffer.Free();
+                if (hCrBuffer.IsAllocated)
+                    hCrBuffer.Free();
             }
+            else
+            {
+                // Fill buffer with luminance information
+                InterWaveTransform.Rgb2Y(pData, width, height, pm.GetRowSize(), yBuffer, width);
+                // Create YMAP
+                eymap.Create(yBuffer, width, msk8, mskrowsize);
+
+                // Inversion for gray images
+                sbyte* e = yBuffer + width * height;
+                for (sbyte* b = yBuffer; b < e; b++)
+                    *b = (sbyte)(255 - *b);
+            }
+
+
 
             if (hMask.IsAllocated)
                 hMask.Free();
 
             hData.Free();
-            hBuffer.Free();
+            hYBuffer.Free();
         }
 
         #endregion Methods

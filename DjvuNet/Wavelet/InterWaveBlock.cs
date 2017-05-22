@@ -159,7 +159,7 @@ namespace DjvuNet.Wavelet
         /// Write a liftblock. Implementation assumes all coeff buffer values are zeros.
         /// </summary>
         /// <param name="coeff">
-        /// An array of block wavelet coefficients - function assumes all values are zeros
+        /// An array of block wavelet coefficients
         /// </param>
         /// <param name="bmin">
         /// Start position
@@ -171,20 +171,28 @@ namespace DjvuNet.Wavelet
         {
             int n = bmin << 4;
 
-            for (int n1 = bmin; n1 < bmax; n1++)
+            int coeffLength = coeff.Length;
+            fixed (short* pCoeff = coeff)
             {
-                short[] d = GetBlock(n1);
+                ulong* pC = (ulong*)pCoeff;
+                int cLength = coeffLength / 4;
 
-                if (d == null)
-                    n += 16;
-                else
+                for (int i = 0; i < cLength; i++)
+                    pC[i] = 0;
+
+                for (int n1 = bmin; n1 < bmax; n1++)
                 {
-                    for (int n2 = 0; n2 < d.Length; )
+                    short[] d = GetBlock(n1);
+
+                    if (d != null)
                     {
-                        coeff[_Zigzagloc[n]] = d[n2];
-                        n2++;
-                        n++;
+                        for (int n2 = 0; n2 < d.Length; n2++, n++)
+                        {
+                            pCoeff[_Zigzagloc[n]] = d[n2];
+                        }
                     }
+                    else
+                        n += 16;
                 }
             }
         }

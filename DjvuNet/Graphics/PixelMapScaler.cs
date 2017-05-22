@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -76,7 +77,7 @@ namespace DjvuNet.Graphics
         public void SetHorzRatio(int numer, int denom)
         {
             if (_SrcWidth <= 0 || _SrcHeight <= 0 || _DestWidth <= 0 || _DestHeight <= 0)
-                throw new FormatException("Scaler undefined size");
+                throw new DjvuInvalidOperationException("Scaler has undefined size");
 
             // Implicit ratio (determined by the input/output sizes)
             if ((numer == 0) && (denom == 0))
@@ -85,7 +86,7 @@ namespace DjvuNet.Graphics
                 denom = _SrcWidth;
             }
             else if ((numer <= 0) || (denom <= 0))
-                throw new FormatException("Scaler illegal ratio");
+                throw new DjvuArgumentOutOfRangeException("Scaler illegal ratio");
 
             // Compute horz reduction
             _XShift = 0;
@@ -124,7 +125,7 @@ namespace DjvuNet.Graphics
         public void SetVertRatio(int numerator, int denominator)
         {
             if ((_SrcWidth <= 0) || (_SrcHeight <= 0) || (_DestWidth <= 0) || (_DestHeight <= 0))
-                throw new FormatException("Scaler undefined size");
+                throw new DjvuInvalidOperationException("Scaler undefined size");
 
             // Implicit ratio (determined by the input/output sizes)
             if ((numerator == 0) && (denominator == 0))
@@ -133,7 +134,7 @@ namespace DjvuNet.Graphics
                 denominator = _SrcHeight;
             }
             else if ((numerator <= 0) || (denominator <= 0))
-                throw new FormatException("Scaler illegal ratio");
+                throw new DjvuArgumentOutOfRangeException("Scaler illegal ratio");
 
             // Compute horz reduction
             _YShift = 0;
@@ -160,10 +161,9 @@ namespace DjvuNet.Graphics
             // Parameter validation
             if ((desired.XMin < 0) || (desired.YMin < 0) || (desired.XMax > _DestWidth) || (desired.YMax > _DestHeight))
             {
-                throw new FormatException(
-                  "desired rectangle too big: " + desired.XMin + "," + desired.YMin
-                  + "," + desired.XMax + "," + desired.YMax + "," + _DestWidth + ","
-                  + _DestHeight);
+                throw new DjvuArgumentOutOfRangeException(
+                  $"Desired rectangle too big: {desired.XMin}, {desired.YMin}, {desired.XMax}, " + 
+                  $"{desired.YMax}, {_DestWidth}, {_DestHeight}", nameof(desired));
             }
 
             // Compute ratio (if not done yet)
@@ -212,8 +212,8 @@ namespace DjvuNet.Graphics
         public void Scale(Rectangle srcRect, IPixelMap srcMap, Rectangle targetRect, IPixelMap targetMap)
         {
             // Parameter validation
-            if ((srcRect.Width != srcMap.ImageWidth) || (srcRect.Height != srcMap.ImageHeight))
-                throw new FormatException("Invalid rectangle");
+            if ((srcRect.Width != srcMap.Width) || (srcRect.Height != srcMap.Height))
+                throw new DjvuArgumentException("Invalid rectangle", nameof(srcRect));
 
             // Compute rectangles
             Rectangle required_red = new Rectangle();
@@ -221,10 +221,10 @@ namespace DjvuNet.Graphics
 
             if ( (srcRect.XMin > sourceRect.XMin) || (srcRect.YMin > sourceRect.YMin)
               || (srcRect.XMax < sourceRect.XMax) || (srcRect.YMax < sourceRect.YMax))
-                throw new FormatException("Invalid rectangle");
+                throw new DjvuArgumentException("Invalid rectangle", nameof(srcRect));
 
             // Adjust output pixmap
-            if ((targetRect.Width != (int)targetMap.ImageWidth) || (targetRect.Height != (int)targetMap.ImageHeight))
+            if ((targetRect.Width != (int)targetMap.Width) || (targetRect.Height != (int)targetMap.Height))
                 targetMap.Init(targetRect.Height, targetRect.Width, null);
 
             // Prepare temp stuff 
@@ -385,7 +385,7 @@ namespace DjvuNet.Graphics
 
             // Result must fit exactly
             if ((@out == outmax) && (y != (beg + len)))
-                throw new FormatException("Scaler assertion");
+                throw new DjvuInvalidOperationException("Scaler assertion");
         }
 
         internal IPixelReference GetLine(int fy, Rectangle redRect, Rectangle srcRect, IPixelMap srcMap)

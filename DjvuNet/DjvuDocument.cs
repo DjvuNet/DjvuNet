@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using DjvuNet.DataChunks;
+using DjvuNet.Errors;
 using DjvuNet.Parser;
 
 namespace DjvuNet
@@ -457,7 +458,7 @@ namespace DjvuNet
                     }
                     catch(Exception error)
                     {
-                        throw new AggregateException("Error while trying to verify DjVu file.", error);
+                        throw new DjvuAggregateException("Error while trying to verify DjVu file.", error);
                     }
                     finally
                     {
@@ -467,13 +468,13 @@ namespace DjvuNet
                     return result;
                 }
                 else
-                    throw new FileNotFoundException($"File was not found: {filePath}");
+                    throw new DjvuFileNotFoundException("File was not found.", filePath);
             }
 
             if (filePath == null)
-                throw new ArgumentNullException(nameof(filePath));
+                throw new DjvuArgumentNullException(nameof(filePath));
             else
-                throw new ArgumentException($"Invalid file path: \"{filePath}\"", nameof(filePath));
+                throw new DjvuArgumentException($"Invalid file path: \"{filePath}\"", nameof(filePath));
 
         }
 
@@ -490,7 +491,7 @@ namespace DjvuNet
         public static bool IsDjvuDocument(Stream stream)
         {
             if (null == stream)
-                throw new ArgumentNullException(nameof(stream));
+                throw new DjvuArgumentNullException(nameof(stream));
 
             // Minimum empty Djvu file will consist of file header (8 bytes)
             // followed by length of IFF stream in the form of uint (4 bytes) and 
@@ -502,7 +503,7 @@ namespace DjvuNet
                 if (stream.CanSeek)
                     stream.Position = 0;
                 else
-                    throw new ArgumentException(
+                    throw new DjvuArgumentException(
                         $"Stream is not set to the start of data and does not support seek. " + 
                         $"Current position: {stream.Position}", nameof(stream));
 

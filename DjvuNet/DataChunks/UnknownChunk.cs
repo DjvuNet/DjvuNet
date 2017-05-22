@@ -72,7 +72,7 @@ namespace DjvuNet.DataChunks
         public override void ReadData(IDjvuReader reader)
         {
             base.ReadData(reader);
-            Trace.WriteLineIf(DjvuSettings.Current.LogLevel.TraceInfo , $"Creating unknown chunk for ID: {ChunkID}");
+            // TODO use ETW logging here
         }
 
         #endregion Protected Methods

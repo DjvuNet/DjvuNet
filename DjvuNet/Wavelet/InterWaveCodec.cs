@@ -21,10 +21,10 @@ namespace DjvuNet.Wavelet
         internal int _CurrentBitPlane;
         internal InterWaveMap _Map;
 
-        public const int ZERO = 1;
-        public const int ACTIVE = 2;
-        public const int NEW = 4;
-        public const int UNK = 8;
+        public const int Zero = 1;
+        public const int Active = 2;
+        public const int New = 4;
+        public const int Unk = 8;
 
         internal readonly int[] _IwQuant = new int[]
         {

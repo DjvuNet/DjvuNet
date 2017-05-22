@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-
+using System.Threading.Tasks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -23,7 +25,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Identity color correction table. 
         /// </summary>
-        internal static readonly int[] IdentityGammaCorrection = new int[256];
+        internal static readonly int[] IdentityGammaCorr = new int[256];
 
         /// <summary>
         /// Cached color correction table. 
@@ -63,14 +65,22 @@ namespace DjvuNet.Graphics
             for (int i = 1; i < _invmap.Length; i++)
                 _invmap[i] = 0x10000 / i;
 
-            for (int i = 0; i < IdentityGammaCorrection.Length; i++)
-                IdentityGammaCorrection[i] = i;
+            for (int i = 0; i < IdentityGammaCorr.Length; i++)
+                IdentityGammaCorr[i] = i;
         }
 
         /// <summary> Creates a new PixelMap object.</summary>
         public PixelMap()
             : base(3, 2, 1, 0, false)
         {
+        }
+
+        public PixelMap(sbyte[] data, int width, int height)
+            : base(3, 2, 1, 0, false)
+        {
+            Data = data;
+            Width = width;
+            Height = height;
         }
 
         #endregion Constructors
@@ -86,21 +96,21 @@ namespace DjvuNet.Graphics
         /// Fill the array with color correction constants.
         /// </summary>
         /// <param name="gamma">
-        /// color correction subsample
+        /// Color correction subsample
         /// </param>
         /// <returns> 
-        /// the new color correction table
+        /// The new color correction table
         /// </returns>
         public static int[] GetGammaCorrection(double gamma)
         {
             lock (_syncObject)
             {
                 if ((gamma < 0.10000000000000001D) || (gamma > 10D))
-                    throw new ArgumentOutOfRangeException(nameof(gamma), $"Gamma out of range: {gamma}");
+                    throw new DjvuArgumentOutOfRangeException(nameof(gamma), $"Gamma out of range: {gamma}");
 
                 int[] retval;
                 if ((gamma < 1.0009999999999999D) && (gamma > 0.999D))
-                    retval = IdentityGammaCorrection;
+                    retval = IdentityGammaCorr;
                 else
                 {
                     if (!(gamma > ( CachedGamma - 0.000000001000000001D) && gamma < (CachedGamma + 0.000000001000000001D)))
@@ -146,18 +156,18 @@ namespace DjvuNet.Graphics
         {
             // Check
             // Compute number of rows and columns
-            int xrows = ypos + bm.ImageHeight;
+            int xrows = ypos + bm.Height;
 
-            if (xrows > ImageHeight)
-                xrows = ImageHeight;
+            if (xrows > Height)
+                xrows = Height;
 
             if (ypos > 0)
                 xrows -= ypos;
 
-            int xcolumns = xpos + bm.ImageWidth;
+            int xcolumns = xpos + bm.Width;
 
-            if (xcolumns > ImageWidth)
-                xcolumns = ImageWidth;
+            if (xcolumns > Width)
+                xcolumns = Width;
 
             if (xpos > 0)
                 xcolumns -= xpos;
@@ -227,18 +237,18 @@ namespace DjvuNet.Graphics
                 return;
 
             // Compute number of rows and columns
-            int xrows = ypos + bm.ImageHeight;
+            int xrows = ypos + bm.Height;
 
-            if (xrows > ImageHeight)
-                xrows = ImageHeight;
+            if (xrows > Height)
+                xrows = Height;
 
             if (ypos > 0)
                 xrows -= ypos;
 
-            int xcolumns = xpos + bm.ImageWidth;
+            int xcolumns = xpos + bm.Width;
 
-            if (xcolumns > ImageWidth)
-                xcolumns = ImageWidth;
+            if (xcolumns > Width)
+                xcolumns = Width;
 
             if (xpos > 0)
                 xcolumns -= xpos;
@@ -304,14 +314,275 @@ namespace DjvuNet.Graphics
         /// </param>
         public void ApplyGammaCorrection(double gamma)
         {
+            ApplyGamma(gamma, Data);
+        }
+
+        public static void ApplyGamma(double gamma, sbyte[] data)
+        {
             if (((gamma > 0.999D) && (gamma < 1.0009999999999999D)))
                 return;
 
             int[] gtable = GetGammaCorrection(gamma);
 
-            for (int i = 0; i < Data.Length; i++)
+            for (int i = 0; i < data.Length; i++)
             {
-                Data[i] = (sbyte)gtable[unchecked((byte)Data[i])];
+                data[i] = (sbyte)gtable[unchecked((byte)data[i])];
+            }
+        }
+
+        public static unsafe void ApplyGammaFastMT(double gamma, sbyte[] data)
+        {
+            if (((gamma > 0.999D) && (gamma < 1.0009999999999999D)))
+                return;
+
+            int[] gtable = GetGammaCorrection(gamma);
+
+            GCHandle hData = default(GCHandle);
+            GCHandle hGTable = default(GCHandle);
+
+            hData = GCHandle.Alloc(data, GCHandleType.Pinned);
+            hGTable = GCHandle.Alloc(gtable, GCHandleType.Pinned);
+            byte* pData = (byte*)hData.AddrOfPinnedObject();
+            int* gammaLUT = (int*)hGTable.AddrOfPinnedObject();
+            int dataLength = data.Length;
+            int reminderLength = data.Length % 48;
+
+            // Parallel.For on 4 cores is 70% slower than single threaded
+            // on one core - extremly inefficient loop call design
+            int prllReminder = 0;
+            int procCount = Environment.ProcessorCount;
+            int part = Math.DivRem(dataLength, procCount, out prllReminder);
+
+            TaskFactory tskFactory = new TaskFactory();
+            List<Task> tasks = new List<Task>();
+            for (int k = 0; k < procCount; k++)
+                tasks.Add(null);
+
+            for (int k = 0; k < procCount; k++)
+            {
+                int index = part * k;
+                tasks[k] = tskFactory.StartNew(() =>
+                {
+                    int i = index;
+                    int partEnd = index + part - 48;
+                    if ((k + 1) == procCount)
+                        partEnd += prllReminder;
+
+                    for (; i < partEnd; i++)
+                    {
+                        pData[i] = (byte)gammaLUT[pData[i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[++i]];
+                    }
+                });
+            }
+
+            Task.WaitAll(tasks[0], tasks[1], tasks[2], tasks[3], tasks[4], tasks[5], tasks[6], tasks[7]);
+
+            if (hData.IsAllocated)
+                hData.Free();
+            if (hGTable.IsAllocated)
+                hGTable.Free();
+
+        }
+
+        public static unsafe void ApplyGammaFastST(double gamma, sbyte[] data)
+        {
+            if (((gamma > 0.999D) && (gamma < 1.0009999999999999D)))
+                return;
+
+            int[] gtable = GetGammaCorrection(gamma);
+            GCHandle hData = default(GCHandle);
+            GCHandle hGTable = default(GCHandle);
+
+            hData = GCHandle.Alloc(data, GCHandleType.Pinned);
+            hGTable = GCHandle.Alloc(gtable, GCHandleType.Pinned);
+            byte* pData = (byte*)hData.AddrOfPinnedObject();
+            int* gammaLUT = (int*)hGTable.AddrOfPinnedObject();
+
+            int dataLength = data.Length;
+            int reminderLength = data.Length % 48;
+            dataLength -= reminderLength;
+
+            for (int i = 0; i < dataLength; i++)
+            {
+                pData[i] = (byte)gammaLUT[pData[i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+            }
+
+            for (int i = dataLength; i < dataLength + reminderLength; i++)
+            {
+                pData[i] = (byte)gammaLUT[pData[i]];
+            }
+            if (hData.IsAllocated)
+                hData.Free();
+            if (hGTable.IsAllocated)
+                hGTable.Free();
+        }
+
+        public static unsafe void ApllyGamma(byte* pData, int dataLengthRem, int dataLength, int* gammaLUT)
+        {
+            for (int i = 0; i < dataLength; i++)
+            {
+                pData[i] = (byte)gammaLUT[pData[i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[++i]];
+            }
+
+            for (int i = dataLength; i < dataLengthRem; i++)
+            {
+                pData[i] = (byte)gammaLUT[pData[i]];
             }
         }
 
@@ -323,8 +594,8 @@ namespace DjvuNet.Graphics
                 {
                     Left = 0,
                     Bottom = 0,
-                    Right = ImageWidth,
-                    Top = ImageHeight
+                    Right = Width,
+                    Top = Height
                 };
             }
         }
@@ -355,14 +626,14 @@ namespace DjvuNet.Graphics
             {
                 if ((targetRect.Right < rect.Right) || (targetRect.Bottom < rect.Bottom) || 
                     (targetRect.Left > rect.Left) || (targetRect.Top > rect.Top))
-                    throw new ArgumentOutOfRangeException(nameof(targetRect),
+                    throw new DjvuArgumentOutOfRangeException(nameof(targetRect),
                         $"Specified rectangle overflows destination PixelMap {nameof(BoundingRectangle)}");
 
                 rect = targetRect;
             }
             else
-                rect = new Rectangle(0, 0, ((src.ImageWidth + subsample) - 1) / subsample,
-                                       ((src.ImageHeight + subsample) - 1) / subsample);
+                rect = new Rectangle(0, 0, ((src.Width + subsample) - 1) / subsample,
+                                       ((src.Height + subsample) - 1) / subsample);
 
 
             Init(rect.Height, rect.Width, null);
@@ -375,11 +646,11 @@ namespace DjvuNet.Graphics
             IPixelReference sptr = src.CreateGPixelReference(0);
             IPixelReference dptr = CreateGPixelReference(0);
 
-            for (int y = 0; y < ImageHeight; y++)
+            for (int y = 0; y < Height; y++)
             {
                 int sx = sxz;
 
-                for (int x = ImageWidth; x-- > 0; dptr.IncOffset())
+                for (int x = Width; x-- > 0; dptr.IncOffset())
                 {
                     int r = 0;
                     int g = 0;
@@ -388,13 +659,13 @@ namespace DjvuNet.Graphics
                     int kidx = sidx;
                     int lsy = sy + subsample;
 
-                    if (lsy > src.ImageHeight)
-                        lsy = src.ImageHeight;
+                    if (lsy > src.Height)
+                        lsy = src.Height;
 
                     int lsx = sx + subsample;
 
-                    if (lsx > src.ImageWidth)
-                        lsx = src.ImageWidth;
+                    if (lsx > src.Width)
+                        lsx = src.Width;
 
                     for (int rsy = sy; rsy < lsy; rsy++)
                     {
@@ -450,12 +721,12 @@ namespace DjvuNet.Graphics
         /// Target bounds
         /// </param>
         /// <throws>  
-        /// ArgumentException if the target rectangle is out of bounds 
+        /// <see cref="DjvuNet.Errors.DjvuArgumentOutOfRangeException"/> if the target rectangle is out of bounds 
         /// </throws>
         public virtual void Downsample43(IMap2 src, Rectangle targetRect)
         {
-            int srcwidth = src.ImageWidth;
-            int srcheight = src.ImageHeight;
+            int srcwidth = src.Width;
+            int srcheight = src.Height;
             int destwidth = (int)Math.Ceiling(srcwidth * 0.75D);
             int destheight = (int)Math.Ceiling(srcheight * 0.75D);
             Rectangle rect = new Rectangle(0, 0, destwidth, destheight);
@@ -463,7 +734,7 @@ namespace DjvuNet.Graphics
             if (targetRect != null)
             {
                 if ((targetRect.Right < rect.Right) || (targetRect.Bottom < rect.Bottom) || (targetRect.Left > rect.Left) || (targetRect.Top > rect.Top))
-                    throw new ArgumentOutOfRangeException(nameof(targetRect), "Rectangle out of bounds" + "pdr=(" + targetRect.Right + "," + targetRect.Bottom + "," +
+                    throw new DjvuArgumentOutOfRangeException(nameof(targetRect), "Rectangle out of bounds" + "pdr=(" + targetRect.Right + "," + targetRect.Bottom + "," +
                                                 targetRect.Left + "," + targetRect.Top + "),rect=(" + rect.Right + "," + rect.Bottom +
                                                 "," + rect.Left + "," + rect.Top + ")");
 
@@ -713,11 +984,11 @@ namespace DjvuNet.Graphics
             int y0 = (dy > 0) ? dy : 0;
             int x1 = (dx < 0) ? (-dx) : 0;
             int y1 = (dy < 0) ? (-dy) : 0;
-            int w0 = ImageWidth - x0;
-            int w1 = source.ImageWidth - x1;
+            int w0 = Width - x0;
+            int w1 = source.Width - x1;
             int w = (w0 < w1) ? w0 : w1;
-            int h0 = ImageHeight - y0;
-            int h1 = source.ImageHeight - y1;
+            int h0 = Height - y0;
+            int h1 = source.Height - y1;
             int h = (h0 < h1) ? h0 : h1;
 
             if ((w > 0) && (h > 0))
@@ -767,14 +1038,14 @@ namespace DjvuNet.Graphics
         public virtual IPixelMap Init(int height, int width, IPixel color)
         {
             //    boolean needFill=false;
-            if ((height != ImageHeight) || (width != ImageWidth))
+            if ((height != Height) || (width != Width))
             {
                 Data = null;
-                ImageHeight = height;
-                ImageWidth = width;
+                Height = height;
+                Width = width;
             }
 
-            int npix = RowOffset(ImageHeight);
+            int npix = RowOffset(Height);
 
             if (npix > 0)
             {
@@ -815,7 +1086,7 @@ namespace DjvuNet.Graphics
         {
             Init(rect.Height, rect.Width, ((null)));
 
-            Rectangle rect2 = new Rectangle(0, 0, source.ImageWidth, source.ImageHeight);
+            Rectangle rect2 = new Rectangle(0, 0, source.Width, source.Height);
             rect2.Intersect(rect2, rect);
             rect2.Translate(-rect.Right, -rect.Bottom);
 
@@ -852,24 +1123,24 @@ namespace DjvuNet.Graphics
         /// </returns>
         public IPixelMap Init(IMap2 source)
         {
-            Init(source.ImageHeight, source.ImageWidth, ((null)));
+            Init(source.Height, source.Width, ((null)));
 
             var pixel = CreateGPixelReference(0);
 
-            if ((ImageHeight > 0) && (ImageWidth > 0))
+            if ((Height > 0) && (Width > 0))
             {
                 var refPixel = (source).CreateGPixelReference(0);
 
-                for (int y = 0; y < ImageHeight; y++)
+                for (int y = 0; y < Height; y++)
                 {
                     pixel.SetOffset(y, 0);
                     refPixel.SetOffset(y, 0);
 
                     if (!IsRampNeeded)
-                        for (int x = ImageWidth; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
+                        for (int x = Width; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
                             pixel.CopyFrom(refPixel);
                     else
-                        for (int x = ImageWidth; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
+                        for (int x = Width; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
                             pixel.CopyFrom(source.PixelRamp(refPixel));
                 }
             }
@@ -885,7 +1156,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         public int GetRowSize()
         {
-            return ImageWidth;
+            return Width;
         }
 
         /// <summary> Query the start offset of a row.
@@ -934,21 +1205,21 @@ namespace DjvuNet.Graphics
         /// color correction factor
         /// </param>
         /// <throws>  
-        /// ArgumentException if the specified bounds are not contained in the page 
+        /// <see cref="DjvuNet.Errors.DjvuArgumentOutOfRangeException"/>  if the specified bounds are not contained in the page 
         /// </throws>
         public unsafe virtual void Stencil(IBitmap mask, IPixelMap foregroundMap, int supersample, 
             int subsample, Rectangle bounds, double gamma)
         {
             // Check arguments
-            Rectangle rect = new Rectangle(0, 0, (foregroundMap.ImageWidth * supersample + subsample - 1) / subsample,
-                                   (foregroundMap.ImageHeight * supersample + subsample - 1) / subsample);
+            Rectangle rect = new Rectangle(0, 0, (foregroundMap.Width * supersample + subsample - 1) / subsample,
+                                   (foregroundMap.Height * supersample + subsample - 1) / subsample);
 
             if (bounds != null)
             {
                 if ((bounds.Right < rect.Right) || (bounds.Bottom < rect.Bottom) || (bounds.Left > rect.Left) ||
                     (bounds.Top > rect.Top))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(bounds),
+                    throw new DjvuArgumentOutOfRangeException(nameof(bounds),
                         "Rectangle out of bounds" + "bounds=(" + bounds.Right + "," + bounds.Bottom +
                                                 "," + bounds.Left + "," + bounds.Top + "),rect=(" + rect.Right + "," +
                                                 rect.Bottom + "," + rect.Left + "," + rect.Top + ")");
@@ -958,19 +1229,19 @@ namespace DjvuNet.Graphics
             }
 
             // Compute number of rows
-            int xrows = ImageHeight;
+            int xrows = Height;
 
-            if (mask.ImageHeight < xrows)
-                xrows = mask.ImageHeight;
+            if (mask.Height < xrows)
+                xrows = mask.Height;
 
             if (rect.Height < xrows)
                 xrows = rect.Height;
 
             // Compute number of columns
-            int xcolumns = ImageWidth;
+            int xcolumns = Width;
 
-            if (mask.ImageWidth < xcolumns)
-                xcolumns = mask.ImageWidth;
+            if (mask.Width < xcolumns)
+                xcolumns = mask.Width;
 
             if (rect.Width < xcolumns)
                 xcolumns = rect.Width;
@@ -1077,8 +1348,8 @@ namespace DjvuNet.Graphics
         /// </returns>
         public IMap2 Translate(int dx, int dy, IMap2 retval)
         {
-            if (!(retval is PixelMap) || (retval.ImageWidth != ImageWidth) || (retval.ImageHeight != ImageHeight))
-                retval = new PixelMap().Init(ImageHeight, ImageWidth, null);
+            if (!(retval is PixelMap) || (retval.Width != Width) || (retval.Height != Height))
+                retval = new PixelMap().Init(Height, Width, null);
 
             retval.Fill(this, -dx, -dy);
 
@@ -1101,8 +1372,8 @@ namespace DjvuNet.Graphics
         /// </returns>
         public virtual IPixelMap Init(sbyte[] data, int arows, int acolumns)
         {
-            ImageHeight = arows;
-            ImageWidth = acolumns;
+            Height = arows;
+            Width = acolumns;
             this.Data = data;
 
             return this;

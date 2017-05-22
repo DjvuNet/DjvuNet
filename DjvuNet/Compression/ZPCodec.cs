@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
@@ -522,7 +523,7 @@ namespace DjvuNet.Compression
                     }
                     else
                     {
-                        throw new InvalidOperationException($"{nameof(ZPCodec)} is not in encoding mode.");
+                        throw new DjvuInvalidOperationException($"{nameof(ZPCodec)} is not in encoding mode.");
                     }
                 }
             }
@@ -552,7 +553,7 @@ namespace DjvuNet.Compression
                     _NRun += 1;
                     break;
                 default:
-                    throw new InvalidOperationException($"Unexpected value of variable b during execution: {b}");
+                    throw new DjvuInvalidOperationException($"Unexpected value of variable b during execution: {b}");
             }
 #if ZPCODEC_BITCOUNT
             _bitcount += 1;
@@ -735,7 +736,7 @@ namespace DjvuNet.Compression
                     zByte = 255;
 
                     if (--_Delay < 1)
-                        throw new IOException("EOF");
+                        throw new DjvuEndOfStreamException("EOF");
                 }
                 buffer = (buffer << 8) | (byte) zByte;
             }

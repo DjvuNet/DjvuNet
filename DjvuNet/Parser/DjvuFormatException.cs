@@ -6,7 +6,9 @@ using System.Text;
 
 namespace DjvuNet
 {
+#if !NETSTANDARD2_0
     [Serializable]
+#endif
     public class DjvuFormatException : System.FormatException
     {
         //

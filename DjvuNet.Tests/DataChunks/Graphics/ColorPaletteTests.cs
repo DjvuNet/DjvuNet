@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Moq;
+using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks.Graphics.Tests
 {
@@ -15,7 +16,7 @@ namespace DjvuNet.DataChunks.Graphics.Tests
         [Fact()]
         public void ColorPaletteTest001()
         {
-            Assert.Throws<ArgumentNullException>("reader", () =>  new ColorPalette(null, null));
+            Assert.Throws<DjvuArgumentNullException>("reader", () =>  new ColorPalette(null, null));
         }
 
         [Fact()]
@@ -24,7 +25,7 @@ namespace DjvuNet.DataChunks.Graphics.Tests
             using (MemoryStream ms = new MemoryStream())
             using (DjvuReader reader = new DjvuReader(ms))
             {
-                Assert.Throws<ArgumentNullException>("parent", () => new ColorPalette(reader, null));
+                Assert.Throws<DjvuArgumentNullException>("parent", () => new ColorPalette(reader, null));
             }
         }
 

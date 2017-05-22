@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DjvuNet;
+using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks
 {
@@ -236,7 +237,7 @@ namespace DjvuNet.DataChunks
         public virtual void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
             if (writer == null)
-                throw new ArgumentNullException(nameof(writer));
+                throw new DjvuArgumentNullException(nameof(writer));
 
             AdjustAlignment(writer);
 

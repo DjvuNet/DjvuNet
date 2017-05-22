@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DjvuNet;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using DPixelMap = DjvuNet.Graphics.PixelMap;
@@ -8,6 +9,7 @@ using System.Drawing.Imaging;
 using DjvuNet.Tests.Xunit;
 using Moq;
 using DjvuNet.DataChunks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Tests
 {
@@ -21,7 +23,7 @@ namespace DjvuNet.Tests
             {
                 var retVal = new List<object[]>();
 
-                for(int i = 1; i <= 77; i++)
+                for (int i = 1; i <= 77; i++)
                 {
                     string pageText = "";
                     string path = null;
@@ -263,6 +265,31 @@ namespace DjvuNet.Tests
             }
         }
 
+        [Fact(Skip = "Bug in new implementation"), Trait("Category", "Skip")]
+        [Trait("Category", "Bugtrack")]
+        public void BuildPageImageTest000()
+        {
+            string file = Path.Combine(Util.ArtifactsPath, "test077C.djvu");
+            using (DjvuDocument doc = new DjvuDocument(file))
+            {
+                var page = (DjvuPage)doc.Pages[0];
+                using (Bitmap image = page.BuildPageImage())
+                {
+                    page.IsInverted = true;
+                    using (Bitmap imageInv = page.BuildPageImage())
+                    {
+                        Assert.NotNull(image);
+                        Assert.NotNull(imageInv);
+                        Color pix = image.GetPixel(0, 0);
+                        Color pixInv = image.GetPixel(0, 0);
+                        Assert.Equal(pix.R, 255 - pixInv.R);
+                        Assert.Equal(pix.G, 255 - pixInv.G);
+                        Assert.Equal(pix.B, 255 - pixInv.B);
+                    }
+                }
+            }
+        }
+
         [Fact]
         public void BuildPageImage001()
         {
@@ -368,6 +395,16 @@ namespace DjvuNet.Tests
             }
         }
 
+        [Fact()]
+        public void DisposeTest001()
+        {
+            DjvuPage page = new DjvuPage();
+            page.Dispose();
+            Assert.True(page.Disposed);
+            // Ensure does not throw
+            page.Dispose();
+        }
+
         [Fact]
         public void GetForegroundImage003()
         {
@@ -383,7 +420,11 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CFn.png"));
+#if !_APPVEYOR
+                    string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CFn.png");
+                    using (FileStream stream = new FileStream(file, FileMode.Create))
+                        image.Save(stream, ImageFormat.Png);
+#endif
                 }
             }
         }
@@ -403,7 +444,11 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png"));
+#if !_APPVEYOR
+                    string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png");
+                    using (FileStream stream = new FileStream(file, FileMode.Create))
+                        image.Save(stream, ImageFormat.Png);
+#endif
                 }
             }
         }
@@ -423,7 +468,11 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CMn.png"));
+#if !_APPVEYOR
+                    string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CMn.png");
+                    using (FileStream stream = new FileStream(file, FileMode.Create))
+                        image.Save(stream, ImageFormat.Png);
+#endif
                 }
             }
 
@@ -512,7 +561,7 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width/subsample, page.Height/subsample);
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width / subsample, page.Height / subsample);
                 Graphics.PixelMap map = new Graphics.PixelMap();
                 var result = page.GetBgPixmap(rect, subsample, 2.2, map);
                 Assert.NotNull(result);
@@ -535,13 +584,13 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                DjvuNet.Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width/12, page.Height/12);
+                DjvuNet.Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width / 12, page.Height / 12);
                 // By setting subsample 1, align 0 one gets AccessViolationException 
                 // subsample 0, align 0 - 10 gives ArgumentException
                 // subsample 12, align 0 gives NullReferenceException
                 // subsample 1 - 12, align 1, components list 1 - 5 or null is OK
                 var image = page.GetBitmapList(rect, 1, 1, null);
-                    //new List<int>(new int[] { 1, 2, 3, 4, 5 }));
+                //new List<int>(new int[] { 1, 2, 3, 4, 5 }));
                 Assert.NotNull(image);
 
                 var image2 = page.GetBitmapList(rect, 1, 1, new List<int>(new int[] { 1, 2, 3, 4, 5 }));
@@ -572,19 +621,19 @@ namespace DjvuNet.Tests
             {
                 List<object[]> retVal = new List<object[]>();
 
+                retVal.Add(new object[] { "Format8bppIndexed", 198659 });
                 retVal.Add(new object[] { "Format16bppRgb555", 135173 });
                 retVal.Add(new object[] { "Format16bppRgb565", 135174 });
+                retVal.Add(new object[] { "Format16bppGrayScale", 1052676 });
+                retVal.Add(new object[] { "Format16bppArgb1555", 397319 });
                 retVal.Add(new object[] { "Format24bppRgb", 137224 });
                 retVal.Add(new object[] { "Format32bppRgb", 139273 });
-                retVal.Add(new object[] { "Format8bppIndexed", 198659 });
-                retVal.Add(new object[] { "Format16bppArgb1555", 397319 });
                 retVal.Add(new object[] { "Format32bppPArgb", 925707 });
-                retVal.Add(new object[] { "Format16bppGrayScale", 1052676 });
+                retVal.Add(new object[] { "Format32bppArgb", 2498570 });
                 retVal.Add(new object[] { "Format48bppRgb", 1060876 });
                 retVal.Add(new object[] { "Format64bppPArgb", 1851406 });
-                retVal.Add(new object[] { "Canonical", 2097152 });
-                retVal.Add(new object[] { "Format32bppArgb", 2498570 });
                 retVal.Add(new object[] { "Format64bppArgb", 3424269 });
+                retVal.Add(new object[] { "Canonical", 2097152 });
 
                 return retVal;
             }
@@ -610,7 +659,7 @@ namespace DjvuNet.Tests
                 return retVal;
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(PixelSizeTestData))]
         public void GetPixelSize_Theory(string name, int format)
@@ -652,7 +701,7 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                Graphics.Rectangle rect = new Graphics.Rectangle(page.Width/2, 0, page.Width/2, page.Height);
+                Graphics.Rectangle rect = new Graphics.Rectangle(page.Width / 2, 0, page.Width / 2, page.Height);
                 var result = page.GetTextForLocation(rect);
                 Assert.NotNull(result);
                 Assert.IsType<string>(result);
@@ -904,44 +953,6 @@ namespace DjvuNet.Tests
         [Fact()]
         public void ResizeImage001()
         {
-            int wh = 128;
-            using (System.Drawing.Bitmap bitmap = new Bitmap(wh, wh))
-            {
-                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bitmap))
-                {
-                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(0xed, 0xed, 0xed)))
-                        g.FillRectangle(brush, 0, 0, bitmap.Width, bitmap.Height);
-
-                }
-
-                Bitmap newImage = DjvuPage.ResizeImage(bitmap, 2 * bitmap.Width, 2 * bitmap.Height);
-                Assert.Equal(2 * wh, newImage.Width);
-                Assert.Equal(2 * wh, newImage.Height);
-                Color c = newImage.GetPixel(newImage.Width / 2, newImage.Height / 2);
-                Assert.Equal(0xed, c.R);
-                Assert.Equal(0xed, c.G);
-                Assert.Equal(0xed, c.B);
-            }
-        }
-
-        [Fact()]
-        public void ResizeImage002()
-        {
-            Assert.Throws<ArgumentNullException>("srcImage", () => DjvuPage.ResizeImage(null, 128, 128));
-        }
-
-        [Fact()]
-        public void ResizeImage003()
-        {
-            using (System.Drawing.Bitmap bitmap = new Bitmap(128, 128))
-            {
-                Assert.Throws<ArgumentException>(() => DjvuPage.ResizeImage(bitmap, -128, 128));
-            }
-        }
-
-        [Fact()]
-        public void ResizeImage004()
-        {
             int pageCount = 0;
             using (DjvuDocument document = Util.GetTestDocument(4, out pageCount))
             {
@@ -955,5 +966,269 @@ namespace DjvuNet.Tests
                 }
             }
         }
+
+        [Fact()]
+        public void GetTextForLocationTest001()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(30, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.ActivePage;
+                string result = page.GetTextForLocation(new Rectangle(0, 0, page.Width, page.Height));
+                Assert.NotNull(result);
+                Assert.Equal(String.Empty, result);
+            }
+        }
+
+        [Fact()]
+        public void GetTextForLocationTest002()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.ActivePage;
+                string result = page.GetTextForLocation(new Rectangle(0, 0, page.Width, page.Height));
+                Assert.False(String.IsNullOrWhiteSpace(result));
+            }
+        }
+
+        [Fact()]
+        public void InvertColorTest001()
+        {
+            int color = 0x00ffffff;
+            int result = DjvuPage.InvertColor(color);
+            Assert.Equal(0x00000000, result);
+        }
+
+        [Fact()]
+        public void InvertColorTest002()
+        {
+            int color = 0x00000000;
+            int result = DjvuPage.InvertColor(color);
+            Assert.Equal(0x00ffffff, result);
+        }
+
+        [Fact()]
+        public void InvertColorTest003()
+        {
+            int color = 0x00f0f0f0;
+            int result = DjvuPage.InvertColor(color);
+            Assert.Equal(0x000f0f0f, result);
+        }
+
+        [Fact()]
+        public void GetBackgroundImage078()
+        {
+            string file = Path.Combine(Util.ArtifactsPath, "test078C.djvu");
+            using (DjvuDocument doc = new DjvuDocument(file))
+            {
+                var page = (DjvuPage)doc.Pages[0];
+                page.Height = 128;
+                page.Width = 128;
+                using (var bitmap = page.GetBackgroundImage(1))
+                {
+                    Assert.NotNull(bitmap);
+                    Assert.NotEqual(0, page.Width);
+                    Assert.Equal(page.Width, bitmap.Width);
+                    Assert.Equal(page.Height, bitmap.Height);
+                    var pixel = bitmap.GetPixel(0, 0);
+                    Assert.Equal(pixel.R, 255);
+                    Assert.Equal(pixel.G, 255);
+                    Assert.Equal(pixel.B, 255);
+                }
+            }
+        }
+
+        [Fact()]
+        public void GetBackgroundImage000()
+        {
+            var page = new DjvuPage();
+            page.Height = 128;
+            page.Width = 128;
+            using (var bitmap = page.GetBackgroundImage(1))
+            {
+                Assert.NotNull(bitmap);
+                Assert.NotEqual(0, page.Width);
+                Assert.Equal(page.Width, bitmap.Width);
+                Assert.Equal(page.Height, bitmap.Height);
+                var pixel = bitmap.GetPixel(0, 0);
+                Assert.Equal(pixel.R, 255);
+                Assert.Equal(pixel.G, 255);
+                Assert.Equal(pixel.B, 255);
+            }
+        }
+
+        [Fact()]
+        public void GetBgPixMap000()
+        {
+            var page = new DjvuPage();
+            Assert.Null(page.GetBgPixmap(new Graphics.Rectangle(), 1, 2.2, null));
+        }
+
+        [Fact()]
+        public void GetBgPixMap001()
+        {
+            var page = new DjvuPage();
+            page.Height = 128;
+            page.Width = 128;
+            Assert.Null(page.GetBgPixmap(new Graphics.Rectangle(), 1, 2.2, null));
+        }
+
+        [Fact()]
+        public void GetForegroundImage078()
+        {
+            string file = Path.Combine(Util.ArtifactsPath, "test078C.djvu");
+            using (DjvuDocument doc = new DjvuDocument(file))
+            {
+                var page = (DjvuPage)doc.Pages[0];
+                page.Height = 128;
+                page.Width = 128;
+                using (var bitmap = page.GetForegroundImage(1))
+                {
+                    Assert.NotNull(bitmap);
+                    Assert.NotEqual(0, page.Width);
+                    Assert.Equal(page.Width, bitmap.Width);
+                    Assert.Equal(page.Height, bitmap.Height);
+                    var pixel = bitmap.GetPixel(0, 0);
+                    Assert.Equal(pixel.R, 0);
+                    Assert.Equal(pixel.G, 0);
+                    Assert.Equal(pixel.B, 0);
+                }
+            }
+        }
+
+        [Fact()]
+        public void GetForegroundImage000()
+        {
+            var page = new DjvuPage();
+            page.Height = 128;
+            page.Width = 128;
+            using (var bitmap = page.GetForegroundImage(1))
+            {
+                Assert.NotNull(bitmap);
+                Assert.NotEqual(0, page.Width);
+                Assert.Equal(page.Width, bitmap.Width);
+                Assert.Equal(page.Height, bitmap.Height);
+                var pixel = bitmap.GetPixel(0, 0);
+                Assert.Equal(pixel.R, 0);
+                Assert.Equal(pixel.G, 0);
+                Assert.Equal(pixel.B, 0);
+            }
+        }
+
+        [Fact()]
+        public void GetTextImage078()
+        {
+            string file = Path.Combine(Util.ArtifactsPath, "test078C.djvu");
+            using (DjvuDocument doc = new DjvuDocument(file))
+            {
+                var page = (DjvuPage)doc.Pages[0];
+                page.Height = 128;
+                page.Width = 128;
+                using (var bitmap = page.GetTextImage(1))
+                {
+                    Assert.NotNull(bitmap);
+                    Assert.NotEqual(0, page.Width);
+                    Assert.Equal(page.Width, bitmap.Width);
+                    Assert.Equal(page.Height, bitmap.Height);
+                    var pixel = bitmap.GetPixel(0, 0);
+                    Assert.Equal(pixel.R, 0);
+                    Assert.Equal(pixel.G, 0);
+                    Assert.Equal(pixel.B, 0);
+                }
+            }
+        }
+
+        [Fact()]
+        public void GetTextImage000()
+        {
+            var page = new DjvuPage();
+            page.Height = 128;
+            page.Width = 128;
+            using (var bitmap = page.GetTextImage(1))
+            {
+                Assert.NotNull(bitmap);
+                Assert.NotEqual(0, page.Width);
+                Assert.Equal(page.Width, bitmap.Width);
+                Assert.Equal(page.Height, bitmap.Height);
+                var pixel = bitmap.GetPixel(0, 0);
+                Assert.Equal(pixel.R, 0);
+                Assert.Equal(pixel.G, 0);
+                Assert.Equal(pixel.B, 0);
+            }
+        }
+
+        [Fact()]
+        public void IsLegalBilevelTest001()
+        {
+            string file = Path.Combine(Util.ArtifactsPath, "test078C.djvu");
+            using (DjvuDocument doc = new DjvuDocument(file))
+            {
+                var page = (DjvuPage)doc.Pages[0];
+                Assert.False(page.IsLegalBilevel());
+            }
+        }
+
+        [Fact()]
+        public void IsLegalBilevelTest002()
+        {
+            var page = new DjvuPage();
+            Assert.False(page.IsLegalBilevel());
+        }
+
+        [Fact()]
+        public void IsLegalBilevelTest003()
+        {
+            var page = new DjvuPage();
+            page.Height = 128;
+            page.Width = 128;
+            Assert.False(page.IsLegalBilevel());
+        }
+
+        [Fact()]
+        public void IsLegalCompundTest001()
+        {
+            string file = Path.Combine(Util.ArtifactsPath, "test078C.djvu");
+            using (DjvuDocument doc = new DjvuDocument(file))
+            {
+                var page = (DjvuPage)doc.Pages[0];
+                Assert.False(page.IsLegalCompound());
+            }
+        }
+
+        [Fact()]
+        public void IsLegalCompundTest002()
+        {
+            var page = new DjvuPage();
+            Assert.False(page.IsLegalCompound());
+        }
+
+        [Fact()]
+        public void IsLegalCompundTest003()
+        {
+            var page = new DjvuPage();
+            page.Height = 128;
+            page.Width = 128;
+            Assert.False(page.IsLegalCompound());
+        }
+
+        [Fact()]
+        public void StencilTest001()
+        {
+            var page = new DjvuPage();
+            Assert.False(page.Stencil(null, new Graphics.Rectangle(), 1, 2.2));
+        }
+
+        [Fact()]
+        public void StencilTest002()
+        {
+            var page = new DjvuPage();
+            page.Height = 128;
+            page.Width = 128;
+            Assert.False(page.Stencil(null, new Graphics.Rectangle(), 1, 2.2));
+        }
+
     }
 }
