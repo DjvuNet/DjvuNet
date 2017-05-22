@@ -212,7 +212,7 @@ namespace DjvuNet.Graphics
         public void Scale(Rectangle srcRect, IPixelMap srcMap, Rectangle targetRect, IPixelMap targetMap)
         {
             // Parameter validation
-            if ((srcRect.Width != srcMap.ImageWidth) || (srcRect.Height != srcMap.ImageHeight))
+            if ((srcRect.Width != srcMap.Width) || (srcRect.Height != srcMap.Height))
                 throw new DjvuArgumentException("Invalid rectangle", nameof(srcRect));
 
             // Compute rectangles
@@ -224,7 +224,7 @@ namespace DjvuNet.Graphics
                 throw new DjvuArgumentException("Invalid rectangle", nameof(srcRect));
 
             // Adjust output pixmap
-            if ((targetRect.Width != (int)targetMap.ImageWidth) || (targetRect.Height != (int)targetMap.ImageHeight))
+            if ((targetRect.Width != (int)targetMap.Width) || (targetRect.Height != (int)targetMap.Height))
                 targetMap.Init(targetRect.Height, targetRect.Width, null);
 
             // Prepare temp stuff 

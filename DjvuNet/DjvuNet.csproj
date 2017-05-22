@@ -189,7 +189,6 @@
     <Compile Include="Graphics\PixelMapScaler.cs" />
     <Compile Include="Graphics\PixelReference.cs" />
     <Compile Include="Graphics\PixelMap.cs" />
-    <Compile Include="Graphics\PixelYCC.cs" />
     <Compile Include="Graphics\Rectangle.cs" />
     <Compile Include="IO\DjvuReader.cs" />
     <Compile Include="IO\DjvuWriter.cs" />
@@ -219,6 +218,7 @@
     <Compile Include="Parser\IDjvuRootElement.cs" />
     <Compile Include="Parser\IffParserException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Wavelet\IInterWaveImage.cs" />
     <Compile Include="Wavelet\ImageDataHeader.cs" />
     <Compile Include="Wavelet\ImageType.cs" />
     <Compile Include="Wavelet\InterWaveBitmap.cs" />

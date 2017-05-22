@@ -19,8 +19,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.NotNull(bmp);
             Assert.Equal(1, bmp.BytesPerPixel);
             Assert.True(bmp.IsRampNeeded);
-            Assert.Equal(0, bmp.ImageWidth);
-            Assert.Equal(0, bmp.ImageHeight);
+            Assert.Equal(0, bmp.Width);
+            Assert.Equal(0, bmp.Height);
             Assert.Null(bmp.Data);
         }
 
@@ -34,8 +34,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.NotNull(bmp);
             Assert.Equal(1, bmp.BytesPerPixel);
             Assert.True(bmp.IsRampNeeded);
-            Assert.Equal(width, bmp.ImageWidth);
-            Assert.Equal(height, bmp.ImageHeight);
+            Assert.Equal(width, bmp.Width);
+            Assert.Equal(height, bmp.Height);
             Assert.Equal((width + border) * height, bmp.Data.Length);
             Assert.Equal(height, bmp.Rows);
         }
@@ -50,15 +50,15 @@ namespace DjvuNet.Graphics.Tests
             Assert.NotNull(bmp);
             Assert.Equal(1, bmp.BytesPerPixel);
             Assert.True(bmp.IsRampNeeded);
-            Assert.Equal(width, bmp.ImageWidth);
-            Assert.Equal(height, bmp.ImageHeight);
+            Assert.Equal(width, bmp.Width);
+            Assert.Equal(height, bmp.Height);
             Assert.Equal((width + border) * height, bmp.Data.Length);
 
             Bitmap test = new Bitmap(bmp);
             Assert.Equal(1, test.BytesPerPixel);
             Assert.True(test.IsRampNeeded);
-            Assert.Equal(width, test.ImageWidth);
-            Assert.Equal(height, test.ImageHeight);
+            Assert.Equal(width, test.Width);
+            Assert.Equal(height, test.Height);
             Assert.Equal((width + border) * height, test.Data.Length);
             Assert.Equal(height, test.Rows);
         }
@@ -69,8 +69,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.NotNull(bmp);
             Assert.Equal(1, bmp.BytesPerPixel);
             Assert.True(bmp.IsRampNeeded);
-            Assert.Equal(0, bmp.ImageWidth);
-            Assert.Equal(0, bmp.ImageHeight);
+            Assert.Equal(0, bmp.Width);
+            Assert.Equal(0, bmp.Height);
             Assert.Null(bmp.Data);
             return bmp;
         }
@@ -79,8 +79,8 @@ namespace DjvuNet.Graphics.Tests
         {
             IBitmap bmp = CreateVerifyBitmap();
             bmp.Init(height, width, border);
-            Assert.Equal(width, bmp.ImageWidth);
-            Assert.Equal(height, bmp.ImageHeight);
+            Assert.Equal(width, bmp.Width);
+            Assert.Equal(height, bmp.Height);
             Assert.Equal(border, bmp.Border);
             return bmp;
         }
@@ -121,8 +121,8 @@ namespace DjvuNet.Graphics.Tests
 
             Assert.NotSame(bmp, bmp2);
 
-            Assert.Equal(width, bmp2.ImageWidth);
-            Assert.Equal(height, bmp2.ImageHeight);
+            Assert.Equal(width, bmp2.Width);
+            Assert.Equal(height, bmp2.Height);
             Assert.Equal(border, bmp2.Border);
             Assert.Equal(unchecked((byte)color), bmp.GetByteAt(width / 2));
             Assert.Equal(bmp.GetByteAt(width/2), bmp2.GetByteAt(width/2));
@@ -383,8 +383,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
-            Assert.Equal(128, bmp.ImageWidth);
-            Assert.Equal(128, bmp.ImageHeight);
+            Assert.Equal(128, bmp.Width);
+            Assert.Equal(128, bmp.Height);
             Assert.Equal(0, bmp.Border);
 
             bmp.Fill(-1);
@@ -425,8 +425,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
-            Assert.Equal(128, bmp.ImageWidth);
-            Assert.Equal(128, bmp.ImageHeight);
+            Assert.Equal(128, bmp.Width);
+            Assert.Equal(128, bmp.Height);
             Assert.Equal(0, bmp.Border);
 
             bmp.Fill(-1);
@@ -437,8 +437,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp2.IsRampNeeded);
 
             bmp2.Init(256, 256, 0);
-            Assert.Equal(256, bmp2.ImageWidth);
-            Assert.Equal(256, bmp2.ImageHeight);
+            Assert.Equal(256, bmp2.Width);
+            Assert.Equal(256, bmp2.Height);
             Assert.Equal(0, bmp2.Border);
 
             bmp2.Fill(127);
@@ -456,8 +456,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
-            Assert.Equal(128, bmp.ImageWidth);
-            Assert.Equal(128, bmp.ImageHeight);
+            Assert.Equal(128, bmp.Width);
+            Assert.Equal(128, bmp.Height);
             Assert.Equal(0, bmp.Border);
         }
 
@@ -469,8 +469,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
-            Assert.Equal(128, bmp.ImageWidth);
-            Assert.Equal(128, bmp.ImageHeight);
+            Assert.Equal(128, bmp.Width);
+            Assert.Equal(128, bmp.Height);
             Assert.Equal(0, bmp.Border);
 
             bmp.Fill(-1);
@@ -480,8 +480,8 @@ namespace DjvuNet.Graphics.Tests
             testBmp.Init(bmp, 0);
 
             Assert.NotSame(bmp, testBmp);
-            Assert.Equal(bmp.ImageWidth, testBmp.ImageWidth);
-            Assert.Equal(bmp.ImageHeight, testBmp.ImageHeight);
+            Assert.Equal(bmp.Width, testBmp.Width);
+            Assert.Equal(bmp.Height, testBmp.Height);
             Assert.Equal(bmp.GetByteAt(64), testBmp.GetByteAt(64));
         }
 
@@ -493,8 +493,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
-            Assert.Equal(128, bmp.ImageWidth);
-            Assert.Equal(128, bmp.ImageHeight);
+            Assert.Equal(128, bmp.Width);
+            Assert.Equal(128, bmp.Height);
             Assert.Equal(0, bmp.Border);
 
             bmp.Fill(-1);
@@ -512,8 +512,8 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
-            Assert.Equal(128, bmp.ImageWidth);
-            Assert.Equal(128, bmp.ImageHeight);
+            Assert.Equal(128, bmp.Width);
+            Assert.Equal(128, bmp.Height);
             Assert.Equal(0, bmp.Border);
 
             bmp.Fill(-1);
@@ -524,16 +524,16 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(bmp2.IsRampNeeded);
 
             bmp2.Init(256, 256, 0);
-            Assert.Equal(256, bmp2.ImageWidth);
-            Assert.Equal(256, bmp2.ImageHeight);
+            Assert.Equal(256, bmp2.Width);
+            Assert.Equal(256, bmp2.Height);
             Assert.Equal(0, bmp2.Border);
 
             bmp2.Fill(127);
             Assert.Equal(127, bmp2.GetByteAt(192));
 
             Bitmap bmp3 = (Bitmap) bmp.Translate(64, 64, bmp2);
-            Assert.Equal(128, bmp3.ImageWidth);
-            Assert.Equal(128, bmp3.ImageHeight);
+            Assert.Equal(128, bmp3.Width);
+            Assert.Equal(128, bmp3.Height);
             Assert.Equal(0, bmp3.GetByteAt(96));
             Assert.Equal(255, bmp3.GetByteAt(32));
         }

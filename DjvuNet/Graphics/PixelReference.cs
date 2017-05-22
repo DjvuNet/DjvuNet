@@ -324,7 +324,7 @@ namespace DjvuNet.Graphics
         /// </param>
         public void FillRgbPixels(int x, int y, int w, int h, int[] pixels, int off, int scansize)
         {
-            int yrev = _parent.ImageHeight - y;
+            int yrev = _parent.Height - y;
 
             if (!_parent.IsRampNeeded)
             {

@@ -722,9 +722,9 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void LoadTest011iw4()
+        public void LoadTest078()
         {
-            string file = Path.Combine(Util.ArtifactsPath, "img11.iw4");
+            string file = Path.Combine(Util.ArtifactsPath, "test078C.djvu");
             using (DjvuDocument document = new DjvuDocument())
             {
                 int hash = file.GetHashCode();
