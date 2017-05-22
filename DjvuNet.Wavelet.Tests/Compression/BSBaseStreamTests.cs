@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Moq;
 using System.IO;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression.Tests
 {
@@ -107,7 +108,7 @@ namespace DjvuNet.Compression.Tests
                 var bsStream = bsStreamMock.Object;
                 bsStream.BaseStream = null;
 
-                Assert.Throws<InvalidOperationException>(() => bsStream.Seek(bufferLength, SeekOrigin.Begin));
+                Assert.Throws<DjvuInvalidOperationException>(() => bsStream.Seek(bufferLength, SeekOrigin.Begin));
 
                 bsStream.BaseStream = stream;
                 bsStream.Seek(bufferLength, SeekOrigin.Begin);
@@ -128,7 +129,7 @@ namespace DjvuNet.Compression.Tests
                 var bsStream = bsStreamMock.Object;
                 bsStream.BaseStream = null;
 
-                Assert.Throws<InvalidOperationException>(() => bsStream.SetLength(bufferLength * 2));
+                Assert.Throws<DjvuInvalidOperationException>(() => bsStream.SetLength(bufferLength * 2));
             }
         }
 

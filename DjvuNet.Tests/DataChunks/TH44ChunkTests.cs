@@ -109,8 +109,8 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.NotNull(img2);
                 Assert.Same(img1, img2);
 
-                Assert.Equal(thumb.Width, img1.ImageWidth);
-                Assert.Equal(thumb.Height, img1.ImageHeight);
+                Assert.Equal(thumb.Width, img1.Width);
+                Assert.Equal(thumb.Height, img1.Height);
             }
         }
 
@@ -156,7 +156,7 @@ namespace DjvuNet.DataChunks.Tests
                 var image = th.Image;
                 Assert.NotNull(image);
                 Assert.IsType<PixelMap>(image);
-                Assert.True(image.ImageWidth >= 64 && image.ImageWidth < 512);
+                Assert.True(image.Width >= 64 && image.Width < 512);
             }
         }
     }

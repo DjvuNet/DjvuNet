@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Tests;
 using System.IO;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression.Tests
 {
@@ -127,31 +128,31 @@ namespace DjvuNet.Compression.Tests
         {
             BlockSort bSort = new BlockSort();
             int markerpos = 0;
-            Assert.Throws<InvalidOperationException>(() => bSort.Sort(ref markerpos));
+            Assert.Throws<DjvuInvalidOperationException>(() => bSort.Sort(ref markerpos));
         }
 
         [Fact()]
         public void BlockSortTest002()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("psize", () => new BlockSort(new byte[1], 0));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("psize", () => new BlockSort(new byte[1], 0));
         }
 
         [Fact()]
         public void BlockSortTest003()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("psize", () => new BlockSort(new byte[1], 0x1000000));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("psize", () => new BlockSort(new byte[1], 0x1000000));
         }
 
         [Fact()]
         public void BlockSortTest004()
         {
-            Assert.Throws<ArgumentNullException>("pdata", () => new BlockSort(null, 1));
+            Assert.Throws<DjvuArgumentNullException>("pdata", () => new BlockSort(null, 1));
         }
 
         [Fact()]
         public void BlockSortTest005()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("pdata", () => new BlockSort(new byte[0], 10));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("pdata", () => new BlockSort(new byte[0], 10));
         }
 
         [Fact()]
@@ -172,14 +173,14 @@ namespace DjvuNet.Compression.Tests
         public void BlockSortDataTest001()
         {
             int markpos = 0;
-            Assert.Throws<ArgumentOutOfRangeException>("psize", () => BlockSort.BlockSortData(new byte[1], 10, ref markpos));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("psize", () => BlockSort.BlockSortData(new byte[1], 10, ref markpos));
         }
 
         [Fact()]
         public void BlockSortDataTest002()
         {
             int markpos = 0;
-            Assert.Throws<InvalidOperationException>(() => BlockSort.BlockSortData(new byte[] { 1, 2, 3, 4, 5 }, 5, ref markpos));
+            Assert.Throws<DjvuInvalidOperationException>(() => BlockSort.BlockSortData(new byte[] { 1, 2, 3, 4, 5 }, 5, ref markpos));
         }
 
         [Fact()]

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.Configuration;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
@@ -20,7 +20,7 @@ namespace DjvuNet.Compression
         public override long Position
         {
             get { return base.Position; }
-            set { throw new IOException("Unsupported operation."); }
+            set { throw new DjvuNotSupportedException("Unsupported operation."); }
         }
 
         protected virtual long PositionInput { get; set; }
@@ -49,7 +49,7 @@ namespace DjvuNet.Compression
         public override BSBaseStream Init(Stream dataStream)
         {
             if (!dataStream.CanWrite)
-                throw new ArgumentException("Stream was not writable.", nameof(dataStream));
+                throw new DjvuArgumentException("Stream was not writable.", nameof(dataStream));
 
             BaseStream = dataStream;
             Coder = DjvuSettings.Current.CoderFactory.CreateCoder(dataStream, true);
@@ -60,27 +60,18 @@ namespace DjvuNet.Compression
         {
             int encoding = (blockSize < MinBlock) ? MinBlock : blockSize;
             if (encoding > MaxBlock)
-                throw new ArgumentException("Block size exceeds maximum value.", nameof(blockSize));
+                throw new DjvuArgumentException("Block size exceeds maximum value.", nameof(blockSize));
 
             _BlockSize = encoding * 1024;
         }
 
 
-#if !NETSTANDARD2_0
         public override void Close()
-#else
-        public void Close()
-#endif
-
         {
             Flush();
             EncodeRaw(Coder, 24, 0);
             Coder.Dispose();
-#if !NETSTANDARD2_0
             base.Close();
-#else
-            Dispose(true);
-#endif
         }
 
         internal static void EncodeRaw(IDataCoder coder, int bits, int x)
@@ -318,7 +309,7 @@ namespace DjvuNet.Compression
             if (BlockOffset > 0)
             {
                 if (!(BlockOffset < _BlockSize))
-                    throw new InvalidOperationException();
+                    throw new DjvuInvalidOperationException();
 
                 for (int i = 0; i < Overflow; i++)
                     _Data[BlockOffset + i] = 0;
@@ -372,22 +363,22 @@ namespace DjvuNet.Compression
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            throw new IOException("Unsupported operation.");
+            throw new DjvuNotSupportedException("Unsupported operation.");
         }
 
         public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            throw new IOException("Unsupported operation.");
+            throw new DjvuNotSupportedException("Unsupported operation.");
         }
 
         public override int ReadByte()
         {
-            throw new IOException("Unsupported operation.");
+            throw new DjvuNotSupportedException("Unsupported operation.");
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            throw new IOException("Unsupported operation.");
+            throw new DjvuNotSupportedException("Unsupported operation.");
         }
 
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)

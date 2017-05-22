@@ -13,9 +13,9 @@ namespace DjvuNet.Graphics
 
         int GreenOffset { get; set; }
 
-        int ImageHeight { get; set; }
+        int Height { get; set; }
 
-        int ImageWidth { get; set; }
+        int Width { get; set; }
 
         bool IsRampNeeded { get; set; }
 

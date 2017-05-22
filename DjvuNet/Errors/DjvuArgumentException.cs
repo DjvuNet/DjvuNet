@@ -31,10 +31,12 @@ namespace DjvuNet.Errors
         {
         }
 
+#if !NETSTANDARD2_0
         public DjvuArgumentException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base (info, context)
         {
         }
+#endif
 
     }
 }

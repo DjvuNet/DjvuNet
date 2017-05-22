@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -124,7 +125,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetHorzRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetHorzRatio(1, 1));
         }
 
         [Fact()]
@@ -137,7 +138,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetHorzRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetHorzRatio(1, 1));
         }
 
         [Fact()]
@@ -150,7 +151,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetHorzRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetHorzRatio(1, 1));
         }
 
         [Fact()]
@@ -163,7 +164,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetHorzRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetHorzRatio(1, 1));
         }
 
         [Fact()]
@@ -176,7 +177,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetHorzRatio(0, 9));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.SetHorzRatio(0, 9));
         }
 
         [Fact()]
@@ -189,7 +190,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetHorzRatio(16, 0));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.SetHorzRatio(16, 0));
         }
 
         [Fact()]
@@ -215,7 +216,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetVertRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetVertRatio(1, 1));
         }
 
         [Fact()]
@@ -228,7 +229,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetVertRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetVertRatio(1, 1));
         }
 
         [Fact()]
@@ -241,7 +242,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetVertRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetVertRatio(1, 1));
         }
 
         [Fact()]
@@ -254,7 +255,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetVertRatio(1, 1));
+            Assert.Throws<DjvuInvalidOperationException>(() => sclr.SetVertRatio(1, 1));
         }
 
         [Fact()]
@@ -267,7 +268,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetVertRatio(0, 9));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.SetVertRatio(0, 9));
         }
 
         [Fact()]
@@ -280,7 +281,7 @@ namespace DjvuNet.Graphics.Tests
 
             var sclr = CreateVerifyPixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
 
-            Assert.Throws<FormatException>(() => sclr.SetVertRatio(16, 0));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.SetVertRatio(16, 0));
         }
 
         [Fact()]
@@ -319,7 +320,7 @@ namespace DjvuNet.Graphics.Tests
                 
             };
 
-            Assert.Throws<FormatException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
         }
 
         [Fact()]
@@ -345,7 +346,7 @@ namespace DjvuNet.Graphics.Tests
 
             };
 
-            Assert.Throws<FormatException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
         }
 
         [Fact()]
@@ -371,7 +372,7 @@ namespace DjvuNet.Graphics.Tests
 
             };
 
-            Assert.Throws<FormatException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
         }
 
         [Fact()]
@@ -397,7 +398,7 @@ namespace DjvuNet.Graphics.Tests
 
             };
 
-            Assert.Throws<FormatException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
         }
 
         [Fact()]
@@ -483,7 +484,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -515,7 +516,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -549,7 +550,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -583,7 +584,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -617,7 +618,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -651,7 +652,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -753,7 +754,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -785,7 +786,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -817,7 +818,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]
@@ -849,7 +850,7 @@ namespace DjvuNet.Graphics.Tests
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
             IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
-            Assert.Throws<FormatException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
+            Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
 
         [Fact()]

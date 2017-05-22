@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Errors;
@@ -8,7 +9,7 @@ using DjvuNet.Graphics;
 
 namespace DjvuNet.Wavelet
 {
-    public class InterWaveImage
+    public class InterWaveImage : IInterWaveImage
     {
         #region Fields
 
@@ -17,10 +18,62 @@ namespace DjvuNet.Wavelet
         internal InterWaveMap _CbMap;
         internal InterWaveMap _CrMap;
         internal int _CSerial;
-        internal int _CSlice;
+        internal int _CSlices;
         internal int _CBytes;
 
         #endregion Fields
+
+        #region Properties
+
+        public int Bytes
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _CBytes; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _CBytes = value; }
+        }
+
+        public int Serial
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _CSerial; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _CSerial = value; }
+        }
+
+        public int Slices
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _CSlices; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            internal set { _CSlices = value; }
+        }
+
+        public float DbFrac
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _dBFrac; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _dBFrac = value; }
+        }
+
+        public int Height
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (_YMap != null) ? _YMap.Height : 0; }
+        }
+
+        public int Width
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return (_YMap != null) ? _YMap.Width : 0; }
+        }
+
+        #endregion Properties
 
         #region Constructors
 
@@ -33,22 +86,30 @@ namespace DjvuNet.Wavelet
 
         #region Methods
 
-        public static InterWaveImage CreateDecoder(ImageType imgType = ImageType.Color)
+        public static InterWaveImage CreateDecoder(ImageType imageType = ImageType.Color)
         {
-            switch (imgType)
+            switch (imageType)
             {
                 case ImageType.Color:
-                    return new InterWavePixelMap();
+                    return new InterWavePixelMapDecoder();
                 case ImageType.Gray:
-                    return new InterWaveBitmap();
+                    return new InterWaveBitmapDecoder();
                 default:
-                    throw new DjvuArgumentException($"Unsupported image type {imgType}", nameof(imgType));
+                    throw new DjvuArgumentException($"Unsupported image type {imageType}", nameof(imageType));
             }
         }
 
-        public static InterWaveImage CreateEncoder(ImageType imgType = ImageType.Color)
+        public static InterWaveImage CreateEncoder(ImageType imageType = ImageType.Color)
         {
-            throw new NotImplementedException();
+            switch (imageType)
+            {
+                case ImageType.Color:
+                    return new InterWavePixelMapEncoder();
+                case ImageType.Gray:
+                    return new InterWaveBitmapEncoder();
+                default:
+                    throw new DjvuArgumentException($"Unsupported image type {imageType}", nameof(imageType));
+            }
         }
 
         public static InterWaveImage CreateEncoder(IBitmap bm, IBitmap mask = null, YCrCbMode mode = YCrCbMode.Normal)

@@ -30,7 +30,7 @@ namespace DjvuNet.Wavelet
         {
             if (_YDecoder == null)
             {
-                _CSlice = _CSerial = 0;
+                _CSlices = _CSerial = 0;
                 _YMap = null;
             }
 
@@ -41,7 +41,7 @@ namespace DjvuNet.Wavelet
                 throw new DjvuFormatException(
                     $"{nameof(IInterWavePixelMap)} received out of order data. Expected serial number {_CSerial}, actual {serial}");
 
-            int nslices = _CSlice + slices;
+            int nslices = _CSlices + slices;
 
             if (_CSerial == 0)
             {
@@ -89,11 +89,11 @@ namespace DjvuNet.Wavelet
 
             IDataCoder coder = DjvuSettings.Current.CoderFactory.CreateCoder(reader.BaseStream, false);
 
-            for (int flag = 1; flag != 0 && _CSlice < nslices; _CSlice++)
+            for (int flag = 1; flag != 0 && _CSlices < nslices; _CSlices++)
             {
                 flag = _YDecoder.CodeSlice(coder);
 
-                if (_CrDecoder != null && _CbDecoder != null && _CrCbDelay <= _CSlice)
+                if (_CrDecoder != null && _CbDecoder != null && _CrCbDelay <= _CSlices)
                 {
                     flag |= _CbDecoder.CodeSlice(coder);
                     flag |= _CrDecoder.CodeSlice(coder);

@@ -90,11 +90,11 @@ namespace DjvuNet.Wavelet
                 for (int i = 0; i < 16; i++)
                 {
                     int threshold = _QuantLow[i];
-                    _CoefficientState[i] = ZERO;
+                    _CoefficientState[i] = Zero;
 
                     if (threshold > 0 && threshold < 0x8000)
                     {
-                        _CoefficientState[i] = UNK;
+                        _CoefficientState[i] = Unk;
                         is_null = false;
                     }
                 }
@@ -134,16 +134,16 @@ namespace DjvuNet.Wavelet
                     int bstatetmp = 0;
                     if (null != pcoeff)
                     {
-                        bstatetmp = UNK;
+                        bstatetmp = Unk;
                         // cstate[i] is not used and does not need initialization
                     }
                     else if (null != epcoeff)
                     {
                         for (int i = 0; i < 16; i++)
                         {
-                            int cstatetmp = UNK;
+                            int cstatetmp = Unk;
                             if ((int)(pcoeff[i]) >= thres || (int)(pcoeff[i]) <= -thres)
-                                cstatetmp = NEW | UNK;
+                                cstatetmp = New | Unk;
 
                             cstate[i] = (sbyte) cstatetmp;
                             bstatetmp |= cstatetmp;
@@ -153,15 +153,15 @@ namespace DjvuNet.Wavelet
                     {
                         for (int i = 0; i < 16; i++)
                         {
-                            int cstatetmp = UNK;
+                            int cstatetmp = Unk;
 
                             if (epcoeff[i] != 0)
                             {
-                                cstatetmp = ACTIVE;
+                                cstatetmp = Active;
                             }
                             else if ((int)(pcoeff[i]) >= thres || (int)(pcoeff[i]) <= -thres)
                             {
-                                cstatetmp = NEW | UNK;
+                                cstatetmp = New | Unk;
                             }
                             cstate[i] = (sbyte) cstatetmp;
                             bstatetmp |= cstatetmp;
@@ -183,16 +183,16 @@ namespace DjvuNet.Wavelet
                 {
                     int thres = _QuantLow[i];
                     int cstatetmp = cstate[i];
-                    if (cstatetmp != ZERO)
+                    if (cstatetmp != Zero)
                     {
-                        cstatetmp = UNK;
+                        cstatetmp = Unk;
                         if (epcoeff[i] != 0)
                         {
-                            cstatetmp = ACTIVE;
+                            cstatetmp = Active;
                         }
                         else if ((int)(pcoeff[i]) >= thres || (int)(pcoeff[i]) <= -thres)
                         {
-                            cstatetmp = NEW | UNK;
+                            cstatetmp = New | Unk;
                         }
                     }
                     cstate[i] = (sbyte) cstatetmp;
@@ -220,21 +220,21 @@ namespace DjvuNet.Wavelet
             int bbstate = EncodePrepare(band, fbucket, nbucket, blk, eblk);
 
             // code root bit
-            if ((nbucket < 16) || (bbstate & ACTIVE) != 0)
+            if ((nbucket < 16) || (bbstate & Active) != 0)
             {
-                bbstate |= NEW;
+                bbstate |= New;
             }
-            else if ((bbstate & UNK) != 0)
+            else if ((bbstate & Unk) != 0)
             {
-                zp.Encoder((bbstate & NEW) != 0 ? 1 : 0, ref _CtxRoot);
+                zp.Encoder((bbstate & New) != 0 ? 1 : 0, ref _CtxRoot);
             }
 
             // code bucket bits
-            if ((bbstate & NEW) != 0)
+            if ((bbstate & New) != 0)
                 for (int buckno = 0; buckno < nbucket; buckno++)
                 {
                     // Code bucket bit
-                    if ((_BucketState[buckno] & UNK) != 0)
+                    if ((_BucketState[buckno] & Unk) != 0)
                     {
                         // Context
                         int ctx = 0;
@@ -257,23 +257,23 @@ namespace DjvuNet.Wavelet
                             }
                         }
 
-                        if ((bbstate & ACTIVE) != 0)
+                        if ((bbstate & Active) != 0)
                             ctx |= 4;
 
                         // Code
-                        zp.Encoder((_BucketState[buckno] & NEW) != 0 ? 1 : 0, ref _CtxBucket[band][ctx]);
+                        zp.Encoder((_BucketState[buckno] & New) != 0 ? 1 : 0, ref _CtxBucket[band][ctx]);
                     }
                 }
 
             // code new active coefficient (with their sign)
-            if ((bbstate & NEW) != 0)
+            if ((bbstate & New) != 0)
             {
                 int thres = _QuantHigh[band];
                 sbyte[] cstate = _CoefficientState;
 
                 for (int buckno = 0, cidx = 0; buckno < nbucket; buckno++, cidx += 16)
                 {
-                    if ((_BucketState[buckno] & NEW) != 0)
+                    if ((_BucketState[buckno] & New) != 0)
                     {
                         int i;
                         int gotcha = 0;
@@ -281,7 +281,7 @@ namespace DjvuNet.Wavelet
 
                         for (i = 0; i < 16; i++)
                         {
-                            if ((cstate[i + cidx] & UNK) != 0)
+                            if ((cstate[i + cidx] & Unk) != 0)
                                 gotcha += 1;
                         }
 
@@ -291,7 +291,7 @@ namespace DjvuNet.Wavelet
                         // iterate within bucket
                         for (i = 0; i < 16; i++)
                         {
-                            if ((cstate[i] & UNK) != 0)
+                            if ((cstate[i] & Unk) != 0)
                             {
                                 // Prepare context
                                 int ctx = 0;
@@ -301,13 +301,13 @@ namespace DjvuNet.Wavelet
                                 else
                                     ctx = gotcha;
 
-                                if ((_BucketState[buckno] & ACTIVE) != 0)
+                                if ((_BucketState[buckno] & Active) != 0)
                                     ctx |= 8;
 
                                 // Code
-                                zp.Encoder((cstate[i] & NEW) != 0 ? 1 : 0, ref _CtxStart[ctx]);
+                                zp.Encoder((cstate[i] & New) != 0 ? 1 : 0, ref _CtxStart[ctx]);
 
-                                if ((cstate[i] & NEW) != 0)
+                                if ((cstate[i] & New) != 0)
                                 {
                                     // Code sign
                                     zp.IWEncoder((pcoeff[i] < 0) ? true : false);
@@ -319,7 +319,7 @@ namespace DjvuNet.Wavelet
                                     epcoeff[i] = (short)(thres + (thres >> 1));
                                 }
 
-                                if ((cstate[i] & NEW) != 0)
+                                if ((cstate[i] & New) != 0)
                                     gotcha = 0;
                                 else if (gotcha > 0)
                                     gotcha -= 1;
@@ -330,21 +330,21 @@ namespace DjvuNet.Wavelet
             }
 
             // code mantissa bits
-            if ((bbstate & ACTIVE) != 0)
+            if ((bbstate & Active) != 0)
             {
                 int thres = _QuantHigh[band];
                 sbyte[] cstate = _CoefficientState;
 
                 for (int buckno = 0, cidx = 0; buckno < nbucket; buckno++, cidx += 16)
                 {
-                    if ((_BucketState[buckno] & ACTIVE) != 0)
+                    if ((_BucketState[buckno] & Active) != 0)
                     {
                         short[] pcoeff = blk.GetBlock(fbucket + buckno);
                         short[] epcoeff = eblk.GetInitializedBlock(fbucket + buckno);
 
                         for (int i = 0; i < 16; i++)
                         {
-                            if ((cstate[i] & ACTIVE) != 0)
+                            if ((cstate[i] & Active) != 0)
                             {
                                 // get coefficient
                                 int coeff = pcoeff[i];

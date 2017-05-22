@@ -10,6 +10,7 @@ using DjvuNet.Utilities;
 using Moq;
 using DjvuNet.Tests;
 using System.IO;
+using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -75,7 +76,7 @@ namespace DjvuNet.DataChunks.Tests
             Mock<DjvuFormElement> formMock = new Mock<DjvuFormElement> { CallBase = true };
             Mock<DjvuFormElement> formMock1 = new Mock<DjvuFormElement> { CallBase = true };
 
-            Assert.Throws<InvalidOperationException>(() => formMock.Object.FirstSibling = formMock1.Object);
+            Assert.Throws<DjvuInvalidOperationException>(() => formMock.Object.FirstSibling = formMock1.Object);
         }
 
         [Fact]
@@ -85,7 +86,7 @@ namespace DjvuNet.DataChunks.Tests
             Mock<DjvuFormElement> formMock1 = new Mock<DjvuFormElement> { CallBase = true };
             formMock.Object.Parent = formMock1.Object;
 
-            Assert.Throws<InvalidOperationException>(() => formMock.Object.FirstSibling = null);
+            Assert.Throws<DjvuInvalidOperationException>(() => formMock.Object.FirstSibling = null);
         }
 
         [Fact]
@@ -135,7 +136,7 @@ namespace DjvuNet.DataChunks.Tests
             Mock<DjvuFormElement> formMock = new Mock<DjvuFormElement> { CallBase = true };
             Mock<DjvuFormElement> formMock1 = new Mock<DjvuFormElement> { CallBase = true };
 
-            Assert.Throws<InvalidOperationException>(() => formMock.Object.LastSibling = formMock1.Object);
+            Assert.Throws<DjvuInvalidOperationException>(() => formMock.Object.LastSibling = formMock1.Object);
         }
 
         [Fact]
@@ -145,7 +146,7 @@ namespace DjvuNet.DataChunks.Tests
             Mock<DjvuFormElement> formMock1 = new Mock<DjvuFormElement> { CallBase = true };
             formMock.Object.Parent = formMock1.Object;
 
-            Assert.Throws<InvalidOperationException>(() => formMock.Object.LastSibling = null);
+            Assert.Throws<DjvuInvalidOperationException>(() => formMock.Object.LastSibling = null);
         }
 
         [Fact]
@@ -492,7 +493,7 @@ namespace DjvuNet.DataChunks.Tests
         public void WriteDataTest004()
         {
             Mock<DjvuFormElement> formMock = new Mock<DjvuFormElement> { CallBase = true };
-            Assert.Throws<ArgumentNullException>("writer", () => formMock.Object.WriteData(null, true));
+            Assert.Throws<DjvuArgumentNullException>("writer", () => formMock.Object.WriteData(null, true));
         }
 
     }

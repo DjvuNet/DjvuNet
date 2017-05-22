@@ -1,12 +1,10 @@
-﻿using Xunit;
-using DjvuNet;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Moq;
 using System.Drawing;
+using DjvuNet;
+using DjvuNet.Errors;
+using Moq;
+using Xunit;
 
 namespace DjvuNet.Tests
 {
@@ -23,7 +21,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void DjvuImageTest002()
         {
-            Assert.Throws<ArgumentNullException>("page", () => new DjvuImage(null));
+            Assert.Throws<DjvuArgumentNullException>("page", () => new DjvuImage(null));
         }
 
         [Fact()]
@@ -78,5 +76,44 @@ namespace DjvuNet.Tests
                 Assert.Equal<byte>(0xff, c.R);
             }
         }
+
+        [Fact()]
+        public void ResizeImage001()
+        {
+            int wh = 128;
+            using (System.Drawing.Bitmap bitmap = new Bitmap(wh, wh))
+            {
+                using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bitmap))
+                {
+                    using (SolidBrush brush = new SolidBrush(Color.FromArgb(0xed, 0xed, 0xed)))
+                        g.FillRectangle(brush, 0, 0, bitmap.Width, bitmap.Height);
+
+                }
+
+                Bitmap newImage = DjvuImage.ResizeImage(bitmap, 2 * bitmap.Width, 2 * bitmap.Height);
+                Assert.Equal(2 * wh, newImage.Width);
+                Assert.Equal(2 * wh, newImage.Height);
+                Color c = newImage.GetPixel(newImage.Width / 2, newImage.Height / 2);
+                Assert.Equal(0xed, c.R);
+                Assert.Equal(0xed, c.G);
+                Assert.Equal(0xed, c.B);
+            }
+        }
+
+        [Fact()]
+        public void ResizeImage002()
+        {
+            Assert.Throws<DjvuArgumentNullException>("srcImage", () => DjvuImage.ResizeImage(null, 128, 128));
+        }
+
+        [Fact()]
+        public void ResizeImage003()
+        {
+            using (System.Drawing.Bitmap bitmap = new Bitmap(128, 128))
+            {
+                Assert.Throws<DjvuArgumentException>(() => DjvuImage.ResizeImage(bitmap, -128, 128));
+            }
+        }
+
     }
 }

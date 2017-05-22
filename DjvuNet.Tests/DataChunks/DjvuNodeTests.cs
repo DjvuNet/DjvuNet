@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DataChunks;
+using DjvuNet.Errors;
 using Moq;
 using Xunit;
 
@@ -138,7 +139,7 @@ namespace DjvuNet.DataChunks.Tests
                 byte[] buffer = new byte[nodeMock.Object.Length];
                 nodeMock.Setup<byte[]>(x => x.ChunkData).Returns(buffer);
 
-                Assert.Throws<ArgumentNullException>("writer", () => nodeMock.Object.WriteData(null));
+                Assert.Throws<DjvuArgumentNullException>("writer", () => nodeMock.Object.WriteData(null));
 
             }
         }

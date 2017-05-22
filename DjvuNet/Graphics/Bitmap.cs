@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -39,14 +40,14 @@ namespace DjvuNet.Graphics
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (value != ImageHeight)
+                if (value != Height)
                 {
-                    ImageHeight = value;
-                    _maxRowOffset = RowOffset(ImageHeight);
+                    Height = value;
+                    _maxRowOffset = RowOffset(Height);
                 }
             }
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return ImageHeight; }
+            get { return Height; }
         }
 
         #region Grays
@@ -67,7 +68,7 @@ namespace DjvuNet.Graphics
                 if (_grays != value)
                 {
                     if ((value < 2) || (value > 256))
-                        throw new ArgumentOutOfRangeException(nameof(value),
+                        throw new DjvuArgumentOutOfRangeException(nameof(value),
                             "Gray levels outside of range");
 
                     _grays = value;
@@ -96,7 +97,7 @@ namespace DjvuNet.Graphics
                 if (_border != value)
                 {
                     _border = value;
-                    _maxRowOffset = RowOffset(ImageHeight);
+                    _maxRowOffset = RowOffset(Height);
                 }
             }
         }
@@ -168,7 +169,7 @@ namespace DjvuNet.Graphics
                 if (_bytesPerRow != value)
                 {
                     _bytesPerRow = value;
-                    _maxRowOffset = RowOffset(ImageHeight);
+                    _maxRowOffset = RowOffset(Height);
                 }
             }
         }
@@ -242,9 +243,9 @@ namespace DjvuNet.Graphics
                 GreenOffset = GreenOffset,
                 _maxRowOffset = _maxRowOffset,
                 BytesPerPixel = BytesPerPixel,
-                ImageWidth = ImageWidth,
+                Width = Width,
                 IsRampNeeded = IsRampNeeded,
-                ImageHeight = ImageHeight,
+                Height = Height,
                 Properties = Properties,
                 _rampData = _rampData,
                 RedOffset = RedOffset,
@@ -328,8 +329,8 @@ namespace DjvuNet.Graphics
             if (subsample == 1)
                 return InsertMap(bm, xh, yh, true);
 
-            if ((xh >= (ImageWidth * subsample)) || (yh >= (ImageHeight * subsample)) || ((xh + bm.ImageWidth) < 0) ||
-                ((yh + bm.ImageHeight) < 0))
+            if ((xh >= (Width * subsample)) || (yh >= (Height * subsample)) || ((xh + bm.Width) < 0) ||
+                ((yh + bm.Height) < 0))
             {
                 return false;
             }
@@ -357,18 +358,18 @@ namespace DjvuNet.Graphics
                 int sr = 0;
                 int idx = 0;
 
-                for (; sr < bm.ImageHeight; sr++)
+                for (; sr < bm.Height; sr++)
                 {
-                    if ((dr >= 0) && (dr < ImageHeight))
+                    if ((dr >= 0) && (dr < Height))
                     {
                         int dc = zdc;
                         int dc1 = zdc1;
                         qidx = bm.RowOffset(sr);
                         pidx = RowOffset(dr);
 
-                        for (int sc = 0; sc < bm.ImageWidth; sc++)
+                        for (int sc = 0; sc < bm.Width; sc++)
                         {
-                            if ((dc >= 0) && (dc < ImageWidth))
+                            if ((dc >= 0) && (dc < Width))
                                 Data[pidx + dc] = (sbyte)(Data[pidx + dc] + bm.Data[qidx + sc]);
 
                             if (++dc1 >= subsample)
@@ -432,11 +433,11 @@ namespace DjvuNet.Graphics
             int idx = 0;
 
             sbyte v = (sbyte)value;
-            for (int y = 0; y < ImageHeight; y++)
+            for (int y = 0; y < Height; y++)
             {
                 idx = RowOffset(y);
 
-                for (int x = 0; x < ImageWidth; x++)
+                for (int x = 0; x < Width; x++)
                     Data[idx + x] = v;
             }
         }
@@ -481,11 +482,11 @@ namespace DjvuNet.Graphics
             int y0 = (dy > 0) ? dy : 0;
             int x1 = (dx < 0) ? (-dx) : 0;
             int y1 = (dy < 0) ? (-dy) : 0;
-            int w0 = ImageWidth - x0;
-            int w1 = bit.ImageWidth - x1;
+            int w0 = Width - x0;
+            int w1 = bit.Width - x1;
             int w = (w0 < w1) ? w0 : w1;
-            int h0 = ImageHeight - y0;
-            int h1 = bit.ImageHeight - y1;
+            int h0 = Height - y0;
+            int h1 = bit.Height - y1;
             int h = (h0 < h1) ? h0 : h1;
 
             if ((w > 0) && (h > 0))
@@ -563,12 +564,12 @@ namespace DjvuNet.Graphics
             Data = null;
             Grays = 2;
             Rows = height;
-            ImageWidth = width;
+            Width = width;
             Border = border;
-            BytesPerRow = (ImageWidth + Border);   
+            BytesPerRow = (Width + Border);   
             // TODO: Verify if value of Bitmap.Border is double sided or single sided?
 
-            int npixels = RowOffset(ImageHeight);
+            int npixels = RowOffset(Height);
 
             if (npixels > 0)
                 Data = new sbyte[npixels];
@@ -593,12 +594,12 @@ namespace DjvuNet.Graphics
         {
             if (this != source)
             {
-                Init(source.ImageHeight, source.ImageWidth, border);
+                Init(source.Height, source.Width, border);
                 Grays = source.Grays;
 
-                for (int i = 0; i < ImageHeight; i++)
+                for (int i = 0; i < Height; i++)
                 {
-                    for (int j = ImageWidth, k = RowOffset(i), kr = source.RowOffset(i); j-- > 0; )
+                    for (int j = Width, k = RowOffset(i), kr = source.RowOffset(i); j-- > 0; )
                         Data[k++] = source.Data[kr++];
                 }
             }
@@ -631,8 +632,8 @@ namespace DjvuNet.Graphics
                 tmp.Grays = (Grays);
                 tmp.Border = ((short)border);
                 tmp.BytesPerRow = (BytesPerRow);
-                tmp.ImageWidth = ImageWidth;
-                tmp.Rows = ImageHeight;
+                tmp.Width = Width;
+                tmp.Rows = Height;
                 tmp.Data = Data;
                 Data = null;
                 Init(tmp, rect, border);
@@ -642,7 +643,7 @@ namespace DjvuNet.Graphics
                 Init(rect.Height, rect.Width, border);
                 Grays = source.Grays;
 
-                Rectangle rect2 = new Rectangle(0, 0, source.ImageWidth, source.ImageHeight);
+                Rectangle rect2 = new Rectangle(0, 0, source.Width, source.Height);
                 rect2.Intersect(rect2, rect);
                 rect2.Translate(-rect.Right, -rect.Bottom);
 
@@ -683,9 +684,9 @@ namespace DjvuNet.Graphics
         /// </returns>
         public IMap2 Translate(int dx, int dy, IMap2 retval)
         {
-            if (!(retval is Bitmap) || (retval.ImageWidth != ImageWidth) || (retval.ImageHeight != ImageHeight))
+            if (!(retval is Bitmap) || (retval.Width != Width) || (retval.Height != Height))
             {
-                IBitmap r = new Bitmap().Init(ImageHeight, ImageWidth, 0);
+                IBitmap r = new Bitmap().Init(Height, Width, 0);
 
                 if ((Grays >= 2) && (Grays <= 256))
                     r.Grays = (Grays);
@@ -716,8 +717,8 @@ namespace DjvuNet.Graphics
         {
             lock (_syncObject)
             {
-                int w = ImageWidth;
-                int h = ImageHeight;
+                int w = Width;
+                int h = Height;
                 int s = GetRowSize();
 
                 int xmin, xmax, ymin, ymax;

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -222,7 +223,7 @@ namespace DjvuNet.Graphics.Tests
             var map = PixelMapTests.CreateInitVerifyPixelMap(width, height, color);
             map.IsRampNeeded = true;
             var pix = map.CreateGPixelReference(0);
-            Assert.Throws<DjvuFormatException>(() => pix.Ycc2Rgb(width * height));
+            Assert.Throws<DjvuInvalidOperationException>(() => pix.Ycc2Rgb(width * height));
         }
 
         [Fact()]
@@ -234,7 +235,7 @@ namespace DjvuNet.Graphics.Tests
 
             var map = BitmapTests.CreateIntiFillVerifyBitmap(width, height, 0, color);
             var pix = map.CreateGPixelReference(0);
-            Assert.Throws<DjvuFormatException>(() => pix.Ycc2Rgb(width * height));
+            Assert.Throws<DjvuInvalidOperationException>(() => pix.Ycc2Rgb(width * height));
         }
 
         [Fact()]

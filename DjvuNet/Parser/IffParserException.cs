@@ -10,7 +10,9 @@ namespace DjvuNet
     /// IFFParserException is thrown to indicate an error in parsing IFF 85 formatting
     /// of DjVu file which is not related to DjVu specific formatting.
     /// </summary>
+#if !NETSTANDARD2_0
     [Serializable]
+#endif
     public class IffParserException : System.FormatException
     {
 

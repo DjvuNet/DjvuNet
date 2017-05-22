@@ -13,8 +13,21 @@ namespace DjvuNet.Wavelet
     /// </summary>
     public class InterWaveTransform
     {
+        public static int[] redYLUT = new int[256];
+        public static int[] greenYLUT = new int[256];
+        public static int[] blueYLUT = new int[256];
 
-        public static float[][] rgb_to_ycc = new float[3][] 
+        public static int[] redCbLUT = new int[256];
+        public static int[] greenCbLUT = new int[256];
+        public static int[] blueCbLUT = new int[256];
+
+        public static int[] redCrLUT = new int[256];
+        public static int[] greenCrLUT = new int[256];
+        public static int[] blueCrLUT = new int[256];
+
+        public static bool IsLutInitialized;
+
+        public static float[][] Rgb2YccCoeff = new float[3][] 
         { 
             new float[] { 0.304348F, 0.608696F, 0.086956F },
             new float[] { 0.463768F, -0.405797F, -0.057971F },
@@ -110,28 +123,30 @@ namespace DjvuNet.Wavelet
         /// <summary>
         /// Color transform - extracts Y (luminance) from RGB images
         /// </summary>
-        /// <param name="p"></param>
-        /// <param name="w"></param>
-        /// <param name="h"></param>
+        /// <param name="pPix"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
         /// <param name="rowsize"></param>
-        /// <param name="out"></param>
+        /// <param name="@out"></param>
         /// <param name="outrowsize"></param>
-        public static unsafe void Rgb2Y(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
+        public static unsafe void Rgb2Y(Pixel* pPix, int width, int height, int rowsize, sbyte* @out, int outrowsize)
         {
             int[] rmul = new int[256];
             int[] gmul = new int[256];
             int[] bmul = new int[256];
             for (int k = 0; k < 256; k++)
             {
-                rmul[k] = (int)(k * 0x10000 * rgb_to_ycc[0][0]);
-                gmul[k] = (int)(k * 0x10000 * rgb_to_ycc[0][1]);
-                bmul[k] = (int)(k * 0x10000 * rgb_to_ycc[0][2]);
+                rmul[k] = (int)(k * 0x10000 * Rgb2YccCoeff[0][0]);
+                gmul[k] = (int)(k * 0x10000 * Rgb2YccCoeff[0][1]);
+                bmul[k] = (int)(k * 0x10000 * Rgb2YccCoeff[0][2]);
             }
-            for (int i = 0; i < h; i++, p += rowsize, @out += outrowsize)
+
+            Pixel* p2 = pPix;
+            sbyte* out2 = @out;
+
+            for (int i = 0; i < height; i++)
             {
-                Pixel* p2 = p;
-                sbyte* out2 = @out;
-                for (int j = 0; j < w; j++, p2++, out2++)
+                for (int j = 0; j < width; j++, p2++, out2++)
                 {
                     Pixel pix = *p2;
                     int y = rmul[unchecked((byte)pix.Red)] + gmul[unchecked((byte)pix.Green)] + bmul[unchecked((byte)pix.Blue)] + 32768;
@@ -143,28 +158,30 @@ namespace DjvuNet.Wavelet
         /// <summary>
         /// Color transform - extracts Cb (blue chrominance) form RGB images
         /// </summary>
-        /// <param name="p"></param>
-        /// <param name="w"></param>
-        /// <param name="h"></param>
+        /// <param name="pPixBuffer"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
         /// <param name="rowsize"></param>
         /// <param name="out"></param>
         /// <param name="outrowsize"></param>
-        public static unsafe void Rgb2Cb(Pixel* p, int w, int h, int rowsize, sbyte* @out, int outrowsize)
+        public static unsafe void Rgb2Cb(Pixel* pPixBuffer, int width, int height, int rowsize, sbyte* @out, int outrowsize)
         {
             int[] rmul = new int[256];
             int[] gmul = new int[256];
             int[] bmul = new int[256];
             for (int k = 0; k < 256; k++)
             {
-                rmul[k] = (int)(k * 0x10000 * rgb_to_ycc[2][0]);
-                gmul[k] = (int)(k * 0x10000 * rgb_to_ycc[2][1]);
-                bmul[k] = (int)(k * 0x10000 * rgb_to_ycc[2][2]);
+                rmul[k] = (int)(k * 0x10000 * Rgb2YccCoeff[2][0]);
+                gmul[k] = (int)(k * 0x10000 * Rgb2YccCoeff[2][1]);
+                bmul[k] = (int)(k * 0x10000 * Rgb2YccCoeff[2][2]);
             }
-            for (int i = 0; i < h; i++, p += rowsize, @out += outrowsize)
+
+            Pixel* p2 = pPixBuffer;
+            sbyte* out2 = @out;
+
+            for (int i = 0; i < height; i++)
             {
-                Pixel* p2 = p;
-                sbyte* out2 = @out;
-                for (int j = 0; j < w; j++, p2++, out2++)
+                for (int j = 0; j < width; j++, p2++, out2++)
                 {
                     int c = rmul[unchecked((byte)p2->Red)] + gmul[unchecked((byte)p2->Green)] + bmul[unchecked((byte)p2->Blue)] + 32768;
                     *out2 = (sbyte) Max(-128, Min(127, c >> 16));
@@ -188,19 +205,121 @@ namespace DjvuNet.Wavelet
             int[] bmul = new int[256];
             for (int k = 0; k < 256; k++)
             {
-                rmul[k] = (int)((k * 0x10000) * rgb_to_ycc[1][0]);
-                gmul[k] = (int)((k * 0x10000) * rgb_to_ycc[1][1]);
-                bmul[k] = (int)((k * 0x10000) * rgb_to_ycc[1][2]);
+                rmul[k] = (int)((k * 0x10000) * Rgb2YccCoeff[1][0]);
+                gmul[k] = (int)((k * 0x10000) * Rgb2YccCoeff[1][1]);
+                bmul[k] = (int)((k * 0x10000) * Rgb2YccCoeff[1][2]);
             }
-            for (int i = 0; i < h; i++, p += rowsize, @out += outrowsize)
+
+            Pixel* p2 = p;
+            sbyte* out2 = @out;
+
+            for (int i = 0; i < h; i++)
             {
-                Pixel* p2 = p;
-                sbyte* out2 = @out;
                 for (int j = 0; j < w; j++, p2++, out2++)
                 {
                     int c = rmul[unchecked((byte)p2->Red)] + gmul[unchecked((byte)p2->Green)] + bmul[unchecked((byte)p2->Blue)] + 32768;
                     *out2 = (sbyte) Max(-128, Min(127, c >> 16));
                 }
+            }
+        }
+
+        /// <summary>
+        /// Color Space Conversion from RGB to YCbCr
+        /// </summary>
+        /// <param name="pPixBuff"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="rowsize"></param>
+        /// <param name="outY"></param>
+        /// <param name="outCb"></param>
+        /// <param name="outCr"></param>
+        /// <param name="outrowsize"></param>
+        public static unsafe void Rgb2YCbCr(
+            Pixel* pPixBuff, int width, int height, int rowsize, 
+            sbyte* @outY, sbyte* @outCb, sbyte* @outCr, int outrowsize)
+        {
+
+            fixed (int* pRedYLUT = redYLUT)
+            fixed (int* pGreenYLUT = greenYLUT)
+            fixed (int* pBlueYLUT = blueYLUT)
+            fixed (int* pRedCbLUT = redCbLUT)
+            fixed (int* pGreenCbLUT = greenCbLUT)
+            fixed (int* pBlueCbLUT = blueCbLUT)
+            fixed (int* pRedCrLUT = redCrLUT)
+            fixed (int* pGreenCrLUT = greenCrLUT)
+            fixed (int* pBlueCrLUT = blueCrLUT)
+            {
+                if (!IsLutInitialized)
+                {
+                    // Create lookup tables
+                    for (int k = 0; k < 256; k++)
+                    {
+                        pRedYLUT[k] = (int)(k * 0x10000 * Rgb2YccCoeff[0][0]);
+                        pGreenYLUT[k] = (int)(k * 0x10000 * Rgb2YccCoeff[0][1]);
+                        pBlueYLUT[k] = (int)(k * 0x10000 * Rgb2YccCoeff[0][2]);
+
+                        pRedCbLUT[k] = (int)(k * 0x10000 * Rgb2YccCoeff[2][0]);
+                        pGreenCbLUT[k] = (int)(k * 0x10000 * Rgb2YccCoeff[2][1]);
+                        pBlueCbLUT[k] = (int)(k * 0x10000 * Rgb2YccCoeff[2][2]);
+
+                        pRedCrLUT[k] = (int)((k * 0x10000) * Rgb2YccCoeff[1][0]);
+                        pGreenCrLUT[k] = (int)((k * 0x10000) * Rgb2YccCoeff[1][1]);
+                        pBlueCrLUT[k] = (int)((k * 0x10000) * Rgb2YccCoeff[1][2]);
+                    }
+                    IsLutInitialized = true;
+                }
+                
+                Pixel* p2 = pPixBuff;
+                sbyte* pOutY = @outY;
+                sbyte* pOutCb = @outCb;
+                sbyte* pOutCr = @outCr;
+
+                int dataLength = width * height;
+
+                for (int i = 0; i < dataLength; i++, p2++, pOutCr++, pOutCb++, pOutY++)
+                {
+                    byte red = unchecked((byte)p2->Red);
+                    byte green = unchecked((byte)p2->Green);
+                    byte blue = unchecked((byte)p2->Blue);
+
+                    int y = pRedYLUT[red] + pGreenYLUT[green] + pBlueYLUT[blue] + 32768;
+                    *pOutY = (sbyte)((y >> 16) - 128);
+
+                    int cb = pRedCbLUT[red] + pGreenCbLUT[green] + pBlueCbLUT[blue] + 32768;
+                    *pOutCb = (sbyte)Max(-128, Min(127, cb >> 16));
+
+                    int cr = pRedCrLUT[red] + pGreenCrLUT[green] + pBlueCrLUT[blue] + 32768;
+                    *pOutCr = (sbyte)Max(-128, Min(127, cr >> 16));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Function to convert Pixel buffer from YCbCr color space to RGB color space
+        /// </summary>
+        /// <param name="pPixBuff">Pointer to Pixel buffer</param>
+        /// <param name="width">Width of image in pixels</param>
+        /// <param name="height">Height of image in pixels</param>
+        public static unsafe void YCbCr2Rgb(Pixel* pPixBuff, int width, int height)
+        {
+            Pixel* q = pPixBuff;
+            int dataLength = width * height;
+
+            for (int i = 0; i < dataLength; i++, q++)
+            {
+                sbyte y = q->Blue;
+                sbyte b = q->Green;
+                sbyte r = q->Red;
+                // This is the Pigeon transform
+                int t1 = b >> 2;
+                int t2 = r + (r >> 1);
+                int t3 = y + 128 - t1;
+                int tr = y + 128 + t2;
+                int tg = t3 - (t2 >> 1);
+                int tb = t3 + (b << 1);
+                q->Red = (sbyte) Max(0, Min(255, tr));
+                q->Green = (sbyte) Max(0, Min(255, tg));
+                q->Blue = (sbyte) Max(0, Min(255, tb));
             }
         }
 
@@ -229,10 +348,6 @@ namespace DjvuNet.Wavelet
                     if (y >= 3 && y + 3 < h)
                     {
                         // Generic case
-//# ifdef MMX
-//                        if (scale == 1 && MMXControl::mmxflag > 0)
-//                            mmx_fv_1(q, e, s, s3);
-//#endif
                         while (q < e)
                         {
                             int a = (int)q[-s] + (int)q[s];
@@ -261,10 +376,6 @@ namespace DjvuNet.Wavelet
                     if (y >= 6 && y < h)
                     {
                         // Generic case
-//# ifdef MMX
-//                        if (scale == 1 && MMXControl::mmxflag > 0)
-//                            mmx_fv_2(q, e, s, s3);
-//#endif
                         while (q < e)
                         {
                             int a = (int)q[-s] + (int)q[s];
@@ -420,11 +531,7 @@ namespace DjvuNet.Wavelet
                     short* e = q + w;
                     if (y >= 3 && y + 3 < h)
                     {
-                        // Generic case
-#if MMX
-                        if (scale == 1 && MMXControl::mmxflag > 0)
-                            mmx_bv_1(q, e, s, s3);
-#endif
+                        // Generic cas
                         while (q < e)
                         {
                             int a = (int)q[-s] + (int)q[s];
@@ -483,10 +590,6 @@ namespace DjvuNet.Wavelet
                     if (y >= 6 && y < h)
                     {
                         // Generic case
-#if MMX
-                        if (scale == 1 && MMXControl::mmxflag > 0)
-                            mmx_bv_2(q, e, s, s3);
-#endif
                         while (q < e)
                         {
                             int a = (int)q[-s] + (int)q[s];
@@ -615,6 +718,5 @@ namespace DjvuNet.Wavelet
                 p += rowsize;
             }
         }
-
     }
 }

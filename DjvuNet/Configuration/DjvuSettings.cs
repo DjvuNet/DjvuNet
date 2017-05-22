@@ -9,8 +9,6 @@ namespace DjvuNet.Configuration
 {
     public class DjvuSettings
     {
-        private TraceSwitch _logLevel;
-
         private static DjvuSettings _Current;
 
         public static DjvuSettings Current
@@ -29,16 +27,7 @@ namespace DjvuNet.Configuration
 
         private DjvuSettings()
         {
-            _logLevel = new TraceSwitch(
-                        "DjvuNet.LogLevel", "Switch to use for setting DjvuNet library classic logging level", "Info");
             CoderFactory = new ZPCoderFactory();
-        }
-
-        public TraceSwitch LogLevel
-        {
-            get { return _logLevel; }
-
-            internal set { _logLevel = value; }
         }
 
         public IDataCoderFactory CoderFactory { get; private set; }
