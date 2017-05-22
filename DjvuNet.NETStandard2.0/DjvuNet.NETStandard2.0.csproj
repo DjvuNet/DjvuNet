@@ -11,25 +11,41 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>  
+
   <ItemGroup>
-    <Compile Include="..\DjvuNet\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\DjvuNet\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.cs" />
-    <Compile Remove="..\DjvuNet\Properties\AssemblyInfoCommon.cs" />
-    <Compile Remove="..\DjvuNet\Properties\AssemblyInfo.Template.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet\Properties\AssemblyInfo.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet\Properties\AssemblyInfoCommon.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet\Properties\AssemblyInfo.Template.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Properties\AssemblyInfo.Template.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.cs" />
+    <Compile Remove="Properties\AssemblyInfo.Template.cs" />
+  </ItemGroup>  
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.Permissions" Version="4.4.0-preview1-25305-02" />
   </ItemGroup>
 
   <ItemGroup>
