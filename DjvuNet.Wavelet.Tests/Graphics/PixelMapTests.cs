@@ -4,12 +4,33 @@ using Xunit;
 using DjvuNet.Graphics;
 using TUtil = DjvuNet.Tests.Util;
 using DjvuNet.Errors;
+using System.Diagnostics;
 
 namespace DjvuNet.Graphics.Tests
 {
 
     public class PixelMapTests
     {
+
+        int shdWidth = 1920 * 2;
+        int shdHeight = 1080 * 2;
+        int shdBytesPerPixel = 4;
+        int testCount = 1;
+
+        public static sbyte[] GetRandomData(int width, int height, int bytesPerPixel)
+        {
+            long length = width * height * bytesPerPixel;
+            sbyte[] data = new sbyte[length];
+            Random rnd = new Random();
+            for (int i = 0; i < data.Length; i++)
+            {
+                byte number = (byte)rnd.Next(256);
+                data[i] = unchecked((sbyte)number);
+            }
+
+            return data;
+        }
+
         public static void WritePixelMap(int width, int height, IPixelMap bmp)
         {
             string formatIndex = "x4";
@@ -41,8 +62,8 @@ namespace DjvuNet.Graphics.Tests
             var map = new PixelMap();
             Assert.Equal(3, map.BytesPerPixel);
             Assert.False(map.IsRampNeeded);
-            Assert.Equal(0, map.ImageWidth);
-            Assert.Equal(0, map.ImageHeight);
+            Assert.Equal(0, map.Width);
+            Assert.Equal(0, map.Height);
             return map;
         }
 
@@ -50,8 +71,8 @@ namespace DjvuNet.Graphics.Tests
         {
             IPixelMap map = CreateVerifyPixelMap();
             map.Init(height, width, color);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
             Assert.Equal<IPixel>(color, map.CreateGPixelReference(width / 2).ToPixel());
 
             var pix = map.CreateGPixelReference(width / 2);
@@ -104,8 +125,8 @@ namespace DjvuNet.Graphics.Tests
             PixelMap map = new PixelMap();
             Assert.Equal(3, map.BytesPerPixel);
             Assert.False(map.IsRampNeeded);
-            Assert.Equal(0, map.ImageWidth);
-            Assert.Equal(0, map.ImageHeight);
+            Assert.Equal(0, map.Width);
+            Assert.Equal(0, map.Height);
         }
 
         [Fact()]
@@ -123,8 +144,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(width, height, color);
             map.Attenuate(bmp, 0, 0);
 
-            Assert.Equal(width, bmp.ImageWidth);
-            Assert.Equal(height, bmp.ImageHeight);
+            Assert.Equal(width, bmp.Width);
+            Assert.Equal(height, bmp.Height);
             Assert.Equal(255, bmp.GetByteAt(256));
         }
 
@@ -144,8 +165,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(width, height, color);
             map.Attenuate(bmp, 16, 16);
 
-            Assert.Equal(width, bmp.ImageWidth);
-            Assert.Equal(height, bmp.ImageHeight);
+            Assert.Equal(width, bmp.Width);
+            Assert.Equal(height, bmp.Height);
             Assert.Equal(bColor, bmp.GetByteAt(256));
         }
 
@@ -165,8 +186,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(width, height, color);
             map.Attenuate(bmp, -512, 16);
 
-            Assert.Equal(width, bmp.ImageWidth);
-            Assert.Equal(height, bmp.ImageHeight);
+            Assert.Equal(width, bmp.Width);
+            Assert.Equal(height, bmp.Height);
             Assert.Equal(bColor, bmp.GetByteAt(256));
         }
 
@@ -186,8 +207,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(width, height, color);
             map.Attenuate(bmp, 16, -512);
 
-            Assert.Equal(width, bmp.ImageWidth);
-            Assert.Equal(height, bmp.ImageHeight);
+            Assert.Equal(width, bmp.Width);
+            Assert.Equal(height, bmp.Height);
             Assert.Equal(bColor, bmp.GetByteAt(256));
         }
 
@@ -206,8 +227,8 @@ namespace DjvuNet.Graphics.Tests
 
             map.Blit(bmp, 256, 1, Pixel.BlackPixel);
 
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             var pix = map.CreateGPixelReference(128);
             Assert.True(color.Equals(pix.ToPixel()));
@@ -311,14 +332,80 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        public void BenchmarkApplyGammaCorrection()
+        {
+            sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);
+            
+            long ticks = 0;
+            Stopwatch watch = new Stopwatch();
+
+            for (int i = 0; i < testCount; i++)
+            {
+                sbyte[] testData = new sbyte[data.Length];
+                Buffer.BlockCopy(data, 0, testData, 0, data.Length);
+
+                watch.Restart();
+                PixelMap.ApplyGamma(2.2, testData);
+                watch.Stop();
+                ticks += watch.ElapsedMilliseconds;
+            }
+
+            Console.WriteLine($"ApplyGammaCorrection ms per call\t\t{((double)ticks / testCount).ToString("0#.000")}");
+
+        }
+
+        [Fact()]
+        public void BenchmarkApplyGammaCorrectionFastMT()
+        {
+            sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);
+            long ticks = 0;
+            Stopwatch watch = new Stopwatch();
+
+            for (int i = 0; i < testCount; i++)
+            {
+                sbyte[] testData = new sbyte[data.Length];
+                Buffer.BlockCopy(data, 0, testData, 0, data.Length);
+
+                watch.Restart();
+                PixelMap.ApplyGammaFastMT(2.2, testData);
+                watch.Stop();
+                ticks += watch.ElapsedMilliseconds;
+            }
+
+            Console.WriteLine($"ApplyGammaCorrectionFastMT ms per call\t\t{((double)ticks / testCount).ToString("0#.000")}");
+        }
+
+        [Fact()]
+        public void BenchmarkApplyGammaCorrectionFastST()
+        {
+            sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);
+            long ticks = 0;
+            Stopwatch watch = new Stopwatch();
+
+            for (int i = 0; i < testCount; i++)
+            {
+                sbyte[] testData = new sbyte[data.Length];
+                Buffer.BlockCopy(data, 0, testData, 0, data.Length);
+
+                watch.Restart();
+                PixelMap.ApplyGammaFastST(2.2, testData);
+                watch.Stop();
+                ticks += watch.ElapsedMilliseconds;
+                //GC.Collect();
+            }
+
+            Console.WriteLine($"ApplyGammaCorrectionFastST ms per call\t\t{((double)ticks/ testCount).ToString("0#.000")}");
+        }
+
+        [Fact()]
         public void DownsampleTest001()
         {
             int width = 32;
             int height = 32;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
             map.Downsample(map, 1, null);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
         }
 
         [Fact()]
@@ -328,8 +415,8 @@ namespace DjvuNet.Graphics.Tests
             int height = 32;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
             map.Downsample(map, 1, map.BoundingRectangle);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
         }
 
         [Fact()]
@@ -339,12 +426,12 @@ namespace DjvuNet.Graphics.Tests
             int height = 32;
             int subsample = 2;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             map.Downsample(map, subsample, null);
-            Assert.Equal(width/subsample, map.ImageWidth);
-            Assert.Equal(height/subsample, map.ImageHeight);
+            Assert.Equal(width/subsample, map.Width);
+            Assert.Equal(height/subsample, map.Height);
         }
 
         [Fact()]
@@ -354,12 +441,12 @@ namespace DjvuNet.Graphics.Tests
             int height = 128;
             int subsample = 4;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             map.Downsample(map, subsample, null);
-            Assert.Equal(width / subsample, map.ImageWidth);
-            Assert.Equal(height / subsample, map.ImageHeight);
+            Assert.Equal(width / subsample, map.Width);
+            Assert.Equal(height / subsample, map.Height);
         }
 
         [Fact()]
@@ -369,12 +456,12 @@ namespace DjvuNet.Graphics.Tests
             int height = 160;
             int subsample = 8;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             map.Downsample(map, subsample, null);
-            Assert.Equal(width / subsample, map.ImageWidth);
-            Assert.Equal(height / subsample, map.ImageHeight);
+            Assert.Equal(width / subsample, map.Width);
+            Assert.Equal(height / subsample, map.Height);
         }
 
         [Fact()]
@@ -384,12 +471,12 @@ namespace DjvuNet.Graphics.Tests
             int height = 512;
             int subsample = 12;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             map.Downsample(map, subsample, null);
-            Assert.Equal(Math.Round((double)width / subsample, 0), map.ImageWidth);
-            Assert.Equal(Math.Round((double)height / subsample, 0), map.ImageHeight);
+            Assert.Equal(Math.Round((double)width / subsample, 0), map.Width);
+            Assert.Equal(Math.Round((double)height / subsample, 0), map.Height);
         }
 
         [Fact()]
@@ -399,12 +486,12 @@ namespace DjvuNet.Graphics.Tests
             int height = 512;
             int subsample = 11;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             map.Downsample(map, subsample, null);
-            Assert.Equal(Math.Round((double)width / subsample, 0), map.ImageWidth);
-            Assert.Equal(Math.Round((double)height / subsample, 0), map.ImageHeight);
+            Assert.Equal(Math.Round((double)width / subsample, 0), map.Width);
+            Assert.Equal(Math.Round((double)height / subsample, 0), map.Height);
         }
 
         [Fact()]
@@ -414,8 +501,8 @@ namespace DjvuNet.Graphics.Tests
             int height = 110;
             int subsample = 11;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             Rectangle rect = new Rectangle
             {
@@ -426,8 +513,8 @@ namespace DjvuNet.Graphics.Tests
             };
 
             map.Downsample(map, subsample, rect);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
         }
 
         [Fact()]
@@ -437,8 +524,8 @@ namespace DjvuNet.Graphics.Tests
             int height = 32;
             int subsample = 4;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             Rectangle rect = new Rectangle
             {
@@ -458,8 +545,8 @@ namespace DjvuNet.Graphics.Tests
             int height = 32;
             int subsample = 4;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             Rectangle rect = new Rectangle
             {
@@ -479,8 +566,8 @@ namespace DjvuNet.Graphics.Tests
             int height = 32;
             int subsample = 4;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             Rectangle rect = new Rectangle
             {
@@ -500,8 +587,8 @@ namespace DjvuNet.Graphics.Tests
             int height = 32;
             int subsample = 4;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             Rectangle rect = new Rectangle
             {
@@ -521,13 +608,13 @@ namespace DjvuNet.Graphics.Tests
             int height = 512;
             int subsample = 11;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             map.IsRampNeeded = true;
             map.Downsample(map, subsample, null);
-            Assert.Equal(Math.Round((double)width / subsample, 0), map.ImageWidth);
-            Assert.Equal(Math.Round((double)height / subsample, 0), map.ImageHeight);
+            Assert.Equal(Math.Round((double)width / subsample, 0), map.Width);
+            Assert.Equal(Math.Round((double)height / subsample, 0), map.Height);
         }
 
 
@@ -537,8 +624,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(512, 512, Pixel.BluePixel);
             var map2 = CreateInitVerifyPixelMap(1024, 1024, Pixel.GreenPixel);
             map.Downsample43(map2, map.BoundingRectangle);
-            Assert.Equal(map.ImageWidth, 512);
-            Assert.Equal(map.ImageHeight, 512);
+            Assert.Equal(map.Width, 512);
+            Assert.Equal(map.Height, 512);
             Assert.Equal(map.CreateGPixelReference(256).ToPixel(), Pixel.GreenPixel);
         }
 
@@ -615,8 +702,8 @@ namespace DjvuNet.Graphics.Tests
 
             var map = CreateVerifyPixelMap();
             map.Init(height, width, color);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             var pix = map.CreateGPixelReference(width / 2);
             Assert.True(color.Equals(pix.ToPixel()));
@@ -632,8 +719,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateVerifyPixelMap();
             var source = CreateInitVerifyPixelMap(width, height, color);
             map.Init(source);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             var pix = map.CreateGPixelReference(width / 2);
             Assert.True(color.Equals(pix.ToPixel()));
@@ -650,8 +737,8 @@ namespace DjvuNet.Graphics.Tests
             var source = CreateInitVerifyPixelMap(width, height, color);
             map.IsRampNeeded = true;
             map.Init(source);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             var pix = map.CreateGPixelReference(width / 2);
             Assert.True(color.Equals(pix.ToPixel()));
@@ -672,8 +759,8 @@ namespace DjvuNet.Graphics.Tests
             int rectHeight = 102;
 
             map.Init(source, new Rectangle(right, 0, rectWidth, rectHeight));
-            Assert.Equal(rectWidth, map.ImageWidth);
-            Assert.Equal(rectHeight, map.ImageHeight);
+            Assert.Equal(rectWidth, map.Width);
+            Assert.Equal(rectHeight, map.Height);
 
             var pix = map.CreateGPixelReference(width / 2);
             Assert.True(color.Equals(pix.ToPixel()));
@@ -695,8 +782,8 @@ namespace DjvuNet.Graphics.Tests
 
             map.IsRampNeeded = true;
             map.Init(source, new Rectangle(right, 0, rectWidth, rectHeight));
-            Assert.Equal(rectWidth, map.ImageWidth);
-            Assert.Equal(rectHeight, map.ImageHeight);
+            Assert.Equal(rectWidth, map.Width);
+            Assert.Equal(rectHeight, map.Height);
 
             var pix = map.CreateGPixelReference(width / 2);
             Assert.True(color.Equals(pix.ToPixel()));
@@ -712,8 +799,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateVerifyPixelMap();
             var source = CreateInitVerifyPixelMap(width, height, color);
             map.Init(source.Data, height, width);
-            Assert.Equal(width, map.ImageWidth);
-            Assert.Equal(height, map.ImageHeight);
+            Assert.Equal(width, map.Width);
+            Assert.Equal(height, map.Height);
 
             var pix = map.CreateGPixelReference(width / 2);
             Assert.True(color.Equals(pix.ToPixel()));

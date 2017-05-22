@@ -26,22 +26,28 @@ namespace DjvuNet.Wavelet
 
         #region Public Properties
 
-        public int Height
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (_YMap != null) ? _YMap.Height : 0; }
-        }
-
-        public int Width
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (_YMap != null) ? _YMap.Width : 0; }
-        }
-
         public bool ImageData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return true; }
+        }
+
+        public int CrCbDelay
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _CrCbDelay; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _CrCbDelay = value; }
+        }
+
+        public bool CrCbHalf
+        {
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _CrCbHalf; }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            set { _CrCbHalf = value; }
         }
 
         #endregion Public Properties
@@ -56,7 +62,7 @@ namespace DjvuNet.Wavelet
 
         public void Close()
         {
-            _CSlice = _CBytes = _CSerial = 0;
+            _CSlices = _CBytes = _CSerial = 0;
         }
 
         public IPixelMap GetPixelMap()
@@ -66,11 +72,11 @@ namespace DjvuNet.Wavelet
 
             int area = _YMap.Width * _YMap.Height;
 
-            int w = _YMap.Width;
-            int h = _YMap.Height;
+            int width = _YMap.Width;
+            int height = _YMap.Height;
             int pixsep = 3;
-            int rowsep = w * pixsep;
-            sbyte[] bytes = new sbyte[h * rowsep];
+            int rowsep = width * pixsep;
+            sbyte[] bytes = new sbyte[height * rowsep];
 
             _YMap.Image(0, bytes, rowsep, pixsep, false);
 
@@ -80,24 +86,25 @@ namespace DjvuNet.Wavelet
                 _CrMap.Image(2, bytes, rowsep, pixsep, _CrCbHalf);
             }
 
-            //h = h - 3;
-            //w = area / h;
-
             // Convert image to RGB
-            IPixelMap pixelMap = new PixelMap().Init(bytes, h, w);
-            IPixelReference pixel = pixelMap.CreateGPixelReference(0);
-
-            for (int i = 0; i < h; )
+            IPixelMap pixelMap = new PixelMap().Init(bytes, height, width);
+            
+            if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
-                pixel.SetOffset(i++, 0);
-
-                if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
-                    pixel.Ycc2Rgb(w);
-                else
+                unsafe
                 {
-                    for (int x = w; x-- > 0; pixel.IncOffset())
-                        pixel.SetGray((sbyte)(127 - pixel.Blue));
+                    fixed(sbyte* pBuffer = bytes)
+                    {
+                        Pixel* pPix = (Pixel*)pBuffer;
+                        InterWaveTransform.YCbCr2Rgb(pPix, width, height);
+                    }
                 }
+            }
+            else
+            {
+                IPixelReference pixel = pixelMap.CreateGPixelReference(0);
+                for (int x = width * height; x-- > 0; pixel.IncOffset())
+                    pixel.SetGray((sbyte)(127 - pixel.Blue));
             }
 
             return pixelMap;
@@ -111,11 +118,11 @@ namespace DjvuNet.Wavelet
             if (retval == null)
                 retval = new PixelMap();
 
-            int w = rect.Width;
-            int h = rect.Height;
+            int width = rect.Width;
+            int height = rect.Height;
             int pixsep = 3;
-            int rowsep = w * pixsep;
-            sbyte[] bytes = retval.Init(h, w, null).Data;
+            int rowsep = width * pixsep;
+            sbyte[] bytes = retval.Init(height, width, null).Data;
 
             _YMap.Image(subsample, rect, 0, bytes, rowsep, pixsep, false);
 
@@ -125,20 +132,24 @@ namespace DjvuNet.Wavelet
                 _CrMap.Image(subsample, rect, 2, bytes, rowsep, pixsep, _CrCbHalf);
             }
 
-            IPixelReference pixel = retval.CreateGPixelReference(0);            
-
-            for (int i = 0; i < h; )
+            if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
-                pixel.SetOffset(i++, 0);
-
-                if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
-                    pixel.Ycc2Rgb(w);
-                else
+                unsafe
                 {
-                    for (int x = w; x-- > 0; pixel.IncOffset())
-                        pixel.SetGray((sbyte)(127 - pixel.Blue));
+                    fixed (sbyte* pBuffer = bytes)
+                    {
+                        Pixel* pPix = (Pixel*)pBuffer;
+                        InterWaveTransform.YCbCr2Rgb(pPix, width, height);
+                    }
                 }
-            }            
+            }
+            else
+            {
+                IPixelReference pixel = retval.CreateGPixelReference(0);
+                for (int x = width * height; x-- > 0; pixel.IncOffset())
+                    pixel.SetGray((sbyte)(127 - pixel.Blue));
+            }
+           
 
             return retval;
         }

@@ -16,98 +16,64 @@ namespace DjvuNet.Graphics
     {
         #region Public Properties
 
-        #region Properties
-
         /// <summary>
         /// Gets the property values
         /// </summary>
         public Hashtable Properties { get; internal set; }
-
-        #endregion Properties
-
-        #region Data
 
         /// <summary>
         /// Gets or sets the image data
         /// </summary>
         public sbyte[] Data { get; set; }
 
-        #endregion Data
-
-        #region ImageWidth
-
         private int _width;
 
         /// <summary>
         /// Gets or sets the width of the image (ncolumns)
         /// </summary>
-        public int ImageWidth
+        public int Width
         {
             get { return _width; }
             set { _width = Math.Abs(value); }
         }
-
-        #endregion ImageWidth
-
-        #region ImageHeight
 
         private int _height;
 
         /// <summary>
         /// Gets or sets the height of the image (nrows)
         /// </summary>
-        public int ImageHeight
+        public int Height
         {
             get { return _height; }
             set { _height = Math.Abs(value); }
         }
 
-        #endregion ImageHeight
-
-        #region BytesPerPixel
 
         /// <summary>
         /// Gets or sets the number of bytes per pixel (NColumns)
         /// </summary>
         public int BytesPerPixel { get; set; }
 
-        #endregion BytesPerPixel
-
-        #region BlueOffset
 
         /// <summary>
         /// Gets or sets the offset to the blue color
         /// </summary>
         public int BlueOffset { get; set; }
 
-        #endregion BlueOffset
-
-        #region GreenOffset
-
         /// <summary>
         /// Gets or sets the offset to the green color
         /// </summary>
         public int GreenOffset { get; set; }
-
-        #endregion GreenOffset
-
-        #region RedOffset
 
         /// <summary>
         /// Gets or sets the offset to the red color
         /// </summary>
         public int RedOffset { get; set; }
 
-        #endregion RedOffset
-
-        #region IsRampNeeded
-
         /// <summary>
         /// True if the ramp call is needed, false otherwise
         /// </summary>
         public bool IsRampNeeded { get; set; }
-
-        #endregion IsRampNeeded
 
         #endregion Public Properties
 
@@ -208,7 +174,7 @@ namespace DjvuNet.Graphics
             try
             {
                 hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-                image = CopyDataToBitmap(ImageWidth, ImageHeight, hData.AddrOfPinnedObject(), Data.Length, format);
+                image = CopyDataToBitmap(Width, Height, hData.AddrOfPinnedObject(), Data.Length, format);
             }
             catch(ArgumentException aex)
             {
@@ -254,15 +220,20 @@ namespace DjvuNet.Graphics
         public static System.Drawing.Bitmap CopyDataToBitmap(
             int width, int height, IntPtr data, long length, PixelFormat format)
         {
-            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height, format);
+            System.Drawing.Bitmap bmp = null;
             BitmapData bmpData = null;
 
             try
             {
+                bmp = new System.Drawing.Bitmap(width, height, format);
                 bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                                      ImageLockMode.WriteOnly, bmp.PixelFormat);
 
                 NativeMethods.MoveMemory(bmpData.Scan0, data, length);
+            }
+            catch(Exception ex)
+            {
+                throw new DjvuAggregateException(ex);
             }
             finally
             {

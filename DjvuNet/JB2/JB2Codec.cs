@@ -442,7 +442,7 @@ namespace DjvuNet.JB2
                         needAddBlit = needAddLibrary = true;
                         CodeAbsoluteMarkSize(bm, 4);
                         CodeBitmapDirectly(bm);
-                        CodeRelativeLocation(jblt, bm.ImageHeight, bm.ImageWidth);
+                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -461,7 +461,7 @@ namespace DjvuNet.JB2
                         needAddBlit = true;
                         CodeAbsoluteMarkSize(bm, 3);
                         CodeBitmapDirectly(bm);
-                        CodeRelativeLocation(jblt, bm.ImageHeight, bm.ImageWidth);
+                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -484,7 +484,7 @@ namespace DjvuNet.JB2
                         CodeBitmapByCrossCoding(bm, cbm, match);
 
                         //          verbose("2.e time="+System.currentTimeMillis()+",rectype="+rectype);
-                        CodeRelativeLocation(jblt, bm.ImageHeight, bm.ImageWidth);
+                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -518,7 +518,7 @@ namespace DjvuNet.JB2
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
                         CodeRelativeMarkSize(bm, (1 + lmatch.Left) - lmatch.Right, (1 + lmatch.Top) - lmatch.Bottom, 4);
                         CodeBitmapByCrossCoding(bm, cbm, match);
-                        CodeRelativeLocation(jblt, bm.ImageHeight, bm.ImageWidth);
+                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -550,7 +550,7 @@ namespace DjvuNet.JB2
                         needAddBlit = true;
                         CodeAbsoluteMarkSize(bm, 3);
                         CodeBitmapDirectly(bm);
-                        CodeAbsoluteLocation(jblt, bm.ImageHeight, bm.ImageWidth);
+                        CodeAbsoluteLocation(jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -752,9 +752,9 @@ namespace DjvuNet.JB2
             // }
             lock (bm)
             {
-                int cw = cbm.ImageWidth;
-                int dw = bm.ImageWidth;
-                int dh = bm.ImageHeight;
+                int cw = cbm.Width;
+                int dw = bm.Width;
+                int dh = bm.Height;
                 Rectangle lmatch = (Rectangle)_LibInfo[libno];
                 //int xd2c = ((1 + (dw / 2)) - dw) - ((((1 + lmatch.Left) - lmatch.Right) / 2) - lmatch.Left);
                 //int yd2c = ((1 + (dh / 2)) - dh) - ((((1 + lmatch.Top) - lmatch.Bottom) / 2) - lmatch.Top);
@@ -780,15 +780,15 @@ namespace DjvuNet.JB2
             {
                 bm.MinimumBorder = 3;
 
-                int dy = bm.ImageHeight - 1;
-                CodeBitmapDirectly(bm, bm.ImageWidth, dy, bm.RowOffset(dy + 2), bm.RowOffset(dy + 1), bm.RowOffset(dy));
+                int dy = bm.Height - 1;
+                CodeBitmapDirectly(bm, bm.Width, dy, bm.RowOffset(dy + 2), bm.RowOffset(dy + 1), bm.RowOffset(dy));
             }
         }
 
         protected virtual void CodeRelativeLocation(JB2Blit jblt, int rows, int columns)
         {
             if (!_GotStartRecordP)
-                throw new SystemException("Image no start");
+                throw new DjvuFormatException("Image no start");
 
             int bottom = 0;
             int left = 0;
