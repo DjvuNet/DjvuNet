@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -67,21 +66,12 @@ namespace DjvuNet.Compression
         }
 
 
-#if !NETSTANDARD2_0
         public override void Close()
-#else
-        public void Close()
-#endif
-
         {
             Flush();
             EncodeRaw(Coder, 24, 0);
             Coder.Dispose();
-#if !NETSTANDARD2_0
             base.Close();
-#else
-            Dispose(true);
-#endif
         }
 
         internal static void EncodeRaw(IDataCoder coder, int bits, int x)

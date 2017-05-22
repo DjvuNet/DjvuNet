@@ -17,7 +17,7 @@ namespace DjvuNet.Extentions
     /// </summary>
     public static class ExtentionMethods
     {
-#if !NETSTANDARD2_0
+
         /// <summary>
         /// Orients the rectangle for the proper page location
         /// </summary>
@@ -39,6 +39,6 @@ namespace DjvuNet.Extentions
         {
             return new System.Drawing.Rectangle(rectangle.Right, pageHeight - rectangle.Bottom - rectangle.Height, rectangle.Width, rectangle.Height);
         }
-#endif
+
     }
 }

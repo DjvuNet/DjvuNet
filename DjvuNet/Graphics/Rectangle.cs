@@ -382,7 +382,6 @@ namespace DjvuNet.Graphics
                 return !(null == (object)first && null == (object)second);
         }
 
-#if !NETSTANDARD2_0
         /// <summary>
         /// Implicit conversion to <typeparamref name="System.Drawing.Rectangle">
         /// System.Drawing.Rectangle</typeparamref>
@@ -395,7 +394,7 @@ namespace DjvuNet.Graphics
         {
             return new System.Drawing.Rectangle(rect.Left, rect.Top, rect.Width, rect.Height);
         }
-#endif
-#endregion Public Methods
+
+        #endregion Public Methods
     }
 }
