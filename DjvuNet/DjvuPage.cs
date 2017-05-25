@@ -865,7 +865,7 @@ namespace DjvuNet
                 if (bg == null)
                 {
                     bg = (retval == null) ? new PixelMap() : retval;
-                    bg.Init(rect.Height, rect.Width, Pixel.WhitePixel);
+                    bg.Init(rect.Height, rect.Width, _IsInverted ? Pixel.BlackPixel : Pixel.WhitePixel);
                 }
                 if (Stencil(bg, rect, subsample, gamma))
                     retval = bg;
@@ -882,39 +882,48 @@ namespace DjvuNet
         /// <returns>
         /// <see cref="System.Drawing.Bitmap"/>Bitmap page image.
         /// </returns>
-        public System.Drawing.Bitmap BuildPageImage()
+        public System.Drawing.Bitmap BuildPageImage(bool rebuild = false)
         {
             int subsample = 1;
             
             int width = Width / subsample;
             int height = Height / subsample;
-
-            var map = GetMap(new GRect(0, 0, width, height), subsample, null);
-
-            if (map == null)
-                return new Bitmap(width, height);
-
+            GMap map = null;
             Rectangle rect = new Rectangle(0, 0, width, height);
             Bitmap retVal = null;
-            if (map.BytesPerPixel == 3)
+
+            if (rebuild || _Image == null)
             {
-                PixelFormat format = PixelFormat.Format24bppRgb;
-                retVal = DjvuImage.ImageFromMap(map, rect, format);
-                if (IsInverted)
-                    retVal = DjvuImage.InvertColor(retVal);
+                map = GetMap(new GRect(0, 0, width, height), subsample, null);
+                if (map == null)
+                    return new Bitmap(width, height);
+                if (map.BytesPerPixel == 3)
+                {
+                    PixelFormat format = PixelFormat.Format24bppRgb;
+                    retVal = DjvuImage.ImageFromMap(map, rect, format);
+                }
+                else if (map.BytesPerPixel == 1)
+                {
+                    PixelFormat format = PixelFormat.Format8bppIndexed;
+                    retVal = DjvuImage.ImageFromMap(map, rect, format);
+                }
+            }
+            else
+                retVal = _Image;
+
+            if (map.BytesPerPixel == 3 && IsInverted)
+            {
+                retVal = DjvuImage.InvertColor(retVal);
             }
             else if (map.BytesPerPixel == 1)
             {
-                PixelFormat format = PixelFormat.Format8bppIndexed;
-                retVal = DjvuImage.ImageFromMap(map, rect, format);
-                // nasty hack 
                 System.Drawing.Imaging.ColorPalette palette = retVal.Palette;
-                Color[] colors = palette.Entries;
 
                 if (!IsInverted)
                 {
                     for (int i = 0; i < 256; i++)
-                        colors[i] = Color.FromArgb(i, i, i);
+                        palette.Entries[i] = Color.FromArgb(i, i, i);
+                    retVal.Palette = palette;
                 }
                 else
                 {
@@ -922,8 +931,9 @@ namespace DjvuNet
                     for (int i = 0; i < 256; i++)
                     {
                         j = 255 - i;
-                        colors[i] = Color.FromArgb(j, j, j);
+                        palette.Entries[i] = Color.FromArgb(j, j, j);
                     }
+                    retVal.Palette = palette;
                 }
             }
 
@@ -949,7 +959,7 @@ namespace DjvuNet
         public unsafe System.Drawing.Bitmap BuildImage(int subsample = 1)
         {
             //
-            // TODO Fix image components size mismatches.
+            // TODO Fix image skew
             //
 
             Verify.SubsampleRange(subsample);
@@ -1029,11 +1039,9 @@ namespace DjvuNet
                                 // Check if the mask byte is set
                                 if (maskRow[x] > 0)
                                 {
-                                    bool inverted = _IsInverted == true;
-
                                     uint xF = foregroundRow[xf];
 
-                                    if (inverted)
+                                    if (_IsInverted)
                                         backgroundRow[xb] = InvertColor(xF);
                                     else
                                         backgroundRow[xb] = xF;

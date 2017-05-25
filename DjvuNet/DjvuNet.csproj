@@ -111,6 +111,7 @@
     <Compile Include="DataChunks\CidaChunkcs.cs" />
     <Compile Include="DataChunks\DjvuFormElement.cs" />
     <Compile Include="DataChunks\DjvuNode.cs" />
+    <Compile Include="DataChunks\Enums\DocumentType.cs" />
     <Compile Include="DataChunks\IBG44Chunk.cs" />
     <Compile Include="DataChunks\IBGjpChunk.cs" />
     <Compile Include="DataChunks\IBM44Chunk.cs" />
