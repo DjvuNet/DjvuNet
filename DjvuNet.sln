@@ -202,6 +202,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specs", "Specs", "{0E66E677
 		Specs\DjVu3Spec.djvu = Specs\DjVu3Spec.djvu
 		Specs\DjVu3Spec.pdf = Specs\DjVu3Spec.pdf
 		Specs\DjVu_Tech_Primer.djvu = Specs\DjVu_Tech_Primer.djvu
+		Specs\Efficient search in hidden text of large DjVu documents - updated version, Janusz S. Bień, in Advanced Language Technologies for Digital Libraries, eds. Bernardi et al, Springer 2011.pdf = Specs\Efficient search in hidden text of large DjVu documents - updated version, Janusz S. Bień, in Advanced Language Technologies for Digital Libraries, eds. Bernardi et al, Springer 2011.pdf
+		Specs\Une famille d'ondelettes biorthogonales sur l'intervalle obtenue par un schéma d'interpolation itérative, G. Deslauriers, S. Dubuc et D. Lemire, Ann Sci Math Quebec, Vol 23, 1999.pdf = Specs\Une famille d'ondelettes biorthogonales sur l'intervalle obtenue par un schéma d'interpolation itérative, G. Deslauriers, S. Dubuc et D. Lemire, Ann Sci Math Quebec, Vol 23, 1999.pdf
+		Specs\Variational decompression of image data from DjVu encoded files, Martin Holler and Kamil S. Kazimierski, 2016.pdf = Specs\Variational decompression of image data from DjVu encoded files, Martin Holler and Kamil S. Kazimierski, 2016.pdf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{79CE4EAD-3414-4E10-B9B0-F0BF675DF9D6}"
