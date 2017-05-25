@@ -6,6 +6,8 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using DjvuNet.DjvuLibre;
+using DjvuNet.Serialization;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace DjvuNet.Tests
@@ -13,47 +15,79 @@ namespace DjvuNet.Tests
     public static partial class Util
     {
         private static string _ArtifactsPath;
+        private static string _ArtifactsContentPath;
         private static string _ArtifactsDataPath;
         private static string _ArtifactsJsonPath;
 
         private static SortedDictionary<int, Tuple<int, int, DocumentType, string> > _TestDocumentData;
 
-        static Util()
+        public static SortedDictionary<int, Tuple<int, int, DocumentType, string>> TestDocumentData
         {
-            _TestDocumentData = new SortedDictionary<int, Tuple< int, int, DocumentType, string>> ();
-
-            for(int i = 1; i <= 77; i++)
+            get
             {
-                using (DjvuNet.DjvuLibre.DjvuDocumentInfo docInfo = 
-                    DjvuLibre.DjvuDocumentInfo.CreateDjvuDocumentInfo(GetTestFilePath(i)))
+                if (_TestDocumentData != null)
                 {
-                    var docData = Tuple.Create<int, int, DocumentType, string>(
-                        docInfo.PageCount, docInfo.FileCount, docInfo.DocumentType, null /* docInfo.DumpDocumentData(true)*/);
-                    _TestDocumentData.Add(i, docData);
+                    return _TestDocumentData;
+                }
+                else
+                {
+                    _TestDocumentData = new SortedDictionary<int, Tuple<int, int, DocumentType, string>>();
 
+                    for (int i = 1; i <= 77; i++)
+                    {
+                        string filePath = GetTestFilePath(i);
+                        filePath = Path.Combine(Util.ArtifactsJsonPath, 
+                            Path.GetFileNameWithoutExtension(filePath) + ".json");
+
+                        JsonConverter[] converters = new JsonConverter[]
+                        {
+                            new DjvuDocConverter(),
+                            new NodeBaseConverter(),
+                        };
+
+                        string json = File.ReadAllText(filePath, new UTF8Encoding(false));
+                        DjvuDoc doc = JsonConvert.DeserializeObject<DjvuDoc>(json, converters);
+                        DjvmForm djvm = doc.DjvuData as DjvmForm;
+                        if (djvm != null)
+                        {
+                            var docType = (DocumentType) Enum.Parse(typeof(DocumentType), djvm.Dirm.DocumentType, true);
+
+                            var docData = Tuple.Create<int, int, DocumentType, string>(
+                                djvm.Dirm.PageCount, djvm.Dirm.FileCount, docType, null);
+                            _TestDocumentData.Add(i, docData);
+                        }
+                        else
+                        {
+                            var djvu = doc.DjvuData as DjvuForm;
+                            var docData = Tuple.Create<int, int, DocumentType, string>(
+                                1, 1, DocumentType.SinglePage, null);
+                            _TestDocumentData.Add(i, docData);
+                        }
+                    }
+
+                    return _TestDocumentData;
                 }
             }
-
         }
 
         public static int GetTestDocumentPageCount(int index)
         {
-            return _TestDocumentData[index].Item1;
+            return TestDocumentData[index].Item1;
         }
 
         public static int GetTestDocumentFileCount(int index)
         {
-            return _TestDocumentData[index].Item2;
+            return TestDocumentData[index].Item2;
         }
 
         public static DocumentType GetTestDocumentType(int index)
         {
-            return _TestDocumentData[index].Item3;
+            return TestDocumentData[index].Item3;
         }
 
         public static string GetTestDocumentJsonDump(int index)
         {
-            return _TestDocumentData[index].Item4;
+            return TestDocumentData[index].Item4;
         }
 
         public static void FailOnException(Exception ex, string message, params object[] data)
@@ -107,6 +141,20 @@ namespace DjvuNet.Tests
                 {
                     _ArtifactsPath = Path.Combine(Util.RepoRoot, "artifacts");
                     return _ArtifactsPath;
+                }
+            }
+        }
+
+        public static string ArtifactsContent
+        {
+            get
+            {
+                if (_ArtifactsContentPath != null)
+                    return _ArtifactsContentPath;
+                else
+                {
+                    _ArtifactsContentPath = Path.Combine(ArtifactsPath, "content");
+                    return _ArtifactsContentPath;
                 }
             }
         }

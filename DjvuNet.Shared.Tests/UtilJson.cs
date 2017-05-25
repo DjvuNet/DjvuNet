@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using DjvuNet.DjvuLibre;
 using Newtonsoft.Json;
 
 namespace DjvuNet.Tests
