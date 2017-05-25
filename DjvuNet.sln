@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet", "DjvuNet\DjvuNet.csproj", "{E681B178-E5F8-4782-89C8-F32720B1464A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNetTest", "DjvuNetTest\DjvuNetTest.csproj", "{192F4E63-6ED7-410F-A372-0B54C6CDF987}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545} = {4FEC9875-D7E6-47BD-A13A-5C1944464545}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Tests", "DjvuNet.Tests\DjvuNet.Tests.csproj", "{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545} = {4FEC9875-D7E6-47BD-A13A-5C1944464545}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}"
 	ProjectSection(SolutionItems) = preProject
@@ -857,6 +863,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{73C6055A-2
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Wavelet.Tests", "DjvuNet.Wavelet.Tests\DjvuNet.Wavelet.Tests.csproj", "{29AE50F0-477D-4445-8FA1-80A7EA22FB88}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545} = {4FEC9875-D7E6-47BD-A13A-5C1944464545}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6575B4E4-C4C2-4CAE-8642-ADF4BACE2607}"
 EndProject
