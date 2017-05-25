@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet", "DjvuNet\DjvuNet.csproj", "{E681B178-E5F8-4782-89C8-F32720B1464A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNetTest", "DjvuNetTest\DjvuNetTest.csproj", "{192F4E63-6ED7-410F-A372-0B54C6CDF987}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545} = {4FEC9875-D7E6-47BD-A13A-5C1944464545}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Tests", "DjvuNet.Tests\DjvuNet.Tests.csproj", "{F7DDB3F7-F251-4B2E-AEEC-810118877E6F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545} = {4FEC9875-D7E6-47BD-A13A-5C1944464545}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "artifacts", "artifacts", "{DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}"
 	ProjectSection(SolutionItems) = preProject
@@ -202,6 +208,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specs", "Specs", "{0E66E677
 		Specs\DjVu3Spec.djvu = Specs\DjVu3Spec.djvu
 		Specs\DjVu3Spec.pdf = Specs\DjVu3Spec.pdf
 		Specs\DjVu_Tech_Primer.djvu = Specs\DjVu_Tech_Primer.djvu
+		Specs\Efficient search in hidden text of large DjVu documents - updated version, Janusz S. Bień, in Advanced Language Technologies for Digital Libraries, eds. Bernardi et al, Springer 2011.pdf = Specs\Efficient search in hidden text of large DjVu documents - updated version, Janusz S. Bień, in Advanced Language Technologies for Digital Libraries, eds. Bernardi et al, Springer 2011.pdf
+		Specs\Une famille d'ondelettes biorthogonales sur l'intervalle obtenue par un schéma d'interpolation itérative, G. Deslauriers, S. Dubuc et D. Lemire, Ann Sci Math Quebec, Vol 23, 1999.pdf = Specs\Une famille d'ondelettes biorthogonales sur l'intervalle obtenue par un schéma d'interpolation itérative, G. Deslauriers, S. Dubuc et D. Lemire, Ann Sci Math Quebec, Vol 23, 1999.pdf
+		Specs\Variational decompression of image data from DjVu encoded files, Martin Holler and Kamil S. Kazimierski, 2016.pdf = Specs\Variational decompression of image data from DjVu encoded files, Martin Holler and Kamil S. Kazimierski, 2016.pdf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{79CE4EAD-3414-4E10-B9B0-F0BF675DF9D6}"
@@ -854,6 +863,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{73C6055A-2
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Wavelet.Tests", "DjvuNet.Wavelet.Tests\DjvuNet.Wavelet.Tests.csproj", "{29AE50F0-477D-4445-8FA1-80A7EA22FB88}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4FEC9875-D7E6-47BD-A13A-5C1944464545} = {4FEC9875-D7E6-47BD-A13A-5C1944464545}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{6575B4E4-C4C2-4CAE-8642-ADF4BACE2607}"
 EndProject
@@ -869,6 +881,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Skia", "DjvuNet.Ski
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{192f4e63-6ed7-410f-a372-0b54c6cdf987}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{29ae50f0-477d-4445-8fa1-80a7ea22fb88}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{61b8cb33-f13a-4309-a137-895017b28e31}*SharedItemsImports = 13

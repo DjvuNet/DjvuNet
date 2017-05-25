@@ -10,6 +10,7 @@ using DjvuNet.Tests.Xunit;
 using Moq;
 using DjvuNet.DataChunks;
 using DjvuNet.Errors;
+using System.Text;
 
 namespace DjvuNet.Tests
 {
@@ -22,18 +23,39 @@ namespace DjvuNet.Tests
             get
             {
                 var retVal = new List<object[]>();
+                UTF8Encoding utf8 = new UTF8Encoding(false);
 
                 for (int i = 1; i <= 77; i++)
                 {
                     string pageText = "";
                     string path = null;
-                    DjvuLibre.DjvuDocumentInfo info = null;
+                    StreamReader info = null;
+                    int pageNo = 0;
 
                     try
                     {
                         path = Util.GetTestFilePath(i);
-                        info = DjvuLibre.DjvuDocumentInfo.CreateDjvuDocumentInfo(path);
-                        pageText = info.GetPageText(info.PageCount - 1);
+                        string textPath = Path.Combine(Util.ArtifactsPath, "content",
+                            Path.GetFileNameWithoutExtension(path) + ".txt");
+                        info = new StreamReader(textPath, utf8);
+                        pageText = null;
+                        string line = info.ReadLine();
+                        while(line != null)
+                        {
+                            if (line.StartsWith("/*** Page"))
+                            {
+                                line = info.ReadLine();
+                                if (!line.StartsWith("//*** End Page") 
+                                    && !String.IsNullOrWhiteSpace(line) && line.Length > 10)
+                                {
+                                    pageText = line.Substring(0, line.Length - 2);
+                                    break;
+                                }
+                                pageNo++;
+                            }
+
+                            line = info.ReadLine();
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -44,13 +66,16 @@ namespace DjvuNet.Tests
                         info?.Dispose();
                     }
 
-                    retVal.Add(new object[]
+                    if (!String.IsNullOrWhiteSpace(pageText))
                     {
-                        path,
-                        Util.GetTestDocumentPageCount(i),
-                        info.PageCount - 1,
-                        pageText
-                    });
+                        retVal.Add(new object[]
+                        {
+                            path,
+                            Util.GetTestDocumentPageCount(i),
+                            pageNo,
+                            pageText
+                        });
+                    }
                 }
 
                 return retVal;
@@ -265,8 +290,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Bug in new implementation"), Trait("Category", "Skip")]
-        [Trait("Category", "Bugtrack")]
+        [Fact()]
         public void BuildPageImageTest000()
         {
             string file = Path.Combine(Util.ArtifactsPath, "test077C.djvu");
@@ -280,8 +304,9 @@ namespace DjvuNet.Tests
                     {
                         Assert.NotNull(image);
                         Assert.NotNull(imageInv);
+                        Assert.NotSame(image, imageInv);
                         Color pix = image.GetPixel(0, 0);
-                        Color pixInv = image.GetPixel(0, 0);
+                        Color pixInv = imageInv.GetPixel(0, 0);
                         Assert.Equal(pix.R, 255 - pixInv.R);
                         Assert.Equal(pix.G, 255 - pixInv.G);
                         Assert.Equal(pix.B, 255 - pixInv.B);

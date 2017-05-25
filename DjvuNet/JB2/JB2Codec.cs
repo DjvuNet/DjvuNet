@@ -700,7 +700,6 @@ namespace DjvuNet.JB2
             _LeftCell.Add(new MutableValue<int>());
             _RightCell.Add(new MutableValue<int>());
 
-            GC.Collect();
         }
 
         protected void Shape2Lib(int shapeno, int libno)

@@ -950,5 +950,48 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.Equal<string>("eLife", annotation);
             }
         }
+
+        //[Fact(), Trait("Category", "DjvuLibre")]
+        public void DumpAllDocumentsText()
+        {
+            for (int i = 1; i <= 77; i++)
+            {
+                string pageText = "";
+                string path = null;
+                DjvuLibre.DjvuDocumentInfo info = null;
+
+                try
+                {
+                    path = Util.GetTestFilePath(i);
+                    string outFile = Path.Combine(Util.ArtifactsDataPath, "dumps", 
+                        Path.GetFileNameWithoutExtension(path) + ".txt");
+                    info = DjvuLibre.DjvuDocumentInfo.CreateDjvuDocumentInfo(path);
+
+                    using (FileStream stream = new FileStream(outFile, FileMode.Create, FileAccess.ReadWrite))
+                    using (StreamWriter writer = new StreamWriter(stream, new UTF8Encoding(false)))
+                    {
+                        for (int pi = 0; pi < info.PageCount; pi++)
+                        {
+                            writer.WriteLine($"/*** Page ={pi}= ***/");
+                            using (DjvuPageInfo page = new DjvuPageInfo(info, pi))
+                            {
+                                pageText = page.Text;
+                            }
+                            
+                            writer.WriteLine(pageText);
+                            writer.WriteLine($"/*** End Page ={pi}= ***/");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex.ToString());
+                }
+                finally
+                {
+                    info?.Dispose();
+                }
+            }
+        }
     }
 }

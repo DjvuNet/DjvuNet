@@ -203,6 +203,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Specs", "Specs", "{0E66E677
 		Specs\DjVu3Spec.djvu = Specs\DjVu3Spec.djvu
 		Specs\DjVu3Spec.pdf = Specs\DjVu3Spec.pdf
 		Specs\DjVu_Tech_Primer.djvu = Specs\DjVu_Tech_Primer.djvu
+		Specs\Efficient search in hidden text of large DjVu documents - updated version, Janusz S. Bień, in Advanced Language Technologies for Digital Libraries, eds. Bernardi et al, Springer 2011.pdf = Specs\Efficient search in hidden text of large DjVu documents - updated version, Janusz S. Bień, in Advanced Language Technologies for Digital Libraries, eds. Bernardi et al, Springer 2011.pdf
+		Specs\Une famille d'ondelettes biorthogonales sur l'intervalle obtenue par un schéma d'interpolation itérative, G. Deslauriers, S. Dubuc et D. Lemire, Ann Sci Math Quebec, Vol 23, 1999.pdf = Specs\Une famille d'ondelettes biorthogonales sur l'intervalle obtenue par un schéma d'interpolation itérative, G. Deslauriers, S. Dubuc et D. Lemire, Ann Sci Math Quebec, Vol 23, 1999.pdf
+		Specs\Variational decompression of image data from DjVu encoded files, Martin Holler and Kamil S. Kazimierski, 2016.pdf = Specs\Variational decompression of image data from DjVu encoded files, Martin Holler and Kamil S. Kazimierski, 2016.pdf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{79CE4EAD-3414-4E10-B9B0-F0BF675DF9D6}"
@@ -876,8 +879,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Bzz", "Utilities\Dj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoreCompat.System.Drawing", "CoreCompat\System.Drawing\src\CoreCompat.System.Drawing\CoreCompat.System.Drawing.csproj", "{023F64A0-82E6-4778-92B7-0491DE680E02}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Tests.NETStandard2.0", "DjvuNet.Tests.NETStandard2.0\DjvuNet.Tests.NETStandard2.0.csproj", "{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Wavelet.Tests.NETStandard2.0", "DjvuNet.Wavelet.Tests.NETStandard2.0\DjvuNet.Wavelet.Tests.NETStandard2.0.csproj", "{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.DjvuLibre.NETStandard2.0", "DjvuNet.DjvuLibre.NETStandard2.0\DjvuNet.DjvuLibre.NETStandard2.0.csproj", "{620AD762-193A-4C3E-A94F-00838CB069F3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.DjvuLibre.Tests.NETStandard2.0", "DjvuNet.DjvuLibre.Tests.NETStandard2.0\DjvuNet.DjvuLibre.Tests.NETStandard2.0.csproj", "{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNetTest.Core", "DjvuNetTest.Core\DjvuNetTest.Core.csproj", "{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{192f4e63-6ed7-410f-a372-0b54c6cdf987}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{29ae50f0-477d-4445-8fa1-80a7ea22fb88}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{61b8cb33-f13a-4309-a137-895017b28e31}*SharedItemsImports = 13
@@ -1058,6 +1072,66 @@ Global
 		{023F64A0-82E6-4778-92B7-0491DE680E02}.Release|x64.Build.0 = Release|Any CPU
 		{023F64A0-82E6-4778-92B7-0491DE680E02}.Release|x86.ActiveCfg = Release|x86
 		{023F64A0-82E6-4778-92B7-0491DE680E02}.Release|x86.Build.0 = Release|x86
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Debug|x64.Build.0 = Debug|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Debug|x86.ActiveCfg = Debug|x86
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Debug|x86.Build.0 = Debug|x86
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Release|x64.ActiveCfg = Release|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Release|x64.Build.0 = Release|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Release|x86.ActiveCfg = Release|Any CPU
+		{4845671C-3BA9-46E3-A384-C5DFC8FBFAB4}.Release|x86.Build.0 = Release|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Debug|x64.Build.0 = Debug|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Debug|x86.ActiveCfg = Debug|x86
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Debug|x86.Build.0 = Debug|x86
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Release|x64.ActiveCfg = Release|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Release|x64.Build.0 = Release|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Release|x86.ActiveCfg = Release|Any CPU
+		{AF1ED166-10AB-494D-8A7F-FA87B3A57BE9}.Release|x86.Build.0 = Release|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Debug|x64.Build.0 = Debug|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Debug|x86.ActiveCfg = Debug|x86
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Debug|x86.Build.0 = Debug|x86
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Release|x64.ActiveCfg = Release|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Release|x64.Build.0 = Release|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Release|x86.ActiveCfg = Release|Any CPU
+		{620AD762-193A-4C3E-A94F-00838CB069F3}.Release|x86.Build.0 = Release|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Debug|x64.Build.0 = Debug|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Debug|x86.Build.0 = Debug|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Release|x64.ActiveCfg = Release|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Release|x64.Build.0 = Release|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Release|x86.ActiveCfg = Release|Any CPU
+		{FCFF8876-89AE-4249-99BC-B4E8E30E36FE}.Release|x86.Build.0 = Release|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Debug|x64.Build.0 = Debug|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Debug|x86.Build.0 = Debug|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Release|x64.ActiveCfg = Release|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Release|x64.Build.0 = Release|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Release|x86.ActiveCfg = Release|Any CPU
+		{FB2F1720-AB3E-40F6-B4CC-95B098F9704F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
