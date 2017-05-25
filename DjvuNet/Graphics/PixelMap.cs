@@ -427,7 +427,7 @@ namespace DjvuNet.Graphics
                 });
             }
 
-            Task.WaitAll(tasks[0], tasks[1], tasks[2], tasks[3], tasks[4], tasks[5], tasks[6], tasks[7]);
+            Task.WaitAll(tasks.ToArray());
 
             if (hData.IsAllocated)
                 hData.Free();

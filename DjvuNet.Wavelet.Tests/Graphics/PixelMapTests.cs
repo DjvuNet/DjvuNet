@@ -354,7 +354,7 @@ namespace DjvuNet.Graphics.Tests
 
         }
 
-        [Fact(Skip = "Fails in AppVeyor"), Trait("Category", "Skip")]
+        [Fact()]
         public void BenchmarkApplyGammaCorrectionFastMT()
         {
             sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);
