@@ -68,7 +68,7 @@ namespace DjvuNet
 
         System.Drawing.Bitmap BuildImage(int subsample = 1);
 
-        System.Drawing.Bitmap BuildPageImage();
+        System.Drawing.Bitmap BuildPageImage(bool rebuild = false);
 
         System.Drawing.Bitmap ExtractThumbnailImage();
 
