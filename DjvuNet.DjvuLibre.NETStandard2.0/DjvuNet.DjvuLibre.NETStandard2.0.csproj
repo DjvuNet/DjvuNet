@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>DjvuNet</RootNamespace>
+    <RootNamespace>DjvuNet.DjvuLibre</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
   <PropertyGroup>
@@ -11,7 +12,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
@@ -29,35 +30,32 @@
 
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>  
-
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <AssemblyName>DjvuNet.DjvuLibre</AssemblyName>
+  </PropertyGroup>
+  
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)..\DjvuNet\**\*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet\Properties\AssemblyInfo.cs" />
-    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet\Properties\AssemblyInfoCommon.cs" />
-    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet\Properties\AssemblyInfo.Template.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\Properties\AssemblyInfo.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\Properties\AssemblyInfoCommon.cs" />
+    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\Properties\AssemblyInfo.Template.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Remove="Properties\AssemblyInfo.Template.cs" />
-  </ItemGroup>  
-
-  <ItemGroup>
-    <PackageReference Include="System.Security.Permissions" Version="4.4.0-preview1-25305-02" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\CoreCompat\System.Drawing\src\CoreCompat.System.Drawing\CoreCompat.System.Drawing.csproj" />
     <ProjectReference Include="..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
   </ItemGroup>
-  <PropertyGroup>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <AssemblyName>DjvuNet</AssemblyName>
-  </PropertyGroup>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
+
 </Project>
