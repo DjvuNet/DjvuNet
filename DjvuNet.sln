@@ -869,6 +869,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Skia", "DjvuNet.Ski
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{192f4e63-6ed7-410f-a372-0b54c6cdf987}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{29ae50f0-477d-4445-8fa1-80a7ea22fb88}*SharedItemsImports = 4
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{4fec9875-d7e6-47bd-a13a-5c1944464545}*SharedItemsImports = 4
 		DjvuNet.Shared\DjvuNet.Shared.projitems*{61b8cb33-f13a-4309-a137-895017b28e31}*SharedItemsImports = 13
