@@ -124,6 +124,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DjvuNet.DjvuLibre.Helper.Tests\DjvuNet.DjvuLibre.Helper.Tests.csproj">
+      <Project>{fcecdff8-938c-4f1f-b47f-55c28d482d5e}</Project>
+      <Name>DjvuNet.DjvuLibre.Helper.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj">
       <Project>{9B255F5A-716A-4A26-A140-525FDE3FA8F7}</Project>
       <Name>DjvuNet.DjvuLibre</Name>
@@ -133,7 +137,6 @@
       <Name>System.Attributes</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />

@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using DjvuNet.DjvuLibre;
-using DjvuNet.Serialization;
+using DjvuNet;
 using Newtonsoft.Json;
 using Xunit;
 
