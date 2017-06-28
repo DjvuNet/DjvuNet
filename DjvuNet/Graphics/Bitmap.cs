@@ -340,37 +340,6 @@ namespace DjvuNet.Graphics
             throw new DjvuFormatException("Data format error.");
         }
 
-        internal static uint ReadInteger(ref char @char, Stream stream)
-        {
-            uint xinteger = 0;
-
-            while (@char == ' ' || @char == '\t' || @char == '\r' || @char == '\n' || @char == '#')
-            {
-                if (@char == '#')
-                {
-                    do
-                    {
-                        @char = (char)stream.ReadByte();
-                    }
-                    while (@char != '\n' && @char != '\r');
-                }
-                @char = (char)0;
-                @char = (char)stream.ReadByte();
-            }
-
-            if (@char < '0' || @char > '9')
-                throw new DjvuFormatException($"Expected integer value. Actual value: {@char}");
-
-            while (@char >= '0' && @char <= '9')
-            {
-                xinteger = xinteger * 10 + @char - '0';
-                @char = (char)0;
-                @char = (char)stream.ReadByte();
-            }
-
-            return xinteger;
-        }
-
         public unsafe void ReadPbmTextStream(Stream stream)
         {
             GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);

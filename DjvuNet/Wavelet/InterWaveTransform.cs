@@ -436,20 +436,20 @@ namespace DjvuNet.Wavelet
         /// 
         /// </summary>
         /// <param name="p"></param>
-        /// <param name="w"></param>
-        /// <param name="h"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
         /// <param name="rowsize"></param>
         /// <param name="scale"></param>
-        public static unsafe void FilterFh(short* p, int w, int h, int rowsize, int scale)
+        public static unsafe void FilterFh(short* p, int width, int height, int rowsize, int scale)
         {
             int y = 0;
             int s = scale;
             int s3 = s + s + s;
             rowsize *= scale;
-            while (y < h)
+            while (y < height)
             {
                 short* q = p + s;
-                short* e = p + w;
+                short* e = p + width;
                 int a0 = 0, a1 = 0, a2 = 0, a3 = 0;
                 int b0 = 0, b1 = 0, b2 = 0, b3 = 0;
                 if (q < e)
