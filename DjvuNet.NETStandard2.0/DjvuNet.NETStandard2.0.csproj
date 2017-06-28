@@ -48,6 +48,7 @@
   </ItemGroup>  
 
   <ItemGroup>
+    <PackageReference Include="System.Numerics.Vectors" Version="4.3.0" />
     <PackageReference Include="System.Security.Permissions" Version="4.4.0-preview1-25305-02" />
   </ItemGroup>
 
