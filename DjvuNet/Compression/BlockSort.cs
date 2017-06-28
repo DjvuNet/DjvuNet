@@ -170,7 +170,12 @@ namespace DjvuNet.Compression
  
         }
 
-
+        /// <summary>
+        /// Main entry point for Block Sort sorting used in bzz compression
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="size"></param>
+        /// <param name="markerpos"></param>
         public static void BlockSortData(byte[] data, int size, ref int markerpos)
         {
             BlockSort bsort = new BlockSort(data, size);
