@@ -70,7 +70,7 @@ namespace DjvuNet.DataChunks.Tests
                     string fileName = Path.GetFileNameWithoutExtension(file);
                     string outFile = Path.Combine(dumpsDir, fileName + "_bg44.png");
                     using (FileStream stream = new FileStream(outFile, FileMode.Create))
-                        image.Save(stream, ImageFormat.Png);
+                        image.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
 
                 }
 #endif
