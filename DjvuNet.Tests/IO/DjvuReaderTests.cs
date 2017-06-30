@@ -79,11 +79,13 @@ namespace DjvuNet.Tests
             {
                 Assert.NotNull(reader);
                 // Verify that BaseStream is System.Net.FileWebStream
+                // the type in .Net Core is System.Net.WebFileStream
                 FileStream fs = reader.BaseStream as FileStream;
                 Assert.NotNull(fs);
                 Assert.IsNotType<FileStream>(reader.BaseStream);
                 Assert.True(fs.CanRead && fs.CanSeek && !fs.CanWrite);
-                Assert.Equal<String>("System.Net.FileWebStream", fs.GetType().FullName);
+                // Do not use this assertion until issue https://github.com/dotnet/corefx/issues/21763 is resolved
+                // Assert.Equal<String>("System.Net.FileWebStream", fs.GetType().FullName);
             }
         }
 
