@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -1037,7 +1038,6 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual IPixelMap Init(int height, int width, IPixel color)
         {
-            //    boolean needFill=false;
             if ((height != Height) || (width != Width))
             {
                 Data = null;
@@ -1052,17 +1052,22 @@ namespace DjvuNet.Graphics
                 if (Data == null)
                     Data = new sbyte[npix * 3];
 
-                if (color != null)
+                if (color != null && (color.Blue != 0 || color.Green != 0 || color.Red != 0 ))
                 {
                     sbyte b = color.Blue;
                     sbyte g = color.Green;
                     sbyte r = color.Red;
-
-                    for (int i = 0; i < Data.Length; )
+                    unsafe
                     {
-                        Data[i++] = b;
-                        Data[i++] = g;
-                        Data[i++] = r;
+                        fixed (sbyte* pdata = Data)
+                        {
+                            for (int i = 0; i < Data.Length;)
+                            {
+                                pdata[i++] = b;
+                                pdata[i++] = g;
+                                pdata[i++] = r;
+                            }
+                        }
                     }
                 }
             }
@@ -1375,6 +1380,158 @@ namespace DjvuNet.Graphics
             Height = arows;
             Width = acolumns;
             this.Data = data;
+
+            return this;
+        }
+
+        public unsafe IPixelMap Init(IDjvuReader reader)
+        {
+            // Read header
+            bool raw = false;
+            bool grey = false;
+            ushort magic = reader.ReadUInt16BigEndian();
+            Bitmap bm = null;
+            switch (magic)
+            {
+                case (('P' << 8) + '2'):
+                    grey = true;
+                    break;
+                case (('P' << 8) + '3'):
+                    break;
+                case (('P' << 8) + '5'):
+                    raw = grey = true;
+                    break;
+                case (('P' << 8) + '6'):
+                    raw = true;
+                    break;
+                case ('P' << 8) + '1':
+                case ('P' << 8) + '4':
+                    reader.BaseStream.Seek(0, SeekOrigin.Begin);
+                    bm = Bitmap.CreateBitmap(reader.BaseStream);
+                    Init(bm);
+                    return this;
+                default:
+                    reader.BaseStream.Seek(0, SeekOrigin.Begin);
+                    //JPEGDecoder::decode(bs, *this);
+                    return this;
+
+            }
+
+            // Read image size
+            char lookahead = '\n';
+            int bytesperrow = 0;
+            int bytespercomp = 1;
+            uint acolumns = ReadInteger(ref lookahead, reader.BaseStream);
+            uint arows = ReadInteger(ref lookahead, reader.BaseStream);
+            uint maxval = ReadInteger(ref lookahead, reader.BaseStream);
+
+            if (maxval > 65535)
+                throw new DjvuFormatException("Cannot read PPM data with depth greater than 48 bits.");
+
+            if (maxval > 255)
+                bytespercomp = 2;
+
+            Init((int)arows, (int)acolumns, Pixel.BlackPixel);
+
+            // Prepare ramp
+            byte[] ramp = null;
+            int maxbin = 1 << (8 * bytespercomp);
+            Array.Resize(ref ramp, maxbin - 1);
+
+            for (int i = 0; i < maxbin; i++)
+                ramp[i] = (byte) (i < maxval ? (255 * i + maxval / 2) / maxval : 255);
+
+            fixed (byte* pramp = ramp)
+            fixed (sbyte* pData = Data)
+            {
+                sbyte* bramp = (sbyte*)pramp;
+                // Read image data
+                if (raw && grey)
+                {
+                    bytesperrow = Width * bytespercomp;
+                    byte[] line = new  byte[bytesperrow];
+
+                    for (int y = Height - 1; y >= 0; y--)
+                    {
+                        fixed (byte* pg = line)
+                        {
+                            byte* g = pg;
+                            Pixel* p = (Pixel*)pData + y * bytesperrow;
+                            if (reader.Read(line, 0, bytesperrow) < bytesperrow)
+                                throw new DjvuEndOfStreamException("Unexpected end of stream");
+
+                            if (bytespercomp <= 1)
+                            {
+                                for (int x = 0; x < Width; x += 1, g += 1)
+                                    p[x].Red = p[x].Green = p[x].Blue = bramp[g[0]];
+                            }
+                            else
+                            {
+                                for (int x = 0; x < Width; x += 1, g += 2)
+                                    p[x].Red = p[x].Green = p[x].Blue = bramp[g[0] * 256 + g[1]];
+                            }
+                        }
+                    }
+                }
+                else if (raw)
+                {
+                    bytesperrow = Width * bytespercomp * 3;
+                    byte[] line = new byte[bytesperrow];
+
+                    for (int y = Height - 1; y >= 0; y--)
+                    {
+                        Pixel* p = (Pixel*)pData + y * bytesperrow;
+                        fixed (byte* prgb = line)
+                        {
+                            byte* rgb = prgb;
+                            if (reader.Read(line, 0, bytesperrow) < bytesperrow)
+                                throw new DjvuEndOfStreamException("Unexpected end of stream");
+
+                            if (bytespercomp <= 1)
+                            {
+                                for (int x = 0; x < Width; x += 1, rgb += 3)
+                                {
+                                    p[x].Red = bramp[rgb[0]];
+                                    p[x].Green = bramp[rgb[1]];
+                                    p[x].Blue = bramp[rgb[2]];
+                                }
+                            }
+                            else
+                            {
+                                for (int x = 0; x < Width; x += 1, rgb += 6)
+                                {
+                                    p[x].Red = bramp[rgb[0] * 256 + rgb[1]];
+                                    p[x].Green = bramp[rgb[2] * 256 + rgb[3]];
+                                    p[x].Blue = bramp[rgb[4] * 256 + rgb[5]];
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    bytesperrow = Width * bytespercomp * 3;
+
+                    for (int y = Height - 1; y >= 0; y--)
+                    {
+                        Pixel* p = (Pixel*)pData + y * bytesperrow;
+
+                        for (int x = 0; x < Width; x++)
+                        {
+                            if (grey)
+                            {
+                                p[x].Green = p[x].Blue = p[x].Red = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
+                            }
+                            else
+                            {
+                                p[x].Red = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
+                                p[x].Green = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
+                                p[x].Blue = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
+                            }
+                        }
+                    }
+                }
+            }
 
             return this;
         }

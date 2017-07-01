@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Drawing;
+using System.IO;
+using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
+using DjvuNet;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace DjvuNet.Tests
 {
-    public static partial class Util
+    public partial class Util
     {
         public static DjvuDocument GetTestDocument(int index, out int pageCount)
         {
@@ -38,6 +41,5 @@ namespace DjvuNet.Tests
             if (pageCount > 0)
                 Assert.Equal<int>(pageCount, document.Pages.Count);
         }
-
     }
 }

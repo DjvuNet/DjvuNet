@@ -24,9 +24,18 @@ namespace DjvuNetTest
 
             string[] docs = new string[]
             {
-               DjvuNet.Tests.Util.GetTestFilePath(1),
-               DjvuNet.Tests.Util.GetTestFilePath(33),
-               DjvuNet.Tests.Util.GetTestFilePath(46),
+                DjvuNet.Tests.Util.GetTestFilePath(1),
+                DjvuNet.Tests.Util.GetTestFilePath(3),
+                DjvuNet.Tests.Util.GetTestFilePath(32),
+                DjvuNet.Tests.Util.GetTestFilePath(33),
+                DjvuNet.Tests.Util.GetTestFilePath(35),
+                DjvuNet.Tests.Util.GetTestFilePath(42),
+                DjvuNet.Tests.Util.GetTestFilePath(43),
+                DjvuNet.Tests.Util.GetTestFilePath(44),
+                DjvuNet.Tests.Util.GetTestFilePath(45),
+                DjvuNet.Tests.Util.GetTestFilePath(46),
+                DjvuNet.Tests.Util.GetTestFilePath(69),
+                DjvuNet.Tests.Util.GetTestFilePath(72),
             };
 
             long[] elapsed = new long[docs.Length * 3];
@@ -90,6 +99,7 @@ namespace DjvuNetTest
                     elapsed[docNo*3 + 0] += watch.ElapsedTicks;
 
                 string fileName = Path.GetFileNameWithoutExtension(doc.Location);
+                fileName = Path.Combine(Util.ArtifactsDataPath, "dumps", fileName);
                 var page = doc.Pages[0];
 
                 BenchmarkBuildPageImageCall(testsToSkip, elapsed, i, docNo, watch, fileName, page, 1);
@@ -103,14 +113,14 @@ namespace DjvuNetTest
             Stopwatch watch, string fileName, IDjvuPage page, int imageNo = 1)
         {
             watch.Restart();
-            using (System.Drawing.Bitmap bmp = page.BuildPageImage())
+            using (System.Drawing.Bitmap bmp = ((DjvuPage)page).BuildPageImage())
             {
                 watch.Stop();
                 Console.WriteLine($"Image {docNo + 1} - {imageNo} generated in\t{watch.ElapsedTicks:000 000 000 000}");
                 if (i + 1 > testsToSkip)
-                    elapsed[docNo*3 + imageNo] += watch.ElapsedTicks;
+                    elapsed[docNo * 3 + imageNo] += watch.ElapsedTicks;
 
-                //bmp.Save(fileName + $"_{imageNo}.png", ImageFormat.Png);
+                //bmp.Save(fileName + $"Mn_{imageNo}.png", ImageFormat.Png);
             }
         }
     }

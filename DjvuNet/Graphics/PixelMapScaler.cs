@@ -319,8 +319,8 @@ namespace DjvuNet.Graphics
                         dest.SetOffset(y - targetRect.YMin, 0);
                             //= targetMap.CreateGPixelReference(y - targetRect.YMin, 0);
 
-                    // Loop horizontally
-                    unsafe
+                        // Loop horizontally
+                        unsafe
                         {
                             for (int x = targetRect.XMin; x < targetRect.XMax; x++)
                             {
