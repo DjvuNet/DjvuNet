@@ -275,6 +275,7 @@ namespace DjvuNet.Graphics
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe void SetBGR(Pixel pixel)
         {
             fixed (sbyte* pD = _parent.Data)

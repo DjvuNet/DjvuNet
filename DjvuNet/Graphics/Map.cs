@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using DjvuNet.Errors;
@@ -92,6 +93,37 @@ namespace DjvuNet.Graphics
         #endregion Constructors
 
         #region Public Methods
+
+        public static uint ReadInteger(ref char @char, Stream stream)
+        {
+            uint xinteger = 0;
+
+            while (@char == ' ' || @char == '\t' || @char == '\r' || @char == '\n' || @char == '#')
+            {
+                if (@char == '#')
+                {
+                    do
+                    {
+                        @char = (char)stream.ReadByte();
+                    }
+                    while (@char != '\n' && @char != '\r');
+                }
+                @char = (char)0;
+                @char = (char)stream.ReadByte();
+            }
+
+            if (@char < '0' || @char > '9')
+                throw new DjvuFormatException($"Expected integer value. Actual value: {@char}");
+
+            while (@char >= '0' && @char <= '9')
+            {
+                xinteger = xinteger * 10 + @char - '0';
+                @char = (char)0;
+                @char = (char)stream.ReadByte();
+            }
+
+            return xinteger;
+        }
 
         /// <summary> 
         /// Fills an array of pixels from the specified values.

@@ -26,6 +26,8 @@ bld/
 # Unignore build tools - does not work lol
 ![Bb]uild/tools/**/*.csproj
 ![Bb]uild/tools/DjvuNet.Artifacts.Build/*.cs
+![Bb]uild/tools/DjvuNet.Git.Tasks/*.cs
+![Bb]uild/tools/DjvuNet.Git.Tasks.Core/*.cs
 ![Bb]uild/tools/**/*.config
 ![Bb]uild/tools/**/*.props
 ![Bb]uild/tools/**/*.targets
