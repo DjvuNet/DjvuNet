@@ -126,7 +126,7 @@ namespace DjvuNetTest.Core
     }
 }
 
-internal class AssemblyData
-{
-    public const string Name = "DjvuNet.Tests";
-}
+//internal class AssemblyData
+//{
+//    public const string Name = "DjvuNet.Tests";
+//}

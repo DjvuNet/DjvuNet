@@ -7,10 +7,17 @@ if "%~1"=="Debug" set _MSB_Configuration=Debug
 if "%~1"=="Release" set _MSB_Configuration=Release
 if "%~1"=="x86" set _MSB_Platform=x86
 if "%~1"=="x64" set _MSB_Platform=x64
+if "%~1"=="AnyCPU" set _MSB_Platform=AnyCPU
 if "%~1"=="Build" set _MSB_Target=Build
 if "%~1"=="Rebuild" set _MSB_Target=Rebuild
 if "%~1"=="Clean" set _MSB_Target=Clean
 if "%~1"=="Test" set _Test=1
+if "%~1"=="Target"(
+    shift
+    if "%~1"=="netfx" set _Framework=netfx
+    if "%~1"=="core" set _Framework=core
+)
+
 SHIFT
 GOTO parse
 :endparse
@@ -18,13 +25,15 @@ GOTO parse
 if not defined _MSB_Target set _MSB_Target=Rebuild
 if not defined _MSB_Configuration set _MSB_Configuration=Debug
 if not defined _MSB_Platform set _MSB_Platform=x86
+if not defined _Framework set _Framework=netfx
 
 @echo:
 @echo Starting Build of DjvuNet at %DATE% %TIME%
 @echo:
 @echo Build Target:   %_MSB_Target%
 @echo Configuration:  %_MSB_Configuration%
-@echo Platform:       %_MSB_Platform% 
+@echo Platform:       %_MSB_Platform%
+@echo Framework:      %_Framework%
 
 if defined _Test (
     @echo Run Tests:      True
@@ -44,7 +53,7 @@ if not exist .\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj (
     call git clone https://github.com/DjvuNet/DjVuLibre.git
     if not %ERRORLEVEL%==0 (
         @echo:
-        @echo Error: git clone returned error
+        @echo Error: git clone https://github.com/DjvuNet/DjVuLibre.git returned error
         goto exit_error
     )
 ) else (
@@ -55,11 +64,11 @@ if not exist .\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj (
 
 @echo,
 @echo Restoring nuget packages
-call %cd%\Tools\nuget.exe restore DjvuNet.sln  -verbosity detailed 
+call %cd%\Tools\nuget.exe restore DjvuNet.sln -verbosity detailed 
 
 if not %ERRORLEVEL%==0 (
     @echo:
-    @echo Error: nuget restore returned error
+    @echo Error: nuget restore DjvuNet.sln returned error
     goto exit_error
 )
 

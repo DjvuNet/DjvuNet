@@ -13,4 +13,9 @@
   <PropertyGroup>
     <BuildingOnNetCore Condition="$(BuildingOnNetCore) == ''">true</BuildingOnNetCore>
   </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 </Project>

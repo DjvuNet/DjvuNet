@@ -217,7 +217,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}"
 	ProjectSection(SolutionItems) = preProject
 		Tools\7z.exe = Tools\7z.exe
+		Tools\DjvuNet.Git.Tasks.dll = Tools\DjvuNet.Git.Tasks.dll
+		Tools\DjvuNet.Git.Tasks.pdb = Tools\DjvuNet.Git.Tasks.pdb
+		Tools\LibGit2Sharp.dll = Tools\LibGit2Sharp.dll
+		Tools\LibGit2Sharp.dll.config = Tools\LibGit2Sharp.dll.config
+		Tools\Microsoft.Build.Framework.dll = Tools\Microsoft.Build.Framework.dll
+		Tools\Microsoft.Build.Tasks.Core.dll = Tools\Microsoft.Build.Tasks.Core.dll
+		Tools\Microsoft.Build.Utilities.Core.dll = Tools\Microsoft.Build.Utilities.Core.dll
+		Tools\NuGet.config = Tools\NuGet.config
 		Tools\nuget.exe = Tools\nuget.exe
+		Tools\System.Threading.Thread.dll = Tools\System.Threading.Thread.dll
 	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared.Tests", "DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.shproj", "{B7EF5575-5932-4EA7-B250-E7DA238D60A9}"
@@ -238,6 +247,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		DjvuNetBuild.targets = DjvuNetBuild.targets
 		library.version = library.version
 		..\LICENSE.md = ..\LICENSE.md
+		NuGet.config = NuGet.config
 		README.md = README.md
 		Snk.snk = Snk.snk
 	EndProjectSection
