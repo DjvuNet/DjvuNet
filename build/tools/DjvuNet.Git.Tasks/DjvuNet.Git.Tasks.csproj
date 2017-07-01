@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
+  <PropertyGroup>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="BuildMajorVersion.cs" />
+    <None Remove="FileUpdate.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BuildMajorVersion.cs" />
+    <Compile Include="FileUpdate.cs" />
+    <Compile Include="GetDateTime.cs" />
+    <Compile Include="GetLastCommit.cs" />
+  </ItemGroup>
+ 
+  <ItemGroup>
+    <PackageReference Include="LibGit2Sharp.Portable" Version="0.24.10" />
+    <PackageReference Include="Microsoft.Build" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\System.Attributes.NETStandard2.0\System.Attributes.csproj" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
+</Project>

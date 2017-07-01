@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.props))\DjvuNetBuild.Core.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\DjvuNet.Git.Tasks\BuildMajorVersion.cs" Link="BuildMajorVersion.cs" />
+    <Compile Include="..\DjvuNet.Git.Tasks\FileUpdate.cs" Link="FileUpdate.cs" />
+    <Compile Include="..\DjvuNet.Git.Tasks\GetDateTime.cs" Link="GetDateTime.cs" />
+    <Compile Include="..\DjvuNet.Git.Tasks\GetLastCommit.cs" Link="GetLastCommit.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="LibGit2Sharp.Portable" Version="0.24.10" />
+    <PackageReference Include="Microsoft.Build" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.1012" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.1.1012" />
+    <PackageReference Include="MSTest.TestAdapter" Version="1.1.18" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
+  </ItemGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNetBuild.Core.targets" />
+</Project>
