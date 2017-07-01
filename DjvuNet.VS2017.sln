@@ -910,10 +910,112 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Git.Tasks", "build\tools\DjvuNet.Git.Tasks\DjvuNet.Git.Tasks.csproj", "{69F4FB91-6A3F-4159-AAAA-581BABEFFE51}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netcoreapp2.0", "netcoreapp2.0", "{8984CBDB-65B9-4466-A9C3-CB9174AF1403}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netcoreapp2.0\DjvuNet.Git.Tasks.Core.deps.json = Tools\netcoreapp2.0\DjvuNet.Git.Tasks.Core.deps.json
+		Tools\netcoreapp2.0\DjvuNet.Git.Tasks.Core.dll = Tools\netcoreapp2.0\DjvuNet.Git.Tasks.Core.dll
+		Tools\netcoreapp2.0\DjvuNet.Git.Tasks.Core.pdb = Tools\netcoreapp2.0\DjvuNet.Git.Tasks.Core.pdb
+		Tools\netcoreapp2.0\git2-15e1193.dll = Tools\netcoreapp2.0\git2-15e1193.dll
+		Tools\netcoreapp2.0\LibGit2Sharp.dll = Tools\netcoreapp2.0\LibGit2Sharp.dll
+		Tools\netcoreapp2.0\LibGit2Sharp.dll.config = Tools\netcoreapp2.0\LibGit2Sharp.dll.config
+		Tools\netcoreapp2.0\LibGit2Sharp.pdb = Tools\netcoreapp2.0\LibGit2Sharp.pdb
+		Tools\netcoreapp2.0\LibGit2Sharp.xml = Tools\netcoreapp2.0\LibGit2Sharp.xml
+		Tools\netcoreapp2.0\System.Attributes.dll = Tools\netcoreapp2.0\System.Attributes.dll
+		Tools\netcoreapp2.0\System.Attributes.pdb = Tools\netcoreapp2.0\System.Attributes.pdb
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Git.Tasks.Core", "build\tools\DjvuNet.Git.Tasks.Core\DjvuNet.Git.Tasks.Core.csproj", "{E5C158FE-1A9E-488A-8BF4-16BE0E3BE544}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Core", "DjvuNet.Core\DjvuNet.Core.csproj", "{1C3F1B50-507C-48B1-8F1C-821D2DC76E1F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "netstandard2.0", "netstandard2.0", "{71BA8C8D-53BE-4C8A-A2F4-A5D17EECB57E}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netstandard2.0\DjvuNet.Git.Tasks.deps.json = Tools\netstandard2.0\DjvuNet.Git.Tasks.deps.json
+		Tools\netstandard2.0\DjvuNet.Git.Tasks.dll = Tools\netstandard2.0\DjvuNet.Git.Tasks.dll
+		Tools\netstandard2.0\DjvuNet.Git.Tasks.pdb = Tools\netstandard2.0\DjvuNet.Git.Tasks.pdb
+		Tools\netstandard2.0\LibGit2Sharp.dll = Tools\netstandard2.0\LibGit2Sharp.dll
+		Tools\netstandard2.0\LibGit2Sharp.dll.config = Tools\netstandard2.0\LibGit2Sharp.dll.config
+		Tools\netstandard2.0\LibGit2Sharp.pdb = Tools\netstandard2.0\LibGit2Sharp.pdb
+		Tools\netstandard2.0\System.Attributes.dll = Tools\netstandard2.0\System.Attributes.dll
+		Tools\netstandard2.0\System.Attributes.pdb = Tools\netstandard2.0\System.Attributes.pdb
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{CDEA2F21-C919-47F6-9E6E-AD735F5C1025}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "win32", "win32", "{345848A2-6EA8-493B-8F6D-87FC7FF1DB5B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "linux", "linux", "{AF76FE0E-2206-413F-9FC9-5297E08260EF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "osx", "osx", "{43B4ACFE-A051-4845-8C4E-65AC5909A59C}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\lib\osx\libgit2-1196807.dylib = Tools\lib\osx\libgit2-1196807.dylib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{5AC2AD42-1811-449A-B2B8-E0A422CDCDE1}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\lib\win32\x86\git2-1196807.dll = Tools\lib\win32\x86\git2-1196807.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{E761C145-DD79-4DCB-9705-80F6F4B13F21}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\lib\win32\x64\git2-1196807.dll = Tools\lib\win32\x64\git2-1196807.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86_64", "x86_64", "{996EA672-BAAA-40C9-A3F4-AD316689DABD}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\lib\linux\x86_64\libgit2-1196807.so = Tools\lib\linux\x86_64\libgit2-1196807.so
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{B8B55D45-8EE7-4200-9EB6-28C94CB6D2A4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "win32", "win32", "{2474A9EB-3B29-468C-8429-C6209233ABEA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "osx", "osx", "{8036D1FD-B927-4A90-B51C-010201DED84B}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netstandard2.0\lib\osx\libgit2-1196807.dylib = Tools\netstandard2.0\lib\osx\libgit2-1196807.dylib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "linux", "linux", "{04110B33-4C32-431D-8351-8242EC8E35C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86_64", "x86_64", "{AB855C46-F61E-4A1B-8637-C5A5C5C39B22}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netstandard2.0\lib\linux\x86_64\libgit2-1196807.so = Tools\netstandard2.0\lib\linux\x86_64\libgit2-1196807.so
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{4DF40A3A-8985-4DCC-8785-281A62269AA2}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netstandard2.0\lib\win32\x86\git2-1196807.dll = Tools\netstandard2.0\lib\win32\x86\git2-1196807.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{D0071726-455F-431C-87E5-CF91D5319ADD}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netstandard2.0\lib\win32\x64\git2-1196807.dll = Tools\netstandard2.0\lib\win32\x64\git2-1196807.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lib", "lib", "{425B5610-72D2-41D4-B005-F604D9CAEFD2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "win32", "win32", "{3A24B0D4-70CE-4C77-8523-BF7FC8767381}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{25036FED-E5C6-4FE9-85A9-64EE6F39E828}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netcoreapp2.0\lib\win32\x86\git2-1196807.dll = Tools\netcoreapp2.0\lib\win32\x86\git2-1196807.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{C1CC4D3A-8EBD-4169-BEAE-79A57A78300E}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netcoreapp2.0\lib\win32\x64\git2-1196807.dll = Tools\netcoreapp2.0\lib\win32\x64\git2-1196807.dll
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "osx", "osx", "{6960D284-AC4D-4946-82E8-70AE25328564}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netcoreapp2.0\lib\osx\libgit2-1196807.dylib = Tools\netcoreapp2.0\lib\osx\libgit2-1196807.dylib
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "linux", "linux", "{EB61D68E-071D-4BEA-8DA4-CF15C6FECA10}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86_64", "x86_64", "{824C1746-69F4-4EF8-9E56-EE098C9056D7}"
+	ProjectSection(SolutionItems) = preProject
+		Tools\netcoreapp2.0\lib\linux\x86_64\libgit2-1196807.so = Tools\netcoreapp2.0\lib\linux\x86_64\libgit2-1196807.so
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -1253,6 +1355,28 @@ Global
 		{69F4FB91-6A3F-4159-AAAA-581BABEFFE51} = {28AC0A0B-0FBC-41BC-920E-D48ADB98A22D}
 		{8984CBDB-65B9-4466-A9C3-CB9174AF1403} = {7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}
 		{E5C158FE-1A9E-488A-8BF4-16BE0E3BE544} = {28AC0A0B-0FBC-41BC-920E-D48ADB98A22D}
+		{71BA8C8D-53BE-4C8A-A2F4-A5D17EECB57E} = {7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}
+		{CDEA2F21-C919-47F6-9E6E-AD735F5C1025} = {7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}
+		{345848A2-6EA8-493B-8F6D-87FC7FF1DB5B} = {CDEA2F21-C919-47F6-9E6E-AD735F5C1025}
+		{AF76FE0E-2206-413F-9FC9-5297E08260EF} = {CDEA2F21-C919-47F6-9E6E-AD735F5C1025}
+		{43B4ACFE-A051-4845-8C4E-65AC5909A59C} = {CDEA2F21-C919-47F6-9E6E-AD735F5C1025}
+		{5AC2AD42-1811-449A-B2B8-E0A422CDCDE1} = {345848A2-6EA8-493B-8F6D-87FC7FF1DB5B}
+		{E761C145-DD79-4DCB-9705-80F6F4B13F21} = {345848A2-6EA8-493B-8F6D-87FC7FF1DB5B}
+		{996EA672-BAAA-40C9-A3F4-AD316689DABD} = {AF76FE0E-2206-413F-9FC9-5297E08260EF}
+		{B8B55D45-8EE7-4200-9EB6-28C94CB6D2A4} = {71BA8C8D-53BE-4C8A-A2F4-A5D17EECB57E}
+		{2474A9EB-3B29-468C-8429-C6209233ABEA} = {B8B55D45-8EE7-4200-9EB6-28C94CB6D2A4}
+		{8036D1FD-B927-4A90-B51C-010201DED84B} = {B8B55D45-8EE7-4200-9EB6-28C94CB6D2A4}
+		{04110B33-4C32-431D-8351-8242EC8E35C0} = {B8B55D45-8EE7-4200-9EB6-28C94CB6D2A4}
+		{AB855C46-F61E-4A1B-8637-C5A5C5C39B22} = {04110B33-4C32-431D-8351-8242EC8E35C0}
+		{4DF40A3A-8985-4DCC-8785-281A62269AA2} = {2474A9EB-3B29-468C-8429-C6209233ABEA}
+		{D0071726-455F-431C-87E5-CF91D5319ADD} = {2474A9EB-3B29-468C-8429-C6209233ABEA}
+		{425B5610-72D2-41D4-B005-F604D9CAEFD2} = {8984CBDB-65B9-4466-A9C3-CB9174AF1403}
+		{3A24B0D4-70CE-4C77-8523-BF7FC8767381} = {425B5610-72D2-41D4-B005-F604D9CAEFD2}
+		{25036FED-E5C6-4FE9-85A9-64EE6F39E828} = {3A24B0D4-70CE-4C77-8523-BF7FC8767381}
+		{C1CC4D3A-8EBD-4169-BEAE-79A57A78300E} = {3A24B0D4-70CE-4C77-8523-BF7FC8767381}
+		{6960D284-AC4D-4946-82E8-70AE25328564} = {425B5610-72D2-41D4-B005-F604D9CAEFD2}
+		{EB61D68E-071D-4BEA-8DA4-CF15C6FECA10} = {425B5610-72D2-41D4-B005-F604D9CAEFD2}
+		{824C1746-69F4-4EF8-9E56-EE098C9056D7} = {EB61D68E-071D-4BEA-8DA4-CF15C6FECA10}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B74125B6-8852-4614-8584-A1593DF478BF}
