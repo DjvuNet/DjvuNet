@@ -123,13 +123,13 @@ namespace DjvuNet.Wavelet
             return _PData[nms][nls];
         }
 
-        /// <summary> 
+        /// <summary>
         /// Query a data value.
         /// </summary>
         /// <param name="n">
         /// Position to query
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// The data value
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -155,7 +155,7 @@ namespace DjvuNet.Wavelet
             d[n & 0xf] = (short)val;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Write a liftblock. Implementation assumes all coeff buffer values are zeros.
         /// </summary>
         /// <param name="coeff">
@@ -209,7 +209,7 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Zero a block of data
         /// </summary>
         /// <param name="n">

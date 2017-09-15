@@ -45,7 +45,7 @@ namespace DjvuNet.Wavelet
 
         #region Constructors
 
-        /// <summary> 
+        /// <summary>
         /// Creates a new Codec object.
         /// </summary>
         public InterWaveCodec(InterWaveMap map)
@@ -75,8 +75,6 @@ namespace DjvuNet.Wavelet
             int i = 0;
             int[] q = _IwQuant;
             int qidx = 0;
-
-            // Ideal for 128/256 packed integer
 
             for (int j = 0; i < 4; j++)
                 _QuantLow[i++] = q[qidx++];
@@ -124,7 +122,7 @@ namespace DjvuNet.Wavelet
         /// <summary>
         /// Faster version of NextQuant - NextQuantFast has 41,5 % shorter execution time or
         /// alternatively NextQuant is 70,7% slower than NextQuantFast. Optimizations comprise
-        /// hand unrolled loops, removed conditionals and use of same variable int in result 
+        /// hand unrolled loops, removed conditionals and use of same variable int in result
         /// accumulation and as return value
         /// </summary>
         /// <returns></returns>

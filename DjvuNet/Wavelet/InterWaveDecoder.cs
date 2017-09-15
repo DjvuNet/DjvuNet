@@ -44,7 +44,7 @@ namespace DjvuNet.Wavelet
             return 0;
         }
 
-        public void DecodeBuckets(IDataCoder coder, int bit, int band, 
+        public void DecodeBuckets(IDataCoder coder, int bit, int band,
             InterWaveBlock blk, int fbucket, int nbucket)
         {
             int thres = _QuantHigh[band];
@@ -268,7 +268,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        /// Checks if slice is null.
         /// </summary>
         /// <param name="bit"></param>
         /// <param name="band"></param>

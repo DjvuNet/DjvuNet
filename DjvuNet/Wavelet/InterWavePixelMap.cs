@@ -65,6 +65,10 @@ namespace DjvuNet.Wavelet
             _CSlices = _CBytes = _CSerial = 0;
         }
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns></returns>
         public IPixelMap GetPixelMap()
         {
             if (_YMap == null)
@@ -88,7 +92,7 @@ namespace DjvuNet.Wavelet
 
             // Convert image to RGB
             IPixelMap pixelMap = new PixelMap().Init(bytes, height, width);
-            
+
             if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
                 unsafe
@@ -149,7 +153,6 @@ namespace DjvuNet.Wavelet
                 for (int x = width * height; x-- > 0; pixel.IncOffset())
                     pixel.SetGray((sbyte)(127 - pixel.Blue));
             }
-           
 
             return retval;
         }

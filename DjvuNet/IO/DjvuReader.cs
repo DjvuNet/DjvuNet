@@ -76,7 +76,7 @@ namespace DjvuNet
         /// Creates DjvuReader for the resource indicated by Uri
         /// </summary>
         /// <param name="link"></param>
-        public DjvuReader(Uri link) : base(GetWebStream(link)) 
+        public DjvuReader(Uri link) : base(GetWebStream(link))
         {
         }
 
@@ -224,17 +224,17 @@ namespace DjvuNet
         }
 
         /// <summary>
-        /// Reads a 2-sbyte signed integer from the current stream and advances 
+        /// Reads a 2-sbyte signed integer from the current stream and advances
         /// the current position of the stream by two bytes.
         /// </summary>
         /// <returns>
         /// A 2-sbyte signed integer read from the current stream.
         /// </returns>
         /// <exception cref="T:System.IO.EndOfStreamException">
-        /// The end of the stream is reached. 
+        /// The end of the stream is reached.
         /// </exception>
         /// <exception cref="T:System.ObjectDisposedException">
-        /// The stream is closed. 
+        /// The stream is closed.
         /// </exception>
         /// <exception cref="T:System.IO.IOException">An I/O error occurs. </exception>
         /// <filterpriority>2</filterpriority>
@@ -302,20 +302,20 @@ namespace DjvuNet
         }
 
         /// <summary>
-        /// Reads an 8-sbyte unsigned integer from the current stream and advances 
+        /// Reads an 8-sbyte unsigned integer from the current stream and advances
         /// the position of the stream by eight bytes.
         /// </summary>
         /// <returns>
         /// An 8-sbyte unsigned integer read from this stream.
         /// </returns>
         /// <exception cref="T:System.IO.EndOfStreamException">
-        /// The end of the stream is reached. 
+        /// The end of the stream is reached.
         /// </exception>
         /// <exception cref="T:System.IO.IOException">
-        /// An I/O error occurs. 
+        /// An I/O error occurs.
         /// </exception>
         /// <exception cref="T:System.ObjectDisposedException">
-        /// The stream is closed. 
+        /// The stream is closed.
         /// </exception>
         /// <filterpriority>2</filterpriority>
         public ulong ReadUInt64BigEndian()
@@ -369,7 +369,7 @@ namespace DjvuNet
             }
         }
 
-        internal virtual MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, 
+        internal virtual MemoryStream ReadStringBytes(out Encoding enc, out int readBytes,
             bool skipBOM = true, int bufferSize = 1024)
         {
             enc = null;
@@ -379,7 +379,6 @@ namespace DjvuNet
             while (true)
             {
                 int result = Read(buffer, 0, bufferSize);
-                    
                 if (!skipBOM)
                     ms.Write(buffer, 0, result);
                 else
@@ -419,7 +418,7 @@ namespace DjvuNet
 
             if (count < 4)
                 throw new ArgumentOutOfRangeException(
-                    "To verify Encoding Scheme Signature caller should pass buffer with at least 4 bytes.", 
+                    "To verify Encoding Scheme Signature caller should pass buffer with at least 4 bytes.",
                     nameof(count));
 
             if (buffer.Length < count)
