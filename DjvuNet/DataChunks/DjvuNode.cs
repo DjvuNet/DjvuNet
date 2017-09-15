@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DjvuNet;
 using DjvuNet.Errors;
 
@@ -77,12 +78,12 @@ namespace DjvuNet.DataChunks
         public virtual string Name { get { return ChunkType.ToString(); } }
 
         /// <summary>
-        /// 
+        /// True indicates that DjvuNode data were changed but are not saved.
         /// </summary>
         public virtual bool IsDirty { get; set; }
 
         /// <summary>
-        /// Tru if chunk was initialized
+        /// True if chunk was initialized
         /// </summary>
         public virtual bool IsInitialized { get; internal set; }
 
@@ -158,7 +159,7 @@ namespace DjvuNet.DataChunks
         /// <param name="document"></param>
         /// <param name="chunkID"></param>
         /// <param name="length"></param>
-        public DjvuNode(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document, 
+        public DjvuNode(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document,
             string chunkID = "", long length = 0)
         {
             Reader = reader;
@@ -226,7 +227,7 @@ namespace DjvuNet.DataChunks
         }
 
         /// <summary>
-        /// Writes node data using passed writer and advances 
+        /// Writes node data using passed writer and advances
         /// writer position by the length of bytes written.
         /// In the case writeHeader parameter is true node
         /// first writes it's ID, than length in Big Endian
@@ -279,7 +280,7 @@ namespace DjvuNet.DataChunks
             // Check if this is a thumbnail
             if (page is T)
             {
-                return new T[] { (T)page };
+                return new T[] { Unsafe.As<T>(page) };
             }
 
             // No items if not form
@@ -289,7 +290,7 @@ namespace DjvuNet.DataChunks
             }
 
             List<T> results = new List<T>();
-            DjvuFormElement form = (DjvuFormElement)page;
+            DjvuFormElement form = Unsafe.As<DjvuFormElement>(page);
 
             foreach (IDjvuNode chunk in form.Children)
             {

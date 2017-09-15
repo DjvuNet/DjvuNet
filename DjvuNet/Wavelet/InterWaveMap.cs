@@ -74,7 +74,7 @@ namespace DjvuNet.Wavelet
         #region Methods
 
         /// <summary>
-        /// 
+        /// Duplicate InterWaveMap
         /// </summary>
         /// <returns></returns>
         public InterWaveMap Duplicate()
@@ -108,7 +108,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="p"></param>
         /// <param name="pidx"></param>
@@ -130,7 +130,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="p"></param>
         /// <param name="pidx"></param>
@@ -222,7 +222,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        /// Returns bucket count.
         /// </summary>
         /// <returns></returns>
         public int GetBucketCount()
@@ -242,7 +242,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="index"></param>
         /// <param name="img8"></param>
@@ -306,7 +306,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="subsample"></param>
         /// <param name="rect"></param>
@@ -435,7 +435,7 @@ namespace DjvuNet.Wavelet
                 r >>= 1;
             }
 
-            Rectangle nrect = (Rectangle)rect.Duplicate();
+            Rectangle nrect = rect.Duplicate();
             nrect.Translate(-work.Right, -work.Bottom);
 
             for (int i = nrect.Bottom, pidx = (nrect.Bottom * dataw), ridx = index;
