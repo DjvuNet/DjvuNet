@@ -565,7 +565,7 @@ namespace DjvuNet
             }
             else if (form.ChunkType == ChunkType.BM44Form || form.ChunkType == ChunkType.PM44Form)
             {
-                throw new NotImplementedException();
+                // TODO: Debug log or assert
             }
         }
 
