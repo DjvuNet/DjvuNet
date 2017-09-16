@@ -91,8 +91,8 @@ namespace DjvuNet.Artifacts.Build
             {
                 Log.LogErrorFromException(ex, true);
                 throw new AggregateException(
-                    "ArtifactsBuildRequired task failed. Check logged exception details for " + 
-                    "more information on error.", ex);
+                    "ArtifactsBuildRequired task failed. Check logged exception details for " +
+                    "more information.", ex);
             }
 
             return !Log.HasLoggedErrors;
