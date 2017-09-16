@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DjvuNet.Errors;
 using DjvuNet.Parser;
@@ -39,7 +40,7 @@ namespace DjvuNet.DataChunks
         {
             get { return _Children; }
 
-            internal set { _Children = (List<IDjvuNode>) value; }
+            internal set { _Children = Unsafe.As<List<IDjvuNode>>(value); }
         }
 
         private IDjvuReader _data;
@@ -126,7 +127,7 @@ namespace DjvuNet.DataChunks
                     if (parent != null && parent.Children?.Count > 0)
                         _FirstSibling = parent.Children[0];
                     return _FirstSibling;
-                }   
+                }
             }
 
             set
@@ -224,7 +225,7 @@ namespace DjvuNet.DataChunks
         /// <returns></returns>
         public override string ToString()
         {
-            return $"{this.GetType().Name} {{ Name: {Name}; ID: {ChunkID} Offset: {DataOffset}" + 
+            return $"{this.GetType().Name} {{ Name: {Name}; ID: {ChunkID} Offset: {DataOffset}" +
                 $" Length: {Length} Children: {Children?.Count} }}";
         }
 
@@ -239,7 +240,7 @@ namespace DjvuNet.DataChunks
         /// children elements or nodes using supplied writer.
         /// When writeHeader is true (default value) it writes
         /// own header data (ID, Length) and asks it's children
-        /// to do the same. 
+        /// to do the same.
         /// </summary>
         /// <param name="writer"></param>
         /// <param name="writeHeader"></param>
@@ -343,7 +344,7 @@ namespace DjvuNet.DataChunks
                         if (isFormChunk)
                             reader.Position -= 4;
                     }
-                }                
+                }
             }
 
             Children = _TempChildren;
