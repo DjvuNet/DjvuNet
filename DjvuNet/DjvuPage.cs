@@ -11,27 +11,21 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DjvuNet.DataChunks;
 using DjvuNet.Graphics;
 using DjvuNet.JB2;
+using DjvuNet.Utilities;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
 using ColorPalette = DjvuNet.DataChunks.ColorPalette;
 using GBitmap = DjvuNet.Graphics.IBitmap;
 using GMap = DjvuNet.Graphics.IMap;
-using GPixel = DjvuNet.Graphics.IPixel;
 using GPixelReference = DjvuNet.Graphics.IPixelReference;
 using GPixmap = DjvuNet.Graphics.IPixelMap;
 using GRect = DjvuNet.Graphics.Rectangle;
-using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
-using DjvuNet.Configuration;
-using DjvuNet.Utilities;
-using System.Runtime.CompilerServices;
-using System.IO;
-using DjvuNet.Errors;
-using System.Runtime.InteropServices;
 
 namespace DjvuNet
 {
@@ -40,7 +34,6 @@ namespace DjvuNet
     /// </summary>
     public class DjvuPage : INotifyPropertyChanged, IDisposable, IDjvuPage
     {
-        
         #region Private Members
 
         /// <summary>
@@ -552,7 +545,7 @@ namespace DjvuNet
 
         internal DjvuPage() { }
 
-        public DjvuPage(int pageNumber, IDjvuDocument document, DirmComponent header, 
+        public DjvuPage(int pageNumber, IDjvuDocument document, DirmComponent header,
             ITH44Chunk thumbnail, IReadOnlyList<IDjviChunk> includedItems, DjvuFormElement form)
         {
             PageNumber = pageNumber;
@@ -572,7 +565,7 @@ namespace DjvuNet
             }
             else if (form.ChunkType == ChunkType.BM44Form || form.ChunkType == ChunkType.PM44Form)
             {
-
+                // TODO: Debug log or assert
             }
         }
 
@@ -885,7 +878,7 @@ namespace DjvuNet
         public System.Drawing.Bitmap BuildPageImage(bool rebuild = false)
         {
             int subsample = 1;
-            
+
             int width = Width / subsample;
             int height = Height / subsample;
             GMap map = null;
@@ -939,7 +932,7 @@ namespace DjvuNet
 
             return retVal;
 
-            //int[] pixels = new int[width * height];            
+            //int[] pixels = new int[width * height];
 
             //map.FillRgbPixels(0, 0, width, height, pixels, 0, width);
             //var image = ConvertDataToImage(pixels);
@@ -954,7 +947,7 @@ namespace DjvuNet
         /// Gets the image for the page
         /// </summary>
         /// <returns>
-        /// <see cref="System.Drawing.Bitmap"/>Bitmap image. 
+        /// <see cref="System.Drawing.Bitmap"/>Bitmap image.
         /// </returns>
         public unsafe System.Drawing.Bitmap BuildImage(int subsample = 1)
         {
@@ -974,7 +967,7 @@ namespace DjvuNet
 
                 // TODO ETW logging goes here
 
-                stopWatch.Restart();                
+                stopWatch.Restart();
 
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
                 {
@@ -1267,7 +1260,7 @@ namespace DjvuNet
                             if (fgPalette.BlitColors[blitno] == colorindex)
                             {
                                 JB2Shape pshape = fgJb2.GetShape(pblit.ShapeNumber);
-                                GRect xrect = new GRect(pblit.Left, pblit.Bottom, 
+                                GRect xrect = new GRect(pblit.Left, pblit.Bottom,
                                     pshape.Bitmap.Width, pshape.Bitmap.Height);
 
                                 comprect.Recthull(comprect, xrect);
@@ -1376,14 +1369,14 @@ namespace DjvuNet
             if (invertImage == null)
                 return null;
 
-            var image = (System.Drawing.Bitmap)invertImage.Clone();
+            var image = Unsafe.As<System.Drawing.Bitmap>(invertImage.Clone());
 
             BitmapData imageData = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height),
                                                   ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
 
             int height = image.Height;
             int width = image.Width;
-            
+
             for(int y = 0; y < height; y++)
             //Parallel.For(
             //    0,

@@ -27,8 +27,8 @@ namespace DjvuNet.Wavelet
 
         public static bool IsLutInitialized;
 
-        public static float[][] Rgb2YccCoeff = new float[3][] 
-        { 
+        public static float[][] Rgb2YccCoeff = new float[3][]
+        {
             new float[] { 0.304348F, 0.608696F, 0.086956F },
             new float[] { 0.463768F, -0.405797F, -0.057971F },
             new float[] { -0.173913F, -0.347826F,  0.521739F }
@@ -77,7 +77,7 @@ namespace DjvuNet.Wavelet
         private static int Max(int x, int y) { return (x > y) ? x : y; }
 
         /// <summary>
-        /// Forward transform.
+        /// Calculates multi scale iterative decomposition.
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>
@@ -121,7 +121,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// Color transform - extracts Y (luminance) from RGB images
+        /// Color space transform - extracts Y (luminance) from RGB images
         /// </summary>
         /// <param name="pPix"></param>
         /// <param name="width"></param>
@@ -156,7 +156,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// Color transform - extracts Cb (blue chrominance) form RGB images
+        /// Color space transform - extracts Cb (blue chrominance) form RGB images
         /// </summary>
         /// <param name="pPixBuffer"></param>
         /// <param name="width"></param>
@@ -190,7 +190,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// Color transform - extracts Cr (red chrominance) from RGB images
+        /// Color space transform - extracts Cr (red chrominance) from RGB images
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>
@@ -235,7 +235,7 @@ namespace DjvuNet.Wavelet
         /// <param name="outCr"></param>
         /// <param name="outrowsize"></param>
         public static unsafe void Rgb2YCbCr(
-            Pixel* pPixBuff, int width, int height, int rowsize, 
+            Pixel* pPixBuff, int width, int height, int rowsize,
             sbyte* @outY, sbyte* @outCb, sbyte* @outCr, int outrowsize)
         {
 
@@ -268,7 +268,7 @@ namespace DjvuNet.Wavelet
                     }
                     IsLutInitialized = true;
                 }
-                
+
                 Pixel* p2 = pPixBuff;
                 sbyte* pOutY = @outY;
                 sbyte* pOutCb = @outCb;
@@ -295,7 +295,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// Function to convert Pixel buffer from YCbCr color space to RGB color space
+        /// Function for in place conversion of Pixel buffer from YCbCr color space to RGB color space.
         /// </summary>
         /// <param name="pPixBuff">Pointer to Pixel buffer</param>
         /// <param name="width">Width of image in pixels</param>
@@ -324,7 +324,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>
@@ -433,7 +433,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="p"></param>
         /// <param name="width"></param>
@@ -509,7 +509,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>
@@ -617,7 +617,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>

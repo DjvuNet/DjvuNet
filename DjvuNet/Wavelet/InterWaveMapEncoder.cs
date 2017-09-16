@@ -20,7 +20,7 @@ namespace DjvuNet.Wavelet
         #region Public Methods
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="img8"></param>
         /// <param name="imgrowsize"></param>
@@ -57,10 +57,7 @@ namespace DjvuNet.Wavelet
             // Handle bitmask
             if (msk8 != (sbyte*)0)
             {
-                // Interpolate pixels below mask
                 InterpolateMask(data16, Width, Height, BlockWidth, msk8, mskrowsize);
-
-                // Multiscale iterative masked decomposition
                 ForwardMask(data16, Width, Height, BlockWidth, 1, 32, msk8, mskrowsize);
             }
             else
@@ -88,7 +85,7 @@ namespace DjvuNet.Wavelet
                     for (int ii = 0; ii < 32; ii++, pp += BlockWidth)
                         for (int jj = 0; jj < 32; jj++)
                             *pl++ = pp[jj];
-                        // transfer into IW44Image::Block (apply zigzag and scaling)
+                    // transfer into IW44Image::Block (apply zigzag and scaling)
                     blocks[bidx].ReadLiftBlock(liftblock);
                     bidx++;
                 }
@@ -97,7 +94,17 @@ namespace DjvuNet.Wavelet
             }
         }
 
-
+        /// <summary>
+        /// Calculates multi scale iterative masked decomposition.
+        /// </summary>
+        /// <param name="data16"></param>
+        /// <param name="w"></param>
+        /// <param name="h"></param>
+        /// <param name="rowsize"></param>
+        /// <param name="begin"></param>
+        /// <param name="end"></param>
+        /// <param name="mask8"></param>
+        /// <param name="mskrowsize"></param>
         public static unsafe void ForwardMask(short* data16, int w, int h, int rowsize,
             int begin, int end, sbyte* mask8, int mskrowsize)
         {
@@ -218,7 +225,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        /// Interpolates pixels below mask in mixed raster image.
         /// </summary>
         /// <param name="data16"></param>
         /// <param name="w"></param>
@@ -348,7 +355,7 @@ namespace DjvuNet.Wavelet
 
 
         /// <summary>
-        /// 
+        /// Decreases image resolution.
         /// </summary>
         /// <param name="res"></param>
         public void Slashres(int res)

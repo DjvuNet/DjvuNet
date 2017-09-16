@@ -11,12 +11,12 @@ namespace DjvuNet.Wavelet
     public class InterWaveEncoder : InterWaveCodec
     {
 
-        #region Constans
+        #region Constants
 
         /// <summary>
         /// Norm of all wavelets (for db estimation)
         /// </summary>
-        public static readonly float[] iw_norm = new float [] 
+        public static readonly float[] iw_norm = new float []
         {
             2.627989e+03F,
             1.832893e+02F, 1.832959e+02F, 5.114690e+01F,
@@ -51,7 +51,7 @@ namespace DjvuNet.Wavelet
         #region Methods
 
         /// <summary>
-        /// 
+        /// Encodes Map slices.
         /// </summary>
         /// <param name="zp"></param>
         /// <returns></returns>
@@ -77,7 +77,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        /// Checks if slice is null.
         /// </summary>
         /// <param name="bit"></param>
         /// <param name="band"></param>
@@ -204,7 +204,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// Function codes a sequence of buckets in a given block
+        /// Encodes a sequence of buckets in a given block.
         /// </summary>
         /// <param name="zp"></param>
         /// <param name="bit"></param>
@@ -377,7 +377,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        /// Estimates image quality in dB.
         /// </summary>
         /// <param name="frac"></param>
         /// <returns></returns>
@@ -534,7 +534,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// 
+        /// Finishes slice encoding and advances to next slice.
         /// </summary>
         /// <param name="zp"></param>
         /// <returns></returns>

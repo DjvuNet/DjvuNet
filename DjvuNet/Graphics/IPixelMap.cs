@@ -10,7 +10,7 @@
 
         void Blit(IBitmap bm, int xpos, int ypos, IPixel color);
 
-        void Downsample(IMap2 src, int subsample, Rectangle pdr);
+        void Downsample(IMap2 src, int subsample, Rectangle targetRect);
 
         void Downsample43(IMap2 src, Rectangle pdr);
 
