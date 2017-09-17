@@ -86,12 +86,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj">
-    </ProjectReference>
-    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj">
-    </ProjectReference>
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
-    </ProjectReference>
+    <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj"/>
+    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj"/>
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
