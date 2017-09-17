@@ -66,8 +66,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
-    </ProjectReference>
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -81,6 +80,6 @@
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
-  <Import Project="DjvuNet.DjvuLibre.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)DjvuNet.DjvuLibre.targets" />
 
 </Project>
