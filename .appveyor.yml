@@ -12,7 +12,7 @@ configuration:
 
 branches:
   only:
-    - parser_archit
+    - upgradeprojects
     - master
 
 # clone directory
@@ -21,7 +21,7 @@ clone_folder: c:\projects\djvunet
 # Force git 1 commit depth repo which is equivalent to zip download
 # but has git repo with last commit - it allows to retrieve commit hash
 # during build and using it for assembly attributes initialization
-# clone_depth: 10 
+# clone_depth: 10
 
 # block DjvuNet testing until test data committed and described
 test:
@@ -34,7 +34,7 @@ matrix:
 
 cache:
     - packages -> **\packages.config
-#    - artifacts -> artifacts.sha256  
+#    - artifacts -> artifacts.sha256
 
 ############################################################################
 #
