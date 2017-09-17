@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
-  <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
@@ -11,6 +10,7 @@
     <RootNamespace>DjvuNet.DjvuLibre.Tests</RootNamespace>
     <AssemblyName>DjvuNet.DjvuLibre.Tests</AssemblyName>
     <TestProjectType>UnitTest</TestProjectType>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -27,30 +27,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="xunit.abstractions, Version=2.0.0.0, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <HintPath>..\packages\xunit.abstractions.2.0.1\lib\net35\xunit.abstractions.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="xunit.assert, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <HintPath>..\packages\xunit.assert.2.2.0\lib\netstandard1.1\xunit.assert.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="xunit.core, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <HintPath>..\packages\xunit.extensibility.core.2.2.0\lib\netstandard1.1\xunit.core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="xunit.execution.desktop, Version=2.2.0.3545, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
-      <HintPath>..\packages\xunit.extensibility.execution.2.2.0\lib\net452\xunit.execution.desktop.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="DjvuPageInfoTests.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
@@ -65,9 +41,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.console" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.msbuild" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\DjvuNet.DjvuLibre.Helper.Tests\DjvuNet.DjvuLibre.Helper.Tests.csproj" />
     <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
+    <NativeReference Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"/>
   </ItemGroup>
 
   <ItemGroup>
