@@ -18,20 +18,21 @@
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
   </ItemGroup>
+
   <ItemGroup>
     <None Include="App.config" />
     <None Include="TestFiles\Mcguffey%27s_Primer.djvu" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp.Portable" Version="0.24.10" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="xunit" Version="2.2.0" />
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj">
-    </ProjectReference>
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj">
-    </ProjectReference>
+    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj" />
+    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 
   <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />

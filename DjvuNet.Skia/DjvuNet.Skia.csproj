@@ -26,11 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="SkiaSharp, Version=1.59.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
-      <HintPath>..\packages\SkiaSharp.1.59.1\lib\net45\SkiaSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
+    <PackageReference Include="SkiaSharp" Version="1.59.0.0"/>
   </ItemGroup>
 
   <ItemGroup>
