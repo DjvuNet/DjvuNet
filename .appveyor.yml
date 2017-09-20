@@ -48,10 +48,10 @@ init:
 install:
     - cmd: cd c:\projects\djvunet
     - cmd: git clone https://github.com/DjvuNet/DjVuLibre.git
-    - cmd: git clone https://github.com/CoreCompat/System.Drawing.git CoreCompat/System.Drawing
-    - cmd: cd CoreCompat/System.Drawing
-    - powershell: .\clone-mono.ps1
-    - cmd: cd c:\projects\djvunet
+ #   - cmd: git clone https://github.com/CoreCompat/System.Drawing.git CoreCompat/System.Drawing
+ #   - cmd: cd CoreCompat/System.Drawing
+ #   - powershell: .\clone-mono.ps1
+ #   - cmd: cd c:\projects\djvunet
     - appveyor DownloadFile https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
     - cmd: 7z x -oartifacts artifacts.zip
 
