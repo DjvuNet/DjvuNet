@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
@@ -26,7 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="1.59.0.0"/>
+    <PackageReference Include="SkiaSharp" Version="1.59.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +40,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj" />
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 

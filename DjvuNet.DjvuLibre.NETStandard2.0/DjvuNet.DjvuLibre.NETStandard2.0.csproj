@@ -1,14 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.props))\DjvuNetBuild.Core.props" />
+
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>DjvuNet.DjvuLibre</RootNamespace>
+    <NETStandardImplicitPackageVersion>2.0.0</NETStandardImplicitPackageVersion>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
+
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
@@ -35,7 +41,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AssemblyName>DjvuNet.DjvuLibre</AssemblyName>
   </PropertyGroup>
-  
+
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\**\*.cs" />
   </ItemGroup>
@@ -53,9 +59,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
+    <ProjectReference Include="../DjVuLibre/win32/djvulibre/libdjvulibre/libdjvulibre.vcxproj" />
   </ItemGroup>
 
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.Core.targets" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
 
 </Project>
