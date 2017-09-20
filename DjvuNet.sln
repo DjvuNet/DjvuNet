@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet", "DjvuNet\DjvuNet.csproj", "{E681B178-E5F8-4782-89C8-F32720B1464A}"
 EndProject
@@ -877,8 +877,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Bzz", "Utilities\DjvuNet.Bzz\DjvuNet.Bzz.csproj", "{1DB249CA-99B3-45D1-B045-AE9434115D9B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Skia", "DjvuNet.Skia\DjvuNet.Skia.csproj", "{D24422FE-5D89-474D-807B-850E92D1EF36}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.DjvuLibre.Helper.Tests", "DjvuNet.DjvuLibre.Helper.Tests\DjvuNet.DjvuLibre.Helper.Tests.csproj", "{FCECDFF8-938C-4F1F-B47F-55C28D482D5E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Git.Tasks", "build\tools\DjvuNet.Git.Tasks\DjvuNet.Git.Tasks.csproj", "{004B17AF-8587-4793-B838-803799BFC587}"
@@ -1032,18 +1030,6 @@ Global
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x64.Build.0 = Release|x64
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.ActiveCfg = Release|x86
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B}.Release|x86.Build.0 = Release|x86
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Debug|x64.ActiveCfg = Debug|x64
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Debug|x64.Build.0 = Debug|x64
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Debug|x86.ActiveCfg = Debug|x86
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Debug|x86.Build.0 = Debug|x86
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Release|x64.ActiveCfg = Release|x64
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Release|x64.Build.0 = Release|x64
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Release|x86.ActiveCfg = Release|x86
-		{D24422FE-5D89-474D-807B-850E92D1EF36}.Release|x86.Build.0 = Release|x86
 		{FCECDFF8-938C-4F1F-B47F-55C28D482D5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FCECDFF8-938C-4F1F-B47F-55C28D482D5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCECDFF8-938C-4F1F-B47F-55C28D482D5E}.Debug|x64.ActiveCfg = Debug|x64
