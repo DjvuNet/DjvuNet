@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <PropertyGroup>
     <TargetFramework>net461</TargetFramework>
@@ -28,10 +28,6 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="ArtifactsBuild.targets" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp.Portable" Version="0.24.10" />
