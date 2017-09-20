@@ -1,20 +1,27 @@
 ﻿<Project>
-  <ItemGroup>
-  </ItemGroup>
+
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Snk.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
+
   <PropertyGroup>
     <BuildingOnNetCore Condition="$(BuildingOnNetCore) == ''">true</BuildingOnNetCore>
   </PropertyGroup>
+
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>$(MSBuildThisFileDirectory)/build/$(Platform)/$(Configuration)/</OutputPath>
+  </PropertyGroup>
+
 </Project>

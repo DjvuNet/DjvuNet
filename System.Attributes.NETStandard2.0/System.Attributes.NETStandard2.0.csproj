@@ -5,6 +5,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>System</RootNamespace>
     <AssemblyName>System.Attributes</AssemblyName>
+    <NETStandardImplicitPackageVersion>2.0.0</NETStandardImplicitPackageVersion>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
