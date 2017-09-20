@@ -3,7 +3,7 @@ DjvuNet
 
 ## ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true)
 
-DjvuNet is a fully managed library written in C# for reading and analyzing Djvu documents. Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
+DjvuNet is an open source library designed to handle DjVu formaat, written in C# for .NET platform. Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
 The so called "Secure DjVu" format is not supported as it's specification was never published. Project was started several years ago
 by [Telavian](https://github.com/Telavian) and after remaining inactive for some time currently is continued at new 
 [GitHub DjvuNet](https://github.com/DjvuNet) location. Current status can be described as a fast code review with 
@@ -12,7 +12,7 @@ in original source. *Code is not production ready.* There are known bugs but it 
 files but they are still only a subset of all DjVu files which can be found out in the wild. 
 Therefore, use it at your own risk and do not blame us for any of your problems.
 
-## Current Developments
+## Current Status
 
 DjvuNet library is not ready for production use. There are several bugs which need to be fixed and missing features which need to be implemented first 
 before library could be treated as production ready. Furthermore, there are some bugs in image decoder that leave some images skewed.
@@ -62,7 +62,6 @@ DjVuLibre used for format support validation is licensed under [GPL v2](https://
 #### Prerequisites
 
 Visual Studio 2017 RTM with at least following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
-(Visual Studio 2015 still works for some scenarios but is unsupported and not recommended)
  
 Git
 
@@ -126,15 +125,14 @@ assemblies under Visual Studio from Test Explorer or using xUnit test runner fro
 
 Performance tests can be run with help of DjvuNetTest project.
 
-### Windows for netstandard2.0 target (alpha)
+### Windows for netstandard2.0 target
 
 #### Prerequisites
 
-Visual Studio 2017 at least v15.3 preview 2 with following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
-VS 2017 version install side by side and preview version can be safely used side by side with RTM versions. 
-Visual Studio 2015 still works for some scenarios but is unsupported and not recommended.
+Visual Studio 2017 at least v15.3 with following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
+VS 2017 versions can be installed side by side and preview version can be safely used side by side with RTM versions. 
 
-.NET Core 2.0 SDK at least preview 1
+.NET Core 2.0 SDK
 
 Git
 
@@ -159,40 +157,17 @@ git clone https://github.com/DjvuNet/DjVuLibre.git
 `````
 DjVuLibre repo is now located in DjVuLibre directory of your DjvuNet repo.
 
-Clone CoreCompat System.Drawing repository
-`````
-git clone https://github.com/CoreCompat/System.Drawing.git CoreCompat/System.Drawing
-`````
-CoreCompat System.Drawing repo is now located in CoreCompat/System.Drawing directory relative to DjvuNet rep root.
-
-Change directory to your CoreCompat System.Drawing repo
-`````
-cd CoreCompat\System.Drawing
-`````
-
-Restore Mono parts required for build
-`````
-powershell -c .\clone-mono.ps1
-`````
-
-Return to DjvuNet repo root
-`````
-cd ..\..
-`````
-
-Build DjvuNet.NETStandard2.0.csproj to get netstandard2.0 compatible binaries or DjvuNet.Core.csproj to get netcoreapp2.0 binaries.
+Build DjvuNet.NETStandard2.0.csproj to get netstandard2.0 binaries or DjvuNet.Core.csproj to get netcoreapp2.0 binaries.
 `````
 cd DjvuNet.Core
 dotnet restore
 dotnet build 
 `````
 
-In general projects with .NETSTandard2.0.csproj and .Core.csproj extensions should be built with dotnet from command line. Building from
-Visual Studi 2017 v15.3 IDE build for this targets fails and supported is planned for first release version of library.
 
 #### Testing
 
-Although all tests are passing on .Net Core 2.0 preview 1 test setup is not streamlined and is a bit involved.
+Although all tests are passing on .Net Core 2.0 test setup is not streamlined and is a bit involved.
 
 Test data are stored in separate repository [artifacts](https://github.com/DjvuNet/artifacts). 
 Clone artifacts repository with git command (run it from DjvuNet repo root directory):
@@ -210,7 +185,15 @@ dotnet restore
 dotnet xunit
 `````
 
-## Issues and Bugs
+## Known Issues
+
+- Tests for .NET Core cannot be run from Visual Studio
+
+- Tests for .NET Standard targeting libraries have to be compiled as netcoreapp2.0 binaries as xunit does not support netstandard2.0 binaries
+
+- Tests for .NET Core need to be sut up manualy by copying libdjvulibre.dll and pdb to test directory with tested binaries
+
+## When You Encounter Issue or Bug
 
 In case of build, test or DjvuNet library usage problems open new issue in [GitHub DjvuNet repo](https://github.com/DjvuNet/DjvuNet/issues) providing
 detailed information on error (logs, command line output, stack trace, minidump) and used system.
