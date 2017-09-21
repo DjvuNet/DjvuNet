@@ -1,5 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿
+<Project>
   <PropertyGroup>
     <HashFilePathValue></HashFilePathValue>
     <ArtifactsDirectoryValue></ArtifactsDirectoryValue>
@@ -9,10 +9,10 @@
   </PropertyGroup>
   <UsingTask TaskName="ArtifactsBuildRequired" 
              TaskFactory="DjvuNet.Artifacts.Build.ArtifactsBuildRequired" 
-             AssemblyFile="Tools/DjvuNet.Artifacts.Build.dll"/>
+             AssemblyFile="Tools/netcoreapp2.0/DjvuNet.Artifacts.Build.Core.dll"/>
   <UsingTask TaskName="ArtifactsBuild"
-          TaskFactory="DjvuNet.Artifacts.Build.ArtifactsBuild"
-          AssemblyFile="Tools/DjvuNet.Artifacts.Build.dll"/>
+          TaskFactory="DjvuNet.Artifacts.Build.ArtifactsBuild.Core"
+          AssemblyFile="Tools/netcoreapp2.0/DjvuNet.Artifacts.Build.Core.dll"/>
   <Target Name="ArtifactsBuildTarget" AfterTargets="AfterBuild">
     <ArtifactsBuildRequired ArtifactsDirectory="$(SolutionDir)artifacts" ArtifactsSearchPattern="*.djvu;*.json"
                              SubdirectoryList="data" SubdirectorySearchPatterns="*"
