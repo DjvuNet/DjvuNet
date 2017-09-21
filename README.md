@@ -1,9 +1,13 @@
 DjvuNet
 =======
 
+### Windows
 ## ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true)
 
-DjvuNet is an open source library designed to process documents encoded with DjVu format. Library is written in C# for .NET platform with 
+### Linux and macOS
+## [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet)
+
+DjvuNet is an open source library designed to process and create documents encoded with DjVu format. Library is written in C# for .NET platform with 
 no external dependencies except for .NET Core target which temporarily up to .NET Core v2.1.0 requires CoreCompat.System.Drawing package. 
 Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
 The so called "Secure DjVu" format is not supported as this specification was never published. Project was started several years ago
@@ -199,6 +203,22 @@ dotnet restore
 dotnet xunit
 `````
 All tests should pass except for skipped.
+
+### Linux for netcore2.0 target
+
+TODO - write docs
+
+### Linux for Mono
+
+TODO - write docs
+
+### macOS for netcore2.0 target
+
+TODO - write docs
+
+### macOS for Mono
+
+TODO - write docs
 
 ## Usage
 
