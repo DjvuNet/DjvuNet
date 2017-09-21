@@ -69,9 +69,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DjvuNet.Core\DjvuNet.Core.csproj" />
+    <ProjectReference Include="..\DjvuNet.Helper.Tests.Core\DjvuNet.Helper.Tests.Core.csproj" />
   </ItemGroup>
 
-  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNetBuild.Core.targets" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNet.Tests\DjvuNet.Tests.targets" />
 
