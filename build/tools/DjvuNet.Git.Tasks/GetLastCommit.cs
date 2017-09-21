@@ -67,9 +67,18 @@ namespace DjvuNet.Git.Tasks
 
             try
             {
-                Repository repo = new Repository(RepoRoot);
-                var commits = repo.Commits;
-                var commit = commits.FirstOrDefault();
+                // This prevents failed builds
+                Commit commit = null;
+
+                try
+                {
+                    Repository repo = new Repository(RepoRoot);
+                    var commits = repo.Commits;
+                    commit = commits.FirstOrDefault();
+                }
+                catch(LibGit2SharpException)
+                {
+                }
 
                 if (commit != null)
                 {
