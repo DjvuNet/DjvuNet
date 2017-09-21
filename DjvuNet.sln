@@ -232,6 +232,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{508EA7BC-4576-4C24-877B-7D7EE4369DA0}"
 	ProjectSection(SolutionItems) = preProject
 		.appveyor.yml = .appveyor.yml
+		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
 		artifacts.sha256 = artifacts.sha256
@@ -881,7 +882,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.DjvuLibre.Helper.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Git.Tasks", "build\tools\DjvuNet.Git.Tasks\DjvuNet.Git.Tasks.csproj", "{004B17AF-8587-4793-B838-803799BFC587}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Git.Tasks.Tests", "build\tools\DjvuNet.Git.Tasks.Tests\DjvuNet.Git.Tasks.Tests.csproj", "{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet.Git.Tasks.Tests", "build\tools\DjvuNet.Git.Tasks.Tests\DjvuNet.Git.Tasks.Tests.csproj", "{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
