@@ -1,0 +1,28 @@
+#
+#
+
+language: csharp
+
+os:
+  - linux
+  - osx
+dist: trusty
+osx_image: xcode8.3
+
+env:
+  global:
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+    - DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+solution: DjvuNet.Core.sln
+
+mono: none
+dotnet: 2.0.0
+dist: trusty
+
+install:
+
+
+script:
+    - git clone https://github.com/DjvuNet/DjvuLibre.git DjvuLibre
+    - dotnet restore DjvuNet.Core.sln
