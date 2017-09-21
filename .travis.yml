@@ -26,3 +26,14 @@ install:
 script:
     - git clone https://github.com/DjvuNet/DjvuLibre.git DjvuLibre
     - dotnet restore DjvuNet.Core.sln
+    - cd DjvuNet.NETStandard2.0
+    - dotnet build
+    - cd ..
+    - cd DjvuNet.Core
+    - dotnet build
+    - cd ..
+    - cd DjvuNet.Tests.NETStandard2.0
+    - dotnet build
+    - cd ..
+    - cd DjvuNet.Wavelet.Tests.NETStandard2.0
+    - dotnet build
