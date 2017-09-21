@@ -6,6 +6,6 @@ namespace DjvuNet.Tests
 {
     public static partial class Util
     {
-        public static string RepoRoot { get { return @"___DJVUNET_ROOT___"; } }
+        public static string RepoRoot { get { return @"@@@DJVUNET_ROOT@@@"; } }
     }
 }
