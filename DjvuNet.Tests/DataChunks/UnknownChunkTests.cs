@@ -20,7 +20,7 @@ namespace DjvuNet.DataChunks.Tests
 
             UnknownChunk unk = new UnknownChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Unknown, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Unknown.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Unknown.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 

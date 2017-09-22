@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             DjviChunk unk = new DjviChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Djvi, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Djvi.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Djvi.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
     }

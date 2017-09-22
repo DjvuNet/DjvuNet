@@ -176,9 +176,9 @@ namespace DjvuNet.Graphics.Tests
             for (int i = 0; i < width * height; i++)
             {
                 pix.SetOffset(i);
-                Assert.Equal(pix.Blue, unchecked((sbyte)(i % 256)));
-                Assert.Equal(pix.Green, 0);
-                Assert.Equal(pix.Red, -1);
+                Assert.Equal(unchecked((sbyte)(i % 256)), pix.Blue);
+                Assert.Equal(0, pix.Green);
+                Assert.Equal(-1, pix.Red);
             }
         }
 
@@ -206,9 +206,9 @@ namespace DjvuNet.Graphics.Tests
                 for (int j = 0; j < width; j++)
                 {
                     pix.SetOffset(i, j);
-                    Assert.Equal(pix.Blue, unchecked((sbyte)((i * width + j) % 256)));
-                    Assert.Equal(pix.Green, 0);
-                    Assert.Equal(pix.Red, -1);
+                    Assert.Equal(unchecked((sbyte)((i * width + j) % 256)), pix.Blue);
+                    Assert.Equal(0, pix.Green);
+                    Assert.Equal(-1, pix.Red);
                 }
             }
         }

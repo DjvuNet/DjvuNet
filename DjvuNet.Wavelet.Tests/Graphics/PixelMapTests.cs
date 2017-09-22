@@ -86,7 +86,7 @@ namespace DjvuNet.Graphics.Tests
         {
             int[] correctionTable = PixelMap.GetGammaCorrection(1.2);
             Assert.NotNull(correctionTable);
-            Assert.Equal(correctionTable.Length, 256);
+            Assert.Equal(256, correctionTable.Length);
         }
 
         [Fact]
@@ -335,7 +335,7 @@ namespace DjvuNet.Graphics.Tests
         public void BenchmarkApplyGammaCorrection()
         {
             sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);
-            
+
             long ticks = 0;
             Stopwatch watch = new Stopwatch();
 
@@ -624,8 +624,8 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(512, 512, Pixel.BluePixel);
             var map2 = CreateInitVerifyPixelMap(1024, 1024, Pixel.GreenPixel);
             map.Downsample43(map2, map.BoundingRectangle);
-            Assert.Equal(map.Width, 512);
-            Assert.Equal(map.Height, 512);
+            Assert.Equal(512, map.Width);
+            Assert.Equal(512, map.Height);
             Assert.Equal(map.CreateGPixelReference(256).ToPixel(), Pixel.GreenPixel);
         }
 
@@ -634,7 +634,7 @@ namespace DjvuNet.Graphics.Tests
         {
             var map = CreateInitVerifyPixelMap(512, 512, Pixel.BluePixel);
             var map2 = CreateInitVerifyPixelMap(1024, 1024, Pixel.GreenPixel);
-            Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", 
+            Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect",
                 () => map.Downsample43(map2, new Rectangle { Left = 0, Bottom = 0, Top = -100, Right = -2048}));
         }
 
@@ -656,7 +656,7 @@ namespace DjvuNet.Graphics.Tests
             map.Fill(map2, 8, 8);
 
             var pix3 = map.CreateGPixelReference(0);
-            pix3.SetOffset(8, 12);            
+            pix3.SetOffset(8, 12);
             Assert.Equal(pix3.ToPixel().ToString(), Pixel.BluePixel.ToString());
 
             var pix4 = map.CreateGPixelReference(0);

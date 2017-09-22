@@ -23,7 +23,7 @@ namespace DjvuNet.DataChunks.Tests
 
             FG44Chunk unk = new FG44Chunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.FG44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.FG44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.FG44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -37,7 +37,7 @@ namespace DjvuNet.DataChunks.Tests
 
             FG44Chunk unk = new FG44Chunk(readerMock.Object, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.FG44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.FG44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.FG44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);
@@ -112,6 +112,7 @@ namespace DjvuNet.DataChunks.Tests
             }
         }
 
+        [Fact]
         public void ForegroundImageTest002()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "test037C_P01.fg44");
@@ -124,7 +125,7 @@ namespace DjvuNet.DataChunks.Tests
 
                 var image = th.ForegroundImage;
                 Assert.NotNull(image);
-                Assert.IsType<InterWavePixelMap>(image);
+                Assert.IsType<InterWavePixelMapDecoder>(image);
                 Assert.True(image.Width >= 0 && image.Height > 0);
 
                 var map = new InterWavePixelMapDecoder();

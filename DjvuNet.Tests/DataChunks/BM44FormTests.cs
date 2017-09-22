@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             BM44Form unk = new BM44Form(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.BM44Form, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.BM44Form.ToString(), unk.Name);
+            Assert.Equal(ChunkType.BM44Form.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 

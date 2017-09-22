@@ -36,7 +36,7 @@ namespace DjvuNet.Tests
                     for (int i = 1; i <= 77; i++)
                     {
                         string filePath = GetTestFilePath(i);
-                        filePath = Path.Combine(Util.ArtifactsJsonPath, 
+                        filePath = Path.Combine(Util.ArtifactsJsonPath,
                             Path.GetFileNameWithoutExtension(filePath) + ".json");
 
                         JsonConverter[] converters = new JsonConverter[]
@@ -92,7 +92,7 @@ namespace DjvuNet.Tests
 
         public static void FailOnException(Exception ex, string message, params object[] data)
         {
-            string info = $"\nTest Failed -> Unexpected Exception: " + 
+            string info = $"\nTest Failed -> Unexpected Exception: " +
                 $"{DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")}\n\n";
 
             if (data != null && data.Length > 0)
@@ -332,7 +332,7 @@ namespace DjvuNet.Tests
             {
                 uint* longCheckSize = (uint*)(image1.Scan0 + bufferSize - remainder);
 
-                uint* lp = (uint*)image1.Scan0;    
+                uint* lp = (uint*)image1.Scan0;
                 uint* rp = (uint*)image2.Scan0;
 
                 for (; lp < longCheckSize; lp++, rp++)

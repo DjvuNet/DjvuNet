@@ -31,7 +31,7 @@ namespace DjvuNet.DataChunks.Tests
                         jsonDoc,
                     });
 
-                } 
+                }
                 return retVal;
             }
         }
@@ -64,7 +64,7 @@ namespace DjvuNet.DataChunks.Tests
         {
             FGbzChunk chunk = new FGbzChunk();
             Assert.Equal<ChunkType>(ChunkType.FGbz, chunk.ChunkType);
-            Assert.Equal<String>("FGbz", chunk.Name);
+            Assert.Equal("FGbz", chunk.Name);
         }
 
         [Fact()]
@@ -118,7 +118,7 @@ namespace DjvuNet.DataChunks.Tests
                 Assert.Equal<int>((int)testChunk.Colors.Value, (int) chunk.Palette?.PaletteColors?.Length);
             }
         }
-        
+
         [Fact()]
         public void ColorPalette001()
         {

@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
             Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
             Mock<IDjvuReader> readerMock = new Mock<IDjvuReader>();
 
-            nodeMock.Object.DataOffset = 1024; 
+            nodeMock.Object.DataOffset = 1024;
             nodeMock.Object.Reader = readerMock.Object;
 
             Assert.False(nodeMock.Object.IsInitialized);
@@ -101,7 +101,7 @@ namespace DjvuNet.DataChunks.Tests
 
                 string nodeName = Encoding.UTF8.GetString(testBuffer, 0, 4);
                 Assert.False(String.IsNullOrWhiteSpace(nodeName));
-                Assert.Equal<string>(chunkID, nodeName);
+                Assert.Equal(chunkID, nodeName);
 
                 byte[] lengthBytes = new byte[4];
                 Buffer.BlockCopy(testBuffer, 4, lengthBytes, 0, 4);
@@ -111,11 +111,11 @@ namespace DjvuNet.DataChunks.Tests
 
                 string startOfData = Encoding.ASCII.GetString(testBuffer, 8, startData.Length);
                 Assert.False(String.IsNullOrWhiteSpace(startOfData));
-                Assert.Equal<string>(startOfChunkData, startOfData);
+                Assert.Equal(startOfChunkData, startOfData);
 
                 string endData = Encoding.ASCII.GetString(testBuffer, 8 + (int)nodeMock.Object.Length - endOfData.Length, endOfData.Length);
                 Assert.False(String.IsNullOrWhiteSpace(endData));
-                Assert.Equal<string>(endOfChunkData, endData);
+                Assert.Equal(endOfChunkData, endData);
             }
         }
 
