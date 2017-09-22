@@ -24,8 +24,9 @@ install:
 
 
 script:
-    - git clone --depth 1 https://github.com/DjvuNet/DjvuLibre.git DjvuNet/DjvuLibre
-    - git clone --depth 1 https://github.com/DjvuNet/artifacts.git DjvuNet/artifacts
+    - git clone --depth 1 https://github.com/DjvuNet/DjvuLibre.git DjvuLibre
+    - git clone --depth 1 https://github.com/DjvuNet/artifacts.git artifacts
+    - ls -li
     - dotnet restore DjvuNet.Core.sln
     - cd DjvuNet.NETStandard2.0
     - dotnet build
