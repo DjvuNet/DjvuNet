@@ -34,10 +34,10 @@ script:
     - cd DjvuNet.Core
     - dotnet build
     - cd ..
-    - cd DjvuNet.Tests.NETStandard2.0
+    - cd DjvuNet.Tests.Core
     - dotnet build
     - dotnet xunit
     - cd ..
-    - cd DjvuNet.Wavelet.Tests.NETStandard2.0
+    - cd DjvuNet.Wavelet.Tests.Core
     - dotnet build
     - dotnet xunit
