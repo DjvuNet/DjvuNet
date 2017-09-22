@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             DjbzChunk unk = new DjbzChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Djbz, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Djbz.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Djbz.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -31,7 +31,7 @@ namespace DjvuNet.DataChunks.Tests
 
             DjbzChunk unk = new DjbzChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Djbz, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Djbz.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Djbz.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             JB2.JB2Dictionary dictionary = new JB2.JB2Dictionary();

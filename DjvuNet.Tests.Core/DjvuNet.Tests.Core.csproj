@@ -14,21 +14,27 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>DjvuNet.Tests.Core.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>DjvuNet.Tests.Core.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisRuleSet>DjvuNet.Tests.Core.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>DjvuNet.Tests.Core.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
+    <CodeAnalysisRuleSet>DjvuNet.Tests.Core.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <PlatformTarget>x64</PlatformTarget>
+    <CodeAnalysisRuleSet>DjvuNet.Tests.Core.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -52,7 +58,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="DjvuNet.Tests.Core.ruleset" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Properties\AssemblyInfo.Template.cs" />
+    <None Include="App.config" />
+    <None Include="DjvuNet.Tests.Core.targets" />
   </ItemGroup>
 
   <ItemGroup>
@@ -60,7 +72,6 @@
     <PackageReference Include="Moq" Version="4.7.99" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="xunit" Version="2.3.0-beta5-build3769" />
-    <PackageReference Include="xunit.analyzers" Version="0.7.0" />
     <PackageReference Include="xunit.runner.console" Version="2.3.0-beta5-build3769" />
     <PackageReference Include="xunit.runner.msbuild" Version="2.3.0-beta5-build3769" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-beta5-build3769" />
@@ -73,6 +84,6 @@
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNetBuild.Core.targets" />
-  <!--<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNet.Tests\DjvuNet.Tests.targets" />-->
+  <!--<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNet.Tests.Core.targets" />-->
 
 </Project>

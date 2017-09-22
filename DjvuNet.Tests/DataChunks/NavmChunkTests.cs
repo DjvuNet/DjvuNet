@@ -34,7 +34,7 @@ namespace DjvuNet.DataChunks.Tests
                 return retVal;
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(NavmTestData))]
         public void NavmChunk_Theory(string file)
@@ -128,7 +128,7 @@ namespace DjvuNet.DataChunks.Tests
 
             NavmChunk unk = new NavmChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Navm, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Navm.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Navm.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -142,7 +142,7 @@ namespace DjvuNet.DataChunks.Tests
 
             NavmChunk unk = new NavmChunk(readerMock.Object, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.Navm, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Navm.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Navm.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);

@@ -22,7 +22,7 @@ namespace DjvuNet.DataChunks.Tests
 
             BM44Chunk unk = new BM44Chunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.BM44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -43,7 +43,7 @@ namespace DjvuNet.DataChunks.Tests
             {
                 BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
                 Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
-                Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+                Assert.Equal(ChunkType.BM44.ToString(), unk.Name);
                 Assert.Equal<long>(0, unk.DataOffset);
                 Assert.Equal<long>(reader.Length, unk.Length);
 
@@ -60,7 +60,7 @@ namespace DjvuNet.DataChunks.Tests
             {
                 BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
                 Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
-                Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+                Assert.Equal(ChunkType.BM44.ToString(), unk.Name);
                 Assert.Equal<long>(0, unk.DataOffset);
                 Assert.Equal<long>(reader.Length, unk.Length);
 
@@ -83,7 +83,7 @@ namespace DjvuNet.DataChunks.Tests
             {
                 BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
                 Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
-                Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+                Assert.Equal(ChunkType.BM44.ToString(), unk.Name);
                 Assert.Equal<long>(0, unk.DataOffset);
                 Assert.Equal<long>(reader.Length, unk.Length);
 
@@ -103,7 +103,7 @@ namespace DjvuNet.DataChunks.Tests
 
             BM44Chunk unk = new BM44Chunk(readerMock.Object, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.BM44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.BM44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);

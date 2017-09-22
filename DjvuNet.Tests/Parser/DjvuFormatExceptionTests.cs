@@ -22,7 +22,7 @@ namespace DjvuNet.Tests
 
             Assert.NotNull(exception);
             Assert.NotNull(exception.Message);
-            Assert.Equal<string>(testStr, exception.Message);
+            Assert.Equal(testStr, exception.Message);
             Assert.Null(exception.InnerException);
         }
 
@@ -36,7 +36,7 @@ namespace DjvuNet.Tests
 
             Assert.NotNull(exception);
             Assert.NotNull(exception.Message);
-            Assert.Equal<string>(testStr, exception.Message);
+            Assert.Equal(testStr, exception.Message);
             Assert.NotNull(exception.InnerException);
             Assert.Same(innerException, exception.InnerException);
         }
@@ -51,7 +51,7 @@ namespace DjvuNet.Tests
             Assert.Null(exception.InnerException);
         }
 
-        [Fact]
+        [Fact, Trait("SkipFramework", "Core")]
         public void DjvuFormatExceptionTest3()
         {
             string innerMessage = "Invalid test message";

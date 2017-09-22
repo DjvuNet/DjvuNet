@@ -72,10 +72,10 @@ namespace DjvuNet.Tests
         /// File search patterns for artifacts root directory. Individual patterns can be separated with semicolon.
         /// </param>
         /// <param name="SubdirectoryList">
-        /// List of subdirectories expressed as relative paths to artifacts directory separated by semicolon 
+        /// List of subdirectories expressed as relative paths to artifacts directory separated by semicolon.
         /// </param>
         /// <param name="SubdirectorySearchPatterns">
-        /// List of subdirectory lists of search patterns. 
+        /// List of subdirectory lists of search patterns.
         /// Each subdirectory list is separated with semicolon and individual directory lists are separated by |</param>
         /// <param name="HashFilePath">
         /// Path to file containing hashes and names with relative paths of all files tracked files in artifacts directory.
@@ -83,7 +83,7 @@ namespace DjvuNet.Tests
         /// <param name="CalculateHashes">
         /// If true hash file should be updated with new hashes at least for one file.
         /// </param>
-        public static void ArtifactsBuildRequired(string ArtifactsDirectory, string ArtifactsSearchPattern, 
+        public static void ArtifactsBuildRequired(string ArtifactsDirectory, string ArtifactsSearchPattern,
             string SubdirectoryList, string SubdirectorySearchPatterns, string HashFilePath, out bool CalculateHashes)
         {
             FileInfo targetnfo = new FileInfo(HashFilePath);
@@ -117,7 +117,7 @@ namespace DjvuNet.Tests
                 for (int i = 0; i < subdirectories.Length; i++)
                 {
                     string d = subdirectories[i];
-                        
+
                     DirectoryInfo subdirInfo = new DirectoryInfo(Path.Combine(ArtifactsDirectory, d));
                     if (subdirInfo.Exists)
                     {

@@ -147,7 +147,7 @@ namespace DjvuNet.Graphics.Tests
                 else
                     Assert.False(bmp.GetBooleanAt(i));
             }
-                
+
         }
 
         [Fact()]
@@ -547,7 +547,7 @@ namespace DjvuNet.Graphics.Tests
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ComputeBoundingBoxTest()
         {
-            
+
         }
     }
 }

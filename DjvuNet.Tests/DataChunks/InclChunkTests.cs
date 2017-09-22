@@ -65,7 +65,7 @@ namespace DjvuNet.DataChunks.Tests
                     .Where(x => x.ID == "INCL" && x.Name == chunk.IncludeID)
                     .FirstOrDefault<DjvuJsonDocument.Chunk>();
                 Assert.NotNull(testChunk);
-                Assert.Equal<string>(testChunk.Name, chunk.IncludeID);
+                Assert.Equal(testChunk.Name, chunk.IncludeID);
             }
         }
     }

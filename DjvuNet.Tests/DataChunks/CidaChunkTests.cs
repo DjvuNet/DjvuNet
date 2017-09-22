@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             CidaChunk unk = new CidaChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Cida, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Cida.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Cida.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -33,7 +33,7 @@ namespace DjvuNet.DataChunks.Tests
 
             CidaChunk unk = new CidaChunk(reader, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.Cida, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Cida.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Cida.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);
