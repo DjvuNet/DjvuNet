@@ -8,6 +8,7 @@
     <AssemblyName>DjvuNet.Tests</AssemblyName>
     <RootNamespace>DjvuNet.Tests</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <NoWarn>1701;1702;1705;8002;xUnit2013</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
@@ -53,26 +54,26 @@
 
   <ItemGroup>
     <Content Include="Properties\AssemblyInfo.Template.cs" />
+    <None Include="App.config" />
+    <None Include="DjvuNet.Tests.Core.targets" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
     <PackageReference Include="Moq" Version="4.7.99" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="xunit" Version="2.3.0-beta5-build3769" />
-    <PackageReference Include="xunit.analyzers" Version="0.7.0" />
-    <PackageReference Include="xunit.runner.console" Version="2.3.0-beta5-build3769" />
-    <PackageReference Include="xunit.runner.msbuild" Version="2.3.0-beta5-build3769" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0-beta5-build3769" />
+    <PackageReference Include="xunit" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.console" Version="2.2.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
     <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.0-beta5-build3769" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DjvuNet.Core\DjvuNet.Core.csproj" />
+    <ProjectReference Include="..\DjvuNet.Helper.Tests.Core\DjvuNet.Helper.Tests.Core.csproj" />
   </ItemGroup>
 
-  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNetBuild.Core.targets" />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNet.Tests\DjvuNet.Tests.targets" />
+  <!--<Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNet.Tests.Core.targets" />-->
 
 </Project>

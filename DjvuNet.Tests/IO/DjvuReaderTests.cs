@@ -241,7 +241,7 @@ namespace DjvuNet.Tests
 
                 var resultU = result as UnicodeEncoding;
                 Assert.NotNull(result);
-                Assert.True(resultU.EncodingName.Contains("Big-Endian"));
+                Assert.Contains("Big-Endian", resultU.EncodingName);
 
                 byte[] bom = resultU.GetPreamble();
                 Assert.NotNull(bom);
@@ -267,7 +267,7 @@ namespace DjvuNet.Tests
 
                 var resultU = result as UnicodeEncoding;
                 Assert.NotNull(result);
-                Assert.False(resultU.EncodingName.Contains("Big-Endian"));
+                Assert.DoesNotContain("Big-Endian", resultU.EncodingName);
 
                 byte[] bom = resultU.GetPreamble();
                 Assert.NotNull(bom);
@@ -293,7 +293,7 @@ namespace DjvuNet.Tests
 
                 var resultU = result as UTF32Encoding;
                 Assert.NotNull(result);
-                Assert.True(resultU.EncodingName.Contains("Big-Endian"));
+                Assert.Contains("Big-Endian", resultU.EncodingName);
 
                 byte[] bom = resultU.GetPreamble();
                 Assert.NotNull(bom);
@@ -319,7 +319,7 @@ namespace DjvuNet.Tests
 
                 var resultU = result as UTF32Encoding;
                 Assert.NotNull(result);
-                Assert.False(resultU.EncodingName.Contains("Big-Endian"));
+                Assert.DoesNotContain("Big-Endian", resultU.EncodingName);
 
                 byte[] bom = resultU.GetPreamble();
                 Assert.NotNull(bom);
@@ -395,7 +395,7 @@ namespace DjvuNet.Tests
             int bufferLength = buffer.Length + 4;
             using (MemoryStream stream = new MemoryStream())
             {
-                Assert.Throws<ArgumentException> ("buffer", 
+                Assert.Throws<ArgumentException> ("buffer",
                     () => DjvuReader.CheckEncodingSignature(buffer, stream, ref bufferLength));
             }
         }
@@ -934,9 +934,9 @@ namespace DjvuNet.Tests
                 Assert.NotNull(result);
                 Assert.False(String.IsNullOrWhiteSpace(result));
                 Assert.True(result.StartsWith("========================================================================================="), "String.StartsWith");
-                Assert.True(result.Contains("Test start - bzz format encoding"));
-                Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
-                Assert.True(result.Contains("Test end bzz format encoding"));
+                Assert.Contains("Test start - bzz format encoding", result);
+                Assert.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is", result);
+                Assert.Contains("Test end bzz format encoding", result);
                 byte[] buffer = Util.ReadFileToEnd(Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.obz"));
                 string expected = new UTF8Encoding(false).GetString(buffer, 0, buffer.Length - 1);
                 Assert.False(String.IsNullOrWhiteSpace(expected));
@@ -962,13 +962,13 @@ namespace DjvuNet.Tests
 
                 Assert.NotNull(result);
                 Assert.False(String.IsNullOrWhiteSpace(result));
-                Assert.True(result.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is"));
+                Assert.Contains("described in ITU-T Recommendation T.44, ISO/IEC 16485. In this model, an image is", result);
 
                 byte[] buffer = Util.ReadFileToEnd(Path.Combine(Util.ArtifactsDataPath, "testbzznbmont.obz"));
                 string expectedResult = new UTF8Encoding(false).GetString(buffer, 0, buffer.Length - 1);
                 Assert.False(String.IsNullOrWhiteSpace(expectedResult));
 
-                Assert.Equal<string>(expectedResult, result);
+                Assert.Equal(expectedResult, result);
             }
         }
 
@@ -1049,7 +1049,7 @@ namespace DjvuNet.Tests
                 stream.Read(testBuffer, 0, testBuffer.Length);
                 Util.AssertBufferEqal(testBuffer, buffer);
             }
-            
+
         }
 
         [Fact()]

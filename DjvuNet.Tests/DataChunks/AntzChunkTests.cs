@@ -43,7 +43,7 @@ namespace DjvuNet.DataChunks.Tests
 
             AntzChunk unk = new AntzChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Antz, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Antz.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Antz.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -61,7 +61,7 @@ namespace DjvuNet.DataChunks.Tests
         }
 
         [Fact]
-        public void AnnotationsTest()  
+        public void AnnotationsTest()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "test004C_P01.antz");
             using (FileStream stream = new FileStream(filePath, FileMode.Open))

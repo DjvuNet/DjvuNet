@@ -2,14 +2,30 @@
   <PropertyGroup>
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
   </PropertyGroup>
-  <UsingTask TaskName="BuildMajorVersion" Condition="$(TargetFramework) == 'netcoreapp2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="GetLastCommit" Condition="$(TargetFramework) == 'netcoreapp2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="GetDateTime" Condition="$(TargetFramework) == 'netcoreapp2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="FileUpdate" Condition="$(TargetFramework) == 'netcoreapp2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="BuildMajorVersion" Condition="$(TargetFramework) == 'netstandard2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="GetLastCommit" Condition="$(TargetFramework) == 'netstandard2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="GetDateTime" Condition="$(TargetFramework) == 'netstandard2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="FileUpdate" Condition="$(TargetFramework) == 'netstandard2.0'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+
+  <!-- .NET Core netcoreapp2.0 target on Non-Windows -->
+  <UsingTask TaskName="BuildMajorVersion" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+  <UsingTask TaskName="GetLastCommit" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+  <UsingTask TaskName="GetDateTime" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+  <UsingTask TaskName="FileUpdate" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+
+  <!-- .NET Core netcoreapp2.0 target on Windows -->
+  <UsingTask TaskName="BuildMajorVersion" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+  <UsingTask TaskName="GetLastCommit" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+  <UsingTask TaskName="GetDateTime" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+  <UsingTask TaskName="FileUpdate" Condition="$(TargetFramework) == 'netcoreapp2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+
+  <!-- .NET Standard netstandard2.0 target on Non-Windows -->
+  <UsingTask TaskName="BuildMajorVersion" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+  <UsingTask TaskName="GetLastCommit" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+  <UsingTask TaskName="GetDateTime" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+  <UsingTask TaskName="FileUpdate" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' != 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll"/>
+
+  <!-- .NET Standard netstandard2.0 target on Windows -->
+  <UsingTask TaskName="BuildMajorVersion" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+  <UsingTask TaskName="GetLastCommit" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+  <UsingTask TaskName="GetDateTime" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+  <UsingTask TaskName="FileUpdate" Condition="$(TargetFramework) == 'netstandard2.0' And '$(OS)' == 'Windows_NT'" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
 
   <Target Name="InjectVersion" BeforeTargets="BeforeBuild">
 
@@ -39,7 +55,7 @@
       <BuildPatch1>$([MsBuild]::Modulo($([MsBuild]::Add($([MsBuild]::Add($(BYear), $(BMonth))), $(BDay))), 100))</BuildPatch1>
       <BuildPatch2>$([MsBuild]::Modulo($([MsBuild]::Add($([MsBuild]::Add($([MsBuild]::Add($(BHour), 260)), $(BMinute))), $(BSecond))), 1000).ToString('00#'))</BuildPatch2>
       <BuildRevision>53217</BuildRevision> -->
-      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
+      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests.Core'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
     </PropertyGroup>
 
     <Message Importance="High"
@@ -49,13 +65,13 @@
           DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.cs"/>
     <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
             DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'"
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests.Core'"
             DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.cs"/>
 
     <ItemGroup>
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.cs' />
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.cs' />
-      <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" />
+      <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests.Core'" />
     </ItemGroup>
 
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_VERSION__" ReplacementText="$(LibraryVersion)"/>
@@ -67,10 +83,11 @@
     <FileUpdate Files="@(WriteFiles)" Regex="// TEMPLATE:.+"
     ReplacementText="// THIS FILE IS AUTOMATICALLY GENERATED DURING BUILD!&#10;// Apply any changes intended to appear in AssemblyInso.cs to 'AssemblyInfo.Template.cs' template,&#10;// in the case of AssemblyInfoCommon.cs file apply changes to AssemblyInfoCommon.Template.cs file in root folder instead."/>
 
-    <FileUpdate Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" Files="@(UtilFiles)" Regex="___DJVUNET_ROOT___" ReplacementText="$(MSBuildThisFileDirectory)"/>
+    <FileUpdate Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests.Core'" Files="@(UtilFiles)" Regex="@@@DJVUNET_ROOT@@@" ReplacementText="$(MSBuildThisFileDirectory)"/>
 
-    <FileUpdate Files="@(UtilFiles)" Regex="// TEMPLATE:.+" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'"
+    <FileUpdate Files="@(UtilFiles)" Regex="// TEMPLATE:.+" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests.Core'"
     ReplacementText="// THIS FILE IS AUTOMATICALLY GENERATED DURING BUILD!&#10;// Apply any changes intended to appear in UtilRoot.cs to 'UtilRoot.Template.cs' template, instead."/>
 
+    <Message Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests.Core'" Text="Updated DjvuNet RepoRoot: $(MSBuildThisFileDirectory)" Importance="high" />
   </Target>
 </Project>

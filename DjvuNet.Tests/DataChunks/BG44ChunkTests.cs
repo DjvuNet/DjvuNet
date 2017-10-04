@@ -44,10 +44,10 @@ namespace DjvuNet.DataChunks.Tests
 
             BG44Chunk unk = new BG44Chunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.BG44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.BG44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.BG44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(BG44TestData))]
         public void ProgressiveDecodeBackground_Theory(string file, long length)
@@ -105,7 +105,7 @@ namespace DjvuNet.DataChunks.Tests
 
             BG44Chunk unk = new BG44Chunk(readerMock.Object, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.BG44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.BG44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.BG44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);

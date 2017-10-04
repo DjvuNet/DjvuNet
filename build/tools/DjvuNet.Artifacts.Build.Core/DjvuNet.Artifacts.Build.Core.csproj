@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.props))\DjvuNetBuild.Core.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeFrameworkVersion>2.0.0</RuntimeFrameworkVersion>
+    <NETStandardImplicitPackageVersion>2.0.0</NETStandardImplicitPackageVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../DjvuNet.Artifacts.Build/ArtifactsBuild.cs" />
+    <Compile Include="../DjvuNet.Artifacts.Build/ArtifactsBuildRequired.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.cs" />
+    <Compile Include="../DjvuNet.Artifacts.Build/Utilities.cs" />
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="LibGit2Sharp.Portable" Version="0.24.10" />
+    <PackageReference Include="Microsoft.Build" Version="15.3.409" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.3.409" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\System.Attributes.NETStandard2.0\System.Attributes.NETStandard2.0.csproj" />
+  </ItemGroup>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.Core.targets))\DjvuNetBuild.Core.targets" />
+
+</Project>

@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             AntaChunk unk = new AntaChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Anta, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Anta.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Anta.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
     }

@@ -1,0 +1,94 @@
+﻿<Project>
+  <UsingTask
+    TaskName="ArtifactsBuildRequired"
+    TaskFactory="CodeTaskFactory"
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Core.Tasks.dll" >
+    <ParameterGroup>
+      <HashFilePath ParameterType="System.String" Required="true"/>
+      <ArtifactsDirectory ParameterType="System.String" Required="true"/>
+      <ArtifactsSearchPattern ParameterType="System.String" Required="true"/>
+      <SubdirectoryList ParameterType="System.String" Required="true" />
+      <SubdirectorySearchPatterns ParameterType="System.String" Required="true"/>
+      <CalculateHashes ParameterType="System.Boolean" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Linq" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+        try
+        {
+            FileInfo targetnfo = new FileInfo(HashFilePath);
+            if (!targetnfo.Exists)
+                CalculateHashes = true;
+            else
+            {
+                DirectoryInfo dirInfo = new DirectoryInfo(ArtifactsDirectory);
+                FileSystemInfo youngestOne = null;
+                if (dirInfo.Exists)
+                {
+                    string[] patterns = ArtifactsSearchPattern.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string s in patterns)
+                    {
+                        FileInfo artFile = dirInfo.GetFiles(s, SearchOption.TopDirectoryOnly)
+                            .OrderByDescending(file => file.LastWriteTimeUtc).FirstOrDefault();
+                        if (youngestOne == null || youngestOne.LastWriteTimeUtc < artFile.LastWriteTimeUtc)
+                            youngestOne = artFile;
+                    }
+                }
+
+                string[] subdirectories = SubdirectoryList.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] subPatterns = SubdirectorySearchPatterns.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                string[][] subsubPatterns = new string[subPatterns.Length][];
+                for (int i = 0; i < subPatterns.Length; i++)
+                {
+                    string[] subsubP = subPatterns[i].Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                    subsubPatterns[i] = subsubP;
+                }
+
+                for (int i = 0; i < subdirectories.Length; i++)
+                {
+                    string d = subdirectories[i];
+
+                    DirectoryInfo subdirInfo = new DirectoryInfo(Path.Combine(ArtifactsDirectory, d));
+                    if (subdirInfo.Exists)
+                    {
+                        string[] patterns = new string[] { "*" };
+                        if (i < subsubPatterns.Length)
+                            patterns = subsubPatterns[i];
+
+                        foreach (string pattern in patterns)
+                        {
+                            FileSystemInfo fInfo = subdirInfo.GetFiles(pattern, SearchOption.TopDirectoryOnly)
+                                .OrderByDescending(file => file.LastWriteTimeUtc).FirstOrDefault();
+                            if (youngestOne.LastWriteTimeUtc < fInfo.LastWriteTimeUtc)
+                                youngestOne = fInfo;
+                        }
+                    }
+                }
+                CalculateHashes = targetnfo.LastWriteTimeUtc < youngestOne.LastWriteTimeUtc;
+            }
+        }
+        catch(Exception ex)
+        {
+            Log.LogErrorFromException(ex, true);
+            throw new AggregateException(
+                "ArtifactsBuildRequired task failed. Check logged exception details for " +
+                "more information on error.", ex);
+        }
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+  <Target Name="AfterBuild">
+    <ArtifactsBuildRequired ArtifactsDirectory="$(SolutionDir)artifacts" ArtifactsSearchPattern="*.djvu;*.json"
+                             SubdirectoryList="data;json" SubdirectorySearchPatterns="*;*.json"
+                             HashFilePath="$(SolutionDir)artifacts.sha256">
+      <Output TaskParameter="CalculateHashes" PropertyName="BuildArtifacts"/>
+    </ArtifactsBuildRequired>
+    <Message Importance="High" Text="Building Artifacts $(BuildArtifacts)" />
+    <Exec Condition="$(BuildArtifacts)"
+      Command="$(SolutionDir)Tools\7z h -scrcSHA256 -xr!.* -xr!dumps $(SolutionDir)artifacts &gt; $(SolutionDir)artifacts.sha256">
+    </Exec>
+  </Target>
+</Project>

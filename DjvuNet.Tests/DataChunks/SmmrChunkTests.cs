@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             SmmrChunk unk = new SmmrChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Smmr, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Smmr.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Smmr.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -33,7 +33,7 @@ namespace DjvuNet.DataChunks.Tests
 
             SmmrChunk unk = new SmmrChunk(readerMock.Object, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.Smmr, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Smmr.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Smmr.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             Assert.Throws<NotImplementedException>(() => unk.ReadData(reader));

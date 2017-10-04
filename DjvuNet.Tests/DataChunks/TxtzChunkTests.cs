@@ -37,7 +37,7 @@ namespace DjvuNet.DataChunks.Tests
 
             TxtzChunk unk = new TxtzChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Txtz, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Txtz.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Txtz.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -52,7 +52,7 @@ namespace DjvuNet.DataChunks.Tests
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);
 
                 Assert.Equal<ChunkType>(ChunkType.Txtz, unk.ChunkType);
-                Assert.Equal<string>(ChunkType.Txtz.ToString(), unk.Name);
+                Assert.Equal(ChunkType.Txtz.ToString(), unk.Name);
                 Assert.Equal<long>(0, unk.DataOffset);
                 Assert.True(unk.TextLength > 0);
                 Assert.NotNull(unk.Text);
@@ -71,7 +71,7 @@ namespace DjvuNet.DataChunks.Tests
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);
 
                 Assert.Equal<ChunkType>(ChunkType.Txtz, unk.ChunkType);
-                Assert.Equal<string>(ChunkType.Txtz.ToString(), unk.Name);
+                Assert.Equal(ChunkType.Txtz.ToString(), unk.Name);
                 Assert.Equal<long>(0, unk.DataOffset);
                 Assert.True(unk.TextLength > 0);
                 Assert.NotNull(unk.Text);

@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             TxtaChunk unk = new TxtaChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.Txta, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.Txta.ToString(), unk.Name);
+            Assert.Equal(ChunkType.Txta.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
     }

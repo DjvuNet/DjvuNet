@@ -1,51 +1,67 @@
 DjvuNet
 =======
 
+### Windows
 ## ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true)
 
-DjvuNet is an open source library designed to handle DjVu formaat, written in C# for .NET platform. Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
-The so called "Secure DjVu" format is not supported as it's specification was never published. Project was started several years ago
+### Linux and macOS
+## [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet)
+
+DjvuNet is an open source library designed to process and create documents encoded with DjVu format. Library is written in C# for .NET platform with 
+no external dependencies except for .NET Core target which temporarily up to .NET Core v2.1.0 requires CoreCompat.System.Drawing package. 
+Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
+The so called "Secure DjVu" format is not supported as this specification was never published. Project was started several years ago
 by [Telavian](https://github.com/Telavian) and after remaining inactive for some time currently is continued at new 
-[GitHub DjvuNet](https://github.com/DjvuNet) location. Current status can be described as a fast code review with 
-refactoring / rearchitecting and creation of test framework harness what should enable fixing of several bugs found 
-in original source. *Code is not production ready.* There are known bugs but it should work on large number of djvu 
-files but they are still only a subset of all DjVu files which can be found out in the wild. 
+[GitHub DjvuNet](https://github.com/DjvuNet) repo location. *Code is not production ready.* There are known bugs but it should work on large number of djvu 
+files but obviously they are still only a subset of all DjVu files which can be found out in the wild. 
 Therefore, use it at your own risk and do not blame us for any of your problems.
 
 ## Current Status
 
-DjvuNet library is not ready for production use. There are several bugs which need to be fixed and missing features which need to be implemented first 
-before library could be treated as production ready. Furthermore, there are some bugs in image decoder that leave some images skewed.
+*DjvuNet library is not ready for production use*. There are several bugs which need to be fixed and missing features which need to be implemented first 
+before library could be treated as production ready or fully functional. Furthermore, there are some bugs in image decoder that leave some of images skewed making them useless.
 
-Project undergoes several architectural changes, which are done in "dev" branch. DjVu file format parser was optimized and refactored what so far resulted
-in more than 10x speedup. Image data decoding and encoding with Interpolated Dubuc-Deslauriers-Lemire (DDL) (4, 4) Discrete Wavelet Transform is close 
-to be finished but still has couple bugs which need to be fixed. There was very limited optimization work done in this area with some 30 - 40% improvements
-in performance and identification of several next optimization targets. ZP arithmetic coder and BZZ encoding/decoding is fully implemented but still not optimized.
-JB decoding is implemented but not optimized, encoding is not implemented. Image segmentation for Mixed Raster Content done in DjvuLibre 
-with ColorPalette histogram calculation will be entirely rewritten as there was significant progress in image segmentation algorithms in last decade. 
-Support for some DjvuLibre masked image formats is not implemented yet.
+Project undergoes several architectural and implementations changes, which are done in "dev" branch. 
 
-Test framework which is systematically developed and is composed of unit and integration tests covers project in top down way and provides 
-around 85% code coverage using more than 2 500 test cases with implementation target being more than 90% code coverage. Performance tests are based 
-on DjvuNetTest project with some additional micro benchmarks planned for implementation soon. 
+- DjVu file format parser was optimized and refactored what so far resulted in more than 10x speedup.
+
+- Image data decoding and **encoding** with Interpolated Dubuc-Deslauriers-Lemire (DDL) (4, 4) Discrete Wavelet Transform is close 
+to be finished but still has couple bugs which need to be fixed.
+
+- There was very limited optimization work done in this area with some 30 - 40% improvements in performance and identification of several next optimization targets.
+
+- ZP arithmetic coder and BZZ encoding/decoding is fully implemented and reached binary compatibility with DjvuLibre. It still awaits final optimizations.
+
+- JB decoding is implemented but not optimized, encoding is not implemented.
+
+- Image segmentation for Mixed Raster Content done in DjvuLibre with ColorPalette histogram calculation will be entirely rewritten as there was significant progress in image segmentation algorithms in last decade. 
+
+- Support for some DjvuLibre masked image formats is not implemented yet.
+
+- Test framework is systematically developed and is composed of unit and functional tests. It covers project in top down way and provides 
+around 85% code coverage using 2 586 test cases with implementation target being more than 90% code coverage. 
+
+- Performance tests are based on DjvuNetTest project with some additional micro benchmarks planned for implementation soon. 
 
 
 ## DjVu Format Support Validation
 
-Full library format handling validation is realized by using reference library implementation of DjVu format and supporting tools namely
-[DjVuLibre](http://djvu.sourceforge.net/). .NET Bindings for majority of C API are available in DjvuNet.DjvuLibre project. It builds for
+Full library format handling validation is realized by using [DjVuLibre](http://djvu.sourceforge.net/) reference library implementation of DjVu format and supporting tools. 
+.NET Bindings for majority of C API are available in DjvuNet.DjvuLibre project. It builds for
 x86 and x64 targets only. Perhaps AnyCPU target will be available via NuGet packaging or alternatively via embedding of native binaries
 in managed assembly - the issue is still open.
 
-DjVuLibre was modified by creating libdjvulibre build integration with DjvuNet and modifying library by expanding some C APIs through 
+DjVuLibre was modified by creating libdjvulibre build integration with DjvuNet projects and modifying library by expanding some C APIs through 
 addition of memory management functions exports, implementation of Json formatted output from some dump functions and tools (djvudump),
-and addition of functions bypassing s-expressions formatting used in text retrieval. Detailed description will be available in changelog
-of DjVuLibre soon. Modified library used for testing DjvuNet implementation of DjVu is available here: [DjVuLibre for DjvuNet](https://github.com/DjvuNet/DjVuLibre).
+and addition of functions bypassing s-expressions formatting used in text retrieval. 
 
-Due to more restrictive licensing conditions of DjVuLibre .NET bindings project DjvuNet.DjvuLibre is double licensed under MIT and GPL v2 or later licenses.
+Modified library used for testing DjvuNet implementation of DjVu format is available here: [DjVuLibre for DjvuNet](https://github.com/DjvuNet/DjVuLibre).
 
-DjvuNet is developed as part of larger effort to create scientific information analysis and understanding framework. First step in data analysis
-is of course to get the data and the second one is to read data in format which can be understood by computers. 
+Due to more restrictive licensing conditions of DjVuLibre .NET bindings project DjvuNet.DjvuLibre is double licensed under MIT and GPL v2 licenses.
+
+DjvuNet is developed as part of larger effort to create scientific information analysis and understanding framework. 
+
+Steps in data analysis comprise data retrieval, reading of data and data conversion into format which later can be processed further. This project covers ssmall part of the pipline dealing with input of data encoded in DjVu format. 
 
 ## License
 
@@ -61,11 +77,11 @@ DjVuLibre used for format support validation is licensed under [GPL v2](https://
 
 #### Prerequisites
 
-Visual Studio 2017 RTM with at least following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
+- Visual Studio 2017 RTM with at least following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
  
-Git
+- Git
 
-Internet access for restoring dependencies
+- Internet access for restoring dependencies
 
 #### Building
 
@@ -123,6 +139,8 @@ git clone --depth 1 https://github.com/DjvuNet/artifacts.git
 Tests can be run by building and running tests from DjvuNet.Tests.dll and DjvuNet.Wavelet.Tests.dll 
 assemblies under Visual Studio from Test Explorer or using xUnit test runner from command line.
 
+All tests should pass except for skipped.
+
 Performance tests can be run with help of DjvuNetTest project.
 
 ### Windows for netstandard2.0 target
@@ -132,11 +150,11 @@ Performance tests can be run with help of DjvuNetTest project.
 Visual Studio 2017 at least v15.3 with following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
 VS 2017 versions can be installed side by side and preview version can be safely used side by side with RTM versions. 
 
-.NET Core 2.0 SDK
+- .NET Core 2.0 SDK
 
-Git
+- Git
 
-Internet access for restoring dependencies
+- Internet access for restoring dependencies
 
 #### Building
 
@@ -167,7 +185,7 @@ dotnet build
 
 #### Testing
 
-Although all tests are passing on .Net Core 2.0 test setup is not streamlined and is a bit involved.
+Test setup for .Net Core 2.0 target is not streamlined and is a bit involved.
 
 Test data are stored in separate repository [artifacts](https://github.com/DjvuNet/artifacts). 
 Clone artifacts repository with git command (run it from DjvuNet repo root directory):
@@ -184,22 +202,23 @@ cd DjvuNet.Wavelet.Tests.NETStandard2.0
 dotnet restore
 dotnet xunit
 `````
+All tests should pass except for skipped.
 
-## Known Issues
+### Linux for netcore2.0 target
 
-- Tests for .NET Core cannot be run from Visual Studio
+TODO - write docs
 
-- Tests for .NET Standard targeting libraries have to be compiled as netcoreapp2.0 binaries as xunit does not support netstandard2.0 binaries
+### Linux for Mono
 
-- Tests for .NET Core need to be sut up manualy by copying libdjvulibre.dll and pdb to test directory with tested binaries
+TODO - write docs
 
-## When You Encounter Issue or Bug
+### macOS for netcore2.0 target
 
-In case of build, test or DjvuNet library usage problems open new issue in [GitHub DjvuNet repo](https://github.com/DjvuNet/DjvuNet/issues) providing
-detailed information on error (logs, command line output, stack trace, minidump) and used system.
+TODO - write docs
 
-We will try to adress all problems quickly unless they depend on missing features or known bugs which will be implemented or fixed according to our roadmap.
+### macOS for Mono
 
+TODO - write docs
 
 ## Usage
 
@@ -236,3 +255,17 @@ using(DjvuDocument doc = new DjvuDocument("Mcguffey's_Primer.djvu"))
     }
 }
 `````
+## Known Issues
+
+- Tests for .NET Core cannot be run from Visual Studio
+
+- Tests for .NET Standard targeting libraries have to be compiled as netcoreapp2.0 binaries as xunit does not support netstandard2.0 binaries
+
+- Tests for .NET Core need to be sut up manualy by copying libdjvulibre.dll and pdb to test directory with tested binaries
+
+## Reporting Issues
+
+In case of build, test or DjvuNet library usage problems open new issue in [GitHub DjvuNet repo](https://github.com/DjvuNet/DjvuNet/issues) providing
+detailed information on error (logs, command line output, stack trace, minidump) and used system.
+
+We will try to adress all problems quickly unless they depend on missing features or known bugs which will be implemented or fixed according to our roadmap.
