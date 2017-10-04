@@ -67,15 +67,37 @@ namespace DjvuNet.Git.Tasks
 
             try
             {
-                Repository repo = new Repository(RepoRoot);
-                Commit commit = repo.Commits.FirstOrDefault<Commit>();
+                // This prevents failed builds
+                Commit commit = null;
 
-                CommitHash = commit.Sha;
-                Author = commit.Author.Name;
-                AuthorEmail = commit.Author.Email;
-                DateTime = commit.Author.When.UtcDateTime;
-                MessageShort = commit.MessageShort;
-                Message = commit.Message;
+                try
+                {
+                    Repository repo = new Repository(RepoRoot);
+                    var commits = repo.Commits;
+                    commit = commits.FirstOrDefault();
+                }
+                catch(LibGit2SharpException)
+                {
+                }
+
+                if (commit != null)
+                {
+                    CommitHash = commit.Sha;
+                    Author = commit.Author.Name;
+                    AuthorEmail = commit.Author.Email;
+                    DateTime = commit.Author.When.UtcDateTime;
+                    MessageShort = commit.MessageShort;
+                    Message = commit.Message;
+                }
+                else
+                {
+                    CommitHash = "No hash available";
+                    Author = String.Empty;
+                    AuthorEmail = String.Empty;
+                    DateTime = DateTime.UtcNow;
+                    MessageShort = "Failed to retrieve git repo data. This could be out of repo build.";
+                    Message = MessageShort;
+                }
             }
             catch(Exception ex)
             {

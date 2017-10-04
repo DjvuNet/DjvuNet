@@ -19,7 +19,7 @@ namespace DjvuNet.DataChunks.Tests
 
             FGjpChunk unk = new FGjpChunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.FGjp, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.FGjp.ToString(), unk.Name);
+            Assert.Equal(ChunkType.FGjp.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -33,7 +33,7 @@ namespace DjvuNet.DataChunks.Tests
 
             FGjpChunk unk = new FGjpChunk(readerMock.Object, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.FGjp, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.FGjp.ToString(), unk.Name);
+            Assert.Equal(ChunkType.FGjp.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);
@@ -53,7 +53,7 @@ namespace DjvuNet.DataChunks.Tests
 
             FGjpChunk unk = new FGjpChunk(reader, null, null, null, 2375);
             Assert.Equal<ChunkType>(ChunkType.FGjp, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.FGjp.ToString(), unk.Name);
+            Assert.Equal(ChunkType.FGjp.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             byte[] buffer = unk.DecodeImageData();
@@ -73,7 +73,7 @@ namespace DjvuNet.DataChunks.Tests
 
             FGjpChunk unk = new FGjpChunk(readerMock.Object, null, null, null, 2375);
             Assert.Equal<ChunkType>(ChunkType.FGjp, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.FGjp.ToString(), unk.Name);
+            Assert.Equal(ChunkType.FGjp.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             byte[] buffer = unk.ForegroundImage;
@@ -93,7 +93,7 @@ namespace DjvuNet.DataChunks.Tests
 
             FGjpChunk unk = new FGjpChunk(readerMock.Object, null, null, null, 2375);
             Assert.Equal<ChunkType>(ChunkType.FGjp, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.FGjp.ToString(), unk.Name);
+            Assert.Equal(ChunkType.FGjp.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             byte[] buffer = new byte[128];
@@ -103,7 +103,7 @@ namespace DjvuNet.DataChunks.Tests
             // TODO Rethink implementation - data length during edition should be associated with node Length prop
 
             byte[] testBuffer = unk.ForegroundImage;
-            Assert.NotEqual(testBuffer.Length, 2375);
+            Assert.NotEqual(2375, testBuffer.Length);
         }
     }
 }

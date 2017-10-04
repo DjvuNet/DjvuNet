@@ -252,7 +252,7 @@ namespace DjvuNet.Tests
                 var idw = ibw as IDjvuWriter;
                 Assert.NotNull(idw);
                 Assert.NotNull(writer.BaseStream);
-                Assert.Same(stream, writer.BaseStream); 
+                Assert.Same(stream, writer.BaseStream);
             }
         }
 
@@ -323,7 +323,7 @@ namespace DjvuNet.Tests
                 Assert.IsType<BzzWriter>(bzzWriter);
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(UInt24TestData))]
         public void WriteUInt24BigEndian_Theory(uint test)
@@ -359,7 +359,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<int>(test, BitConverter.ToInt32(testBuffer, 0));
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(UInt24TestData))]
         public void WriteUInt24_Theory(uint test)
@@ -410,7 +410,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<Int16>(test, BitConverter.ToInt16(testBuffer, 0));
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(Int32TestData))]
         public void WriteInt32BigEndian_Theory(int test)
@@ -427,7 +427,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<int>(test, BitConverter.ToInt32(testBuffer, 0));
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(Int64TestData))]
         public void WriteInt64BigEndian_Theory(long test)
@@ -478,7 +478,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<uint>(test, BitConverter.ToUInt32(testBuffer, 0));
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(UInt64TestData))]
         public void WriteUInt64BigEndian_Theory(ulong test)
@@ -495,7 +495,7 @@ namespace DjvuNet.Tests
                 Assert.Equal<ulong>(test, BitConverter.ToUInt64(testBuffer, 0));
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(StringTestData))]
         public void WriteUTF8String_Theory(string testString)
@@ -511,9 +511,9 @@ namespace DjvuNet.Tests
                 Buffer.BlockCopy(buffer, 0, testBuffer, 0, (int)length);
                 UTF8Encoding encoding = new UTF8Encoding(false);
                 string result = encoding.GetString(testBuffer);
-                Assert.Equal<string>(testString, result);
+                Assert.Equal(testString, result);
                 Assert.Equal<long>(length, stream.Position);
-                Assert.Equal<long>(stream.Position, writer.Position); 
+                Assert.Equal<long>(stream.Position, writer.Position);
             }
         }
 
@@ -532,7 +532,7 @@ namespace DjvuNet.Tests
                 Buffer.BlockCopy(buffer, 0, testBuffer, 0, (int)length);
                 UTF7Encoding encoding = new UTF7Encoding(false);
                 string result = encoding.GetString(testBuffer);
-                Assert.Equal<string>(testString, result);
+                Assert.Equal(testString, result);
                 Assert.Equal<long>(length, stream.Position);
                 Assert.Equal<long>(stream.Position, writer.Position);
             }
@@ -553,7 +553,7 @@ namespace DjvuNet.Tests
                 Buffer.BlockCopy(buffer, 0, testBuffer, 0, (int)length);
                 UnicodeEncoding encoding = new UnicodeEncoding(false, false);
                 string result = encoding.GetString(testBuffer);
-                Assert.Equal<string>(testString, result);
+                Assert.Equal(testString, result);
                 Assert.Equal<long>(length, stream.Position);
                 Assert.Equal<long>(stream.Position, writer.Position);
             }
@@ -574,12 +574,12 @@ namespace DjvuNet.Tests
                 Buffer.BlockCopy(buffer, 0, testBuffer, 0, (int)length);
                 UnicodeEncoding encoding = new UnicodeEncoding(false, true);
                 string result = encoding.GetString(testBuffer);
-                Assert.Equal<string>(testString, result);
+                Assert.Equal(testString, result);
                 Assert.Equal<long>(length, stream.Position);
                 Assert.Equal<long>(stream.Position, writer.Position);
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(StringEncodingTestData))]
         public void WriteStringEncoding_Theory(String testString, Encoding encoding)
@@ -594,7 +594,7 @@ namespace DjvuNet.Tests
                 byte[] testBuffer = new byte[length];
                 Buffer.BlockCopy(buffer, 0, testBuffer, 0, (int)length);
                 string result = encoding.GetString(testBuffer);
-                Assert.Equal<string>(testString, result);
+                Assert.Equal(testString, result);
                 Assert.Equal<long>(length, stream.Position);
                 Assert.Equal<long>(stream.Position, writer.Position);
             }

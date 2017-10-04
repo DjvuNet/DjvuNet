@@ -26,14 +26,8 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(16, codec._BucketState.Length);
             Assert.Equal(0, codec._CurrentBand);
             Assert.Equal(1, codec._CurrentBitPlane);
-            Assert.NotNull(codec._CtxMant);
-            Assert.NotNull(codec._CtxRoot);
-
             Assert.NotNull(codec._CtxStart);
             Assert.Equal(32, codec._CtxStart.Length);
-
-            foreach (var s in codec._CtxStart)
-                Assert.NotNull(s);
 
             Assert.NotNull(codec._CtxBucket);
             Assert.Equal(10, codec._CtxBucket.Length);
@@ -42,9 +36,6 @@ namespace DjvuNet.Wavelet.Tests
             {
                 Assert.NotNull(b);
                 Assert.Equal(8, b.Length);
-
-                foreach (var c in b)
-                    Assert.NotNull(c);
             }
         }
 

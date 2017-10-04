@@ -1,0 +1,43 @@
+#
+#
+
+language: csharp
+
+os:
+  - linux
+  - osx
+dist: trusty
+osx_image: xcode8.3
+
+env:
+  global:
+    - DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+    - DOTNET_CLI_TELEMETRY_OPTOUT=1
+
+solution: DjvuNet.Core.sln
+
+mono: none
+dotnet: 2.0.0
+dist: trusty
+
+install:
+
+
+script:
+    - git clone --depth 1 https://github.com/DjvuNet/DjvuLibre.git DjvuLibre
+    - git clone --depth 1 https://github.com/DjvuNet/artifacts.git artifacts
+    - ls -li
+    - dotnet restore DjvuNet.Core.sln
+    - cd DjvuNet.NETStandard2.0
+    - dotnet build
+    - cd ..
+    - cd DjvuNet.Core
+    - dotnet build
+    - cd ..
+    - cd DjvuNet.Tests.Core
+    - dotnet build
+    - dotnet xunit
+    - cd ..
+    - cd DjvuNet.Wavelet.Tests.Core
+    - dotnet build
+    - dotnet xunit

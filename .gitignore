@@ -24,18 +24,18 @@ bld/
 [Ll]og/
 
 # Unignore build tools - does not work lol
-![Bb]uild/tools/**/*.csproj
-![Bb]uild/tools/DjvuNet.Artifacts.Build/*.cs
-![Bb]uild/tools/DjvuNet.Git.Tasks/*.cs
-![Bb]uild/tools/DjvuNet.Git.Tasks.Core/*.cs
-![Bb]uild/tools/**/*.config
-![Bb]uild/tools/**/*.props
-![Bb]uild/tools/**/*.targets
+# ![Bb]uild/tools/**/*.csproj
+# ![Bb]uild/tools/DjvuNet.Artifacts.Build/*.cs
+# ![Bb]uild/tools/DjvuNet.Git.Tasks/*.cs
+# ![Bb]uild/tools/DjvuNet.Git.Tasks.Core/*.cs
+# ![Bb]uild/tools/**/*.config
+# ![Bb]uild/tools/**/*.props
+# ![Bb]uild/tools/**/*.targets
 
 
 # Test related content
-artifacts/
-artifacts/*
+[Aa]rtifacts/
+[Aa]rtifacts/**
 launchSettings.json
 Test.bat
 
@@ -50,11 +50,13 @@ DjvuNet.DjvuLibre.Helper/
 # External dependencies directory with repositories
 [Ee]xternal/
 
-# DDjVuLibre native library
-DjvuLibre/
+# DjVuLibre native library
+[Dd]jvu[Ll]ibre/
+[Dd]jvu[Ll]ibre/**
 
 # CoreCompat projects
 CoreCompat/
+CoreCompat/**
 
 # Visual Studio 2015 cache/options directory
 .vs/

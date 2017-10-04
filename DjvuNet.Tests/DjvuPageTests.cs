@@ -45,7 +45,7 @@ namespace DjvuNet.Tests
                             if (line.StartsWith("/*** Page"))
                             {
                                 line = info.ReadLine();
-                                if (!line.StartsWith("//*** End Page") 
+                                if (!line.StartsWith("//*** End Page")
                                     && !String.IsNullOrWhiteSpace(line) && line.Length > 10)
                                 {
                                     pageText = line.Substring(0, line.Length - 2);
@@ -178,7 +178,7 @@ namespace DjvuNet.Tests
                 var text = page.Text;
                 Assert.NotNull(text);
                 Assert.IsType<string>(text);
-                Assert.True(text.Contains(expectedValue));
+                Assert.Contains(expectedValue, text);
             }
         }
 
@@ -196,7 +196,7 @@ namespace DjvuNet.Tests
                 var text = page.Text;
                 Assert.NotNull(text);
                 Assert.IsType<string>(text);
-                Assert.True(text.Contains(expectedValue));
+                Assert.Contains(expectedValue, text);
             }
         }
 
@@ -610,7 +610,7 @@ namespace DjvuNet.Tests
                 var page = document.FirstPage;
 
                 DjvuNet.Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width / 12, page.Height / 12);
-                // By setting subsample 1, align 0 one gets AccessViolationException 
+                // By setting subsample 1, align 0 one gets AccessViolationException
                 // subsample 0, align 0 - 10 gives ArgumentException
                 // subsample 12, align 0 gives NullReferenceException
                 // subsample 1 - 12, align 1, components list 1 - 5 or null is OK
@@ -790,7 +790,7 @@ namespace DjvuNet.Tests
                 Util.VerifyDjvuDocument(pageCount, document);
 
                 IDjvuPage page = document.FirstPage;
-                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png");
+                var testImagePath = Path.Combine(Util.ArtifactsDataPath, "test003C.png");
 
                 using (var image = page.Image)
                 using (Bitmap testImage = new Bitmap(testImagePath))
@@ -1059,9 +1059,9 @@ namespace DjvuNet.Tests
                     Assert.Equal(page.Width, bitmap.Width);
                     Assert.Equal(page.Height, bitmap.Height);
                     var pixel = bitmap.GetPixel(0, 0);
-                    Assert.Equal(pixel.R, 255);
-                    Assert.Equal(pixel.G, 255);
-                    Assert.Equal(pixel.B, 255);
+                    Assert.Equal(255, pixel.R);
+                    Assert.Equal(255, pixel.G);
+                    Assert.Equal(255, pixel.B);
                 }
             }
         }
@@ -1079,9 +1079,9 @@ namespace DjvuNet.Tests
                 Assert.Equal(page.Width, bitmap.Width);
                 Assert.Equal(page.Height, bitmap.Height);
                 var pixel = bitmap.GetPixel(0, 0);
-                Assert.Equal(pixel.R, 255);
-                Assert.Equal(pixel.G, 255);
-                Assert.Equal(pixel.B, 255);
+                Assert.Equal(255, pixel.R);
+                Assert.Equal(255, pixel.G);
+                Assert.Equal(255, pixel.B);
             }
         }
 
@@ -1117,9 +1117,9 @@ namespace DjvuNet.Tests
                     Assert.Equal(page.Width, bitmap.Width);
                     Assert.Equal(page.Height, bitmap.Height);
                     var pixel = bitmap.GetPixel(0, 0);
-                    Assert.Equal(pixel.R, 0);
-                    Assert.Equal(pixel.G, 0);
-                    Assert.Equal(pixel.B, 0);
+                    Assert.Equal(0, pixel.R);
+                    Assert.Equal(0, pixel.G);
+                    Assert.Equal(0, pixel.B);
                 }
             }
         }
@@ -1137,9 +1137,9 @@ namespace DjvuNet.Tests
                 Assert.Equal(page.Width, bitmap.Width);
                 Assert.Equal(page.Height, bitmap.Height);
                 var pixel = bitmap.GetPixel(0, 0);
-                Assert.Equal(pixel.R, 0);
-                Assert.Equal(pixel.G, 0);
-                Assert.Equal(pixel.B, 0);
+                Assert.Equal(0, pixel.R);
+                Assert.Equal(0, pixel.G);
+                Assert.Equal(0, pixel.B);
             }
         }
 
@@ -1159,9 +1159,9 @@ namespace DjvuNet.Tests
                     Assert.Equal(page.Width, bitmap.Width);
                     Assert.Equal(page.Height, bitmap.Height);
                     var pixel = bitmap.GetPixel(0, 0);
-                    Assert.Equal(pixel.R, 0);
-                    Assert.Equal(pixel.G, 0);
-                    Assert.Equal(pixel.B, 0);
+                    Assert.Equal(0, pixel.R);
+                    Assert.Equal(0, pixel.G);
+                    Assert.Equal(0, pixel.B);
                 }
             }
         }
@@ -1179,9 +1179,9 @@ namespace DjvuNet.Tests
                 Assert.Equal(page.Width, bitmap.Width);
                 Assert.Equal(page.Height, bitmap.Height);
                 var pixel = bitmap.GetPixel(0, 0);
-                Assert.Equal(pixel.R, 0);
-                Assert.Equal(pixel.G, 0);
-                Assert.Equal(pixel.B, 0);
+                Assert.Equal(0, pixel.R);
+                Assert.Equal(0, pixel.G);
+                Assert.Equal(0, pixel.B);
             }
         }
 

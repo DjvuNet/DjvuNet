@@ -81,7 +81,6 @@ namespace DjvuNet.Graphics.Tests
             Pixel pix1 = new Pixel(-1, 0, -1);
             Pixel pix2 = (Pixel) pix1.Duplicate();
             Assert.Equal<Pixel>(pix1, pix2);
-            Assert.NotSame(pix1, pix2);
         }
 
         [Fact()]

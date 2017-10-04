@@ -24,7 +24,7 @@ namespace DjvuNet.DataChunks.Tests
 
             TH44Chunk unk = new TH44Chunk(readerMock.Object, null, null, null, 0);
             Assert.Equal<ChunkType>(ChunkType.TH44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.TH44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.TH44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
         }
 
@@ -38,7 +38,7 @@ namespace DjvuNet.DataChunks.Tests
 
             TH44Chunk unk = new TH44Chunk(reader, null, null, null, 1024);
             Assert.Equal<ChunkType>(ChunkType.TH44, unk.ChunkType);
-            Assert.Equal<string>(ChunkType.TH44.ToString(), unk.Name);
+            Assert.Equal(ChunkType.TH44.ToString(), unk.Name);
             Assert.Equal<long>(1024, unk.DataOffset);
 
             unk.ReadData(reader);

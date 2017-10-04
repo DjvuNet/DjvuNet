@@ -38,11 +38,11 @@ namespace DjvuNet.DataChunks.Tests
             string test = "This is an annotation test";
             string[] testSplit = test.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
             Annotation anno = new Annotation(test);
-            Assert.Equal<string>("This", anno.Name);
+            Assert.Equal("This", anno.Name);
             Assert.NotNull(anno.Parameters);
             Assert.Equal<int>(4, anno.Parameters.Length);
             for (int i = 0; i < anno.Parameters.Length; i++)
-                Assert.Equal<string>(testSplit[i + 1], anno.Parameters[i].Name);
+                Assert.Equal(testSplit[i + 1], anno.Parameters[i].Name);
         }
 
         [Fact()]
@@ -51,14 +51,14 @@ namespace DjvuNet.DataChunks.Tests
             string test = "(This (is (an) (annotation)) (test))";
             string[] testSplit = test.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
             Annotation anno = new Annotation(test);
-            Assert.Equal<string>("This", anno.Name);
+            Assert.Equal("This", anno.Name);
             Assert.NotNull(anno.Parameters);
             Assert.Equal<int>(2, anno.Parameters.Length);
-            Assert.Equal<string>("is", anno.Parameters[0].Name);
+            Assert.Equal("is", anno.Parameters[0].Name);
             Assert.Equal<int>(2, anno.Parameters[0].Parameters.Length);
-            Assert.Equal<string>("an", anno.Parameters[0].Parameters[0].Name);
-            Assert.Equal<string>("annotation", anno.Parameters[0].Parameters[1].Name);
-            Assert.Equal<string>("test", anno.Parameters[1].Name);
+            Assert.Equal("an", anno.Parameters[0].Parameters[0].Name);
+            Assert.Equal("annotation", anno.Parameters[0].Parameters[1].Name);
+            Assert.Equal("test", anno.Parameters[1].Name);
         }
 
         [Fact()]
@@ -67,14 +67,14 @@ namespace DjvuNet.DataChunks.Tests
             string test = "(This (is (an) (\"annotation\")) (test))";
             string[] testSplit = test.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
             Annotation anno = new Annotation(test);
-            Assert.Equal<string>("This", anno.Name);
+            Assert.Equal("This", anno.Name);
             Assert.NotNull(anno.Parameters);
             Assert.Equal<int>(2, anno.Parameters.Length);
-            Assert.Equal<string>("is", anno.Parameters[0].Name);
+            Assert.Equal("is", anno.Parameters[0].Name);
             Assert.Equal<int>(2, anno.Parameters[0].Parameters.Length);
-            Assert.Equal<string>("an", anno.Parameters[0].Parameters[0].Name);
-            Assert.Equal<string>("\"annotation\"", anno.Parameters[0].Parameters[1].Name);
-            Assert.Equal<string>("test", anno.Parameters[1].Name);
+            Assert.Equal("an", anno.Parameters[0].Parameters[0].Name);
+            Assert.Equal("\"annotation\"", anno.Parameters[0].Parameters[1].Name);
+            Assert.Equal("test", anno.Parameters[1].Name);
         }
 
         [Fact()]
@@ -83,14 +83,14 @@ namespace DjvuNet.DataChunks.Tests
             string test = "(This (is \"(an) (\"annotation\")\") (test))";
             string[] testSplit = test.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
             Annotation anno = new Annotation(test);
-            Assert.Equal<string>("This", anno.Name);
+            Assert.Equal("This", anno.Name);
             Assert.NotNull(anno.Parameters);
             Assert.Equal<int>(2, anno.Parameters.Length);
-            Assert.Equal<string>("is", anno.Parameters[0].Name);
+            Assert.Equal("is", anno.Parameters[0].Name);
             Assert.Equal<int>(2, anno.Parameters[0].Parameters.Length);
-            Assert.Equal<string>("an", anno.Parameters[0].Parameters[0].Name);
-            Assert.Equal<string>("\"annotation\"", anno.Parameters[0].Parameters[1].Name);
-            Assert.Equal<string>("test", anno.Parameters[1].Name);
+            Assert.Equal("an", anno.Parameters[0].Parameters[0].Name);
+            Assert.Equal("\"annotation\"", anno.Parameters[0].Parameters[1].Name);
+            Assert.Equal("test", anno.Parameters[1].Name);
         }
 
 
@@ -100,8 +100,8 @@ namespace DjvuNet.DataChunks.Tests
             string test = "This (is (an) (annotation)) (test)";
             string[] pieces = Annotation.BreakIntoAnnotationPieces(test);
             Assert.Equal<int>(2, pieces.Length);
-            Assert.Equal<string>("(is (an) (annotation))", pieces[0]);
-            Assert.Equal<string>("(test)", pieces[1]);
+            Assert.Equal("(is (an) (annotation))", pieces[0]);
+            Assert.Equal("(test)", pieces[1]);
         }
 
         [Fact()]
@@ -110,8 +110,8 @@ namespace DjvuNet.DataChunks.Tests
             string test = "This (is (an) (annotation)) (\"test\")";
             string[] pieces = Annotation.BreakIntoAnnotationPieces(test);
             Assert.Equal<int>(2, pieces.Length);
-            Assert.Equal<string>("(is (an) (annotation))", pieces[0]);
-            Assert.Equal<string>("(\"test\")", pieces[1]);
+            Assert.Equal("(is (an) (annotation))", pieces[0]);
+            Assert.Equal("(\"test\")", pieces[1]);
         }
 
         [Fact()]

@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <UsingTask
     TaskName="ArtifactsBuildRequired"
     TaskFactory="CodeTaskFactory"
@@ -74,7 +74,7 @@
         {
             Log.LogErrorFromException(ex, true);
             throw new AggregateException(
-                "ArtifactsBuildRequired task failed. Check logged exception details for " + 
+                "ArtifactsBuildRequired task failed. Check logged exception details for " +
                 "more information on error.", ex);
         }
         ]]>
@@ -83,12 +83,12 @@
   </UsingTask>
   <Target Name="AfterBuild">
     <ArtifactsBuildRequired ArtifactsDirectory="$(SolutionDir)artifacts" ArtifactsSearchPattern="*.djvu;*.json"
-                             SubdirectoryList="data;json" SubdirectorySearchPatterns="*;*.json" 
+                             SubdirectoryList="data;json" SubdirectorySearchPatterns="*;*.json"
                              HashFilePath="$(SolutionDir)artifacts.sha256">
       <Output TaskParameter="CalculateHashes" PropertyName="BuildArtifacts"/>
     </ArtifactsBuildRequired>
     <Message Importance="High" Text="Building Artifacts $(BuildArtifacts)" />
-    <Exec Condition="$(BuildArtifacts)" 
+    <Exec Condition="$(BuildArtifacts)"
       Command="$(SolutionDir)Tools\7z h -scrcSHA256 -xr!.* -xr!dumps $(SolutionDir)artifacts &gt; $(SolutionDir)artifacts.sha256">
     </Exec>
   </Target>
