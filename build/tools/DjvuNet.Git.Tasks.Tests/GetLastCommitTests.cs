@@ -10,7 +10,7 @@ namespace DjvuNet.Git.Tasks.Tests
 {
     public class GetLastCommitTests
     {
-        [Fact]
+        [Fact, Trait("Category", "Skip")]
         public void LastCommit()
         {
             var task = new GetLastCommit();
