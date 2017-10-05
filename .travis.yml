@@ -35,9 +35,7 @@ script:
     - dotnet build
     - cd ..
     - cd DjvuNet.Tests.Core
-    - dotnet build
     - dotnet xunit
     - cd ..
     - cd DjvuNet.Wavelet.Tests.Core
     - dotnet build
-    - dotnet xunit
