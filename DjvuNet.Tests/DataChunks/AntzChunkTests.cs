@@ -51,7 +51,7 @@ namespace DjvuNet.DataChunks.Tests
         [MemberData(nameof(AntzTestData))]
         public void AntzChunk_Theory(string fileName, string filePath)
         {
-            using (FileStream stream = new FileStream(filePath, FileMode.Open))
+            using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 AntzChunk unk = new AntzChunk(reader, null, null, null, stream.Length);
@@ -64,7 +64,7 @@ namespace DjvuNet.DataChunks.Tests
         public void AnnotationsTest()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "test004C_P01.antz");
-            using (FileStream stream = new FileStream(filePath, FileMode.Open))
+            using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 AntzChunk unk = new AntzChunk(reader, null, null, null, stream.Length);
