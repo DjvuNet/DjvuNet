@@ -23,7 +23,7 @@ namespace DjvuNet.DataChunks.Tests
                 textChunkMock.Setup(x => x.GetTextDataReader(5113)).Returns((IDjvuReader)null);
                 TextChunk txtChunk = textChunkMock.Object;
 
-                using (FileStream stream = new FileStream(file, FileMode.Open))
+                using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
                 using (DjvuReader reader = new DjvuReader(stream))
                 {
                     Assert.Equal<ChunkType>(ChunkType.Text, txtChunk.ChunkType);

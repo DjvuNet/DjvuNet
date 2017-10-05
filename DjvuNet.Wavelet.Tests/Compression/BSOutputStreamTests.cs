@@ -134,7 +134,7 @@ namespace DjvuNet.Compression.Tests
         {
             UTF8Encoding encoding = new UTF8Encoding(false);
             string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
-            string outFilePath = filePath + ".bz3";
+            string outFilePath = Path.GetTempFileName();
 
             try
             {
@@ -179,7 +179,7 @@ namespace DjvuNet.Compression.Tests
         public void WriteTest002()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "DjvuNet.pdb");
-            string outFilePath = filePath + ".bz3";
+            string outFilePath = Path.GetTempFileName();
             string refFilePath = filePath + ".bzz";
 
             try

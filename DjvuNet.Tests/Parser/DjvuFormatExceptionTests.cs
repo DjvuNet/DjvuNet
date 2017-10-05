@@ -51,8 +51,8 @@ namespace DjvuNet.Tests
             Assert.Null(exception.InnerException);
         }
 
-        [Fact, Trait("SkipFramework", "Core")]
-        public void DjvuFormatExceptionTest3()
+        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        public void BinarySerializationRoundtripTest()
         {
             string innerMessage = "Invalid test message";
             InvalidOperationException inner = new InvalidOperationException(innerMessage);

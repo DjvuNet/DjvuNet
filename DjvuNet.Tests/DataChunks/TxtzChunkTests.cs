@@ -46,7 +46,7 @@ namespace DjvuNet.DataChunks.Tests
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test077C_P01.txtz");
 
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);
@@ -65,7 +65,7 @@ namespace DjvuNet.DataChunks.Tests
         [MemberData(nameof(TextChunkTestData))]
         public void TxtzChunk_Theory(string file)
         {
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);

@@ -49,7 +49,7 @@ namespace DjvuNet.DataChunks.Tests
         public void ThumbnailTest053()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test053C_01_01.th44");
-            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TH44Chunk th = new TH44Chunk(reader, null, null, "TH44", stream.Length);
@@ -64,7 +64,7 @@ namespace DjvuNet.DataChunks.Tests
         public void ThumbnailTest053s()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test053C_01_01.th44");
-            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TH44Chunk th = new TH44Chunk(reader, null, null, "TH44", stream.Length);
@@ -94,7 +94,7 @@ namespace DjvuNet.DataChunks.Tests
         public void ImageTest053()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test053C_01_01.th44");
-            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TH44Chunk th = new TH44Chunk(reader, null, null, "TH44", stream.Length);

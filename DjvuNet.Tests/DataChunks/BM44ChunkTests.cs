@@ -39,7 +39,8 @@ namespace DjvuNet.DataChunks.Tests
         public void DecodeImageTest()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
-            using (DjvuReader reader = new DjvuReader(file))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (DjvuReader reader = new DjvuReader(stream))
             {
                 BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
                 Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
@@ -56,7 +57,8 @@ namespace DjvuNet.DataChunks.Tests
         public void ImageTest()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
-            using (DjvuReader reader = new DjvuReader(file))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (DjvuReader reader = new DjvuReader(stream))
             {
                 BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
                 Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
@@ -79,7 +81,8 @@ namespace DjvuNet.DataChunks.Tests
         public void ProgressiveDecodeBackgroundTest()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test001C_P01.fg44");
-            using (DjvuReader reader = new DjvuReader(file))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (DjvuReader reader = new DjvuReader(stream))
             {
                 BM44Chunk unk = new BM44Chunk(reader, null, null, null, reader.Length);
                 Assert.Equal<ChunkType>(ChunkType.BM44, unk.ChunkType);
