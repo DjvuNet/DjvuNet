@@ -51,7 +51,7 @@ namespace DjvuNet.Tests
             Assert.Null(exception.InnerException);
         }
 
-        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [Fact, SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp), Trait("Category", "SkipNetCoreApp")]
         public void BinarySerializationRoundtripTest()
         {
             string innerMessage = "Invalid test message";
