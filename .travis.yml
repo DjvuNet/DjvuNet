@@ -40,7 +40,7 @@ script:
     - dotnet build
     - cd ..
     - cd DjvuNet.Tests.Core
-    - dotnet xunit
+    - dotnet xunit -parallel none
     - cd ..
     - cd DjvuNet.Wavelet.Tests.Core
     - dotnet build
