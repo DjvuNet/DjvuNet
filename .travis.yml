@@ -40,8 +40,10 @@ script:
     - dotnet build
     - cd ..
     - cd DjvuNet.Tests.Core
-    - dotnet xunit -debug -parallel none -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
-    - dotnet xunit -release -parallel none -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet build -c Debug
+    - dotnet xunit -debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet build -c Release
+    - dotnet xunit -release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
     - cd ..
     - cd DjvuNet.Wavelet.Tests.Core
     - dotnet build
