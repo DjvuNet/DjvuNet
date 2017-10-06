@@ -56,5 +56,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuNamedDataRowTestCase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuTheoryAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuTheoryDiscoverer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\SkipOnTargetFrameworkAttribute.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\SkipOnTargetFrameworkDiscoverer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\TargetFrameworkMonikers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)xunit\XunitConstants.cs" />
   </ItemGroup>
 </Project>

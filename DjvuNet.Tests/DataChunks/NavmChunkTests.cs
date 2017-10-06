@@ -82,7 +82,7 @@ namespace DjvuNet.DataChunks.Tests
 
             Mock<DjvuFormElement> parentMock = new Mock<DjvuFormElement> { CallBase = true };
 
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 NavmChunk unk = new NavmChunk(reader, parentMock.Object, docMock.Object, "NAVM", stream.Length);
@@ -109,7 +109,7 @@ namespace DjvuNet.DataChunks.Tests
 
             Mock<DjvuFormElement> parentMock = new Mock<DjvuFormElement> { CallBase = true };
 
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 NavmChunk unk = new NavmChunk(reader, parentMock.Object, docMock.Object, "NAVM", stream.Length);

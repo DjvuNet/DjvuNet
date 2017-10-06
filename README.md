@@ -4,7 +4,7 @@ DjvuNet
 ### Windows
 ## ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true)
 
-### Linux and macOS
+### Linux
 ## [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet)
 
 DjvuNet is an open source library designed to process and create documents encoded with DjVu format. Library is written in C# for .NET platform with 

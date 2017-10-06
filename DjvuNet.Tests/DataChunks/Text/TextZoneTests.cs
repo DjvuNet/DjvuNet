@@ -63,7 +63,7 @@ namespace DjvuNet.DataChunks.Tests
         public void SearchForTextRectangleTest()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test077C_P01.txtz");
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);
@@ -83,7 +83,7 @@ namespace DjvuNet.DataChunks.Tests
         public void SearchForTextStringTest()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test077C_P01.txtz");
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);
@@ -129,7 +129,7 @@ namespace DjvuNet.DataChunks.Tests
         public void OrientedSearchForTextTest()
         {
             string file = Path.Combine(Util.ArtifactsDataPath, "test077C_P01.txtz");
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);
@@ -151,7 +151,7 @@ namespace DjvuNet.DataChunks.Tests
         [MemberData(nameof(TextZoneData))]
         public void TextZone_Theory(string file)
         {
-            using (FileStream stream = new FileStream(file, FileMode.Open))
+            using (FileStream stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (DjvuReader reader = new DjvuReader(stream))
             {
                 TxtzChunk unk = new TxtzChunk(reader, null, null, null, stream.Length);

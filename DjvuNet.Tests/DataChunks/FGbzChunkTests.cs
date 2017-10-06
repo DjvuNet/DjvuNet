@@ -91,11 +91,11 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(FgbzTestData))]
-        public void Palette_Theory(string testFile, DjvuJsonDocument doc)
+        public void Palette_Theory(string file, DjvuJsonDocument doc)
         {
 
             byte[] buffer = null;
-            using (FileStream fs = File.OpenRead(testFile))
+            using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 buffer = new byte[fs.Length];
                 int result = fs.Read(buffer, 0, buffer.Length);

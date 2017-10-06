@@ -48,21 +48,23 @@ namespace DjvuNet.Tests
                         string json = File.ReadAllText(filePath, new UTF8Encoding(false));
                         DjvuDoc doc = JsonConvert.DeserializeObject<DjvuDoc>(json, converters);
                         DjvmForm djvm = doc.DjvuData as DjvmForm;
+                        Tuple<int, int, DocumentType, string> docData = null;
                         if (djvm != null)
                         {
                             var docType = (DocumentType) Enum.Parse(typeof(DocumentType), djvm.Dirm.DocumentType, true);
 
-                            var docData = Tuple.Create<int, int, DocumentType, string>(
+                            docData = Tuple.Create<int, int, DocumentType, string>(
                                 djvm.Dirm.PageCount, djvm.Dirm.FileCount, docType, null);
-                            _TestDocumentData.Add(i, docData);
                         }
                         else
                         {
                             var djvu = doc.DjvuData as DjvuForm;
-                            var docData = Tuple.Create<int, int, DocumentType, string>(
+                            docData = Tuple.Create<int, int, DocumentType, string>(
                                 1, 1, DocumentType.SinglePage, null);
-                            _TestDocumentData.Add(i, docData);
                         }
+                        if (!_TestDocumentData.ContainsKey(i))
+                            _TestDocumentData.Add(i, docData);
+
                     }
 
                     return _TestDocumentData;
