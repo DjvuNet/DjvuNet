@@ -54,15 +54,16 @@ namespace DjvuNet.Tests
 
                             var docData = Tuple.Create<int, int, DocumentType, string>(
                                 djvm.Dirm.PageCount, djvm.Dirm.FileCount, docType, null);
-                            _TestDocumentData.Add(i, docData);
                         }
                         else
                         {
                             var djvu = doc.DjvuData as DjvuForm;
                             var docData = Tuple.Create<int, int, DocumentType, string>(
                                 1, 1, DocumentType.SinglePage, null);
-                            _TestDocumentData.Add(i, docData);
                         }
+                        if (!_TestDocumentData.ContainsKey(i))
+                            _TestDocumentData.Add(i, docData);
+
                     }
 
                     return _TestDocumentData;
