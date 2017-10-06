@@ -23,6 +23,7 @@ dotnet: 2.0.0
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y zip unzip
+  - sudo apt-get install -y libgdiplus
 
 install:
 
@@ -40,7 +41,9 @@ script:
     - dotnet build
     - cd ..
     - cd DjvuNet.Tests.Core
-    - dotnet xunit -parallel none
+    - dotnet build
+    - dotnet xunit -debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet xunit -release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
     - cd ..
     - cd DjvuNet.Wavelet.Tests.Core
     - dotnet build
