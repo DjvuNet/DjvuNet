@@ -5,10 +5,11 @@ language: csharp
 
 os:
   - linux
-  - osx
+#  - osx
+
 dist: trusty
 sudo: required
-osx_image: xcode8.3
+# osx_image: xcode8.3
 
 env:
   global:
@@ -41,9 +42,12 @@ script:
     - cd ..
     - cd DjvuNet.Tests.Core
     - dotnet build -c Debug
-    - dotnet xunit -debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet xunit -configuration Debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
     - dotnet build -c Release
-    - dotnet xunit -release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
     - cd ..
     - cd DjvuNet.Wavelet.Tests.Core
-    - dotnet build
+    - dotnet build -c Debug
+    - dotnet xunit -configuration Debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet build -c Release
+    - dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
