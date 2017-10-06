@@ -5,10 +5,11 @@ language: csharp
 
 os:
   - linux
-  - osx
+#  - osx
+
 dist: trusty
 sudo: required
-osx_image: xcode8.3
+# osx_image: xcode8.3
 
 env:
   global:
@@ -29,6 +30,7 @@ install:
 
 
 script:
+    - chmod u+x build.sh
     - git clone --depth 1 https://github.com/DjvuNet/DjvuLibre.git DjvuLibre
     - curl -L -o artifacts.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
     - unzip -q artifacts.zip -d artifacts
@@ -41,9 +43,12 @@ script:
     - cd ..
     - cd DjvuNet.Tests.Core
     - dotnet build -c Debug
-    - dotnet xunit -debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet xunit -configuration Debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
     - dotnet build -c Release
-    - dotnet xunit -release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
     - cd ..
     - cd DjvuNet.Wavelet.Tests.Core
-    - dotnet build
+    - dotnet build -c Debug
+    - dotnet xunit -configuration Debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+    - dotnet build -c Release
+    - dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
