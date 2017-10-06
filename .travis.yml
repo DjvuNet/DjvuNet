@@ -30,7 +30,7 @@ install:
 script:
     - git clone --depth 1 https://github.com/DjvuNet/DjvuLibre.git DjvuLibre
     - curl -L -o artifacts.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
-    - unzip artifacts.zip
+    - unzip -q artifacts.zip -d artifacts/
     - ls -li
     - dotnet restore DjvuNet.Core.sln
     - cd DjvuNet.NETStandard2.0
