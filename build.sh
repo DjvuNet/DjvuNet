@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Uncommment set -x to trace execution of the script
+# set -x
+
 usage()
 {
     echo "Usage: $0 [BuildArch] [BuildType] [-verbose] [-coverage] [-cross] [-clangx.y] [-ninja] [-skipnative] [-skiptests] [-bindir]"
@@ -84,7 +87,7 @@ initTargetDistroRid()
 
 setup_dirs()
 {
-    echo Setting up directories for build
+    echo "Setting up directories for build"
 
     mkdir -p "$__RootBinDir"
     mkdir -p "$__BinDir"
@@ -103,111 +106,94 @@ check_prereqs()
 {
     echo "Checking prerequisites..."
 
+    success=1
+
+    # Check presence of dotnet sdk at least 2.0
+    hash dotnet 2>/dev/null
+    if ! [[ $? -eq 0 ]]; then
+        echo "dotnet not installed"; 
+        success=0;
+    else
+        __DotnetVer=$(dotnet --version)
+        printf -v int '%d\n' $__DotnetVer 2>/dev/null
+        if [[ $int -ge 2 ]]; then
+            echo "dotnet $__DotnetVer installed"
+            __MSBuildVer=$(dotnet msbuild /nologo /version)
+            if [[ -z $__MSBuildVer ]]; then
+                echo "dotnet sdk not installed $__MSBuildVer"
+                success=0
+            else
+                versionLines=$(echo $__MSBuildVer | tr "." "\n")
+                index=0
+                for d in $versionLines
+                do
+                    verDigits[$index]=$d
+                    index=$(( $index + 1 ))
+                done
+
+                if [[ ( ${verDigits[0]} -eq 15 && ${verDigits[1]} -ge 3 ) || ${verDigits[0]} -gt 15 ]]; then
+                    echo "msbuild $__MSBuildVer installed"
+                else
+                    echo "Please install newer dotnet sdk. Current MSBuild version $__MSBuildVer."
+                    success=0
+                fi
+            fi
+        else
+            echo "Please install dotnet sdk version 2.0.0 or newer before running this script."
+            echo "Current dotnet version: $__DotnetVer"
+            success=0
+        fi
+    fi  
+    
+    # Check presence of git on the path
+    hash git 2>/dev/null
+    if ! [[ $? -eq 0 ]]; then
+        echo "git not installed"; 
+        success=0;
+    else
+        echo "git installed"
+    fi 
+
     # Check presence of unzip on the path
-    hash unzip 2>/dev/null || { echo >&2 "not found"; exit 1; }
+     hash unzip 2>/dev/null
+     if ! [[ $? -eq 0 ]]; then
+        echo >&2 "unzip not installed"; 
+        success=0;
+    else
+        echo "unzip installed"
+    fi
 
     # Check presence of libgdiplus
-    hash unzip 2>/dev/null || { echo >&2 "not found"; exit 1; }
-
+    ldconfig -p | grep libgdiplus >/dev/null
+    if [[ $? -ne 0 ]]; then 
+        echo "libgdiplus not installed"; 
+        success=0;
+    else
+        echo "libgdiplus installed"
+    fi
 
     # Minimum required version of clang is version 3.9 for arm/armel cross build
     if [[ $__CrossBuild == 1 && ("$__BuildArch" == "arm" || "$__BuildArch" == "armel") ]]; then
         if ! [[ "$__ClangMajorVersion" -gt "3" || ( $__ClangMajorVersion == 3 && $__ClangMinorVersion == 9 ) ]]; then
-            echo "Please install clang3.9 or newer for arm/armel cross build"; exit 1;
+            echo "Please install clang3.9 or newer for arm/armel cross build"; 
+            success=0;
         fi
     fi
 
     # Check for clang
-    hash clang-$__ClangMajorVersion.$__ClangMinorVersion 2>/dev/null ||  hash clang$__ClangMajorVersion$__ClangMinorVersion 2>/dev/null ||  hash clang 2>/dev/null || { echo >&2 "Please install clang-$__ClangMajorVersion.$__ClangMinorVersion before running this script"; exit 1; }
-
-}
-
-generate_event_logging_sources()
-{
-    if [ $__SkipCoreCLR == 1 ]; then
-        return
-    fi
-
-# Event Logging Infrastructure
-   __GeneratedIntermediate="$__IntermediatesDir/Generated"
-   __GeneratedIntermediateEventProvider="$__GeneratedIntermediate/eventprovider_new"
-   __GeneratedIntermediateEventPipe="$__GeneratedIntermediate/eventpipe_new"
-
-    if [[ -d "$__GeneratedIntermediateEventProvider" ]]; then
-        rm -rf  "$__GeneratedIntermediateEventProvider"
-    fi
-
-    if [[ -d "$__GeneratedIntermediateEventPipe" ]]; then
-        rm -rf  "$__GeneratedIntermediateEventPipe"
-    fi
-
-    if [[ ! -d "$__GeneratedIntermediate/eventprovider" ]]; then
-        mkdir -p "$__GeneratedIntermediate/eventprovider"
-    fi
-
-    if [[ ! -d "$__GeneratedIntermediate/eventpipe" ]]; then
-        mkdir -p "$__GeneratedIntermediate/eventpipe"
-    fi
-
-    mkdir -p "$__GeneratedIntermediateEventProvider"
-    mkdir -p "$__GeneratedIntermediateEventPipe"
-
-    __PythonWarningFlags="-Wall"
-    if [[ $__IgnoreWarnings == 0 ]]; then
-        __PythonWarningFlags="$__PythonWarningFlags -Werror"
-    fi
-
-
-    if [[ $__SkipCoreCLR == 0 || $__ConfigureOnly == 1 ]]; then
-        echo "Laying out dynamically generated files consumed by the build system "
-        echo "Laying out dynamically generated Event Logging Test files"
-        $PYTHON -B $__PythonWarningFlags "$__ProjectRoot/src/scripts/genXplatEventing.py" --man "$__ProjectRoot/src/vm/ClrEtwAll.man" --exc "$__ProjectRoot/src/vm/ClrEtwAllMeta.lst" --testdir "$__GeneratedIntermediateEventProvider/tests"
-
-        if  [[ $? != 0 ]]; then
-            exit
+    hash clang-$__ClangMajorVersion.$__ClangMinorVersion 2>/dev/null
+    if ! [[ $? -eq 0 ]]; then
+        hash clang$__ClangMajorVersion$__ClangMinorVersion 2>/dev/null
+        if ! [[ $? -eq 0 ]]; then
+            hash clang 2>/dev/null
+            if ! [[ $? -eq 0 ]]; then 
+                echo >&2 "Please install clang-$__ClangMajorVersion.$__ClangMinorVersion before running this script"; 
+                success=0; 
+            fi
         fi
-
-        case $__BuildOS in
-            Linux)
-                echo "Laying out dynamically generated EventPipe Implementation"
-                $PYTHON -B $__PythonWarningFlags "$__ProjectRoot/src/scripts/genEventPipe.py" --man "$__ProjectRoot/src/vm/ClrEtwAll.man" --intermediate "$__GeneratedIntermediateEventPipe" --exc "$__ProjectRoot/src/vm/ClrEtwAllMeta.lst"
-                if  [[ $? != 0 ]]; then
-                    exit
-                fi
-                ;;
-            *)
-                ;;
-        esac
-
-        #determine the logging system
-        case $__BuildOS in
-            Linux)
-                echo "Laying out dynamically generated Event Logging Implementation of Lttng"
-                $PYTHON -B $__PythonWarningFlags "$__ProjectRoot/src/scripts/genXplatLttng.py" --man "$__ProjectRoot/src/vm/ClrEtwAll.man" --intermediate "$__GeneratedIntermediateEventProvider"
-                if  [[ $? != 0 ]]; then
-                    exit
-                fi
-                ;;
-            *)
-                ;;
-        esac
     fi
 
-    echo "Cleaning the temp folder of dynamically generated Event Logging files"
-    $PYTHON -B $__PythonWarningFlags -c "import sys;sys.path.insert(0,\"$__ProjectRoot/src/scripts\"); from Utilities import *;UpdateDirectory(\"$__GeneratedIntermediate/eventprovider\",\"$__GeneratedIntermediateEventProvider\")"
-    if  [[ $? != 0 ]]; then
-        exit
-    fi
-
-    rm -rf "$__GeneratedIntermediateEventProvider"
-
-    echo "Cleaning the temp folder of dynamically generated EventPipe files"
-    $PYTHON -B $__PythonWarningFlags -c "import sys;sys.path.insert(0,\"$__ProjectRoot/src/scripts\"); from Utilities import *;UpdateDirectory(\"$__GeneratedIntermediate/eventpipe\",\"$__GeneratedIntermediateEventPipe\")"
-    if  [[ $? != 0 ]]; then
-        exit
-    fi
-
-    rm -rf "$__GeneratedIntermediateEventPipe"
+    if [ $success -eq 0 ]; then exit 1; fi 
 }
 
 build_native()
@@ -288,48 +274,6 @@ build_native()
     fi
 
     popd
-}
-
-build_cross_arch_component()
-{
-    __SkipCrossArchBuild=1
-    TARGET_ROOTFS=""
-    # check supported cross-architecture components host(__HostArch)/target(__BuildArch) pair
-    if [[ ("$__BuildArch" == "arm" || "$__BuildArch" == "armel") && "$__CrossArch" == "x86" ]]; then
-        export CROSSCOMPILE=0
-        __SkipCrossArchBuild=0
-
-        # building x64-host/arm-target cross-architecture component need to use cross toolchain of x86
-        if [ "$__HostArch" == "x64" ]; then
-            export CROSSCOMPILE=1
-        fi
-    else
-        # not supported
-        return
-    fi
-
-    export __CMakeBinDir="$__CrossComponentBinDir"
-    export CROSSCOMPONENT=1
-    __IncludeTests=
-
-    if [ $CROSSCOMPILE == 1 ]; then
-        TARGET_ROOTFS="$ROOTFS_DIR"
-        if [ -n "$CAC_ROOTFS_DIR" ]; then
-            export ROOTFS_DIR="$CAC_ROOTFS_DIR"
-        else
-            export ROOTFS_DIR="$__ProjectRoot/cross/rootfs/$__CrossArch"
-        fi
-    fi
-
-    __ExtraCmakeArgs="-DCLR_CMAKE_TARGET_ARCH=$__BuildArch -DCLR_CMAKE_TARGET_OS=$__BuildOS -DCLR_CMAKE_PACKAGES_DIR=$__PackagesDir -DCLR_CMAKE_PGO_INSTRUMENT=$__PgoInstrument -DCLR_CMAKE_OPTDATA_VERSION=$__PgoOptDataVersion -DCLR_CMAKE_PGO_OPTIMIZE=$__PgoOptimize"
-    build_native $__SkipCrossArchBuild "$__CrossArch" "$__CrossCompIntermediatesDir" "$__ExtraCmakeArgs" "cross-architecture component"
-
-    # restore ROOTFS_DIR, CROSSCOMPONENT, and CROSSCOMPILE
-    if [ -n "$TARGET_ROOTFS" ]; then
-        export ROOTFS_DIR="$TARGET_ROOTFS"
-    fi
-    export CROSSCOMPONENT=
-    export CROSSCOMPILE=1
 }
 
 isMSBuildOnNETCoreSupported()
@@ -455,7 +399,7 @@ generate_NugetPackages()
     fi
 }
 
-echo "\nCommencing DjvuNet Repo build"; date;
+echo ; echo "Commencing DjvuNet Repo build"; date; echo "";
 
 # Argument types supported by this script:
 #
@@ -695,6 +639,11 @@ while :; do
             __ClangMinorVersion=0
             ;;
 
+        clang5.0|-clang5.0)
+            __ClangMajorVersion=5
+            __ClangMinorVersion=0
+            ;;        
+
         ninja|-ninja)
             __UseNinja=1
             ;;
@@ -841,7 +790,6 @@ if [[ $__ClangMajorVersion == 0 && $__ClangMinorVersion == 0 ]]; then
 fi
 
 
-
 # init the host distro name
 initHostDistroRid
 
@@ -872,13 +820,9 @@ fi
 # Check prereqs.
 check_prereqs
 
-# Generate event logging infrastructure sources
-generate_event_logging_sources
 
-# Build the coreclr (native) components.
-__ExtraCmakeArgs="-DCLR_CMAKE_TARGET_OS=$__BuildOS -DCLR_CMAKE_PACKAGES_DIR=$__PackagesDir -DCLR_CMAKE_PGO_INSTRUMENT=$__PgoInstrument -DCLR_CMAKE_OPTDATA_VERSION=$__PgoOptDataVersion -DCLR_CMAKE_PGO_OPTIMIZE=$__PgoOptimize"
-build_native $__SkipCoreCLR "$__BuildArch" "$__IntermediatesDir" "$__ExtraCmakeArgs" "CoreCLR component"
-
+# Build the libdjvulibre (native) components.
+# build_native 
 
 
 # Build cross-architecture components
