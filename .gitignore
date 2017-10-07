@@ -51,12 +51,8 @@ DjvuNet.DjvuLibre.Helper/
 [Ee]xternal/
 
 # DjVuLibre native library
-[Dd]jvu[Ll]ibre/
-[Dd]jvu[Ll]ibre/**
-
-# CoreCompat projects
-CoreCompat/
-CoreCompat/**
+[Dd]j[Vv]u[Ll]ibre/
+[Dd]j[Vv]u[Ll]ibre/**
 
 # Visual Studio 2015 cache/options directory
 .vs/
