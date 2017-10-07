@@ -7,6 +7,9 @@ DjvuNet
 ### Linux
 ## [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet)
 
+### macOS
+## [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet)
+
 DjvuNet is an open source library designed to process and create documents encoded with DjVu format. Library is written in C# for .NET platform with 
 no external dependencies except for .NET Core target which temporarily up to .NET Core v2.1.0 requires CoreCompat.System.Drawing package. 
 Library supports Djvu format specification version 3 up to the minor version 26 (v3.26). 
@@ -20,6 +23,8 @@ Therefore, use it at your own risk and do not blame us for any of your problems.
 
 *DjvuNet library is not ready for production use*. There are several bugs which need to be fixed and missing features which need to be implemented first 
 before library could be treated as production ready or fully functional. Furthermore, there are some bugs in image decoder that leave some of images skewed making them useless.
+
+Library supports full .NET Framework 4.6.1 or newer on Windows and .NET Core 2.0.0 or newer on Windows, Linux, macOS.
 
 Project undergoes several architectural and implementations changes, which are done in "dev" branch. 
 
@@ -143,11 +148,11 @@ All tests should pass except for skipped.
 
 Performance tests can be run with help of DjvuNetTest project.
 
-### Windows for netstandard2.0 target
+### Windows for netstandard2.0 or netcore2.0 target
 
 #### Prerequisites
 
-Visual Studio 2017 at least v15.3 with following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
+Visual Studio 2017 at least v15.3.3 with following workloads: .NET desktop development, desktop development with C++, .NET Core cross-platform development
 VS 2017 versions can be installed side by side and preview version can be safely used side by side with RTM versions. 
 
 - .NET Core 2.0 SDK
@@ -192,33 +197,129 @@ Clone artifacts repository with git command (run it from DjvuNet repo root direc
 `````
 git clone --depth 1 https://github.com/DjvuNet/artifacts.git
 
-cd DjvuNet.Tests.NETStandard2.0
+cd DjvuNet.Tests.Core
 dotnet restore
 dotnet xunit 
 
 cd ..\..
 
-cd DjvuNet.Wavelet.Tests.NETStandard2.0
+cd DjvuNet.Wavelet.Tests.Core
 dotnet restore
 dotnet xunit
 `````
 All tests should pass except for skipped.
 
-### Linux for netcore2.0 target
+### Linux for netstandard2.0 / netcore2.0 target
 
-TODO - write docs
+#### Prerequisites
 
-### Linux for Mono
+Tested on Ubuntu 14.04 and 16.04.
 
-TODO - write docs
+Install required tools and dependencies:
 
-### macOS for netcore2.0 target
+`````
+sudo apt-get update
+sudo apt-get install git zip unzip curl libgdiplus
+`````
 
-TODO - write docs
+Install dotnet 2.0 SDK (check for latest instructions [here](https://github.com/dotnet/docs/blob/master/docs/core/linux-prerequisites.md#install-net-core-for-ubuntu-1404-ubuntu-1604-ubuntu-1610--linux-mint-17-linux-mint-18-64-bit)):
 
-### macOS for Mono
+1. Remove any previous preview versions of .NET Core from your system.
+2. Register the Microsoft Product key as trusted.
+`````
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
+`````
+3. Set up the desired version host package feed.
 
-TODO - write docs
+Ubuntu 17.04
+`````
+sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-zesty-prod zesty main" > /etc/apt/sources.list.d/dotnetdev.list'
+sudo apt-get update
+`````
+
+Ubuntu 16.04 / Linux Mint 18
+`````
+sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-xenial-prod xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
+sudo apt-get update
+`````
+
+Ubuntu 14.04 / Linux Mint 17
+`````
+sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
+sudo apt-get update
+`````
+4. Install .NET Core.
+`````
+sudo apt-get install dotnet-sdk-2.0.0
+`````
+5. Run the dotnet --version command to prove the installation succeeded.
+`````
+dotnet --version
+`````
+
+#### Building
+
+Clone repository:
+`````
+git clone https://github.com/DjvuNet/DjvuNet.git
+`````
+
+Change directory to cloned DjvuNet repo:
+`````
+cd DjvuNet
+`````
+
+Restore dependencies
+`````
+dotnet restore DjvuNet.Core.sln
+`````
+
+Build either netstandard2.0 or netcoreapp2.0 target
+`````
+# For netstandard2.0 build
+cd DjvuNet.NETStandard2.0
+dotnet build -c Release
+
+# For netcoreapp2.0 build
+cd DjvuNet.Core
+dotnet build -c Release
+`````
+
+#### Testing
+
+Download required test artifacts into DjvuNet repository root and extract them to artifacts directory:
+`````
+curl -L -o artifacts.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
+unzip -q artifacts.zip -d artifacts
+`````
+
+Build and run DjvuNet tests (commands are starting from repo root):
+`````
+cd DjvuNet.Tests.Core
+dotnet build -c Release
+dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+
+# Return to repo root
+cd ..
+    
+cd DjvuNet.Wavelet.Tests.Core
+dotnet build -c Release
+dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0
+`````
+
+
+### macOS for netstandard2.0 / netcore2.0 target
+
+Supported on macOS 10.12 "Sierra" and later versions
+
+#### Prerequisites
+
+Download and install the .NET Core SDK from [.NET Downloads](https://www.microsoft.com/net/download/core).
+
+#### Building and Testing
+
+Follow Linux instructions for Building and Testing
 
 ## Usage
 
