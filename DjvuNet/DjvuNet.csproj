@@ -183,7 +183,7 @@
     <Compile Include="Wavelet\InterWavePixelMapEncoder.cs" />
     <Compile Include="Wavelet\InterWavePixelMapDecoder.cs" />
     <Compile Include="Wavelet\InterWaveTransform.cs" />
-    <Compile Include="Wavelet\NativeMethods.cs" />
+    <Compile Include="Wavelet\MemoryUtilities.cs" />
     <Compile Include="Wavelet\YCrCbMode.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
