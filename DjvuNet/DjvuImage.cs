@@ -60,7 +60,7 @@ namespace DjvuNet
             BitmapData bmpData = retVal.LockBits(rect, ImageLockMode.WriteOnly, format);
             GCHandle hMapData = GCHandle.Alloc(map.Data, GCHandleType.Pinned);
             IntPtr pMapData = hMapData.AddrOfPinnedObject();
-            NativeMethods.MoveMemory(bmpData.Scan0, pMapData, map.Data.Length);
+            MemoryUtilities.MoveMemory(bmpData.Scan0, pMapData, map.Data.Length);
             hMapData.Free();
             retVal.UnlockBits(bmpData);
             return retVal;

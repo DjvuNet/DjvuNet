@@ -261,7 +261,7 @@ namespace DjvuNet.Graphics
                 bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                                      ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-                NativeMethods.MoveMemory(bmpData.Scan0, data, length);
+                MemoryUtilities.MoveMemory(bmpData.Scan0, data, length);
             }
             catch(Exception ex)
             {
