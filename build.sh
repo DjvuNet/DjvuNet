@@ -111,7 +111,7 @@ check_prereqs()
     # Check presence of dotnet sdk at least 2.0
     hash dotnet 2>/dev/null
     if ! [[ $? -eq 0 ]]; then
-        echo "dotnet not installed"; 
+        echo "dotnet not installed";
         success=0;
     else
         __DotnetVer=$(dotnet --version)
@@ -143,21 +143,21 @@ check_prereqs()
             echo "Current dotnet version: $__DotnetVer"
             success=0
         fi
-    fi  
-    
+    fi
+
     # Check presence of git on the path
     hash git 2>/dev/null
     if ! [[ $? -eq 0 ]]; then
-        echo "git not installed"; 
+        echo "git not installed";
         success=0;
     else
         echo "git installed"
-    fi 
+    fi
 
     # Check presence of unzip on the path
      hash unzip 2>/dev/null
      if ! [[ $? -eq 0 ]]; then
-        echo >&2 "unzip not installed"; 
+        echo >&2 "unzip not installed";
         success=0;
     else
         echo "unzip installed"
@@ -165,8 +165,8 @@ check_prereqs()
 
     # Check presence of libgdiplus
     ldconfig -p | grep libgdiplus >/dev/null
-    if [[ $? -ne 0 ]]; then 
-        echo "libgdiplus not installed"; 
+    if [[ $? -ne 0 ]]; then
+        echo "libgdiplus not installed";
         success=0;
     else
         echo "libgdiplus installed"
@@ -175,7 +175,7 @@ check_prereqs()
     # Minimum required version of clang is version 3.9 for arm/armel cross build
     if [[ $__CrossBuild == 1 && ("$__BuildArch" == "arm" || "$__BuildArch" == "armel") ]]; then
         if ! [[ "$__ClangMajorVersion" -gt "3" || ( $__ClangMajorVersion == 3 && $__ClangMinorVersion == 9 ) ]]; then
-            echo "Please install clang3.9 or newer for arm/armel cross build"; 
+            echo "Please install clang3.9 or newer for arm/armel cross build";
             success=0;
         fi
     fi
@@ -186,14 +186,14 @@ check_prereqs()
         hash clang$__ClangMajorVersion$__ClangMinorVersion 2>/dev/null
         if ! [[ $? -eq 0 ]]; then
             hash clang 2>/dev/null
-            if ! [[ $? -eq 0 ]]; then 
-                echo >&2 "Please install clang-$__ClangMajorVersion.$__ClangMinorVersion before running this script"; 
-                success=0; 
+            if ! [[ $? -eq 0 ]]; then
+                echo >&2 "Please install clang-$__ClangMajorVersion.$__ClangMinorVersion before running this script";
+                success=0;
             fi
         fi
     fi
 
-    if [ $success -eq 0 ]; then exit 1; fi 
+    if [ $success -eq 0 ]; then exit 1; fi
 }
 
 build_native()
@@ -255,7 +255,7 @@ build_native()
         echo "Failed to generate $message build project!"
         exit 1
     fi
-    
+
     # Build
     if [ $__ConfigureOnly == 1 ]; then
         echo "Finish configuration & skipping $message build."
@@ -642,7 +642,7 @@ while :; do
         clang5.0|-clang5.0)
             __ClangMajorVersion=5
             __ClangMinorVersion=0
-            ;;        
+            ;;
 
         ninja|-ninja)
             __UseNinja=1
@@ -780,7 +780,7 @@ __RunArgs="-BuildArch=$__BuildArch -BuildType=$__BuildType -BuildOS=$__BuildOS"
 # Configure environment if we are doing a verbose build
 if [ $__VerboseBuild == 1 ]; then
     export VERBOSE=1
-	__RunArgs="$__RunArgs -verbose"
+    __RunArgs="$__RunArgs -verbose"
 fi
 
 # Set default clang version
@@ -822,7 +822,7 @@ check_prereqs
 
 
 # Build the libdjvulibre (native) components.
-# build_native 
+# build_native
 
 
 # Build cross-architecture components
