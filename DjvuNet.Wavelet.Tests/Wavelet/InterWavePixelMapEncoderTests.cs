@@ -31,7 +31,7 @@ namespace DjvuNet.Wavelet.Tests
                 unsafe
                 {
                     fixed (sbyte* dest = pixMap.Data)
-                        NativeMethods.MoveMemory(dest, (void*)data.Scan0, pixMap.Data.Length);
+                        MemoryUtilities.MoveMemory(dest, (void*)data.Scan0, pixMap.Data.Length);
                 }
             }
             catch(Exception ex)
