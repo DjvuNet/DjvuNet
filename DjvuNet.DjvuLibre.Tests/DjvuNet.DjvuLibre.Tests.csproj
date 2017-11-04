@@ -42,17 +42,17 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="xunit" Version="2.2.0" />
-    <PackageReference Include="xunit.runner.console" Version="2.2.0" />
-    <PackageReference Include="xunit.runner.msbuild" Version="2.2.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.console" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.msbuild" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DjvuNet.DjvuLibre.Helper.Tests\DjvuNet.DjvuLibre.Helper.Tests.csproj" />
     <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
-    <NativeReference Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"/>
+    <NativeReference Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
   </ItemGroup>
 
   <ItemGroup>
