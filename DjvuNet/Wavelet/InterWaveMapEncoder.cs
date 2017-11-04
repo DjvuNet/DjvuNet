@@ -125,7 +125,7 @@ namespace DjvuNet.Wavelet
             m = smask;
 
             for (i = 0; i < h; i += 1, m += w, mask8 += mskrowsize)
-                NativeMethods.MoveMemory((void*)m, (void*)mask8, w);
+                MemoryUtilities.MoveMemory((void*)m, (void*)mask8, w);
 
             // Loop over scale
             for (int scale = begin; scale < end; scale <<= 1)
