@@ -1,14 +1,14 @@
-DjvuNet
-=======
+DjvuNet Library
+===============
 
-### Windows
-## ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true)
+## CI status of master branch
 
-### Linux
-## [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet)
+| Windows | Linux | macOS |
+| :---: | :---: | :---: |
+| ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true) | [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet) | [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet) |
 
-### macOS
-## [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet)
+
+## Introduction
 
 DjvuNet is an open source library designed to process and create documents encoded with DjVu format. Library is written in C# for .NET platform with 
 no external dependencies except for .NET Core target which temporarily up to .NET Core v2.1.0 requires CoreCompat.System.Drawing package. 
