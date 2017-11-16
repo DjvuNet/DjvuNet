@@ -180,10 +180,10 @@ namespace DjvuNet.Graphics
 
         #region Public Methods
 
-        /// <summary> 
+        /// <summary>
         /// Create a clone of this pixel.
         /// </summary>
-        /// <returns> 
+        /// <returns>
         /// The cloned pixel
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -197,15 +197,12 @@ namespace DjvuNet.Graphics
             return $"{{ {GetType().Name} Red: {Red} Green: {Green} Blue: {Blue} }}";
         }
 
-        /// <summary> Initialize a pixel with bgr values.
-        ///
+        /// <summary>
+        /// Initialize a pixel with BGR values.
         /// </summary>
-        /// <param name="blue">pixel value
-        /// </param>
-        /// <param name="green">pixel value
-        /// </param>
-        /// <param name="red">pixel value
-        /// </param>
+        /// <param name="blue">pixel value</param>
+        /// <param name="green">pixel value</param>
+        /// <param name="red">pixel value</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetBGR(int blue, int green, int red)
         {
