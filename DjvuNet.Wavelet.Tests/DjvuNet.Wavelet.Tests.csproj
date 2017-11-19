@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
-  <PropertyGroup>
-    <TargetFramework>net471</TargetFramework>
-  </PropertyGroup>
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
