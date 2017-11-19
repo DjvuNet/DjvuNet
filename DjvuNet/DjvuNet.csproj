@@ -9,16 +9,12 @@
     <RootNamespace>DjvuNet</RootNamespace>
     <AssemblyName>DjvuNet</AssemblyName>
     <TargetFramework>net471</TargetFramework>
-    <NetStandardImplicitPackageVersion>2.0</NetStandardImplicitPackageVersion>
+    <NetStandardImplicitPackageVersion>2.0.1</NetStandardImplicitPackageVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <PropertyGroup>
     <_HasReferenceToSystemRuntime>true</_HasReferenceToSystemRuntime>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
