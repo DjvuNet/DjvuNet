@@ -8,7 +8,6 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet</RootNamespace>
     <AssemblyName>DjvuNet</AssemblyName>
-    <TargetFramework>net471</TargetFramework>
     <NetStandardImplicitPackageVersion>2.0.1</NetStandardImplicitPackageVersion>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>

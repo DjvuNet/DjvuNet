@@ -10,7 +10,6 @@
     <AssemblyName>DjvuNet.Skia.Tests</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <TestProjectType>UnitTest</TestProjectType>
-    <TargetFramework>net461</TargetFramework>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
