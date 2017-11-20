@@ -1,8 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
-
-  <PropertyGroup>
-    <TargetFramework>net461</TargetFramework>
-  </PropertyGroup>
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -49,7 +46,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj" />
+    <ProjectReference Include="..\..\..\System.Attributes\System.Attributes.csproj" />
     <ProjectReference Include="..\DjvuNet.Git.Tasks\DjvuNet.Git.Tasks.csproj" />
   </ItemGroup>
+
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 
 </Project>

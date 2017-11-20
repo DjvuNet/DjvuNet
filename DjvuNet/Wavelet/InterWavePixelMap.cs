@@ -69,7 +69,7 @@ namespace DjvuNet.Wavelet
         ///
         /// </summary>
         /// <returns></returns>
-        public IPixelMap GetPixelMap()
+        public PixelMap GetPixelMap()
         {
             if (_YMap == null)
                 return null;
@@ -91,7 +91,7 @@ namespace DjvuNet.Wavelet
             }
 
             // Convert image to RGB
-            IPixelMap pixelMap = new PixelMap().Init(bytes, height, width);
+            PixelMap pixelMap = new PixelMap().Init(bytes, height, width);
 
             if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
