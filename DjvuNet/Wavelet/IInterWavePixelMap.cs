@@ -14,7 +14,7 @@ namespace DjvuNet.Wavelet
 
         void Decode(IBinaryReader reader);
 
-        IPixelMap GetPixelMap();
+        PixelMap GetPixelMap();
 
         IPixelMap GetPixelMap(int subsample, Rectangle rect, IPixelMap retval);
     }

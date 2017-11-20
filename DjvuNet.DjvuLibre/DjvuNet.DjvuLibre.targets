@@ -5,26 +5,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Condition="$(ProjectFileName) != 'libdjvulibre.vcxproj'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"/>
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And
-                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
+    <NativeReference Condition="$(ProjectFileName) != 'libdjvulibre.vcxproj'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
                         Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\**\libdjvulibre.dll" />
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And
-                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
                     Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\**\libdjvulibre.pdb" />
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And
-                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\') And
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\') And
                                    $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
                 Include="$(DepsRootDir)$(PlatformTarget)\$(Configuration)\jpeg62.dll" />
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And
-                                   HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\') And
-                                   $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\') And $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
             Include="$(DepsRootDir)$(PlatformTarget)\$(Configuration)\jpeg.pdb" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(ContentDjvuLibreFiles)' != '' And
-                        '$(ContentDjvuLibreFiles)' != 'false' And
-                        '@(DjvuLibreFiles)' != ''">
+  <ItemGroup Condition="'$(ContentDjvuLibreFiles)' != '' And '$(ContentDjvuLibreFiles)' != 'false' And '@(DjvuLibreFiles)' != ''">
     <Content Include="@(DjvuLibreFiles)">
       <Link>%(RecursiveDir)%(FileName)%(Extension)</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -32,10 +28,7 @@
   </ItemGroup>
 
   <Target  Name="CopyDjvuLibreFiles" BeforeTargets="AfterBuild"
-          Condition="'$(CopyDjvuLibreFiles)' != 'false' And
-                     '$(OutDir)' != '' And
-                     HasTrailingSlash('$(OutDir)') And
-                     Exists('$(OutDir)')"
+          Condition="'$(CopyDjvuLibreFiles)' != 'false' And '$(OutDir)' != '' And HasTrailingSlash('$(OutDir)') And Exists('$(OutDir)')"
           Inputs="@(DjvuLibreFiles)"
           Outputs="@(DjvuLibreFiles -> '$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')">
     <Message Importance="high"  Text="Copying DjvuLibre files and dependencies to output directory"/>
@@ -45,10 +38,7 @@
 
 
   <Target Name="CleanDjvuLibreFiles" BeforeTargets="Clean"
-          Condition="'$(CleanDjvuLibreFiles)' != 'false' And
-                     '$(OutDir)' != '' And
-                     HasTrailingSlash('$(OutDir)') And
-                     Exists('$(OutDir)')">
+          Condition="'$(CleanDjvuLibreFiles)' != 'false' And '$(OutDir)' != '' And HasTrailingSlash('$(OutDir)') And Exists('$(OutDir)')">
     <Message Importance="high"  Text="Deleting DjvuLibre files and dependencies from output directory"/>
     <Delete Files="@(DjvuLibreFiles -> '$(OutDir)%(RecursiveDir)%(Filename)%(Extension)')" />
   </Target>
@@ -77,12 +67,7 @@
     </CleanDependsOn>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(VisualStudioVersion)' == '' Or
-                            '$(VisualStudioVersion)' == '10.0' Or
-                            '$(VisualStudioVersion)' == '11.0' Or
-                            '$(VisualStudioVersion)' == '12.0' Or
-                            '$(VisualStudioVersion)' == '14.0' Or
-                            '$(VisualStudioVersion)' == '15.0'">
+  <PropertyGroup Condition="'$(VisualStudioVersion)' == '' Or '$(VisualStudioVersion)' == '10.0' Or '$(VisualStudioVersion)' == '11.0' Or '$(VisualStudioVersion)' == '12.0' Or '$(VisualStudioVersion)' == '14.0' Or '$(VisualStudioVersion)' == '15.0'">
     <PipelineCollectFilesPhaseDependsOn>
       CollectDjvuLibreFiles;
       $(PipelineCollectFilesPhaseDependsOn);

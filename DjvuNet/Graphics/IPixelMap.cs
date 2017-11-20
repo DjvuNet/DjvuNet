@@ -16,13 +16,13 @@
 
         IPixel GetPixelAt(int row, int column);
 
-        IPixelMap Init(int height, int width, IPixel color);
+        PixelMap Init(int height, int width, IPixel color);
 
-        IPixelMap Init(IMap2 source);
+        PixelMap Init(IMap2 source);
 
-        IPixelMap Init(IMap2 source, Rectangle rect);
+        PixelMap Init(IMap2 source, Rectangle rect);
 
-        IPixelMap Init(sbyte[] data, int arows, int acolumns);
+        PixelMap Init(sbyte[] data, int arows, int acolumns);
 
         void Stencil(IBitmap mask, IPixelMap foregroundMap, int supersample, int subsample, Rectangle bounds, double gamma);
     }
