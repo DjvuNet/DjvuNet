@@ -16,10 +16,10 @@ namespace DjvuNet.DjvuLibre.Tests
 {
     public class DjvuDocumentInfoTests : SynchronizedBase
     {
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void CreateDjvuDocumentInfoTest001()
         {
-            using (DjvuDocumentInfo document = 
+            using (DjvuDocumentInfo document =
                 DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(1)))
             {
                 Assert.NotNull(document);
@@ -30,7 +30,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void CreateDjvuDocumentInfoTest003()
         {
             using (DjvuDocumentInfo document =
@@ -45,7 +45,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void CreateDjvuDocumentInfoTest030()
         {
             using (DjvuDocumentInfo document =
@@ -59,7 +59,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DisposeTest()
         {
             DjvuDocumentInfo document = null;
@@ -79,7 +79,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void GetPageInfoTest003()
         {
             using (DjvuDocumentInfo document =
@@ -102,7 +102,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void GetFileInfoTest003()
         {
             using (DjvuDocumentInfo document =
@@ -120,12 +120,12 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.Equal<int>('I', info.Type);
                 Assert.Equal<int>(3364, info.Size);
                 Assert.True(info.PageNumber < 0);
-                Assert.Equal<string>("Schultens_Страница_005_1L.djbz", info.Title);
-                Assert.Equal<string>("Schultens_Страница_005_1L.djbz", info.Name);
+                Assert.Equal("Schultens_Страница_005_1L.djbz", info.Title);
+                Assert.Equal("Schultens_Страница_005_1L.djbz", info.Name);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData001()
         {
             using (DjvuDocumentInfo document =
@@ -141,11 +141,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(1, false);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData001Json()
         {
             using (DjvuDocumentInfo document =
@@ -161,11 +161,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(1, true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData001JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -181,11 +181,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(1);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData001JsonParser()
         {
             using (DjvuDocumentInfo document =
@@ -204,7 +204,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData002()
         {
             using (DjvuDocumentInfo document =
@@ -220,11 +220,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(0, false);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData002Json()
         {
             using (DjvuDocumentInfo document =
@@ -240,11 +240,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(0, true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData002JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -260,11 +260,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(0);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData002JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -283,7 +283,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData003()
         {
             using (DjvuDocumentInfo document =
@@ -299,11 +299,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(0, false);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData003Json()
         {
             using (DjvuDocumentInfo document =
@@ -319,11 +319,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(0, true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData003JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -339,11 +339,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(0);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData003JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -362,7 +362,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData017()
         {
             using (DjvuDocumentInfo document =
@@ -378,11 +378,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(1, false);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData017Json()
         {
             using (DjvuDocumentInfo document =
@@ -398,11 +398,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(1, true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData017JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -418,11 +418,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(1);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData017JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -441,7 +441,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData023()
         {
             using (DjvuDocumentInfo document =
@@ -457,11 +457,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(2, false);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData023Json()
         {
             using (DjvuDocumentInfo document =
@@ -477,12 +477,12 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(2, true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data); 
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
-        public void DumpPageData023JsonDefault()   
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        public void DumpPageData023JsonDefault()
         {
             using (DjvuDocumentInfo document =
                 DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(23)))
@@ -496,11 +496,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(2);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData023JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -519,7 +519,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData077()
         {
             using (DjvuDocumentInfo document =
@@ -535,11 +535,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(2, false);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData077Json()
         {
             using (DjvuDocumentInfo document =
@@ -555,11 +555,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(2, true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData077JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -575,11 +575,11 @@ namespace DjvuNet.DjvuLibre.Tests
 
                 var data = document.DumpPageData(2);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpPageData077JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -598,7 +598,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData001()
         {
             using (DjvuDocumentInfo document =
@@ -619,7 +619,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData001Json()
         {
             using (DjvuDocumentInfo document =
@@ -632,14 +632,14 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.Equal<DocumentType>(DocumentType.Bundled, type);
                 string expectedStart = "{ \"$type\":\"DjvuNet.Serialization.DjvuDoc\", \"DjvuData\":\n    { \"$type\": \"DjvuNet.Serialization.DjvmForm\", \"ID\": \"FORM:DJVM\", \"NodeOffset\": 0, \"Size\": 1634952, \"Children\": [\n            { \"$type\": \"DjvuNet.Serialization.Dirm\", \"ID\": \"DIRM\", \"NodeOffset\": 16, \"Size\": 338, \"Description\": \"Document directory\", \"DocumentType\": \"bundled\", \"FileCount\": 31, \"PageCount\": 31 },\n            { \"$type\": \"DjvuNet.Serialization.DjvuForm\", \"ID\": \"FORM:DJVU\", \"NodeOffset\": 362, \"Size\": 25228, \"Children\": [\n                    { \"$type\": \"DjvuNet.Serialization.Info\", \"ID\": \"INFO\", \"NodeOffset\": 374, \"Size\": 10, \"Width\": 2260, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2, \"Orientation\": 0 },\n                    { \"$type\": \"DjvuNet.Serialization.Cida\", \"ID\": \"CIDa\", \"NodeOffset\": 392, \"Size\": 36 },\n                    { \"$type\": \"DjvuNet.Serialization.Sjbz\", \"ID\": \"Sjbz\", \"NodeOffset\": 436, \"Size\": 10327,";
                 string expectedEnd = "\", \"NodeOffset\": 1614728, \"Size\": 20228, \"Children\": [\n                    { \"$type\": \"DjvuNet.Serialization.Info\", \"ID\": \"INFO\", \"NodeOffset\": 1614740, \"Size\": 10, \"Width\": 2215, \"Height\": 3669, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2, \"Orientation\": 0 },\n                    { \"$type\": \"DjvuNet.Serialization.Cida\", \"ID\": \"CIDa\", \"NodeOffset\": 1614758, \"Size\": 36 },\n                    { \"$type\": \"DjvuNet.Serialization.Sjbz\", \"ID\": \"Sjbz\", \"NodeOffset\": 1614802, \"Size\": 11471, \"Description\": \"JB2 bilevel data\" },\n                    { \"$type\": \"DjvuNet.Serialization.FG44\", \"ID\": \"FG44\", \"NodeOffset\": 1626282, \"Size\": 2315, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 185, \"Height\": 306 },\n                    { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 1628606, \"Size\": 1054, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 739, \"Height\": 1223 },\n                    { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 1629668, \"Size\": 1172, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n                    { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 1630848, \"Size\": 522, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n                    { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 1631378, \"Size\": 2612, \"Description\": \"IW4 data #4\", \"Slices\": 9 },\n                    { \"$type\": \"DjvuNet.Serialization.Txtz\", \"ID\": \"TXTz\", \"NodeOffset\": 1633998, \"Size\": 929, \"Description\": \"Hidden text (text, etc.)\" },\n                    { \"$type\": \"DjvuNet.Serialization.Antz\", \"ID\": \"ANTz\", \"NodeOffset\": 1634936, \"Size\": 19, \"Description\": \"Page annotation (hyperlinks, etc.)\" }\n                ]\n            }\n        ]\n    }\n}\n";
-                var data = document.DumpDocumentData(true);      
+                var data = document.DumpDocumentData(true);
                 Assert.NotNull(data);
                 Assert.StartsWith(expectedStart, data);
-                Assert.EndsWith(expectedEnd, data);   
+                Assert.EndsWith(expectedEnd, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData001JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -660,7 +660,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData001JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -678,7 +678,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData023()
         {
             using (DjvuDocumentInfo document =
@@ -699,7 +699,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData023Json()
         {
             using (DjvuDocumentInfo document =
@@ -720,7 +720,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData023JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -741,7 +741,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData023JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -759,7 +759,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData030()
         {
             using (DjvuDocumentInfo document =
@@ -774,11 +774,11 @@ namespace DjvuNet.DjvuLibre.Tests
                 string expected = "  FORM:DJVU [146736] \n    INFO [10]         DjVu 6518x9399, v25, 400 dpi, gamma=2.2, orientation=0\n    CIDa [36] \n    Sjbz [84753]      JB2 bilevel data\n    FG44 [31845]      IW4 data #1, 100 slices, v1.2 (color), 544x784\n    BG44 [7015]       IW4 data #1, 74 slices, v1.2 (color), 1630x2350\n    BG44 [6576]       IW4 data #2, 10 slices\n    BG44 [1245]       IW4 data #3, 4 slices\n    BG44 [15184]      IW4 data #4, 9 slices\n";
                 var data = document.DumpDocumentData(false);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData030Json()
         {
             using (DjvuDocumentInfo document =
@@ -793,11 +793,11 @@ namespace DjvuNet.DjvuLibre.Tests
                 string expected = "{ \"$type\":\"DjvuNet.Serialization.DjvuDoc\", \"DjvuData\":\n    { \"$type\": \"DjvuNet.Serialization.DjvuForm\", \"ID\": \"FORM:DJVU\", \"NodeOffset\": 0, \"Size\": 146736, \"Children\": [\n            { \"$type\": \"DjvuNet.Serialization.Info\", \"ID\": \"INFO\", \"NodeOffset\": 16, \"Size\": 10, \"Width\": 6518, \"Height\": 9399, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2, \"Orientation\": 0 },\n            { \"$type\": \"DjvuNet.Serialization.Cida\", \"ID\": \"CIDa\", \"NodeOffset\": 34, \"Size\": 36 },\n            { \"$type\": \"DjvuNet.Serialization.Sjbz\", \"ID\": \"Sjbz\", \"NodeOffset\": 78, \"Size\": 84753, \"Description\": \"JB2 bilevel data\" },\n            { \"$type\": \"DjvuNet.Serialization.FG44\", \"ID\": \"FG44\", \"NodeOffset\": 84840, \"Size\": 31845, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 544, \"Height\": 784 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 116694, \"Size\": 7015, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 1630, \"Height\": 2350 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 123718, \"Size\": 6576, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 130302, \"Size\": 1245, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 131556, \"Size\": 15184, \"Description\": \"IW4 data #4\", \"Slices\": 9 }\n        ]\n    }\n}\n";
                 var data = document.DumpDocumentData(true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData030JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -812,11 +812,11 @@ namespace DjvuNet.DjvuLibre.Tests
                 string expected = "{ \"$type\":\"DjvuNet.Serialization.DjvuDoc\", \"DjvuData\":\n    { \"$type\": \"DjvuNet.Serialization.DjvuForm\", \"ID\": \"FORM:DJVU\", \"NodeOffset\": 0, \"Size\": 146736, \"Children\": [\n            { \"$type\": \"DjvuNet.Serialization.Info\", \"ID\": \"INFO\", \"NodeOffset\": 16, \"Size\": 10, \"Width\": 6518, \"Height\": 9399, \"Version\": 25, \"Dpi\": 400, \"Gamma\": 2.2, \"Orientation\": 0 },\n            { \"$type\": \"DjvuNet.Serialization.Cida\", \"ID\": \"CIDa\", \"NodeOffset\": 34, \"Size\": 36 },\n            { \"$type\": \"DjvuNet.Serialization.Sjbz\", \"ID\": \"Sjbz\", \"NodeOffset\": 78, \"Size\": 84753, \"Description\": \"JB2 bilevel data\" },\n            { \"$type\": \"DjvuNet.Serialization.FG44\", \"ID\": \"FG44\", \"NodeOffset\": 84840, \"Size\": 31845, \"Description\": \"IW4 data #1\", \"Slices\": 100, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 544, \"Height\": 784 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 116694, \"Size\": 7015, \"Description\": \"IW4 data #1\", \"Slices\": 74, \"Version\": 1.2, \"Color\": \"True\", \"Width\": 1630, \"Height\": 2350 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 123718, \"Size\": 6576, \"Description\": \"IW4 data #2\", \"Slices\": 10 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 130302, \"Size\": 1245, \"Description\": \"IW4 data #3\", \"Slices\": 4 },\n            { \"$type\": \"DjvuNet.Serialization.BG44\", \"ID\": \"BG44\", \"NodeOffset\": 131556, \"Size\": 15184, \"Description\": \"IW4 data #4\", \"Slices\": 9 }\n        ]\n    }\n}\n";
                 var data = document.DumpDocumentData(true);
                 Assert.NotNull(data);
-                Assert.Equal<string>(expected, data);
+                Assert.Equal(expected, data);
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData030JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -834,7 +834,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData077()
         {
             using (DjvuDocumentInfo document =
@@ -856,7 +856,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData077Json()
         {
             using (DjvuDocumentInfo document =
@@ -877,7 +877,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData077JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -898,7 +898,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpDocumentData077JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -916,7 +916,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DocumentAnnotation002()
         {
             using (DjvuDocumentInfo document =
@@ -933,7 +933,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DocumentAnnotation077()
         {
             using (DjvuDocumentInfo document =
@@ -947,11 +947,11 @@ namespace DjvuNet.DjvuLibre.Tests
                 string annotation = document.GetDocumentAnnotation();
 
                 Assert.NotNull(annotation);
-                Assert.Equal<string>("eLife", annotation);
+                Assert.Equal("eLife", annotation);
             }
         }
 
-        //[Fact(), Trait("Category", "DjvuLibre")]
+        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpAllDocumentsText()
         {
             for (int i = 1; i <= 77; i++)
@@ -963,7 +963,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 try
                 {
                     path = Util.GetTestFilePath(i);
-                    string outFile = Path.Combine(Util.ArtifactsDataPath, "dumps", 
+                    string outFile = Path.Combine(Util.ArtifactsDataPath, "dumps",
                         Path.GetFileNameWithoutExtension(path) + ".txt");
                     info = DjvuLibre.DjvuDocumentInfo.CreateDjvuDocumentInfo(path);
 
@@ -977,7 +977,7 @@ namespace DjvuNet.DjvuLibre.Tests
                             {
                                 pageText = page.Text;
                             }
-                            
+
                             writer.WriteLine(pageText);
                             writer.WriteLine($"/*** End Page ={pi}= ***/");
                         }
