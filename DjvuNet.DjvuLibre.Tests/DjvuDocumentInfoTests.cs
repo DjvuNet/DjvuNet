@@ -951,7 +951,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(Skip = "Long running test used to generate test artifacts"), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
         public void DumpAllDocumentsText()
         {
             for (int i = 1; i <= 77; i++)
