@@ -64,6 +64,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"/>
   </ItemGroup>
 
   <ItemGroup>
