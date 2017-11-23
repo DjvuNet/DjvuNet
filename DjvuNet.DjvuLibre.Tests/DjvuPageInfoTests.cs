@@ -15,7 +15,7 @@ namespace DjvuNet.DjvuLibre.Tests
 {
     public class DjvuPageInfoTests : SynchronizedBase
     {
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DjvuPageInfoTest001()
         {
             using (DjvuDocumentInfo document =
@@ -39,7 +39,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DjvuPageInfoTest002()
         {
             using (DjvuDocumentInfo document =
@@ -63,7 +63,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DjvuPageInfoTest077()
         {
             using (DjvuDocumentInfo document =
@@ -87,7 +87,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DisposeTest001()
         {
             DjvuPageInfo page = null;
@@ -121,7 +121,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DisposeTest003()
         {
             DjvuPageInfo page = null;
@@ -155,7 +155,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DisposeTest070()
         {
             DjvuPageInfo page = null;
@@ -189,7 +189,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTypeTest001()
         {
             using (DjvuDocumentInfo document =
@@ -223,7 +223,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTypeTest003()
         {
             using (DjvuDocumentInfo document =
@@ -257,7 +257,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTypeTest030()
         {
             using (DjvuDocumentInfo document =
@@ -282,7 +282,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTextTest001()
         {
             using (DjvuDocumentInfo document =
@@ -307,7 +307,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTextTest002()
         {
             using (DjvuDocumentInfo document =
@@ -332,7 +332,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTextTest003()
         {
             using (DjvuDocumentInfo document =
@@ -366,7 +366,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTextTest004()
         {
             using (DjvuDocumentInfo document =
@@ -400,7 +400,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTextTest041()
         {
             using (DjvuDocumentInfo document =
@@ -434,7 +434,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTextTest076()
         {
             using (DjvuDocumentInfo document =
@@ -468,7 +468,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageTextTest077()
         {
             using (DjvuDocumentInfo document =
@@ -502,7 +502,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageAnnotationTest001()
         {
             using (DjvuDocumentInfo document =
@@ -536,7 +536,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageAnnotationTest004()
         {
             using (DjvuDocumentInfo document =
@@ -570,7 +570,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageAnnotationTest008()
         {
             using (DjvuDocumentInfo document =
@@ -604,7 +604,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageAnnotationTest014()
         {
             using (DjvuDocumentInfo document =
@@ -638,7 +638,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageAnnotationTest021()
         {
             using (DjvuDocumentInfo document =
@@ -672,7 +672,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageAnnotationTest076()
         {
             using (DjvuDocumentInfo document =
@@ -709,7 +709,7 @@ namespace DjvuNet.DjvuLibre.Tests
         [DllImport("NtDll.dll", EntryPoint = "RtlMoveMemory")]
         public static extern void CopyMemory(IntPtr Destination, IntPtr Source, uint Length);
 
-        [Fact, Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact, Trait("Category", "DjvuLibre")]
         public void RenderPage_RenderMode003Image()
         {
             using (DjvuDocumentInfo document =
@@ -748,7 +748,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact, Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact, Trait("Category", "DjvuLibre")]
         public void RenderPage_RenderMode003BackgroundImage()
         {
             using (DjvuDocumentInfo document =
@@ -788,7 +788,7 @@ namespace DjvuNet.DjvuLibre.Tests
 
         }
 
-        [Fact, Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact, Trait("Category", "DjvuLibre")]
         public void RenderPage_RenderMode003ForegroundImage()
         {
             using (DjvuDocumentInfo document =
