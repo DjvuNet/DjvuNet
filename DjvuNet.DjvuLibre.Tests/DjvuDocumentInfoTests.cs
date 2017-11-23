@@ -16,7 +16,7 @@ namespace DjvuNet.DjvuLibre.Tests
 {
     public class DjvuDocumentInfoTests : SynchronizedBase
     {
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void CreateDjvuDocumentInfoTest001()
         {
             using (DjvuDocumentInfo document =
@@ -30,7 +30,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void CreateDjvuDocumentInfoTest003()
         {
             using (DjvuDocumentInfo document =
@@ -45,7 +45,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void CreateDjvuDocumentInfoTest030()
         {
             using (DjvuDocumentInfo document =
@@ -59,7 +59,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DisposeTest()
         {
             DjvuDocumentInfo document = null;
@@ -79,7 +79,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetPageInfoTest003()
         {
             using (DjvuDocumentInfo document =
@@ -102,7 +102,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void GetFileInfoTest003()
         {
             using (DjvuDocumentInfo document =
@@ -125,7 +125,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData001()
         {
             using (DjvuDocumentInfo document =
@@ -145,7 +145,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData001Json()
         {
             using (DjvuDocumentInfo document =
@@ -165,7 +165,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData001JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -185,7 +185,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData001JsonParser()
         {
             using (DjvuDocumentInfo document =
@@ -204,7 +204,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData002()
         {
             using (DjvuDocumentInfo document =
@@ -224,7 +224,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData002Json()
         {
             using (DjvuDocumentInfo document =
@@ -244,7 +244,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData002JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -264,7 +264,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData002JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -283,7 +283,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData003()
         {
             using (DjvuDocumentInfo document =
@@ -303,7 +303,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData003Json()
         {
             using (DjvuDocumentInfo document =
@@ -323,7 +323,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData003JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -343,7 +343,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData003JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -362,7 +362,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData017()
         {
             using (DjvuDocumentInfo document =
@@ -382,7 +382,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData017Json()
         {
             using (DjvuDocumentInfo document =
@@ -402,7 +402,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData017JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -422,7 +422,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData017JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -441,7 +441,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData023()
         {
             using (DjvuDocumentInfo document =
@@ -461,7 +461,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData023Json()
         {
             using (DjvuDocumentInfo document =
@@ -481,7 +481,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData023JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -500,7 +500,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData023JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -519,7 +519,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData077()
         {
             using (DjvuDocumentInfo document =
@@ -539,7 +539,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData077Json()
         {
             using (DjvuDocumentInfo document =
@@ -559,7 +559,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData077JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -579,7 +579,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpPageData077JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -598,7 +598,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData001()
         {
             using (DjvuDocumentInfo document =
@@ -619,7 +619,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData001Json()
         {
             using (DjvuDocumentInfo document =
@@ -639,7 +639,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData001JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -660,7 +660,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData001JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -678,7 +678,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData023()
         {
             using (DjvuDocumentInfo document =
@@ -699,7 +699,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData023Json()
         {
             using (DjvuDocumentInfo document =
@@ -720,7 +720,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData023JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -741,7 +741,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData023JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -759,7 +759,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData030()
         {
             using (DjvuDocumentInfo document =
@@ -778,7 +778,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData030Json()
         {
             using (DjvuDocumentInfo document =
@@ -797,7 +797,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData030JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -816,7 +816,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData030JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -834,7 +834,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData077()
         {
             using (DjvuDocumentInfo document =
@@ -856,7 +856,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData077Json()
         {
             using (DjvuDocumentInfo document =
@@ -877,7 +877,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData077JsonDefault()
         {
             using (DjvuDocumentInfo document =
@@ -898,7 +898,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DumpDocumentData077JsonParse()
         {
             using (DjvuDocumentInfo document =
@@ -916,7 +916,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DocumentAnnotation002()
         {
             using (DjvuDocumentInfo document =
@@ -933,7 +933,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(), Trait("Category", "DjvuLibre")]
         public void DocumentAnnotation077()
         {
             using (DjvuDocumentInfo document =
@@ -951,7 +951,7 @@ namespace DjvuNet.DjvuLibre.Tests
             }
         }
 
-        [Fact(Skip = "Long running data dump test"), Trait("Category", "DjvuLibre"), Trait("Category", "Skip")]
+        [Fact(Skip = "Long running data dump test"), Trait("Category", "DjvuLibre")]
         public void DumpAllDocumentsText()
         {
             for (int i = 1; i <= 77; i++)

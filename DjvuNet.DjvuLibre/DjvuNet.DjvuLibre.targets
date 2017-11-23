@@ -5,10 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <NativeReference Condition="$(ProjectFileName) != 'libdjvulibre.vcxproj'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"/>
-  </ItemGroup>
-
-  <ItemGroup>
     <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
                         Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\**\libdjvulibre.dll" />
     <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
