@@ -925,20 +925,6 @@ namespace DjvuNet.Tests
         }
 
         [Fact()]
-        public void CachePageImagesTest()
-        {
-            int pageCount;
-            using (DjvuDocument doc = Util.GetTestDocument(5, out pageCount))
-            {
-                doc.CachePageImages(doc.Pages);
-                var cached = doc.Pages.Where(p => p.IsPageImageCached == true).ToList();
-                Assert.NotNull(cached);
-                // TODO verify logic after method reimplementation
-                Assert.Equal(0, cached.Count);
-            }
-        }
-
-        [Fact()]
         public void DirectoryTest001()
         {
             int pageCount;

@@ -83,7 +83,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj" />
     <ProjectReference Include="..\DjvuNet\DjvuNet.csproj" />
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
   </ItemGroup>

@@ -34,13 +34,13 @@ namespace DjvuNet
 
         event PropertyChangedEventHandler PropertyChanged;
 
-        void ClearImage();
+        //void ClearImage();
 
         void Dispose();
 
         string GetTextForLocation(System.Drawing.Rectangle rect);
 
-        void Preload();
+        //void Preload();
 
         IInterWavePixelMap BackgroundIWPixelMap { get; }
 
@@ -52,25 +52,23 @@ namespace DjvuNet
 
         IPixelMap ForegroundPixelMap { get; }
 
-        System.Drawing.Bitmap Image { get; }
-
         bool IsColor { get; }
 
         bool IsInverted { get; set; }
 
-        bool IsPageImageCached { get; set; }
+        //bool IsPageImageCached { get; set; }
 
         ITH44Chunk Thumbnail { get; }
 
-        System.Drawing.Bitmap ThumbnailImage { get; set; }
+        //System.Drawing.Bitmap ThumbnailImage { get; set; }
 
         IBitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, System.Drawing.Bitmap retVal);
 
-        System.Drawing.Bitmap BuildImage(int subsample = 1);
+        //System.Drawing.Bitmap BuildImage(int subsample = 1);
 
-        System.Drawing.Bitmap BuildPageImage(bool rebuild = false);
+        //System.Drawing.Bitmap BuildPageImage(bool rebuild = false);
 
-        System.Drawing.Bitmap ExtractThumbnailImage();
+        //System.Drawing.Bitmap ExtractThumbnailImage();
 
         IPixelMap GetBgPixmap(Graphics.Rectangle rect, int subsample, double gamma, IPixelMap retval);
 
@@ -82,6 +80,6 @@ namespace DjvuNet
 
         IPixelMap GetPixelMap(Graphics.Rectangle rect, int subsample, double gamma, IPixelMap retval);
 
-        System.Drawing.Bitmap ResizeImage(int newWidth, int newHeight);
+        IDjvuImage Image { get; }
     }
 }
