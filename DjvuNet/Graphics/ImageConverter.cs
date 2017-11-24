@@ -1,21 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace DjvuNet.Graphics
 {
-    public class ImageConverter
+    public static class ImageConverter
     {
         /// <summary>
         /// General method to load image data in different formats recognized by ImageConverter or it's
-        /// plugins into data structures recognized by DjvyNet library.  
+        /// plugins into data structures recognized by DjvyNet library.
         /// </summary>
         /// <param name="reader"></param>
         /// <param name="fileNameExtension"></param>
         /// <returns></returns>
-        public static IMap2 Deserialize(IDjvuReader reader)
+        public static IMap2 Read(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -26,36 +23,36 @@ namespace DjvuNet.Graphics
 
             // JPEG header -> ff d8 ff
             if (buffer[0] == 0xff && buffer[1] == 0xd8 && buffer[2] == 0xff)
-                return DeserializeJpeg(reader);
+                return ReadJpeg(reader);
 
             // PNG header -> 89 50 4e 47 0d 0a 1a 0a
-            if (buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4e && buffer[3] == 0x47 && 
+            if (buffer[0] == 0x89 && buffer[1] == 0x50 && buffer[2] == 0x4e && buffer[3] == 0x47 &&
                 buffer[4] == 0x0d && buffer[5] == 0x0a && buffer[6] == 0x1a && buffer[7] == 0x0a)
-                return DeserializePng(reader);
+                return ReadPng(reader);
 
             // GIF header -> 47 49 46 38 (37 | 39)
             if (buffer[0] == 0x47 && buffer[1] == 0x49 && buffer[2] == 0x46 && buffer[3] == 0x38 &&
                 (buffer[4] == 0x37 || buffer[5] == 0x39))
-                return DeserializeGif(reader);
+                return ReadGif(reader);
 
             // TIFF header -> ( 49 49 2a 00 | 4d 4d 00 2a)
             if ((buffer[0] == 0x49 && buffer[1] == 0x49 && buffer[2] == 0x2a && buffer[3] == 0x00) ||
                 (buffer[4] == 0x4d && buffer[5] == 0x4d && buffer[6] == 0x00 && buffer[7] == 0x2a))
-                return DeserializeTiff(reader);
+                return ReadTiff(reader);
 
             // JPEG 2000 header ->  ff 4f ff 51 ff 52
-            if (buffer[0] == 0xff && buffer[1] == 0x4f && buffer[2] == 0xff && buffer[3] == 0x51 && 
+            if (buffer[0] == 0xff && buffer[1] == 0x4f && buffer[2] == 0xff && buffer[3] == 0x51 &&
                 buffer[4] == 0xff && buffer[5] == 0x52)
-                return DeserializeJpeg2k(reader);
+                return ReadJpeg2k(reader);
 
             // JPEG XR header -> 57 4d 50 48 4f 54 4f 00
             if (buffer[0] == 0x57 && buffer[1] == 0x4d && buffer[2] == 0x50 && buffer[3] == 0x48 &&
                 buffer[4] == 0x4f && buffer[5] == 0x54 && buffer[6] == 0x4f && buffer[7] == 0x00)
-                return DeserializeJpegXr(reader);
+                return ReadJpegXr(reader);
 
             // OpenEXR header -> 76 2f 31 01
             if (buffer[0] == 0x76 && buffer[1] == 0x2f && buffer[2] == 0x31 && buffer[3] == 0x01)
-                return DeserializeExr(reader);
+                return ReadExr(reader);
 
 
             // JPEG header                          -> ff d8 ff
@@ -89,12 +86,12 @@ namespace DjvuNet.Graphics
 
             // ICO | CUR header                     -> 00 00 ( 01 | 02 ) 00
 
-            // EPS header -> 
+            // EPS header ->
 
             // PS header ->
 
             // PNM headers
-            //      PBM header -> P4                -> 50 34 
+            //      PBM header -> P4                -> 50 34
             //      PBM Plain header -> P1          -> 50 31
 
             //      PGM header -> P5                -> 50 35
@@ -113,7 +110,7 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException("Code reached part of function which is still not implemented.");
         }
 
-        public static IMap2 DeserializeJpeg(IDjvuReader reader)
+        public static IMap2 ReadJpeg(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -124,7 +121,7 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException();
         }
 
-        public static IMap2 DeserializeJpeg2k(IDjvuReader reader)
+        public static IMap2 ReadJpeg2k(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -135,7 +132,7 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException();
         }
 
-        public static IMap2 DeserializeJpegXr(IDjvuReader reader)
+        public static IMap2 ReadJpegXr(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -146,7 +143,7 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException();
         }
 
-        public static IMap2 DeserializeExr(IDjvuReader reader)
+        public static IMap2 ReadExr(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -157,7 +154,7 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException();
         }
 
-        public static IMap2 DeserializePng(IDjvuReader reader)
+        public static IMap2 ReadPng(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -168,7 +165,7 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException();
         }
 
-        public static IMap2 DeserializeGif(IDjvuReader reader)
+        public static IMap2 ReadGif(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
@@ -179,7 +176,7 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException();
         }
 
-        public static IMap2 DeserializeTiff(IDjvuReader reader)
+        public static IMap2 ReadTiff(IDjvuReader reader)
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));

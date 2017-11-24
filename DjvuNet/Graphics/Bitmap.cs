@@ -16,20 +16,20 @@ namespace DjvuNet.Graphics
     /// The DjvuNet library uses "bottom left" coordinate system.
     /// Line zero of a bitmap is the bottom line in the bitmap. Pixels are
     /// organized from left to right within each line.
-    /// 
+    ///
     /// Class Bitmap can internally represent bilevel images
     /// using a run-length encoded representation. Some algorithms may benefit
     /// from a direct access to this run information.
-    /// 
+    ///
     /// Bilevel and gray-level images. Instances of class GBitmap represent
     /// bilevel or gray-level images.Images are usually represented using one
     /// byte per pixel. Value zero represents a white pixel. A value equal to
     /// the number of gray levels minus one represents a black pixel.  The number
     /// of gray levels is returned by the property Grays and can be set
-    /// using this same property. This convention of gray representation 
+    /// using this same property. This convention of gray representation
     /// is the opposite to conventionally used in .NET or many other libraries.
     ///
-    /// The bracket [] indexing operator returns a pointer to the bytes composing 
+    /// The bracket [] indexing operator returns a pointer to the bytes composing
     /// one line of the image.This pointer can be used to read or write the image pixels.
     /// Line zero represents the bottom line of the image.
     ///
@@ -44,7 +44,7 @@ namespace DjvuNet.Graphics
     {
         // TODO Verify if this change does not break rendering
 
-        // As this is read and assigned from instance methods changing 
+        // As this is read and assigned from instance methods changing
         // to instance field - will verify results but perhaps it is
         // one of the bugs which prevents proper image rendering
         private Object[] RampRefArray = new Object[256];
@@ -92,7 +92,7 @@ namespace DjvuNet.Graphics
         private int _Grays;
 
         /// <summary>
-        /// Gets or sets the depth of colors - indirectly influnces 
+        /// Gets or sets the depth of colors - indirectly influnces
         /// effectively used pixel size expressed in bits
         /// </summary>
         public int Grays
@@ -141,7 +141,7 @@ namespace DjvuNet.Graphics
         }
 
         #endregion Border
-        
+
         public Pixel[] Ramp
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -160,7 +160,7 @@ namespace DjvuNet.Graphics
             Pixel[] retval = (Pixel[])RampRefArray[Grays];
             if (retval != null)
                 return _RampData = retval;
-            else 
+            else
                 return _RampData = RampNullRefArrayGreys(Grays);
         }
 
@@ -275,7 +275,7 @@ namespace DjvuNet.Graphics
         #region Methods
 
         /// <summary>
-        /// Method creates bitmap and initializes it with deserialized data read from supplied Stream. 
+        /// Method creates bitmap and initializes it with deserialized data read from supplied Stream.
         /// </summary>
         /// <param name="stream">Stream with serialized data source.</param>
         /// <param name="border">Size of border surrounding bitmap data from all sides.</param>
@@ -732,7 +732,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        
+
         internal unsafe void Uncompress()
         {
             // GMonitorLock lock (monitor()) ;
@@ -850,13 +850,13 @@ namespace DjvuNet.Graphics
             while(row < rowEnd)
             {
                 int count = 0;
-                if ((p = !p)) 
+                if ((p = !p))
                 {
                     if (*row != 0)
                     {
                         for (++count, ++row; (row < rowEnd) && *row != 0; ++count, ++row) ;
                     }
-                } 
+                }
                 else if(*row == 0)
                 {
                     for(++count, ++row; (row < rowEnd) && *row == 0; ++count, ++row);
@@ -989,13 +989,13 @@ namespace DjvuNet.Graphics
             get { throw new NotImplementedException(); }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Query a pixel as boolean
         /// </summary>
         /// <param name="offset">
         /// Position to query
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// True if zero
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1004,12 +1004,14 @@ namespace DjvuNet.Graphics
             return (offset < Border) || (offset >= _MaxRowOffset) || (Data[offset] == 0);
         }
 
-        /// <summary> Set the pixel value.
-        ///
+        /// <summary>
+        /// Set the pixel value.
         /// </summary>
-        /// <param name="offset">position of the pixel to set
+        /// <param name="offset">
+        /// position of the pixel to set
         /// </param>
-        /// <param name="value">gray scale value to set
+        /// <param name="value">
+        /// gray scale value to set
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetByteAt(int offset, sbyte value)
@@ -1020,13 +1022,13 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Query the pixel at a particular location
         /// </summary>
         /// <param name="offset">
         /// The pixel location
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// The gray scale value
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1038,7 +1040,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Insert another bitmap at the specified location.  Note that both bitmaps
         /// need to have the same number of grays.
         /// </summary>
@@ -1054,7 +1056,7 @@ namespace DjvuNet.Graphics
         /// <param name="subsample">
         /// Subsample value at
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// True if the blit intersected this bitmap
         /// </returns>
         public bool Blit(IBitmap bm, int xh, int yh, int subsample)
@@ -1154,36 +1156,34 @@ namespace DjvuNet.Graphics
             throw new NotImplementedException();
         }
 
-        /// <summary> 
+        /// <summary>
         /// Query the start offset of a row.
         /// </summary>
         /// <param name="row">
         /// The row to query
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// The offset to the pixel data
         /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int RowOffset(int row)
         {
             return (row * BytesPerRow) + Border;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Query the number of bytes per row.
         /// </summary>
-        /// <returns> 
+        /// <returns>
         /// Bytes per row
         /// </returns>
-        // TODO virtual methods are not inlined - find some other optimizations
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetRowSize()
         {
             return BytesPerRow;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Set the value of all pixels.
         /// </summary>
         /// <param name="value">
@@ -1204,7 +1204,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Insert the reference map at the specified location.
         /// </summary>
         /// <param name="ref">
@@ -1216,26 +1216,28 @@ namespace DjvuNet.Graphics
         /// <param name="dy">
         /// Vertical position to insert at
         /// </param>
-        // TODO virtual methods are not inlined - find some other optimizations
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Fill(IMap2 source, int dx, int dy)
         {
             InsertMap((IBitmap)source, dx, dy, false);
         }
 
-        /// <summary> 
+        /// <summary>
         /// Insert the reference map at the specified location.
         /// </summary>
-        /// <param name="bit">map to insert
+        /// <param name="bit">
+        /// map to insert
         /// </param>
-        /// <param name="dx">horizontal position to insert at
+        /// <param name="dx">
+        /// horizontal position to insert at
         /// </param>
-        /// <param name="dy">vertical position to insert at
+        /// <param name="dy">
+        /// vertical position to insert at
         /// </param>
         /// <param name="doBlit">
         /// True if the gray scale values should be added
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// True if pixels are inserted
         /// </returns>
         public unsafe bool InsertMap(IBitmap bit, int dx, int dy, bool doBlit)
@@ -1305,7 +1307,7 @@ namespace DjvuNet.Graphics
             return false;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Initialize this image with the specified values.
         /// </summary>
         /// <param name="height">
@@ -1317,7 +1319,7 @@ namespace DjvuNet.Graphics
         /// <param name="border">
         /// Width of the border
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// The initialized image map
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1328,7 +1330,7 @@ namespace DjvuNet.Graphics
             Rows = height;
             Width = width;
             Border = border;
-            BytesPerRow = (Width + Border);   
+            BytesPerRow = (Width + Border);
             // TODO: Verify if value of Bitmap.Border is double sided or single sided?
 
             int npixels = RowOffset(Height);
@@ -1369,7 +1371,7 @@ namespace DjvuNet.Graphics
         /// <param name="border">
         /// Number of border pixels
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// The initialized Bitmap
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1404,7 +1406,7 @@ namespace DjvuNet.Graphics
         /// <param name="border">
         /// Number of border pixels
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// Initialized map
         /// </returns>
         public IBitmap Init(IBitmap source, Rectangle rect, int border)
@@ -1493,7 +1495,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Find the bounding box for non-white pixels.
         /// </summary>
-        /// <returns> 
+        /// <returns>
         /// Bounding rectangle
         /// </returns>
         public Rectangle ComputeBoundingBox()
