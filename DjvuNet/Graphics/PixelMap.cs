@@ -1543,7 +1543,7 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// Attenuation array
         /// </returns>
-        protected static int[] GetMultiplier(int maxgray)
+        internal static int[] GetMultiplier(int maxgray)
         {
             int[] retval = (int[])_multiplierRefArray[maxgray];
             if (retval == null)

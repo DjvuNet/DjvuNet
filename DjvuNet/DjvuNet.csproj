@@ -103,6 +103,7 @@
     <Compile Include="Diagnostics\DjvuEventSource.cs" />
     <Compile Include="DjvuDocument.cs" />
     <Compile Include="DjvuImage.cs" />
+    <Compile Include="IDjvuImage.cs" />
     <Compile Include="DjvuPage.cs" />
     <Compile Include="Errors\DjvuAggregateException.cs" />
     <Compile Include="Errors\DjvuArgumentException.cs" />
