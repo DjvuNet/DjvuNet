@@ -109,11 +109,11 @@ namespace DjvuNetTest
             }
         }
 
-        private static void BenchmarkBuildPageImageCall(int testsToSkip, long[] elapsed, int i, int docNo, 
+        private static void BenchmarkBuildPageImageCall(int testsToSkip, long[] elapsed, int i, int docNo,
             Stopwatch watch, string fileName, IDjvuPage page, int imageNo = 1)
         {
             watch.Restart();
-            using (System.Drawing.Bitmap bmp = ((DjvuPage)page).BuildPageImage())
+            using (System.Drawing.Bitmap bmp = ((DjvuImage)((DjvuPage)page).Image).BuildPageImage())
             {
                 watch.Stop();
                 Console.WriteLine($"Image {docNo + 1} - {imageNo} generated in\t{watch.ElapsedTicks:000 000 000 000}");

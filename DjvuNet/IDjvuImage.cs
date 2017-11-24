@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Drawing;
 
 namespace DjvuNet
 {
@@ -8,7 +9,7 @@ namespace DjvuNet
 
         IDjvuDocument Document { get; }
 
-        System.Drawing.Bitmap Image { get; }
+        Bitmap Image { get; }
 
         bool IsInverted { get; set; }
 
@@ -22,6 +23,6 @@ namespace DjvuNet
 
         void Preload();
 
-        System.Drawing.Bitmap ResizeImage(int newWidth, int newHeight);
+        Bitmap ResizeImage(int newWidth, int newHeight);
     }
 }
