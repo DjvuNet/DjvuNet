@@ -35,6 +35,7 @@
     <Compile Include="Compression\ZPTableTests.cs" />
     <Compile Include="Diagnostics\DjvuEventSourceTests.cs" />
     <Compile Include="Graphics\BitmapTests.cs" />
+	<Compile Include="Graphics\ImageConverterTests.cs" />
     <Compile Include="Graphics\MapTests.cs" />
     <Compile Include="Graphics\PixelMapScalerTests.cs" />
     <Compile Include="Graphics\PixelMapTests.cs" />
