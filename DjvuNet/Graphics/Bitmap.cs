@@ -92,7 +92,7 @@ namespace DjvuNet.Graphics
         private int _Grays;
 
         /// <summary>
-        /// Gets or sets the depth of colors - indirectly influnces
+        /// Gets or sets the depth of colors - indirectly influences
         /// effectively used pixel size expressed in bits
         /// </summary>
         public int Grays
