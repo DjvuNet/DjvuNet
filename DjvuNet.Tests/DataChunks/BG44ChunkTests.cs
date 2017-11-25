@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DjvuNet.DataChunks;
-using DjvuNet.Graphics;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Wavelet;
