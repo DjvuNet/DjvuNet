@@ -125,7 +125,7 @@ namespace DjvuNet.Graphics
             return xinteger;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Fills an array of pixels from the specified values.
         /// </summary>
         /// <param name="x">
@@ -155,14 +155,14 @@ namespace DjvuNet.Graphics
         }
 
 
-        /// <summary> 
+        /// <summary>
         /// Create a PixelReference (a pixel iterator) that refers to this map
         /// starting at the specified offset.
         /// </summary>
         /// <param name="offset">
         /// Position of the first pixel to reference
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// The newly created PixelReference
         /// </returns>
         public IPixelReference CreateGPixelReference(int offset)
@@ -170,7 +170,7 @@ namespace DjvuNet.Graphics
             return new PixelReference((IMap2)this, offset);
         }
 
-        /// <summary> 
+        /// <summary>
         /// Create a PixelReference (a pixel iterator) that refers to this map
         /// starting at the specified position.
         /// </summary>
@@ -192,14 +192,16 @@ namespace DjvuNet.Graphics
         /// <returns></returns>
         public System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
         {
-
             PixelFormat format = PixelFormat.Undefined;
 
             if (BytesPerPixel == 1) format = PixelFormat.Format8bppIndexed;
             else if (BytesPerPixel == 2) format = PixelFormat.Format16bppRgb555;
             else if (BytesPerPixel == 3) format = PixelFormat.Format24bppRgb;
             else if (BytesPerPixel == 4) format = PixelFormat.Format32bppArgb;
-            else throw new DjvuFormatException($"Unknown pixel format for byte count: {BytesPerPixel}");
+            else if (BytesPerPixel == 6) format = PixelFormat.Format48bppRgb;
+            else if (BytesPerPixel == 8) format = PixelFormat.Format64bppArgb;
+            else
+                throw new DjvuFormatException($"Unknown pixel format for byte count: {BytesPerPixel}");
 
             GCHandle hData = default(GCHandle);
             System.Drawing.Bitmap image = null;
@@ -246,8 +248,8 @@ namespace DjvuNet.Graphics
         /// Format of image pixel expressed with <see cref="System.Drawing.Imaging.PixelFormat"/> enumeration
         /// </param>
         /// <returns>
-        /// <see cref="System.Drawing.Bitmap"/> created with data copied from Data buffer 
-        /// of this instance of <see cref="DjvuNet.Graphics.Map"/> 
+        /// <see cref="System.Drawing.Bitmap"/> created with data copied from Data buffer
+        /// of this instance of <see cref="DjvuNet.Graphics.Map"/>
         /// </returns>
         public static System.Drawing.Bitmap CopyDataToBitmap(
             int width, int height, IntPtr data, long length, PixelFormat format)
