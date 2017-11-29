@@ -1,6 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
+  <PropertyGroup>
+    <TargetFramework />
+    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>2.0.1</NETStandardImplicitPackageVersion>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -17,10 +27,7 @@
   <ItemGroup>
     <Compile Include="ArtifactsBuild.cs" />
     <Compile Include="ArtifactsBuildRequired.cs" />
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Utilities.cs" />
-    <Content Include="Properties\AssemblyInfo.Template.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
