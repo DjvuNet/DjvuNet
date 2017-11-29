@@ -46,8 +46,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj" />
-    <ProjectReference Include="..\..\..\System.Attributes\System.Attributes.csproj" />
     <ProjectReference Include="..\DjvuNet.Git.Tasks\DjvuNet.Git.Tasks.csproj" />
   </ItemGroup>
 

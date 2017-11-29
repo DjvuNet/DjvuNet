@@ -2,6 +2,8 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
+    <TargetFramework />
+    <TargetFrameworks>net471;netcoreapp2.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre.Tests</RootNamespace>
@@ -25,10 +27,7 @@
 
   <ItemGroup>
     <Compile Include="DjvuPageInfoTests.cs" />
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
-    <Content Include="Properties\AssemblyInfo.Template.cs" />
     <Compile Include="DjvuDocumentInfoTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,7 +48,7 @@
     <ProjectReference Include="..\DjvuNet.DjvuLibre.Helper.Tests\DjvuNet.DjvuLibre.Helper.Tests.csproj" />
     <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
-    <ProjectReference Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
+    <ProjectReference Condition="$(TargetFramework) == 'net471'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
   </ItemGroup>
 
   <ItemGroup>

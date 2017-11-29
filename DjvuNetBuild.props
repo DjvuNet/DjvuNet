@@ -12,6 +12,7 @@
     <TargetFramework>net471</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -24,6 +25,11 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NugetRootPackagesDir Condition="$(NugetRootPackagesDir) == '' And '$(OS)' == 'Windows_NT'">$(UserProfile)/.nuget/packages/</NugetRootPackagesDir>
+    <NugetRootPackagesDir Condition="$(NugetRootPackagesDir) == '' And '$(OS)' != 'Windows_NT'">~/.nuget/packages/</NugetRootPackagesDir>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -78,6 +84,37 @@
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'net471'">
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <Compile Include="Properties\AssemblyInfo.netstandard2.0.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.netstandard2.0.cs" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.0'">
+    <Compile Include="Properties\AssemblyInfo.netcoreapp2.0.cs" />
+    <Compile Include="Properties\AssemblyInfoCommon.netcoreapp2.0.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Properties\AssemblyInfo.Template.cs" />
+  </ItemGroup>
+
+  <!--<ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
+      <HintPath>$(NugetRootPackagesDir)netstandard.library/$(NETStandardImplicitPackageVersion)/build/$(TargetFramework)/ref/netstandard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.0'">
+    <Reference Include="System.Runtime, Version=4.2.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath Condition="'$(OS)' == 'Windows_NT'">$(NugetRootPackagesDir)runtime.win-$(Platfrom).microsoft.netcore.app/2.0.0/runtimes/win-$(Platfrom)/lib/netcoreapp2.0/System.Runtime.dll</HintPath>
+    </Reference>
+  </ItemGroup>-->
 
   <PropertyGroup>
     <OutputPath>$(MSBuildThisFileDirectory)/build/$(Platform)/$(Configuration)/</OutputPath>

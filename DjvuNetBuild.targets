@@ -31,22 +31,50 @@
     </BuildMajorVersion>
 
     <PropertyGroup>
-      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
+      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'net471'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
+      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netstandard2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netstandard2.0.cs</UtilTestFile>
+      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netcoreapp2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netcoreapp2.0.cs</UtilTestFile>
     </PropertyGroup>
 
     <Message Importance="High"
-             Text="Building [$(TargetName)] version: [$(LibraryVersion).$(BuildRevision)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
+             Text="Building [$(TargetName)] target framework: [$(TargetFramework)], version: [$(LibraryVersion).$(BuildRevision)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
 
-    <Copy SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
+    <Copy Condition="$(TargetFramework) == 'net471'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
           DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
+    <Copy Condition="$(TargetFramework) == 'net471'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
             DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'"
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'net471'"
             DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.cs"/>
 
-    <ItemGroup>
+    <Copy Condition="$(TargetFramework) == 'netstandard2.0'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
+      DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.netstandard2.0.cs"/>
+    <Copy Condition="$(TargetFramework) == 'netstandard2.0'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
+            DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.netstandard2.0.cs"/>
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netstandard2.0'"
+            DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.netstandard2.0.cs"/>
+
+    <Copy Condition="$(TargetFramework) == 'netcoreapp2.0'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
+      DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.netcoreapp2.0.cs"/>
+    <Copy Condition="$(TargetFramework) == 'netcoreapp2.0'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
+            DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.netcoreapp2.0.cs"/>
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netcoreapp2.0'"
+            DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.netcoreapp2.0.cs"/>
+
+    <ItemGroup Condition="$(TargetFramework) == 'net471'">
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.cs' />
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.cs' />
+      <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.netstandard2.0.cs' />
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.netstandard2.0.cs' />
+      <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.0'">
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.netcoreapp2.0.cs' />
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.netcoreapp2.0.cs' />
       <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" />
     </ItemGroup>
 
