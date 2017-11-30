@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
-    <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And $(TargetFramework) == 'netcoreapp2.0' And '$(OS)' == 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And $(TargetFramework) == 'netcoreapp2.0' And '$(OS)' != 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll</GitTasksAssembly>
     <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And $(TargetFramework) == 'netstandard2.0' And '$(OS)' == 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/netstandard2.0/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
   </PropertyGroup>
 
