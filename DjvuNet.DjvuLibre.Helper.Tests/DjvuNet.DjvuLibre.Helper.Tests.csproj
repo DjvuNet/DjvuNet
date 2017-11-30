@@ -2,6 +2,9 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
+    <TargetFramework />
+    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>2.0.1</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre.Helper.Tests</RootNamespace>
@@ -23,22 +26,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Condition="$(TargetFramework) == 'netstandard2.0' Or $(TargetFramework) == 'netcoreapp2.0'" Include="CoreCompat.System.Drawing.v2" Version="5.2.0-preview1-r131" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="xunit" Version="2.3.1" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
-    <Content Include="Properties\AssemblyInfo.Template.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" />
 
   <ItemGroup>
     <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 
+  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.props" />
   <ItemGroup>
     <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet.Shared.Tests\DjvuDocumentUtil.cs" />
   </ItemGroup>

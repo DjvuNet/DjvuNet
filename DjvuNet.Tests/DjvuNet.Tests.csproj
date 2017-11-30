@@ -3,6 +3,8 @@
   <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
 
   <PropertyGroup>
+    <TargetFramework />
+    <TargetFrameworks>net471;netcoreapp2.0</TargetFrameworks>    
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.Tests</RootNamespace>
@@ -70,13 +72,10 @@
     <Compile Include="Parser\DjvuFormatExceptionTests.cs" />
     <Compile Include="Parser\DjvuParserTests.cs" />
     <Compile Include="Parser\IffParserExceptionTests.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DjvuPageTests.cs" />
     <Compile Include="SerializationTests.cs" />
     <Compile Include="Util\GenericComparerTests.cs" />
     <Compile Include="Util\VerifyTests.cs" />
-    <Content Include="Properties\AssemblyInfo.Template.cs" />
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="Text\PageTextItemTests.cs" />
     <Compile Include="Text\PageTextSearchTests.cs" />
     <Compile Include="Text\PageTextTests.cs" />
@@ -92,7 +91,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Moq" Version="4.7.142" />
+    <PackageReference Include="Moq" Version="4.7.145" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.extensibility.core" Version="2.3.1" />

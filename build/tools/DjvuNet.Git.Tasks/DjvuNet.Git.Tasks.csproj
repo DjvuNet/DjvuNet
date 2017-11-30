@@ -1,5 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
+
+  <PropertyGroup>
+    <TargetFramework />
+    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>2.0.1</NETStandardImplicitPackageVersion>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
@@ -26,6 +33,7 @@
     <Compile Include="FileUpdate.cs" />
     <Compile Include="GetDateTime.cs" />
     <Compile Include="GetLastCommit.cs" />
+    <Compile Include="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))/System.Attributes/AssemblyPlatformAttribute.cs"/>
   </ItemGroup>
 
   <ItemGroup>

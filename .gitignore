@@ -45,7 +45,9 @@ DjvuNet.DjvuLibre.Helper/
 
 # Code generated during build
 /**/Properties/AssemblyInfoCommon.cs
+/**/Properties/AssemblyInfoCommon.net*.cs
 /**/Properties/AssemblyInfo.cs
+/**/Properties/AssemblyInfo.net*.cs
 
 # External dependencies directory with repositories
 [Ee]xternal/

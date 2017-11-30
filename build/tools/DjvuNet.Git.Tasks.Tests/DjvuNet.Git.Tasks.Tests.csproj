@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.3.409" />
     <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409" />
-    <PackageReference Include="Moq" Version="4.7.142" />
+    <PackageReference Include="Moq" Version="4.7.145" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.extensibility.core" Version="2.3.1" />
@@ -40,14 +40,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="Properties/AssemblyInfo.cs" />
     <Compile Include="GetLastCommitTests.cs" />
     <Compile Include="Moqs/BuildEngineMoq.cs" />
+    <Compile Include="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))/DjvuNet.Shared.Tests/UtilRoot.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\DjvuNet.Helper.Tests\DjvuNet.Helper.Tests.csproj" />
-    <ProjectReference Include="..\..\..\System.Attributes\System.Attributes.csproj" />
     <ProjectReference Include="..\DjvuNet.Git.Tasks\DjvuNet.Git.Tasks.csproj" />
   </ItemGroup>
 

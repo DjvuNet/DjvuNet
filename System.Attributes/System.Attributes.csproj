@@ -1,26 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
+  
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <TargetFramework />
+    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
+    <NetStandardImplicitPackageVersion>2.0.1</NetStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Attributes</RootNamespace>
     <AssemblyName>System.Attributes</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
+  
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
-    <Content Include="Properties\AssemblyInfo.Template.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="AssemblyPlatformAttribute.cs" />
   </ItemGroup>
 
-  <Import Project="..\DjvuNet.Shared\DjvuNet.Shared.projitems" Label="Shared" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 </Project>
