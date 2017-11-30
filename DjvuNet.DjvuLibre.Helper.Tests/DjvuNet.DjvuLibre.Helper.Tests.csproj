@@ -10,6 +10,7 @@
     <RootNamespace>DjvuNet.DjvuLibre.Helper.Tests</RootNamespace>
     <AssemblyName>DjvuNet.DjvuLibre.Helper.Tests</AssemblyName>
     <FileAlignment>512</FileAlignment>
+    <DefineConstants>EXCLUDE_DJVUNET;$(DefineConstans)</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -31,8 +32,6 @@
     <PackageReference Include="xunit" Version="2.3.1" />
   </ItemGroup>
 
-  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" />
-
   <ItemGroup>
     <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
@@ -42,6 +41,7 @@
     <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet.Shared.Tests\DjvuDocumentUtil.cs" />
   </ItemGroup>
 
+  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 
 </Project>
