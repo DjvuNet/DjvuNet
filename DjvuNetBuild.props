@@ -1,8 +1,9 @@
 ﻿<Project>
 
-  <PropertyGroup Condition="'OS' == 'Windows_NT'">
+  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Snk.snk</AssemblyOriginatorKeyFile>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
     <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
