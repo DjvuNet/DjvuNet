@@ -4,7 +4,7 @@
 
   <PropertyGroup>
     <TargetFramework />
-    <TargetFrameworks>net471;netcoreapp2.0</TargetFrameworks>    
+    <TargetFrameworks>net471;netcoreapp2.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.Tests</RootNamespace>
@@ -99,6 +99,7 @@
     <PackageReference Include="xunit.runner.console" Version="2.3.1" />
     <PackageReference Include="xunit.runner.msbuild" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
