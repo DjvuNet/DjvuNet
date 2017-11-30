@@ -10,7 +10,6 @@
     <RootNamespace>DjvuNet.DjvuLibre.Helper.Tests</RootNamespace>
     <AssemblyName>DjvuNet.DjvuLibre.Helper.Tests</AssemblyName>
     <FileAlignment>512</FileAlignment>
-    <DefineConstants>EXCLUDE_DJVUNET;$(DefineConstans)</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -37,11 +36,11 @@
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 
+  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.props" />
   <ItemGroup>
     <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet.Shared.Tests\DjvuDocumentUtil.cs" />
   </ItemGroup>
 
-  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 
 </Project>
