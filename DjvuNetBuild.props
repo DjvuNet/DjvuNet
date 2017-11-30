@@ -1,8 +1,9 @@
 ﻿<Project>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'OS' == 'Windows_NT'">
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Snk.snk</AssemblyOriginatorKeyFile>
+    <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -12,7 +13,6 @@
     <TargetFramework>net471</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Platforms>AnyCPU;x64;x86</Platforms>
-    <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup>
