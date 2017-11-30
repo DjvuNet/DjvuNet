@@ -45,12 +45,12 @@ script:
     - cd ..
     - cd DjvuNet.Tests
     - dotnet msbuild /m /nologo /p:Configuration=Debug /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet xunit -configuration Debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0 ../build/x64/Debug/netcoreapp2.0/DjvuNet.Tests.dll
+    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll -parallel none -notrait Category=SkipNetCoreApp ../build/x64/Debug/netcoreapp2.0/DjvuNet.Tests.dll
     - dotnet msbuild /m /nologo /p:Configuration=Release /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0 ../build/x64/Release/netcoreapp2.0/DjvuNet.Tests.dll
+    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll -parallel none -notrait Category=SkipNetCoreApp ../build/x64/Release/netcoreapp2.0/DjvuNet.Tests.dll
     - cd ..
     - cd DjvuNet.Wavelet.Tests
     - dotnet msbuild /m /nologo /p:Configuration=Debug /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet xunit -configuration Debug -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0 ../build/x64/Debug/netcoreapp2.0/DjvuNet.Wavelet.Tests.dll
+    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll -parallel none -notrait Category=SkipNetCoreApp ../build/x64/Debug/netcoreapp2.0/DjvuNet.Wavelet.Tests.dll
     - dotnet msbuild /m /nologo /p:Configuration=Release /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet xunit -configuration Release -parallel none -nobuild -notrait Category=SkipNetCoreApp -framework netcoreapp2.0 ../build/x64/Release/netcoreapp2.0/DjvuNet.Wavelet.Tests.dll
+    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll -parallel none -notrait Category=SkipNetCoreApp ../build/x64/Release/netcoreapp2.0/DjvuNet.Wavelet.Tests.dll
