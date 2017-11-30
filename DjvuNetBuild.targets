@@ -1,9 +1,9 @@
 ﻿<Project>
   <PropertyGroup>
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
-    <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0') And '$(OS)' != 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll</GitTasksAssembly>
-    <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0') And '$(OS)' == 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
-    <GitTasksAssembly Condition="$(GitTaskAssembly) == ''">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0') And '$(OS)' != 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0') And '$(OS)' == 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == ''">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
   </PropertyGroup>
   <UsingTask TaskName="BuildMajorVersion" AssemblyFile="$(GitTasksAssembly)"/>
   <UsingTask TaskName="GetLastCommit" AssemblyFile="$(GitTasksAssembly)"/>
