@@ -1,11 +1,14 @@
 ﻿<Project>
   <PropertyGroup>
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
+    <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0') And '$(OS)' != 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.Core.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0') And '$(OS)' == 'Windows_NT'">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTaskAssembly) == '' And $(TargetFramework) == 'net471'">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
   </PropertyGroup>
-  <UsingTask TaskName="BuildMajorVersion" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="GetLastCommit" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="GetDateTime" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
-  <UsingTask TaskName="FileUpdate" AssemblyFile="$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll"/>
+  <UsingTask TaskName="BuildMajorVersion" AssemblyFile="$(GitTasksAssembly)"/>
+  <UsingTask TaskName="GetLastCommit" AssemblyFile="$(GitTasksAssembly)"/>
+  <UsingTask TaskName="GetDateTime" AssemblyFile="$(GitTasksAssembly)"/>
+  <UsingTask TaskName="FileUpdate" AssemblyFile="$(GitTasksAssembly)"/>
 
   <Target Name="InjectVersion" BeforeTargets="BeforeBuild">
 

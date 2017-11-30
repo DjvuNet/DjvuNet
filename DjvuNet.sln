@@ -225,6 +225,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		.travis.yml = .travis.yml
 		artifacts.sha256 = artifacts.sha256
 		build.cmd = build.cmd
 		DjvuNet.Tests.runsettings = DjvuNet.Tests.runsettings
