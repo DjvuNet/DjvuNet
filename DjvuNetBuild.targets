@@ -31,9 +31,10 @@
     </BuildMajorVersion>
 
     <PropertyGroup>
-      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'net471'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
-      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netstandard2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netstandard2.0.cs</UtilTestFile>
-      <UtilTestFile Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netcoreapp2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netcoreapp2.0.cs</UtilTestFile>
+      <UtilRepoRootUpdate>$(ProjectName.EndsWith(`.Tests`))</UtilRepoRootUpdate>
+      <UtilTestFile Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'net471'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
+      <UtilTestFile Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netstandard2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netstandard2.0.cs</UtilTestFile>
+      <UtilTestFile Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netcoreapp2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netcoreapp2.0.cs</UtilTestFile>
     </PropertyGroup>
 
     <Message Importance="High"
@@ -43,39 +44,39 @@
           DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.cs"/>
     <Copy Condition="$(TargetFramework) == 'net471'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
             DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'net471'"
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'net471'"
             DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.cs"/>
 
     <Copy Condition="$(TargetFramework) == 'netstandard2.0'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
       DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.netstandard2.0.cs"/>
     <Copy Condition="$(TargetFramework) == 'netstandard2.0'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
             DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.netstandard2.0.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netstandard2.0'"
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netstandard2.0'"
             DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.netstandard2.0.cs"/>
 
     <Copy Condition="$(TargetFramework) == 'netcoreapp2.0'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
       DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.netcoreapp2.0.cs"/>
     <Copy Condition="$(TargetFramework) == 'netcoreapp2.0'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
             DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.netcoreapp2.0.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests' And $(TargetFramework) == 'netcoreapp2.0'"
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netcoreapp2.0'"
             DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.netcoreapp2.0.cs"/>
 
     <ItemGroup Condition="$(TargetFramework) == 'net471'">
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.cs' />
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.cs' />
-      <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" />
+      <UtilFiles Include='$(UtilTestFile)' Condition="$(UtilRepoRootUpdate) == true" />
     </ItemGroup>
 
     <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.netstandard2.0.cs' />
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.netstandard2.0.cs' />
-      <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" />
+      <UtilFiles Include='$(UtilTestFile)' Condition="$(UtilRepoRootUpdate) == true" />
     </ItemGroup>
 
     <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.0'">
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.netcoreapp2.0.cs' />
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.netcoreapp2.0.cs' />
-      <UtilFiles Include='$(UtilTestFile)' Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" />
+      <UtilFiles Include='$(UtilTestFile)' Condition="$(UtilRepoRootUpdate) == true" />
     </ItemGroup>
 
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_VERSION__" ReplacementText="$(LibraryVersion)"/>
@@ -87,9 +88,9 @@
     <FileUpdate Files="@(WriteFiles)" Regex="// TEMPLATE:.+"
     ReplacementText="// THIS FILE IS AUTOMATICALLY GENERATED DURING BUILD!&#10;// Apply any changes intended to appear in AssemblyInso.cs to 'AssemblyInfo.Template.cs' template,&#10;// in the case of AssemblyInfoCommon.cs file apply changes to AssemblyInfoCommon.Template.cs file in root folder instead."/>
 
-    <FileUpdate Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'" Files="@(UtilFiles)" Regex="@@@DJVUNET_ROOT@@@" ReplacementText="$(MSBuildThisFileDirectory)"/>
+    <FileUpdate Condition="$(UtilRepoRootUpdate) == true" Files="@(UtilFiles)" Regex="@@@DJVUNET_ROOT@@@" ReplacementText="$(MSBuildThisFileDirectory)"/>
 
-    <FileUpdate Files="@(UtilFiles)" Regex="// TEMPLATE:.+" Condition="'$(ProjectName)' == 'DjvuNet.Helper.Tests'"
+    <FileUpdate Files="@(UtilFiles)" Regex="// TEMPLATE:.+" Condition="$(UtilRepoRootUpdate) == true"
     ReplacementText="// THIS FILE IS AUTOMATICALLY GENERATED DURING BUILD!&#10;// Apply any changes intended to appear in UtilRoot.cs to 'UtilRoot.Template.cs' template, instead."/>
 
   </Target>

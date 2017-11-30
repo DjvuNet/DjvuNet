@@ -206,7 +206,7 @@
     <Folder Include="Edition\" />
     <Folder Include="Export\" />
     <Folder Include="Services\" />
-  </ItemGroup>  
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Condition="$(TargetFramework) == 'netstandard2.0' Or $(TargetFramework) == 'netcoreapp2.0'" Include="CoreCompat.System.Drawing.v2" Version="5.2.0-preview1-r131" />

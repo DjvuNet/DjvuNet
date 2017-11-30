@@ -12,6 +12,7 @@ namespace DjvuNet.Tests
 {
     public partial class Util
     {
+#if !EXCLUDE_DJVUNET
         public static DjvuDocument GetTestDocument(int index, out int pageCount)
         {
             pageCount = 0;
@@ -41,5 +42,6 @@ namespace DjvuNet.Tests
             if (pageCount > 0)
                 Assert.Equal<int>(pageCount, document.Pages.Count);
         }
+#endif
     }
 }
