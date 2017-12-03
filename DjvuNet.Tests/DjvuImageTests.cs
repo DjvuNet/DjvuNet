@@ -441,7 +441,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-#if !_APPVEYOR
+#if DUMP_IMAGES
                     string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CFn.png");
                     using (FileStream stream = new FileStream(file, FileMode.Create))
                         image.Save(stream, ImageFormat.Png);
@@ -466,7 +466,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-#if !_APPVEYOR
+#if DUMP_IMAGES
                     string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CBn.png");
                     using (FileStream stream = new FileStream(file, FileMode.Create))
                         image.Save(stream, ImageFormat.Png);
@@ -491,7 +491,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-#if !_APPVEYOR
+#if DUMP_IMAGES
                     string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CMn.png");
                     using (FileStream stream = new FileStream(file, FileMode.Create))
                         image.Save(stream, ImageFormat.Png);
