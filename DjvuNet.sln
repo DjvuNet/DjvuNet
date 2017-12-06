@@ -211,12 +211,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{
 		Templates\UtilRoot.Template.cs = Templates\UtilRoot.Template.cs
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{7DD5F8A4-BD76-4DEA-B632-3EE41FC3D493}"
-	ProjectSection(SolutionItems) = preProject
-		Tools\7z.exe = Tools\7z.exe
-		Tools\nuget.exe = Tools\nuget.exe
-	EndProjectSection
-EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "DjvuNet.Shared.Tests", "DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.shproj", "{B7EF5575-5932-4EA7-B250-E7DA238D60A9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{508EA7BC-4576-4C24-877B-7D7EE4369DA0}"
@@ -229,15 +223,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		artifacts.sha256 = artifacts.sha256
 		build.cmd = build.cmd
 		DjvuNet.Tests.runsettings = DjvuNet.Tests.runsettings
-		DjvuNetBuild.Core.props = DjvuNetBuild.Core.props
-		DjvuNetBuild.Core.targets = DjvuNetBuild.Core.targets
 		DjvuNetBuild.props = DjvuNetBuild.props
 		DjvuNetBuild.targets = DjvuNetBuild.targets
 		library.version = library.version
 		..\LICENSE.md = ..\LICENSE.md
 		README.md = README.md
 		Snk.snk = Snk.snk
-		TEST.bat = TEST.bat
 	EndProjectSection
 EndProject
 Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "DjvuNet.Build", "DjvuNet.Build\DjvuNet.Build.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
@@ -252,128 +243,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Attributes", "System.Attributes\System.Attributes.csproj", "{75DE07A6-854C-4EC8-9BEB-24B8EFE42634}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdjvulibre", "DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj", "{AAA67337-AABD-4D04-A3CC-0A7F341F216C}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deps", "deps", "{022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x86", "x86", "{24379D70-5866-45DA-9DF1-E1182F3C8D64}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "x64", "x64", "{D69E081C-83D4-4A0F-8667-E10AAF614902}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{FB072A68-F276-4CAC-9FE2-9BFA99A509FE}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x86\include\jconfig.h = deps\x86\include\jconfig.h
-		deps\x86\include\jerror.h = deps\x86\include\jerror.h
-		deps\x86\include\jmorecfg.h = deps\x86\include\jmorecfg.h
-		deps\x86\include\jpeglib.h = deps\x86\include\jpeglib.h
-		deps\x86\include\tiff.h = deps\x86\include\tiff.h
-		deps\x86\include\tiffconf.h = deps\x86\include\tiffconf.h
-		deps\x86\include\tiffio.h = deps\x86\include\tiffio.h
-		deps\x86\include\tiffio.hxx = deps\x86\include\tiffio.hxx
-		deps\x86\include\tiffvers.h = deps\x86\include\tiffvers.h
-		deps\x86\include\turbojpeg.h = deps\x86\include\turbojpeg.h
-		deps\x86\include\zlib.h = deps\x86\include\zlib.h
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{61D3B80C-4A7B-4C27-870B-A893443ACA39}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x86\Debug\jpeg.lib = deps\x86\Debug\jpeg.lib
-		deps\x86\Debug\jpeg.pdb = deps\x86\Debug\jpeg.pdb
-		deps\x86\Debug\jpeg62.dll = deps\x86\Debug\jpeg62.dll
-		deps\x86\Debug\tiffd.dll = deps\x86\Debug\tiffd.dll
-		deps\x86\Debug\tiffd.lib = deps\x86\Debug\tiffd.lib
-		deps\x86\Debug\tiffd.pdb = deps\x86\Debug\tiffd.pdb
-		deps\x86\Debug\zlibd.lib = deps\x86\Debug\zlibd.lib
-		deps\x86\Debug\zlibd.pdb = deps\x86\Debug\zlibd.pdb
-		deps\x86\Debug\zlibd1.dll = deps\x86\Debug\zlibd1.dll
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{8597CB2A-5ED0-4B9E-B86A-16A4795C5146}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x86\Release\jpeg.lib = deps\x86\Release\jpeg.lib
-		deps\x86\Release\jpeg.pdb = deps\x86\Release\jpeg.pdb
-		deps\x86\Release\jpeg62.dll = deps\x86\Release\jpeg62.dll
-		deps\x86\Release\tiff.dll = deps\x86\Release\tiff.dll
-		deps\x86\Release\tiff.lib = deps\x86\Release\tiff.lib
-		deps\x86\Release\tiff.pdb = deps\x86\Release\tiff.pdb
-		deps\x86\Release\zlib.lib = deps\x86\Release\zlib.lib
-		deps\x86\Release\zlib.pdb = deps\x86\Release\zlib.pdb
-		deps\x86\Release\zlib1.dll = deps\x86\Release\zlib1.dll
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "include", "include", "{C1AEB7FA-E6F9-465F-8189-00EF56D72C6E}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x64\include\jconfig.h = deps\x64\include\jconfig.h
-		deps\x64\include\jerror.h = deps\x64\include\jerror.h
-		deps\x64\include\jmorecfg.h = deps\x64\include\jmorecfg.h
-		deps\x64\include\jpeglib.h = deps\x64\include\jpeglib.h
-		deps\x64\include\tiff.h = deps\x64\include\tiff.h
-		deps\x64\include\tiffconf.h = deps\x64\include\tiffconf.h
-		deps\x64\include\tiffio.h = deps\x64\include\tiffio.h
-		deps\x64\include\tiffio.hxx = deps\x64\include\tiffio.hxx
-		deps\x64\include\tiffvers.h = deps\x64\include\tiffvers.h
-		deps\x64\include\turbojpeg.h = deps\x64\include\turbojpeg.h
-		deps\x64\include\zlib.h = deps\x64\include\zlib.h
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Release", "Release", "{C20C859D-FADB-4380-8107-89FE6D8F1CFD}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x64\Release\jpeg.lib = deps\x64\Release\jpeg.lib
-		deps\x64\Release\jpeg.pdb = deps\x64\Release\jpeg.pdb
-		deps\x64\Release\jpeg62.dll = deps\x64\Release\jpeg62.dll
-		deps\x64\Release\tiff.dll = deps\x64\Release\tiff.dll
-		deps\x64\Release\tiff.lib = deps\x64\Release\tiff.lib
-		deps\x64\Release\tiff.pdb = deps\x64\Release\tiff.pdb
-		deps\x64\Release\zlib.lib = deps\x64\Release\zlib.lib
-		deps\x64\Release\zlib.pdb = deps\x64\Release\zlib.pdb
-		deps\x64\Release\zlib1.dll = deps\x64\Release\zlib1.dll
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Debug", "Debug", "{D8B6CB0B-9D06-429E-B902-F1C70925E3AD}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x64\Debug\jpeg.lib = deps\x64\Debug\jpeg.lib
-		deps\x64\Debug\jpeg.pdb = deps\x64\Debug\jpeg.pdb
-		deps\x64\Debug\jpeg62.dll = deps\x64\Debug\jpeg62.dll
-		deps\x64\Debug\tiffd.dll = deps\x64\Debug\tiffd.dll
-		deps\x64\Debug\tiffd.lib = deps\x64\Debug\tiffd.lib
-		deps\x64\Debug\tiffd.pdb = deps\x64\Debug\tiffd.pdb
-		deps\x64\Debug\zlibd.lib = deps\x64\Debug\zlibd.lib
-		deps\x64\Debug\zlibd.pdb = deps\x64\Debug\zlibd.pdb
-		deps\x64\Debug\zlibd1.dll = deps\x64\Debug\zlibd1.dll
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{847DB819-B1AD-435D-B460-73E06303C477}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x86\Debug\static\jpeg-static.pdb = deps\x86\Debug\static\jpeg-static.pdb
-		deps\x86\Debug\static\jpeg.lib = deps\x86\Debug\static\jpeg.lib
-		deps\x86\Debug\static\tiff.lib = deps\x86\Debug\static\tiff.lib
-		deps\x86\Debug\static\zlib.lib = deps\x86\Debug\static\zlib.lib
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{35A32C1F-2570-4DB2-9EA2-9455EA724C02}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x64\Debug\static\jpeg-static.pdb = deps\x64\Debug\static\jpeg-static.pdb
-		deps\x64\Debug\static\jpeg.lib = deps\x64\Debug\static\jpeg.lib
-		deps\x64\Debug\static\tiffd.lib = deps\x64\Debug\static\tiffd.lib
-		deps\x64\Debug\static\zlibd.lib = deps\x64\Debug\static\zlibd.lib
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{A52C9873-4D9B-4CD1-A74C-21BEC3F5D013}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x64\Release\static\jpeg-static.pdb = deps\x64\Release\static\jpeg-static.pdb
-		deps\x64\Release\static\jpeg.lib = deps\x64\Release\static\jpeg.lib
-		deps\x64\Release\static\tiff.lib = deps\x64\Release\static\tiff.lib
-		deps\x64\Release\static\zlib.lib = deps\x64\Release\static\zlib.lib
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "share", "share", "{60A232E8-EBC3-4574-B6F0-92CCCAEAF503}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "static", "static", "{384245D7-CAE8-4E63-AFFC-922D923ECB73}"
-	ProjectSection(SolutionItems) = preProject
-		deps\x86\Release\static\jpeg-static.pdb = deps\x86\Release\static\jpeg-static.pdb
-		deps\x86\Release\static\jpeg.lib = deps\x86\Release\static\jpeg.lib
-		deps\x86\Release\static\tiff.lib = deps\x86\Release\static\tiff.lib
-		deps\x86\Release\static\zlib.lib = deps\x86\Release\static\zlib.lib
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "data", "data", "{73C6055A-2FF4-4852-B3F0-402D6EB5B8B9}"
 	ProjectSection(SolutionItems) = preProject
@@ -1033,19 +902,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{24379D70-5866-45DA-9DF1-E1182F3C8D64} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
-		{D69E081C-83D4-4A0F-8667-E10AAF614902} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
-		{FB072A68-F276-4CAC-9FE2-9BFA99A509FE} = {24379D70-5866-45DA-9DF1-E1182F3C8D64}
-		{61D3B80C-4A7B-4C27-870B-A893443ACA39} = {24379D70-5866-45DA-9DF1-E1182F3C8D64}
-		{8597CB2A-5ED0-4B9E-B86A-16A4795C5146} = {24379D70-5866-45DA-9DF1-E1182F3C8D64}
-		{C1AEB7FA-E6F9-465F-8189-00EF56D72C6E} = {D69E081C-83D4-4A0F-8667-E10AAF614902}
-		{C20C859D-FADB-4380-8107-89FE6D8F1CFD} = {D69E081C-83D4-4A0F-8667-E10AAF614902}
-		{D8B6CB0B-9D06-429E-B902-F1C70925E3AD} = {D69E081C-83D4-4A0F-8667-E10AAF614902}
-		{847DB819-B1AD-435D-B460-73E06303C477} = {61D3B80C-4A7B-4C27-870B-A893443ACA39}
-		{35A32C1F-2570-4DB2-9EA2-9455EA724C02} = {D8B6CB0B-9D06-429E-B902-F1C70925E3AD}
-		{A52C9873-4D9B-4CD1-A74C-21BEC3F5D013} = {C20C859D-FADB-4380-8107-89FE6D8F1CFD}
-		{60A232E8-EBC3-4574-B6F0-92CCCAEAF503} = {022088E2-265A-4E81-AFC5-BAEC4F7E4CE6}
-		{384245D7-CAE8-4E63-AFFC-922D923ECB73} = {8597CB2A-5ED0-4B9E-B86A-16A4795C5146}
 		{73C6055A-2FF4-4852-B3F0-402D6EB5B8B9} = {DA12BDB9-14EE-4DE9-96E8-7C679660A1C0}
 		{1C4777B0-B3DC-4EF4-A14F-CA6753E9DBCE} = {6575B4E4-C4C2-4CAE-8642-ADF4BACE2607}
 		{8971D9F4-82A4-4ABC-8A6E-B15097972011} = {1C4777B0-B3DC-4EF4-A14F-CA6753E9DBCE}

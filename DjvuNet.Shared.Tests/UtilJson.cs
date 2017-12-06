@@ -21,8 +21,8 @@ namespace DjvuNet.Tests
                     return _JsonDocumentList;
                 else
                 {
-                    _JsonDocumentList = new List<DjvuJsonDocument>();
                     string artifactsPath = Path.Combine(Util.RepoRoot, "artifacts");
+                    _JsonDocumentList = new List<DjvuJsonDocument>();
                     string[] jsonFiles = Directory.GetFiles(Util.ArtifactsPath, "*C*.json");
                     Array.Sort(jsonFiles);
 

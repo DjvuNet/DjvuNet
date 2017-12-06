@@ -6,6 +6,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>DjvuNet.Bzz</RootNamespace>
     <AssemblyName>DjvuNet.Bzz</AssemblyName>
+    <Platforms>AnyCPU;x64;x86</Platforms>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
 
