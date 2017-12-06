@@ -7,7 +7,7 @@ namespace DjvuNet.Tests
 {
     public class UtilJsonTests : IDisposable
     {
-        string ArtifactsDirectory = "artifacts"; 
+        string ArtifactsDirectory = "artifacts";
         string ArtifactsSearchPattern = "*.djvu;*.json";
         string ArtifactsDjvuFile = "test001C.djvu";
         string ArtifactsJsonFile = "test001C.json";
@@ -47,7 +47,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
-        public void BuildRequiredTest001() 
+        public void BuildRequiredTest001()
         {
             FileInfo hashFileInfo = new FileInfo(HashFilePath);
             if (hashFileInfo.Exists)
@@ -116,7 +116,7 @@ namespace DjvuNet.Tests
             if (hashFileInfo.Exists)
             {
                 DateTime prevLastWriteUtc = hashFileInfo.LastWriteTimeUtc;
-                FileInfo test001CInfo = new FileInfo(Path.Combine(DataDirectory, "test001C.djvu"));
+                FileInfo test001CInfo = new FileInfo(Path.Combine(ArtifactsDirectory, "test001C.djvu"));
                 DateTime prevTestLastWriteUtc = test001CInfo.LastWriteTimeUtc;
                 try
                 {

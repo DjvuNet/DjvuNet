@@ -32,18 +32,17 @@ namespace DjvuNet.Tests
                 else
                 {
                     _TestDocumentData = new SortedDictionary<int, Tuple<int, int, DocumentType, string>>();
+                    JsonConverter[] converters = new JsonConverter[]
+                    {
+                        new DjvuDocConverter(),
+                        new NodeBaseConverter(),
+                    };
 
                     for (int i = 1; i <= 77; i++)
                     {
                         string filePath = GetTestFilePath(i);
                         filePath = Path.Combine(Util.ArtifactsJsonPath,
                             Path.GetFileNameWithoutExtension(filePath) + ".json");
-
-                        JsonConverter[] converters = new JsonConverter[]
-                        {
-                            new DjvuDocConverter(),
-                            new NodeBaseConverter(),
-                        };
 
                         string json = File.ReadAllText(filePath, new UTF8Encoding(false));
                         DjvuDoc doc = JsonConvert.DeserializeObject<DjvuDoc>(json, converters);

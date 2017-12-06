@@ -154,8 +154,8 @@ if defined __BuildLibDjvuLibre (
     echo %__MsgPrefix%Using environment: "%__VCToolsRoot%\vcvarsall.bat" !__VCBuildArch!
     call                                 "%__VCToolsRoot%\vcvarsall.bat" !__VCBuildArch!
 
-    echo %__MsgPrefix%Calling: msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
-    call msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
+    echo %__MsgPrefix%Calling: msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
+    call msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
 
     if not [%ERRORLEVEL%]==[0] (
         echo %__MsgPrefix%Error: native libdjvulibre library build failed. Refer to the build log files for details:
@@ -185,8 +185,8 @@ set __DjvuNetDjvuLibreProj=DjvuNet.DjvuLibre/DjvuNet.DjvuLibre.csproj
 
 echo.
 echo %__MsgPrefix%Building %__DjvuNetGitTasksProj%
-echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetGitTasksProj%"
-call %__BuildCommand% /p:Configuration=Release /p:Platform=AnyCPU /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetGitTasksProj%"
+echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetGitTasksProj%"
+call %__BuildCommand% /p:Configuration=Release /p:Platform=AnyCPU /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetGitTasksProj%"
 
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: %__DjvuNetGitTasksProj% build failed. Refer to the build log files for details:
@@ -198,8 +198,8 @@ if not [%ERRORLEVEL%]==[0] (
 
 echo.
 echo %__MsgPrefix%Building %__DjvuNetProj%
-echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetProj%"
-call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetProj%"
+echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetProj%"
+call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetProj%"
 
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: %__DjvuNetProj% build failed. Refer to the build log files for details:
@@ -213,8 +213,8 @@ if defined _SkipNative goto :no_djvunet_djvulibre_build
 
 echo.
 echo %__MsgPrefix%Building %__DjvuNetDjvuLibreProj%
-echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreProj%"
-call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreProj%"
+echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreProj%"
+call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreProj%"
 
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: %__DjvuNetProj% build failed. Refer to the build log files for details:
@@ -239,12 +239,20 @@ if not defined _Test (
     )
 )
 
+if /i "%_Framework%" == "netstandard" (
+    set __TestFramework=netcoreapp2.0
+) else (
+    set __TestFramework=%__Framework%
+)
+
+set __TestOutputDir=%__RootBuildDir%%_MSB_Platform%\%_MSB_Configuration%\%__TestFramework%\
+
 set __DjvuNetTestsProj=DjvuNet.Tests/DjvuNet.Tests.csproj
 
 echo.
 echo %__MsgPrefix%Building %__DjvuNetTestsProj%
-echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetTestsProj%"
-call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetTestsProj%"
+echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetTestsProj%"
+call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetTestsProj%"
 
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: %__DjvuNetTestsProj% build failed. Refer to the build log files for details:
@@ -258,8 +266,8 @@ set __DjvuNetWaveletTestsProj=DjvuNet.Wavelet.Tests/DjvuNet.Wavelet.Tests.csproj
 
 echo.
 echo %__MsgPrefix%Building %__DjvuNetWaveletTestsProj%
-echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetWaveletTestsProj%"
-call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetWaveletTestsProj%"
+echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetWaveletTestsProj%"
+call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetWaveletTestsProj%"
 
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: %__DjvuNetWaveletTestsProj% build failed. Refer to the build log files for details:
@@ -271,12 +279,59 @@ if not [%ERRORLEVEL%]==[0] (
 
 if defined _SkipNative goto :no_djvunet_djvulibre_tests
 
+set __LogsDir=%__RootBuildDir%logs
+set __BuildLogRootName=libdjvulibre
+set __BuildLog="%__LogsDir%\%__BuildLogRootName%_%_MSB_Platform%_%_MSB_Configuration%_Tests.log"
+set __BuildWrn="%__LogsDir%\%__BuildLogRootName%_%_MSB_Platform%_%_MSB_Configuration%_Tests.wrn"
+set __BuildErr="%__LogsDir%\%__BuildLogRootName%_%_MSB_Platform%_%_MSB_Configuration%_Tests.err"
+set "__MsbuildLog=/flp:Verbosity=diag;LogFile=%__BuildLog%"
+set "__MsbuildWrn=/flp1:WarningsOnly;LogFile=%__BuildWrn%
+set "__MsbuildErr=/flp2:ErrorsOnly;LogFile=%__BuildErr%
+
+if defined __BuildLibDjvuLibre (
+    REM Scope environment changes start {
+    setlocal
+
+    echo %__MsgPrefix%Building native libdjvulibre.vcxproj for DjvuNet.DjvuLibre.Tests
+
+    set __VCBuildArch=x86_x64
+
+    if /i "%_MSB_Platform%" == "x86" set __VCBuildArch=x86
+    if /i "%_MSB_Platform%" == "arm" set __VCBuildArch=x86_arm
+    if /i "%_MSB_Platform%" == "arm64" set __VCBuildArch=x86_arm64
+
+    echo %__MsgPrefix%Using environment: "%__VCToolsRoot%\vcvarsall.bat" !__VCBuildArch!
+    call                                 "%__VCToolsRoot%\vcvarsall.bat" !__VCBuildArch!
+
+    echo %__MsgPrefix%Calling: msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
+    call msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
+
+    if not [%ERRORLEVEL%]==[0] (
+        echo %__MsgPrefix%Error: native libdjvulibre library build failed. Refer to the build log files for details:
+        echo     !__BuildLog!
+        echo     !__BuildWrn!
+        echo     !__BuildErr!
+        exit /b 1
+    )
+
+REM } Scope environment changes end
+    endlocal
+)
+
+set __BuildLogRootName=%__DjvuTargetSolution%
+set __BuildLog="%__LogsDir%\%__BuildLogRootName%_%_MSB_Platform%_%_MSB_Configuration%.log"
+set __BuildWrn="%__LogsDir%\%__BuildLogRootName%_%_MSB_Platform%_%_MSB_Configuration%.wrn"
+set __BuildErr="%__LogsDir%\%__BuildLogRootName%_%_MSB_Platform%_%_MSB_Configuration%.err"
+set __MsbuildLog=/flp:Verbosity=diag;LogFile=%__BuildLog%
+set __MsbuildWrn=/flp1:WarningsOnly;LogFile=%__BuildWrn%
+set __MsbuildErr=/flp2:ErrorsOnly;LogFile=%__BuildErr%
+
 set __DjvuNetDjvuLibreTestsProj=DjvuNet.DjvuLibre.Tests/DjvuNet.DjvuLibre.Tests.csproj
 
 echo.
 echo %__MsgPrefix%Building %__DjvuNetDjvuLibreTestsProj%
-echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreTestsProj%"
-call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /t:%_MSB_Target% /v:n /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreTestsProj%"
+echo %__MsgPrefix%calling %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreTestsProj%"
+call %__BuildCommand% /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__TestFramework% /t:%_MSB_Target% /v:m /m:1 /nologo %__MsbuildLog% %__MsbuildWrn% %__MsbuildErr% "%__RepoRootDir%%__DjvuNetDjvuLibreTestsProj%"
 
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: %__DjvuNetDjvuLibreTestsProj% build failed. Refer to the build log files for details:
@@ -288,33 +343,44 @@ if not [%ERRORLEVEL%]==[0] (
 
 :no_djvunet_djvulibre_tests
 
-set _DjvuNet_Tests=%__OutputDir%DjvuNet.Tests.dll
-set _DjvuNet_DjvuLibre_Tests=%__OutputDir%DjvuNet.DjvuLibre.Tests.dll
-set _DjvuNet_Wavelet_Tests=%__OutputDir%DjvuNet.Wavelet.Tests.dll
-set __TestOutputDir=TestResults\%__Framework%\
+set _DjvuNet_Tests=%__TestOutputDir%DjvuNet.Tests.dll
+set _DjvuNet_DjvuLibre_Tests=%__TestOutputDir%DjvuNet.DjvuLibre.Tests.dll
+set _DjvuNet_Wavelet_Tests=%__TestOutputDir%DjvuNet.Wavelet.Tests.dll
+set __TestResOutputDir=TestResults\%__Framework%\
+set __DotNetCommandx86="%ProgramFiles(x86)%\dotnet\dotnet" %UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\netcoreapp2.0\xunit.console.dll
+set __DotNetCommandx64="%ProgramFiles%\dotnet\dotnet" %UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\netcoreapp2.0\xunit.console.dll
 
-if /i "%__Framework%" == "net471" (
+if /i "%__TestFramework%" == "net471" (
     if %_MSB_Platform%==x86 set _xUnit_console=%UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\net452\xunit.console.x86.exe
     if %_MSB_Platform%==AnyCPU set _xUnit_console=%UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\net452\xunit.console.x86.exe
     if %_MSB_Platform%==x64 set _xUnit_console=%UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\net452\xunit.console.exe
+    set __TestOutputFormat=html
 )
 
-if /i "%__Framework%" == "netcoreapp2.0" (
-    set "_xUnit_console=dotnet %UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\netcoreapp2.0\xunit.console.dll"
+if /i "%__TestFramework%" == "netcoreapp2.0" (
+    if %_MSB_Platform%==x86 set "_xUnit_console=!__DotNetCommandx86!"
+    if %_MSB_Platform%==x64 set "_xUnit_console=!__DotNetCommandx64!"
+    if %_MSB_Platform%==AnyCPU set _xUnit_console=dotnet %UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\netcoreapp2.0\xunit.console.dll
+    set _Test_Options=-notrait "Category=SkipNetCoreApp"
+    set __TestOutputFormat=xml
 )
 
-if /i "%__Framework%" == "netstandard2.0" (
-    set "_xUnit_console=dotnet %UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\netcoreapp2.0\xunit.console.dll"
+if /i "%__TestFramework%" == "netstandard2.0" (
+    if %_MSB_Platform%==x86 set "_xUnit_console=!__DotNetCommandx86!"
+    if %_MSB_Platform%==x64 set "_xUnit_console=!__DotNetCommandx64!"
+    if %_MSB_Platform%==AnyCPU set _xUnit_console=dotnet %UserProfile%\.nuget\packages\xunit.runner.console\2.3.1\tools\netcoreapp2.0\xunit.console.dll
+    set _Test_Options=-notrait "Category=SkipNetCoreApp"
+    set __TestOutputFormat=xml
 )
 
-set _Test_Options=-notrait "Category=Skip" -nologo -nocolor -noshadow -html
+set _Test_Options=%_Test_Options% -notrait "Category=Skip" -nologo -nocolor -noshadow -maxthreads 1 -%__TestOutputFormat%
 
 :xUnit_tests
 echo.
 echo %__MsgPrefix%Running tests from DjvuNet.Tests assembly
-echo %__MsgPrefix%calling: %_xUnit_console% %_DjvuNet_Tests% %_Test_Options% %__TestOutputDir%DjvuNet.Tests.html
+echo %__MsgPrefix%calling: "!_xUnit_console! %_DjvuNet_Tests% %_Test_Options% %__TestResOutputDir%DjvuNet.Tests.%__TestOutputFormat%"
 echo.
-call %_xUnit_console% %_DjvuNet_Tests% %_Test_Options% %__TestOutputDir%DjvuNet.Tests.html
+call !_xUnit_console! %_DjvuNet_Tests% %_Test_Options% %__TestResOutputDir%DjvuNet.Tests.%__TestOutputFormat%
 
 if not [%ERRORLEVEL%]==[0] set _DjvuNet_Tests_Error=true
 
@@ -322,9 +388,9 @@ if defined _SkipNative goto :no_djvulibre_tests
 
 echo.
 echo %__MsgPrefix%Running tests from DjvuNet.DjvuLibre.Tests assembly
-echo %__MsgPrefix%calling: %_xUnit_console% %_DjvuNet_DjvuLibre_Tests% %_Test_Options% %__TestOutputDir%DjvuNet.DjvuLibre.Tests.html
+echo %__MsgPrefix%calling: %_xUnit_console% %_DjvuNet_DjvuLibre_Tests% %_Test_Options% %__TestResOutputDir%DjvuNet.DjvuLibre.Tests.%__TestOutputFormat%
 echo.
-call %_xUnit_console% %_DjvuNet_DjvuLibre_Tests% %_Test_Options% %__TestOutputDir%DjvuNet.DjvuLibre.Tests.html
+call %_xUnit_console% %_DjvuNet_DjvuLibre_Tests% %_Test_Options% %__TestResOutputDir%DjvuNet.DjvuLibre.Tests.%__TestOutputFormat%
 
 if not [%ERRORLEVEL%]==[0] set _DjvuNet_DjvuLibre_Tests_Error=true
 
@@ -332,9 +398,9 @@ if not [%ERRORLEVEL%]==[0] set _DjvuNet_DjvuLibre_Tests_Error=true
 
 echo.
 echo %__MsgPrefix%Running tests from DjvuNet.Wavelet.Tests assembly
-echo %__MsgPrefix%calling: %_xUnit_console% %_DjvuNet_Wavelet_Tests% %_Test_Options% %__TestOutputDir%DjvuNet.Wavelet.Tests.html
+echo %__MsgPrefix%calling: %_xUnit_console% %_DjvuNet_Wavelet_Tests% %_Test_Options% %__TestResOutputDir%DjvuNet.Wavelet.Tests.%__TestOutputFormat%
 echo.
-call %_xUnit_console% %_DjvuNet_Wavelet_Tests% %_Test_Options% %__TestOutputDir%DjvuNet.Wavelet.Tests.html
+call %_xUnit_console% %_DjvuNet_Wavelet_Tests% %_Test_Options% %__TestResOutputDir%DjvuNet.Wavelet.Tests.%__TestOutputFormat%
 
 if not [%ERRORLEVEL%]==[0] goto test_error
 if /i "%_DjvuNet_Tests_Error%" == "true" goto test_error
