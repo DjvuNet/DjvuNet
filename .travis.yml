@@ -36,6 +36,10 @@ script:
     - git clone --depth 1 https://github.com/DjvuNet/DjVuLibre.git DjVuLibre
     - curl -L -o artifacts.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
     - unzip -q artifacts.zip -d artifacts
+    - curl -L -o Tools.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/Tools.zip
+    - unzip -q Tools.zip -d Tools
+    - curl -L -o deps.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/deps.zip
+    - unzip -q deps.zip -d deps
     - dotnet restore DjvuNet.sln
     - cd DjvuNet
     - dotnet msbuild /m /nologo /p:Configuration=Debug /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
