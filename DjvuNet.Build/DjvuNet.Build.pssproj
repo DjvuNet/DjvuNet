@@ -28,8 +28,8 @@
   </PropertyGroup>
   <ItemGroup />
   <ItemGroup>
-    <Compile Include="Bootstrap.ps1" />
     <Compile Include="Before-Tests.ps1" />
+    <Compile Include="Get-Tools.ps1" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Target Name="Build" />

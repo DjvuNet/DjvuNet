@@ -78,12 +78,19 @@ if not exist .\DjvuNet.sln (
      goto exit_error
 )
 
+set __BuildToolsUri=https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/Tools.zip
+
+call powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 %__BuildToolsUri% Tools.zip Tools BuildTools
+if not [%ERRORLEVEL%]==[0] (
+    echo %__MsgPrefix%Error: Failed to download build tools from %__BuildToolsUri%
+    goto exit_error
+)
 :: if defined _SkipNative goto :no_djvulibre
 
 if not exist .\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj (
     echo %__MsgPrefix%Cloning DjVuLibre
     call git clone https://github.com/DjvuNet/DjVuLibre.git
-    if not %ERRORLEVEL%==0 (
+    if not [%ERRORLEVEL%]==[0] (
         echo %__MsgPrefix%Error: git clone https://github.com/DjvuNet/DjVuLibre.git returned error
         goto exit_error
     )
@@ -109,9 +116,10 @@ if /i "%_Framework%" == "netstandard" (
 )
 if /i "%_Framework%" == "net471" (
     set __RestoreCmd=%cd%\Tools\nuget.exe
-    set __RestoreCmdArgs=-verbosity detailed
+    set __RestoreCmdArgs=-verbosity quiet
     set __BuildCommand=msbuild
     set __Framework=net471
+    set __BuildLibDjvuLibre=1
 )
 
 set __DjvuTargetSolution=DjvuNet.sln
@@ -139,9 +147,17 @@ set "__MsbuildLog=/flp:Verbosity=diag;LogFile=%__BuildLog%"
 set "__MsbuildWrn=/flp1:WarningsOnly;LogFile=%__BuildWrn%
 set "__MsbuildErr=/flp2:ErrorsOnly;LogFile=%__BuildErr%
 
+set __NativeDepsUri=https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/deps.zip
+
 if defined __BuildLibDjvuLibre (
     REM Scope environment changes start {
     setlocal
+
+    call powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 %__NativeDepsUri% deps.zip deps NativeDependencies
+    if not [%ERRORLEVEL%]==[0] (
+        echo %__MsgPrefix%Error: Failed to download native dependencies from %__NativeDepsUri%
+        goto exit_error
+    )
 
     echo %__MsgPrefix%Building native libdjvulibre.vcxproj
 
