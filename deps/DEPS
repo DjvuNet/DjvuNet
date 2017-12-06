@@ -1,6 +1,0 @@
-
-Binary dependencies for building libdjvulibre are located in this directory. They are provided as convenience to jump start building libdjvulibre without the need of setting up builds for dependencies. These are libjpeg-turbo v1.5.1, tiff v4.0.7 and zlib v1.2.11. Furthermore, they are tested and compile, link and test without errors.
-
-All binaries were build with vcpkg using Visual Studio 2015 update 3 toolchain (v140) targeting both x86 and x64 architectures with dynamic and static linking. If other toolchain would be used for libdjvulibre project it is necessary to use binary dependencies built with the same toolchain as well.
-
-License information for packages is located in directory subdirectory "share".
