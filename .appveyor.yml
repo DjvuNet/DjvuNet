@@ -35,6 +35,10 @@ cache:
 #    - packages -> **\packages.config
 #    - artifacts -> artifacts.sha256
 
+# environment variables
+environment:
+    TargetFramework: net471
+
 ############################################################################
 #
 #  BUILD SEQUENCE
