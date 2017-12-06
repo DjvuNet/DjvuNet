@@ -50,7 +50,13 @@ install:
     - cmd: if exist artifacts\ rd /s /q artifacts
     - cmd: git clone https://github.com/DjvuNet/DjVuLibre.git
     - cmd: powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/Tools.zip Tools.zip Tools BuildTools
+    - cmd: cd Tools
+    - cmd: dir
+    - cmd: cd ..
     - cmd: powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/deps.zip deps.zip deps NativeDeps
+    - cmd: cd deps
+    - cmd: dir
+    - cmd: cd ..
     - appveyor DownloadFile https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
     - cmd: 7z x -oartifacts artifacts.zip
 
