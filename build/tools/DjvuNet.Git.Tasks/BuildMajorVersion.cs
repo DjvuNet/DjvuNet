@@ -13,13 +13,14 @@ namespace DjvuNet.Git.Tasks
         {
             try
             {
-                DateTime now = DateTime.Now;
-                DateTime reference = new DateTime(2014, 1, 23);
+                DateTime now = DateTime.UtcNow;
+                DateTime reference = new DateTime(2017, 1, 1);
                 TimeSpan span = now.Subtract(reference);
                 int reminder;
-                Version = Math.DivRem((int)span.TotalDays, 7, out reminder);
-                Version *= 100;
+                Version = Math.DivRem((int)span.TotalDays, 28, out reminder);
+                Version *= 1000;
                 int reminderHour;
+                int value = (int) Math.Round((double) reminder * 24.0 * 1.488095238d, 0);
                 int hoursMod = Math.DivRem(now.Hour , 8, out reminderHour);
                 reminder = (reminder * 3 + hoursMod) * 4 + reminderHour;
                 Version += reminder;

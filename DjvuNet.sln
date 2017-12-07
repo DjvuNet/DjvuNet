@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27128.1
+VisualStudioVersion = 15.0.27130.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DjvuNet", "DjvuNet\DjvuNet.csproj", "{E681B178-E5F8-4782-89C8-F32720B1464A}"
 EndProject
@@ -222,11 +222,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		.travis.yml = .travis.yml
 		artifacts.sha256 = artifacts.sha256
 		build.cmd = build.cmd
+		build.sh = build.sh
 		DjvuNet.Tests.runsettings = DjvuNet.Tests.runsettings
 		DjvuNetBuild.props = DjvuNetBuild.props
 		DjvuNetBuild.targets = DjvuNetBuild.targets
 		library.version = library.version
 		..\LICENSE.md = ..\LICENSE.md
+		MinimumRecommendedRules.ruleset = MinimumRecommendedRules.ruleset
 		README.md = README.md
 		Snk.snk = Snk.snk
 	EndProjectSection
