@@ -6,24 +6,36 @@ namespace DjvuNet.Git.Tasks
 {
     public class BuildMajorVersion : Task
     {
+
+        [Required]
+        public string MajorMinorVersion { get; set; }
+
         [Output]
-        public int Version { get; set; }
+        public string Version { get; set; }
 
         public override bool Execute()
         {
             try
             {
+                if (!System.Version.TryParse(MajorMinorVersion, out Version baseVersion))
+                    Log.LogError($"{nameof(MajorMinorVersion)} has invalid version formt.");
+
                 DateTime now = DateTime.UtcNow;
                 DateTime reference = new DateTime(2017, 1, 1);
-                TimeSpan span = now.Subtract(reference);
-                int reminder;
-                Version = Math.DivRem((int)span.TotalDays, 28, out reminder);
-                Version *= 1000;
-                int reminderHour;
-                int value = (int) Math.Round((double) reminder * 24.0 * 1.488095238d, 0);
-                int hoursMod = Math.DivRem(now.Hour , 8, out reminderHour);
-                reminder = (reminder * 3 + hoursMod) * 4 + reminderHour;
-                Version += reminder;
+                TimeSpan spanFromEpoch = now.Subtract(reference);
+
+                int majorBuildVersion = Math.DivRem((int)spanFromEpoch.TotalDays, 28, out int reminder);
+                majorBuildVersion *= 1000;
+                majorBuildVersion += (int) Math.Round((double) ((reminder * 24 + spanFromEpoch.Hours) * 1.488095238d), 0);
+
+                // Calculate Build Revision based on part of hour expressed in
+                // seconds x 0.277777778 -coefficient normalizes it to 1 000
+                TimeSpan lastHour = new TimeSpan((int)spanFromEpoch.TotalHours, 0, 0);
+                lastHour = spanFromEpoch - lastHour;
+                int buildRevision = (int) Math.Round((double)(lastHour.TotalSeconds * 0.277777778d), 0);
+
+                var intVersion = new Version(baseVersion.Major, baseVersion.Minor, majorBuildVersion, buildRevision);
+                Version = intVersion.ToString();
             }
             catch (Exception ex)
             {
