@@ -6,7 +6,7 @@ using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
-    /// <summary> 
+    /// <summary>
     /// This class decodes a bzz encoded InputStream.
     /// </summary>
     public partial class BSInputStream : BSBaseStream

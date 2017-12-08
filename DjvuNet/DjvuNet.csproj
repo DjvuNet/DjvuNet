@@ -135,6 +135,7 @@
     <Compile Include="Graphics\PixelReference.cs" />
     <Compile Include="Graphics\PixelMap.cs" />
     <Compile Include="Graphics\Rectangle.cs" />
+    <Compile Include="Interfaces/IDecoder.cs" />
     <Compile Include="IO\DjvuReader.cs" />
     <Compile Include="IO\DjvuWriter.cs" />
     <Compile Include="IO\IDjvuWriter.cs" />
@@ -143,7 +144,6 @@
     <Compile Include="IDjvuPage.cs" />
     <Compile Include="IO\IBinaryWriter.cs" />
     <Compile Include="IO\IDjvuReader.cs" />
-    <Compile Include="Interfaces\ICodec.cs" />
     <Compile Include="JB2\JB2Blit.cs" />
     <Compile Include="JB2\JB2Codec.cs" />
     <Compile Include="JB2\JB2Decoder.cs" />

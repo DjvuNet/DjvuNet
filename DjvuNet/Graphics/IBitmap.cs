@@ -33,6 +33,6 @@
         bool InsertMap(IBitmap bit, int dx, int dy, bool doBlit);
 
         void SetByteAt(int offset, sbyte value);
- 
+
     }
 }

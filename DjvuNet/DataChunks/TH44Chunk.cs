@@ -2,11 +2,6 @@
 // TODO: Update copyright text.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using DjvuNet.Graphics;
 using DjvuNet.Wavelet;
 

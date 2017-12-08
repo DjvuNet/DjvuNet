@@ -439,7 +439,7 @@ namespace DjvuNet
         /// Function verifies DjVu file header and expects minimum length of 16 bytes.
         /// In sixteen bytes first eight form AT&TFORM ASCII text, 4 following ones
         /// contain length of DjVu file data (counted from first byte after file length field
-        /// at position 12) and first chunk name being second part of form name (DJVM, DJVU, DJVI). 
+        /// at position 12) and first chunk name being second part of form name (DJVM, DJVU, DJVI).
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
@@ -494,7 +494,7 @@ namespace DjvuNet
                 throw new DjvuArgumentNullException(nameof(stream));
 
             // Minimum empty Djvu file will consist of file header (8 bytes)
-            // followed by length of IFF stream in the form of uint (4 bytes) and 
+            // followed by length of IFF stream in the form of uint (4 bytes) and
             // "DJVM", "DJVU" or "DJVI" ASCII string (4 bytes) giving total of 16 bytes.
             if (stream.Length < MagicBuffer.Length * 2)
                 return false;
@@ -504,7 +504,7 @@ namespace DjvuNet
                     stream.Position = 0;
                 else
                     throw new DjvuArgumentException(
-                        $"Stream is not set to the start of data and does not support seek. " + 
+                        $"Stream is not set to the start of data and does not support seek. " +
                         $"Current position: {stream.Position}", nameof(stream));
 
             byte[] buff = new byte[MagicBuffer.Length];
@@ -548,8 +548,8 @@ namespace DjvuNet
         /// <summary>
         /// Builds the list of pages
         /// </summary>
-		internal void BuildPageList()
-		{
+        internal void BuildPageList()
+        {
             if (Pages == null)
                 Pages = new List<IDjvuPage>();
 
@@ -579,9 +579,9 @@ namespace DjvuNet
                 default:
                     throw new DjvuFormatException($"Unsupported root form type {RootForm.GetType()}");
             }
-            
+
             OnPropertyChanged(nameof(Pages));
-		}
+        }
 
         internal void AddPage(Queue<ITH44Chunk> thumbnails, DjvuChunk page)
         {

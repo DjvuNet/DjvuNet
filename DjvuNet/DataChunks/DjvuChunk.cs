@@ -2,11 +2,8 @@
 // TODO: Update copyright text.
 // </copyright>
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-
 
 namespace DjvuNet.DataChunks
 {
@@ -48,7 +45,7 @@ namespace DjvuNet.DataChunks
 
         /// <summary>
         /// Include chunk of page or single page document.
-        /// Theoretically there could be many includes but 
+        /// Theoretically there could be many includes but
         /// in practice it is very rare to see that kind of docs.
         /// </summary>
         public IReadOnlyList<InclChunk> Includes

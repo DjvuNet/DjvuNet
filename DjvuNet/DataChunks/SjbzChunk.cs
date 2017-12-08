@@ -2,11 +2,7 @@
 // TODO: Update copyright text.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using DjvuNet.JB2;
 
 namespace DjvuNet.DataChunks
@@ -93,12 +89,12 @@ namespace DjvuNet.DataChunks
                         DjvmChunk root = Document.RootForm as DjvmChunk;
                         DirmComponent component = root?.Dirm.Components
                             .Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
-                       
-                        var includeForm = 
+
+                        var includeForm =
                             root.Includes
                             .Where(x =>  x.DataOffset == (component.Offset + 12))
                             .FirstOrDefault<IDjviChunk>();
-                        
+
                         var djbzItem = includeForm?.Children
                             .Where<IDjvuNode>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
 

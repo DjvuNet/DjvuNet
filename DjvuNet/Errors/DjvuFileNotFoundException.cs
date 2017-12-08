@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DjvuNet.Errors
 {
@@ -26,13 +22,13 @@ namespace DjvuNet.Errors
         }
 
 #if !NETSTANDARD2_0
-        public DjvuFileNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) 
+        public DjvuFileNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base (info, context)
         {
         }
 #endif
 
-        public DjvuFileNotFoundException(string message, string fileName, Exception innerException) 
+        public DjvuFileNotFoundException(string message, string fileName, Exception innerException)
             : base(message, fileName, innerException)
         {
         }

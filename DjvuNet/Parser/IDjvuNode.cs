@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DjvuNet.DataChunks;
-
+﻿using DjvuNet.DataChunks;
 
 namespace DjvuNet
 {
@@ -36,15 +31,15 @@ namespace DjvuNet
         string Name { get; }
 
         IDjvuElement Parent { get; set; }
-        
+
         IDjvuRootElement RootElement { get; set; }
-        
+
         IDjvuDocument Document { get; set; }
-        
+
         IDjvuReader Reader { get; set; }
 
         void ReadData(IDjvuReader reader);
 
-        void WriteData(IDjvuWriter writer, bool writeHeader); 
+        void WriteData(IDjvuWriter writer, bool writeHeader);
     }
 }

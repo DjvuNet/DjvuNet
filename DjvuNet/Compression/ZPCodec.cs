@@ -329,7 +329,7 @@ namespace DjvuNet.Compression
                 z = 0x4000 + (z>>1);
 #else
             uint d = 0x6000 + ((z + _AValue) >> 2);
-            if (z > d) 
+            if (z > d)
                 z = d;
 #endif
 
@@ -483,7 +483,7 @@ namespace DjvuNet.Compression
                 _Subend = 0x10000;
             else if (_Subend > 0)
                 _Subend = 0x8000;
-            
+
             while (_Buffer != 0xffffff || _Subend != 0)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
@@ -496,7 +496,7 @@ namespace DjvuNet.Compression
                 Outbit(0);
 
             _NRun = 0;
-            
+
             while (_SCount > 0)
                 Outbit(1);
 
@@ -597,7 +597,7 @@ namespace DjvuNet.Compression
             z = 0x10000 - z;
             _Subend += z;
             _AValue += z;
-          
+
             while (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
@@ -610,7 +610,7 @@ namespace DjvuNet.Compression
         internal void EncodeMpsSimple(uint z)
         {
             _AValue = z;
-            
+
             if (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
@@ -625,7 +625,7 @@ namespace DjvuNet.Compression
             z = 0x10000 - z;
             _Subend += z;
             _AValue += z;
-            
+
             while (_AValue >= 0x8000)
             {
                 Zemit((int)(1 - (_Subend >> 15)));
@@ -776,9 +776,9 @@ namespace DjvuNet.Compression
         /// <returns></returns>
         internal ZPTable[] CreateDefaultTable()
         {
-            return new[] 
+            return new[]
             {
-                       
+
 #if !ZCODER
                 new ZPTable( 0x8000,  0x0000,  84, 145 ),    /* 000: p=0.500000 (    0,    0) */
                 new ZPTable( 0x8000,  0x0000,   3,   4 ),    /* 001: p=0.500000 (    0,    0) */

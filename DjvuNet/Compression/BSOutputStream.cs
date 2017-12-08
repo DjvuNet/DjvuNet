@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+﻿using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.Configuration;
@@ -154,7 +151,7 @@ namespace DjvuNet.Compression
             {
                 // Get MTF data
                 int c = _Data[i];
-                int ctxid = CTXIDS - 1; 
+                int ctxid = CTXIDS - 1;
 
                 if (ctxid > mtfno)
                     ctxid = mtfno;

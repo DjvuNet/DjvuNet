@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DjvuNet.Utilities
 {
@@ -11,10 +8,10 @@ namespace DjvuNet.Utilities
         private readonly Func<T, T, bool> ComparerFunc;
         private readonly Func<T, int> HashFunc;
 
-        public GenericComparer(Func<T, int> hashFunc) 
+        public GenericComparer(Func<T, int> hashFunc)
             : this(hashFunc, (x, y) => hashFunc(x) == hashFunc(y)) { }
-       
-        public GenericComparer(Func<T, T, bool> comparer) 
+
+        public GenericComparer(Func<T, T, bool> comparer)
             : this((x) => x.GetHashCode(), comparer) { }
 
         public GenericComparer(Func<T, int> hashFunc, Func<T, T, bool> comparer)

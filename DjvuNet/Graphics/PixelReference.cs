@@ -119,7 +119,7 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        /// <summary> 
+        /// <summary>
         /// Creates a createGPixelReference object.
         /// </summary>
         /// <param name="parent">
@@ -156,7 +156,7 @@ namespace DjvuNet.Graphics
 
         #region Methods
 
-        /// <summary> 
+        /// <summary>
         /// Copy pixel values from source.
         /// </summary>
         /// <param name="ref">
@@ -182,7 +182,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Set the map image pixel we are referring to.
         /// </summary>
         /// <param name="offset">pixel position
@@ -193,7 +193,7 @@ namespace DjvuNet.Graphics
             _offset = offset * _ncolors;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Set the map image pixel we are referring to.
         /// </summary>
         /// <param name="row">vertical position
@@ -206,7 +206,7 @@ namespace DjvuNet.Graphics
             _offset = (_parent.RowOffset(row) + column) * _ncolors;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Convert the following number of pixels from YCC to RGB. The offset will
         /// be advanced to the end.
         /// </summary>
@@ -238,7 +238,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Set the blue, green, and red values of the current pixel.
         /// </summary>
         /// <param name="blue">
@@ -285,7 +285,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary> 
+        /// <summary>
         /// Create a duplicate of this PixelReference.
         /// </summary>
         /// <returns> the newly created PixelReference
@@ -296,7 +296,7 @@ namespace DjvuNet.Graphics
             return new PixelReference(_parent, _offset);
         }
 
-        /// <summary> 
+        /// <summary>
         /// Fills an array of pixels from the specified values.
         /// </summary>
         /// <param name="x">
@@ -360,7 +360,7 @@ namespace DjvuNet.Graphics
             _offset += _ncolors;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Skip past the specified number of pixels. Care should be taken when stepping
         /// past the end of a row.
         /// </summary>

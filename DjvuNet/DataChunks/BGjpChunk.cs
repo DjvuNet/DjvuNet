@@ -2,9 +2,6 @@
 // TODO: Update copyright text.
 // </copyright>
 
-using System;
-
-
 namespace DjvuNet.DataChunks
 {
 

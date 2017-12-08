@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using DjvuNet.Compression;
 using DjvuNet.DataChunks;
 using DjvuNet.Errors;

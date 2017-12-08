@@ -5,13 +5,23 @@ root = true
 
 [*]
 insert_final_newline = true
-
-[*.{cs, c, cpp, h, hpp, json, ps1, py}]
+trim_trailing_whitespace = true
 indent_style = space
+
+[*.{cs,c,cpp,h,hpp,json,ps1,py,cmd,sh,yml,editorconfig}]
 indent_size = 4
-trim_trailing_whitespace = true
 
-[*.{xml, props, targets, *proj, config, yml}]
-indent_style = space
+
+[*.{xml,props,targets,*proj,config,pubxml}]
 indent_size = 2
-trim_trailing_whitespace = true
+
+# C# files
+[*.cs]
+# New line preferences
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_anonymous_types = true
+csharp_new_line_within_query_expression_clauses = true
