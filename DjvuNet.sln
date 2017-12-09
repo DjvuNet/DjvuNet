@@ -226,9 +226,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		DjvuNet.Tests.runsettings = DjvuNet.Tests.runsettings
 		DjvuNetBuild.props = DjvuNetBuild.props
 		DjvuNetBuild.targets = DjvuNetBuild.targets
+		DjvuNetPackaging.props = DjvuNetPackaging.props
 		library.version = library.version
 		..\LICENSE.md = ..\LICENSE.md
 		MinimumRecommendedRules.ruleset = MinimumRecommendedRules.ruleset
+		NuGet.config = NuGet.config
 		README.md = README.md
 		Snk.snk = Snk.snk
 	EndProjectSection

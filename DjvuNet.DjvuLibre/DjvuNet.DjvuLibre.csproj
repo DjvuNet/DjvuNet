@@ -1,8 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <!--
+      DjvuNetPackaging.props should go always first due to pack target requirements:
+      first PropertyGroup in project defines packaging props
+   -->
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetPackaging.props))\DjvuNetPackaging.props" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
 
   <PropertyGroup>
+    <Title>$(PackageId) - DjVuLibre .NET Bindings</Title>
+    <Description>DjvuNet is a managed library for working with a DjVu documents. It is binary compatible with a reference implementation - DjvuLibre.</Description>
     <TargetFramework />
     <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
     <NETStandardImplicitPackageVersion>2.0.1</NETStandardImplicitPackageVersion>
