@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 using DjvuNet.Compression;
@@ -69,7 +67,7 @@ namespace DjvuNet
 
         internal static FileStream GetFile(string filePath)
         {
-            FileStream stream = new FileStream(filePath, FileMode.Create, 
+            FileStream stream = new FileStream(filePath, FileMode.Create,
                 FileAccess.ReadWrite, FileShare.ReadWrite);
             return stream;
         }
@@ -227,7 +225,7 @@ namespace DjvuNet
         }
 
         /// <summary>
-        /// Writes bytes of the string using passed encoder. 
+        /// Writes bytes of the string using passed encoder.
         /// Encoders may emit BOM if not created with parameters
         /// explicitly asking not to do that.
         /// </summary>

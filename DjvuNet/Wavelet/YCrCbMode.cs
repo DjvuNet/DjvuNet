@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DjvuNet.Wavelet
+﻿namespace DjvuNet.Wavelet
 {
 
     public enum YCrCbMode

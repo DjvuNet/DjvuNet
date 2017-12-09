@@ -1,14 +1,5 @@
-using System;
-using System.IO;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using DjvuNet.Compression;
-using DjvuNet.Configuration;
-using DjvuNet.DataChunks;
-using DjvuNet.Errors;
 using DjvuNet.Graphics;
-using DjvuNet.Interfaces;
-using DjvuNet.Parser;
 
 namespace DjvuNet.Wavelet
 {

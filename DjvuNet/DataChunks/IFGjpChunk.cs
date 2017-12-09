@@ -1,5 +1,4 @@
-﻿
-namespace DjvuNet.DataChunks
+﻿namespace DjvuNet.DataChunks
 {
     public interface IFGjpChunk : IDjvuNode
     {

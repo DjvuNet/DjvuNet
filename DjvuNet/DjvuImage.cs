@@ -1,28 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using DjvuNet.DataChunks;
 using DjvuNet.Errors;
+using DjvuNet.JB2;
+using DjvuNet.Utilities;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
-using ColorPalette = DjvuNet.DataChunks.ColorPalette;
-using GBitmap = DjvuNet.Graphics.IBitmap;
 using GMap = DjvuNet.Graphics.IMap;
-using GPixelReference = DjvuNet.Graphics.IPixelReference;
-using GPixmap = DjvuNet.Graphics.IPixelMap;
 using GRect = DjvuNet.Graphics.Rectangle;
 using Rectangle = System.Drawing.Rectangle;
-using System.Runtime.CompilerServices;
-using DjvuNet.JB2;
-using System.ComponentModel;
-using DjvuNet.Utilities;
-using System.Diagnostics;
-using DjvuNet.DataChunks;
 
 namespace DjvuNet
 {

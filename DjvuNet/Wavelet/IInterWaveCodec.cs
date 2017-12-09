@@ -1,6 +1,4 @@
-﻿using DjvuNet.Compression;
-
-namespace DjvuNet.Wavelet
+﻿namespace DjvuNet.Wavelet
 {
     public interface IInterWaveCodec
     {

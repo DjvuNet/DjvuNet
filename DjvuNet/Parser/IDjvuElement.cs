@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
+﻿using System.Collections.Generic;
 
 namespace DjvuNet
 {
@@ -35,7 +31,5 @@ namespace DjvuNet
         bool RemoveChild(IDjvuNode node);
 
         int RemoveChildAt(int index);
-
-
     }
 }

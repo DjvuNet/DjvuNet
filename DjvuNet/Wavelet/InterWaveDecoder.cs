@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DjvuNet.Compression;
-using DjvuNet.Interfaces;
+﻿using DjvuNet.Compression;
 
 namespace DjvuNet.Wavelet
 {

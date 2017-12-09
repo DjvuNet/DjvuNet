@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DjvuNet.Graphics
+﻿namespace DjvuNet.Graphics
 {
     public interface IMap2 : IMap
     {

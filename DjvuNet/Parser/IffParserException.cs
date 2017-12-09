@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 
 namespace DjvuNet
 {
@@ -45,7 +41,7 @@ namespace DjvuNet
         /// The exception that is the cause of the current exception. If the innerException
         /// parameter is not a null reference (Nothing in Visual Basic), the current exception
         /// is raised in a catch block that handles the inner exception.
-        /// </param>    
+        /// </param>
         public IffParserException(string message, Exception innerException)
             : base(message, innerException)
         {
@@ -53,13 +49,13 @@ namespace DjvuNet
 #if !NETSTANDARD2_0
         /// <summary>
         /// Initializes a new instance of the DjvuNet.IFFParserException class with serialized data.
-        /// </summary>   
+        /// </summary>
         /// <parameter name="info">
         /// The object that holds the serialized object data.
         /// </parameter>
         /// <parameter name="context">
         /// The contextual information about the source or destination.
-        /// </parameter>    
+        /// </parameter>
         protected IffParserException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context):
             base (info, context)
         {

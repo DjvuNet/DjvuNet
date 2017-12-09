@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using DjvuNet.Errors;
 using DjvuNet.Graphics;
 

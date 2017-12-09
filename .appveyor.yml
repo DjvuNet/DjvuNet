@@ -12,7 +12,7 @@ configuration:
 
 branches:
   only:
-#    - parser_archit
+    - dev
     - master
 
 # clone directory
@@ -30,6 +30,9 @@ test:
 
 matrix:
   fast_finish: false
+
+# Maximum number of concurrent jobs for the project
+max_jobs: 4
 
 cache:
 #    - packages -> **\packages.config

@@ -176,10 +176,10 @@ namespace DjvuNet.Graphics
 
         #region Public Methods
 
-        /// <summary> 
+        /// <summary>
         /// Create a clone of this pixel.
         /// </summary>
-        /// <returns> 
+        /// <returns>
         /// The cloned pixel
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

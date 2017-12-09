@@ -4,14 +4,8 @@
 // </copyright>
 // -----------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace DjvuNet.JB2
 {
-
     /// <summary>
     /// Used to share a common type for storage purposes.
     /// </summary>

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
@@ -69,7 +65,7 @@ namespace DjvuNet.Compression
             if (!(_Data[_Size - 1] == 0))
                 throw new DjvuInvalidOperationException();
 
-            // Step 1: Radix sort 
+            // Step 1: Radix sort
             int depth = 0;
             if (_Size > RadixThreshold)
             {
@@ -167,7 +163,7 @@ namespace DjvuNet.Compression
 
             if (!(markerpos >= 0 && markerpos < _Size))
                 throw new DjvuInvalidOperationException();
- 
+
         }
 
         /// <summary>
@@ -411,7 +407,7 @@ namespace DjvuNet.Compression
 
                     // -- reorganize as follows
                     //   [lo..l1[ [l1..h1] ]h1..hi]
-                    //      <        =        > 
+                    //      <        =        >
                     tmp = Math.Min(l1 - lo, l - l1);
                     ValueSwap(lo, l - tmp, tmp, _Posn);
                     l1 = lo + (l - l1);
@@ -567,7 +563,7 @@ namespace DjvuNet.Compression
 
                     // -- reorganize as follows
                     //   [lo..l1[ [l1..h1] ]h1..hi]
-                    //      <        =        > 
+                    //      <        =        >
                     tmp = Math.Min(l1 - lo, l - l1);
                     ValueSwap(lo, l - tmp, tmp, _Posn);
                     l1 = lo + (l - l1);

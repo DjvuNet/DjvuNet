@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DjvuNet.Errors;
+﻿using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -162,7 +158,7 @@ namespace DjvuNet.Graphics
             if ((desired.XMin < 0) || (desired.YMin < 0) || (desired.XMax > _DestWidth) || (desired.YMax > _DestHeight))
             {
                 throw new DjvuArgumentOutOfRangeException(
-                  $"Desired rectangle too big: {desired.XMin}, {desired.YMin}, {desired.XMax}, " + 
+                  $"Desired rectangle too big: {desired.XMin}, {desired.YMin}, {desired.XMax}, " +
                   $"{desired.YMax}, {_DestWidth}, {_DestHeight}", nameof(desired));
             }
 
@@ -227,7 +223,7 @@ namespace DjvuNet.Graphics
             if ((targetRect.Width != (int)targetMap.Width) || (targetRect.Height != (int)targetMap.Height))
                 targetMap.Init(targetRect.Height, targetRect.Width, null);
 
-            // Prepare temp stuff 
+            // Prepare temp stuff
             int bufw = required_red.Width;
             Pixel[] lbuffer = new Pixel[bufw + 2];
 

@@ -1,4 +1,3 @@
-using System;
 using DjvuNet.Graphics;
 
 namespace DjvuNet.JB2

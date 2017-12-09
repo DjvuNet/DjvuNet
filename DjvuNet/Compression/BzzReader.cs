@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-
-using DjvuNet;
 using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
@@ -105,7 +101,7 @@ namespace DjvuNet.Compression
 
                 bytesRead += result;
 
-                // TODO verify if BSInputStream always creates data buffer 
+                // TODO verify if BSInputStream always creates data buffer
                 //      longer by 1 byte than decoded data and appends null
 
                 if (streamLength > 0 && bytesRead < streamLength)
@@ -121,7 +117,7 @@ namespace DjvuNet.Compression
             readBytes = bytesRead;
 
             return targetStream;
-            
+
         }
     }
 }

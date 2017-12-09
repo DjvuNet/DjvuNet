@@ -1,14 +1,11 @@
-using System;
-using System.IO;
-
 namespace DjvuNet.Interfaces
 {
     public interface IDecoder
     {
-        /// <summary> 
+        /// <summary>
         /// Query if this is image data.  Any data which will effects Map data should return true.
         /// </summary>
-        /// <returns> 
+        /// <returns>
         /// true if effects image data
         /// </returns>
         bool ImageData

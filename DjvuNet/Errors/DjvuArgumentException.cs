@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DjvuNet.Errors
 {
@@ -21,7 +17,7 @@ namespace DjvuNet.Errors
         {
         }
 
-        public DjvuArgumentException(string message, string paramName) 
+        public DjvuArgumentException(string message, string paramName)
             : base (message, paramName)
         {
         }

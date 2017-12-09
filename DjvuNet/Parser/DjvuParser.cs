@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DjvuNet;
 using DjvuNet.DataChunks;
 using DjvuNet.Errors;
 
@@ -293,10 +289,10 @@ namespace DjvuNet.Parser
 
         /// <summary>
         /// Three types of FORM chunks could form a root of DjVu document / file:
-        /// DJVU for single page documents, DJVM for multi page documents 
-        /// and DJVI for include files associated with separate multi page 
+        /// DJVU for single page documents, DJVM for multi page documents
+        /// and DJVI for include files associated with separate multi page
         /// document - include files can not function independently (?).
-        /// 
+        ///
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
@@ -352,7 +348,7 @@ namespace DjvuNet.Parser
                 }
             }
 
-            // TODO Implement other single file docs??? 
+            // TODO Implement other single file docs???
 
             // DJVM form is the only chunk type which is always in document root
             if (type == ChunkType.Djvm) return false;

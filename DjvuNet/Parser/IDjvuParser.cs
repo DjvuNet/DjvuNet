@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 
 namespace DjvuNet.Parser
 {
@@ -22,11 +18,11 @@ namespace DjvuNet.Parser
     public class ParsedDjvuNodeEventArgs : EventArgs
     {
         public IDjvuNode Node { get; private set; }
-        
+
         public ParsedDjvuNodeEventArgs(IDjvuNode node) : base()
         {
             Node = node;
-        } 
+        }
 
     }
 

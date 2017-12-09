@@ -114,14 +114,14 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
-        /// <summary> 
+        /// <summary>
         /// Creates a new Rectangle object.
         /// </summary>
         public Rectangle()
         {
         }
 
-        /// <summary> 
+        /// <summary>
         /// Creates a new Rectangle object initialized with provided values.
         /// </summary>
         /// <param name="right">
@@ -149,10 +149,10 @@ namespace DjvuNet.Graphics
 
         #region Public Methods
 
-        /// <summary> 
+        /// <summary>
         /// Create a clone of this rectangle.
         /// </summary>
-        /// <returns> 
+        /// <returns>
         /// the newly created copy
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -168,8 +168,8 @@ namespace DjvuNet.Graphics
             Right = Left = Bottom = Top = 0;
         }
 
-        /// <summary> 
-        /// Test if a point is contained in this rectangle. The definition of point 
+        /// <summary>
+        /// Test if a point is contained in this rectangle. The definition of point
         /// contained by rectangle on 2D plane is
         /// that point lies inside or on the edge of the rectangle.
         /// </summary>
@@ -179,7 +179,7 @@ namespace DjvuNet.Graphics
         /// <param name="y">
         /// vertical coordinate
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// true if the point is within this rectangle
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -188,16 +188,16 @@ namespace DjvuNet.Graphics
             return (x >= Right) && (x <= Left) && (y >= Bottom) && (y <= Top);
         }
 
-        /// <summary> 
+        /// <summary>
         /// Test if a rectangle is contained within this rectangle.
-        /// Empty rectangle is treated as a point on 2D plane with coordinates which may 
+        /// Empty rectangle is treated as a point on 2D plane with coordinates which may
         /// "contain" other points with same coordinates. In other words on 2D plane
         /// rectangle with width and height equal to zero is reduced to a point.
         /// </summary>
         /// <param name="rect">
         /// rectangle to test
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// true if the rectangle is contained within this rectangle
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -215,13 +215,13 @@ namespace DjvuNet.Graphics
             return (Contains(rect.Right, rect.Bottom) && Contains(rect.Left - 1, rect.Top - 1));
         }
 
-        /// <summary> 
+        /// <summary>
         /// Test if two rectangles are equal.
         /// </summary>
         /// <param name="obj">
         /// reference rectangle to compare with
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// true if all the edges are equal
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -242,11 +242,11 @@ namespace DjvuNet.Graphics
 
         public override int GetHashCode()
         {
-            return (Right.GetHashCode() - Width.GetHashCode() + Bottom.GetHashCode() 
+            return (Right.GetHashCode() - Width.GetHashCode() + Bottom.GetHashCode()
                 - Height.GetHashCode()).GetHashCode();
         }
 
-        /// <summary> 
+        /// <summary>
         /// Grow the size of this rectangle by moving all the edges outwards.
         /// </summary>
         /// <param name="dx">
@@ -255,7 +255,7 @@ namespace DjvuNet.Graphics
         /// <param name="dy">
         /// Amount to grow the vertical edges
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// true if not empty.
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -267,7 +267,7 @@ namespace DjvuNet.Graphics
             Top += dy;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Set this rectangle as the intersection of two rectangles.
         /// </summary>
         /// <param name="rect1">
@@ -276,7 +276,7 @@ namespace DjvuNet.Graphics
         /// <param name="rect2">
         /// rectangle to intersect
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// true if the intersection is not empty
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -297,7 +297,7 @@ namespace DjvuNet.Graphics
         /// <param name="rect2">
         /// rectangle to union
         /// </param>
-        /// <returns> 
+        /// <returns>
         /// true if the results are non-empty
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -339,7 +339,7 @@ namespace DjvuNet.Graphics
             return false;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Shift this rectangle (linear translation), if rectangle is empty linear
         /// translation is applied to a point (x,y) on 2D plane.
         /// </summary>

@@ -1,7 +1,7 @@
 ﻿<Project>
   <PropertyGroup>
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
-    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0')">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And ($(TargetFramework) == 'netcoreapp2.0' Or $(TargetFramework) == 'netstandard2.0') And '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
     <GitTasksAssembly Condition="$(GitTasksAssembly) == ''">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
   </PropertyGroup>
   <UsingTask TaskName="BuildMajorVersion" AssemblyFile="$(GitTasksAssembly)"/>
@@ -28,8 +28,8 @@
       <Output TaskParameter="Second" PropertyName="BSecond" />
     </GetDateTime>
 
-    <BuildMajorVersion>
-      <Output TaskParameter="Version" PropertyName="BuildRevision" />
+    <BuildMajorVersion MajorMinorVersion="$(LibraryVersion)">
+      <Output TaskParameter="Version" PropertyName="FullBuildVersion" />
     </BuildMajorVersion>
 
     <PropertyGroup>
@@ -40,7 +40,7 @@
     </PropertyGroup>
 
     <Message Importance="High"
-             Text="Building [$(TargetName)] target framework: [$(TargetFramework)], version: [$(LibraryVersion).$(BuildRevision)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
+             Text="Building [$(TargetName)] target framework: [$(TargetFramework)], version: [$(FullBuildVersion)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
 
     <Copy Condition="$(TargetFramework) == 'net471'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
           DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.cs"/>
@@ -81,8 +81,7 @@
       <UtilFiles Include='$(UtilTestFile)' Condition="$(UtilRepoRootUpdate) == true" />
     </ItemGroup>
 
-    <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_VERSION__" ReplacementText="$(LibraryVersion)"/>
-    <FileUpdate Files="@(WriteFiles)" Regex="____LIBRARY_PATCH___" ReplacementText="$(BuildRevision)"/>
+    <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_FULL_VERSION__" ReplacementText="$(FullBuildVersion)"/>
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_CONFIGURATION__" ReplacementText="$(Configuration)"/>
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_PLATFORM__" ReplacementText="$(Platform)"/>
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_COMMIT__" ReplacementText="$(CommitVersion)"/>

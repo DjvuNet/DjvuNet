@@ -13,7 +13,7 @@ namespace DjvuNet.Errors
         {
         }
 
-        public DjvuAggregateException(params Exception[] innerExceptions) 
+        public DjvuAggregateException(params Exception[] innerExceptions)
             : base(innerExceptions)
         {
         }

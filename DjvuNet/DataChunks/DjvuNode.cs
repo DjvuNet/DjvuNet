@@ -2,12 +2,8 @@
 // TODO: Update copyright text.
 // </copyright>
 
-using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using DjvuNet;
 using DjvuNet.Errors;
 
 namespace DjvuNet.DataChunks
