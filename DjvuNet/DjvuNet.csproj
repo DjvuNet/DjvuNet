@@ -209,7 +209,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Condition="$(TargetFramework) == 'netstandard2.0' Or $(TargetFramework) == 'netcoreapp2.0'" Include="CoreCompat.System.Drawing.v2" Version="5.2.0-preview1-r131" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-25914-04" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
   </ItemGroup>
 
