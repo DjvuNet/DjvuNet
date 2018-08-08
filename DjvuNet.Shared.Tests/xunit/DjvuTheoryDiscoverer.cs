@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -20,8 +18,8 @@ namespace DjvuNet.Tests.Xunit
         public IMessageSink MessageSink { get { return _MessageSink; } }
 
         public IEnumerable<IXunitTestCase> Discover(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
-            ITestMethod testMethod, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
+            ITestMethod testMethod,
             IAttributeInfo factAttribute)
         {
             var skipReason = factAttribute.GetNamedArgument<string>("Skip");
@@ -37,7 +35,7 @@ namespace DjvuNet.Tests.Xunit
 
                     for (int index = 0; index < dataAttributes.Count; index++)
                     {
-                        var discovererAttribute = 
+                        var discovererAttribute =
                             dataAttributes[index]
                             .GetCustomAttributes(typeof(DataDiscovererAttribute))
                             .First();
@@ -48,7 +46,7 @@ namespace DjvuNet.Tests.Xunit
                         if (!discoverer.SupportsDiscoveryEnumeration(dataAttributes[index], testMethod.Method))
                             return new[] { CreateTestCaseForTheory(discoveryOptions, testMethod, factAttribute) };
 
-                        IEnumerable<object[]> data = 
+                        IEnumerable<object[]> data =
                             discoverer.GetData(dataAttributes[index], testMethod.Method).ToList();
 
                         if (data is IDictionary<string, object[]>)
@@ -90,6 +88,7 @@ namespace DjvuNet.Tests.Xunit
                             new ExecutionErrorTestCase(
                                 MessageSink,
                                 discoveryOptions.MethodDisplayOrDefault(),
+                                TestMethodDisplayOptions.None,
                                 testMethod,
                                 $"No data found for {testMethod.TestClass.Class.Name}.{testMethod.Method.Name}"));
 
@@ -97,7 +96,8 @@ namespace DjvuNet.Tests.Xunit
                 }
                 catch (Exception ex)    // If something goes wrong, fall through to return just the XunitTestCase
                 {
-                    MessageSink.OnMessage(new DiagnosticMessage($"Exception thrown during theory discovery on '{testMethod.TestClass.Class.Name}.{testMethod.Method.Name}'; falling back to single test case.{Environment.NewLine}{ex}"));
+                    MessageSink.OnMessage(
+                        new DiagnosticMessage($"Exception thrown during theory discovery on '{testMethod.TestClass.Class.Name}.{testMethod.Method.Name}'; falling back to single test case.{Environment.NewLine}{ex}"));
                 }
             }
 
@@ -105,79 +105,105 @@ namespace DjvuNet.Tests.Xunit
         }
 
         protected virtual IEnumerable<IXunitTestCase> CreateTestCasesForTheory(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestMethod testMethod, IAttributeInfo theoryAttribute)
         {
-            return new[] { CreateTestCaseForTheory(discoveryOptions, testMethod, theoryAttribute) };
+            return new[] {
+                CreateTestCaseForTheory(
+                    discoveryOptions,
+                    testMethod,
+                    theoryAttribute) };
         }
 
         protected virtual IEnumerable<IXunitTestCase> CreateTestCasesForSkip(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestMethod testMethod, IAttributeInfo theoryAttribute, string skipReason)
         {
-            return new[] { CreateTestCaseForSkip(discoveryOptions, testMethod, theoryAttribute, skipReason) };
+            return new[] {
+                CreateTestCaseForSkip(
+                    discoveryOptions,
+                    testMethod,
+                    theoryAttribute,
+                    skipReason) };
         }
 
         protected virtual IXunitTestCase CreateTestCaseForSkip(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestMethod testMethod, IAttributeInfo factAttribute, string skipReason)
         {
-            return new XunitTestCase(_MessageSink, discoveryOptions.MethodDisplayOrDefault(), testMethod);
+            return new XunitTestCase(
+                _MessageSink,
+                discoveryOptions.MethodDisplayOrDefault(),
+                TestMethodDisplayOptions.None,
+                testMethod);
         }
 
         protected virtual IXunitTestCase CreateTestCaseForTheory(
             ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestMethod testMethod, IAttributeInfo factAttribute, string skipReason = null)
         {
-            return new XunitTheoryTestCase(MessageSink, discoveryOptions.MethodDisplayOrDefault(), testMethod);
+            return new XunitTheoryTestCase(
+                MessageSink,
+                discoveryOptions.MethodDisplayOrDefault(),
+                TestMethodDisplayOptions.None,
+                testMethod);
         }
 
         protected virtual IEnumerable<IXunitTestCase> CreateTestCasesForSkippedDataRow(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
-            ITestMethod testMethod, IAttributeInfo theoryAttribute, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
+            ITestMethod testMethod, IAttributeInfo theoryAttribute,
             object[] dataRow, string skipReason)
         {
-            return new[] { CreateTestCaseForSkippedDataRow(discoveryOptions, testMethod, theoryAttribute, dataRow, skipReason) };
+            return new[] {
+                CreateTestCaseForSkippedDataRow(
+                    discoveryOptions,
+                    testMethod,
+                    theoryAttribute,
+                    dataRow,
+                    skipReason) };
         }
 
         protected virtual IXunitTestCase CreateTestCaseForSkippedDataRow(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
-            ITestMethod testMethod, IAttributeInfo factAttribute, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
+            ITestMethod testMethod, IAttributeInfo factAttribute,
             object[] dataRow, string skipReason)
         {
              return new XunitSkippedDataRowTestCase(
-                 MessageSink, 
-                 discoveryOptions.MethodDisplayOrDefault(), 
-                 testMethod, 
-                 skipReason, 
+                 MessageSink,
+                 discoveryOptions.MethodDisplayOrDefault(),
+                 TestMethodDisplayOptions.None,
+                 testMethod,
+                 skipReason,
                  dataRow);
         }
 
         protected virtual IXunitTestCase CreateTestCaseForDataRow(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
-            ITestMethod testMethod, IAttributeInfo theoryAttribute, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
+            ITestMethod testMethod, IAttributeInfo theoryAttribute,
             int dataAttributeNumber, int dataRowNumber)
         {
             return new DjvuDataRowTestCase(
-                MessageSink, 
-                discoveryOptions.MethodDisplayOrDefault(), 
-                testMethod, 
-                dataAttributeNumber, 
+                MessageSink,
+                discoveryOptions.MethodDisplayOrDefault(),
+                TestMethodDisplayOptions.None,
+                testMethod,
+                dataAttributeNumber,
                 dataRowNumber);
         }
 
         protected virtual IXunitTestCase CreateTestCaseForNamedDataRow(
-            ITestFrameworkDiscoveryOptions discoveryOptions, 
-            ITestMethod testMethod, 
-            IAttributeInfo theoryAttribute, 
-            int dataAttributeNumber, 
+            ITestFrameworkDiscoveryOptions discoveryOptions,
+            ITestMethod testMethod,
+            IAttributeInfo theoryAttribute,
+            int dataAttributeNumber,
             string dataRowName)
         {
             return new DjvuNamedDataRowTestCase(
-                MessageSink, 
-                discoveryOptions.MethodDisplayOrDefault(), 
-                testMethod, 
-                dataAttributeNumber, 
+                MessageSink,
+                discoveryOptions.MethodDisplayOrDefault(),
+                TestMethodDisplayOptions.None,
+                testMethod,
+                dataAttributeNumber,
                 dataRowName);
         }
 
