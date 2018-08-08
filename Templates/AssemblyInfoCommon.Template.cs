@@ -9,14 +9,14 @@ using System.Runtime.InteropServices;
 // associated with an assembly.
 [assembly: AssemblyCompany("DjvuNet")]
 [assembly: AssemblyProduct("DjvuNet Library")]
-[assembly: AssemblyCopyright("Copyright © by Telavian 2014, Copyright © by Jacek Blaszczynski 2017")]
+[assembly: AssemblyCopyright("Copyright © by Jacek Blaszczynski 2017-__LIBRARY_BYEAR__, Copyright © by Telavian 2014")]
 [assembly: AssemblyTrademark("DjvuNet")]
 
 
 [assembly: ComVisible(false)]
 
 
-[assembly: AssemblyVersion("__LIBRARY_FULL_VERSION__")]
+[assembly: AssemblyVersion("__LIBRARY_VERSION__")]
 [assembly: AssemblyFileVersion("__LIBRARY_FULL_VERSION__")]
-[assembly: AssemblyInformationalVersion("__LIBRARY_FULL_VERSION__ commit: __LIBRARY_COMMIT__")]
+[assembly: AssemblyInformationalVersion("__LIBRARY_FULL_VERSION__ @Branch: __LIBRARY_REPO_BRANCH__ @SrcCode: https://github.com/DjvuNet/DjvuNet/tree/__LIBRARY_COMMIT__")]
 

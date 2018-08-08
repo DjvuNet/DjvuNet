@@ -1,9 +1,17 @@
 ﻿<Project>
+
   <PropertyGroup>
+    <IntermediateOutputPath>$(MSBuildThisFileDirectory)/build/bin/$(OS).$(Platform).$(Configuration)/obj/$(AssemblyName)/</IntermediateOutputPath>
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
-    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)Tools/netcoreapp2.0/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
-    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)Tools/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)Tools/DjvuNet/$(DotNetCoreFrameworkVersion)/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)Tools/DjvuNet/$(NetFXTargetFrameworkVersion)/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <OutDir>$(MSBuildThisFileDirectory)/build/bin/$(OS).$(Platform).$(Configuration)/binaries/$(TargetFramework)/</OutDir>
+    <OutputPath>$(OutDir)</OutputPath>
+  </PropertyGroup>
+
   <UsingTask TaskName="BuildMajorVersion" AssemblyFile="$(GitTasksAssembly)"/>
   <UsingTask TaskName="GetLastCommit" AssemblyFile="$(GitTasksAssembly)"/>
   <UsingTask TaskName="GetDateTime" AssemblyFile="$(GitTasksAssembly)"/>
@@ -16,6 +24,7 @@
 
     <GetLastCommit Condition="Exists('$(MSBuildThisFileDirectory).git/HEAD')" RepoRoot="$(MSBuildThisFileDirectory)">
       <Output TaskParameter="CommitHash" PropertyName="CommitVersion" />
+      <Output TaskParameter="BranchName" PropertyName="BuildBranch" />
     </GetLastCommit>
 
     <GetDateTime Format="yyyy-MM-ddTHH:mm:ssZ">
@@ -30,62 +39,56 @@
     <BuildMajorVersion MajorMinorVersion="$(LibraryVersion)">
       <Output TaskParameter="Version" PropertyName="FullBuildVersion" />
     </BuildMajorVersion>
+
+    <PropertyGroup Condition="$(DjvuAssemblyVersion) == ''">
+      <IndexOfLastVersionDot>$(FullBuildVersion.LastIndexOf('.'))</IndexOfLastVersionDot>
+      <DjvuAssemblyVersion>$(FullBuildVersion.Substring(0, $(IndexOfLastVersionDot)))</DjvuAssemblyVersion>
+    </PropertyGroup>
   </Target>
 
   <Target Name="InjectVersion" BeforeTargets="CoreCompile" DependsOnTargets="CalculateVersion">
 
     <PropertyGroup>
       <UtilRepoRootUpdate>$(ProjectName.EndsWith(`.Tests`))</UtilRepoRootUpdate>
-      <UtilTestFile Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'net471'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
-      <UtilTestFile Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netstandard2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netstandard2.0.cs</UtilTestFile>
-      <UtilTestFile Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netcoreapp2.0'">$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.netcoreapp2.0.cs</UtilTestFile>
+      <UtilTestFile>$(ProjectDir)..\DjvuNet.Shared.Tests\UtilRoot.cs</UtilTestFile>
     </PropertyGroup>
 
     <Message Importance="High"
-             Text="Building [$(TargetName)] target framework: [$(TargetFramework)], version: [$(FullBuildVersion)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
+             Text="Building [$(TargetName)] target framework: [$(TargetFramework)], assembly version: [$(DjvuAssemblyVersion)], file version: [$(FullBuildVersion)], configuration: [$(Configuration)], platform [$(Platform)], branch: [$(BuildBranch)] commit: [$(CommitVersion)]"/>
 
-    <Copy Condition="$(TargetFramework) == 'net471'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
+    <Copy Condition="$(TargetFramework) == 'net472'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
           DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.cs"/>
-    <Copy Condition="$(TargetFramework) == 'net471'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
-            DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'net471'"
-            DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.cs"/>
+    <Copy Condition="$(TargetFramework) == 'net472'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
+          DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.cs"/>
 
-    <Copy Condition="$(TargetFramework) == 'netstandard2.0'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
-      DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.netstandard2.0.cs"/>
-    <Copy Condition="$(TargetFramework) == 'netstandard2.0'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
-            DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.netstandard2.0.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netstandard2.0'"
-            DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.netstandard2.0.cs"/>
+    <Copy Condition="$(TargetFramework) != 'net472'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
+      DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.$(TargetFramework).cs"/>
+    <Copy Condition="$(TargetFramework) != 'net472'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
+          DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.$(TargetFramework).cs"/>
 
-    <Copy Condition="$(TargetFramework) == 'netcoreapp2.0'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
-      DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.netcoreapp2.0.cs"/>
-    <Copy Condition="$(TargetFramework) == 'netcoreapp2.0'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
-            DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.netcoreapp2.0.cs"/>
-    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true And $(TargetFramework) == 'netcoreapp2.0'"
-            DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.netcoreapp2.0.cs"/>
+    <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true"
+          DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.cs"/>
 
-    <ItemGroup Condition="$(TargetFramework) == 'net471'">
+    <ItemGroup Condition="$(TargetFramework) == 'net472'">
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.cs' />
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.cs' />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(TargetFramework) != 'net472'">
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.$(TargetFramework).cs' />
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.$(TargetFramework).cs' />
+    </ItemGroup>
+
+    <ItemGroup>
       <UtilFiles Include='$(UtilTestFile)' Condition="$(UtilRepoRootUpdate) == true" />
     </ItemGroup>
 
-    <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
-      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.netstandard2.0.cs' />
-      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.netstandard2.0.cs' />
-      <UtilFiles Include='$(UtilTestFile)' Condition="$(UtilRepoRootUpdate) == true" />
-    </ItemGroup>
-
-    <ItemGroup Condition="$(TargetFramework) == 'netcoreapp2.0'">
-      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.netcoreapp2.0.cs' />
-      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.netcoreapp2.0.cs' />
-      <UtilFiles Include='$(UtilTestFile)' Condition="$(UtilRepoRootUpdate) == true" />
-    </ItemGroup>
-
+    <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_VERSION__" ReplacementText="$(DjvuAssemblyVersion)"/>
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_FULL_VERSION__" ReplacementText="$(FullBuildVersion)"/>
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_CONFIGURATION__" ReplacementText="$(Configuration)"/>
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_PLATFORM__" ReplacementText="$(Platform)"/>
+    <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_BYEAR__" ReplacementText="$(BYear)" />
+    <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_REPO_BRANCH__" ReplacementText="$(BuildBranch)" />
     <FileUpdate Files="@(WriteFiles)" Regex="__LIBRARY_COMMIT__" ReplacementText="$(CommitVersion)"/>
 
     <FileUpdate Files="@(WriteFiles)" Regex="// TEMPLATE:.+"
@@ -103,6 +106,6 @@
       <PackageVersion>$(FullBuildVersion)</PackageVersion>
     </PropertyGroup>
     <Message Importance="High"
-             Text="Packaging [$(PackageId)] target frameworks: [@(_TargetFrameworks)], version: [$(FullBuildVersion)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
+             Text="Packaging [$(PackageId)] target frameworks: [@(_TargetFrameworks)], assembly version: [$(DjvuAssemblyVersion)], version: [$(FullBuildVersion)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
   </Target>
 </Project>

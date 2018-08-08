@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!--
       DjvuNetPackaging.props should go always first due to pack target requirements:
       first PropertyGroup in project defines packaging props
@@ -9,10 +9,10 @@
   <PropertyGroup>
     <IsTool>true</IsTool>
     <Title>$(PackageId) - DjvuNet custom build tool</Title>
-    <Description>$(PackageId) implements custom MSBuild build tasks for DjvuNet repository build infrastructure.</Description>
-    <TargetFramework />
-    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
-    <NETStandardImplicitPackageVersion>2.0.1</NETStandardImplicitPackageVersion>
+    <Description>$(PackageId) implements custom MSBuild build tasks used in DjvuNet repository build infrastructure.</Description>
+    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
+    <TargetFramework>net472</TargetFramework>
     <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
   <PropertyGroup>
@@ -31,25 +31,29 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
+  </PropertyGroup>
 
-  <ItemGroup>
-    <None Remove="BuildMajorVersion.cs" />
-    <None Remove="FileUpdate.cs" />
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildMajorVersion.cs" />
     <Compile Include="FileUpdate.cs" />
     <Compile Include="GetDateTime.cs" />
     <Compile Include="GetLastCommit.cs" />
-    <Compile Include="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))/System.Attributes/AssemblyPlatformAttribute.cs" />
+    <Compile Include="$(RepoRootDir)System.Attributes/AssemblyPlatformAttribute.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LibGit2Sharp.Portable" Version="0.24.10" />
-    <PackageReference Include="Microsoft.Build" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Framework" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.3.409" />
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="15.3.409" />
+    <PackageReference Include="LibGit2Sharp" Version="$(LibGit2SharpPackageVersion)" />
+    <PackageReference Include="Microsoft.Build" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Framework" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="$(MicrosoftBuildPackageVersion)" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="$(MicrosoftBuildPackageVersion)" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
 </Project>

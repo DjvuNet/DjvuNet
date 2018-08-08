@@ -2,18 +2,20 @@
 
   <PropertyGroup>
     <DepsRootDir>$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))/deps/</DepsRootDir>
+    <CalculatedPlatform Condition="$(PlatformTarget) == 'AnyCPU' And $(CalculatedPlatform) == ''">x64</CalculatedPlatform>
+    <CalculatedPlatform Condition="$(CalculatedPlatform) == ''">$(PlatformTarget)</CalculatedPlatform>
   </PropertyGroup>
 
   <ItemGroup>
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
-                        Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\**\libdjvulibre.dll" />
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\')"
-                    Include="$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\**\libdjvulibre.pdb" />
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\') And
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\')"
+                        Include="$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\**\libdjvulibre.dll" />
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\')"
+                    Include="$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\**\libdjvulibre.pdb" />
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\') And
                                    $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
-                Include="$(DepsRootDir)$(PlatformTarget)\$(Configuration)\jpeg62.dll" />
-    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(PlatformTarget)\$(Configuration)\$(TargetFramework)\') And $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
-            Include="$(DepsRootDir)$(PlatformTarget)\$(Configuration)\jpeg.pdb" />
+                Include="$(DepsRootDir)$(CalculatedPlatform)\$(Configuration)\jpeg62.dll" />
+    <DjvuLibreFiles Condition="'$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\' != '' And HasTrailingSlash('$(ProjectDir)..\build\$(CalculatedPlatform)\$(Configuration)\$(TargetFramework)\') And $(Configuration) != 'ReleaseStatic' And $(Configuration) != 'DebugStatic'"
+            Include="$(DepsRootDir)$(CalculatedPlatform)\$(Configuration)\jpeg.pdb" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(ContentDjvuLibreFiles)' != '' And '$(ContentDjvuLibreFiles)' != 'false' And '@(DjvuLibreFiles)' != ''">

@@ -8,6 +8,9 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 indent_style = space
 
+[*.txt]
+insert_final_newline = false
+
 [*.{cs,c,cpp,h,hpp,json,ps1,py,cmd,sh,yml,editorconfig}]
 indent_size = 4
 

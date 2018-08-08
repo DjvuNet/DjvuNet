@@ -16,6 +16,12 @@ namespace DjvuNet.Git.Tasks
         public string RepoRoot { get; set; }
 
         /// <summary>
+        /// Branch to which repo head is pointing
+        /// </summary>
+        [Output]
+        public string BranchName { get; set; }
+
+        /// <summary>
         /// Last commit hash
         /// </summary>
         [Output]
@@ -69,10 +75,12 @@ namespace DjvuNet.Git.Tasks
             {
                 // This prevents failed builds
                 Commit commit = null;
+                Branch headBranch = null;
 
                 try
                 {
                     Repository repo = new Repository(RepoRoot);
+                    headBranch = repo.Head;
                     var commits = repo.Commits;
                     commit = commits.FirstOrDefault();
                 }
@@ -88,6 +96,7 @@ namespace DjvuNet.Git.Tasks
                     DateTime = commit.Author.When.UtcDateTime;
                     MessageShort = commit.MessageShort;
                     Message = commit.Message;
+
                 }
                 else
                 {
@@ -97,6 +106,15 @@ namespace DjvuNet.Git.Tasks
                     DateTime = DateTime.UtcNow;
                     MessageShort = "Failed to retrieve git repo data. This could be out of repo build.";
                     Message = MessageShort;
+                }
+
+                if (headBranch != null)
+                {
+                    BranchName = headBranch.FriendlyName;
+                }
+                else
+                {
+                    BranchName = "N/A";
                 }
             }
             catch(Exception ex)

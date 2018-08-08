@@ -10,9 +10,8 @@
   <PropertyGroup>
     <Title>$(PackageId) - DjVuLibre .NET Bindings</Title>
     <Description>DjvuNet is a managed library for working with a DjVu documents. It is binary compatible with a reference implementation - DjvuLibre.</Description>
-    <TargetFramework />
-    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
-    <NETStandardImplicitPackageVersion>2.0.1</NETStandardImplicitPackageVersion>
+    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre</RootNamespace>
@@ -24,14 +23,23 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
+  </PropertyGroup>
+
 
   <ItemGroup>
     <Compile Include="DjvuLibreException.cs" />
@@ -73,8 +81,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
-    <ProjectReference Condition="$(TargetFramework) == 'net471'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
+    <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Condition="$(TargetFramework) == 'net472' And '$(__ManagedPlatform)' == ''" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />

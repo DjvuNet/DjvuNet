@@ -1,0 +1,55 @@
+<Project ToolsVersion="15.0">
+
+  <!-- NuGet package restore sources. -->
+  <PropertyGroup>
+    <RestoreSources>
+      https://myget.org/F/djvunet/api/v3/index.json;
+      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
+      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
+      https://api.nuget.org/v3/index.json;
+      $(RestoreSources)
+    </RestoreSources>
+  </PropertyGroup>
+
+  <!-- Tests/infrastructure dependency versions. -->
+  <PropertyGroup>
+    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.302</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.3-servicing-26803-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.1.302</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNetCoreILAsmPackageVersion>2.1.0-rtm-26528-02</MicrosoftNetCoreILAsmPackageVersion>
+    <XunitPackageVersion>2.4.0</XunitPackageVersion>
+    <MoqPackageVersion>4.9.0</MoqPackageVersion>
+    <NewtonSoftJsonPackageVersion>11.0.2</NewtonSoftJsonPackageVersion>
+    <MicrosoftBuildPackageVersion>15.7.179</MicrosoftBuildPackageVersion>
+    <LibGit2SharpPackageVersion>0.25.2</LibGit2SharpPackageVersion>
+    <SystemDrawingCommonPackageVersion>4.5.0</SystemDrawingCommonPackageVersion>
+    <SystemRuntimeCompilerServicesUnsafePackageVersion>4.5.1</SystemRuntimeCompilerServicesUnsafePackageVersion>
+
+  </PropertyGroup>
+
+  <!-- ILLink.Tasks package version -->
+  <PropertyGroup>
+    <ILLinkTasksPackage>ILLink.Tasks</ILLinkTasksPackage>
+    <ILLinkTasksPackageVersion>0.1.5-preview-1841732</ILLinkTasksPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <XUnitDependency Include="xunit"/>
+    <XUnitDependency Include="xunit.assert"/>
+    <XUnitDependency Include="xunit.core"/>
+    <XUnitDependency Include="xunit.extensibility.core" />
+    <XUnitDependency Include="xunit.runner.console"/>
+    <XUnitDependency Include="xunit.runner.msbuild"/>
+    <XUnitDependency Include="xunit.runner.utility"/>
+    <StaticDependency Include="@(XUnitDependency)">
+      <Version>$(XunitPackageVersion)</Version>
+    </StaticDependency>
+
+  </ItemGroup>
+
+  <!-- Override isolated build dependency versions with versions from Repo API. -->
+  <Import Project="$(DotNetPackageVersionPropsPath)"
+          Condition="'$(DotNetPackageVersionPropsPath)' != ''" />
+
+</Project>

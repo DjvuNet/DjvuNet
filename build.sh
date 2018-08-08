@@ -817,11 +817,14 @@ if [ $__CrossBuild == 1 ]; then
     fi
 fi
 
-# Check prereqs.
+# Check prerequisites
 check_prereqs
 
 
 # Build the libdjvulibre (native) components.
+
+
+
 # build_native
 
 

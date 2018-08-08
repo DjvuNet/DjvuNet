@@ -9,15 +9,35 @@
   <PropertyGroup>
     <Title>$(PackageId) - custom assembly level attributes.</Title>
     <Description>$(PackageId) implements custom assembly level attributes used to provide additional information about assemblies.</Description>
-    <TargetFramework />
-    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
-    <NetStandardImplicitPackageVersion>2.0.1</NetStandardImplicitPackageVersion>
+    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Attributes</RootNamespace>
     <AssemblyName>System.Attributes</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
   </PropertyGroup>
 
   <PropertyGroup>

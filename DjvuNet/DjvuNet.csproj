@@ -10,8 +10,8 @@
     <Title>$(PackageId) - DjVu Document .NET Library</Title>
     <Description>DjvuNet is a managed library for working with a DjVu documents. It is binary compatible with a reference implementation - DjvuLibre.</Description>
     <TargetFramework />
-    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
-    <NetStandardImplicitPackageVersion>2.0.1</NetStandardImplicitPackageVersion>
+    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet</RootNamespace>
@@ -20,8 +20,35 @@
     <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
+  </PropertyGroup>
+
+
   <PropertyGroup>
     <_HasReferenceToSystemRuntime>true</_HasReferenceToSystemRuntime>
+  </PropertyGroup>
+
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -216,12 +243,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-25914-04" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
