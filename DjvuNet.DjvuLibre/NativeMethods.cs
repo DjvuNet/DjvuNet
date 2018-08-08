@@ -10,7 +10,7 @@ namespace DjvuNet.DjvuLibre
 {
     internal static class NativeMethods
     {
-
+        public const String DjVuLibrePath = "..\\libdjvulibre.dll";
         //  DDJVUAPI const char*
         //  ddjvu_get_version_string(void);
 
@@ -20,7 +20,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// DjVuLibre library version string.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_get_version_string",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_get_version_string",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true, ThrowOnUnmappableChar = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern String GetDjvuLibreVersion();
@@ -33,7 +33,7 @@ namespace DjvuNet.DjvuLibre
         //ddjvu_context_create(const char* programname);
 
         /// <summary>
-        /// Creates a ddjvu_context_t object. Argument programName is the name 
+        /// Creates a ddjvu_context_t object. Argument programName is the name
         /// of the calling executable.
         /// There is usually only one ddjvu_context_t object.
         /// This object holds global data structures such as the
@@ -43,7 +43,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// Pointer to the ddjvu_context_t.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_context_create", 
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_context_create",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true, ThrowOnUnmappableChar = true)]
         internal static extern IntPtr CreateDjvuContext(
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef=typeof(UTF8StringMarshaler))]
@@ -65,7 +65,7 @@ namespace DjvuNet.DjvuLibre
         /// or thread needs it.
         /// </summary>
         /// <param name="context"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_context_release",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_context_release",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void ReleaseDjvuContext(IntPtr context);
 
@@ -84,7 +84,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="size">
         /// The argument is expressed in bytes.
         /// </param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_cache_set_size",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_cache_set_size",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void DjvuSetCacheSize(IntPtr context, uint size);
 
@@ -98,7 +98,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// Size of cache in bytes.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_cache_get_size",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_cache_get_size",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern uint DjvuGetCacheSize(IntPtr context);
 
@@ -109,7 +109,7 @@ namespace DjvuNet.DjvuLibre
         /// Clears all cached data.
         /// </summary>
         /// <param name="context"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_cache_clear",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_cache_clear",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void DjvuClearCache(IntPtr context);
 
@@ -124,8 +124,8 @@ namespace DjvuNet.DjvuLibre
            decoding job then generates messages to request the raw
            data and to indicate the state of the decoding process.
 
-           Argument <url> specifies an optional URL for the document.  
-           The URL follows the usual syntax (<"protocol://machine/path">). 
+           Argument <url> specifies an optional URL for the document.
+           The URL follows the usual syntax (<"protocol://machine/path">).
            It should not end with a slash. It only serves two purposes:
            - The URL is used as a key for the cache of decoded pages.
            - The URL is used to document <m_newstream> messages.
@@ -136,12 +136,12 @@ namespace DjvuNet.DjvuLibre
 
            It is important to understand that the URL is not used to
            access the data.  The document generates <m_newstream>
-           messages to indicate which data is needed.  The caller must 
-           then provide the raw data using <ddjvu_stream_write> 
+           messages to indicate which data is needed.  The caller must
+           then provide the raw data using <ddjvu_stream_write>
            and <ddjvu_stream_close>.
 
-           Localized characters in argument <url> should be in 
-           urlencoded UTF-8 (like "%2A"). What is happening for non 
+           Localized characters in argument <url> should be in
+           urlencoded UTF-8 (like "%2A"). What is happening for non
            ascii characters is unclear (probably UTF-8). */
 
         //  DDJVUAPI ddjvu_document_t *
@@ -149,7 +149,7 @@ namespace DjvuNet.DjvuLibre
         //                      const char* url,
         //                      int cache);
 
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_create",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_create",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr LoadDjvuDocumentUrl(
             IntPtr context,
@@ -174,12 +174,12 @@ namespace DjvuNet.DjvuLibre
         /// </param>
         /// <param name="cache"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint= "ddjvu_document_create_by_filename_utf8",
+        [DllImport(DjVuLibrePath, EntryPoint= "ddjvu_document_create_by_filename_utf8",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr LoadDjvuDocumentUtf8(
             IntPtr context,
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef=typeof(UTF8StringMarshaler))]
-            String filePath, 
+            String filePath,
             int cache);
 
         //  DDJVUAPI ddjvu_document_t *
@@ -199,7 +199,7 @@ namespace DjvuNet.DjvuLibre
         /// </param>
         /// <param name="cache"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_create_by_filename",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_create_by_filename",
             CallingConvention = CallingConvention.Cdecl,
             CharSet = CharSet.Ansi, PreserveSig = true, ThrowOnUnmappableChar = true)]
         internal static extern IntPtr LoadDjvuDocument(IntPtr context, String filePath, int cache);
@@ -211,7 +211,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="doc"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pagenum",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_pagenum",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int GetDjvuDocumentPageCount(IntPtr doc);
 
@@ -226,7 +226,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="doc"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_type",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_type",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern DocumentType GetDjvuDocumentType(IntPtr doc);
 
@@ -240,7 +240,7 @@ namespace DjvuNet.DjvuLibre
         /// or thread needs it.
         /// </summary>
         /// <param name="doc"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_job_release",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_job_release",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void ReleaseDjvuDocument(IntPtr doc);
 
@@ -258,7 +258,7 @@ namespace DjvuNet.DjvuLibre
              while ((msg = ddjvu_message_peek(ctx)))
              {
                switch(msg->m_any.tag)
-               { 
+               {
                case DDJVU_ERROR:      .... ; break;
                case DDJVU_INFO:       .... ; break;
                case DDJVU_NEWSTREAM:  .... ; break;
@@ -280,7 +280,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_message_peek",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_message_peek",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr DjvuPeekMessage(IntPtr context);
 
@@ -294,7 +294,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="context"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_message_wait",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_message_wait",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr DjvuWaitMessage(IntPtr context);
 
@@ -309,12 +309,12 @@ namespace DjvuNet.DjvuLibre
         /// calling ddjvu_message_pop.
         /// </summary>
         /// <param name="context"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_message_pop",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_message_pop",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void DjvuPopMessage(IntPtr context);
 
 
-        //  typedef void 
+        //  typedef void
         //  (*ddjvu_message_callback_t)(ddjvu_context_t* context, void* closure);
 
         //  DDJVUAPI void
@@ -364,13 +364,13 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="context"></param>
         /// <param name="callback">
-        /// Create DjvuMessageCallbackDelegate, get delegate pointer 
+        /// Create DjvuMessageCallbackDelegate, get delegate pointer
         /// by calling Marshal.GetFunctionPointerForDelegate(yourDelegate)
         /// and pass it to the DjvuSetMessageCallback function along
-        /// Context pointer and 
+        /// Context pointer and
         /// </param>
         /// <param name="closure"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_message_set_callback",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_message_set_callback",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void DjvuSetMessageCallback(IntPtr context, IntPtr callback, IntPtr closure);
 
@@ -379,9 +379,9 @@ namespace DjvuNet.DjvuLibre
         /* -------------------------------------------------- */
 
 
-        /* Many essential ddjvuapi functions initiate asynchronous operations. 
+        /* Many essential ddjvuapi functions initiate asynchronous operations.
            These "jobs" run in separate threads and report their
-           progress by posting messages into the ddjvu context event queue. 
+           progress by posting messages into the ddjvu context event queue.
            Jobs are sometimes represented by a ddjvu_job_t object. */
 
         /* ddjvu_job_status ---
@@ -409,7 +409,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="job"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_job_status",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_job_status",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern DjvuJobStatus GetDjvuJobStatus(IntPtr job);
 
@@ -423,7 +423,7 @@ namespace DjvuNet.DjvuLibre
 
         //  ddjvu_job_t*
         //  ddjvu_document_job(ddjvu_document_t* document)
-        //  { 
+        //  {
         //    return document;
         //  }
 
@@ -455,7 +455,7 @@ namespace DjvuNet.DjvuLibre
         //      DjVuFileCache* xcache = ctx->cache;
         //      if (! cache) xcache = 0;
         //      GURL gurl;
-        //      if (utf8) 
+        //      if (utf8)
         //        gurl = GURL::Filename::UTF8(filename);
         //      else
         //        gurl = GURL::Filename::Native(filename);
@@ -590,7 +590,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="document"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_filenum",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_filenum",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int GetDjvuDocumentFileCount(IntPtr document);
 
@@ -599,8 +599,8 @@ namespace DjvuNet.DjvuLibre
            Returns information about component file <fileno>.
            This function might return <DDJVU_JOB_STARTED> when
            called before receiving a <m_docinfo> message.
-           String pointers in the returned data structure 
-           might be null. Strings are UTF8 encoded and remain 
+           String pointers in the returned data structure
+           might be null. Strings are UTF8 encoded and remain
            allocated as long as the ddjvu_document_t object exists.
 
            Changes for ddjvuapi=18
@@ -625,9 +625,9 @@ namespace DjvuNet.DjvuLibre
         //  ddjvu_document_get_fileinfo_imp(ddjvu_document_t* document, int fileno,
         //                                ddjvu_fileinfo_t* info, unsigned int infosz);
 
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_fileinfo_imp",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_fileinfo_imp",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
-        internal static extern int GetDjvuDocumentFileInfo(IntPtr document, int fileNumber, 
+        internal static extern int GetDjvuDocumentFileInfo(IntPtr document, int fileNumber,
             IntPtr pageInfo, int size = 24);
 
         //  DDJVUAPI int
@@ -647,7 +647,7 @@ namespace DjvuNet.DjvuLibre
         /// Zero based index page number (values from 0 to page count - 1).
         /// </param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_check_pagedata",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_check_pagedata",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int CheckDjvuDocumentPageData(IntPtr document, int pageNumber);
 
@@ -675,7 +675,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns></returns>
         /// <remarks>
         /// Typical synchronous usage:
-        /// 
+        ///
         /// ddjvu_status_t r;
         /// ddjvu_pageinfo_t info;
         /// while ((r=ddjvu_document_get_pageinfo(doc,pageno,&info)) less than DDJVU_JOB_OK)
@@ -683,9 +683,9 @@ namespace DjvuNet.DjvuLibre
         /// if (r>=DDJVU_JOB_FAILED)
         ///   signal_error();
         /// </remarks>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pageinfo_imp",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_pageinfo_imp",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
-        internal static extern int GetDjvuDocumentPageInfo(IntPtr document, int pageNumber, 
+        internal static extern int GetDjvuDocumentPageInfo(IntPtr document, int pageNumber,
             IntPtr pageInfo, int size = 20);
 
 
@@ -707,7 +707,7 @@ namespace DjvuNet.DjvuLibre
         /// Set to true (default value) to get json formatted output.
         /// </param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_dump",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_dump",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern String GetDjvuDocumentDump(IntPtr document, bool json = true);
@@ -731,7 +731,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// String with formatted dump of page data.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pagedump",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_pagedump",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern String GetDjvuDocumentPageDump(IntPtr document, int pageNumber);
@@ -740,7 +740,7 @@ namespace DjvuNet.DjvuLibre
         //  ddjvu_document_get_pagedump_json(ddjvu_document_t* document, int pageno, bool json);
 
         /// <summary>
-        /// This function returns a UTF8 encoded json formatted text 
+        /// This function returns a UTF8 encoded json formatted text
         /// describing the contents of page pageno using the same
         /// format as command djvudump. The returned string must
         /// be deallocated using free().
@@ -756,7 +756,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// String with formatted dump of page data.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pagedump_json",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_pagedump_json",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern String GetDjvuDocumentPageDump(IntPtr document, int pageNumber, bool json);
@@ -777,7 +777,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// Pointer to null terminated UTF8 string which has to be released by caller.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_filedump",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_filedump",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern String GetDjvuDocumentFileDump(IntPtr document, int fileNumber);
@@ -786,7 +786,7 @@ namespace DjvuNet.DjvuLibre
         //  ddjvu_document_get_filedump_json(ddjvu_document_t* document, int fileno, bool json);
 
         /// <summary>
-        /// This function returns a UTF8 encoded json formatted text 
+        /// This function returns a UTF8 encoded json formatted text
         /// describing the contents of file fileno using the same
         /// format as command djvudump.
         /// The returned string must be deallocated using free().
@@ -800,7 +800,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// Pointer to null terminated UTF8 string which has to be released by caller.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_filedump_json",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_filedump_json",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern String GetDjvuDocumentFileDump(IntPtr document, int fileNumber, bool json);
@@ -827,7 +827,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// Pointer to null terminated UTF8 string which has to be released by caller.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_create_by_pageno",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_create_by_pageno",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuDocumentPage(IntPtr document, int pageNumber);
 
@@ -842,11 +842,11 @@ namespace DjvuNet.DjvuLibre
         /// <param name="document"></param>
         /// <param name="pageName"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_create_by_pageid",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_create_by_pageid",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuDocumentPage(
             IntPtr document,
-            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))] 
+            [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
             String pageName);
 
         //  DDJVUAPI double
@@ -859,7 +859,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_get_gamma",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_gamma",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern double GetDjvuPageGamma(IntPtr page);
 
@@ -873,7 +873,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_get_type",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_type",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern PageType GetDjvuPageType(IntPtr page);
 
@@ -888,7 +888,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="page"></param>
         /// <param name="rotation"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_set_rotation",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_set_rotation",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuPageRotation(IntPtr page, PageRotation rotation);
 
@@ -902,7 +902,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_get_rotation",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_rotation",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern PageRotation GetDjvuPageRotation(IntPtr page);
 
@@ -920,7 +920,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_get_initial_rotation",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_initial_rotation",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern PageRotation GetDjvuPageInitialRotation(IntPtr page);
 
@@ -938,7 +938,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// DjVu format version of the page file.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_get_version",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_version",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int GetDjvuPageVersion(IntPtr page);
 
@@ -952,7 +952,7 @@ namespace DjvuNet.DjvuLibre
         /// the number returned by ddjvu_page_get_version.
         /// </summary>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_code_get_version",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_code_get_version",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int GetDjvuCodeVersion();
 
@@ -969,7 +969,7 @@ namespace DjvuNet.DjvuLibre
         /// Renders a segment of a page with arbitrary scale.
         /// Argument<mode> indicates what image layers
         /// should be rendered.
-        /// 
+        ///
         /// Conceptually this function renders the full page
         /// into a rectangle pageRectangle and copies the
         /// pixels specified by rectangle renderRectangle
@@ -977,7 +977,7 @@ namespace DjvuNet.DjvuLibre
         /// The actual code is much more efficient than that.
         ///
         /// The final image is written into buffer imageBuffer.
-        /// Argument pixelFormat specifies the expected pixel format.  
+        /// Argument pixelFormat specifies the expected pixel format.
         ///
         /// Argument rowSize specifies the number of bytes from
         /// one row to the next in the buffer. The buffer must be
@@ -997,7 +997,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="rowSize"></param>
         /// <param name="imageBuffer"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_page_render",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_render",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int RenderDjvuPage(
             IntPtr page,
@@ -1029,7 +1029,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="style"></param>
         /// <param name="numberOfArgs"></param>
         /// <param name="args"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_create",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_format_create",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr CreateDjvuFormat(FormatStyle style, int numberOfArgs, IntPtr args);
 
@@ -1044,7 +1044,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="format"></param>
         /// <param name="topToBottom"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_row_order",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_format_set_row_order",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatRowOrder(IntPtr format, int topToBottom);
 
@@ -1059,7 +1059,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="format"></param>
         /// <param name="topToBottom"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_y_direction",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_format_set_y_direction",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatYDirection(IntPtr format, int topToBottom);
 
@@ -1073,7 +1073,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="format"></param>
         /// <param name="bits"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_ditherbits",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_format_set_ditherbits",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatDitherBits(IntPtr format, int bits);
 
@@ -1088,7 +1088,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="format"></param>
         /// <param name="gamma"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_gamma",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_format_set_gamma",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void SetDjvuFormatGamma(IntPtr format, double gamma);
 
@@ -1106,9 +1106,9 @@ namespace DjvuNet.DjvuLibre
         /// <param name="blue"></param>
         /// <param name="green"></param>
         /// <param name="red"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_set_white",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_format_set_white",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
-        internal static extern void SetDjvuFormatWhite(IntPtr format, 
+        internal static extern void SetDjvuFormatWhite(IntPtr format,
             byte blue, byte green, byte red);
 
         //  DDJVUAPI void
@@ -1119,7 +1119,7 @@ namespace DjvuNet.DjvuLibre
         /// The calling program should no longer reference this object.
         /// </summary>
         /// <param name="format"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_format_release",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_format_release",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void ReleaseDjvuFormat(IntPtr format);
 
@@ -1142,7 +1142,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="pageNumber"></param>
         /// <param name="start"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_thumbnail_status",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_thumbnail_status",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern DjvuJobStatus GetDjvuThumbnailStatus(IntPtr document, int pageNumber, int start);
 
@@ -1172,11 +1172,11 @@ namespace DjvuNet.DjvuLibre
         /// <param name="rowSize"></param>
         /// <param name="imageBuffer"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_thumbnail_render",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_thumbnail_render",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern DjvuJobStatus RenderDjvuThumbnail(
-            IntPtr document, 
-            int pageNumber, 
+            IntPtr document,
+            int pageNumber,
             ref int pWidth,
             ref int pHeight,
             IntPtr pixelFormat,
@@ -1196,17 +1196,17 @@ namespace DjvuNet.DjvuLibre
            <"libdjvu/miniexp.h"> for the s-expression documentation
            and manipulation functions.  See the <djvused> man page
            for the specification of the s-expressions representing
-           outlines, hidden text and annotations. It often help 
+           outlines, hidden text and annotations. It often help
            to print s-expressions using function <miniexp_pprint>.
 
-           WARNING: All strings in s-expression are UTF-8 encoded.  
-           Strings returned by miniexp_to_str might have to be 
+           WARNING: All strings in s-expression are UTF-8 encoded.
+           Strings returned by miniexp_to_str might have to be
            converted to the locale encoding. */
 
 
         /* miniexp_t --
            Opaque type representing s-expressions.
-           The same definition also appears in 
+           The same definition also appears in
            file <"libdjvu/miniexp.h">. */
 
 
@@ -1225,7 +1225,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="document"></param>
         /// <param name="expression"></param>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_miniexp_release",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_miniexp_release",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern void ReleaseDjvuMiniexp(IntPtr document, IntPtr expression);
 
@@ -1237,7 +1237,7 @@ namespace DjvuNet.DjvuLibre
         /// If this information is available, it returns a
         /// s-expression with the same syntax as function
         /// print-outline of program djvused.
-        /// Otherwise it returns <miniexp_dummy> until the document 
+        /// Otherwise it returns <miniexp_dummy> until the document
         /// header gets fully decoded.
         /// </summary>
         /// <remarks>
@@ -1255,7 +1255,7 @@ namespace DjvuNet.DjvuLibre
         /// return symbols <failed> or <stopped> when an error occurs
         /// while accessing the desired information.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_outline",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_outline",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuDocumentOutline(IntPtr document);
 
@@ -1263,11 +1263,11 @@ namespace DjvuNet.DjvuLibre
            This function returns the document-wide annotations.
            This corresponds to a proposed change in the djvu format.
            When no new-style document-wide annotations are available
-           and <compat> is true, this function searches a shared 
+           and <compat> is true, this function searches a shared
            annotation chunk and returns its contents.
 
            This function returns <miniexp_dummy> if the information
-           is not yet available. It may then cause the emission 
+           is not yet available. It may then cause the emission
            of <m_pageinfo> messages with null <m_any.page>.
 
            This function returns the empty list <miniexp_nil> when
@@ -1278,31 +1278,31 @@ namespace DjvuNet.DjvuLibre
         //  DDJVUAPI miniexp_t
         //  ddjvu_document_get_anno(ddjvu_document_t* document, int compat);
 
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_anno",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_anno",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuDocumentAnnotation(IntPtr document, int compat);
 
-        /* ddjvu_document_get_pagetext -- 
+        /* ddjvu_document_get_pagetext --
            This function tries to obtain the text information for
            page <pageno>. If this information is available, it
            returns a s-expression with the same syntax as function
            <print-txt> of program <djvused>.  Otherwise it starts
            fetching the page data and returns <miniexp_dummy>.
-           This function causes the emission of <m_pageinfo> messages 
+           This function causes the emission of <m_pageinfo> messages
            with zero in the <m_any.page> field.
            Typical synchronous usage:
 
             miniexp_t r;
             while ((r=ddjvu_document_get_pagetext(doc,pageno,0))==miniexp_dummy)
-              handle_ddjvu_messages(ctx, TRUE); 
+              handle_ddjvu_messages(ctx, TRUE);
 
            This function returns the empty list <miniexp_nil> when
            the page contains no text information. It can also return
            symbols <failed> or <stopped> when an error occurs while
-           accessing the desired information. 
+           accessing the desired information.
 
            Argument <maxdetail> controls the level of detail in the
-           returned s-expression. Values "page", "column", "region", "para", 
+           returned s-expression. Values "page", "column", "region", "para",
            "line", and "word" restrict the output to the specified granularity.
            All other values produce a s-expression that represents
            the hidden text data as finely as possible. */
@@ -1324,7 +1324,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="pageNumber"></param>
         /// <param name="maxDetail"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pagetext",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_pagetext",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuDocumentPageText(
             IntPtr document,
@@ -1337,7 +1337,7 @@ namespace DjvuNet.DjvuLibre
         //                                  const char* maxdetail)
 
         /// <summary>
-        /// Function returns decoded DjVu document page text bypassing miniexp 
+        /// Function returns decoded DjVu document page text bypassing miniexp
         /// and directly reading from native text buffer with support of modified
         /// libdjvulibre library C API. Fidelity is on par with original miniexp
         /// based API but skips unnecessary miniexp encoding and decoding.
@@ -1346,7 +1346,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="pageNumber"></param>
         /// <param name="maxDetail"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pagetext_utf8",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_pagetext_utf8",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern string GetDjvuDocumentPageTextUtf8(
@@ -1372,7 +1372,7 @@ namespace DjvuNet.DjvuLibre
         /// miniexp_t r;
         /// while ((r = ddjvu_document_get_pageanno(doc,pageno))==miniexp_dummy)
         ///   handle_ddjvu_messages(ctx, TRUE);
-        ///   
+        ///
         /// This function returns the empty list miniexp_nil when
         /// the page contains no annotations. It can also return
         /// symbols failed or stopped when an error occurs while
@@ -1381,7 +1381,7 @@ namespace DjvuNet.DjvuLibre
         /// <param name="document"></param>
         /// <param name="pageNumber"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "ddjvu_document_get_pageanno",
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_document_get_pageanno",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr GetDjvuPageAnnotation(IntPtr document, int pageNumber);
 
@@ -1391,7 +1391,7 @@ namespace DjvuNet.DjvuLibre
 
         // MINILISPAPI const char* miniexp_to_name(miniexp_t p);
 
-        [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_to_name",
+        [DllImport(DjVuLibrePath, EntryPoint = "miniexp_to_name",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern string MiniexpToName(IntPtr miniexp);
@@ -1401,7 +1401,7 @@ namespace DjvuNet.DjvuLibre
 
         // MINILISPAPI miniexp_t miniexp_symbol(const char* name);
 
-        [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_symbol",
+        [DllImport(DjVuLibrePath, EntryPoint = "miniexp_symbol",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr CreateSymbolMiniexp(
             [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
@@ -1415,7 +1415,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="miniexp"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_length",
+        [DllImport(DjVuLibrePath, EntryPoint = "miniexp_length",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern int MiniexpLength(IntPtr miniexp);
 
@@ -1432,7 +1432,7 @@ namespace DjvuNet.DjvuLibre
         /// <returns>
         /// n-th miniexp element in miniexpList.
         /// </returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_nth",
+        [DllImport(DjVuLibrePath, EntryPoint = "miniexp_nth",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr MiniexpItem(int index, IntPtr miniexpList);
 
@@ -1443,7 +1443,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         /// <param name="miniexp"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_stringp",
+        [DllImport(DjVuLibrePath, EntryPoint = "miniexp_stringp",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern bool IsMiniexpString(IntPtr miniexp);
 
@@ -1452,19 +1452,19 @@ namespace DjvuNet.DjvuLibre
         /// <summary>
         /// Returns the c string represented by the expression.
         /// Returns NULL if the expression is not a string.
-        /// The c string remains valid as long as the corresponding 
+        /// The c string remains valid as long as the corresponding
         /// lisp object exists.
         /// </summary>
         /// <param name="miniexp"></param>
         /// <returns></returns>
-        [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_to_str",
+        [DllImport(DjVuLibrePath, EntryPoint = "miniexp_to_str",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern string GetMiniexpString(IntPtr miniexp);
 
-        /* miniexp_to_lstr ---- 
+        /* miniexp_to_lstr ----
            Returns the length of the string represented by the expression.
-           Optionally returns the c string into *sp.  
+           Optionally returns the c string into *sp.
            Return 0 and makes *sp null if the expression is not a string. */
 
         // MINILISPAPI size_t miniexp_to_lstr(miniexp_t p, const char** sp);
@@ -1476,7 +1476,7 @@ namespace DjvuNet.DjvuLibre
 
         // MINILISPAPI miniexp_t miniexp_print(miniexp_t p);
 
-        [DllImport("libdjvulibre.dll", EntryPoint = "miniexp_print",
+        [DllImport(DjVuLibrePath, EntryPoint = "miniexp_print",
             CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr MiniexpPrint(IntPtr miniexp);
     }

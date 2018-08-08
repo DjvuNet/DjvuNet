@@ -15,7 +15,7 @@ namespace DjvuNet.DjvuLibre
         private string _Text;
         private string _Annotation;
         private PageType _PageType;
-        
+
         public DjvuPageInfo(DjvuDocumentInfo docInfo, int pageNumber)
         {
             if (docInfo == null)
@@ -23,7 +23,7 @@ namespace DjvuNet.DjvuLibre
 
             if ((_Info = docInfo.GetPageInfo(pageNumber)) == null)
                 throw new ArgumentException(
-                    $"{nameof(DjvuDocumentInfo)} object {nameof(docInfo)} is not fully initialized.", 
+                    $"{nameof(DjvuDocumentInfo)} object {nameof(docInfo)} is not fully initialized.",
                     nameof(docInfo));
 
             if (pageNumber < 0 || pageNumber >= docInfo.PageCount)
@@ -283,7 +283,7 @@ namespace DjvuNet.DjvuLibre
                 if (ex is DjvuLibreException)
                     throw new DjvuLibreException(message, ex);
 
-                throw new AggregateException(message, ex); 
+                throw new AggregateException(message, ex);
             }
 
             return buffer;

@@ -1,13 +1,8 @@
-﻿using Xunit;
-using DjvuNet.Compression;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Moq;
+﻿using System;
 using System.IO;
 using DjvuNet.Errors;
+using Moq;
+using Xunit;
 
 namespace DjvuNet.Compression.Tests
 {
