@@ -12,6 +12,8 @@ param(
 $retryCount = 0
 $success = $false
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 do {
     try {
         Write-Output "Downloading $ToolsName from $ToolsRemotePath"
