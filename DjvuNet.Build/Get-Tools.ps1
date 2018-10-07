@@ -30,6 +30,8 @@ if ([System.IO.Directory]::Exists($ToolsPath)) {
     }
 }
 
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 do {
     try {
         Write-Output "$MessagePrefix Downloading $ToolsName from $ToolsRemotePath"
