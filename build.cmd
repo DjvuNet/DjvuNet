@@ -56,6 +56,9 @@ set _DefaultNetFX=net472
 set _NetFXId=.NETFramework
 set _NetFXTFM=.NETFramework,Version=v4.7.2
 set _Framework=%_DefaultNetCoreApp%
+set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/
+
+REM Parse command line
 
 :parse
 if /i "%1"=="" goto endparse
@@ -80,11 +83,6 @@ if /i "%~1"=="-OS"                  (set "_OS=%2"&shift&shift&goto :parse)
 echo Unknown command line parameter: %1
 goto :usage
 :endparse
-
-call init-tools.cmd
-if not [%ERRORLEVEL%]==[0] (
-    goto exit_error
-)
 
 if /i [%_MSB_Platform%] == [Arm]         (set "__ManagedPlatform=AnyCPU" & if /i [%PROCESSOR_ARCHITECTURE%] == [AMD64] (set "__SkipNativeTests=1")&goto :check_params)
 if /i [%_MSB_Platform%] == [Arm64]       (set "__ManagedPlatform=AnyCPU" & if /i [%PROCESSOR_ARCHITECTURE%] == [AMD64] (set "__SkipNativeTests=1")&goto :check_params)
@@ -196,13 +194,35 @@ if not exist .\DjvuNet.sln (
      goto exit_error
 )
 
-set __BuildToolsUri=https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/Tools.zip
+REM Download ready to use DjvuNet build tools
+
+set __BuildToolsUri=!__GithubDjvuNetReleaseUri!Tools.zip
 
 call powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 %__BuildToolsUri% Tools.zip Tools BuildTools {314FA7B0-6864-4842-B539-5728CBC73F27} %__MsgPrefix%
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: Failed to download build tools from %__BuildToolsUri%
     goto exit_error
 )
+
+REM Download native build and test deps
+
+set __NativeDepsUri=!__GithubDjvuNetReleaseUri!deps.zip
+
+call powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 %__NativeDepsUri% deps.zip deps NativeDependencies {87E5AD66-912F-477C-BDA5-52F7785AE705} %__MsgPrefix%
+if not [%ERRORLEVEL%]==[0] (
+    echo %__MsgPrefix%Error: Failed to download native dependencies from %__NativeDepsUri%
+    goto exit_error
+)
+
+REM Download and initialize out own .NETCore SDK
+
+call .\init-tools.cmd
+
+if not [%ERRORLEVEL%]==[0] (
+    goto exit_error
+)
+
+REM Clone libdjvulibre if needed
 
 if defined _SkipNative goto :no_djvulibre
 
@@ -218,6 +238,8 @@ if not exist .\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj (
 )
 
 :no_djvulibre
+
+REM Set target specific environment values
 
 if /i "%_Framework%" == "%_DefaultNetCoreApp%" (
     set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
@@ -301,8 +323,6 @@ call :restore_dotnet_proj !__DjvuNetDjvuLibreProj!
 
 if defined _SkipNative goto :no_djvulibre_build
 
-set __NativeDepsUri=https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/deps.zip
-
 if defined __BuildLibDjvuLibre (
     REM Scope environment changes start {
     setlocal
@@ -316,12 +336,6 @@ if defined __BuildLibDjvuLibre (
     set "__MsbuildWrn=/flp1:WarningsOnly;LogFile=!__BuildWrn!"
     set "__MsbuildErr=/flp2:ErrorsOnly;LogFile=!__BuildErr!"
     set "__MsbuildLogging=!__MsbuildLog! !__MsbuildPubWrn! !__MsbuildErr!"
-
-    call powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 %__NativeDepsUri% deps.zip deps NativeDependencies {87E5AD66-912F-477C-BDA5-52F7785AE705} %__MsgPrefix%
-    if not [%ERRORLEVEL%]==[0] (
-        echo %__MsgPrefix%Error: Failed to download native dependencies from %__NativeDepsUri%
-        goto exit_error
-    )
 
     echo %__MsgPrefix%Building native libdjvulibre.vcxproj
 
