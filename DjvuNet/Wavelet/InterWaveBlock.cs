@@ -83,13 +83,14 @@ namespace DjvuNet.Wavelet
             return retval;
         }
 
-        /// <summary> Query a data block.
-        ///
+        /// <summary>
+        /// Query a data block.
         /// </summary>
-        /// <param name="n">the data block to query.
-        ///
+        /// <param name="n">
+        /// the data block to query.
         /// </param>
-        /// <returns> the requested block
+        /// <returns>
+        /// the requested block
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public short[] GetBlock(int n)
@@ -98,13 +99,14 @@ namespace DjvuNet.Wavelet
             return (_PData[nms] != null) ? _PData[nms][n & 0xf] : null;
         }
 
-        /// <summary> Query a data block.
-        ///
+        /// <summary>
+        /// Query a data block.
         /// </summary>
-        /// <param name="n">the block to query.
+        /// <param name="n">
+        /// the block to query.
         /// </param>
-        /// <param name="map">to use
-        ///
+        /// <param name="map">
+        /// to use
         /// </param>
         /// <returns> the requested block
         /// </returns>
