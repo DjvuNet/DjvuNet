@@ -223,7 +223,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		artifacts.sha256 = artifacts.sha256
 		build.cmd = build.cmd
 		build.sh = build.sh
-		BuildToolsVersion.txt = BuildToolsVersion.txt
 		clean.cmd = clean.cmd
 		clean.sh = clean.sh
 		common.props = common.props
@@ -234,7 +233,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RepoRoot", "RepoRoot", "{50
 		DjvuNetPackaging.props = DjvuNetPackaging.props
 		DotNetCliVersion.txt = DotNetCliVersion.txt
 		global.json = global.json
-		ILAsmVersion.txt = ILAsmVersion.txt
 		init-tools.cmd = init-tools.cmd
 		init-tools.msbuild = init-tools.msbuild
 		init-tools.sh = init-tools.sh
@@ -761,6 +759,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{C7A00994
 		Tools\global.json = Tools\global.json
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNetTest", "DjvuNetTest\DjvuNetTest.csproj", "{FD767831-2359-4DEE-A0D8-EAB57475A309}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems*{b7ef5575-5932-4ea7-b250-e7da238d60a9}*SharedItemsImports = 13
@@ -1033,6 +1033,26 @@ Global
 		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}.Release|x64.Build.0 = Release|x64
 		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}.Release|x86.ActiveCfg = Release|x86
 		{2E3DF5C2-8A38-4A03-86D7-8D463C917E47}.Release|x86.Build.0 = Release|x86
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|Arm.ActiveCfg = Debug|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|Arm.Build.0 = Debug|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|Arm64.ActiveCfg = Debug|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|Arm64.Build.0 = Debug|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|x64.ActiveCfg = Debug|x64
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|x64.Build.0 = Debug|x64
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|x86.ActiveCfg = Debug|x86
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Debug|x86.Build.0 = Debug|x86
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|AnyCPU.Build.0 = Release|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|Arm.ActiveCfg = Release|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|Arm.Build.0 = Release|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|Arm64.ActiveCfg = Release|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|Arm64.Build.0 = Release|Any CPU
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|x64.ActiveCfg = Release|x64
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|x64.Build.0 = Release|x64
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|x86.ActiveCfg = Release|x86
+		{FD767831-2359-4DEE-A0D8-EAB57475A309}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

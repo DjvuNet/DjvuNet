@@ -9,14 +9,15 @@
   <PropertyGroup>
     <Title>$(PackageId) - custom assembly level attributes.</Title>
     <Description>$(PackageId) implements custom assembly level attributes used to provide additional information about assemblies.</Description>
+    <TargetFramework Condition="$(TargetFramework) != ''">$(TargetFramework)</TargetFramework>
     <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>System.Attributes</RootNamespace>
     <AssemblyName>System.Attributes</AssemblyName>
+    <IsDjvuNetTestProject>false</IsDjvuNetTestProject>
     <FileAlignment>512</FileAlignment>
-    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

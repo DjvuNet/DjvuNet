@@ -11,27 +11,28 @@
     </RestoreSources>
   </PropertyGroup>
 
-  <!-- Tests/infrastructure dependency versions. -->
+  <!-- Project dependency versions. -->
   <PropertyGroup>
-    <MicrosoftPrivateCoreFxNETCoreAppPackageVersion>4.6.0</MicrosoftPrivateCoreFxNETCoreAppPackageVersion>
-    <MicrosoftNETCorePlatformsPackageVersion>2.1.302</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>2.1.3-servicing-26803-01</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.1.302</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNetCoreILAsmPackageVersion>2.1.0-rtm-26528-02</MicrosoftNetCoreILAsmPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>2.1.1</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>2.1.5</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
+    <MicrosoftNETCoreDotNetAppHostPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetAppHostPackageVersion>
+    <MicrosoftNETCoreDotnetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotnetHostResolverPackageVersion>
+    <MicrosoftNETCoreDotnetHostPolicyPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotnetHostPolicyPackageVersion>
     <XunitPackageVersion>2.4.0</XunitPackageVersion>
     <MoqPackageVersion>4.9.0</MoqPackageVersion>
     <NewtonSoftJsonPackageVersion>11.0.2</NewtonSoftJsonPackageVersion>
-    <MicrosoftBuildPackageVersion>15.7.179</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>15.8.166</MicrosoftBuildPackageVersion>
     <LibGit2SharpPackageVersion>0.25.2</LibGit2SharpPackageVersion>
-    <SystemDrawingCommonPackageVersion>4.5.0</SystemDrawingCommonPackageVersion>
-    <SystemRuntimeCompilerServicesUnsafePackageVersion>4.5.1</SystemRuntimeCompilerServicesUnsafePackageVersion>
-
+    <LibGit2SharpNativeBinariesPackageVersion>1.0.233</LibGit2SharpNativeBinariesPackageVersion>
+    <SystemDrawingCommonPackageVersion>4.5.1</SystemDrawingCommonPackageVersion>
+    <SystemRuntimeCompilerServicesUnsafePackageVersion>4.5.2</SystemRuntimeCompilerServicesUnsafePackageVersion>
   </PropertyGroup>
 
   <!-- ILLink.Tasks package version -->
   <PropertyGroup>
     <ILLinkTasksPackage>ILLink.Tasks</ILLinkTasksPackage>
-    <ILLinkTasksPackageVersion>0.1.5-preview-1841732</ILLinkTasksPackageVersion>
+    <ILLinkTasksPackageVersion>0.1.5-preview-1841731</ILLinkTasksPackageVersion>
   </PropertyGroup>
 
   <ItemGroup>

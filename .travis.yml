@@ -19,7 +19,7 @@ env:
 solution: DjvuNet.sln
 
 mono: none
-dotnet: 2.0.3
+dotnet: 2.1.5
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi

@@ -1,30 +1,38 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNetTest</RootNamespace>
     <AssemblyName>DjvuNetTest</AssemblyName>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <IsDjvuNetTestProject>True</IsDjvuNetTestProject>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_HasReferenceToSystemRuntime>true</_HasReferenceToSystemRuntime>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
-    <Content Include="Properties\AssemblyInfo.Template.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="App.config" />
     <None Include="TestFiles\Mcguffey%27s_Primer.djvu" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="LibGit2Sharp.Portable" Version="0.24.10" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="LibGit2Sharp" Version="$(LibGit2SharpPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <!-- Avoid multiple entry points compile errors by excluding .NETFramework specific executable references -->
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.reporters" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

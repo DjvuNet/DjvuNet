@@ -22,17 +22,16 @@ if errorlevel 1 (
 
 if not defined NO_DASHES_ARG goto no_args
 if /I [%NO_DASHES_ARG:-=%] == [all] (
-  echo Cleaning entire working directory with: git clean -xdf
-  call git clean -xdf
+  echo Cleaning entire repo with: git clean -xdf %__ProjectDir%
+  call git clean -xdf %__ProjectDir%
   exit /b !ERRORLEVEL!
 )
 
 :no_args
 
-if exist "%__ProjectDir%packages" rd /s /q "%__ProjectDir%packages"
 if exist "%__ProjectDir%obj" rd /s /q "%__ProjectDir%obj"
-if exist "%__ProjectDir%Tools\coreclr" rd /s /q "%__ProjectDir%Tools\coreclr"
+if exist "%__ProjectDir%packages" rd /s /q "%__ProjectDir%packages"
 if exist init-tools.log del /q *.log
 if exist "%__ProjectDir%build\bin" rd /s /q "%__ProjectDir%build\bin"
 
-exit /b 0
+exit /b %errorlevel%

@@ -9,14 +9,14 @@
   <PropertyGroup>
     <Title>$(PackageId) - DjVu Document .NET Library</Title>
     <Description>DjvuNet is a managed library for working with a DjVu documents. It is binary compatible with a reference implementation - DjvuLibre.</Description>
-    <TargetFramework />
+    <!--<TargetFramework Condition="$(TargetFramework) != ''">$(TargetFramework)</TargetFramework>-->
     <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet</RootNamespace>
     <AssemblyName>DjvuNet</AssemblyName>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <IsDjvuNetTestProject>false</IsDjvuNetTestProject>
     <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
@@ -39,16 +39,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm64'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
-  </PropertyGroup>
-
-
-  <PropertyGroup>
-    <_HasReferenceToSystemRuntime>true</_HasReferenceToSystemRuntime>
-  </PropertyGroup>
-
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net472|AnyCPU'">
-    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -242,8 +232,12 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <_HasReferenceToSystemRuntime>true</_HasReferenceToSystemRuntime>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
+    <PackageReference Condition="$(TargetFrmework) != $(NetFXTargetFrameworkVersion)" Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
   </ItemGroup>
 

@@ -108,4 +108,32 @@
     <Message Importance="High"
              Text="Packaging [$(PackageId)] target frameworks: [@(_TargetFrameworks)], assembly version: [$(DjvuAssemblyVersion)], version: [$(FullBuildVersion)], configuration: [$(Configuration)], platform [$(Platform)], commit: [$(CommitVersion)]"/>
   </Target>
+
+  <Target Name="PrepareCopyXUnitTestProduct"
+      AfterTargets="GeneratePublishRuntimeConfigurationFile"
+      BeforeTargets="CopyXUnitTestProduct">
+
+    <PropertyGroup>
+      <CopyPublishXUnitPackages Condition="$(IsDjvuNetTestProject) == 'true'">true</CopyPublishXUnitPackages>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReferenceFiles
+        Condition="%(PackageReference.CopyToOutputDirectory) != ''"
+        Include="$(NugetPackageRoot)\%(PackageReference.Identity)\%(PackageReference.Version)\%(PackageReference.CopyToOutputDirectory)" />
+    </ItemGroup>
+
+    <Message Condition="$(CopyPublishXUnitPackages) == 'true'" Text="Target CopyXUnitTestProduct CopyPublishXUnitPackages: %(PackageReferenceFiles.Identity)" Importance="High" />
+  </Target>
+
+  <Target
+    Name="CopyXUnitTestProduct"
+    AfterTargets="PrepareCopyXUnitTestProduct"
+    BeforeTargets="_PublishBuildAlternative"
+    Condition="$(CopyPublishXUnitPackages) == 'true'">
+
+    <Copy SourceFiles="@(PackageReferenceFiles)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" ContinueOnError="false" />
+
+  </Target>
+
 </Project>

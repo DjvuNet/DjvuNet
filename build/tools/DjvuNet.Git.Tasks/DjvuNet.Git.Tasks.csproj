@@ -12,8 +12,7 @@
     <Description>$(PackageId) implements custom MSBuild build tasks used in DjvuNet repository build infrastructure.</Description>
     <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
-    <TargetFramework>net472</TargetFramework>
-    <Platforms>AnyCPU;x64;x86</Platforms>
+    <IsDjvuNetTestProject>false</IsDjvuNetTestProject>
   </PropertyGroup>
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>

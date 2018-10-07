@@ -1,0 +1,10 @@
+{
+    "appDomain": "denied",
+    "maxParallelThreads": 1,
+    "diagnosticMessages": true,
+    "longRunningTestSeconds": 15,
+    "shadowCopy": false,
+    "preEnumerateTheories": true,
+    "parallelizeAssembly": false,
+    "parallelizeTestCollections": false
+}

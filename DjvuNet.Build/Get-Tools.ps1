@@ -15,7 +15,8 @@ $ErrorActionPreference = "Stop"
 $MessagePrefix = $MessagePrefix.Trim()
 $retryCount = 0
 $success = $false
-$semaphoreFile = $ToolsPath + [System.IO.Path]::DirectorySeparatorChar + $ToolsSemaphoreFileName
+$semaphoreFile = [System.IO.Path]::Combine($ToolsPath, $ToolsSemaphoreFileName)
+$semaphoreFile = [System.IO.Path]::GetFullPath($semaphoreFile)
 
 if ([System.IO.Directory]::Exists($ToolsPath)) {
     if ([System.IO.File]::Exists($semaphoreFile)) {
@@ -23,6 +24,7 @@ if ([System.IO.Directory]::Exists($ToolsPath)) {
         exit
     }
     else {
+        Write-Output "$MessagePrefix Not found sempahore file: $semaphoreFile"
         [System.IO.Directory]::Delete($ToolsPath, $true)
         Write-Output "$MessagePrefix Deleted $ToolsPath directory"
     }

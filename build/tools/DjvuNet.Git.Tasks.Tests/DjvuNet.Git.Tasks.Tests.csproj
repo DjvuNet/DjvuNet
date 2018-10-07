@@ -8,8 +8,7 @@
     <RootNamespace>DjvuNet.Git.Tasks.Tests</RootNamespace>
     <AssemblyName>DjvuNet.Git.Tasks.Tests</AssemblyName>
     <TestProjectType>UnitTest</TestProjectType>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <IsDjvuNetTestProject>True</IsDjvuNetTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -43,18 +42,9 @@
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
-    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
 

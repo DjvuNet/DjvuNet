@@ -16,6 +16,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre</RootNamespace>
     <AssemblyName>DjvuNet.DjvuLibre</AssemblyName>
+    <IsDjvuNetTestProject>false</IsDjvuNetTestProject>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
 

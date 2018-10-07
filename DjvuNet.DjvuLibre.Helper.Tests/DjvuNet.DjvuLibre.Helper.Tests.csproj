@@ -2,13 +2,13 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
-    <TargetFramework />
     <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre.Helper.Tests</RootNamespace>
     <AssemblyName>DjvuNet.DjvuLibre.Helper.Tests</AssemblyName>
+    <IsTestProject>False</IsTestProject>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
 
@@ -38,6 +38,12 @@
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

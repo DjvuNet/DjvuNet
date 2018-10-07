@@ -9,6 +9,7 @@
     <RootNamespace>DjvuNet.Wavelet.Tests</RootNamespace>
     <AssemblyName>DjvuNet.Wavelet.Tests</AssemblyName>
     <TestProjectType>UnitTest</TestProjectType>
+    <IsDjvuNetTestProject>True</IsDjvuNetTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -31,6 +32,9 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="DjvuNet.Wavelet.Tests.xunit.runner.json" />
+  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Compression\BlockSortTests.cs" />
@@ -71,6 +75,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="DjvuNet.Wavelet.Tests.xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
 
@@ -85,18 +95,9 @@
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
-    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
 
@@ -108,5 +109,6 @@
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
   <Import Project="$(RepoRootDir)DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>

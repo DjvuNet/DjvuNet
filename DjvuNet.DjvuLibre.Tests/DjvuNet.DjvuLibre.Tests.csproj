@@ -2,7 +2,6 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
-    <TargetFramework />
     <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -10,6 +9,7 @@
     <AssemblyName>DjvuNet.DjvuLibre.Tests</AssemblyName>
     <TestProjectType>UnitTest</TestProjectType>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
+    <IsDjvuNetTestProject>True</IsDjvuNetTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -39,6 +39,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="DjvuNet.DjvuLibre.Tests.xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="App.config">
     </None>
   </ItemGroup>
@@ -46,21 +52,13 @@
   <ItemGroup>
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
+    <PackageReference Condition="$(TargetFrmework) != $(NetFXTargetFrameworkVersion)" Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
-    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
 

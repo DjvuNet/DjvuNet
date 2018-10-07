@@ -3,13 +3,15 @@
   <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
 
   <PropertyGroup>
-    <TargetFramework />
     <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.Tests</RootNamespace>
     <AssemblyName>DjvuNet.Tests</AssemblyName>
     <TestProjectType>UnitTest</TestProjectType>
+    <IsDjvuNetTestProject>True</IsDjvuNetTestProject>
+    <!--<DisableImplicitFrameworkReferences
+      Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">true</DisableImplicitFrameworkReferences>-->
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -90,37 +92,49 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(RepoRootDir)DjvuNet\DjvuNet.csproj" />
-    <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
+    <Content Include="DjvuNet.Tests.xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
+
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="DjvuNet.Tests.targets">
-    </None>
+    <None Include="DjvuNet.Tests.targets" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <_HasReferenceToSystemRuntime>true</_HasReferenceToSystemRuntime>
+  </PropertyGroup>
+
   <ItemGroup>
+    <PackageReference Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)" Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreDotnetHostPolicyPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)" Include="Microsoft.NETCore.DotNetHostPolicy" Version="$(MicrosoftNETCoreDotnetHostPolicyPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)" Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotnetHostResolverPackageVersion)" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
+    <PackageReference Condition="$(TargetFrmework) != $(NetFXTargetFrameworkVersion)" Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
-    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" >
+      <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
+      <CopyToOutputDirectory Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)">tools/$(NetFXTargetFrameworkVersion)/*.*</CopyToOutputDirectory>
     </PackageReference>
-    <PackageReference Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Include="$(RepoRootDir)DjvuNet\DjvuNet.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
+
   <Import Project="$(RepoRootDir)DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" Label="Shared" />
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
   <Import Project="$(RepoRootDir)DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
