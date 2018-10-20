@@ -19,7 +19,7 @@ env:
 solution: DjvuNet.sln
 
 mono: none
-dotnet: 2.1.5
+dotnet: 2.1.403
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
@@ -32,29 +32,37 @@ install:
 
 
 script:
-    - chmod u+x build.sh
     - git clone --depth 1 https://github.com/DjvuNet/DjVuLibre.git DjVuLibre
-    - curl -L -o artifacts.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
+    - curl -L -o artifacts.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/artifacts.zip
     - unzip -q artifacts.zip -d artifacts
-    - curl -L -o Tools.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/Tools.zip
+    - curl -L -o Tools.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/Tools.zip
     - unzip -q Tools.zip -d Tools
-    - curl -L -o deps.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/deps.zip
+    - curl -L -o deps.zip -s https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/deps.zip
     - unzip -q deps.zip -d deps
-    - dotnet restore DjvuNet.sln
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet restore -r linux-x64 DjvuNet.sln; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet restore -r osx-x64 DjvuNet.sln; fi
     - cd DjvuNet
-    - dotnet msbuild /m /nologo /p:Configuration=Debug /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet msbuild /m /nologo /p:Configuration=Release /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet msbuild /m /nologo /p:Configuration=Debug /p:Platform=x64 /p:TargetFramework=netstandard2.0 /t:Build
-    - dotnet msbuild /m /nologo /p:Configuration=Release /p:Platform=x64 /p:TargetFramework=netstandard2.0 /t:Build
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet msbuild -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=linux-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet msbuild -m -nologo -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=linux-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet msbuild -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=osx-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet msbuild -m -nologo -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=osx-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
     - cd ..
     - cd DjvuNet.Tests
-    - dotnet msbuild /m /nologo /p:Configuration=Debug /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll ../build/x64/Debug/netcoreapp2.0/DjvuNet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp
-    - dotnet msbuild /m /nologo /p:Configuration=Release /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll ../build/x64/Release/netcoreapp2.0/DjvuNet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet msbuild -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=linux-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Debug/binaries/netcoreapp2.1/netcoreapp2.1/linux-x64/publish/DjvuNet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet msbuild -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=osx-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Debug/binaries/netcoreapp2.1/netcoreapp2.1/osx-x64/publish/DjvuNet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet msbuild -m -nologo -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=linux-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Release/binaries/netcoreapp2.1/netcoreapp2.1/linux-x64/publish/DjvuNet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet msbuild -m -nologo -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=osx-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Release/binaries/netcoreapp2.1/netcoreapp2.1/osx-x64/publish/DjvuNet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
     - cd ..
     - cd DjvuNet.Wavelet.Tests
-    - dotnet msbuild /m /nologo /p:Configuration=Debug /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll ../build/x64/Debug/netcoreapp2.0/DjvuNet.Wavelet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp
-    - dotnet msbuild /m /nologo /p:Configuration=Release /p:Platform=x64 /p:TargetFramework=netcoreapp2.0 /t:Build
-    - dotnet ~/.nuget/packages/xunit.runner.console/2.3.1/tools/netcoreapp2.0/xunit.console.dll ../build/x64/Release/netcoreapp2.0/DjvuNet.Wavelet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet msbuild -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=linux-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Debug/binaries/netcoreapp2.1/netcoreapp2.1/linux-x64/publish/DjvuNet.Wavelet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet msbuild -m -nologo -p:Configuration=Debug -p:Platform=x64 -p:RuntimeIdentifier=osx-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Debug/binaries/netcoreapp2.1/netcoreapp2.1/osx-x64/publish/DjvuNet.Wavelet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet msbuild -m -nologo -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=linux-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Release/binaries/netcoreapp2.1/netcoreapp2.1/linux-x64/publish/DjvuNet.Wavelet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet msbuild -m -nologo -p:Configuration=Release -p:Platform=x64 -p:RuntimeIdentifier=osx-x64 -p:TargetFramework=netcoreapp2.1 -t:Publish; fi
+    - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then dotnet ~/.nuget/packages/xunit.runner.console/2.4.0/tools/netcoreapp2.0/xunit.console.dll ../build/bin/Unix.x64.Release/binaries/netcoreapp2.1/netcoreapp2.1/osx-x64/publish/DjvuNet.Wavelet.Tests.dll -nologo -parallel none -notrait Category=SkipNetCoreApp; fi
