@@ -28,7 +28,7 @@
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <TargetFramework Condition="$(TargetFramework) == ''">$(DotNetCoreFrameworkVersion)</TargetFramework>
+    <!--<TargetFramework Condition="$(TargetFramework) == ''">$(DotNetCoreFrameworkVersion)</TargetFramework>-->
     <FileAlignment>512</FileAlignment>
     <Platforms>AnyCPU;x64;x86;arm;arm64</Platforms>
     <Feature>strict</Feature>
