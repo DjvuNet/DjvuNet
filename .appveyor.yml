@@ -1,9 +1,9 @@
-image: Visual Studio 2017 Preview
+image: Visual Studio 2017
 
 version: '0.7.0.{build}'
 
 platform:
-  - x86
+#  - x86
   - x64
 
 configuration:
@@ -40,7 +40,9 @@ cache:
 
 # environment variables
 environment:
-    TargetFramework: net472
+    TargetFramework: netcoreapp2.1
+    DOTNET_CLI_TELEMETRY_OPTOUT: 1
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
 
 ############################################################################
 #
@@ -52,28 +54,11 @@ init:
     - cmd: git config --global core.autocrlf false
 
 install:
+    - cmd: echo Publish directory [%PublishDir%]
     - cmd: cd c:\projects\djvunet
-    - cmd: if exist DjvuLibre\ rd /s /q DjvuLibre
-    - cmd: if exist artifacts\ rd /s /q artifacts
-    - cmd: git clone https://github.com/DjvuNet/DjVuLibre.git
-    - cmd: powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/Tools.zip Tools.zip Tools BuildTools
-    - cmd: cd Tools
-    - cmd: dir
-    - cmd: cd ..
-    - cmd: powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/deps.zip deps.zip deps NativeDeps
-    - cmd: cd deps
-    - cmd: dir
-    - cmd: cd ..
-    - appveyor DownloadFile https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
-    - cmd: 7z x -oartifacts artifacts.zip
-
-before_build:
-    - appveyor DownloadFile https://dist.nuget.org/win-x86-commandline/latest/nuget.exe
-    - appveyor-retry nuget restore c:\projects\djvunet\DjvuNet.sln -DisableParallelProcessing  -verbosity detailed
-
-#build:
-#    project: DjvuNet.sln
-#    verbosity: detailed
 
 build_script:
-    - msbuild DjvuNet.sln /v:detailed /m /p:TargetFramework=net472 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    - cmd: build -p %PLATFORM% -c %CONFIGURATION% -f netcoreapp2.1 -sn -Test
+
+test_script:
+    - cmd: echo DjvuNet [%PLATFORM%] [%CONFIGURATION%] build by AppVeyor
