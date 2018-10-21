@@ -644,6 +644,16 @@ while :; do
             __ClangMinorVersion=0
             ;;
 
+        clang6.0|-clang6.0)
+            __ClangMajorVersion=6
+            __ClangMinorVersion=0
+            ;;
+
+        clang7.0|-clang7.0)
+            __ClangMajorVersion=7
+            __ClangMinorVersion=0
+            ;;
+
         ninja|-ninja)
             __UseNinja=1
             ;;
@@ -817,13 +827,11 @@ if [ $__CrossBuild == 1 ]; then
     fi
 fi
 
-# Check prereqs.
+# Check prerequisites
 check_prereqs
-
 
 # Build the libdjvulibre (native) components.
 # build_native
-
 
 # Build cross-architecture components
 if [[ $__CrossBuild == 1 && $__DoCrossArchBuild == 1 ]]; then
@@ -834,4 +842,3 @@ fi
 
 echo "Repo successfully built."
 exit 0
-

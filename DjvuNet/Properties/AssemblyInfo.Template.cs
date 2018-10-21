@@ -8,6 +8,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("DjvuNet")]
+[assembly: AssemblyDefaultAlias("DjvuNet")]
 [assembly: AssemblyDescription("DjvuNet Library for handling of DjVu documents.")]
 [assembly: AssemblyConfiguration("__LIBRARY_CONFIGURATION__")]
 [assembly: AssemblyPlatform("__LIBRARY_PLATFORM__")]

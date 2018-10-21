@@ -1,4 +1,4 @@
-image: Visual Studio 2017
+image: Visual Studio 2017 Preview
 
 version: '0.7.0.{build}'
 
@@ -40,7 +40,7 @@ cache:
 
 # environment variables
 environment:
-    TargetFramework: net471
+    TargetFramework: net472
 
 ############################################################################
 #
@@ -56,15 +56,15 @@ install:
     - cmd: if exist DjvuLibre\ rd /s /q DjvuLibre
     - cmd: if exist artifacts\ rd /s /q artifacts
     - cmd: git clone https://github.com/DjvuNet/DjVuLibre.git
-    - cmd: powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/Tools.zip Tools.zip Tools BuildTools
+    - cmd: powershell -NoProfile -ExecutionPolicy Bypass DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/Tools.zip Tools BuildTools {314FA7B0-6864-4842-B539-5728CBC73F27} %__MsgPrefix%
     - cmd: cd Tools
     - cmd: dir
     - cmd: cd ..
-    - cmd: powershell -NoProfile DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/deps.zip deps.zip deps NativeDeps
+    - cmd: powershell -NoProfile -ExecutionPolicy Bypass DjvuNet.Build/Get-Tools.ps1 https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/deps.zip deps NativeDependencies {87E5AD66-912F-477C-BDA5-52F7785AE705} %__MsgPrefix%
     - cmd: cd deps
     - cmd: dir
     - cmd: cd ..
-    - appveyor DownloadFile https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.11/artifacts.zip
+    - appveyor DownloadFile https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/artifacts.zip
     - cmd: 7z x -oartifacts artifacts.zip
 
 before_build:
@@ -76,4 +76,4 @@ before_build:
 #    verbosity: detailed
 
 build_script:
-    - msbuild DjvuNet.sln /v:detailed /m /p:TargetFramework=net471 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+    - msbuild DjvuNet.sln /v:detailed /m /p:TargetFramework=net472 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"

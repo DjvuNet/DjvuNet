@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
+using DiagnosticMessage = Xunit.Sdk.DiagnosticMessage;
+using NullMessageSink = Xunit.Sdk.NullMessageSink;
+using TestMethodDisplay = Xunit.Sdk.TestMethodDisplay;
+using TestMethodDisplayOptions = Xunit.Sdk.TestMethodDisplayOptions;
 
 namespace DjvuNet.Tests.Xunit
 {
@@ -16,6 +19,7 @@ namespace DjvuNet.Tests.Xunit
         private readonly IMessageSink _MessageSink;
         private int _AttributeNumber;
         private string _RowName;
+        private int _Timeout;
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("Use for deserialization only.")]
@@ -27,12 +31,14 @@ namespace DjvuNet.Tests.Xunit
         public DjvuNamedDataRowTestCase(
             IMessageSink messageSink,
             TestMethodDisplay defaultMethodDisplay,
+            TestMethodDisplayOptions methodDisplayOptions,
             ITestMethod testMethod,
             int attributeNumber,
             string rowName)
             : base(
-                  defaultMethodDisplay, 
-                  testMethod, 
+                  defaultMethodDisplay,
+                  methodDisplayOptions,
+                  testMethod,
                   GetTestMethodArguments(testMethod, attributeNumber, rowName, messageSink))
         {
             _AttributeNumber = attributeNumber;
@@ -40,14 +46,19 @@ namespace DjvuNet.Tests.Xunit
             _MessageSink = messageSink;
         }
 
+        /// <summary>
+        /// TODO implement interface memeber
+        /// </summary>
+        public virtual int Timeout { get; }
+
         protected virtual string GetDisplayName(IAttributeInfo factAttribute, string displayName)
-        { 
+        {
             return TestMethod.Method
                 .GetDisplayNameWithArguments(displayName, TestMethodArguments, MethodGenericTypes);
         }
 
         protected virtual string GetSkipReason(IAttributeInfo factAttribute)
-        { 
+        {
             return factAttribute.GetNamedArgument<string>("Skip");
         }
 
@@ -64,7 +75,7 @@ namespace DjvuNet.Tests.Xunit
 
             foreach (var traitAttribute in GetTraitAttributesData(TestMethod))
             {
-                var discovererAttribute = 
+                var discovererAttribute =
                     traitAttribute.GetCustomAttributes(typeof(TraitDiscovererAttribute)).FirstOrDefault();
 
                 if (discovererAttribute != null)
@@ -98,7 +109,7 @@ namespace DjvuNet.Tests.Xunit
         {
             try
             {
-                IAttributeInfo dataAttribute = 
+                IAttributeInfo dataAttribute =
                     testMethod.Method
                     .GetCustomAttributes(typeof(DataAttribute))
                     .Where((x, i) => i == attributeNumber)
@@ -107,10 +118,10 @@ namespace DjvuNet.Tests.Xunit
                 if (dataAttribute == null)
                     return null;
 
-                IAttributeInfo discovererAttribute = 
+                IAttributeInfo discovererAttribute =
                     dataAttribute.GetCustomAttributes(typeof(DataDiscovererAttribute)).First();
 
-                IDataDiscoverer discoverer = 
+                IDataDiscoverer discoverer =
                     ExtensibilityPointFactory.GetDataDiscoverer(diagnosticMessageSink, discovererAttribute);
 
                 IEnumerable<object[]> data = discoverer.GetData(dataAttribute, testMethod.Method);
@@ -143,10 +154,10 @@ namespace DjvuNet.Tests.Xunit
 
         protected override string GetUniqueID()
         {
-            return 
-                $"{TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name};" + 
-                $"{TestMethod.TestClass.Class.Name};" + 
-                $"{TestMethod.Method.Name};" + 
+            return
+                $"{TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name};" +
+                $"{TestMethod.TestClass.Class.Name};" +
+                $"{TestMethod.Method.Name};" +
                 $"{_AttributeNumber}/{_RowName}";
         }
 
@@ -156,16 +167,16 @@ namespace DjvuNet.Tests.Xunit
                                                  object[] constructorArguments,
                                                  ExceptionAggregator aggregator,
                                                  CancellationTokenSource cancellationTokenSource)
-        { 
-            return 
+        {
+            return
                 new XunitTestCaseRunner(
-                    this, 
-                    DisplayName, 
-                    SkipReason, 
-                    constructorArguments, 
-                    TestMethodArguments, 
-                    messageBus, 
-                    aggregator, 
+                    this,
+                    DisplayName,
+                    SkipReason,
+                    constructorArguments,
+                    TestMethodArguments,
+                    messageBus,
+                    aggregator,
                     cancellationTokenSource).RunAsync();
         }
     }

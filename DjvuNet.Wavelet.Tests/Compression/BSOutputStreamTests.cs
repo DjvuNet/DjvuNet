@@ -28,7 +28,7 @@ namespace DjvuNet.Compression.Tests
                     if (fileName == "test003C.json" || fileName == "test032C.json" || fileName == "test049C.json")
                         continue;
 
-                    retVal.Add(new object[] 
+                    retVal.Add(new object[]
                     {
                         fileName,
                         f,
@@ -262,7 +262,7 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
-        [Fact()]
+        [Fact(Skip = "Long running"), Trait("Category", "Skip")]
         public void WriteTest004()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "LLVMMCJIT.lib");
@@ -303,7 +303,7 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
-        [Fact()]
+        [Fact(Skip = "Long running"), Trait("Category", "Skip")]
         public void WriteTest005()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "LLVMTarget.pdb");
@@ -342,7 +342,7 @@ namespace DjvuNet.Compression.Tests
                     File.Delete(outFilePath);
             }
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(WriteTestData))]
         public void Write_Theory(string fileName, string filePath, string outFilePath)

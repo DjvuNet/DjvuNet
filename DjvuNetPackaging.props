@@ -2,7 +2,7 @@
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <GenerateNuspecDependsOn>InjectPackageVersion; $(GenerateNuspecDependsOn)</GenerateNuspecDependsOn>
-    <PackageVersion>$(FullBuildVersion)</PackageVersion>
+    <PackageVersion>$(DjvuAssemblyVersion)</PackageVersion>
     <PackageId>$(AssemblyName)</PackageId>
     <Authors>4creators</Authors>
     <Copyright>© by Jacek Blaszczynski 2017</Copyright>
@@ -13,7 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <IncludeBuildOutput>true</IncludeBuildOutput>
     <IncludeContentFilesProjectOutputGroup>false</IncludeContentFilesProjectOutputGroup>
-    <IncludeContentInPack>false</IncludeContentInPack>
+    <IncludeContentInPack>true</IncludeContentInPack>
     <PackageTags></PackageTags>
   </PropertyGroup>
 </Project>

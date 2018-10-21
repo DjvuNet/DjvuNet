@@ -42,7 +42,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)TestExecution\TestManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)UtilJson.cs" />
-    <Compile Condition="$(TargetFramework) == 'net471'" Include="$(MSBuildThisFileDirectory)UtilRoot.cs" />
+    <Compile Condition="$(TargetFramework) == 'net472'" Include="$(MSBuildThisFileDirectory)UtilRoot.cs" />
     <Compile Condition="$(TargetFramework) == 'netstandard2.0'" Include="$(MSBuildThisFileDirectory)UtilRoot.netstandard2.0.cs" />
     <Compile Condition="$(TargetFramework) == 'netcoreapp2.0'" Include="$(MSBuildThisFileDirectory)UtilRoot.netcoreapp2.0.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)xunit\DjvuDataRowTestCase.cs" />

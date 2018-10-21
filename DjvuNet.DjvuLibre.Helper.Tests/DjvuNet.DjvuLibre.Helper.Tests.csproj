@@ -2,13 +2,13 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
-    <TargetFramework />
-    <TargetFrameworks>net471;netstandard2.0;netcoreapp2.0</TargetFrameworks>
-    <NETStandardImplicitPackageVersion>2.0.1</NETStandardImplicitPackageVersion>
+    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre.Helper.Tests</RootNamespace>
     <AssemblyName>DjvuNet.DjvuLibre.Helper.Tests</AssemblyName>
+    <IsTestProject>False</IsTestProject>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
 
@@ -16,29 +16,44 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
+  </PropertyGroup>
+
 
   <ItemGroup>
-    <PackageReference Condition="$(TargetFramework) == 'netstandard2.0' Or $(TargetFramework) == 'netcoreapp2.0'" Include="CoreCompat.System.Drawing.v2" Version="5.2.0-preview1-r131" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Include="$(RepoRootDir)DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
+    <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 
-  <Import Project="..\DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.props" />
+  <Import Project="$(RepoRootDir)DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" />
   <ItemGroup>
-    <Compile Remove="$(MSBuildThisFileDirectory)..\DjvuNet.Shared.Tests\DjvuDocumentUtil.cs" />
+    <Compile Remove="$(RepoRootDir)DjvuNet.Shared.Tests\DjvuDocumentUtil.cs" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />

@@ -2,27 +2,35 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
-    <TargetFramework />
-    <TargetFrameworks>net471;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre.Tests</RootNamespace>
     <AssemblyName>DjvuNet.DjvuLibre.Tests</AssemblyName>
     <TestProjectType>UnitTest</TestProjectType>
     <RunPostBuildEvent>Always</RunPostBuildEvent>
+    <IsDjvuNetTestProject>True</IsDjvuNetTestProject>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm'">
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Arm64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Arm64'">
   </PropertyGroup>
 
   <ItemGroup>
@@ -31,25 +39,34 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="DjvuNet.DjvuLibre.Tests.xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="App.config">
-      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.console" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.msbuild" Version="2.3.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+    <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
+    <PackageReference Condition="$(TargetFrmework) != $(NetFXTargetFrameworkVersion)" Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
+    <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DjvuNet.DjvuLibre.Helper.Tests\DjvuNet.DjvuLibre.Helper.Tests.csproj" />
-    <ProjectReference Include="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
-    <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
-    <ProjectReference Condition="$(TargetFramework) == 'net471'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
+    <ProjectReference Include="$(RepoRootDir)DjvuNet.DjvuLibre.Helper.Tests\DjvuNet.DjvuLibre.Helper.Tests.csproj" />
+    <ProjectReference Include="$(RepoRootDir)DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.csproj" />
+    <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Condition="$(TargetFramework) == 'net472'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -57,6 +74,6 @@
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
-  <Import Project="..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
+  <Import Project="$(RepoRootDir)DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.targets" />
 
 </Project>

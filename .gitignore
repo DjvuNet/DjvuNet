@@ -50,6 +50,7 @@ DjvuNet.DjvuLibre.Helper/
 /**/Properties/AssemblyInfoCommon.net*.cs
 /**/Properties/AssemblyInfo.cs
 /**/Properties/AssemblyInfo.net*.cs
+DjvuNet.Shared.Tests/UtilRoot.*.cs
 
 # External dependencies directory with repositories
 [Ee]xternal/

@@ -17,10 +17,10 @@ namespace DjvuNet.Wavelet.Tests
         int width = 4160;
         int height = 2160;
         int bytesPerPixel = 3;
-        int testsToSkip = 3;
-        int testCount = 15;
+        int testsToSkip = 0;
+        int testCount = 1;
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")] 
+        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void ForwardTest()
         {
             Assert.True(false, "This test needs an implementation");
@@ -242,7 +242,7 @@ namespace DjvuNet.Wavelet.Tests
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void FilterBvTest()
         {
- 
+
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+    <BaseIntermediateOutputPath>$(ToolsDir)/$(BuildToolsPackageVersion)</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <Import Project="common.props" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.BuildTools">
+      <Version>$(BuildToolsPackageVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="$(ILLinkTasksPackage)">
+      <Version>$(ILLinkTasksPackageVersion)</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NetCore.ILAsm">
+        <Version>[$(MicrosoftNetCoreILAsmPackageVersion),$(MicrosoftNetCoreILAsmPackageVersion)]</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NetCore.Runtime.CoreCLR">
+        <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
+    </PackageReference>
+  </ItemGroup>
+</Project>
