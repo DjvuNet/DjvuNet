@@ -198,7 +198,7 @@ REM Download ready to use DjvuNet build tools
 
 set __BuildToolsUri=!__GithubDjvuNetReleaseUri!Tools.zip
 
-call powershell -NoProfile -ExecutionPolicy Bypass DjvuNet.Build/Get-Tools.ps1 %__BuildToolsUri% Tools.zip Tools BuildTools {314FA7B0-6864-4842-B539-5728CBC73F27} %__MsgPrefix%
+call powershell -NoProfile -ExecutionPolicy ByPass -NoLogo -NonInteractive -File DjvuNet.Build\Get-Tools.ps1 %__BuildToolsUri% Tools.zip Tools BuildTools {314FA7B0-6864-4842-B539-5728CBC73F27} %__MsgPrefix%
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: Failed to download build tools from %__BuildToolsUri%
     goto exit_error
@@ -208,7 +208,7 @@ REM Download native build and test deps
 
 set __NativeDepsUri=!__GithubDjvuNetReleaseUri!deps.zip
 
-call powershell -NoProfile -ExecutionPolicy DjvuNet.Build/Get-Tools.ps1 %__NativeDepsUri% deps.zip deps NativeDependencies {87E5AD66-912F-477C-BDA5-52F7785AE705} %__MsgPrefix%
+call powershell -NoProfile -ExecutionPolicy ByPass -NoLogo -NonInteractive -File DjvuNet.Build/Get-Tools.ps1 %__NativeDepsUri% deps.zip deps NativeDependencies {87E5AD66-912F-477C-BDA5-52F7785AE705} %__MsgPrefix%
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: Failed to download native dependencies from %__NativeDepsUri%
     goto exit_error
@@ -216,7 +216,7 @@ if not [%ERRORLEVEL%]==[0] (
 
 REM Download and initialize out own .NETCore SDK
 
-call .\init-tools.cmd
+call .\init-tools.cmd %_MSB_Platform%
 
 if not [%ERRORLEVEL%]==[0] (
     goto exit_error
