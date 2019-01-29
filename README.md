@@ -114,7 +114,7 @@ DjVuLibre repo is now located in DjVuLibre directory of your DjvuNet repo.
 
 Build using MSBuild from command line
 `````
-msbuild /t:Rebuild /p:Configuration=Release /p:Platform:x86 djvunet\djvunet.csproj
+msbuild /t:Rebuild /p:Configuration=Release /p:Platform=x86 djvunet\djvunet.csproj
 `````
 Available configurations: 
 `````
