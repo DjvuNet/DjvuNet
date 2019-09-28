@@ -284,7 +284,7 @@ namespace DjvuNet.DataChunks
         /// Decodes the children of this chunk
         /// </summary>
         /// <param name="reader"></param>
-        internal virtual void ReadChildren(IDjvuReader reader)
+        public virtual void ReadChildren(IDjvuReader reader)
         {
             _TempChildren = new List<IDjvuNode>();
 
