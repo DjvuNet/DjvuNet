@@ -3,6 +3,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFramework Condition="$(DotNetCoreFrameworkVersion) == ''">$(DotNetCoreFrameworkVersion)</TargetFramework>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre.Tests</RootNamespace>

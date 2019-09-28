@@ -34,7 +34,7 @@ call "%_VSCOMNTOOLS%\VsDevCmd.bat"
 if defined VS160COMNTOOLS (
   set "__VSToolsRoot=%VS160COMNTOOLS%"
   set "__VCToolsRoot=%VS160COMNTOOLS%\..\..\VC\Auxiliary\Build"
-  set __VSVersion=vs2017
+  set __VSVersion=vs2019
 )
 
 REM Set default values
@@ -187,6 +187,7 @@ if defined _Test (
 )
 
 set TargetFramework=%_Framework%
+set __SkipPublish=1
 
 
 if not exist .\DjvuNet.sln (
@@ -204,9 +205,6 @@ if not [%ERRORLEVEL%]==[0] (
     goto exit_error
 )
 
-call dir Tools\*
-call dir Tools\netcoreapp3.0\*
-
 REM Download native build and test deps
 
 set __NativeDepsUri=!__GithubDjvuNetReleaseUri!deps.zip
@@ -217,9 +215,7 @@ if not [%ERRORLEVEL%]==[0] (
     goto exit_error
 )
 
-call dir deps\*
-
-REM Download and initialize out own .NETCore SDK
+REM Download and initialize our own .NETCore SDK
 
 call .\init-tools.cmd %_MSB_Platform%
 
@@ -424,6 +420,8 @@ call :restore_dotnet_proj !__DjvuNetTestExeProj!
 
 if defined _SkipNative goto :skip_djvunet_tests_restore
 
+call :restore_dotnet_proj !__DjvuNetDjvuLibreTestsProj!
+
 :skip_djvunet_tests_restore
 
 REM Build and publish tests
@@ -446,24 +444,24 @@ set __DotNetCommandx86=%ProgramFiles(x86)%\dotnet\dotnet
 set __DotNetCommandx64=!__RepoRootDir!Tools\coreclr\dotnetcli\dotnet
 
 if /i "%__TestFramework%" == "%_DefaultNetFX%" (
-    if [%__ManagedPlatform%] == [x86] set _xUnit_console=!UserProfile!\.nuget\packages\xunit.runner.console\2.4.0\tools\!__TestFramework!\xunit.console.x86.exe
-    if [%__ManagedPlatform%] == [AnyCPU] set _xUnit_console="%UserProfile%\.nuget\packages\xunit.runner.console\2.4.0\tools\%__TestFramework%\xunit.console.exe"
-    if [%__ManagedPlatform%] == [x64] set _xUnit_console=!UserProfile!\.nuget\packages\xunit.runner.console\2.4.0\tools\!__TestFramework!\xunit.console.exe
+    if [%__ManagedPlatform%] == [x86] set _xUnit_console=!UserProfile!\.nuget\packages\xunit.runner.console\2.4.1\tools\!__TestFramework!\xunit.console.x86.exe
+    if [%__ManagedPlatform%] == [AnyCPU] set _xUnit_console="%UserProfile%\.nuget\packages\xunit.runner.console\2.4.1\tools\%__TestFramework%\xunit.console.exe"
+    if [%__ManagedPlatform%] == [x64] set _xUnit_console=!UserProfile!\.nuget\packages\xunit.runner.console\2.4.1\tools\!__TestFramework!\xunit.console.exe
     set __TestOutputFormat=html
 )
 
 if /i "%__TestFramework%" == "%_DefaultNetCoreApp%" (
-    if [%__ManagedPlatform%] == [x86] set _xUnit_console="!__DotNetCommandx86!" "!__PublishDir!xunit.console.dll"
-    if [%__ManagedPlatform%] == [x64] set _xUnit_console="!__DotNetCommandx64!" "!__PublishDir!xunit.console.dll"
-    if [%__ManagedPlatform%] == [AnyCPU] set _xUnit_console="!__DotNetCommandx64!" "!__PublishDir!xunit.console.dll"
+    if [%__ManagedPlatform%] == [x86] set _xUnit_console="!__DotNetCommandx86!" "!__OutputDir!xunit.console.dll"
+    if [%__ManagedPlatform%] == [x64] set _xUnit_console="!__DotNetCommandx64!" "!__OutputDir!xunit.console.dll"
+    if [%__ManagedPlatform%] == [AnyCPU] set _xUnit_console="!__DotNetCommandx64!" "!__OutputDir!xunit.console.dll"
     set _Test_Options=-notrait "Category=SkipNetCoreApp"
     set __TestOutputFormat=xml
 )
 
 if /i "%__TestFramework%" == "%_DefaultNetStandard%" (
-    if [%__ManagedPlatform%] == [x86] set _xUnit_console="!__DotNetCommandx86!" "!__PublishDir!xunit.console.dll"
-    if [%__ManagedPlatform%] == [x64] set _xUnit_console="!__DotNetCommandx64!" "!__PublishDir!xunit.console.dll"
-    if [%__ManagedPlatform%] == [AnyCPU] set _xUnit_console="!__DotNetCommandx64!" "!__PublishDir!xunit.console.dll"
+    if [%__ManagedPlatform%] == [x86] set _xUnit_console="!__DotNetCommandx86!" "!__OutputDir!xunit.console.dll"
+    if [%__ManagedPlatform%] == [x64] set _xUnit_console="!__DotNetCommandx64!" "!__OutputDir!xunit.console.dll"
+    if [%__ManagedPlatform%] == [AnyCPU] set _xUnit_console="!__DotNetCommandx64!" "!__OutputDir!xunit.console.dll"
     set _Test_Options=-notrait "Category=SkipNetCoreApp"
     set __TestOutputFormat=xml
 )
@@ -479,9 +477,9 @@ REM Run tests
 :xUnit_tests
 echo.
 echo %__MsgPrefix%Running tests from DjvuNet.Tests assembly
-echo %__MsgPrefix%calling: !_xUnit_console! "!_DjvuNet_Tests!" "!__PublishDir!DjvuNet.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.Tests.!__TestOutputFormat!"
+echo %__MsgPrefix%calling: !_xUnit_console! "!_DjvuNet_Tests!" "!__OutputDir!DjvuNet.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.Tests.!__TestOutputFormat!"
 echo.
-call !_xUnit_console! "!_DjvuNet_Tests!" "!__PublishDir!DjvuNet.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.Tests.!__TestOutputFormat!
+call !_xUnit_console! "!_DjvuNet_Tests!" "!__OutputDir!DjvuNet.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.Tests.!__TestOutputFormat!
 
 if not [%ERRORLEVEL%]==[0] set _DjvuNet_Tests_Error=true
 
@@ -490,9 +488,9 @@ if defined __SkipNativeTests goto :no_djvulibre_tests
 
 echo.
 echo %__MsgPrefix%Running tests from DjvuNet.DjvuLibre.Tests assembly
-echo %__MsgPrefix%calling: !_xUnit_console! "!_DjvuNet_DjvuLibre_Tests!" "!__PublishDir!DjvuNet.DjvuLibre.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.DjvuLibre.Tests.!__TestOutputFormat!"
+echo %__MsgPrefix%calling: !_xUnit_console! "!_DjvuNet_DjvuLibre_Tests!" "!__OutputDir!DjvuNet.DjvuLibre.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.DjvuLibre.Tests.!__TestOutputFormat!"
 echo.
-call !_xUnit_console! "!_DjvuNet_DjvuLibre_Tests!" "!__PublishDir!DjvuNet.DjvuLibre.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.DjvuLibre.Tests.!__TestOutputFormat!"
+call !_xUnit_console! "!_DjvuNet_DjvuLibre_Tests!" "!__OutputDir!DjvuNet.DjvuLibre.Tests.!__XunitConfig!" !_Test_Options! "!__TestResOutputDir!DjvuNet.DjvuLibre.Tests.!__TestOutputFormat!"
 
 if not [%ERRORLEVEL%]==[0] set _DjvuNet_DjvuLibre_Tests_Error=true
 
@@ -500,9 +498,9 @@ if not [%ERRORLEVEL%]==[0] set _DjvuNet_DjvuLibre_Tests_Error=true
 
 echo.
 echo %__MsgPrefix%Running tests from DjvuNet.Wavelet.Tests assembly
-echo %__MsgPrefix%calling: !_xUnit_console! "!_DjvuNet_Wavelet_Tests!" "!__PublishDir!DjvuNet.Wavelet.Tests.!__XunitConfig!" -serialize !_Test_Options! "!__TestResOutputDir!DjvuNet.Wavelet.Tests.!__TestOutputFormat!"
+echo %__MsgPrefix%calling: !_xUnit_console! "!_DjvuNet_Wavelet_Tests!" "!__OutputDir!DjvuNet.Wavelet.Tests.!__XunitConfig!" -serialize !_Test_Options! "!__TestResOutputDir!DjvuNet.Wavelet.Tests.!__TestOutputFormat!"
 echo.
-call !_xUnit_console! "!_DjvuNet_Wavelet_Tests!" "!__PublishDir!DjvuNet.Wavelet.Tests.!__XunitConfig!" -serialize !_Test_Options! "!__TestResOutputDir!DjvuNet.Wavelet.Tests.!__TestOutputFormat!"
+call !_xUnit_console! "!_DjvuNet_Wavelet_Tests!" "!__OutputDir!DjvuNet.Wavelet.Tests.!__XunitConfig!" -serialize !_Test_Options! "!__TestResOutputDir!DjvuNet.Wavelet.Tests.!__TestOutputFormat!"
 
 if not [%ERRORLEVEL%]==[0] goto test_error
 if /i "%_DjvuNet_Tests_Error%" == "true" goto test_error
@@ -616,14 +614,14 @@ echo     -Framework           defines framework target, default "%_DefaultNetCor
 echo     -f                   allowed values [ %_DefaultNetFX% ^| netfx ^| %_DefaultNetCoreApp% ^| netcoreapp ^| %_DefaultNetStandard% ^| netstandard ]
 echo.
 echo     -Configuration       defines build configuration, default "Debug",
-echo     -c                   allowed values [ Release ^| Debug ]
+echo     -c                   allowed values [ Release ^| Checked ^| Debug ]
 echo.
 echo     -Platform            defines build target platform, default "x64",
 echo     -p                   allowed values [ x64 ^| x86 ^| arm ^| arm64 ^| AnyCPU ]
 echo.
 echo     -OS                  defines target OS, allowed values [ Windows_NT ^| Linux ^| OSX ]
 echo.
-echo     -SkipNative          do not clone, build libdjvulibre, skip libdjvulibre dependent tests,
+echo     -SkipNative          do not clone and build libdjvulibre, skip libdjvulibre dependent tests,
 echo     -sn
 echo.
 echo     -Target              defines build script target, default "Rebuild",
@@ -635,6 +633,6 @@ echo.
 echo     -Processors          defines number of processes which should be used ^for build parallelization,
 echo     -proc                default on this machine "%NUMBER_OF_PROCESSORS%"
 echo.
-echo     -Test                build and run tests, when not used testing is skipped
+echo     -Test                build and run tests, when not used tests are not build and their execution is skipped
 echo.
 exit /b 1
