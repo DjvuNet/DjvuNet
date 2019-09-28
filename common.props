@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0">
+<Project>
   <!--
     $(OS) is set to Unix/Windows_NT. This comes from an environment variable on Windows and MSBuild on Unix.
   -->
@@ -15,8 +15,8 @@
 
   <!-- Build Tools Versions -->
   <PropertyGroup>
-    <RoslynVersion>2.8.2</RoslynVersion>
-    <RoslynPackageName>Microsoft.CodeAnalysis.Compilers</RoslynPackageName>
+    <RoslynVersion>3.3.1</RoslynVersion>
+    <RoslynPackageName>Microsoft.Net.Compilers</RoslynPackageName>
   </PropertyGroup>
 
   <!--

@@ -9,10 +9,10 @@
   <PropertyGroup>
     <Title>$(PackageId) - DjVu Document .NET Library</Title>
     <Description>DjvuNet is a managed library for working with a DjVu documents. It is binary compatible with a reference implementation - DjvuLibre.</Description>
-    <!--<TargetFramework Condition="$(TargetFramework) != ''">$(TargetFramework)</TargetFramework>-->
-    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFramework Condition="$(TargetFramework) != ''">$(TargetFramework)</TargetFramework>
+    <TargetFrameworks>$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
-    <RuntimeIdentifiers>linux-x64;osx-x64;win-x64;win-x86</RuntimeIdentifiers>
+    <RuntimeIdentifiers>linux-x64;osx-x64;win-x64</RuntimeIdentifiers>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet</RootNamespace>

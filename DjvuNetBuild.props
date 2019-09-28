@@ -18,17 +18,17 @@
 
   <PropertyGroup>
     <NetFXTargetFrameworkVersion>net472</NetFXTargetFrameworkVersion>
-    <DotNetCoreFrameworkVersion>netcoreapp2.1</DotNetCoreFrameworkVersion>
-    <DotNetStandardVersion>netstandard2.0</DotNetStandardVersion>
+    <DotNetCoreFrameworkVersion>netcoreapp3.0</DotNetCoreFrameworkVersion>
+    <DotNetStandardVersion>netstandard2.1</DotNetStandardVersion>
   </PropertyGroup>
 
   <PropertyGroup>
-    <NETStandardPackageVersion>2.0.3</NETStandardPackageVersion>
+    <!--<NETStandardPackageVersion>2.0.3</NETStandardPackageVersion>-->
   </PropertyGroup>
 
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <!--<TargetFramework Condition="$(TargetFramework) == ''">$(DotNetCoreFrameworkVersion)</TargetFramework>-->
+    <TargetFramework>$(DotNetCoreFrameworkVersion)</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <Platforms>AnyCPU;x64;x86;arm;arm64</Platforms>
     <Feature>strict</Feature>

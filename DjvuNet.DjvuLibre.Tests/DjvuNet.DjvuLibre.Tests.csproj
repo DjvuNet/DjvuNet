@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFrameworks>$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFramework Condition="$(DotNetCoreFrameworkVersion) == ''">$(DotNetCoreFrameworkVersion)</TargetFramework>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.DjvuLibre.Tests</RootNamespace>
@@ -56,7 +57,12 @@
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
-    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" />
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" >
+      <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
+    </PackageReference>
+    <PackageReference Include="xunit.console" Version="$(XunitPackageVersion)" >
+      <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
+    </PackageReference>
     <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.utility" Version="$(XunitPackageVersion)" />

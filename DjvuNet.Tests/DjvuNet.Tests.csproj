@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFramework Condition="$(TargetFramework) != ''">$(TargetFramework)</TargetFramework>
+    <TargetFrameworks>$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.Tests</RootNamespace>
@@ -107,9 +108,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)" Include="Microsoft.NETCore.App" Version="$(MicrosoftNETCoreDotnetHostPolicyPackageVersion)" />
-    <PackageReference Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)" Include="Microsoft.NETCore.DotNetHostPolicy" Version="$(MicrosoftNETCoreDotnetHostPolicyPackageVersion)" />
-    <PackageReference Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)" Include="Microsoft.NETCore.DotNetHostResolver" Version="$(MicrosoftNETCoreDotnetHostResolverPackageVersion)" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
@@ -119,7 +117,10 @@
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" >
       <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
-      <CopyToOutputDirectory Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)">tools/$(NetFXTargetFrameworkVersion)/*.*</CopyToOutputDirectory>
+      <!--<CopyToOutputDirectory Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)">tools/$(NetFXTargetFrameworkVersion)/*.*</CopyToOutputDirectory>-->
+    </PackageReference>
+    <PackageReference Include="xunit.console" Version="$(XunitPackageVersion)" >
+      <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
     </PackageReference>
     <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.visualstudio" Version="$(XunitPackageVersion)" />

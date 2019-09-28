@@ -10,8 +10,9 @@
     <IsTool>true</IsTool>
     <Title>$(PackageId) - DjvuNet custom build tool</Title>
     <Description>$(PackageId) implements custom MSBuild build tasks used in DjvuNet repository build infrastructure.</Description>
-    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFrameworks>$(DotNetCoreFrameworkVersion);$(NetFXTargetFrameworkVersion)</TargetFrameworks>
     <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
+    <!--<TargetFramework Condition="$(TargetFramework) == ''">$(DotNetCoreFrameworkVersion)</TargetFramework>-->
     <IsDjvuNetTestProject>false</IsDjvuNetTestProject>
   </PropertyGroup>
   <PropertyGroup>

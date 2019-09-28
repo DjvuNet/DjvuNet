@@ -10,7 +10,7 @@
     <Title>$(PackageId) - custom assembly level attributes.</Title>
     <Description>$(PackageId) implements custom assembly level attributes used to provide additional information about assemblies.</Description>
     <TargetFramework Condition="$(TargetFramework) != ''">$(TargetFramework)</TargetFramework>
-    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFrameworks>$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
