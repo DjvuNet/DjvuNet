@@ -19,9 +19,9 @@ set _VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if exist %_VSWHERE% (
     for /f "usebackq tokens=*" %%i in (`%_VSWHERE% -latest -prerelease -property installationPath`) do set _VSCOMNTOOLS=%%i\Common7\Tools
 )
-if not exist "%_VSCOMNTOOLS%" set _VSCOMNTOOLS=%VS150COMNTOOLS%
+if not exist "%_VSCOMNTOOLS%" set _VSCOMNTOOLS=%VS160COMNTOOLS%
 if not exist "%_VSCOMNTOOLS%" (
-    echo %__MsgPrefix%Error: Visual Studio 2017 required.
+    echo %__MsgPrefix%Error: Visual Studio 2019 required.
     echo        Please see https://github.com/DjvuNet/DjvuNet for build instructions.
     exit /b 1
 )
@@ -31,9 +31,9 @@ call "%_VSCOMNTOOLS%\VsDevCmd.bat"
 
 :Run
 
-if defined VS150COMNTOOLS (
-  set "__VSToolsRoot=%VS150COMNTOOLS%"
-  set "__VCToolsRoot=%VS150COMNTOOLS%\..\..\VC\Auxiliary\Build"
+if defined VS160COMNTOOLS (
+  set "__VSToolsRoot=%VS160COMNTOOLS%"
+  set "__VCToolsRoot=%VS160COMNTOOLS%\..\..\VC\Auxiliary\Build"
   set __VSVersion=vs2017
 )
 
@@ -46,12 +46,12 @@ set _Processors=%NUMBER_OF_PROCESSORS%
 set _OS=Windows_NT
 set _SkipNative=
 set _Test=
-set _DefaultNetCoreApp=netcoreapp2.1
+set _DefaultNetCoreApp=netcoreapp3.0
 set _NetCoreAppId=.NETCoreApp
-set _NetCoreAppTFM=.NETCoreApp,Version=v2.1
-set _DefaultNetStandard=netstandard2.0
+set _NetCoreAppTFM=.NETCoreApp,Version=v3.0
+set _DefaultNetStandard=netstandard2.1
 set _NetStandardId=.NETStandard
-set _NetStandardTFM=.NETStandard,Version=v2.0
+set _NetStandardTFM=.NETStandard,Version=v2.1
 set _DefaultNetFX=net472
 set _NetFXId=.NETFramework
 set _NetFXTFM=.NETFramework,Version=v4.7.2

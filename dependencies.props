@@ -1,4 +1,4 @@
-<Project ToolsVersion="15.0">
+<Project ToolsVersion="16.0">
 
   <!-- NuGet package restore sources. -->
   <PropertyGroup>
@@ -13,18 +13,18 @@
 
   <!-- Project dependency versions. -->
   <PropertyGroup>
-    <MicrosoftNETCorePlatformsPackageVersion>2.1.1</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>2.1.5</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.100</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.0.0</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreDotNetAppHostPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetAppHostPackageVersion>
     <MicrosoftNETCoreDotnetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotnetHostResolverPackageVersion>
     <MicrosoftNETCoreDotnetHostPolicyPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotnetHostPolicyPackageVersion>
-    <XunitPackageVersion>2.4.0</XunitPackageVersion>
-    <MoqPackageVersion>4.9.0</MoqPackageVersion>
-    <NewtonSoftJsonPackageVersion>11.0.2</NewtonSoftJsonPackageVersion>
-    <MicrosoftBuildPackageVersion>15.8.166</MicrosoftBuildPackageVersion>
-    <LibGit2SharpPackageVersion>0.25.2</LibGit2SharpPackageVersion>
-    <LibGit2SharpNativeBinariesPackageVersion>1.0.233</LibGit2SharpNativeBinariesPackageVersion>
+    <XunitPackageVersion>2.4.1</XunitPackageVersion>
+    <MoqPackageVersion>4.12.0</MoqPackageVersion>
+    <NewtonSoftJsonPackageVersion>12.0.2</NewtonSoftJsonPackageVersion>
+    <MicrosoftBuildPackageVersion>16.3.0</MicrosoftBuildPackageVersion>
+    <LibGit2SharpPackageVersion>0.26.1</LibGit2SharpPackageVersion>
+    <LibGit2SharpNativeBinariesPackageVersion>2.0.289</LibGit2SharpNativeBinariesPackageVersion>
     <SystemDrawingCommonPackageVersion>4.5.1</SystemDrawingCommonPackageVersion>
     <SystemRuntimeCompilerServicesUnsafePackageVersion>4.5.2</SystemRuntimeCompilerServicesUnsafePackageVersion>
   </PropertyGroup>
