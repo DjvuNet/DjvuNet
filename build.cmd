@@ -14,14 +14,14 @@ if defined VisualStudioVersion (
     goto :Run
 )
 
-echo %__MsgPrefix%Searching ^for Visual Studio 2017 installation
+echo %__MsgPrefix%Searching ^for Visual Studio 2019 installation
 set _VSWHERE="%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
 if exist %_VSWHERE% (
     for /f "usebackq tokens=*" %%i in (`%_VSWHERE% -latest -prerelease -property installationPath`) do set _VSCOMNTOOLS=%%i\Common7\Tools
 )
 if not exist "%_VSCOMNTOOLS%" set _VSCOMNTOOLS=%VS160COMNTOOLS%
 if not exist "%_VSCOMNTOOLS%" (
-    echo %__MsgPrefix%Error: Visual Studio 2019 required.
+    echo %__MsgPrefix%Error: Visual Studio 2019 required.++
     echo        Please see https://github.com/DjvuNet/DjvuNet for build instructions.
     exit /b 1
 )
@@ -56,7 +56,7 @@ set _DefaultNetFX=net472
 set _NetFXId=.NETFramework
 set _NetFXTFM=.NETFramework,Version=v4.7.2
 set _Framework=%_DefaultNetCoreApp%
-set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.7.0.12/
+set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.8.0/
 
 REM Parse command line
 
