@@ -204,6 +204,9 @@ if not [%ERRORLEVEL%]==[0] (
     goto exit_error
 )
 
+call dir Tools\*
+call dir Tools\netcoreapp3.0\*
+
 REM Download native build and test deps
 
 set __NativeDepsUri=!__GithubDjvuNetReleaseUri!deps.zip
