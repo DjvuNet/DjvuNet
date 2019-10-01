@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using DjvuNet.Tests;
 using Moq;
 using DjvuNet.Tests.Xunit;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -41,6 +42,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(InclTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void InclChunk_Theory(string file, DjvuJsonDocument doc)
         {
             byte[] buffer = null;

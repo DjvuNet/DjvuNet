@@ -9,12 +9,12 @@ using System.IO;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Errors;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Compression.Tests
 {
     public class BSOutputStreamTests
     {
-
         public static IEnumerable<object[]> WriteTestData
         {
             get
@@ -41,6 +41,7 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BSOutputStreamTest001()
         {
             using(BSOutputStream outStream = new BSOutputStream())
@@ -54,6 +55,7 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BSOutputStreamTest002()
         {
             using (MemoryStream stream = new MemoryStream())
@@ -108,11 +110,13 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void InitTest002()
         {
             byte[] buffer = new byte[16];
             using (MemoryStream stream = new MemoryStream(buffer))
-            using (BSOutputStream outStream = (BSOutputStream) new BSOutputStream().Init(stream))
+            using (var bsoStream = new BSOutputStream())
+            using (BSOutputStream outStream = (BSOutputStream)bsoStream.Init(stream))
             {
                 Assert.NotNull(outStream.BaseStream);
                 Assert.IsType<MemoryStream>(outStream.BaseStream);
@@ -130,18 +134,17 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteTest001()
         {
-            UTF8Encoding encoding = new UTF8Encoding(false);
             string filePath = Path.Combine(Util.ArtifactsDataPath, "testhello.obz");
             string outFilePath = Path.GetTempFileName();
 
             try
             {
-
                 byte[] buffer = Util.ReadFileToEnd(filePath);
 
-                string testText = "Hello bzz! \r\n";
+                const string testText = "Hello bzz! \r\n";
                 string sourceText = new UTF8Encoding(false).GetString(buffer);
                 Assert.Equal(testText, sourceText);
 
@@ -162,7 +165,6 @@ namespace DjvuNet.Compression.Tests
                 using (MemoryStream readStream = new MemoryStream(testBuffer))
                 using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
                 {
-
                     string testResult = reader.ReadUTF8String(testText.Length);
                     Assert.False(String.IsNullOrWhiteSpace(testResult));
                     Assert.Equal(testText, testResult);
@@ -176,6 +178,7 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteTest002()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "DjvuNet.pdb");
@@ -247,7 +250,6 @@ namespace DjvuNet.Compression.Tests
                 using (MemoryStream readStream = new MemoryStream(testBuffer))
                 using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
                 {
-
                     byte[] testResult = reader.ReadBytes(buffer.Length);
                     Assert.NotNull(testResult);
                     Assert.Equal(buffer.Length, testResult.Length);
@@ -345,6 +347,7 @@ namespace DjvuNet.Compression.Tests
 
         [DjvuTheory]
         [MemberData(nameof(WriteTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Write_Theory(string fileName, string filePath, string outFilePath)
         {
             try
@@ -371,7 +374,6 @@ namespace DjvuNet.Compression.Tests
                 using (MemoryStream readStream = new MemoryStream(testBuffer))
                 using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
                 {
-
                     string testResult = reader.ReadUTF8String(sourceText.Length);
                     Assert.False(String.IsNullOrWhiteSpace(testResult));
                     Assert.Equal(sourceText, testResult);

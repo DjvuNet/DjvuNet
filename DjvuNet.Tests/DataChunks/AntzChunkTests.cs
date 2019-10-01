@@ -9,6 +9,7 @@ using Moq;
 using DjvuNet.Tests.Xunit;
 using System.IO;
 using DjvuNet.Tests;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -49,6 +50,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(AntzTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void AntzChunk_Theory(string fileName, string filePath)
         {
             using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))

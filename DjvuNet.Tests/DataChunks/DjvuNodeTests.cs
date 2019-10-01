@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DataChunks;
@@ -145,6 +146,7 @@ namespace DjvuNet.DataChunks.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ChunkDataTest001()
         {
             Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
@@ -168,6 +170,7 @@ namespace DjvuNet.DataChunks.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ChunkDataTest002()
         {
             Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };
@@ -190,6 +193,7 @@ namespace DjvuNet.DataChunks.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ChunkDataTest003()
         {
             Mock<DjvuNode> nodeMock = new Mock<DjvuNode>() { CallBase = true };

@@ -46,9 +46,8 @@ namespace DjvuNet.Tests
 
                         string json = File.ReadAllText(filePath, new UTF8Encoding(false));
                         DjvuDoc doc = JsonConvert.DeserializeObject<DjvuDoc>(json, converters);
-                        DjvmForm djvm = doc.DjvuData as DjvmForm;
-                        Tuple<int, int, DocumentType, string> docData = null;
-                        if (djvm != null)
+                        Tuple<int, int, DocumentType, string> docData;
+                        if (doc.DjvuData is DjvmForm djvm)
                         {
                             var docType = (DocumentType) Enum.Parse(typeof(DocumentType), djvm.Dirm.DocumentType, true);
 
@@ -63,7 +62,6 @@ namespace DjvuNet.Tests
                         }
                         if (!_TestDocumentData.ContainsKey(i))
                             _TestDocumentData.Add(i, docData);
-
                     }
 
                     return _TestDocumentData;
@@ -96,10 +94,14 @@ namespace DjvuNet.Tests
             string info = $"\nTest Failed -> Unexpected Exception: " +
                 $"{DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ")}\n\n";
 
-            if (data != null && data.Length > 0)
+            if (data?.Length > 0)
+            {
                 info += (String.Format(message, data) + "\n" + ex.ToString());
+            }
             else
+            {
                 info += (message + "\n" + ex.ToString());
+            }
 
             Assert.True(false, info);
         }
@@ -109,8 +111,7 @@ namespace DjvuNet.Tests
             char dirSep = Path.DirectorySeparatorChar;
             string filePathTempl = $"artifacts{dirSep}test{{0:00#}}C.djvu";
             string rootDir = Util.RepoRoot;
-            filePathTempl = Path.Combine(rootDir, filePathTempl);
-            return filePathTempl;
+            return Path.Combine(rootDir, filePathTempl);
         }
 
         public static string GetTestFilePath(int index)
@@ -137,7 +138,9 @@ namespace DjvuNet.Tests
             get
             {
                 if (_ArtifactsPath != null)
+                {
                     return _ArtifactsPath;
+                }
                 else
                 {
                     _ArtifactsPath = Path.Combine(Util.RepoRoot, "artifacts");
@@ -151,7 +154,9 @@ namespace DjvuNet.Tests
             get
             {
                 if (_ArtifactsContentPath != null)
+                {
                     return _ArtifactsContentPath;
+                }
                 else
                 {
                     _ArtifactsContentPath = Path.Combine(ArtifactsPath, "content");
@@ -165,7 +170,9 @@ namespace DjvuNet.Tests
             get
             {
                 if (_ArtifactsDataPath != null)
+                {
                     return _ArtifactsDataPath;
+                }
                 else
                 {
                     _ArtifactsDataPath = Path.Combine(ArtifactsPath, "data");
@@ -179,7 +186,9 @@ namespace DjvuNet.Tests
             get
             {
                 if (_ArtifactsJsonPath != null)
+                {
                     return _ArtifactsJsonPath;
+                }
                 else
                 {
                     _ArtifactsJsonPath = Path.Combine(ArtifactsPath, "json");
@@ -205,7 +214,12 @@ namespace DjvuNet.Tests
                     int div = refBuffer.Length / sizeof(int);
 
                     for (int i = 0; i < div; i++)
-                        Assert.Equal(*pbuf++, *pref++);
+                    {
+                        if (*pbuf++ != *pref++)
+                        {
+                            Assert.True(false);
+                        }
+                    }
 
                     int rem = refBuffer.Length % sizeof(int);
 
@@ -219,7 +233,6 @@ namespace DjvuNet.Tests
                 }
             }
         }
-
 
         public static List<String> TestUnicodeStrings
         {

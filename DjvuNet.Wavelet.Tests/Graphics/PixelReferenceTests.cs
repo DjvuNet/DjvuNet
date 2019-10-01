@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Errors;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -158,6 +159,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void SetOffsetTest001()
         {
             int width = 32;
@@ -183,6 +185,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void SetOffsetTest002()
         {
             int width = 32;

@@ -7,14 +7,16 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
     public class DjvuChunkTests
     {
- 
+
         [DjvuTheory]
         [ClassData(typeof(DjvuJsonDataSource))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DjvuChunk_Theory(DjvuJsonDocument doc, int index)
         {
             int pageCount = 0;

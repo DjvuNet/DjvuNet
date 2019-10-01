@@ -10,6 +10,7 @@ using System.IO;
 using DjvuNet.Tests;
 using DjvuNet.Wavelet;
 using DjvuNet.Tests.Xunit;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -96,6 +97,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(FG44TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void FG44Chunk_Theory(string fileName, string filePath)
         {
             using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))

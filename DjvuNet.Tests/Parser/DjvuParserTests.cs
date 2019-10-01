@@ -9,6 +9,7 @@ using DjvuNet.DataChunks;
 using Moq;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Errors;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Parser.Tests
 {
@@ -110,6 +111,7 @@ namespace DjvuNet.Parser.Tests
 
         [DjvuTheory]
         [MemberData(nameof(NodeTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void CreateDecodedDjvuNode_Theory(IDjvuReader reader, IDjvuDocument rootDocument,
             IDjvuElement parent, ChunkType chunkType,
             string chunkID = "", long length = 0)
@@ -214,6 +216,7 @@ namespace DjvuNet.Parser.Tests
 
         [DjvuTheory]
         [MemberData(nameof(EncodedNodeTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void CreateEncodedDjvuNode_Theory(IDjvuWriter writer, IDjvuElement parent, ChunkType chunkType, long length = 0)
         {
             if (writer == null)

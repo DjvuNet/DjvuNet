@@ -9,6 +9,7 @@ using DjvuNet.Graphics;
 using System.Runtime.InteropServices;
 using DjvuNet.Graphics.Tests;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Wavelet.Tests
 {
@@ -150,6 +151,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Rgb2YCbCrFragmentedTest()
         {
             sbyte[] data = PixelMapTests.GetRandomData(width, height, bytesPerPixel);
@@ -193,6 +195,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Rgb2YCbCrOptimizedTest()
         {
 

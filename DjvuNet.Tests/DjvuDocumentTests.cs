@@ -9,6 +9,7 @@ using System.Linq;
 using DjvuNet.Tests.Xunit;
 using System.ComponentModel;
 using DjvuNet.Errors;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Tests
 {
@@ -97,6 +98,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(DjvuArtifacts))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void IsDjvuDocument_String_Theory(string filePath, int pageCount)
         {
             Assert.True(DjvuDocument.IsDjvuDocument(filePath));
@@ -104,6 +106,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(DjvuArtifacts))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ctor_Theory(string filePath, int pageCount)
         {
             DjvuDocument document = null;

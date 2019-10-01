@@ -317,7 +317,7 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle red = new Rectangle
             {
-                
+
             };
 
             Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));

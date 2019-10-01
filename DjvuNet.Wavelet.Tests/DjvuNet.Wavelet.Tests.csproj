@@ -47,6 +47,7 @@
     <Compile Include="Compression\ZPCodecTests.cs" />
     <Compile Include="Compression\ZPTableTests.cs" />
     <Compile Include="Diagnostics\DjvuEventSourceTests.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Graphics\BitmapTests.cs" />
     <Compile Include="Graphics\ImageConverterTests.cs" />
     <Compile Include="Graphics\MapTests.cs" />
@@ -95,10 +96,10 @@
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
-    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" >
+    <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)">
       <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
     </PackageReference>
-    <PackageReference Include="xunit.console" Version="$(XunitPackageVersion)" >
+    <PackageReference Include="xunit.console" Version="$(XunitPackageVersion)">
       <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
     </PackageReference>
     <PackageReference Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)" Include="xunit.runner.msbuild" Version="$(XunitPackageVersion)" />

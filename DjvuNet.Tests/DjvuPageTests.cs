@@ -11,6 +11,7 @@ using Moq;
 using DjvuNet.DataChunks;
 using DjvuNet.Errors;
 using System.Text;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Tests
 {
@@ -95,6 +96,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(TextContentData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Text_Theory001(string filePath, int pageCount, int testPage, string expectedValue)
         {
             using (DjvuDocument document = new DjvuDocument(filePath))
@@ -117,6 +119,7 @@ namespace DjvuNet.Tests
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static void DumpPageNodes(string filePath, DjvuDocument document)
         {
             try
@@ -150,6 +153,7 @@ namespace DjvuNet.Tests
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         private static void TestPageText(string expectedValue, IDjvuPage page)
         {
             var text = page.Text;
@@ -248,6 +252,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(SubsampleTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetBgPixmap_Theory(int subsample)
         {
             int pageCount = 0;
@@ -429,6 +434,7 @@ namespace DjvuNet.Tests
         }
 
         [Fact]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetPixelMap003()
         {
             int pageCount = 0;

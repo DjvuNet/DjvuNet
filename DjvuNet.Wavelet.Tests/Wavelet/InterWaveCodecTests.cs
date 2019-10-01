@@ -6,12 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Compression;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Wavelet.Tests
 {
     public class InterWaveCodecTests
     {
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void InterWaveCodecTest()
         {
             InterWaveMap map = new InterWaveMap();

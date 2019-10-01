@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Wavelet.Tests
 {
@@ -59,6 +60,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DuplicateTest002()
         {
             InterWaveBlock block = new InterWaveBlock();
@@ -93,6 +95,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetBlockTest()
         {
             InterWaveBlock block = new InterWaveBlock();
@@ -103,6 +106,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetInitializedBlockTest()
         {
             InterWaveBlock block = new InterWaveBlock();
@@ -238,6 +242,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ClearBlockTest()
         {
             InterWaveBlock block = new InterWaveBlock();
