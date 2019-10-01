@@ -224,8 +224,8 @@ namespace DjvuNet.Graphics
         /// <summary> Test if two pixels are equal.
         ///
         /// </summary>
-        /// <param name="object">pixel to compare to
-        ///
+        /// <param name="object">
+        /// pixel to compare to
         /// </param>
         /// <returns> true if red, green, and blue values are all equal
         /// </returns>
@@ -233,9 +233,13 @@ namespace DjvuNet.Graphics
         {
             var pix = item as IPixel;
             if (pix != null)
-                return this == (Pixel) pix;
+            {
+                return this == (Pixel)pix;
+            }
             else
+            {
                 return false;
+            }
         }
 
         /// <summary> Set the gray color.

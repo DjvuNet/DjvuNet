@@ -91,7 +91,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_ChunkData != null)
+                {
                     return _ChunkData;
+                }
                 else
                 {
                     if (Length > 0)
@@ -234,7 +236,9 @@ namespace DjvuNet.DataChunks
         public virtual void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
             if (writer == null)
+            {
                 throw new DjvuArgumentNullException(nameof(writer));
+            }
 
             AdjustAlignment(writer);
 
@@ -250,15 +254,21 @@ namespace DjvuNet.DataChunks
         public virtual long GetDataLength()
         {
             if (ChunkData != null)
+            {
                 return ChunkData.Length;
+            }
             else
+            {
                 return Length;
+            }
         }
 
         internal static void AdjustAlignment(IDjvuWriter writer)
         {
             if (writer.Position % 2 == 1)
+            {
                 writer.Write((byte)0x00);
+            }
         }
 
         #endregion Public Methods

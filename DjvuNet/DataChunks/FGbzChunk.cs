@@ -57,7 +57,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_palette != null)
+                {
                     return _palette;
+                }
                 else
                 {
                     _palette = DecodePaletteData();
@@ -68,7 +70,9 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_palette != value)
+                {
                     _palette = value;
+                }
             }
         }
 

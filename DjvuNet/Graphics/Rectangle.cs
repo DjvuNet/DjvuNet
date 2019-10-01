@@ -206,11 +206,15 @@ namespace DjvuNet.Graphics
             // First check for special cases
 
             if (this.Empty && !rect.Empty)
+            {
                 return false;
+            }
 
             // Test point coordinates on 2D plane
             if (this.Empty && rect.Empty)
+            {
                 return (this.Right == rect.Right) && (this.Bottom == rect.Bottom);
+            }
 
             return (Contains(rect.Right, rect.Bottom) && Contains(rect.Left - 1, rect.Top - 1));
         }
@@ -367,19 +371,27 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Rectangle first, Rectangle second)
         {
-            if (null != (object) first && null != (object) second)
+            if (null != (object)first && null != (object)second)
+            {
                 return first.Left == second.Left && first.Top == second.Top && first.Width == second.Width && first.Height == second.Height;
+            }
             else
+            {
                 return null == (object)first && null == (object)second;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Rectangle first, Rectangle second)
         {
             if (null != (object)first && null != (object)second)
+            {
                 return first.Left != second.Left || first.Top != second.Top || first.Width != second.Width || first.Height != second.Height;
+            }
             else
+            {
                 return !(null == (object)first && null == (object)second);
+            }
         }
 
         /// <summary>

@@ -36,7 +36,9 @@ namespace DjvuNet.Wavelet
         {
             _PData = new short[4][][];
             if (_Zigzagloc == null)
+            {
                 _Zigzagloc = BuildZigZagData();
+            }
         }
 
         #endregion Constructors
@@ -115,11 +117,15 @@ namespace DjvuNet.Wavelet
         {
             int nms = n >> 4;
             if (_PData[nms] == null)
+            {
                 _PData[nms] = new short[16][];
+            }
 
             int nls = n & 0xf;
             if (_PData[nms][nls] == null)
+            {
                 _PData[nms][nls] = new short[16];
+            }
 
             return _PData[nms][nls];
         }
@@ -179,7 +185,9 @@ namespace DjvuNet.Wavelet
                 int cLength = coeffLength / 4;
 
                 for (int i = 0; i < cLength; i++)
+                {
                     pC[i] = 0;
+                }
 
                 for (int n1 = bmin; n1 < bmax; n1++)
                 {
@@ -193,7 +201,9 @@ namespace DjvuNet.Wavelet
                         }
                     }
                     else
+                    {
                         n += 16;
+                    }
                 }
             }
         }
@@ -206,7 +216,9 @@ namespace DjvuNet.Wavelet
                 short[] d = GetInitializedBlock(n1);
 
                 for (int n2 = 0; n2 < 16; n2++, n++)
+                {
                     d[n2] = coeff[_Zigzagloc[n]];
+                }
             }
         }
 

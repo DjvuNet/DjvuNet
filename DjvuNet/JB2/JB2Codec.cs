@@ -7,7 +7,7 @@ namespace DjvuNet.JB2
 {
     public abstract class JB2Codec
     {
-        #region Constans
+        #region Constants
 
         internal const sbyte NewMark = 1;
         internal const sbyte NewMarkLibraryOnly = 2;
@@ -131,7 +131,9 @@ namespace DjvuNet.JB2
             int ictx = ctx.Value;
 
             if (ictx >= _BitCells.Count)
+            {
                 throw new IndexOutOfRangeException("Image bad MutableValue<int>");
+            }
 
             for (int phase = 1, range = -1; range != 1; ictx = ctx.Value)
             {
@@ -178,7 +180,9 @@ namespace DjvuNet.JB2
                             if (negative)
                             {
                                 if (_Encoding)
+                                {
                                     v = -v - 1;
+                                }
 
                                 int temp = -low - 1;
                                 low = -high - 1;
@@ -199,12 +203,18 @@ namespace DjvuNet.JB2
                                 range = (cutoff + 1) >> 1;
 
                                 if (range == 1)
+                                {
                                     cutoff = 0;
+                                }
                                 else
+                                {
                                     cutoff -= (range >> 1);
+                                }
                             }
                             else
+                            {
                                 cutoff = (cutoff << 1) + 1;
+                            }
 
                             break;
                         }
@@ -216,12 +226,18 @@ namespace DjvuNet.JB2
                             if (range != 1)
                             {
                                 if (!decision)
+                                {
                                     cutoff -= (range >> 1);
+                                }
                                 else
+                                {
                                     cutoff += (range >> 1);
+                                }
                             }
                             else if (!decision)
+                            {
                                 cutoff--;
+                            }
 
                             break;
                         }
@@ -287,9 +303,13 @@ namespace DjvuNet.JB2
                 case MatchedRefineLibraryOnly:
                     {
                         if (!_Encoding)
+                        {
                             jshp = new JB2Shape().Init(-1);
+                        }
                         else if (jshp == null)
+                        {
                             jshp = new JB2Shape();
+                        }
 
                         bm = jshp.Bitmap;
 
@@ -305,7 +325,9 @@ namespace DjvuNet.JB2
                         CodeEventualLosslessRefinement();
 
                         if (!_Encoding)
+                        {
                             InitLibrary(jim);
+                        }
 
                         break;
                     }
@@ -323,7 +345,9 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_Encoding)
+                        {
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
+                        }
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
@@ -342,9 +366,13 @@ namespace DjvuNet.JB2
                 case RequiredDictOrReset:
                     {
                         if (!_GotStartRecordP)
+                        {
                             CodeInheritedShapeCount(jim);
+                        }
                         else
+                        {
                             ResetNumcoder();
+                        }
 
                         break;
                     }
@@ -364,7 +392,9 @@ namespace DjvuNet.JB2
                     case MatchedRefineLibraryOnly:
                         {
                             if (xjshp != null)
+                            {
                                 jshp = jshp.Duplicate();
+                            }
 
                             shapeno = jim.AddShape(jshp);
                             AddLibrary(shapeno, jshp);
@@ -394,7 +424,9 @@ namespace DjvuNet.JB2
                 case NonMarkData:
                     {
                         if (jblt == null)
+                        {
                             jblt = new JB2Blit();
+                        }
                         // fall through
                     }
                     goto case NewMarkLibraryOnly;
@@ -403,9 +435,13 @@ namespace DjvuNet.JB2
                 case MatchedRefineLibraryOnly:
                     {
                         if (!_Encoding)
+                        {
                             jshp = new JB2Shape().Init((rectype == NonMarkData) ? (-2) : (-1));
+                        }
                         else if (jshp == null)
+                        {
                             jshp = new JB2Shape();
+                        }
 
                         bm = jshp.Bitmap;
                         break;
@@ -414,7 +450,9 @@ namespace DjvuNet.JB2
                 case MatchedCopy:
                     {
                         if (jblt == null)
+                        {
                             jblt = new JB2Blit();
+                        }
 
                         break;
                     }
@@ -431,7 +469,9 @@ namespace DjvuNet.JB2
                         CodeEventualLosslessRefinement();
 
                         if (!_Encoding)
+                        {
                             InitLibrary(jim);
+                        }
 
                         break;
                     }
@@ -473,7 +513,9 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_Encoding)
+                        {
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
+                        }
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
@@ -495,7 +537,9 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_Encoding)
+                        {
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
+                        }
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
@@ -511,7 +555,9 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jshp.Parent, jim);
 
                         if (!_Encoding)
+                        {
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
+                        }
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
@@ -527,7 +573,9 @@ namespace DjvuNet.JB2
                         int match = CodeMatchIndex(jblt.ShapeNumber, jim);
 
                         if (!_Encoding)
+                        {
                             jblt.ShapeNumber = Convert.ToInt32((_Lib2Shape[match]));
+                        }
 
                         bm = jim.GetShape(jblt.ShapeNumber).Bitmap;
 
@@ -590,20 +638,26 @@ namespace DjvuNet.JB2
                     case NonMarkData:
                         {
                             if (xjshp != null)
+                            {
                                 jshp = jshp.Duplicate();
+                            }
 
                             shapeno = jim.AddShape(jshp);
                             Shape2Lib(shapeno, MinusOneObject);
 
                             if (needAddLibrary)
+                            {
                                 AddLibrary(shapeno, jshp);
+                            }
 
                             if (needAddBlit)
                             {
                                 jblt.ShapeNumber = shapeno;
 
                                 if (xjblt != null)
+                                {
                                     jblt = (JB2Blit)xjblt.Duplicate();
+                                }
 
                                 jim.AddBlit(jblt);
                             }
@@ -614,7 +668,9 @@ namespace DjvuNet.JB2
                     case MatchedCopy:
                         {
                             if (xjblt != null)
+                            {
                                 jblt = (JB2Blit)xjblt.Duplicate();
+                            }
 
                             jim.AddBlit(jblt);
                             break;
@@ -708,12 +764,16 @@ namespace DjvuNet.JB2
             if (size <= shapeno)
             {
                 while (size++ < shapeno)
+                {
                     _Shape2Lib.Add(MinusOneObject);
+                }
 
                 _Shape2Lib.Add(libno);
             }
             else
+            {
                 _Shape2Lib[shapeno] = libno;
+            }
         }
 
         protected int ShiftCrossContext(IBitmap bm, IBitmap cbm, int context, int n, int up1, int up0,
@@ -727,8 +787,8 @@ namespace DjvuNet.JB2
         protected int ShiftDirectContext(IBitmap bm, int context, int next, int up2, int up1, int up0,
                                                     int column)
         {
-            return (((context << 1) & 0x37a) | (bm.GetByteAt(up1 + column + 2) << 2) |
-                    (bm.GetByteAt(up2 + column + 1) << 7) | next);
+            return ((context << 1) & 0x37a) | (bm.GetByteAt(up1 + column + 2) << 2) |
+                    (bm.GetByteAt(up2 + column + 1) << 7) | next;
         }
 
         protected abstract bool CodeBit(bool bit, MutableValue<sbyte> ctx);
@@ -786,7 +846,9 @@ namespace DjvuNet.JB2
         protected virtual void CodeRelativeLocation(JB2Blit jblt, int rows, int columns)
         {
             if (!_GotStartRecordP)
+            {
                 throw new DjvuFormatException("Image no start");
+            }
 
             int bottom = 0;
             int left = 0;
@@ -870,7 +932,9 @@ namespace DjvuNet.JB2
         protected virtual int UpdateShortList(int v)
         {
             if (++_ShortListPos == 3)
+            {
                 _ShortListPos = 0;
+            }
 
             _ShortList[_ShortListPos] = v;
 

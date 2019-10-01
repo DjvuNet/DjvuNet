@@ -44,18 +44,26 @@ namespace DjvuNet.Wavelet
         {
             byte[] buffer = null;
             if (reader.PeekChar() == 0)
+            {
                 buffer = reader.ReadBytes(9);
+            }
             else
+            {
                 buffer = reader.ReadBytes(2);
+            }
 
             fixed (byte* d = Data)
+            {
                 Marshal.Copy(buffer, 0, (IntPtr)d, buffer.Length);
+            }
         }
 
         public void WriteHeader(Stream writer)
         {
             if (Serial != 0)
+            {
                 WriteBaseHeader(writer);
+            }
             else
             {
                 WriteBaseHeader(writer);

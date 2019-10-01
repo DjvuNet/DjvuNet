@@ -37,10 +37,14 @@ namespace DjvuNet.Wavelet
         {
             // Check
             if (settings.Slices == 0 && settings.Bytes == 0 && settings.Decibels == 0)
+            {
                 throw new DjvuArgumentException("Encoder needs stop condition", nameof(settings));
+            }
 
             if (_YMap == null)
+            {
                 throw new DjvuInvalidOperationException($"Cannot encode! Target encoder map is null {nameof(_YMap)}");
+            }
 
             // Open
             if (_YEncoder == null)
@@ -57,7 +61,7 @@ namespace DjvuNet.Wavelet
             // Prepare zcodec slices
             int flag = 1;
             int nslices = 0;
-            
+
             using (MemoryStream coderStream = new MemoryStream())
             {
 
@@ -67,20 +71,28 @@ namespace DjvuNet.Wavelet
                 while (flag != 0)
                 {
                     if (settings.Decibels > 0 && estdb >= settings.Decibels)
+                    {
                         break;
+                    }
 
                     if (settings.Bytes > 0 && coderStream.Position + _CBytes >= settings.Bytes)
+                    {
                         break;
+                    }
 
                     if (settings.Slices > 0 && nslices + _CSlices >= settings.Slices)
+                    {
                         break;
+                    }
 
                     flag = _YEncoder.CodeSlice(zp);
 
                     if (flag != 0 && settings.Decibels > 0)
                     {
                         if (_YEncoder._CurrentBand == 0 || estdb >= settings.Decibels - DecibelPrune)
+                        {
                             estdb = _YEncoder.EstimateDecibel(_dBFrac);
+                        }
                     }
 
                     if (_CrEncoder != null && _CbEncoder != null && _CSlices + nslices >= _CrCbDelay)
@@ -103,7 +115,9 @@ namespace DjvuNet.Wavelet
                 {
                     byte major = InterWaveCodec.MajorVersion;
                     if (!(_CrMap != null && _CbMap != null))
+                    {
                         major |= 0x80;
+                    }
 
                     stream.WriteByte(major);
                     stream.WriteByte(InterWaveCodec.MinorVersion);
@@ -134,7 +148,7 @@ namespace DjvuNet.Wavelet
 
         /// <summary>
         /// Writes a color image into a DjVu IW44 file. This function creates a
-        /// composite Form element containing one or more IW44 encoded chunks. 
+        /// composite Form element containing one or more IW44 encoded chunks.
         /// Data for each chunk is generated with a call to EncodeChunk method
         /// while encoding is controlled by the corresponding parameters in an array
         /// parameter settings.
@@ -146,7 +160,9 @@ namespace DjvuNet.Wavelet
             ChunkType formType = ChunkType.PM44Form, ChunkType nodeType = ChunkType.PM44)
         {
             if (_YEncoder != null)
+            {
                 throw new DjvuInvalidOperationException($"Encoder already exists or left open from previous operation.");
+            }
 
             int flag = 1;
 
@@ -282,9 +298,14 @@ namespace DjvuNet.Wavelet
                 }
 
                 if (hCbBuffer.IsAllocated)
+                {
                     hCbBuffer.Free();
+                }
+
                 if (hCrBuffer.IsAllocated)
+                {
                     hCrBuffer.Free();
+                }
             }
             else
             {
@@ -296,13 +317,15 @@ namespace DjvuNet.Wavelet
                 // Inversion for gray images
                 sbyte* e = yBuffer + width * height;
                 for (sbyte* b = yBuffer; b < e; b++)
+                {
                     *b = (sbyte)(255 - *b);
+                }
             }
 
-
-
             if (hMask.IsAllocated)
+            {
                 hMask.Free();
+            }
 
             hData.Free();
             hYBuffer.Free();

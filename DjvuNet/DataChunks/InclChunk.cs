@@ -35,7 +35,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_IncludeID != null)
+                {
                     return _IncludeID;
+                }
                 else
                 {
                     ReadData(Reader);

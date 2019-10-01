@@ -30,7 +30,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_thumbnail != null)
+                {
                     return _thumbnail;
+                }
                 else
                 {
                     _thumbnail = DecodeThumbnailImage();
@@ -41,7 +43,9 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_thumbnail != value)
+                {
                     _thumbnail = value;
+                }
             }
         }
 
@@ -55,7 +59,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_image != null)
+                {
                     return _image;
+                }
                 else
                 {
                     _image = Thumbnail.GetPixelMap();

@@ -67,7 +67,9 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_components != value)
+                {
                     _components = (List<DirmComponent>) value;
+                }
             }
         }
 
@@ -146,21 +148,29 @@ namespace DjvuNet.DataChunks
 
             // Read the component sizes
             for (int x = 0; x < count; x++)
+            {
                 _components[x].Size = bzReader.ReadInt24BigEndian();
+            }
 
             // Read the component flag information
             for (int x = 0; x < count; x++)
+            {
                 _components[x].DecodeFlags(bzReader.ReadByte());
+            }
 
             // Read the component strings
             for (int x = 0; x < count; x++)
             {
                 _components[x].ID = bzReader.ReadNullTerminatedString();
                 if (_components[x].HasName == true)
+                {
                     _components[x].Name = bzReader.ReadNullTerminatedString();
+                }
 
                 if (_components[x].HasTitle == true)
+                {
                     _components[x].Title = bzReader.ReadNullTerminatedString();
+                }
             }
 
             _isInitialized = true;

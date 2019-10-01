@@ -104,8 +104,10 @@ namespace DjvuNet.Graphics
                 if (_Grays != value)
                 {
                     if ((value < 2) || (value > 256))
+                    {
                         throw new DjvuArgumentOutOfRangeException(nameof(value),
                             "Gray levels outside of range");
+                    }
 
                     _Grays = value;
                     _RampData = null;
@@ -146,9 +148,13 @@ namespace DjvuNet.Graphics
             get
             {
                 if (_RampData != null)
+                {
                     return _RampData;
+                }
                 else
+                {
                     return RampNullGrays();
+                }
             }
         }
 
@@ -157,9 +163,13 @@ namespace DjvuNet.Graphics
         {
             Pixel[] retval = (Pixel[])RampRefArray[Grays];
             if (retval != null)
+            {
                 return _RampData = retval;
+            }
             else
+            {
                 return _RampData = RampNullRefArrayGreys(Grays);
+            }
         }
 
         internal Pixel[] RampNullRefArrayGreys(int grays)
@@ -181,7 +191,9 @@ namespace DjvuNet.Graphics
             }
 
             while (i < retval.Length)
+            {
                 retval[i++] = Pixel.BlackPixel;
+            }
 
             RampRefArray[grays] = retval;
             return retval;
@@ -270,17 +282,20 @@ namespace DjvuNet.Graphics
 
         #endregion Constructors
 
-        #region Methods
+#region Methods
 
-        /// <summary>
-        /// Method creates bitmap and initializes it with deserialized data read from supplied Stream.
-        /// </summary>
-        /// <param name="stream">Stream with serialized data source.</param>
-        /// <param name="border">Size of border surrounding bitmap data from all sides.</param>
-        /// <returns>Bitmap initialized with data read from stream.</returns>
+/// <summary>
+/// Method creates bitmap and initializes it with deserialized data read from supplied Stream.
+/// </summary>
+/// <param name="stream">Stream with serialized data source.</param>
+/// <param name="border">Size of border surrounding bitmap data from all sides.</param>
+/// <returns>Bitmap initialized with data read from stream.</returns>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+# endif
         public static Bitmap CreateBitmap(Stream stream, int border = 0)
         {
-            // TODO create multithreaded synchronization for accessing Bitmap data;
+            // TODO create multi threaded synchronization for accessing Bitmap data;
 
             // Get magic number
             byte[] magic = new byte[2];
@@ -305,7 +320,10 @@ namespace DjvuNet.Graphics
                     case (byte)'2':
                         maxval = (int)ReadInteger(ref lookahead, stream);
                         if (maxval > 65535)
+                        {
                             throw new DjvuFormatException("Cannot read PGM formatted data with depth greater than 16 bits.");
+                        }
+
                         bitmap.Grays = (maxval > 255 ? 256 : maxval + 1);
                         bitmap.ReadPgmTextStream(stream, maxval);
                         return bitmap;
@@ -318,7 +336,10 @@ namespace DjvuNet.Graphics
                     case (byte)'5':
                         maxval = (int)ReadInteger(ref lookahead, stream);
                         if (maxval > 65535)
+                        {
                             throw new DjvuFormatException("Cannot read PGM formatted data with depth greater than 16 bits.");
+                        }
+
                         bitmap.Grays = maxval > 255 ? 256 : maxval + 1;
                         bitmap.ReadPgmRawStream(stream, maxval);
                         return bitmap;
@@ -338,6 +359,9 @@ namespace DjvuNet.Graphics
             throw new DjvuFormatException("Data format error.");
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void ReadPbmTextStream(Stream stream)
         {
             GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
@@ -358,17 +382,26 @@ namespace DjvuNet.Graphics
                             bit = 0;
                             bitInt = stream.ReadByte();
                             if (bitInt == -1)
+                            {
                                 throw new DjvuEndOfStreamException(
                                     $"End of stream reached. Stream: {nameof(stream)}, Position: {stream.Position}");
+                            }
+
                             bit = (byte)bitInt;
                         }
 
                         if (bit == '1')
+                        {
                             row[c] = 1;
+                        }
                         else if (bit == '0')
+                        {
                             row[c] = 0;
+                        }
                         else
+                        {
                             throw new DjvuFormatException("Corrupted PBM data.");
+                        }
                     }
                     row -= BytesPerRow;
                 }
@@ -376,10 +409,15 @@ namespace DjvuNet.Graphics
             finally
             {
                 if (hData.IsAllocated)
+                {
                     hData.Free();
+                }
             }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void ReadPgmTextStream(Stream stream, int maxval)
         {
             GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
@@ -393,12 +431,16 @@ namespace DjvuNet.Graphics
                 byte[] ramp = new byte[maxval + 1];
 
                 for (int i = 0; i <= maxval; i++)
+                {
                     ramp[i] = (byte)(i < maxval ? ((Grays - 1) * (maxval - i) + maxval / 2) / maxval : 0);
+                }
 
                 for (int n = Rows - 1; n >= 0; n--)
                 {
                     for (int c = 0; c < Width; c++)
+                    {
                         row[c] = ramp[(int)ReadInteger(ref lookahead, stream)];
+                    }
 
                     row -= BytesPerRow;
                 }
@@ -406,10 +448,15 @@ namespace DjvuNet.Graphics
             finally
             {
                 if (hData.IsAllocated)
+                {
                     hData.Free();
+                }
             }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void ReadPbmRawStream(Stream stream)
         {
             GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
@@ -428,15 +475,22 @@ namespace DjvuNet.Graphics
                         {
                             int accInt = stream.ReadByte();
                             if (accInt == -1)
+                            {
                                 throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                            }
 
                             acc = (byte)accInt;
                             mask = (byte)0x80;
                         }
                         if ((acc & mask) != 0)
+                        {
                             row[c] = 1;
+                        }
                         else
+                        {
                             row[c] = 0;
+                        }
+
                         mask >>= 1;
                     }
                     row -= BytesPerRow;
@@ -445,17 +499,24 @@ namespace DjvuNet.Graphics
             finally
             {
                 if (hData.IsAllocated)
+                {
                     hData.Free();
+                }
             }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void ReadPgmRawStream(Stream stream, int maxval)
         {
             int maxbin = (maxval > 255) ? 65536 : 256;
             byte[] ramp = new byte[maxbin];
 
             for (int i = 0; i < maxbin; i++)
+            {
                 ramp[i] = (byte)(i < maxval ? ((Grays - 1) * (maxval - i) + maxval / 2) / maxval : 0);
+            }
 
             GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
             IntPtr dataPtr = hData.AddrOfPinnedObject();
@@ -484,7 +545,9 @@ namespace DjvuNet.Graphics
                         {
                             int xInt = stream.ReadByte();
                             if (xInt == -1)
+                            {
                                 throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                            }
 
                             row[c] = bramp[xInt];
                         }
@@ -495,12 +558,20 @@ namespace DjvuNet.Graphics
             finally
             {
                 if (hData.IsAllocated)
+                {
                     hData.Free();
+                }
+
                 if (hRamp.IsAllocated)
+                {
                     hRamp.Free();
+                }
             }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void ReadRleStream(Stream stream)
         {
             GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
@@ -519,23 +590,31 @@ namespace DjvuNet.Graphics
                 {
                     hInt = stream.ReadByte();
                     if (hInt == -1)
+                    {
                         throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                    }
 
                     int x = hInt;
                     if (x >= RunOverflow)
                     {
                         hInt = stream.ReadByte();
                         if (hInt == -1)
+                        {
                             throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                        }
 
                         x = hInt + ((x - RunOverflow) << 8);
                     }
 
                     if (c + x > Width)
+                    {
                         throw new DjvuFormatException("Bitmap RLE format data are not in sync");
+                    }
 
                     while (x-- > 0)
+                    {
                         row[c++] = p;
+                    }
 
                     p = (byte)unchecked(1 - p);
 
@@ -551,7 +630,9 @@ namespace DjvuNet.Graphics
             finally
             {
                 if (hData.IsAllocated)
+                {
                     hData.Free();
+                }
             }
         }
 
@@ -560,14 +641,19 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="raw">
-        /// True to serilize to raw PBM format, false to serialize to text PBM format. Default value is true.
+        /// True to serialize to raw PBM format, false to serialize to text PBM format. Default value is true.
         /// </param>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void SerializeToPbm(Stream stream, bool raw = true)
         {
             // check arguments
             if (Grays > 2)
+            {
                 throw new DjvuFormatException(
                     $"Only bi-level bitmaps can be saved in PBM format. Grays: {Grays}");
+            }
 
             //GMonitorLock lock (monitor()) ;
             // header
@@ -579,7 +665,10 @@ namespace DjvuNet.Graphics
             if (raw)
             {
                 if (_RleData != null)
+                {
                     Compress();
+                }
+
                 fixed (byte* runs = _RleData)
                 {
                     byte* runs_end = runs + _RleData.Length;
@@ -598,7 +687,9 @@ namespace DjvuNet.Graphics
             else
             {
                 if (Data == null)
+                {
                     Uncompress();
+                }
 
                 fixed (sbyte* rowStart = Data)
                 {
@@ -615,7 +706,9 @@ namespace DjvuNet.Graphics
                             stream.WriteByte(bit);
                             c += 1;
                             if (c == Width || (c & RunMsbMask) == 0)
+                            {
                                 stream.WriteByte(eol);
+                            }
                         }
                         // next row
                         row -= BytesPerRow;
@@ -630,14 +723,19 @@ namespace DjvuNet.Graphics
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="raw">
-        /// True to serilize to raw PGM format, false to serialize to text PGM format. Default value is true.
+        /// True to serialize to raw PGM format, false to serialize to text PGM format. Default value is true.
         /// </param>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void SerializeToPgm(Stream stream, bool raw = true)
         {
             // checks
             //GMonitorLock lock (monitor()) ;
             if (Data == null)
+            {
                 Uncompress();
+            }
 
             // header
             string head = $"P{(raw ? '5' : '2')}\n{Width} {Height}\n{Grays - 1}\n";
@@ -671,7 +769,9 @@ namespace DjvuNet.Graphics
                             stream.Write(data, 0, data.Length);
                             c += 1;
                             if (c == Width || (c & 0x1f) == 0)
+                            {
                                 stream.WriteByte(eol);
+                            }
                         }
                     }
                     row -= BytesPerRow;
@@ -684,16 +784,23 @@ namespace DjvuNet.Graphics
         /// Method serializes Bitmap data using Run Length Encoding compression to RLE format.
         /// </summary>
         /// <param name="stream"></param>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe void SerializeToRle(Stream stream)
         {
             // checks
             if (Width == 0 || Height == 0)
+            {
                 throw new DjvuInvalidOperationException("Bitmap is not properly initialized.");
+            }
 
             //GMonitorLock lock (monitor()) ;
             if (Grays > 2)
+            {
                 throw new DjvuInvalidOperationException(
                     $"Only bi-level bitmaps can be saved in PBM format. Grays: {Grays}");
+            }
 
             // header
             string head= $"R4\n{Width} {Height}\n";
@@ -710,7 +817,9 @@ namespace DjvuNet.Graphics
                 byte[] gruns;
                 long size = RleEncode(out gruns);
                 if (gruns != null && size > 0)
+                {
                     stream.Write(gruns, 0, gruns.Length);
+                }
             }
         }
 
@@ -718,7 +827,9 @@ namespace DjvuNet.Graphics
         internal unsafe void Compress()
         {
             if (Grays > 2)
+            {
                 throw new DjvuInvalidOperationException($"Cannot compress data with Grays: {Grays}");
+            }
 
             //GMonitorLock lock (monitor()) ;
             if (Data != null)
@@ -726,7 +837,9 @@ namespace DjvuNet.Graphics
                 byte[] grle;
                 long rleLength = RleEncode(out grle);
                 if (rleLength > 0)
+                {
                     Data = null;
+                }
             }
         }
 
@@ -741,13 +854,18 @@ namespace DjvuNet.Graphics
             }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal unsafe long RleEncode(out byte[] gpruns)
         {
             gpruns = null;
 
             // uncompress rle information
             if (Height == 0 || Width == 0)
+            {
                 return 0;
+            }
 
             if (Data == null)
             {
@@ -791,20 +909,29 @@ namespace DjvuNet.Graphics
             return pos;
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal unsafe void RleDecode(byte* runs)
         {
             // initialize pixel array
             if (Width == 0 || Height == 0)
+            {
                 throw new DjvuInvalidOperationException("Bitmap is not properly initialized.");
+            }
 
             BytesPerRow = Width + Border;
             if (runs == (byte*) 0)
+            {
                 throw new DjvuArgumentNullException(nameof(runs));
+            }
 
             long npixels = Height * BytesPerRow + Border;
 
             if (Data == null)
+            {
                 Data = new sbyte[npixels];
+            }
 
             // interpret runs data
             int c, n;
@@ -821,10 +948,14 @@ namespace DjvuNet.Graphics
                     int x = ReadRun(runs);
 
                     if (c + x > Width)
+                    {
                         throw new DjvuFormatException("Invalid RLE encoded data.");
+                    }
 
                     while (x-- > 0)
+                    {
                         row[c++] = p;
+                    }
 
                     p = (byte)unchecked(1 - p);
 
@@ -911,6 +1042,9 @@ namespace DjvuNet.Graphics
             return (z >= RunOverflow) ? ((z & ~RunOverflow) << 8) | (*data++) : z;
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal unsafe void Rle2Bitmap(int width, byte* runs, byte* bitmap, bool invert = false)
         {
             int obyte_def = invert ? 0xff : 0;
@@ -944,21 +1078,25 @@ namespace DjvuNet.Graphics
                     while((x--) > 0)
                     {
                         obyte |= mask;
-                        if((mask >>= 1) == 0)
+                        if ((mask >>= 1) == 0)
                         {
                             *(bitmap++) = (byte) (obyte ^ obyte_def);
                             obyte = 0;
                             mask = 0x80;
 
-                            for(; x > 8 ; x -= 8)
+                            for (; x > 8; x -= 8)
+                            {
                                 *(bitmap++) = (byte) obyte_ndef;
+                            }
                         }
                     }
                 }
             }
 
             if(mask != 0x80)
+            {
                 *(bitmap++) = (byte)(obyte ^ obyte_def);
+            }
         }
 
         public IBitmap Duplicate()
@@ -967,7 +1105,7 @@ namespace DjvuNet.Graphics
             {
                 BlueOffset = BlueOffset,
                 Border = Border,
-                Data = Data,
+                Data = Data,  /// TODO: Fix me
                 Grays = Grays,
                 GreenOffset = GreenOffset,
                 _MaxRowOffset = _MaxRowOffset,
@@ -1057,13 +1195,18 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// True if the blit intersected this bitmap
         /// </returns>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public bool Blit(IBitmap bm, int xh, int yh, int subsample)
         {
             int pidx = 0;
             int qidx = 0;
 
             if (subsample == 1)
+            {
                 return InsertMap(bm, xh, yh, true);
+            }
 
             if ((xh >= (Width * subsample)) || (yh >= (Height * subsample)) || ((xh + bm.Width) < 0) ||
                 ((yh + bm.Height) < 0))
@@ -1106,7 +1249,9 @@ namespace DjvuNet.Graphics
                         for (int sc = 0; sc < bm.Width; sc++)
                         {
                             if ((dc >= 0) && (dc < Width))
+                            {
                                 Data[pidx + dc] = (sbyte)(Data[pidx + dc] + bm.Data[qidx + sc]);
+                            }
 
                             if (++dc1 >= subsample)
                             {
@@ -1149,7 +1294,9 @@ namespace DjvuNet.Graphics
         public void ChangeGrays(int grays)
         {
             if (grays < 2 || grays > 256)
+            {
                 throw new DjvuArgumentOutOfRangeException(nameof(grays));
+            }
 
             throw new NotImplementedException();
         }
@@ -1198,7 +1345,9 @@ namespace DjvuNet.Graphics
                 idx = RowOffset(y);
 
                 for (int x = 0; x < Width; x++)
+                {
                     Data[idx + x] = v;
+                }
             }
         }
 
@@ -1238,6 +1387,9 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// True if pixels are inserted
         /// </returns>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public unsafe bool InsertMap(IBitmap bit, int dx, int dy, bool doBlit)
         {
             int x0 = (dx > 0) ? dx : 0;
@@ -1334,7 +1486,9 @@ namespace DjvuNet.Graphics
             int npixels = RowOffset(Height);
 
             if (npixels > 0)
+            {
                 Data = new sbyte[npixels];
+            }
 
             return this;
         }
@@ -1352,10 +1506,14 @@ namespace DjvuNet.Graphics
             int npixels = RowOffset(Height);
 
             if (npixels > 0 && data != null && data.Length == npixels)
+            {
                 Data = data;
+            }
             else
+            {
                 throw new DjvuArgumentException(
-                    "Mismatch in data size and Bitmap dimensions.", nameof(data));
+                   "Mismatch in data size and Bitmap dimensions.", nameof(data));
+            }
 
             return this;
         }
@@ -1382,12 +1540,16 @@ namespace DjvuNet.Graphics
 
                 for (int i = 0; i < Height; i++)
                 {
-                    for (int j = Width, k = RowOffset(i), kr = source.RowOffset(i); j-- > 0; )
+                    for (int j = Width, k = RowOffset(i), kr = source.RowOffset(i); j-- > 0;)
+                    {
                         Data[k++] = source.Data[kr++];
+                    }
                 }
             }
             else if (border > Border)
+            {
                 MinimumBorder = border;
+            }
 
             return this;
         }
@@ -1472,7 +1634,9 @@ namespace DjvuNet.Graphics
                 IBitmap r = new Bitmap().Init(Height, Width, 0);
 
                 if ((Grays >= 2) && (Grays <= 256))
-                    r.Grays = (Grays);
+                {
+                    r.Grays = Grays;
+                }
 
                 retval = r;
             }
@@ -1496,6 +1660,9 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// Bounding rectangle
         /// </returns>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public Rectangle ComputeBoundingBox()
         {
             lock (_SyncObject)
@@ -1511,10 +1678,14 @@ namespace DjvuNet.Graphics
                     int pe = p + (s * h);
 
                     while ((p < pe) && GetBooleanAt(p))
+                    {
                         p += s;
+                    }
 
                     if (p < pe)
+                    {
                         break;
+                    }
                 }
 
                 for (ymax = h - 1; ymax >= 0; ymax--)
@@ -1523,10 +1694,14 @@ namespace DjvuNet.Graphics
                     int pe = p + w;
 
                     while ((p < pe) && GetBooleanAt(p))
+                    {
                         ++p;
+                    }
 
                     if (p < pe)
+                    {
                         break;
+                    }
                 }
 
                 for (xmin = 0; xmin <= xmax; xmin++)
@@ -1535,10 +1710,14 @@ namespace DjvuNet.Graphics
                     int pe = p + (s * h);
 
                     while ((p < pe) && GetBooleanAt(p))
+                    {
                         p += s;
+                    }
 
                     if (p < pe)
+                    {
                         break;
+                    }
                 }
 
                 for (ymin = 0; ymin <= ymax; ymin++)
@@ -1565,6 +1744,6 @@ namespace DjvuNet.Graphics
             }
         }
 
-        #endregion Methods
+#endregion Methods
     }
 }

@@ -51,7 +51,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_data == null)
+                {
                     _data = ExtractRawData();
+                }
 
                 return _data;
             }
@@ -70,9 +72,13 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Children?.Count > 0)
+                {
                     return _Children[0];
+                }
                 else
+                {
                     return null;
+                }
             }
         }
 
@@ -81,9 +87,13 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Children?.Count > 0)
+                {
                     return _Children[_Children.Count - 1];
+                }
                 else
+                {
                     return null;
+                }
             }
         }
 
@@ -118,12 +128,17 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_FirstSibling != null)
+                {
                     return _FirstSibling;
+                }
                 else
                 {
                     var parent = Parent as IDjvuElement;
                     if (parent != null && parent.Children?.Count > 0)
+                    {
                         _FirstSibling = parent.Children[0];
+                    }
+
                     return _FirstSibling;
                 }
             }
@@ -133,7 +148,9 @@ namespace DjvuNet.DataChunks
                 if (value != null)
                 {
                     if (Parent == null)
+                    {
                         throw new DjvuInvalidOperationException("Parent cannot be null for not null sibling.");
+                    }
 
                     _FirstSibling = value;
                 }
@@ -142,7 +159,9 @@ namespace DjvuNet.DataChunks
                     throw new DjvuInvalidOperationException("Parent has to be null if first sibling is null.");
                 }
                 else
+                {
                     _FirstSibling = value;
+                }
             }
         }
 
@@ -151,12 +170,17 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_LastSibling != null)
+                {
                     return _LastSibling;
+                }
                 else
                 {
                     var parent = (IDjvuElement)Parent;
                     if (parent != null && parent.Children.Count > 0)
+                    {
                         _LastSibling = parent.Children[parent.Children.Count - 1];
+                    }
+
                     return _LastSibling;
                 }
             }
@@ -166,7 +190,9 @@ namespace DjvuNet.DataChunks
                 if (value != null)
                 {
                     if (Parent == null)
+                    {
                         throw new DjvuInvalidOperationException("Parent cannot be null for not null sibling.");
+                    }
 
                     _LastSibling = value;
                 }
@@ -175,7 +201,9 @@ namespace DjvuNet.DataChunks
                     throw new DjvuInvalidOperationException("Parent has to be null if first sibling is null.");
                 }
                 else
+                {
                     _LastSibling = value;
+                }
             }
         }
 
@@ -230,7 +258,9 @@ namespace DjvuNet.DataChunks
         public override void ReadData(IDjvuReader reader)
         {
             if (Length > 0)
+            {
                 ReadChildren(reader);
+            }
         }
 
         /// <summary>
@@ -245,7 +275,9 @@ namespace DjvuNet.DataChunks
         public override void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
             if (writer == null)
+            {
                 throw new DjvuArgumentNullException(nameof(writer));
+            }
 
             AdjustAlignment(writer);
 
@@ -295,7 +327,9 @@ namespace DjvuNet.DataChunks
             {
                 reader.Position = DataOffset;
                 if (DjvuParser.IsFormChunk(ChunkType))
+                {
                     maxPosition -= 4;
+                }
             }
 
             // Read in all the chunks
@@ -307,7 +341,9 @@ namespace DjvuNet.DataChunks
                 }
 
                 if (reader.Position >= maxPosition)
+                {
                     break;
+                }
 
                 // Read the chunk ID
                 string id = reader.ReadUTF8String(4);

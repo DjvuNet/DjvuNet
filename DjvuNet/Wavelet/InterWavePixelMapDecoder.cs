@@ -21,6 +21,9 @@ namespace DjvuNet.Wavelet
             Close();
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public void Decode(IBinaryReader reader)
         {
             if (_YDecoder == null)
@@ -33,8 +36,10 @@ namespace DjvuNet.Wavelet
             byte slices = reader.ReadByte();
 
             if (serial != _CSerial)
+            {
                 throw new DjvuFormatException(
                     $"{nameof(IInterWavePixelMap)} received out of order data. Expected serial number {_CSerial}, actual {serial}");
+            }
 
             int nslices = _CSlices + slices;
 
@@ -44,10 +49,14 @@ namespace DjvuNet.Wavelet
                 int minor = reader.ReadByte();
 
                 if ((major & 0x7f) != InterWaveCodec.MajorVersion)
+                {
                     throw new DjvuFormatException("File has been compressed with an incompatible codec");
+                }
 
                 if (minor > InterWaveCodec.MinorVersion)
+                {
                     throw new DjvuFormatException("File has been compressed with a more recent codec");
+                }
 
                 int w = (reader.ReadByte() << 8);
                 w |= reader.ReadByte();
@@ -65,10 +74,14 @@ namespace DjvuNet.Wavelet
                 }
 
                 if (minor >= 2)
+                {
                     _CrCbHalf = ((crcbDelay & 0x80) != 0 ? false : true);
+                }
 
                 if ((major & 0x80) != 0)
+                {
                     _CrCbDelay = -1;
+                }
 
                 _YMap = new InterWaveMap(w, h);
                 _YDecoder = new InterWaveDecoder(_YMap);

@@ -231,9 +231,13 @@ namespace DjvuNet.Graphics
         public override bool Equals(object item)
         {
             if (item != null)
+            {
                 return this == (Pixel3B)item;
+            }
             else
+            {
                 return false;
+            }
         }
 
         /// <summary> Set the gray color.

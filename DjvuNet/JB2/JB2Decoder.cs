@@ -40,7 +40,9 @@ namespace DjvuNet.JB2
             } while (rectype != EndOfData);
 
             if (!_GotStartRecordP)
+            {
                 throw new DjvuFormatException("Image has no start record");
+            }
         }
 
         public void Code(JB2Dictionary jim)
@@ -53,7 +55,9 @@ namespace DjvuNet.JB2
             } while (rectype != EndOfData);
 
             if (!_GotStartRecordP)
+            {
                 throw new DjvuFormatException("Image has no start record");
+            }
         }
 
         public void Init(IBinaryReader gbs, JB2Dictionary zdict)
@@ -96,7 +100,9 @@ namespace DjvuNet.JB2
         protected override void CodeAbsoluteLocation(JB2Blit jblt, int rows, int columns)
         {
             if (!_GotStartRecordP)
+            {
                 throw new DjvuFormatException("Image no start");
+            }
 
             int left = CodeNum(1, _ImageColumns, _AbsLocX);
             int top = CodeNum(1, _ImageRows, _AbsLocY);
@@ -111,7 +117,9 @@ namespace DjvuNet.JB2
             int ysize = CodeNum(0, Bigpositive, _AbsSizeY);
 
             if ((xsize != (0xffff & xsize)) || (ysize != (0xffff & ysize)))
+            {
                 throw new DjvuFormatException("Image bad number");
+            }
 
             bm.Init(ysize, xsize, border);
         }
@@ -165,10 +173,11 @@ namespace DjvuNet.JB2
             byte[] combuf = new byte[size];
 
             for (int i = 0; i < combuf.Length; i++)
+            {
                 combuf[i] = (byte)CodeNum(0, 255, _DistCommentByte);
+            }
 
-            string result = Encoding.UTF8.GetString(combuf);
-            return result;
+            return Encoding.UTF8.GetString(combuf);
         }
 
         protected override void CodeImageSize(JB2Dictionary jim)
@@ -177,7 +186,9 @@ namespace DjvuNet.JB2
             int h = CodeNum(0, Bigpositive, _ImageSizeDist);
 
             if ((w != 0) || (h != 0))
+            {
                 throw new DjvuFormatException("Image bad dict 2");
+            }
 
             base.CodeImageSize(jim);
         }
@@ -188,7 +199,9 @@ namespace DjvuNet.JB2
             _ImageRows = CodeNum(0, Bigpositive, _ImageSizeDist);
 
             if ((_ImageColumns == 0) || (_ImageRows == 0))
+            {
                 throw new DjvuFormatException("Image with zero size");
+            }
 
             jim.Width = _ImageColumns;
             jim.Height = _ImageRows;
@@ -208,11 +221,15 @@ namespace DjvuNet.JB2
                     jim.InheritedDictionary = dict;
                 }
                 else
+                {
                     throw new DjvuFormatException("Image dictionary not provided");
+                }
             }
 
             if ((dict != null) && (size != dict.ShapeCount))
+            {
                 throw new DjvuFormatException("Image dictionary is invalid");
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -238,7 +255,9 @@ namespace DjvuNet.JB2
             int ysize = ch + ydiff;
 
             if ((xsize != (0xffff & xsize)) || (ysize != (0xffff & ysize)))
+            {
                 throw new DjvuFormatException("Image decoder value");
+            }
 
             bm.Init(ysize, xsize, border);
         }

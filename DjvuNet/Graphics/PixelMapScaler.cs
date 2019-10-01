@@ -73,7 +73,9 @@ namespace DjvuNet.Graphics
         public void SetHorzRatio(int numer, int denom)
         {
             if (_SrcWidth <= 0 || _SrcHeight <= 0 || _DestWidth <= 0 || _DestHeight <= 0)
+            {
                 throw new DjvuInvalidOperationException("Scaler has undefined size");
+            }
 
             // Implicit ratio (determined by the input/output sizes)
             if ((numer == 0) && (denom == 0))
@@ -82,7 +84,9 @@ namespace DjvuNet.Graphics
                 denom = _SrcWidth;
             }
             else if ((numer <= 0) || (denom <= 0))
+            {
                 throw new DjvuArgumentOutOfRangeException("Scaler illegal ratio");
+            }
 
             // Compute horz reduction
             _XShift = 0;
@@ -121,7 +125,9 @@ namespace DjvuNet.Graphics
         public void SetVertRatio(int numerator, int denominator)
         {
             if ((_SrcWidth <= 0) || (_SrcHeight <= 0) || (_DestWidth <= 0) || (_DestHeight <= 0))
+            {
                 throw new DjvuInvalidOperationException("Scaler undefined size");
+            }
 
             // Implicit ratio (determined by the input/output sizes)
             if ((numerator == 0) && (denominator == 0))
@@ -130,7 +136,9 @@ namespace DjvuNet.Graphics
                 denominator = _SrcHeight;
             }
             else if ((numerator <= 0) || (denominator <= 0))
+            {
                 throw new DjvuArgumentOutOfRangeException("Scaler illegal ratio");
+            }
 
             // Compute horz reduction
             _YShift = 0;
@@ -145,7 +153,9 @@ namespace DjvuNet.Graphics
 
             // Compute coordinate table
             if (_VCoord == null)
+            {
                 _VCoord = new int[_DestHeight];
+            }
 
             PrepareCoord(_VCoord, _Redh, _DestHeight, denominator, numerator);
         }
@@ -164,10 +174,14 @@ namespace DjvuNet.Graphics
 
             // Compute ratio (if not done yet)
             if (_VCoord == null)
+            {
                 SetVertRatio(0, 0);
+            }
 
             if (_HCoord == null)
+            {
                 SetHorzRatio(0, 0);
+            }
 
             // Compute reduced bounds
             red.XMin = (_HCoord[desired.XMin]) >> FRACBITS;
@@ -185,22 +199,30 @@ namespace DjvuNet.Graphics
             inp.XMin = red.XMin << _XShift;
 
             if (inp.XMin < 0)
+            {
                 inp.XMin = 0;
+            }
 
             inp.XMax = red.XMax << _XShift;
 
             if (inp.XMax > _SrcWidth)
+            {
                 inp.XMax = _SrcWidth;
+            }
 
             inp.YMin = red.YMin << _YShift;
 
             if (inp.YMin < 0)
+            {
                 inp.YMin = 0;
+            }
 
             inp.YMax = red.YMax << _YShift;
 
             if (inp.YMax > _SrcHeight)
+            {
                 inp.YMax = _SrcHeight;
+            }
 
             return inp;
         }
@@ -209,7 +231,9 @@ namespace DjvuNet.Graphics
         {
             // Parameter validation
             if ((srcRect.Width != srcMap.Width) || (srcRect.Height != srcMap.Height))
+            {
                 throw new DjvuArgumentException("Invalid rectangle", nameof(srcRect));
+            }
 
             // Compute rectangles
             Rectangle required_red = new Rectangle();
@@ -217,11 +241,15 @@ namespace DjvuNet.Graphics
 
             if ( (srcRect.XMin > sourceRect.XMin) || (srcRect.YMin > sourceRect.YMin)
               || (srcRect.XMax < sourceRect.XMax) || (srcRect.YMax < sourceRect.YMax))
+            {
                 throw new DjvuArgumentException("Invalid rectangle", nameof(srcRect));
+            }
 
             // Adjust output pixmap
             if ((targetRect.Width != (int)targetMap.Width) || (targetRect.Height != (int)targetMap.Height))
+            {
                 targetMap.Init(targetRect.Height, targetRect.Width, null);
+            }
 
             // Prepare temp stuff
             int bufw = required_red.Width;
@@ -260,10 +288,14 @@ namespace DjvuNet.Graphics
                             int dx = required_red.XMin - srcRect.XMin;
 
                             if (required_red.YMin > fy1)
+                            {
                                 fy1 = required_red.YMin;
+                            }
 
                             if (required_red.YMax <= fy2)
+                            {
                                 fy2 = required_red.YMax - 1;
+                            }
 
                             lower.SetOffset(fy1 - srcRect.YMin, dx);
                             // srcMap.CreateGPixelReference(fy1 - srcRect.YMin, dx);
@@ -381,22 +413,32 @@ namespace DjvuNet.Graphics
 
             // Result must fit exactly
             if ((@out == outmax) && (y != (beg + len)))
+            {
                 throw new DjvuInvalidOperationException("Scaler assertion");
+            }
         }
 
         internal IPixelReference GetLine(int fy, Rectangle redRect, Rectangle srcRect, IPixelMap srcMap)
         {
             if (fy < redRect.YMin)
+            {
                 fy = redRect.YMin;
+            }
             else if (fy >= redRect.YMax)
+            {
                 fy = redRect.YMax - 1;
+            }
 
             // Cached line
             if (fy == _L2)
+            {
                 return _PixelMap2.CreateGPixelReference(0);
+            }
 
             if (fy == _L1)
+            {
                 return _PixelMap1.CreateGPixelReference(0);
+            }
 
             // Shift
             IPixelMap p = _PixelMap1;
@@ -437,7 +479,9 @@ namespace DjvuNet.Graphics
                 int sy1 = (1 << _YShift);
 
                 if (sy1 > sy2)
+                {
                     sy1 = sy2;
+                }
 
                 for (int sy = 0; sy < sy1; sy++, inp0 += rowsize)
                 {
@@ -445,7 +489,9 @@ namespace DjvuNet.Graphics
                     inp1.SetOffset(inp0);
 
                     if (sx1 > line.XMax)
+                    {
                         sx1 = line.XMax;
+                    }
 
                     for (int sx = sx1 - x; sx-- > 0; s++, inp1.IncOffset())
                     {
@@ -456,9 +502,13 @@ namespace DjvuNet.Graphics
                 }
 
                 if (s == rnd2)
+                {
                     ip.SetBGR((b + rnd) >> div, (g + r) >> div, (r + rnd) >> div);
+                }
                 else
+                {
                     ip.SetBGR((b + (s / 2)) / 2, (g + (s / 2)) / s, (r + (s / 2)) / s);
+                }
             }
             return _PixelMap2.CreateGPixelReference(0);
         }

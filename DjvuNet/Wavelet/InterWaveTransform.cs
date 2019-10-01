@@ -319,7 +319,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        ///
+        /// Add documentation
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>
@@ -428,7 +428,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        ///
+        /// Add docs
         /// </summary>
         /// <param name="p"></param>
         /// <param name="width"></param>
@@ -452,9 +452,15 @@ namespace DjvuNet.Wavelet
                     // Special case: x=1
                     a1 = a2 = a3 = q[-s];
                     if (q + s < e)
+                    {
                         a2 = q[s];
+                    }
+
                     if (q + s3 < e)
+                    {
                         a3 = q[s3];
+                    }
+
                     b3 = q[0] - ((a1 + a2 + 1) >> 1);
                     q[0] = (short) b3;
                     q += s + s;
@@ -495,7 +501,10 @@ namespace DjvuNet.Wavelet
                     b2 = b3;
                     b3 = 0;
                     if (q - s3 >= p)
+                    {
                         q[-s3] = (short)((int)q[-s3] + ((((b1 + b2) << 3) + (b1 + b2) - b0 - b3 + 16) >> 5));
+                    }
+
                     q += s + s;
                 }
                 y += scale;
@@ -504,7 +513,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        ///
+        /// Add docs
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>
@@ -612,7 +621,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        ///
+        /// Add docs
         /// </summary>
         /// <param name="p"></param>
         /// <param name="w"></param>

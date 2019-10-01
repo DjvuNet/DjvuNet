@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.Configuration;
@@ -46,7 +47,9 @@ namespace DjvuNet.Compression
         public override BSBaseStream Init(Stream dataStream)
         {
             if (!dataStream.CanWrite)
+            {
                 throw new DjvuArgumentException("Stream was not writable.", nameof(dataStream));
+            }
 
             BaseStream = dataStream;
             Coder = DjvuSettings.Current.CoderFactory.CreateCoder(dataStream, true);
@@ -57,7 +60,9 @@ namespace DjvuNet.Compression
         {
             int encoding = (blockSize < MinBlock) ? MinBlock : blockSize;
             if (encoding > MaxBlock)
+            {
                 throw new DjvuArgumentException("Block size exceeds maximum value.", nameof(blockSize));
+            }
 
             _BlockSize = encoding * 1024;
         }
@@ -100,6 +105,9 @@ namespace DjvuNet.Compression
             }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public void Encode()
         {
 
@@ -137,10 +145,14 @@ namespace DjvuNet.Compression
 
             uint m = 0;
             for (m = 0; m < 256; m++)
+            {
                 mtf[m] = (byte) m;
+            }
 
             for (m = 0; m < 256; m++)
+            {
                 rmtf[mtf[m]] = (byte) m;
+            }
 
             int fadd = 4;
 
@@ -154,12 +166,16 @@ namespace DjvuNet.Compression
                 int ctxid = CTXIDS - 1;
 
                 if (ctxid > mtfno)
+                {
                     ctxid = mtfno;
+                }
 
                 mtfno = rmtf[c];
 
                 if (i == markerpos)
+                {
                     mtfno = 256;
+                }
 
                 // Encode using ZPCoder
                 int b;
@@ -170,7 +186,9 @@ namespace DjvuNet.Compression
                 Coder.Encoder(b, ref _Cxt[ctxid]);
 
                 if (b != 0)
+                {
                     goto rotate;
+                }
 
                 cx += CTXIDS;
 
@@ -179,7 +197,9 @@ namespace DjvuNet.Compression
                 Coder.Encoder(b, ref _Cxt[ctxid + cx]);
 
                 if (b != 0)
+                {
                     goto rotate;
+                }
 
                 cx += CTXIDS;
                 b = (mtfno < 4) ? 1 : 0;
@@ -273,13 +293,17 @@ namespace DjvuNet.Compression
                     freq[2] >>= 24;
                     freq[3] >>= 24;
                     for (int kk = 4; kk < FreqMax; kk++)
+                    {
                         freq[kk] >>= 24;
+                    }
                 }
                 // Relocate new char according to new freq
                 uint fc = (uint) fadd;
 
                 if (mtfno < FreqMax)
+                {
                     fc += freq[mtfno];
+                }
 
                 int k;
                 for (k = mtfno; k >= FreqMax; k--)
@@ -306,10 +330,14 @@ namespace DjvuNet.Compression
             if (BlockOffset > 0)
             {
                 if (!(BlockOffset < _BlockSize))
+                {
                     throw new DjvuInvalidOperationException();
+                }
 
                 for (int i = 0; i < Overflow; i++)
+                {
                     _Data[BlockOffset + i] = 0;
+                }
 
                 _Size = BlockOffset + 1;
                 Encode();
@@ -327,7 +355,9 @@ namespace DjvuNet.Compression
         {
             // Trivial checks
             if (sz == 0)
+            {
                 return;
+            }
 
             // Loop
             int copied = 0;
@@ -343,10 +373,14 @@ namespace DjvuNet.Compression
                 int bytes = _BlockSize - 1 - BlockOffset;
 
                 if (bytes > sz)
+                {
                     bytes = sz;
+                }
 
                 for (int i = offset + (int) _Offset, j = 0; j < bytes; i++, j++)
+                {
                     _Data[j] = buffer[i];
+                }
 
                 BlockOffset = (BlockOffset + bytes);
                 sz = (sz - bytes);
@@ -354,7 +388,9 @@ namespace DjvuNet.Compression
                 _Offset = (_Offset + bytes);
                 // Flush when needed
                 if (BlockOffset + 1 >= _BlockSize)
+                {
                     Flush();
+                }
             }
         }
 

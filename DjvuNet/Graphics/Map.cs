@@ -3,6 +3,7 @@ using System.Collections;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using DjvuNet.Errors;
 using DjvuNet.Wavelet;
@@ -112,7 +113,9 @@ namespace DjvuNet.Graphics
             }
 
             if (@char < '0' || @char > '9')
+            {
                 throw new DjvuFormatException($"Expected integer value. Actual value: {@char}");
+            }
 
             while (@char >= '0' && @char <= '9')
             {
@@ -216,7 +219,9 @@ namespace DjvuNet.Graphics
             finally
             {
                 if (hData.IsAllocated)
+                {
                     hData.Free();
+                }
             }
 
             image.RotateFlip(rotation);
@@ -251,7 +256,7 @@ namespace DjvuNet.Graphics
         /// of this instance of <see cref="DjvuNet.Graphics.Map"/>
         /// </returns>
         public static System.Drawing.Bitmap CopyDataToBitmap(
-            int width, int height, IntPtr data, long length, PixelFormat format)
+        int width, int height, IntPtr data, long length, PixelFormat format)
         {
             System.Drawing.Bitmap bmp = null;
             BitmapData bmpData = null;

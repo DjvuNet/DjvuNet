@@ -60,8 +60,10 @@ namespace DjvuNet.JB2
             Verify.SubsampleRange(subsample);
 
             if ((Width == 0) || (Height == 0))
+            {
                 throw new DjvuFormatException(
                     $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
+            }
 
             int swidth = ((Width + subsample) - 1) / subsample;
             int sheight = ((Height + subsample) - 1) / subsample;
@@ -82,7 +84,9 @@ namespace DjvuNet.JB2
                 JB2Shape pshape = GetShape(pblit.ShapeNumber);
 
                 if (pshape.Bitmap != null)
+                {
                     bm.Blit(pshape.Bitmap, pblit.Left, pblit.Bottom, subsample);
+                }
                 //});
             }
 
@@ -107,42 +111,11 @@ namespace DjvuNet.JB2
         public Bitmap GetBitmap(Rectangle rect, int subsample, int align, int dispy)
         {
             if ((Width == 0) || (Height == 0))
+            {
                 throw new DjvuFormatException(
                     $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
-
-            Verify.SubsampleRange(subsample);
-
-            int rxmin = rect.Right * subsample;
-            int rymin = rect.Bottom * subsample;
-            int swidth = rect.Width;
-            int sheight = rect.Height;
-            int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
-
-            Bitmap bm = new Bitmap();
-            bm.Init(sheight, swidth, border);
-            bm.Grays = (1 + (subsample * subsample));
-
-            for (int blitno = 0; blitno < Blits.Count; )
-            {
-                JB2Blit pblit = GetBlit(blitno++);
-                JB2Shape pshape = GetShape(pblit.ShapeNumber);
-
-                if (pshape.Bitmap != null)
-                    bm.Blit(pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample);
             }
 
-            return bm;
-        }
-
-        public Bitmap GetBitmap(Rectangle rect, int subsample, int align, int dispy, List<int> components)
-        {
-            if (components == null)
-                return GetBitmap(rect, subsample, align, dispy);
-
-            if ((Width == 0) || (Height == 0))
-                throw new DjvuFormatException(
-                    $"Image is empty can not be used to create bitmap. Width: {Width}, Height {Height}");
-
             Verify.SubsampleRange(subsample);
 
             int rxmin = rect.Right * subsample;
@@ -150,6 +123,7 @@ namespace DjvuNet.JB2
             int swidth = rect.Width;
             int sheight = rect.Height;
             int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
+
             Bitmap bm = new Bitmap();
             bm.Init(sheight, swidth, border);
             bm.Grays = (1 + (subsample * subsample));
@@ -161,8 +135,45 @@ namespace DjvuNet.JB2
 
                 if (pshape.Bitmap != null)
                 {
-                    if (bm.Blit(pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample))
-                        components.Add((blitno - 1));
+                    bm.Blit(pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample);
+                }
+            }
+
+            return bm;
+        }
+
+        public Bitmap GetBitmap(Rectangle rect, int subsample, int align, int dispy, List<int> components)
+        {
+            if (components == null)
+            {
+                return GetBitmap(rect, subsample, align, dispy);
+            }
+
+            if ((Width == 0) || (Height == 0))
+            {
+                throw new DjvuFormatException(
+                    $"Image is empty can not be used to create bitmap. Width: {Width}, Height {Height}");
+            }
+
+            Verify.SubsampleRange(subsample);
+
+            int rxmin = rect.Right * subsample;
+            int rymin = rect.Bottom * subsample;
+            int swidth = rect.Width;
+            int sheight = rect.Height;
+            int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
+            Bitmap bm = new Bitmap();
+            bm.Init(sheight, swidth, border);
+            bm.Grays = (1 + (subsample * subsample));
+
+            for (int blitno = 0; blitno < Blits.Count; )
+            {
+                JB2Blit pblit = GetBlit(blitno++);
+                JB2Shape pshape = GetShape(pblit.ShapeNumber);
+
+                if (pshape.Bitmap != null && bm.Blit(pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample))
+                {
+                    components.Add((blitno - 1));
                 }
             }
 
@@ -178,7 +189,9 @@ namespace DjvuNet.JB2
         public virtual int AddBlit(JB2Blit jb2Blit)
         {
             if (jb2Blit.ShapeNumber >= ShapeCount)
+            {
                 throw new ArgumentException("Image bad shape", nameof(jb2Blit));
+            }
 
             int retval = _Blits.Count;
             _Blits.Add(jb2Blit);

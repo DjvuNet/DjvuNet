@@ -1,6 +1,5 @@
 ﻿namespace DjvuNet.Wavelet
 {
-
     public enum YCrCbMode
     {
         None,

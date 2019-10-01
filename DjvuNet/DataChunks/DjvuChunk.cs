@@ -53,7 +53,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Includes != null)
+                {
                     return _Includes;
+                }
                 else if (Children != null)
                 {
                     _Includes = Children.Select(
@@ -61,7 +63,9 @@ namespace DjvuNet.DataChunks
                         .Where(x => x != null).ToList<InclChunk>();
                 }
                 else
+                {
                     _Includes = new List<InclChunk>();
+                }
 
                 return _Includes;
             }

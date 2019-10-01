@@ -99,11 +99,15 @@ namespace DjvuNet
         internal static Stream GetWebStream(Uri urlStr)
         {
             if (urlStr == null)
+            {
                 throw new ArgumentNullException(nameof(urlStr));
+            }
 
             WebClient client = new WebClient();
             if (String.CompareOrdinal(urlStr.Scheme, "file") == 0)
+            {
                 return client.OpenRead(urlStr);
+            }
             else
             {
                 byte[] buffer = client.DownloadData(urlStr);
@@ -194,7 +198,10 @@ namespace DjvuNet
             Read(buffer, 1, 3);
             Array.Reverse(buffer);
             if (buffer[2] >> 7 == 1)
+            {
                 buffer[3] = 0xff;
+            }
+
             return BitConverter.ToInt32(buffer, 0);
         }
 
@@ -358,9 +365,13 @@ namespace DjvuNet
                 if (enc == null)
                 {
                     if (_CurrentEncoding != null)
+                    {
                         enc = _CurrentEncoding;
+                    }
                     else
+                    {
                         enc = _CurrentEncoding = new UTF8Encoding(false);
+                    }
                 }
                 return enc.GetString(test, 0, length);
             }
@@ -377,7 +388,9 @@ namespace DjvuNet
             {
                 int result = Read(buffer, 0, bufferSize);
                 if (!skipBOM)
+                {
                     ms.Write(buffer, 0, result);
+                }
                 else
                 {
                     enc = CheckEncodingSignature(buffer, ms, ref result);
@@ -388,7 +401,9 @@ namespace DjvuNet
 
                 // Check if we read to the end of the stream
                 if (result < bufferSize)
+                {
                     break;
+                }
             }
             readBytes = bytesRead;
 
@@ -408,19 +423,27 @@ namespace DjvuNet
         internal static Encoding CheckEncodingSignature(byte[] buffer, Stream stream, ref int count)
         {
             if (buffer == null)
+            {
                 throw new ArgumentNullException(nameof(buffer));
+            }
 
             if (stream == null)
+            {
                 throw new ArgumentNullException(nameof(stream));
+            }
 
             if (count < 4)
+            {
                 throw new ArgumentOutOfRangeException(
                     "To verify Encoding Scheme Signature caller should pass buffer with at least 4 bytes.",
                     nameof(count));
+            }
 
             if (buffer.Length < count)
+            {
                 throw new ArgumentException(
                     $"Buffer length is lower than value of {nameof(count)}", nameof(buffer));
+            }
 
             byte[] checkBuffer = new byte[4];
             Buffer.BlockCopy(buffer, 0, checkBuffer, 0, 4);
@@ -498,7 +521,9 @@ namespace DjvuNet
 
             // Do a deep clone with new BaseStream
             if (_Location != null)
+            {
                 newReader = new DjvuReader(_Location);
+            }
             else
             {
                 MemoryStream stream = new MemoryStream((int)BaseStream.Length);

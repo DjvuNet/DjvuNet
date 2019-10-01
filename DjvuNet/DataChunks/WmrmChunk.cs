@@ -29,7 +29,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_watermarkImage != null)
+                {
                     return _watermarkImage;
+                }
                 else
                 {
                     _watermarkImage = ReadCompressedWatermarkImage();
@@ -40,7 +42,9 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_watermarkImage != value)
+                {
                     _watermarkImage = value;
+                }
             }
         }
 

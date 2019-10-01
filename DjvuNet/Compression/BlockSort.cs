@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
@@ -32,16 +33,24 @@ namespace DjvuNet.Compression
         public BlockSort(byte[] pdata, int psize)
         {
             if (psize <= 0 || psize >= 0x1000000)
+            {
                 throw new DjvuArgumentOutOfRangeException(nameof(psize));
+            }
 
             if (pdata == null)
+            {
                 throw new DjvuArgumentNullException(nameof(pdata));
+            }
 
             if (pdata.Length == 0)
+            {
                 throw new DjvuArgumentOutOfRangeException(nameof(pdata));
+            }
 
             if (pdata.Length < psize)
+            {
                 throw new DjvuArgumentOutOfRangeException(nameof(psize));
+            }
 
             _Size = psize;
             _Data = pdata;
@@ -49,21 +58,32 @@ namespace DjvuNet.Compression
             _Rank = new int[_Size + 1];
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public void Sort(ref int markerpos)
         {
             int lo, hi;
 
             if (_Size <= 0)
+            {
                 throw new DjvuInvalidOperationException();
+            }
 
             if (_Data == null)
+            {
                 throw new DjvuInvalidOperationException();
+            }
 
             if (_Data.Length <= 1 || _Size <= 1)
+            {
                 return;
+            }
 
             if (!(_Data[_Size - 1] == 0))
+            {
                 throw new DjvuInvalidOperationException();
+            }
 
             // Step 1: Radix sort
             int depth = 0;
@@ -83,7 +103,10 @@ namespace DjvuNet.Compression
             {
                 hi = _Rank[_Posn[lo]];
                 if (lo < hi)
+                {
                     QuickSort3d(lo, hi, depth);
+                }
+
                 lo = hi;
             }
 
@@ -145,7 +168,9 @@ namespace DjvuNet.Compression
             markerpos = -1;
 
             for (i = 0; i < _Size; i++)
+            {
                 _Rank[i] = _Data[i];
+            }
 
             for (i = 0; i < _Size; i++)
             {
@@ -162,8 +187,9 @@ namespace DjvuNet.Compression
             }
 
             if (!(markerpos >= 0 && markerpos < _Size))
+            {
                 throw new DjvuInvalidOperationException();
-
+            }
         }
 
         /// <summary>
@@ -188,6 +214,9 @@ namespace DjvuNet.Compression
             }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal bool GT(int p1, int p2, int depth)
         {
             int r1, r2;
@@ -201,48 +230,64 @@ namespace DjvuNet.Compression
                 p2 += twod;
 
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
 
                 r1 = _Rank[p1];
                 r2 = _Rank[p2];
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
 
                 r1 = _Rank[p1 + depth];
                 r2 = _Rank[p2 + depth];
                 p1 += twod;
                 p2 += twod;
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
 
                 r1 = _Rank[p1];
                 r2 = _Rank[p2];
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
 
                 r1 = _Rank[p1 + depth];
                 r2 = _Rank[p2 + depth];
                 p1 += twod;
                 p2 += twod;
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
 
                 r1 = _Rank[p1];
                 r2 = _Rank[p2];
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
 
                 r1 = _Rank[p1 + depth];
                 r2 = _Rank[p2 + depth];
                 p1 += twod;
                 p2 += twod;
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
 
                 r1 = _Rank[p1];
                 r2 = _Rank[p2];
                 if (r1 != r2)
+                {
                     return (r1 > r2);
+                }
             };
         }
 
@@ -267,7 +312,9 @@ namespace DjvuNet.Compression
                 c2 = _Data[p2];
 
                 if (c1 != c2)
+                {
                     return (c1 > c2);
+                }
 
                 c1 = _Data[p1 + 1];
                 c2 = _Data[p2 + 1];
@@ -277,11 +324,15 @@ namespace DjvuNet.Compression
                 depth += 2;
 
                 if (c1 != c2)
+                {
                     return c1 > c2;
+                }
             }
 
             if (p1 < _Size && p2 < _Size)
+            {
                 return false;
+            }
 
             return p1 < p2;
         }
@@ -300,13 +351,17 @@ namespace DjvuNet.Compression
                 int tmp = _Posn[i];
 
                 for (j = i - 1; j >= lo && GT(_Posn[j], tmp, depth); j--)
+                {
                     _Posn[j + 1] = _Posn[j];
+                }
 
                 _Posn[j + 1] = tmp;
             }
 
             for (i = lo; i <= hi; i++)
+            {
                 _Rank[_Posn[i]] = i;
+            }
         }
 
         /// <summary>
@@ -341,13 +396,22 @@ namespace DjvuNet.Compression
             }
 
             if (c2 <= c1)
+            {
                 return c1;
+            }
             else if (c2 >= c3)
+            {
                 return c3;
+            }
             else
+            {
                 return c2;
+            }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal void QuickSort3r(int lo, int hi, int depth)
         {
             /* Initialize stack */
@@ -401,7 +465,12 @@ namespace DjvuNet.Compression
                             if (c == 0) { tmp = _Posn[h]; _Posn[h] = _Posn[h1]; _Posn[h1--] = tmp; }
                             h--;
                         }
-                        if (l > h) break;
+
+                        if (l > h)
+                        {
+                            break;
+                        }
+
                         tmp = _Posn[l]; _Posn[l] = _Posn[h]; _Posn[h] = tmp;
                     }
 
@@ -418,22 +487,31 @@ namespace DjvuNet.Compression
 
                     // -- process segments
                     if (!(sp + 2 < QuickSortStack))
+                    {
                         throw new DjvuInvalidOperationException(
                             $"Value of {nameof(sp)} variable outside of expected range: {sp}");
+                    }
 
                     // ----- middle segment (=?) [l1, h1]
                     for (int i = l1; i <= h1; i++)
+                    {
                         _Rank[_Posn[i]] = h1;
+                    }
 
                     // ----- lower segment (<) [lo, l1[
                     if (l1 > lo)
                     {
                         for (int i = lo; i < l1; i++)
+                        {
                             _Rank[_Posn[i]] = l1 - 1;
+                        }
+
                         slo[sp] = lo;
                         shi[sp] = l1 - 1;
                         if (slo[sp] < shi[sp])
+                        {
                             sp++;
+                        }
                     }
 
                     // ----- upper segment (>) ]h1, hi]
@@ -442,7 +520,9 @@ namespace DjvuNet.Compression
                         slo[sp] = h1 + 1;
                         shi[sp] = hi;
                         if (slo[sp] < shi[sp])
+                        {
                             sp++;
+                        }
                     }
                 }
             }
@@ -473,13 +553,22 @@ namespace DjvuNet.Compression
             }
 
             if (c2 <= c1)
+            {
                 return c1;
+            }
             else if (c2 >= c3)
+            {
                 return c3;
+            }
             else
+            {
                 return c2;
+            }
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal void QuickSort3d(int lo, int hi, int depth)
         {
             /* Initialize stack */
@@ -503,7 +592,9 @@ namespace DjvuNet.Compression
                 if (depth >= PresortDepth)
                 {
                     for (int i = lo; i <= hi; i++)
+                    {
                         _Rank[_Posn[i]] = hi;
+                    }
                 }
                 else if (hi - lo < PresortThreshold)
                 {
@@ -512,7 +603,10 @@ namespace DjvuNet.Compression
                     {
                         int tmp = _Posn[i];
                         for (j = i - 1; j >= lo && GTD(_Posn[j], tmp, depth); j--)
+                        {
                             _Posn[j + 1] = _Posn[j];
+                        }
+
                         _Posn[j + 1] = tmp;
                     }
                     for (i = hi; i >= lo; i = j)
@@ -520,7 +614,9 @@ namespace DjvuNet.Compression
                         int tmp = _Posn[i];
                         _Rank[tmp] = i;
                         for (j = i - 1; j >= lo && !GTD(tmp, _Posn[j], depth); j--)
+                        {
                             _Rank[_Posn[j]] = i;
+                        }
                     }
                 }
                 else
@@ -546,8 +642,16 @@ namespace DjvuNet.Compression
                         while (l <= h)
                         {
                             int c = (int)_Data[_Posn[l] + depth] - (int)med;
-                            if (c > 0) break;
-                            if (c == 0) { tmp = _Posn[l]; _Posn[l] = _Posn[l1]; _Posn[l1++] = tmp; }
+                            if (c > 0)
+                            {
+                                break;
+                            }
+
+                            if (c == 0)
+                            {
+                                tmp = _Posn[l]; _Posn[l] = _Posn[l1]; _Posn[l1++] = tmp;
+                            }
+
                             l++;
                         }
                         while (l <= h)
@@ -557,7 +661,12 @@ namespace DjvuNet.Compression
                             if (c == 0) { tmp = _Posn[h]; _Posn[h] = _Posn[h1]; _Posn[h1--] = tmp; }
                             h--;
                         }
-                        if (l > h) break;
+
+                        if (l > h)
+                        {
+                            break;
+                        }
+
                         tmp = _Posn[l]; _Posn[l] = _Posn[h]; _Posn[h] = tmp;
                     }
 
@@ -573,9 +682,11 @@ namespace DjvuNet.Compression
                     h1 = hi - (h1 - h);
 
                     // -- process segments
-                    if(!(sp + 3 < QuickSortStack))
+                    if (!(sp + 3 < QuickSortStack))
+                    {
                         throw new DjvuInvalidOperationException(
                             $"Value of {nameof(sp)} variable outside of expected range: {sp}");
+                    }
 
                     // ----- middle segment (=?) [l1, h1]
                     l = l1; h = h1;
@@ -651,7 +762,9 @@ namespace DjvuNet.Compression
 
             // Generate upper position
             for (i = 1; i < 65536; i++)
+            {
                 ftab[i] += ftab[i - 1];
+            }
 
             // Fill rank array with upper bound
             c1 = _Data[0];
@@ -672,8 +785,10 @@ namespace DjvuNet.Compression
             }
 
             // Fixup marker stuff
-            if(!(_Data[_Size - 1] == 0))
+            if (!(_Data[_Size - 1] == 0))
+            {
                 throw new DjvuInvalidOperationException();
+            }
 
             c1 = _Data[_Size - 2];
             _Posn[0] = _Size - 1;
@@ -692,9 +807,11 @@ namespace DjvuNet.Compression
             int[] lo = new int[256];
             int[] hi = new int[256];
 
-            // Count occurences
+            // Count occurrences
             for (i = 0; i < _Size - 1; i++)
+            {
                 hi[_Data[i]]++;
+            }
 
             // Compute positions (lo)
             int last = 1;

@@ -21,6 +21,11 @@
     <NoWarn>8002</NoWarn>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DefineConstants Condition="$(TargetFramework) == $(DotNetStandardVersion)" Label="Define_NETSTANDARD">NETSTANDARD</DefineConstants>
+    <DefineConstants Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)" Label="Define_NETCOREAPP">NETCOREAPP</DefineConstants>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
