@@ -217,8 +217,10 @@ namespace DjvuNet.Graphics
         public void Ycc2Rgb(int count)
         {
             if ((_ncolors != 3) || _parent.IsRampNeeded)
+            {
                 throw new DjvuInvalidOperationException(
                     $"Function {nameof(Ycc2Rgb)} can be used only with three color based images.");
+            }
 
             while (count-- > 0)
             {
@@ -408,19 +410,27 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(IPixel other)
         {
-            if (null != (object) other)
+            if (null != (object)other)
+            {
                 return Red == other.Red && Green == other.Green && Blue == other.Blue;
+            }
             else
+            {
                 return false;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(IPixelReference other)
         {
             if (null != (object)other)
+            {
                 return Red == other.Red && Green == other.Green && Blue == other.Blue;
+            }
             else
+            {
                 return false;
+            }
         }
 
         //[MethodImpl(MethodImplOptions.AggressiveInlining)]

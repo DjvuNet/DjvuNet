@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -15,9 +16,10 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [ClassData(typeof(DjvuJsonDataSource))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void DjvmChunk_Theory(DjvuJsonDocument doc, int index)
         {
-            // TODO Fix libdjvulibre DjvuDumpHelper implementation - fails 
+            // TODO Fix libdjvulibre DjvuDumpHelper implementation - fails
             // for index 39, 63, 64 in some tests - need DjVuLibre tests
             if (index == 63)
                 return;

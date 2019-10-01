@@ -10,6 +10,7 @@ using DjvuNet.Tests;
 using System.IO;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Errors;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -37,6 +38,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(NavmTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void NavmChunk_Theory(string file)
         {
             Mock<IDjvuDocument> docMock = new Mock<IDjvuDocument>();

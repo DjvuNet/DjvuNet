@@ -65,7 +65,9 @@ namespace DjvuNet.Wavelet
             Blocks = new InterWaveBlock[BlockNumber];
 
             for (int i = 0; i < Blocks.Length; i++)
+            {
                 Blocks[i] = new InterWaveBlock();
+            }
         }
 
         #endregion Constructors
@@ -97,7 +99,9 @@ namespace DjvuNet.Wavelet
                 //((IWMap)retval).Blocks = blocks;
 
                 for (int i = 0; i < BlockNumber; i++)
+                {
                     retval.Blocks[i] = Blocks[i].Duplicate();
+                }
             }
             catch
             {
@@ -107,7 +111,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        ///
+        /// Add docs
         /// </summary>
         /// <param name="p"></param>
         /// <param name="pidx"></param>
@@ -121,15 +125,19 @@ namespace DjvuNet.Wavelet
             for (int scale = begin >> 1; scale >= end; scale >>= 1)
             {
                 for (int j = 0; j < w; j += scale)
+                {
                     BackwardFilter(p, pidx, j, j + (h * rowsize), j, scale * rowsize);
+                }
 
                 for (int i = 0; i < h; i += scale)
+                {
                     BackwardFilter(p, pidx, i * rowsize, (i * rowsize) + w, i * rowsize, scale);
+                }
             }
         }
 
         /// <summary>
-        ///
+        /// Add docs
         /// </summary>
         /// <param name="p"></param>
         /// <param name="pidx"></param>
@@ -142,7 +150,9 @@ namespace DjvuNet.Wavelet
             int s3 = 3 * s;
 
             if ((z < b) || (z > e))
+            {
                 throw new DjvuFormatException("Filter parameters were out of bounds");
+            }
 
             int n = z;
             int bb;
@@ -179,7 +189,9 @@ namespace DjvuNet.Wavelet
                 int x = bb;
 
                 if ((n + s) < e)
+                {
                     x = (bb + cc + 1) >> 1;
+                }
 
                 p[pidx + n] = (short)(p[pidx + n] + x);
                 n = n + s + s;
@@ -233,7 +245,9 @@ namespace DjvuNet.Wavelet
                 for (int buckno = 0; buckno < 64; buckno++)
                 {
                     if (Blocks[blockno].GetBlock(buckno) != null)
+                    {
                         buckets++;
+                    }
                 }
             }
 
@@ -241,7 +255,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        ///
+        /// Add docs
         /// </summary>
         /// <param name="index"></param>
         /// <param name="img8"></param>
@@ -268,7 +282,9 @@ namespace DjvuNet.Wavelet
                     ppidx = pidx + j;
 
                     for (int ii = 0, p1idx = 0; ii++ < 32; p1idx += 32, ppidx += BlockWidth)
+                    {
                         Array.Copy(liftblock, p1idx, data16, ppidx, 32);
+                    }
                 }
             }
 
@@ -280,11 +296,15 @@ namespace DjvuNet.Wavelet
                 for (int i = 0; i < BlockHeight; i += 2, pidx += BlockWidth)
                 {
                     for (int jj = 0; jj < BlockWidth; jj += 2, pidx += 2)
+                    {
                         data16[pidx + BlockWidth] = data16[pidx + BlockWidth + 1] = data16[pidx + 1] = data16[pidx];
+                    }
                 }
             }
             else
+            {
                 Backward(data16, 0, Width, Height, BlockWidth, 32, 1);
+            }
 
             pidx = 0;
 
@@ -295,9 +315,13 @@ namespace DjvuNet.Wavelet
                     int x = (data16[pidx + (j++)] + 32) >> 6;
 
                     if (x < -128)
+                    {
                         x = -128;
+                    }
                     else if (x > 127)
+                    {
                         x = 127;
+                    }
 
                     img8[pixidx] = (sbyte)x;
                 }
@@ -305,7 +329,7 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        ///
+        /// Add docs
         /// </summary>
         /// <param name="subsample"></param>
         /// <param name="rect"></param>
@@ -319,23 +343,31 @@ namespace DjvuNet.Wavelet
             int nlevel = 0;
 
             while ((nlevel < 5) && ((32 >> nlevel) > subsample))
+            {
                 nlevel++;
+            }
 
             int boxsize = 1 << nlevel;
 
             if (subsample != (32 >> nlevel))
+            {
                 throw new DjvuArgumentOutOfRangeException("Unsupported subsampling factor");
+            }
 
             if (rect.Empty)
+            {
                 throw new DjvuArgumentException("Rectangle is empty", nameof(rect));
+            }
 
             Rectangle irect = new Rectangle(
                 0, 0, ((Width + subsample) - 1) / subsample, ((Height + subsample) - 1) / subsample);
 
             if ((rect.Right < 0) || (rect.Bottom < 0) || (rect.Left > irect.Left) || (rect.Top > irect.Top))
+            {
                 throw new DjvuArgumentException(
                     "Rectangle is out of bounds: " + rect.Right + "," + rect.Bottom +
                     "," + rect.Left + "," + rect.Top + "," + irect.Left + "," + irect.Top, nameof(rect));
+            }
 
             Rectangle[] needed = new Rectangle[8];
             Rectangle[] recomp = new Rectangle[8];
@@ -405,7 +437,9 @@ namespace DjvuNet.Wavelet
                     for (int ii = 0, tt = 0, pp = rdata; ii < boxsize; ii += ppinc, pp += ppmod1, tt += (ttmod1 - 32))
                     {
                         for (int jj = 0; jj < boxsize; jj += ppinc, tt += ttmod0)
+                        {
                             data[pp + jj] = liftblock[tt];
+                        }
                     }
                 }
             }
@@ -424,7 +458,9 @@ namespace DjvuNet.Wavelet
                     for (int ii = comp.Bottom, pp = (comp.Bottom * dataw); ii < comp.Top; ii += 2, pp += (dataw + dataw))
                     {
                         for (int jj = comp.Right; jj < comp.Left; jj += 2)
+                        {
                             data[pp + jj + dataw] = data[pp + jj + dataw + 1] = data[pp + jj + 1] = data[pp + jj];
+                        }
                     }
 
                     break;
@@ -446,9 +482,13 @@ namespace DjvuNet.Wavelet
                     int x = (data[pidx + j] + 32) >> 6;
 
                     if (x < -128)
+                    {
                         x = -128;
+                    }
                     else if (x > 127)
+                    {
                         x = 127;
+                    }
 
                     img8[pixidx] = (sbyte)x;
                 }

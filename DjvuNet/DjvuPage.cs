@@ -521,7 +521,9 @@ namespace DjvuNet
                     retval = bg;
             }
             else
+            {
                 retval = bg;
+            }
 
             return retval;
         }
@@ -534,6 +536,9 @@ namespace DjvuNet
         /// <param name="gamma"></param>
         /// <param name="retval"></param>
         /// <returns></returns>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public GPixmap GetBgPixmap(GRect rect, int subsample, double gamma, GPixmap retval)
         {
             Verify.SubsampleRange(subsample);
@@ -543,7 +548,9 @@ namespace DjvuNet
             int height = Height;
 
             if (width <= 0 || height <= 0)
+            {
                 return null;
+            }
 
             double gammaCorr = 1.0D;
 
@@ -569,12 +576,16 @@ namespace DjvuNet
                 int iwHeight = bgIWPixmap.Height;
 
                 if (iwWidth == 0 || iwHeight == 0)
+                {
                     return null;
+                }
 
                 int red = ComputeRed(width, height, iwWidth, iwHeight);
 
                 if (red < 1 || red > 12)
+                {
                     return null;
+                }
 
                 if (subsample == red)
                 {
@@ -603,10 +614,14 @@ namespace DjvuNet
                     GRect nrect = new GRect(0, 0, rect.Width, rect.Height);
 
                     if (xrect.Left > iwWidth)
+                    {
                         xrect.Left = iwWidth;
+                    }
 
                     if (xrect.Top > iwHeight)
+                    {
                         xrect.Top = iwHeight;
+                    }
 
                     GPixmap iwPMap = bgIWPixmap.GetPixelMap(1, xrect, null);
                     pMap = (retval != null) ? retval : new PixelMap();
@@ -617,7 +632,9 @@ namespace DjvuNet
                     int po2 = 16;
 
                     while (po2 > 1 && subsample < po2 * red)
+                    {
                         po2 >>= 1;
+                    }
 
                     int inw = ((iwWidth + po2) - 1) / po2;
                     int inh = ((iwHeight + po2) - 1) / po2;
@@ -640,13 +657,17 @@ namespace DjvuNet
                     pMap.ApplyGammaCorrection(gammaCorr);
 
                     for (int i = 0; i < 9; i++)
+                    {
                         pMap.ApplyGammaCorrection(gammaCorr);
+                    }
                 }
 
                 return pMap;
             }
             else
+            {
                 return null;
+            }
         }
 
         public GBitmap GetBitmap(GRect rect, int subsample, int align, GBitmap retval)
@@ -740,6 +761,9 @@ namespace DjvuNet
             return ((fgred >= 1) && (fgred <= 12));
         }
 
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal bool Stencil(IPixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
         {
             Verify.SubsampleRange(subsample);
@@ -748,7 +772,9 @@ namespace DjvuNet
             int height = Height;
 
             if (width <= 0 || height <= 0)
+            {
                 return false;
+            }
 
             double gammaCorr = 1.0D;
 
@@ -790,7 +816,9 @@ namespace DjvuNet
                     GPixelReference color = colors.CreateGPixelReference(0);
 
                     for (int i = 0; i < colors.Width; color.IncOffset())
+                    {
                         fgPalette.IndexToColor(i++, color);
+                    }
 
                     colors.ApplyGammaCorrection(gammaCorr);
 
@@ -888,7 +916,9 @@ namespace DjvuNet
 
                         //          if((red < 1) || (red > 12))
                         if (red < 1 || red > 16)
+                        {
                             return false;
+                        }
                         //
                         //          int supersample = (red <= subsample)
                         //            ? 1

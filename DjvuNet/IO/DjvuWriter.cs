@@ -217,9 +217,13 @@ namespace DjvuNet
         {
             UnicodeEncoding encoding = null;
             if (skipBOM)
+            {
                 encoding = new UnicodeEncoding(false, false);
+            }
             else
+            {
                 encoding = new UnicodeEncoding(false, true);
+            }
 
             return WriteString(value, encoding);
         }
@@ -235,10 +239,14 @@ namespace DjvuNet
         public long WriteString(string value, Encoding encoding)
         {
             if (value == null)
+            {
                 throw new ArgumentNullException(nameof(value));
+            }
 
             if (encoding == null)
+            {
                 throw new ArgumentNullException(nameof(encoding));
+            }
 
             byte[] buffer = encoding.GetBytes(value);
             Write(buffer, 0, buffer.Length);

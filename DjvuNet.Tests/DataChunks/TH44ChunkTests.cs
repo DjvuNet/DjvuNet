@@ -11,6 +11,7 @@ using DjvuNet.Graphics;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Wavelet;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -144,6 +145,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(TH44TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void TH44Chunk_Theory(string fileName, string filePath)
         {
             using (FileStream stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))

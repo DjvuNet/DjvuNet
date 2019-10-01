@@ -5,6 +5,7 @@ using DjvuNet.Graphics;
 using TUtil = DjvuNet.Tests.Util;
 using DjvuNet.Errors;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -17,6 +18,7 @@ namespace DjvuNet.Graphics.Tests
         int shdBytesPerPixel = 4;
         int testCount = 1;
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static sbyte[] GetRandomData(int width, int height, int bytesPerPixel)
         {
             long length = width * height * bytesPerPixel;
@@ -31,6 +33,7 @@ namespace DjvuNet.Graphics.Tests
             return data;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void WritePixelMap(int width, int height, IPixelMap bmp)
         {
             string formatIndex = "x4";
@@ -332,6 +335,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BenchmarkApplyGammaCorrection()
         {
             sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);
@@ -355,6 +359,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BenchmarkApplyGammaCorrectionFastMT()
         {
             sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);
@@ -376,6 +381,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BenchmarkApplyGammaCorrectionFastST()
         {
             sbyte[] data = GetRandomData(shdWidth, shdHeight, shdBytesPerPixel);

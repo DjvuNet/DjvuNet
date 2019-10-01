@@ -36,7 +36,6 @@ namespace DjvuNet.Compression.Tests
                 using(MemoryStream readStream = new MemoryStream(readBuffer))
                 using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
                 {
-
                     string testResult = reader.ReadUTF8String(buffer.Length);
                     Assert.False(String.IsNullOrWhiteSpace(testResult));
                     // TODO track bug causing roundtrip errors
@@ -68,7 +67,7 @@ namespace DjvuNet.Compression.Tests
             UTF8Encoding encoding = new UTF8Encoding(false);
             string filePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "testhello.obz");
             filePath = filePath.Replace(".obz", ".bz3");
-            string testText = "Hello bzz! \r\n";
+            const string testText = "Hello bzz! \r\n";
             long bytesWritten = 0;
             using (Stream stream = File.Create(filePath, 8192))
             using (BzzWriter writer = new BzzWriter(stream))
@@ -87,7 +86,6 @@ namespace DjvuNet.Compression.Tests
             using (MemoryStream readStream = new MemoryStream(testBuffer))
             using (BzzReader reader = new BzzReader(new BSInputStream(readStream)))
             {
-
                 string testResult = reader.ReadUTF8String(testText.Length);
                 Assert.False(String.IsNullOrWhiteSpace(testResult));
                 // Assert.Equal(testText, testResult);
@@ -97,7 +95,7 @@ namespace DjvuNet.Compression.Tests
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void BzzWriterTest004()
         {
- 
+            Assert.True(false, "This test needs an implementation");
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

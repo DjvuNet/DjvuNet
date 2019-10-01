@@ -17,10 +17,14 @@ namespace DjvuNet.Utilities
         public GenericComparer(Func<T, int> hashFunc, Func<T, T, bool> comparer)
         {
             if (hashFunc == null)
+            {
                 throw new ArgumentNullException(nameof(hashFunc));
+            }
 
             if (comparer == null)
+            {
                 throw new ArgumentNullException(nameof(comparer));
+            }
 
             HashFunc = hashFunc;
             ComparerFunc = comparer;

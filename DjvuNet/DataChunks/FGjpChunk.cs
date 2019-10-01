@@ -28,7 +28,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_foregroundImage == null)
+                {
                     _foregroundImage = DecodeImageData();
+                }
 
                 return _foregroundImage;
             }
@@ -36,7 +38,9 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_foregroundImage != value)
+                {
                     _foregroundImage = value;
+                }
             }
         }
 

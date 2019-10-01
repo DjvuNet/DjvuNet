@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -16,6 +17,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [ClassData(typeof(DjvuJsonDataSource))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ThumChunk_Theory(DjvuJsonDocument doc, int index)
         {
             int pageCount = 0;

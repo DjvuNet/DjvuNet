@@ -6,6 +6,7 @@ using System.Linq;
 using DjvuNet.Tests;
 using Moq;
 using DjvuNet.Tests.Xunit;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DataChunks.Tests
 {
@@ -91,6 +92,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(FgbzTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Palette_Theory(string file, DjvuJsonDocument doc)
         {
 

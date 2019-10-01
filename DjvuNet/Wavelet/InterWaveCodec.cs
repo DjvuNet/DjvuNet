@@ -52,7 +52,9 @@ namespace DjvuNet.Wavelet
 
             _CtxBucket = new byte[10][];
             for (int i2 = 0; i2 < _CtxBucket.Length; i2++)
+            {
                 _CtxBucket[i2] = new byte[8];
+            }
 
             _QuantHigh = new int[10];
             _QuantLow = new int[16];
@@ -75,29 +77,41 @@ namespace DjvuNet.Wavelet
             int qidx = 0;
 
             for (int j = 0; i < 4; j++)
+            {
                 _QuantLow[i++] = q[qidx++];
+            }
 
             for (int j = 0; j < 4; j++)
+            {
                 _QuantLow[i++] = q[qidx];
+            }
 
             qidx++;
 
             for (int j = 0; j < 4; j++)
+            {
                 _QuantLow[i++] = q[qidx];
+            }
 
             qidx++;
 
             for (int j = 0; j < 4; j++)
+            {
                 _QuantLow[i++] = q[qidx];
+            }
 
             qidx++;
             _QuantHigh[0] = 0;
 
             for (int j = 1; j < 10; j++)
+            {
                 _QuantHigh[j] = q[qidx++];
+            }
 
             while (_QuantLow[0] >= 32768)
+            {
                 NextQuant();
+            }
 
             return this;
         }
@@ -107,12 +121,20 @@ namespace DjvuNet.Wavelet
             int flag = 0;
 
             for (int i = 0; i < 16; i++)
+            {
                 if ((_QuantLow[i] = _QuantLow[i] >> 1) != 0)
+                {
                     flag = 1;
+                }
+            }
 
             for (int i = 0; i < 10; i++)
+            {
                 if ((_QuantHigh[i] = _QuantHigh[i] >> 1) != 0)
+                {
                     flag = 1;
+                }
+            }
 
             return flag;
         }

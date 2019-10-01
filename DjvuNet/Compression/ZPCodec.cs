@@ -83,7 +83,6 @@ namespace DjvuNet.Compression
 
         #endregion Constructors
 
-
         internal void InitializeInternal(bool encoding = false, bool djvuCompat = true)
         {
             Encoding = encoding;
@@ -94,7 +93,9 @@ namespace DjvuNet.Compression
             for (int i = 0; i < _ArraySize; i++)
             {
                 for (int j = i; (j & 0x80) > 0; j <<= 1)
+                {
                     FFZT[i]++;
+                }
             }
 
             _Ffzt = new sbyte[FFZT.Length];
@@ -115,7 +116,9 @@ namespace DjvuNet.Compression
                     ushort a = (ushort)(0x10000 - _PArray[j]);
 
                     while (a >= 0x8000)
+                    {
                         a = (ushort)(a << 1);
+                    }
 
                     if (_MArray[j] > 0 && a + _PArray[j] >= 0x8000 && a >= _MArray[j])
                     {
@@ -142,7 +145,9 @@ namespace DjvuNet.Compression
         protected void Dispose(bool disposing)
         {
             if (!_Disposed && Encoding)
+            {
                 Flush();
+            }
 
             _Disposed = true;
         }
@@ -167,7 +172,9 @@ namespace DjvuNet.Compression
             get
             {
                 if (_DefaultTable != null)
+                {
                     return _DefaultTable;
+                }
                 else
                 {
                     _DefaultTable = CreateDefaultTable();
@@ -201,9 +208,13 @@ namespace DjvuNet.Compression
         {
             uint z = 0x8000 + ((_AValue + _AValue + _AValue) >> 3);
             if (bit)
+            {
                 EncodeLpsSimple((uint)z);
+            }
             else
+            {
                 EncodeMpsSimple((uint)z);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -216,9 +227,13 @@ namespace DjvuNet.Compression
         public void Encoder(int bit)
         {
             if (bit != 0)
+            {
                 EncodeLpsSimple((uint)(0x8000 + (_AValue >> 1)));
+            }
             else
+            {
                 EncodeMpsSimple((uint)(0x8000 + (_AValue >> 1)));
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -232,7 +247,9 @@ namespace DjvuNet.Compression
                 return ctx & 1;
             }
             else
+            {
                 return DecodeSub(ref ctx, z);
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -241,11 +258,17 @@ namespace DjvuNet.Compression
             uint z = _AValue + _PArray[ctx];
 
             if (bit != (ctx & 1))
+            {
                 EncodeLps(ref ctx, z);
+            }
             else if (z >= 0x8000)
+            {
                 EncodeMps(ref ctx, z);
+            }
             else
+            {
                 _AValue = z;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -266,11 +289,17 @@ namespace DjvuNet.Compression
         {
             uint z = _AValue + _PArray[ctx];
             if (bit != (ctx & 1))
+            {
                 EncodeLpsNolearn(z);
+            }
             else if (z >= 0x8000)
+            {
                 EncodeMpsNolearn(z);
+            }
             else
+            {
                 _AValue = z;
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -296,7 +325,10 @@ namespace DjvuNet.Compression
             int sz = 0;
             int lo = (mps != 0 ? 1 : 2);
 
-            while (_PArray[lo + sz + sz + 2] < _PArray[lo + sz + sz]) sz += 1;
+            while (_PArray[lo + sz + sz + 2] < _PArray[lo + sz + sz])
+            {
+                sz += 1;
+            }
 
             // Bisection
             while (sz > 1)
@@ -304,7 +336,9 @@ namespace DjvuNet.Compression
                 int nsz = sz >> 1;
                 float nplps = P2PlPs((ushort)_PArray[lo + nsz + nsz]);
                 if (nplps < plps)
+                {
                     sz = nsz;
+                }
                 else
                 {
                     lo = lo + nsz + nsz;
@@ -351,11 +385,16 @@ namespace DjvuNet.Compression
                 bitcount += shift;
 #endif
                 if (_SCount < 16)
+                {
                     Preload();
+                }
                 /* Adjust fence */
                 _Fence = _Code;
                 if (_Code >= 0x8000)
+                {
                     _Fence = 0x7fff;
+                }
+
                 return bit ^ 1;
             }
             else
@@ -371,11 +410,15 @@ namespace DjvuNet.Compression
                 _bitcount += 1;
 #endif
                 if (_SCount < 16)
+                {
                     Preload();
+                }
                 /* Adjust fence */
                 _Fence = _Code;
                 if (_Code >= 0x8000)
+                {
                     _Fence = 0x7fff;
+                }
 
                 return bit;
             }
@@ -389,7 +432,9 @@ namespace DjvuNet.Compression
 #else
             uint d = 0x6000 + ((z + _AValue) >> 2);
             if (z > d)
+            {
                 z = d;
+            }
 #endif
             /* Test MPS/LPS */
             if (z > _Code)
@@ -407,11 +452,16 @@ namespace DjvuNet.Compression
                 _bitcount += shift;
 #endif
                 if (_SCount < 16)
+                {
                     Preload();
+                }
                 /* Adjust fence */
                 _Fence = _Code;
                 if (_Code >= 0x8000)
+                {
                     _Fence = 0x7fff;
+                }
+
                 return mps ^ 1;
             }
             else
@@ -424,11 +474,16 @@ namespace DjvuNet.Compression
                 _bitcount += 1;
 #endif
                 if (_SCount < 16)
+                {
                     Preload();
+                }
                 /* Adjust fence */
                 _Fence = _Code;
                 if (_Code >= 0x8000)
+                {
                     _Fence = 0x7fff;
+                }
+
                 return mps;
             }
         }
@@ -451,11 +506,16 @@ namespace DjvuNet.Compression
                 _bitcount += shift;
 #endif
                 if (_SCount < 16)
+                {
                     Preload();
+                }
                 /* Adjust fence */
                 _Fence = _Code;
                 if (_Code >= 0x8000)
+                {
                     _Fence = 0x7fff;
+                }
+
                 return mps ^ 1;
             }
             else
@@ -468,11 +528,16 @@ namespace DjvuNet.Compression
                 _bitcount += 1;
 #endif
                 if (_SCount < 16)
+                {
                     Preload();
+                }
                 /* Adjust fence */
                 _Fence = _Code;
                 if (_Code >= 0x8000)
+                {
                     _Fence = 0x7fff;
+                }
+
                 return mps;
             }
         }
@@ -480,9 +545,13 @@ namespace DjvuNet.Compression
         public void Flush()
         {
             if (_Subend > 0x8000)
+            {
                 _Subend = 0x10000;
+            }
             else if (_Subend > 0)
+            {
                 _Subend = 0x8000;
+            }
 
             while (_Buffer != 0xffffff || _Subend != 0)
             {
@@ -493,12 +562,16 @@ namespace DjvuNet.Compression
             Outbit(1);
 
             while (_NRun-- > 0)
+            {
                 Outbit(0);
+            }
 
             _NRun = 0;
 
             while (_SCount > 0)
+            {
                 Outbit(1);
+            }
 
             _Delay = 0xff;
         }
@@ -508,7 +581,9 @@ namespace DjvuNet.Compression
             if (_Delay > 0)
             {
                 if (_Delay < 0xff)
+                {
                     _Delay -= 1;
+                }
             }
             else
             {
@@ -540,13 +615,19 @@ namespace DjvuNet.Compression
                 case 1:
                     Outbit(1);
                     while (_NRun-- > 0)
+                    {
                         Outbit(0);
+                    }
+
                     _NRun = 0;
                     break;
                 case 0xff:
                     Outbit(0);
                     while (_NRun-- > 0)
+                    {
                         Outbit(1);
+                    }
+
                     _NRun = 0;
                     break;
                 case 0:
@@ -569,10 +650,15 @@ namespace DjvuNet.Compression
 #else
             uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
             if (z > d)
+            {
                 z = d;
+            }
 #endif
             if (_AValue >= _MArray[ctx])
+            {
                 ctx = _Up[ctx];
+            }
+
             _AValue = z;
 
             if (_AValue >= 0x8000)
@@ -591,7 +677,9 @@ namespace DjvuNet.Compression
 #else
             uint d = (uint)(0x6000 + ((z + _AValue) >> 2));
             if (z > d)
+            {
                 z = d;
+            }
 #endif
             ctx = _Down[ctx];
             z = 0x10000 - z;
@@ -643,7 +731,9 @@ namespace DjvuNet.Compression
 #else
             uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
             if (z > d)
+            {
                 z = d;
+            }
 #endif
             _AValue = z;
 
@@ -664,7 +754,9 @@ namespace DjvuNet.Compression
 #else
             uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
             if (z > d)
+            {
                 z = d;
+            }
 #endif
             z = 0x10000 - z;
             _Subend += z;
@@ -688,9 +780,13 @@ namespace DjvuNet.Compression
             fplps = fp - (fp + 0.5) * Math.Log(fp + 0.5) + (fp - 0.5) * log2;
 #else
             if (fp <= (1.0 / 6.0))
+            {
                 fplps = fp * 2 * log2;
+            }
             else
+            {
                 fplps = (float)((1.5 * fp - 0.25) - (1.5 * fp + 0.25) * Math.Log(1.5 * fp + 0.25) + (0.5 * fp - 0.25) * log2);
+            }
 #endif
             return fplps;
         }
@@ -706,9 +802,14 @@ namespace DjvuNet.Compression
         {
             DataStream = inputStream;
             if (!Encoding)
+            {
                 DecoderInitialize();
+            }
             else
+            {
                 EncoderInitialize();
+            }
+
             return this;
         }
 
@@ -736,7 +837,9 @@ namespace DjvuNet.Compression
                     zByte = 255;
 
                     if (--_Delay < 1)
+                    {
                         throw new DjvuEndOfStreamException("EOF");
+                    }
                 }
                 buffer = (buffer << 8) | (byte) zByte;
             }
@@ -767,7 +870,9 @@ namespace DjvuNet.Compression
             _Fence = _Code;
 
             if (_Code >= 0x8000)
+            {
                 _Fence = 0x7fff;
+            }
         }
 
         /// <summary>

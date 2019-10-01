@@ -36,7 +36,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_shapeDictionary == null)
+                {
                     _shapeDictionary = DecodeShapeDictionary();
+                }
 
                 return _shapeDictionary;
             }
@@ -44,7 +46,9 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_shapeDictionary != value)
+                {
                     _shapeDictionary = value;
+                }
             }
         }
 

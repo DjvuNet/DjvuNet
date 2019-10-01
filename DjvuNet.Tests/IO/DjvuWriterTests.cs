@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.IO;
 using DjvuNet.Compression;
 using DjvuNet.Tests.Xunit;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Tests
 {
@@ -326,6 +327,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(UInt24TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteUInt24BigEndian_Theory(uint test)
         {
             DjvuWriter writer = null;
@@ -343,6 +345,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(Int24TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteInt24BigEndian_Theory(int test)
         {
             DjvuWriter writer = null;
@@ -362,6 +365,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(UInt24TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteUInt24_Theory(uint test)
         {
             DjvuWriter writer = null;
@@ -378,6 +382,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(Int24TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteInt24_Theory(int test)
         {
             DjvuWriter writer = null;
@@ -396,6 +401,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(Int16TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteInt16BigEndian_Theory(short test)
         {
             DjvuWriter writer = null;
@@ -413,6 +419,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(Int32TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteInt32BigEndian_Theory(int test)
         {
             DjvuWriter writer = null;
@@ -430,6 +437,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(Int64TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteInt64BigEndian_Theory(long test)
         {
             DjvuWriter writer = null;
@@ -447,6 +455,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(UInt16TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteUInt16BigEndian_Theory(ushort test)
         {
             DjvuWriter writer = null;
@@ -464,6 +473,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(UInt32TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteUInt32BigEndian_Theory(uint test)
         {
             DjvuWriter writer = null;
@@ -481,6 +491,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(UInt64TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteUInt64BigEndian_Theory(ulong test)
         {
             DjvuWriter writer = null;
@@ -498,6 +509,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(StringTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteUTF8String_Theory(string testString)
         {
             DjvuWriter writer = null;
@@ -519,6 +531,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(StringTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteUTF7String_Theory(string testString)
         {
             DjvuWriter writer = null;
@@ -540,6 +553,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(StringTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteString_Theory01(String testString)
         {
             DjvuWriter writer = null;
@@ -561,6 +575,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(StringTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteString_Theory02(String testString)
         {
             DjvuWriter writer = null;
@@ -582,6 +597,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(StringEncodingTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void WriteStringEncoding_Theory(String testString, Encoding encoding)
         {
             DjvuWriter writer = null;

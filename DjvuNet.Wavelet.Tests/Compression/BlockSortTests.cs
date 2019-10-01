@@ -9,6 +9,7 @@ using DjvuNet.Tests.Xunit;
 using DjvuNet.Tests;
 using System.IO;
 using DjvuNet.Errors;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Compression.Tests
 {
@@ -207,6 +208,7 @@ namespace DjvuNet.Compression.Tests
 
         [DjvuTheory]
         [MemberData(nameof(StringTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BlockSortData_Theory01(string testStr)
         {
             UTF8Encoding enc = new UTF8Encoding(false);
@@ -217,13 +219,14 @@ namespace DjvuNet.Compression.Tests
 
             BlockSort.BlockSortData(buffer, buffer.Length, ref markpos);
         }
- 
+
         [DjvuTheory]
         [MemberData(nameof(StringEncodingTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BlockSortData_Theory02(Encoding enc, string testStr)
         {
             // TODO Find reason for failing tests with Big Endian multibyte
-            // text encodings - except for some Chinese samples 
+            // text encodings - except for some Chinese samples
             // (probably not enough 0x00s as these may be 4 byte unicode characters)
 
             byte[] buffer;
@@ -235,6 +238,7 @@ namespace DjvuNet.Compression.Tests
 
         [DjvuTheory, Trait("Category", "BugTrack")]
         [MemberData(nameof(StringEncodingCrashTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BlockSortData_Theory03(Encoding enc, string testStr)
         {
 
@@ -256,6 +260,7 @@ namespace DjvuNet.Compression.Tests
 
         [DjvuTheory]
         [MemberData(nameof(BlockSortValidateData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void BlockSortValidate_Theory(string source, string expected)
         {
             byte[] sourceData = Util.ReadFileToEnd(source);
@@ -266,7 +271,12 @@ namespace DjvuNet.Compression.Tests
             BlockSort.BlockSortData(buffer, buffer.Length, ref markpos);
 
             for (int i = 0; i < expectedData.Length; i++)
-                Assert.Equal<uint>(expectedData[i], buffer[i]);
+            {
+                if (expectedData[i] != buffer[i])
+                {
+                    Assert.True(false);
+                }
+            }
         }
 
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]

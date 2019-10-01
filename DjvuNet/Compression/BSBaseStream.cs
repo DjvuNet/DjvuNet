@@ -135,17 +135,25 @@ namespace DjvuNet.Compression
         public override long Seek(long offset, SeekOrigin origin)
         {
             if (BaseStream != null)
+            {
                 return BaseStream.Seek(offset, origin);
+            }
             else
+            {
                 throw new DjvuInvalidOperationException();
+            }
         }
 
         public override void SetLength(long value)
         {
             if (BaseStream != null)
+            {
                 BaseStream.SetLength(value);
+            }
             else
+            {
                 throw new DjvuInvalidOperationException();
+            }
         }
     }
 }

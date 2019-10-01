@@ -44,7 +44,9 @@ namespace DjvuNet.JB2
             set
             {
                 if (_inheritedDictionary != value)
+                {
                     SetInheritedDict(value, false);
+                }
             }
         }
 
@@ -85,7 +87,9 @@ namespace DjvuNet.JB2
         public virtual int AddShape(JB2Shape jb2Shape)
         {
             if (jb2Shape.Parent >= ShapeCount)
+            {
                 throw new ArgumentException("Image bad parent shape");
+            }
 
             int retval = InheritedShapes + _Shapes.Count;
             _Shapes.Add(jb2Shape);
@@ -107,11 +111,17 @@ namespace DjvuNet.JB2
             JB2Shape retval;
 
             if (shapeNum >= InheritedShapes)
+            {
                 retval = (JB2Shape)_Shapes[shapeNum - InheritedShapes];
+            }
             else if (InheritedDictionary != null)
+            {
                 retval = InheritedDictionary.GetShape(shapeNum);
+            }
             else
+            {
                 throw new DjvuFormatException("Bad image number");
+            }
 
             return retval;
         }
@@ -135,10 +145,14 @@ namespace DjvuNet.JB2
             if (force == false)
             {
                 if (_Shapes.Count > 0)
+                {
                     throw new DjvuFormatException("Can not set image.");
+                }
 
                 if (InheritedDictionary != null)
+                {
                     throw new DjvuFormatException("Image can not be changed.");
+                }
             }
 
             _inheritedDictionary = value;

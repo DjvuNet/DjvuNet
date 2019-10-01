@@ -33,7 +33,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_data == null)
+                {
                     _data = ExtractRawData();
+                }
 
                 return _data;
             }

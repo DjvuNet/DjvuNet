@@ -23,9 +23,13 @@ namespace DjvuNet.Compression
             get
             {
                 if (_Data == null)
+                {
                     return 0;
+                }
                 else
+                {
                     return _Data.Length;
+                }
             }
         }
 
@@ -74,7 +78,9 @@ namespace DjvuNet.Compression
         public override BSBaseStream Init(Stream dataStream)
         {
             if (!dataStream.CanRead)
+            {
                 throw new DjvuArgumentException("Stream was not readable.", nameof(dataStream));
+            }
 
             BaseStream = dataStream;
             Coder = DjvuSettings.Current.CoderFactory.CreateCoder(dataStream, false);
@@ -88,12 +94,17 @@ namespace DjvuNet.Compression
         /// <param name="offset"></param>
         /// <param name="count"></param>
         /// <returns></returns>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         public override int Read(byte[] buffer, int offset, int count)
         {
             int copied = 0;
 
             if (_Eof)
+            {
                 return copied;
+            }
 
             while (count > 0 && !_Eof)
             {
@@ -153,7 +164,6 @@ namespace DjvuNet.Compression
         /// <param name="ctxoff"></param>
         /// <param name="bits"></param>
         /// <returns></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int DecodeBinary(int ctxoff, int bits)
         {
             int n = 1;
@@ -173,6 +183,9 @@ namespace DjvuNet.Compression
         /// TODO documentation
         /// </summary>
         /// <returns></returns>
+#if NETCOREAPP
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+#endif
         internal int Decode()
         {
             /////////////////////////////////
@@ -180,10 +193,14 @@ namespace DjvuNet.Compression
             _Size = DecodeRaw(24);
 
             if (_Size == 0)
+            {
                 return 0;
+            }
 
             if (_Size > MaxBlock * 1024)
+            {
                 throw new DjvuFormatException("ByteStream.corrupt");
+            }
 
             // Allocate
             if (_BlockSize < _Size)
@@ -192,7 +209,9 @@ namespace DjvuNet.Compression
                 _Data = new byte[_BlockSize];
             }
             else if (_Data == null)
+            {
                 _Data = new byte[_BlockSize];
+            }
 
             // Decoder Estimation Speed
             int fshift = 0;
@@ -201,14 +220,18 @@ namespace DjvuNet.Compression
             {
                 fshift++;
                 if (Coder.Decoder() != 0)
+                {
                     fshift++;
+                }
             }
 
             // Prepare Quasi MTF
             byte[] mtf = new byte[256];
             uint m = 0;
             for (m = 0; m < 256; m++)
+            {
                 mtf[m] = (byte)m;
+            }
 
             int[] freq = new int[FreqMax];
 
@@ -223,7 +246,9 @@ namespace DjvuNet.Compression
                 int ctxid = CTXIDS - 1;
 
                 if (ctxid > mtfno)
+                {
                     ctxid = mtfno;
+                }
 
                 int ctxoff = 0;
 
@@ -340,17 +365,23 @@ namespace DjvuNet.Compression
                     freq[3] >>= 24;
 
                     for (k = 4; k < freq.Length; k++)
+                    {
                         freq[k] >>= 24;
+                    }
                 }
 
                 // Relocate new char according to new freq
                 int fc = fadd;
 
                 if (mtfno < FreqMax)
+                {
                     fc += freq[mtfno];
+                }
 
                 for (k = mtfno; k >= FreqMax; k--)
+                {
                     mtf[k] = mtf[k - 1];
+                }
 
                 for (; (k > 0) && ((unchecked((int)0xffffffffL) & fc) >= (unchecked((int)0xffffffffL) & freq[k - 1])); k--)
                 {
@@ -365,7 +396,9 @@ namespace DjvuNet.Compression
             /////////////////////////////////
             ////////// Reconstruct the string
             if ((markerpos < 1) || (markerpos >= _Size))
+            {
                 throw new DjvuFormatException("ByteStream.corrupt");
+            }
 
             // Allocate pointers
             int[] pos = new int[_Size];
@@ -412,7 +445,9 @@ namespace DjvuNet.Compression
 
             // Free and check
             if (j2 != markerpos)
+            {
                 throw new DjvuFormatException("ByteStream.corrupt");
+            }
 
             return _Size;
         }

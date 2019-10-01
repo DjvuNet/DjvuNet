@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 using DjvuNet.Tests;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Compression.Tests
 {
@@ -31,9 +32,11 @@ namespace DjvuNet.Compression.Tests
         [Fact()]
         public void ZPCodecTest001()
         {
-            ZPCodec codec = new ZPCodec();
-            Assert.NotNull(codec.FFZT);
-            Assert.Equal<int>(256, codec.FFZT.Length);
+            using (ZPCodec codec = new ZPCodec())
+            {
+                Assert.NotNull(codec.FFZT);
+                Assert.Equal<int>(256, codec.FFZT.Length);
+            }
         }
 
         [Fact()]
@@ -41,8 +44,8 @@ namespace DjvuNet.Compression.Tests
         {
             byte[] buffer = BzzCompressedTestBuffer;
             using(MemoryStream stream = new MemoryStream(buffer, false))
+            using (ZPCodec codec = new ZPCodec(stream))
             {
-                ZPCodec codec = new ZPCodec(stream);
                 Assert.NotNull(codec.DataStream);
             }
         }
@@ -50,50 +53,59 @@ namespace DjvuNet.Compression.Tests
         [Fact()]
         public void ZPCodecTest003()
         {
-            ZPCodec codec = new ZPCodec();
-            Assert.True(codec.DjvuCompat);
-            Assert.False(codec.Encoding);
+            using (ZPCodec codec = new ZPCodec())
+            {
+                Assert.True(codec.DjvuCompat);
+                Assert.False(codec.Encoding);
+            }
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ZPCodecTest004()
         {
-            ZPCodec codec = new ZPCodec();
-            Assert.True(codec.DjvuCompat);
-            Assert.False(codec.Encoding);
-            ZPTable[] table = codec.CreateDefaultTable();
-            for(int i = 0; i < table.Length; i++)
+            using (ZPCodec codec = new ZPCodec())
             {
-                var row = table[i];
-                Assert.Equal<uint>(row.PValue, codec._PArray[i]);
-                Assert.Equal<uint>(row.MValue, codec._MArray[i]);
-                Assert.Equal<uint>(row.Down, codec._Down[i]);
-                Assert.Equal<uint>(row.Up, codec._Up[i]);
+                Assert.True(codec.DjvuCompat);
+                Assert.False(codec.Encoding);
+                ZPTable[] table = codec.CreateDefaultTable();
+                for (int i = 0; i < table.Length; i++)
+                {
+                    ZPTable row = table[i];
+                    Assert.Equal<uint>(row.PValue, codec._PArray[i]);
+                    Assert.Equal<uint>(row.MValue, codec._MArray[i]);
+                    Assert.Equal<uint>(row.Down, codec._Down[i]);
+                    Assert.Equal<uint>(row.Up, codec._Up[i]);
+                }
             }
         }
 
         [Fact()]
         public void ZPCodecTest005()
         {
-            ZPCodec codec = new ZPCodec(null, true);
-            Assert.True(codec.DjvuCompat);
-            Assert.True(codec.Encoding);
+            using (ZPCodec codec = new ZPCodec(null, true))
+            {
+                Assert.True(codec.DjvuCompat);
+                Assert.True(codec.Encoding);
+            }
         }
 
         [Fact()]
         public void ZPCodecTest006()
         {
-            ZPCodec codec = new ZPCodec(null, true, false);
-            Assert.False(codec.DjvuCompat);
-            Assert.True(codec.Encoding);
+            using (ZPCodec codec = new ZPCodec(null, true, false))
+            {
+                Assert.False(codec.DjvuCompat);
+                Assert.True(codec.Encoding);
+            }
         }
 
         [Fact()]
         public void ZPCodecTest007()
         {
             using (MemoryStream stream = new MemoryStream())
+            using(ZPCodec codec = new ZPCodec(stream, true, false))
             {
-                ZPCodec codec = new ZPCodec(stream, true, false);
                 Assert.NotNull(codec.DataStream);
                 Assert.Same(stream, codec.DataStream);
                 Assert.False(codec.DjvuCompat);
@@ -105,8 +117,8 @@ namespace DjvuNet.Compression.Tests
         public void ZPCodecTest008()
         {
             using (MemoryStream stream = new MemoryStream())
+            using (ZPCodec codec = new ZPCodec(stream, false, false))
             {
-                ZPCodec codec = new ZPCodec(stream, false, false);
                 Assert.NotNull(codec.DataStream);
                 Assert.Same(stream, codec.DataStream);
                 Assert.False(codec.DjvuCompat);
@@ -117,25 +129,28 @@ namespace DjvuNet.Compression.Tests
         [Fact()]
         public void DefaultTable001()
         {
-            ZPCodec codec = new ZPCodec();
-            Assert.True(codec.DjvuCompat);
-            Assert.False(codec.Encoding);
-            ZPTable[] table = codec.CreateDefaultTable();
-            ZPTable[] defaultTable = codec.DefaultTable;
-            Assert.NotSame(table, codec.DefaultTable);
-            Assert.Same(defaultTable, codec.DefaultTable);
-            for (int i = 0; i < table.Length; i++)
+            using (ZPCodec codec = new ZPCodec())
             {
-                var row = table[i];
-                var defRow = defaultTable[i];
-                Assert.Equal<uint>(row.PValue, defRow.PValue);
-                Assert.Equal<uint>(row.MValue, defRow.MValue);
-                Assert.Equal<uint>(row.Down, defRow.Down);
-                Assert.Equal<uint>(row.Up, defRow.Up);
+                Assert.True(codec.DjvuCompat);
+                Assert.False(codec.Encoding);
+                ZPTable[] table = codec.CreateDefaultTable();
+                ZPTable[] defaultTable = codec.DefaultTable;
+                Assert.NotSame(table, codec.DefaultTable);
+                Assert.Same(defaultTable, codec.DefaultTable);
+                for (int i = 0; i < table.Length; i++)
+                {
+                    ZPTable row = table[i];
+                    ZPTable defRow = defaultTable[i];
+                    Assert.Equal<uint>(row.PValue, defRow.PValue);
+                    Assert.Equal<uint>(row.MValue, defRow.MValue);
+                    Assert.Equal<uint>(row.Down, defRow.Down);
+                    Assert.Equal<uint>(row.Up, defRow.Up);
+                }
             }
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void IWEncoderTest001()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "testbzz.obz");
@@ -176,7 +191,7 @@ namespace DjvuNet.Compression.Tests
                 Assert.Same(stream, codec.DataStream);
                 Assert.Equal(0, stream.Position);
 
-                ulong hashLong = 0x0184b6730184b673;
+                const ulong hashLong = 0x0184b6730184b673;
 
                 for (int i = 0; i < 64; i++)
                 {
@@ -195,7 +210,6 @@ namespace DjvuNet.Compression.Tests
         [Fact()]
         public void DecoderNoLearn001()
         {
-
             string filePath = Path.Combine(Util.ArtifactsDataPath, "test043C.json.bzz");
             byte[] testBuffer = Util.ReadFileToEnd(filePath);
             using (MemoryStream readStream = new MemoryStream(testBuffer))
@@ -214,7 +228,6 @@ namespace DjvuNet.Compression.Tests
         [Fact()]
         public void DecoderNoLearn002()
         {
-
             string filePath = Path.Combine(Util.ArtifactsDataPath, "test043C.json.bzz");
             byte[] testBuffer = Util.ReadFileToEnd(filePath);
             using (MemoryStream readStream = new MemoryStream(testBuffer))
@@ -323,8 +336,8 @@ namespace DjvuNet.Compression.Tests
         public void FFZTest()
         {
             using (MemoryStream stream = new MemoryStream())
+            using (ZPCodec codec = new ZPCodec(stream, true, true))
             {
-                ZPCodec codec = new ZPCodec(stream, true, true);
                 Assert.True(codec.DjvuCompat);
                 Assert.True(codec.Encoding);
                 Assert.Same(stream, codec.DataStream);
@@ -352,6 +365,7 @@ namespace DjvuNet.Compression.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void StateTest001()
         {
             string filePath = Path.Combine(Util.ArtifactsDataPath, "DjvuNet.pdb");

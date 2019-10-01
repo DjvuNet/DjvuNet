@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using DjvuNet.Errors;
 
@@ -46,7 +47,9 @@ namespace DjvuNet.Compression
                 {
                     byte b = ReadByte();
                     if (b == 0)
+                    {
                         break;
+                    }
 
                     // Increase buffer size if string is longer
                     // increase is exponential by doubling previous length
@@ -61,7 +64,9 @@ namespace DjvuNet.Compression
                 }
 
                 if (i <= 0)
-                    return String.Empty;
+                {
+                    return string.Empty;
+                }
                 else
                 {
                     byte[] copyBuffer = new byte[i];
@@ -74,7 +79,6 @@ namespace DjvuNet.Compression
                 throw new DjvuAggregateException("Error while reading null terminated string.", err);
             }
         }
-
 
         internal override MemoryStream ReadStringBytes(out Encoding enc, out int readBytes, bool skipBOM = true, int bufferSize = 1024)
         {
@@ -89,7 +93,9 @@ namespace DjvuNet.Compression
                 int result = Read(buffer, 0, bufferSize);
 
                 if (!skipBOM)
+                {
                     targetStream.Write(buffer, 0, result);
+                }
                 else
                 {
                     enc = CheckEncodingSignature(buffer, targetStream, ref result);
@@ -97,7 +103,9 @@ namespace DjvuNet.Compression
                 }
 
                 if (bytesRead == 0)
+                {
                     streamLength = (int)BaseStream.Length - 1 - (bufferSize - result);
+                }
 
                 bytesRead += result;
 
@@ -107,11 +115,15 @@ namespace DjvuNet.Compression
                 if (streamLength > 0 && bytesRead < streamLength)
                 {
                     if ((streamLength - bytesRead) < bufferSize)
+                    {
                         bufferSize = streamLength - bytesRead;
+                    }
                 }
 
                 if (bytesRead >= streamLength)
+                {
                     break;
+                }
             }
 
             readBytes = bytesRead;

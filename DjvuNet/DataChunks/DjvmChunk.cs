@@ -39,14 +39,18 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_dirmData != null)
+                {
                     return _dirmData;
+                }
                 else if (Children != null)
                 {
                     _dirmData = (DirmChunk)Children.FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Dirm);
                     return _dirmData;
                 }
                 else
+                {
                     return null;
+                }
             }
         }
 
@@ -55,7 +59,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Includes != null)
+                {
                     return _Includes;
+                }
                 else if (Children != null)
                 {
                     _Includes = Children.Select(
@@ -64,7 +70,9 @@ namespace DjvuNet.DataChunks
                     return _Includes;
                 }
                 else
+                {
                     return null;
+                }
             }
         }
 
@@ -74,7 +82,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Thumbnails != null)
+                {
                     return _Thumbnails;
+                }
                 else if (Children != null)
                 {
                     _Thumbnails = Children.Select(
@@ -83,7 +93,9 @@ namespace DjvuNet.DataChunks
                     return _Thumbnails;
                 }
                 else
+                {
                     return null;
+                }
             }
         }
 
@@ -92,7 +104,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Pages != null)
+                {
                     return _Pages;
+                }
                 else if (Children != null)
                 {
                     _Pages = Children.Select(
@@ -101,7 +115,9 @@ namespace DjvuNet.DataChunks
                     return _Pages;
                 }
                 else
+                {
                     return null;
+                }
             }
         }
 
@@ -110,15 +126,19 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Files != null)
+                {
                     return _Files;
+                }
                 else if (Children != null)
                 {
-                    _Files = Children.Where( x =>
-                        x.ChunkType == ChunkType.Djvu || x.ChunkType == ChunkType.Djvi ||
-                        x.ChunkType == ChunkType.Thum ).ToList<IDjvuNode>();
+                    _Files = Children.Where(x =>
+                       x.ChunkType == ChunkType.Djvu || x.ChunkType == ChunkType.Djvi ||
+                       x.ChunkType == ChunkType.Thum).ToList<IDjvuNode>();
                 }
                 else
+                {
                     _Files = new List<IDjvuNode>();
+                }
 
                 return _Files;
             }
@@ -134,11 +154,16 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_NavmData != null)
+                {
                     return _NavmData;
+                }
                 else
                 {
                     if (Children != null && Children.Count > 0)
+                    {
                         _NavmData = (NavmChunk)Children.FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Navm);
+                    }
+
                     return _NavmData;
                 }
             }

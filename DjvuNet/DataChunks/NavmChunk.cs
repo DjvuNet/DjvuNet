@@ -37,7 +37,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_bookmarks == null)
+                {
                     _bookmarks = ReadBookmarkData();
+                }
 
                 return _bookmarks;
             }
@@ -45,7 +47,9 @@ namespace DjvuNet.DataChunks
             private set
             {
                 if (_bookmarks != value)
+                {
                     _bookmarks = (List<IBookmark>)value;
+                }
             }
         }
 
@@ -86,7 +90,9 @@ namespace DjvuNet.DataChunks
                 // TODO improve parsing - slow while condition
                 // Read in all the bookmarks
                 while (bookmarks.Count + bookmarks.Sum(x => x.TotalBookmarks) != totalBookmarks)
+                {
                     bookmarks.Add(new Bookmark(decompressor, Document, this, null));
+                }
 
                 return bookmarks;
             }

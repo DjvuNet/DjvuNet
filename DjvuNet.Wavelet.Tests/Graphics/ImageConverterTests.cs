@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DjvuNet.Graphics;
 using DjvuNet.Tests.Xunit;
 using Xunit;
@@ -76,6 +77,7 @@ namespace DjvuNet.Wavelet.Tests.Graphics
 
         [DjvuTheory]
         [MemberData(nameof(ReadHeaderData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ReadHeader_Theory(string fileFormat, byte[] headerBuffer)
         {
             using (MemoryStream ms = new MemoryStream(headerBuffer))
@@ -87,6 +89,7 @@ namespace DjvuNet.Wavelet.Tests.Graphics
 
         [DjvuTheory]
         [MemberData(nameof(ReadHeaderDataWithErrors))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ReadHeaderWithError_Theory(string fileFormat, byte[] headerBuffer)
         {
             using (MemoryStream ms = new MemoryStream(headerBuffer))

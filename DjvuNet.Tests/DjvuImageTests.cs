@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using DjvuNet.Errors;
 using DjvuNet.Tests.Xunit;
 using Moq;
@@ -166,6 +167,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(PixelSizeTestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetPixelSize_Theory(string name, int format)
         {
             int size = DjvuImage.GetPixelSize((PixelFormat)format);
@@ -173,6 +175,7 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(PixelSizeTestThrows))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetPixelSize_Theory2(string name, int format)
         {
             Assert.Throws<DjvuFormatException>(() => DjvuImage.GetPixelSize((PixelFormat)format));

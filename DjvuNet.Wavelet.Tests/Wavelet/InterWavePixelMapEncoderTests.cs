@@ -19,10 +19,9 @@ namespace DjvuNet.Wavelet.Tests
 {
     public class InterWavePixelMapEncoderTests
     {
-
         public static IPixelMap PixelMapFromBitmap(System.Drawing.Bitmap bmp)
         {
-            var pixMap = PixelMapTests.CreateInitVerifyPixelMap(bmp.Width, bmp.Height, Pixel.WhitePixel);
+            IPixelMap pixMap = PixelMapTests.CreateInitVerifyPixelMap(bmp.Width, bmp.Height, Pixel.WhitePixel);
             BitmapData data = null;
 
             try
@@ -30,6 +29,7 @@ namespace DjvuNet.Wavelet.Tests
                 data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
                 unsafe
                 {
+                    // TODO: Fix me!
                     fixed (sbyte* dest = pixMap.Data)
                         MemoryUtilities.MoveMemory(dest, (void*)data.Scan0, pixMap.Data.Length);
                 }
@@ -42,7 +42,9 @@ namespace DjvuNet.Wavelet.Tests
             finally
             {
                 if (data != null)
+                {
                     bmp.UnlockBits(data);
+                }
             }
             return pixMap;
         }
@@ -51,13 +53,14 @@ namespace DjvuNet.Wavelet.Tests
         {
             get
             {
-                List<object[]> retVal = new List<object[]>();
-
-                retVal.Add(new object[] { "nasa001C.png" });
-                retVal.Add(new object[] { "nasa002C.png" });
-                retVal.Add(new object[] { "nasa003C.png" });
-                retVal.Add(new object[] { "nasa004C.png" });
-                retVal.Add(new object[] { "nasa005C.png" });
+                List<object[]> retVal = new List<object[]>
+                {
+                    new object[] { "nasa001C.png" },
+                    new object[] { "nasa002C.png" },
+                    new object[] { "nasa003C.png" },
+                    new object[] { "nasa004C.png" },
+                    new object[] { "nasa005C.png" }
+                };
 
                 return retVal;
             }
@@ -66,7 +69,6 @@ namespace DjvuNet.Wavelet.Tests
         [Fact()]
         public void EncodeChunkTest()
         {
-            ;
         }
 
         [DjvuTheory]
@@ -80,12 +82,12 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
 
-                int nchunks = 4;
+                const int nchunks = 4;
                 int[] slices = new int[] { 74, 90, 98, 103 };
                 //float[] decibel = new float[] { 5.0f, 10.0f, 15.0f, 20.0f };
 
@@ -94,10 +96,7 @@ namespace DjvuNet.Wavelet.Tests
                 {
                     for (int i = 0; i < nchunks; i++)
                     {
-                        settings[i] = new InterWaveEncoderSettings
-                        {
-                            Slices = slices[i]
-                        };
+                        settings[i] = new InterWaveEncoderSettings { Slices = slices[i] };
                     }
                 }
                 //else
@@ -114,43 +113,88 @@ namespace DjvuNet.Wavelet.Tests
                 DjvuFormElement form = null;
                 using (MemoryStream stream = new MemoryStream())
                 using (IDjvuWriter writer = new DjvuWriter(stream))
+                {
                     form = map.EncodeImage(writer, nchunks, settings);
+                }
 
                 using (IDjvuWriter writer = new DjvuWriter(outFile))
+                {
                     form.WriteData(writer);
+                }
 
                 using (DjvuDocument doc = new DjvuDocument(outFile))
                 {
                     IDjvuPage page = doc.Pages[0];
                     PM44Form pageForm = (PM44Form) page.PageForm;
-                    Assert.Equal(nchunks, pageForm.Children.Count);
 
-                    Assert.NotNull(form);
-                    Assert.Equal(nchunks, form.Children.Count);
-                    Assert.IsType<PM44Form>(form);
-                    for (int i = 0; i < form.Children.Count; i++)
+                    if (nchunks != pageForm.Children.Count)
                     {
-                        var c = form.Children[i];
-                        Assert.NotNull(c);
-                        Assert.IsType<PM44Chunk>(c);
-                        PM44Chunk chunk = (PM44Chunk)c;
-                        Assert.NotNull(chunk.ChunkData);
-                        if (chunk.ChunkData.Length >= 2)
+                        Assert.True(false);
+                    }
+
+                    if (nchunks != form.Children.Count)
+                    {
+                        Assert.True(false);
+                    }
+
+                    Assert.IsType<PM44Form>(form);
+
+                    for (int i = 0; i < nchunks; i++)
+                    {
+                        IDjvuNode c = form.Children[i];
+
+                        if (c == null)
                         {
-                            Assert.Equal(i, chunk.ChunkData[0]);
-                            Assert.Equal(slices[i] - (i == 0 ? 0 : slices[i - 1]), chunk.ChunkData[1]);
+                            Assert.True(false);
+                        }
+
+                        byte[] chunkDataBuffer = null;
+                        if (!(c is PM44Chunk chunk))
+                        {
+                            Assert.True(false);
+                        }
+                        else if (chunk.ChunkData == null)
+                        {
+                            Assert.True(false);
+                        }
+                        else
+                        {
+                            chunkDataBuffer = chunk.ChunkData;
+                        }
+
+                        if (chunkDataBuffer.Length >= 2)
+                        {
+                            if (i != chunkDataBuffer[0])
+                            {
+                                Assert.True(false);
+                            }
+
+                            if (chunkDataBuffer[1] != (slices[i] - (i == 0 ? 0 : slices[i - 1])))
+                            {
+                                Assert.True(false);
+                            }
+
                             if (i == 0)
                             {
-                                Assert.Equal(1, chunk.ChunkData[2]);
-                                Assert.Equal(2, chunk.ChunkData[3]);
+                                if (chunkDataBuffer[2] != 1 || chunkDataBuffer[3] != 2)
+                                {
+                                    Assert.True(false);
+                                }
 
-                                int widthTest = chunk.ChunkData[4] << 8;
-                                widthTest |= chunk.ChunkData[5];
-                                Assert.Equal(bmp.Width, widthTest);
+                                int widthTest = chunkDataBuffer[4] << 8;
+                                widthTest |= chunkDataBuffer[5];
 
-                                int heightTest = chunk.ChunkData[6] << 8;
-                                heightTest |= chunk.ChunkData[7];
-                                Assert.Equal(bmp.Height, heightTest);
+                                if (widthTest != bmp.Width)
+                                {
+                                    Assert.True(false);
+                                }
+
+                                int heightTest = chunkDataBuffer[6] << 8;
+                                heightTest |= chunkDataBuffer[7];
+                                if (bmp.Height != heightTest)
+                                {
+                                    Assert.True(false);
+                                }
                             }
                         }
                     }
@@ -168,13 +212,13 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 map._CrCbDelay = 0;
                 map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
 
-                int nchunks = 4;
+                const int nchunks = 4;
                 float[] decibel = new float[] { 25.0f, 25.2f, 25.2647f, 25.7f };
 
                 InterWaveEncoderSettings[] settings = new InterWaveEncoderSettings[nchunks];
@@ -201,7 +245,7 @@ namespace DjvuNet.Wavelet.Tests
                 Assert.IsType<PM44Form>(form);
                 for (int i = 0; i < form.Children.Count; i++)
                 {
-                    var c = form.Children[i];
+                    IDjvuNode c = form.Children[i];
                     Assert.NotNull(c);
                     Assert.IsType<PM44Chunk>(c);
                     PM44Chunk chunk = (PM44Chunk)c;
@@ -225,8 +269,6 @@ namespace DjvuNet.Wavelet.Tests
                     }
                 }
 
-
-
                 //using (DjvuDocument doc = new DjvuDocument(outFile))
                 //{
                 //    IDjvuPage page = doc.Pages[0];
@@ -246,13 +288,13 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 map._CrCbDelay = 0;
                 map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
 
-                int nchunks = 4;
+                const int nchunks = 4;
                 int[] slices = new int[] { 111, 152, 184, 200 };
 
                 InterWaveEncoderSettings[] settings = new InterWaveEncoderSettings[nchunks];
@@ -277,7 +319,7 @@ namespace DjvuNet.Wavelet.Tests
                 Assert.IsType<PM44Form>(form);
                 for (int i = 0; i < form.Children.Count; i++)
                 {
-                    var c = form.Children[i];
+                    IDjvuNode c = form.Children[i];
                     Assert.NotNull(c);
                     Assert.IsType<PM44Chunk>(c);
                     PM44Chunk chunk = (PM44Chunk)c;
@@ -302,7 +344,6 @@ namespace DjvuNet.Wavelet.Tests
                     }
                 }
 
-
                 //using (DjvuDocument doc = new DjvuDocument(outFile))
                 //{
                 //    IDjvuPage page = doc.Pages[0];
@@ -322,13 +363,13 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 map._CrCbDelay = 0;
                 map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
 
-                int nchunks = 4;
+                const int nchunks = 4;
                 int[] slices = new int[] { 111, 152, 184, 200 };
 
                 InterWaveEncoderSettings[] settings = new InterWaveEncoderSettings[nchunks];
@@ -355,7 +396,7 @@ namespace DjvuNet.Wavelet.Tests
                 Assert.IsType<PM44Form>(form);
                 for (int i = 0; i < form.Children.Count; i++)
                 {
-                    var c = form.Children[i];
+                    IDjvuNode c = form.Children[i];
                     Assert.NotNull(c);
                     Assert.IsType<PM44Chunk>(c);
                     PM44Chunk chunk = (PM44Chunk)c;
@@ -378,8 +419,6 @@ namespace DjvuNet.Wavelet.Tests
                         }
                     }
                 }
-
-
 
                 //using (DjvuDocument doc = new DjvuDocument(outFile))
                 //{
@@ -423,7 +462,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);
@@ -438,7 +477,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);
@@ -453,7 +492,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);
@@ -468,7 +507,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                var pixMap = PixelMapFromBitmap(bmp);
+                IPixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);

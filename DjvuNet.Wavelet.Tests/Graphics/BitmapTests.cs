@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.Tests;
 using DjvuNet.Errors;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Graphics.Tests
 {
@@ -93,6 +94,7 @@ namespace DjvuNet.Graphics.Tests
             return bmp;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static void WriteBitmap(int width, int height, IBitmap bmp)
         {
             string format = "x4";
@@ -129,6 +131,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetBooleanAtTest001()
         {
             int width = 16;
@@ -233,6 +236,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetByteAtTest001()
         {
             int width = 16;

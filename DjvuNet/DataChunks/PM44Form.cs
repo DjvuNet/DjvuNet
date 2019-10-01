@@ -26,7 +26,9 @@ namespace DjvuNet.DataChunks
         public override void WriteData(IDjvuWriter writer, bool writeHeader = true)
         {
             if (writer == null)
+            {
                 throw new DjvuArgumentNullException(nameof(writer));
+            }
 
             if (writeHeader)
             {

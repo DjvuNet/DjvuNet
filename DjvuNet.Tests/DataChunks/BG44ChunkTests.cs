@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Wavelet;
@@ -42,6 +43,7 @@ namespace DjvuNet.DataChunks.Tests
 
         [DjvuTheory]
         [MemberData(nameof(BG44TestData))]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ProgressiveDecodeBackground_Theory(string file, long length)
         {
             using (FileStream fs = File.Open(file, FileMode.Open, FileAccess.Read, FileShare.Read))

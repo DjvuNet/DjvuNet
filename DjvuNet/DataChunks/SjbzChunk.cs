@@ -2,6 +2,7 @@
 // TODO: Update copyright text.
 // </copyright>
 
+using System.Collections.Generic;
 using System.Linq;
 using DjvuNet.JB2;
 
@@ -37,7 +38,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_image == null)
+                {
                     _image = ReadCompressedImage();
+                }
 
                 return _image;
             }
@@ -45,7 +48,9 @@ namespace DjvuNet.DataChunks
             private set
             {
                 if (_image != value)
+                {
                     _image = value;
+                }
             }
         }
 
@@ -76,27 +81,25 @@ namespace DjvuNet.DataChunks
             {
                 JB2Image image = new JB2Image();
                 JB2.JB2Dictionary includedDictionary = null;
-                DjvuChunk djvuChunk = Parent as DjvuChunk;
 
-                if (djvuChunk != null)
+                if (Parent is DjvuChunk djvuChunk)
                 {
-                    var includes = djvuChunk.IncludedItems;
+                    IReadOnlyList<InclChunk> includes = djvuChunk.IncludedItems;
 
                     if (includes?.Count > 0)
                     {
                         string includeID = includes
                             .FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Incl)?.IncludeID;
-                        DjvmChunk root = Document.RootForm as DjvmChunk;
+                        var root = Document.RootForm as DjvmChunk;
                         DirmComponent component = root?.Dirm.Components
                             .Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
 
                         var includeForm =
                             root.Includes
-                            .Where(x =>  x.DataOffset == (component.Offset + 12))
-                            .FirstOrDefault<IDjviChunk>();
+                            .FirstOrDefault<IDjviChunk>(x => x.DataOffset == (component.Offset + 12));
 
                         var djbzItem = includeForm?.Children
-                            .Where<IDjvuNode>(x => x.ChunkType == ChunkType.Djbz).FirstOrDefault() as DjbzChunk;
+                            .FirstOrDefault(x => x.ChunkType == ChunkType.Djbz) as DjbzChunk;
 
                         includedDictionary = djbzItem?.ShapeDictionary;
                     }

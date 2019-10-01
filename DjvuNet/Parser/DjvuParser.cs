@@ -17,13 +17,17 @@ namespace DjvuNet.Parser
         protected void OnParsedDjvuNode(IDjvuNode node)
         {
             if (ParsedDjvuNodeEvent != null)
+            {
                 ParsedDjvuNodeEvent(this, new ParsedDjvuNodeEventArgs(node));
+            }
         }
 
         protected void OnParsedDjvuElement(IDjvuElement element)
         {
             if (ParsedDjvuElementEvent != null)
+            {
                 ParsedDjvuElementEvent(this, new ParsedDjvuElementEventArgs(element));
+            }
         }
 
         public static DjvuFormElement GetRootForm(IDjvuReader reader, IDjvuElement parent, IDjvuDocument document)
@@ -351,10 +355,12 @@ namespace DjvuNet.Parser
             // TODO Implement other single file docs???
 
             // DJVM form is the only chunk type which is always in document root
-            if (type == ChunkType.Djvm) return false;
+            if (type == ChunkType.Djvm)
+            {
+                return false;
+            }
 
-            return IsFormChunk(type) || type == ChunkType.Dirm ||
-                type == ChunkType.Navm;
+            return IsFormChunk(type) || type == ChunkType.Dirm || type == ChunkType.Navm;
         }
     }
 }

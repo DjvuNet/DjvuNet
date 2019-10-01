@@ -22,7 +22,9 @@ namespace DjvuNet.DataChunks
             get
             {
                 if (_Image == null)
+                {
                     _Image = DecodeImage();
+                }
 
                 return _Image;
             }
@@ -30,7 +32,9 @@ namespace DjvuNet.DataChunks
             internal set
             {
                 if (_Image != value)
+                {
                     _Image = value;
+                }
             }
         }
 
