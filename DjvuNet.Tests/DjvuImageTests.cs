@@ -329,7 +329,7 @@ namespace DjvuNet.Tests
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildPageImagen.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildPageImagen.png"));
                 }
             }
         }

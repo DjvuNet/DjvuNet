@@ -16,7 +16,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);DUMP_IMAGES</DefineConstants>
+    <!-- Uncomment constant define below to dump images during test run -->
+    <!--<DefineConstants>$(DefineConstants);DUMP_IMAGES</DefineConstants>-->
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
