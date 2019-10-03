@@ -84,14 +84,13 @@ namespace DjvuNet.Tests
         [Fact()]
         public void ResizeImage001()
         {
-            int wh = 128;
+            const int wh = 128;
             using (System.Drawing.Bitmap bitmap = new Bitmap(wh, wh))
             {
                 using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bitmap))
                 {
                     using (SolidBrush brush = new SolidBrush(Color.FromArgb(0xed, 0xed, 0xed)))
                         g.FillRectangle(brush, 0, 0, bitmap.Width, bitmap.Height);
-
                 }
 
                 Bitmap newImage = DjvuImage.ResizeImage(bitmap, 2 * bitmap.Width, 2 * bitmap.Height);
@@ -119,26 +118,26 @@ namespace DjvuNet.Tests
             }
         }
 
-
         public static IEnumerable<object[]> PixelSizeTestData
         {
             get
             {
-                List<object[]> retVal = new List<object[]>();
-
-                retVal.Add(new object[] { "Format8bppIndexed", 198659 });
-                retVal.Add(new object[] { "Format16bppRgb555", 135173 });
-                retVal.Add(new object[] { "Format16bppRgb565", 135174 });
-                retVal.Add(new object[] { "Format16bppGrayScale", 1052676 });
-                retVal.Add(new object[] { "Format16bppArgb1555", 397319 });
-                retVal.Add(new object[] { "Format24bppRgb", 137224 });
-                retVal.Add(new object[] { "Format32bppRgb", 139273 });
-                retVal.Add(new object[] { "Format32bppPArgb", 925707 });
-                retVal.Add(new object[] { "Format32bppArgb", 2498570 });
-                retVal.Add(new object[] { "Format48bppRgb", 1060876 });
-                retVal.Add(new object[] { "Format64bppPArgb", 1851406 });
-                retVal.Add(new object[] { "Format64bppArgb", 3424269 });
-                retVal.Add(new object[] { "Canonical", 2097152 });
+                List<object[]> retVal = new List<object[]>
+                {
+                    new object[] { "Format8bppIndexed", 198659 },
+                    new object[] { "Format16bppRgb555", 135173 },
+                    new object[] { "Format16bppRgb565", 135174 },
+                    new object[] { "Format16bppGrayScale", 1052676 },
+                    new object[] { "Format16bppArgb1555", 397319 },
+                    new object[] { "Format24bppRgb", 137224 },
+                    new object[] { "Format32bppRgb", 139273 },
+                    new object[] { "Format32bppPArgb", 925707 },
+                    new object[] { "Format32bppArgb", 2498570 },
+                    new object[] { "Format48bppRgb", 1060876 },
+                    new object[] { "Format64bppPArgb", 1851406 },
+                    new object[] { "Format64bppArgb", 3424269 },
+                    new object[] { "Canonical", 2097152 }
+                };
 
                 return retVal;
             }
@@ -148,18 +147,19 @@ namespace DjvuNet.Tests
         {
             get
             {
-                List<object[]> retVal = new List<object[]>();
-
-                retVal.Add(new object[] { "Undefined", 0 });
-                retVal.Add(new object[] { "DontCare", 0 });
-                retVal.Add(new object[] { "Max", 15 });
-                retVal.Add(new object[] { "Indexed", 65536 });
-                retVal.Add(new object[] { "Gdi", 131072 });
-                retVal.Add(new object[] { "Format1bppIndexed", 196865 });
-                retVal.Add(new object[] { "Format4bppIndexed", 197634 });
-                retVal.Add(new object[] { "Alpha", 262144 });
-                retVal.Add(new object[] { "PAlpha", 524288 });
-                retVal.Add(new object[] { "Extended", 1048576 });
+                List<object[]> retVal = new List<object[]>
+                {
+                    new object[] { "Undefined", 0 },
+                    new object[] { "DontCare", 0 },
+                    new object[] { "Max", 15 },
+                    new object[] { "Indexed", 65536 },
+                    new object[] { "Gdi", 131072 },
+                    new object[] { "Format1bppIndexed", 196865 },
+                    new object[] { "Format4bppIndexed", 197634 },
+                    new object[] { "Alpha", 262144 },
+                    new object[] { "PAlpha", 524288 },
+                    new object[] { "Extended", 1048576 }
+                };
 
                 return retVal;
             }
@@ -203,9 +203,9 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -223,10 +223,10 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -243,10 +243,10 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
                 page.IsInverted = true;
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -262,11 +262,11 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png");
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
                     Assert.NotNull(image);
@@ -296,7 +296,7 @@ namespace DjvuNet.Tests
             {
                 var page = (DjvuPage)doc.Pages[0];
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildPageImage())
+                using (Bitmap image = djvuImage.BuildPageImage())
                 {
                     page.IsInverted = true;
                     using (Bitmap imageInv = djvuImage.BuildPageImage())
@@ -322,15 +322,14 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildPageImagen.png"));
-
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test001CBuildPageImagen.png"));
                 }
             }
         }
@@ -343,10 +342,10 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -362,14 +361,14 @@ namespace DjvuNet.Tests
             using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
                 page.IsInverted = true;
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
-                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002CBuildPageImagen.png"));
+                    //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test002iCBuildPageImagen.png"));
                 }
             }
         }
@@ -386,7 +385,7 @@ namespace DjvuNet.Tests
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png");
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.BuildImage())
+                using (Bitmap image = djvuImage.BuildImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
                     Assert.NotNull(image);
@@ -414,17 +413,16 @@ namespace DjvuNet.Tests
             using (DjvuDocument document = Util.GetTestDocument(2, out pageCount))
             {
                 Util.VerifyDjvuDocument(pageCount, document);
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
                 var djvuImage = page.Image as DjvuImage;
                 Assert.NotNull(djvuImage);
-                var image = djvuImage.Image;
+                Bitmap image = djvuImage.Image;
 
                 Assert.NotNull(image);
-                var format = image.RawFormat;
+                ImageFormat format = image.RawFormat;
 
                 page.Image.ClearImage();
                 Assert.Throws<ArgumentException>(() => image.RawFormat);
-
             }
         }
 
@@ -440,7 +438,7 @@ namespace DjvuNet.Tests
                 Assert.NotNull(page);
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.GetForegroundImage(1))
+                using (Bitmap image = djvuImage.GetForegroundImage(1))
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -465,7 +463,7 @@ namespace DjvuNet.Tests
                 Assert.NotNull(page);
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.GetBackgroundImage(1))
+                using (Bitmap image = djvuImage.GetBackgroundImage(1))
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -490,7 +488,7 @@ namespace DjvuNet.Tests
                 Assert.NotNull(page);
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.GetTextImage(1))
+                using (Bitmap image = djvuImage.GetTextImage(1))
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -501,7 +499,6 @@ namespace DjvuNet.Tests
 #endif
                 }
             }
-
         }
 
         [Fact]
@@ -512,10 +509,10 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.ExtractThumbnailImage())
+                using (Bitmap image = djvuImage.ExtractThumbnailImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -531,10 +528,10 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.ExtractThumbnailImage())
+                using (Bitmap image = djvuImage.ExtractThumbnailImage())
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
@@ -554,7 +551,7 @@ namespace DjvuNet.Tests
                 var testImagePath = Path.Combine(Util.ArtifactsDataPath, "test003C.png");
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var image = djvuImage.Image)
+                using (Bitmap image = djvuImage.Image)
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
                     Assert.NotNull(image);
@@ -583,14 +580,13 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.Pages[11];
+                IDjvuPage page = document.Pages[11];
                 page.Image.Preload();
-                var image = ((DjvuImage)page.Image).Image;
+                Bitmap image = ((DjvuImage)page.Image).Image;
                 Assert.NotNull(image);
                 Assert.IsType<Bitmap>(image);
             }
         }
-
 
         [Fact()]
         public void InvertImageTest001()
@@ -601,7 +597,6 @@ namespace DjvuNet.Tests
                 {
                     using (SolidBrush brush = new SolidBrush(Color.FromArgb(0xed, 0xed, 0xed)))
                         g.FillRectangle(brush, 0, 0, bitmap.Width, bitmap.Height);
-
                 }
 
                 Bitmap bitmap2 = null;
@@ -654,7 +649,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void InvertColorTest001()
         {
-            int color = 0x00ffffff;
+            const int color = 0x00ffffff;
             int result = DjvuImage.InvertColor(color);
             Assert.Equal(0x00000000, result);
         }
@@ -662,7 +657,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void InvertColorTest002()
         {
-            int color = 0x00000000;
+            const int color = 0x00000000;
             int result = DjvuImage.InvertColor(color);
             Assert.Equal(0x00ffffff, result);
         }
@@ -670,7 +665,7 @@ namespace DjvuNet.Tests
         [Fact()]
         public void InvertColorTest003()
         {
-            int color = 0x00f0f0f0;
+            const int color = 0x00f0f0f0;
             int result = DjvuImage.InvertColor(color);
             Assert.Equal(0x000f0f0f, result);
         }
@@ -685,13 +680,13 @@ namespace DjvuNet.Tests
                 page.Height = 128;
                 page.Width = 128;
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var bitmap = djvuImage.GetBackgroundImage(1))
+                using (Bitmap bitmap = djvuImage.GetBackgroundImage(1))
                 {
                     Assert.NotNull(bitmap);
                     Assert.NotEqual(0, page.Width);
                     Assert.Equal(page.Width, bitmap.Width);
                     Assert.Equal(page.Height, bitmap.Height);
-                    var pixel = bitmap.GetPixel(0, 0);
+                    Color pixel = bitmap.GetPixel(0, 0);
                     Assert.Equal(255, pixel.R);
                     Assert.Equal(255, pixel.G);
                     Assert.Equal(255, pixel.B);
@@ -702,23 +697,24 @@ namespace DjvuNet.Tests
         [Fact()]
         public void GetBackgroundImage000()
         {
-            var page = new DjvuPage();
-            page.Height = 128;
-            page.Width = 128;
-            DjvuImage djvuImage = page.Image as DjvuImage;
-            using (var bitmap = djvuImage.GetBackgroundImage(1))
+            using (var page = new DjvuPage())
             {
-                Assert.NotNull(bitmap);
-                Assert.NotEqual(0, page.Width);
-                Assert.Equal(page.Width, bitmap.Width);
-                Assert.Equal(page.Height, bitmap.Height);
-                var pixel = bitmap.GetPixel(0, 0);
-                Assert.Equal(255, pixel.R);
-                Assert.Equal(255, pixel.G);
-                Assert.Equal(255, pixel.B);
+                page.Height = 128;
+                page.Width = 128;
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap bitmap = djvuImage.GetBackgroundImage(1))
+                {
+                    Assert.NotNull(bitmap);
+                    Assert.NotEqual(0, page.Width);
+                    Assert.Equal(page.Width, bitmap.Width);
+                    Assert.Equal(page.Height, bitmap.Height);
+                    Color pixel = bitmap.GetPixel(0, 0);
+                    Assert.Equal(255, pixel.R);
+                    Assert.Equal(255, pixel.G);
+                    Assert.Equal(255, pixel.B);
+                }
             }
         }
-
 
         [Fact()]
         public void GetForegroundImage078()
@@ -730,13 +726,13 @@ namespace DjvuNet.Tests
                 page.Height = 128;
                 page.Width = 128;
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var bitmap = djvuImage.GetForegroundImage(1))
+                using (Bitmap bitmap = djvuImage.GetForegroundImage(1))
                 {
                     Assert.NotNull(bitmap);
                     Assert.NotEqual(0, page.Width);
                     Assert.Equal(page.Width, bitmap.Width);
                     Assert.Equal(page.Height, bitmap.Height);
-                    var pixel = bitmap.GetPixel(0, 0);
+                    Color pixel = bitmap.GetPixel(0, 0);
                     Assert.Equal(0, pixel.R);
                     Assert.Equal(0, pixel.G);
                     Assert.Equal(0, pixel.B);
@@ -747,20 +743,22 @@ namespace DjvuNet.Tests
         [Fact()]
         public void GetForegroundImage000()
         {
-            var page = new DjvuPage();
-            page.Height = 128;
-            page.Width = 128;
-            DjvuImage djvuImage = page.Image as DjvuImage;
-            using (var bitmap = djvuImage.GetForegroundImage(1))
+            using (var page = new DjvuPage())
             {
-                Assert.NotNull(bitmap);
-                Assert.NotEqual(0, page.Width);
-                Assert.Equal(page.Width, bitmap.Width);
-                Assert.Equal(page.Height, bitmap.Height);
-                var pixel = bitmap.GetPixel(0, 0);
-                Assert.Equal(0, pixel.R);
-                Assert.Equal(0, pixel.G);
-                Assert.Equal(0, pixel.B);
+                page.Height = 128;
+                page.Width = 128;
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap bitmap = djvuImage.GetForegroundImage(1))
+                {
+                    Assert.NotNull(bitmap);
+                    Assert.NotEqual(0, page.Width);
+                    Assert.Equal(page.Width, bitmap.Width);
+                    Assert.Equal(page.Height, bitmap.Height);
+                    Color pixel = bitmap.GetPixel(0, 0);
+                    Assert.Equal(0, pixel.R);
+                    Assert.Equal(0, pixel.G);
+                    Assert.Equal(0, pixel.B);
+                }
             }
         }
 
@@ -774,13 +772,13 @@ namespace DjvuNet.Tests
                 page.Height = 128;
                 page.Width = 128;
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (var bitmap = djvuImage.GetTextImage(1))
+                using (Bitmap bitmap = djvuImage.GetTextImage(1))
                 {
                     Assert.NotNull(bitmap);
                     Assert.NotEqual(0, page.Width);
                     Assert.Equal(page.Width, bitmap.Width);
                     Assert.Equal(page.Height, bitmap.Height);
-                    var pixel = bitmap.GetPixel(0, 0);
+                    Color pixel = bitmap.GetPixel(0, 0);
                     Assert.Equal(0, pixel.R);
                     Assert.Equal(0, pixel.G);
                     Assert.Equal(0, pixel.B);
@@ -791,20 +789,22 @@ namespace DjvuNet.Tests
         [Fact()]
         public void GetTextImage000()
         {
-            var page = new DjvuPage();
-            page.Height = 128;
-            page.Width = 128;
-            DjvuImage djvuImage = page.Image as DjvuImage;
-            using (var bitmap = djvuImage.GetTextImage(1))
+            using (var page = new DjvuPage())
             {
-                Assert.NotNull(bitmap);
-                Assert.NotEqual(0, page.Width);
-                Assert.Equal(page.Width, bitmap.Width);
-                Assert.Equal(page.Height, bitmap.Height);
-                var pixel = bitmap.GetPixel(0, 0);
-                Assert.Equal(0, pixel.R);
-                Assert.Equal(0, pixel.G);
-                Assert.Equal(0, pixel.B);
+                page.Height = 128;
+                page.Width = 128;
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap bitmap = djvuImage.GetTextImage(1))
+                {
+                    Assert.NotNull(bitmap);
+                    Assert.NotEqual(0, page.Width);
+                    Assert.Equal(page.Width, bitmap.Width);
+                    Assert.Equal(page.Height, bitmap.Height);
+                    Color pixel = bitmap.GetPixel(0, 0);
+                    Assert.Equal(0, pixel.R);
+                    Assert.Equal(0, pixel.G);
+                    Assert.Equal(0, pixel.B);
+                }
             }
         }
 
@@ -816,8 +816,8 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
-                var image = page.Image;
+                IDjvuPage page = document.FirstPage;
+                IDjvuImage image = page.Image;
                 Assert.NotNull(image);
                 Assert.IsType<DjvuImage>(image);
                 Assert.NotNull(image.Image);
@@ -833,9 +833,9 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                var page = document.FirstPage;
+                IDjvuPage page = document.FirstPage;
 
-                var image = page.Image;
+                IDjvuImage image = page.Image;
                 Assert.NotNull(image);
                 Assert.IsType<DjvuImage>(image);
                 Assert.NotNull(image.Image);

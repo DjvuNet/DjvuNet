@@ -234,7 +234,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Fast copy of managed pixel array data into System.Drawing.Bitmap image.
         /// No checking of passed parameters, therefore, it is a caller responsibility
-        /// to provid valid parameter values.
+        /// to provide valid parameter values.
         /// </summary>
         /// <param name="width">
         /// Image width <see cref="System.Int32"/> in pixels
@@ -267,7 +267,17 @@ namespace DjvuNet.Graphics
                 bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                                      ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-                MemoryUtilities.MoveMemory(bmpData.Scan0, data, length);
+                uint pixelSize = (uint) DjvuImage.GetPixelSize(bmp.PixelFormat);
+                uint bytesPerRow = (uint) bmp.Width * pixelSize;
+
+                IntPtr dataPtr = bmpData.Scan0;
+
+                for (int i = 0; i < height; i++)
+                {
+                    MemoryUtilities.MoveMemory(dataPtr, data, bytesPerRow);
+                    dataPtr = (IntPtr)((long)dataPtr + bmpData.Stride);
+                    data = (IntPtr)((long)data + bytesPerRow);
+                }
             }
             catch(Exception ex)
             {

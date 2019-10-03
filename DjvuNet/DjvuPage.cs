@@ -42,7 +42,7 @@ namespace DjvuNet
         private InfoChunk _Info;
         private DirmComponent _Header;
         private DataChunks.TextChunk _TextChunk;
-        private String _Text;
+        private string _Text;
         private JB2.JB2Image _ForegroundJB2Image;
         private Wavelet.IInterWavePixelMap _ForegroundIWPixelMap;
         private Wavelet.IInterWavePixelMap _BackgroundIWPixelMap;
@@ -143,11 +143,12 @@ namespace DjvuNet
             {
                 if (_Info == null)
                 {
-                    var chunk = PageForm.Children
-                        .FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Info);
+                    IDjvuNode chunk = PageForm.Children.FirstOrDefault<IDjvuNode>(x => x.ChunkType == ChunkType.Info);
                     _Info = chunk as InfoChunk;
                     if (_Info != null)
+                    {
                         OnPropertyChanged(nameof(Info));
+                    }
                 }
 
                 return _Info;
@@ -193,14 +194,16 @@ namespace DjvuNet
                     _TextChunk = (TextChunk) PageForm.Children.FirstOrDefault(
                         x => x.ChunkType == ChunkType.Txtz);
                     if (_TextChunk != null)
-                        OnPropertyChanged(nameof(TextChunk)); ;
+                    {
+                        OnPropertyChanged(nameof(TextChunk));
+                    }
                 }
 
                 return _TextChunk;
             }
         }
 
-        public String Text
+        public string Text
         {
             get
             {
@@ -208,7 +211,9 @@ namespace DjvuNet
                 {
                     _Text = TextChunk?.Text;
                     if (_Text == null)
-                        _Text = String.Empty;
+                    {
+                        _Text = string.Empty;
+                    }
                 }
 
                 return _Text;
@@ -301,7 +306,9 @@ namespace DjvuNet
 
                     _ForegroundPalette = result?.Palette;
                     if (_ForegroundPalette != null)
+                    {
                         OnPropertyChanged(nameof(ForegroundPalette));
+                    }
                 }
 
                 return _ForegroundPalette;
@@ -319,7 +326,9 @@ namespace DjvuNet
                 {
                     _ForegroundPixelMap = ForegroundIWPixelMap.GetPixelMap();
                     if (_ForegroundPixelMap != null)
+                    {
                         OnPropertyChanged(nameof(ForegroundPixelMap));
+                    }
                 }
 
                 return _ForegroundPixelMap;
@@ -429,10 +438,12 @@ namespace DjvuNet
             GC.SuppressFinalize(this);
         }
 
-        protected void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (Disposed)
+            {
                 return;
+            }
 
             if (disposing)
             {
@@ -460,8 +471,7 @@ namespace DjvuNet
         /// <param name="property"></param>
         protected void OnPropertyChanged(string property)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(property));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
         /// <summary>
@@ -472,7 +482,9 @@ namespace DjvuNet
         public string GetTextForLocation(Rectangle rect)
         {
             if (TextChunk == null || TextChunk.Zone == null)
+            {
                 return "";
+            }
 
             StringBuilder text = new StringBuilder();
 
@@ -489,7 +501,9 @@ namespace DjvuNet
                 }
 
                 if (item.Parent == currentParent)
-                    text.Append(item.Text + " ");
+                {
+                    text.Append(item.Text).Append(' ');
+                }
             }
 
             return text.ToString().Trim();
@@ -506,8 +520,10 @@ namespace DjvuNet
         {
             Verify.SubsampleRange(subsample);
 
-            if (rect == null || rect.Empty)
+            if (rect?.Empty != false)
+            {
                 return (retval == null) ? (new PixelMap()) : retval.Init(0, 0, null);
+            }
 
             GPixmap bg = GetBgPixmap(rect, subsample, gamma, retval);
             if (ForegroundJB2Image != null)
@@ -517,8 +533,11 @@ namespace DjvuNet
                     bg = (retval == null) ? new PixelMap() : retval;
                     bg.Init(rect.Height, rect.Width, _IsInverted ? Pixel.BlackPixel : Pixel.WhitePixel);
                 }
+
                 if (Stencil(bg, rect, subsample, gamma))
+                {
                     retval = bg;
+                }
             }
             else
             {
@@ -605,11 +624,13 @@ namespace DjvuNet
                 }
                 else if ((red * 4) == (subsample * 3))
                 {
-                    GRect xrect = new GRect();
-                    xrect.Right = (int)Math.Floor(rect.Right * 4D / 3D);
-                    xrect.Bottom = (int)Math.Floor(rect.Bottom * 4D / 3D);
-                    xrect.Left = (int)Math.Ceiling((double)rect.Left * 4D / 3D);
-                    xrect.Top = (int)Math.Ceiling((double)rect.Top * 4D / 3D);
+                    GRect xrect = new GRect
+                    {
+                        Right = (int)Math.Floor(rect.Right * 4D / 3D),
+                        Bottom = (int)Math.Floor(rect.Bottom * 4D / 3D),
+                        Left = (int)Math.Ceiling((double)rect.Left * 4D / 3D),
+                        Top = (int)Math.Ceiling((double)rect.Top * 4D / 3D)
+                    };
 
                     GRect nrect = new GRect(0, 0, rect.Width, rect.Height);
 
@@ -681,7 +702,9 @@ namespace DjvuNet
             Verify.SubsampleRange(subsample);
 
             if (rect.Empty)
+            {
                 return new Graphics.Bitmap();
+            }
 
             int width = Width;
             int height = Height;
@@ -689,7 +712,9 @@ namespace DjvuNet
             JB2Image fgJb2 = ForegroundJB2Image;
 
             if (width != 0 && height != 0 && fgJb2 != null && fgJb2.Width == width && fgJb2.Height == height)
+            {
                 return fgJb2.GetBitmap(rect, subsample, align, 0, components);
+            }
 
             return null;
         }
@@ -699,11 +724,13 @@ namespace DjvuNet
             Verify.SubsampleRange(subsample);
 
             if (IsColor)
-                retval = GetPixelMap(segment, subsample, 0.0D,
-                    (retval is GPixmap) ? (GPixmap)retval : null);
+            {
+                retval = GetPixelMap(segment, subsample, 0.0D, (retval is GPixmap) ? (GPixmap)retval : null);
+            }
             else
-                retval = GetBitmap(segment, subsample, 1,
-                        (retval is GBitmap) ? (GBitmap)retval : null);
+            {
+                retval = GetBitmap(segment, subsample, 1, (retval is GBitmap) ? (GBitmap)retval : null);
+            }
 
             return retval;
         }
@@ -716,12 +743,16 @@ namespace DjvuNet
             int height = Height;
 
             if (width <= 0 || height <= 0)
+            {
                 return false;
+            }
 
             JB2Image fgJb2 = ForegroundJB2Image;
 
             if (fgJb2 == null || fgJb2.Width != width || fgJb2.Height != height)
+            {
                 return false;
+            }
 
             return !(BackgroundIWPixelMap != null || ForegroundIWPixelMap != null
                      || ForegroundPalette != null);
@@ -733,22 +764,30 @@ namespace DjvuNet
             int height = Height;
 
             if (width <= 0 || height <= 0)
+            {
                 return false;
+            }
 
             JB2Image fgJb2 = ForegroundJB2Image;
 
             if (fgJb2 == null || fgJb2.Width != width || fgJb2.Height != height)
+            {
                 return false;
+            }
 
             // There is no need to synchronize since we won't access data which could be updated.
             IInterWavePixelMap bgIWPixmap = (IInterWavePixelMap)BackgroundIWPixelMap;
             int bgred = 0;
 
             if (bgIWPixmap != null)
+            {
                 bgred = ComputeRed(width, height, bgIWPixmap.Width, bgIWPixmap.Height);
+            }
 
             if ((bgred < 1) || (bgred > 12))
+            {
                 return false;
+            }
 
             int fgred = 0;
 
@@ -758,7 +797,7 @@ namespace DjvuNet
                 fgred = ComputeRed(width, height, fgPixmap.Width, fgPixmap.Height);
             }
 
-            return ((fgred >= 1) && (fgred <= 12));
+            return (fgred >= 1) && (fgred <= 12);
         }
 
 #if NETCOREAPP
@@ -946,7 +985,9 @@ namespace DjvuNet
             for (int red = 1; red < 16; red++)
             {
                 if (((((w + red) - 1) / red) == rw) && ((((h + red) - 1) / red) == rh))
+                {
                     return red;
+                }
             }
 
             return 16;

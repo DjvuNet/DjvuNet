@@ -14,13 +14,11 @@ using DjvuNet.Parser;
 
 namespace DjvuNet
 {
-
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
     public class DjvuDocument : INotifyPropertyChanged, IDisposable, IDjvuDocument
     {
-
         /// <summary>
         /// DjvuFile according to specification starts with AT&T followed by FORM
         /// </summary>
@@ -138,7 +136,9 @@ namespace DjvuNet
             get
             {
                 if (_Includes != null)
+                {
                     return _Includes;
+                }
                 else
                 {
                     _Includes = RootForm.ChunkType == ChunkType.Djvm ?
@@ -357,8 +357,6 @@ namespace DjvuNet
         {
         }
 
-
-
         /// <summary>
         /// TODO docs
         /// </summary>
@@ -443,9 +441,9 @@ namespace DjvuNet
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public static bool IsDjvuDocument(String filePath)
+        public static bool IsDjvuDocument(string filePath)
         {
-            if (!String.IsNullOrWhiteSpace(filePath))
+            if (!string.IsNullOrWhiteSpace(filePath))
             {
                 FileStream stream = null;
                 bool result = false;
@@ -456,7 +454,7 @@ namespace DjvuNet
                         stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                         result = IsDjvuDocument(stream);
                     }
-                    catch(Exception error)
+                    catch (Exception error)
                     {
                         throw new DjvuAggregateException("Error while trying to verify DjVu file.", error);
                     }
@@ -468,14 +466,19 @@ namespace DjvuNet
                     return result;
                 }
                 else
+                {
                     throw new DjvuFileNotFoundException("File was not found.", filePath);
+                }
             }
 
             if (filePath == null)
+            {
                 throw new DjvuArgumentNullException(nameof(filePath));
+            }
             else
+            {
                 throw new DjvuArgumentException($"Invalid file path: \"{filePath}\"", nameof(filePath));
-
+            }
         }
 
         /// <summary>
@@ -490,22 +493,32 @@ namespace DjvuNet
         /// <returns></returns>
         public static bool IsDjvuDocument(Stream stream)
         {
-            if (null == stream)
+            if (stream == null)
+            {
                 throw new DjvuArgumentNullException(nameof(stream));
+            }
 
             // Minimum empty Djvu file will consist of file header (8 bytes)
             // followed by length of IFF stream in the form of uint (4 bytes) and
             // "DJVM", "DJVU" or "DJVI" ASCII string (4 bytes) giving total of 16 bytes.
             if (stream.Length < MagicBuffer.Length * 2)
+            {
                 return false;
+            }
 
             if (stream.Position != 0)
+            {
                 if (stream.CanSeek)
+                {
                     stream.Position = 0;
+                }
                 else
+                {
                     throw new DjvuArgumentException(
-                        $"Stream is not set to the start of data and does not support seek. " +
-                        $"Current position: {stream.Position}", nameof(stream));
+                       $"Stream is not set to the start of data and does not support seek. " +
+                       $"Current position: {stream.Position}", nameof(stream));
+                }
+            }
 
             byte[] buff = new byte[MagicBuffer.Length];
             int readBytes = stream.Read(buff, 0, buff.Length);
@@ -525,9 +538,11 @@ namespace DjvuNet
             BuildPageList();
 
             if (Navigation == null)
+            {
                 Navigation = new DocumentNavigator(this);
+            }
 
-            if (Pages != null && Pages.Count > 0)
+            if (Pages?.Count > 0)
             {
                 ActivePage = FirstPage = Pages[0];
                 LastPage = Pages[Pages.Count - 1];
@@ -537,12 +552,14 @@ namespace DjvuNet
         public List<T> GetRootFormChildren<T>() where T : DjvuNode
         {
             if (RootForm.ChunkType == ChunkType.Djvu)
+            {
                 return new List<T>(new T[] { RootForm as T });
+            }
 
             string id = typeof(T).Name.Replace("Chunk", null);
             ChunkType chunkType = DjvuParser.GetChunkType(id);
             return RootForm.Children.Where<IDjvuNode>(x => x.ChunkType == chunkType)
-                .ToList<IDjvuNode>().ConvertAll<T>(x => { return (T)x; });
+                .ToList<IDjvuNode>().ConvertAll<T>(x => (T)x);
         }
 
         /// <summary>
@@ -551,7 +568,9 @@ namespace DjvuNet
         internal void BuildPageList()
         {
             if (Pages == null)
+            {
                 Pages = new List<IDjvuPage>();
+            }
 
             switch (RootForm.ChunkType)
             {
@@ -562,11 +581,15 @@ namespace DjvuNet
                         foreach (IThumChunk t in root.Thumbnails)
                         {
                             foreach (ITH44Chunk th in t.Children)
+                            {
                                 thumbnails.Enqueue(th);
+                            }
                         }
 
                         foreach (DjvuChunk page in root.Pages)
+                        {
                             AddPage(thumbnails, page);
+                        }
                     }
                     break;
                 case ChunkType.Djvu:
@@ -585,7 +608,7 @@ namespace DjvuNet
 
         internal void AddPage(Queue<ITH44Chunk> thumbnails, DjvuChunk page)
         {
-            ITH44Chunk thumbnail = thumbnails != null && thumbnails.Count > 0 ? thumbnails.Dequeue() : null;
+            ITH44Chunk thumbnail = thumbnails?.Count > 0 ? thumbnails.Dequeue() : null;
             DjvuPage newPage = new DjvuPage(_Pages.Count + 1, this, null, thumbnail, Includes, page);
             _Pages.Add(newPage);
         }
@@ -606,11 +629,13 @@ namespace DjvuNet
             try
             {
                 reader.Position = 0;
-                uint expectedHeader = 0x54265441;
+                const uint expectedHeader = 0x54265441;
                 uint actual = reader.ReadUInt32();
 
                 if (expectedHeader != actual)
+                {
                     throw new DjvuFormatException("DjVu \"AT$T\" file header is invalid");
+                }
             }
             finally
             {
@@ -627,7 +652,9 @@ namespace DjvuNet
             RootForm = DjvuParser.GetRootForm(reader, null, this);
             RootForm.Initialize(reader);
             foreach (IDjvuNode chunk in RootForm.Children)
+            {
                 chunk.Initialize(reader);
+            }
         }
 
         /// <summary>
@@ -694,8 +721,7 @@ namespace DjvuNet
         /// <param name="property"></param>
         protected void OnPropertyChanged(string property)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, new PropertyChangedEventArgs(property));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
         #endregion Private Methods
