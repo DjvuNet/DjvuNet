@@ -21,7 +21,7 @@ namespace DjvuNet.JB2
         public string Comment;
 
         /// <summary>
-        /// Query if this is image data.  Note that even though this data effects
+        /// Query if this is image data.  Note that even though this data affects
         /// rendering, the effect is indirect.  This class itself does not produce
         /// an image, so the return value is false.
         /// </summary>

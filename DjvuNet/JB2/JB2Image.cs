@@ -52,7 +52,7 @@ namespace DjvuNet.JB2
 
         public Bitmap GetBitmap(int subsample)
         {
-            return GetBitmap(subsample, 1);
+            return GetBitmap(subsample, 4);
         }
 
         public Bitmap GetBitmap(int subsample, int align)

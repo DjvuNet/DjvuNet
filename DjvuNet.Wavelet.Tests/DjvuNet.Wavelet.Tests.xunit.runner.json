@@ -4,7 +4,7 @@
     "diagnosticMessages": true,
     "longRunningTestSeconds": 15,
     "shadowCopy": false,
-    "preEnumerateTheories": false,
+    "preEnumerateTheories": true,
     "parallelizeAssembly": false,
     "parallelizeTestCollections": false
 }

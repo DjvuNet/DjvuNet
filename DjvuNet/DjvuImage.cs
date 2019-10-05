@@ -13,6 +13,7 @@ using DjvuNet.Utilities;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
 using GMap = DjvuNet.Graphics.IMap;
+using GBitmap = DjvuNet.Graphics.Bitmap;
 using GRect = DjvuNet.Graphics.Rectangle;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -362,10 +363,12 @@ namespace DjvuNet
             GC.SuppressFinalize(this);
         }
 
-        protected void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (Disposed)
+            {
                 return;
+            }
 
             if (disposing)
             {
@@ -446,9 +449,7 @@ namespace DjvuNet
             Bitmap result = BuildImage();
             var scaleAmount = (double)128 / result.Width;
 
-            result = DjvuImage.ResizeImage(result, (int)(result.Width * scaleAmount), (int)(result.Height * scaleAmount));
-
-            return result;
+            return DjvuImage.ResizeImage(result, (int)(result.Width * scaleAmount), (int)(result.Height * scaleAmount));
         }
 
         /// <summary>
@@ -547,17 +548,13 @@ namespace DjvuNet
 #endif
         public unsafe System.Drawing.Bitmap BuildImage(int subsample = 1)
         {
-            //
-            // TODO Fix image skew
-            //
-
             Verify.SubsampleRange(subsample);
 
             lock (_LoadingLock)
             {
                 Stopwatch stopWatch = Stopwatch.StartNew();
 
-                System.Drawing.Bitmap background = GetBackgroundImage(subsample, false);
+                System.Drawing.Bitmap background = GetBackgroundImage(subsample, true);
 
                 stopWatch.Stop();
 
@@ -565,14 +562,14 @@ namespace DjvuNet
 
                 stopWatch.Restart();
 
-                using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, false))
+                using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, true))
                 {
                     stopWatch.Stop();
                     // TODO ETW logging goes here
 
                     stopWatch.Restart();
 
-                    using (System.Drawing.Bitmap mask = GetTextImage(subsample, false))
+                    using (System.Drawing.Bitmap mask = GetTextImage(subsample, true))
                     {
                         stopWatch.Stop();
                         // TODO ETW logging goes here
@@ -709,7 +706,7 @@ namespace DjvuNet
                 }
                 else if ((jb2image = _Page.ForegroundJB2Image) != null)
                 {
-                    result = jb2image.GetBitmap().ToImage();
+                    result = jb2image.GetBitmap(1, GBitmap.BorderSize).ToImage();
                 }
                 else if (iwPixelMap == null && jb2image == null)
                 {
@@ -731,7 +728,7 @@ namespace DjvuNet
 
             lock (_LoadingLock)
             {
-                Bitmap result = _Page.ForegroundJB2Image.GetBitmap(subsample, 4).ToImage();
+                Bitmap result = _Page.ForegroundJB2Image.GetBitmap(subsample, GBitmap.BorderSize).ToImage();
                 return resizeImage ? DjvuImage.ResizeImage(result, _Page.Width / subsample, _Page.Height / subsample) : result;
             }
         }

@@ -18,6 +18,7 @@ namespace DjvuNet.Tests
         public void DjvuImageTest001()
         {
             DjvuImage image = new DjvuImage();
+            Assert.IsType<DjvuImage>(image);
             Assert.Null(image.Page);
             Assert.Null(image.Document);
         }
@@ -54,7 +55,7 @@ namespace DjvuNet.Tests
             Assert.Same(pageMock.Object, image.Page);
             Assert.Same(documentMock.Object, image.Document);
 
-            using(Bitmap bitmap = image.CreateBlankImage(Brushes.White))
+            using (Bitmap bitmap = image.CreateBlankImage(Brushes.White))
             {
                 Assert.Equal<int>(page.Width, bitmap.Width);
                 Assert.Equal<int>(page.Height, bitmap.Height);
@@ -167,7 +168,6 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(PixelSizeTestData))]
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetPixelSize_Theory(string name, int format)
         {
             int size = DjvuImage.GetPixelSize((PixelFormat)format);
@@ -175,7 +175,6 @@ namespace DjvuNet.Tests
 
         [DjvuTheory]
         [MemberData(nameof(PixelSizeTestThrows))]
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void GetPixelSize_Theory2(string name, int format)
         {
             Assert.Throws<DjvuFormatException>(() => DjvuImage.GetPixelSize((PixelFormat)format));
@@ -402,6 +401,206 @@ namespace DjvuNet.Tests
 
                     //image.Save(Path.Combine(Util.RepoRoot, "artifacts", "data", "dumps", "test003CBuildPageImagen.png"));
                     //Assert.True(result);
+                }
+            }
+        }
+
+        [Fact]
+        public void BuildPageImage004()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(4, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                IDjvuPage page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test004C.png");
+
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap image = djvuImage.BuildImage())
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+
+                    //Assert.True(result);
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> BuildImageSourceDocs
+        {
+            get
+            {
+                List<object[]> retVal = new List<object[]>();
+
+                for (int i = 1; i <= 77; i++)
+                {
+                    if (i == 33)
+                    {
+                        continue;
+                    }
+
+                    retVal.Add(new object[] { i });
+                }
+                return retVal;
+            }
+        }
+
+        [DjvuTheory]
+        [MemberData(nameof(BuildImageSourceDocs))]
+        public void BuildImage_Theory(int docNumber)
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(docNumber, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}C.tif");
+                Console.WriteLine($"Test image path: {testImagePath}");
+
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap image = djvuImage.BuildImage())
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+
+#if DUMP_IMAGES
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}Creference.tif"));
+#endif
+
+                    Assert.True(result);
+                }
+
+            }
+        }
+
+        [DjvuTheory]
+        [MemberData(nameof(BuildImageSourceDocs))]
+        public void BuildBackgroundImage_Theory(int docNumber)
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(docNumber, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}C.tif");
+                Console.WriteLine($"Test image path: {testImagePath}");
+
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap image = djvuImage.GetBackgroundImage(1))
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+
+#if DUMP_IMAGES
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}C_bg_reference.tif"));
+#endif
+
+                    Assert.True(result);
+                }
+            }
+        }
+
+        [DjvuTheory]
+        [MemberData(nameof(BuildImageSourceDocs))]
+        public void BuildForegroundImage_Theory(int docNumber)
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(docNumber, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}C.tif");
+                Console.WriteLine($"Test image path: {testImagePath}");
+
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap image = djvuImage.GetForegroundImage(1))
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+
+#if DUMP_IMAGES
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}C_fg_reference.tif"));
+#endif
+
+                    Assert.True(result);
+                }
+            }
+        }
+
+        [DjvuTheory]
+        [MemberData(nameof(BuildImageSourceDocs))]
+        public void BuildTextImage_Theory(int docNumber)
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(docNumber, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+                IDjvuPage page = document.FirstPage;
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}C.tif");
+                Console.WriteLine($"Test image path: {testImagePath}");
+
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap image = djvuImage.GetTextImage(1))
+                using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+                    Rectangle rect = new Rectangle(0, 0, image.Width, image.Height);
+
+                    BitmapData data = image.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                    BitmapData testData = testImage.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+                    bool result = Util.CompareImages(data, testData);
+
+                    image.UnlockBits(data);
+                    testImage.UnlockBits(testData);
+
+#if DUMP_IMAGES
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "dumps", $"test{docNumber:00#}C_txt_reference.tif"));
+#endif
+
+                    Assert.True(result);
                 }
             }
         }

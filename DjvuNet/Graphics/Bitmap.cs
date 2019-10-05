@@ -52,6 +52,8 @@ namespace DjvuNet.Graphics
         private const int RunMsbMask = 0x3f;
         private const int RunLsbMask = 0xff;
 
+        public const int BorderSize = 4;
+
         #region Private Members
 
         /// <summary>end of the buffer  </summary>
@@ -85,8 +87,6 @@ namespace DjvuNet.Graphics
             get { return Height; }
         }
 
-        #region Grays
-
         private int _Grays;
 
         /// <summary>
@@ -115,10 +115,6 @@ namespace DjvuNet.Graphics
             }
         }
 
-        #endregion Grays
-
-        #region Border
-
         private int _Border;
 
         /// <summary>
@@ -139,8 +135,6 @@ namespace DjvuNet.Graphics
                 }
             }
         }
-
-        #endregion Border
 
         public Pixel[] Ramp
         {
@@ -199,8 +193,6 @@ namespace DjvuNet.Graphics
             return retval;
         }
 
-        #region BytesPerRow
-
         private int _BytesPerRow;
 
         /// <summary>
@@ -221,8 +213,6 @@ namespace DjvuNet.Graphics
                 }
             }
         }
-
-        #endregion BytesPerRow
 
         /// <summary>
         /// Set the minimum border needed
@@ -262,7 +252,7 @@ namespace DjvuNet.Graphics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Bitmap(int height, int width, int border = 0) : base(1, 0, 0, 0, true)
+        public Bitmap(int height, int width, int border = Bitmap.BorderSize) : base(1, 0, 0, 0, true)
         {
             Init(height, width, border);
         }
@@ -274,7 +264,7 @@ namespace DjvuNet.Graphics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Bitmap(sbyte[] data, int height, int width, int border = 0)
+        public Bitmap(sbyte[] data, int height, int width, int border = Bitmap.BorderSize)
             : base(1, 0, 0, 0, true)
         {
             Init(data, height, width, border);
@@ -293,7 +283,7 @@ namespace DjvuNet.Graphics
 #if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
 # endif
-        public static Bitmap CreateBitmap(Stream stream, int border = 0)
+        public static Bitmap CreateBitmap(Stream stream, int border = Bitmap.BorderSize)
         {
             // TODO create multi threaded synchronization for accessing Bitmap data;
 
@@ -781,7 +771,7 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Method serializes Bitmap data using Run Length Encoding compression to RLE format.
+        /// Serializes Bitmap data using Run Length Encoding compression to RLE format.
         /// </summary>
         /// <param name="stream"></param>
 #if NETCOREAPP
@@ -850,7 +840,9 @@ namespace DjvuNet.Graphics
             if (Data == null && _RleData != null)
             {
                 fixed (byte* rle = _RleData)
+                {
                     RleDecode(rle);
+                }
             }
         }
 
@@ -1177,7 +1169,7 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Insert another bitmap at the specified location.  Note that both bitmaps
+        /// Insert another bitmap at the specified location. Note that both bitmaps
         /// need to have the same number of grays.
         /// </summary>
         /// <param name="bm">
