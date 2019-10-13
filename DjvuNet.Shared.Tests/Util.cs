@@ -289,9 +289,14 @@ namespace DjvuNet.Tests
         public static bool CompareImages(BitmapData image1, BitmapData image2)
         {
             if (image1.PixelFormat != image2.PixelFormat)
+            {
                 return false;
+            }
+
             if (image1.Width != image2.Width || image1.Height != image2.Height)
+            {
                 return false;
+            }
 
             return CompareImagesInternal(image1, image2);
         }
@@ -299,37 +304,57 @@ namespace DjvuNet.Tests
         private static bool CompareImagesInternal(BitmapData image1, BitmapData image2)
         {
             if (Environment.Is64BitProcess)
+            {
                 return CompareImages64(image1, image2);
+            }
             else
+            {
                 return CompareImages32(image1, image2);
+            }
         }
 
         private static bool CompareImages64(BitmapData image1, BitmapData image2)
         {
             int pixelSize = Image.GetPixelFormatSize(image1.PixelFormat);
-            int bufferSize = (pixelSize / 8) * image1.Width * image1.Height;
-            int remainder = bufferSize % 8;
 
             unsafe
             {
-                ulong* longCheckSize = (ulong*)(image1.Scan0 + bufferSize - remainder);
+                ulong rowSize = (ulong) ((pixelSize / 8) * image1.Width);
+                ulong rowSizeWithPadding = (ulong) image1.Stride;
+                ulong* longCheckSize;
 
-                ulong* lp = (ulong*)image1.Scan0;
-                ulong* rp = (ulong*)image2.Scan0;
+                ulong* lp, lpRow = (ulong*)image1.Scan0;
+                ulong* rp, rpRow = (ulong*)image2.Scan0;
 
-                for (; lp < longCheckSize; lp++, rp++)
+                for (uint i = 0; i < image1.Height; i++)
                 {
-                    if (*lp != *rp)
-                        return false;
-                }
+                    lp = (ulong*)(((byte*) lpRow) + (i * rowSizeWithPadding));
+                    rp = (ulong*)(((byte*) rpRow) + (i * rowSizeWithPadding));
+                    longCheckSize = (ulong*) (((byte*) lp) + rowSize);
 
-                byte* lb = (byte*)lp;
-                byte* rb = (byte*)rp;
+                    for (; lp < longCheckSize; lp++, rp++)
+                    {
+                        if (*lp != *rp)
+                        {
+                            return false;
+                        }
+                    }
 
-                for(int i = 0; i < remainder; i++, lb++, rb++)
-                {
-                    if (*lb != *rb)
-                        return false;
+                    int remainder = 0;
+
+                    if ((remainder = (int) (longCheckSize - lp)) > 0)
+                    {
+                        byte* lb = (byte*)lp;
+                        byte* rb = (byte*)rp;
+
+                        for (int ii = 0; ii < remainder; ii++, lb++, rb++)
+                        {
+                            if (*lb != *rb)
+                            {
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -339,29 +364,45 @@ namespace DjvuNet.Tests
         private static bool CompareImages32(BitmapData image1, BitmapData image2)
         {
             int pixelSize = Image.GetPixelFormatSize(image1.PixelFormat);
-            int bufferSize = (pixelSize/8) * image1.Width * image1.Height;
-            int remainder = bufferSize % 4;
 
             unsafe
             {
-                uint* longCheckSize = (uint*)(image1.Scan0 + bufferSize - remainder);
+                uint rowSize = (uint)((pixelSize / 8) * image1.Width);
+                uint rowSizeWithPadding = (uint)image1.Stride;
+                uint* longCheckSize;
 
-                uint* lp = (uint*)image1.Scan0;
-                uint* rp = (uint*)image2.Scan0;
+                uint* lp, lpRow = (uint*)image1.Scan0;
+                uint* rp, rpRow = (uint*)image2.Scan0;
 
-                for (; lp < longCheckSize; lp++, rp++)
+                for (uint i = 0; i < image1.Height; i++)
                 {
-                    if (*lp != *rp)
-                        return false;
-                }
+                    lp = (uint*)(((byte*)lpRow) + (i * rowSizeWithPadding));
+                    rp = (uint*)(((byte*)rpRow) + (i * rowSizeWithPadding));
+                    longCheckSize = (uint*)(((byte*)lp) + rowSize);
 
-                byte* lb = (byte*)lp;
-                byte* rb = (byte*)rp;
+                    for (; lp < longCheckSize; lp++, rp++)
+                    {
+                        if (*lp != *rp)
+                        {
+                            return false;
+                        }
+                    }
 
-                for (int i = 0; i < remainder; i++, lb++, rb++)
-                {
-                    if (*lb != *rb)
-                        return false;
+                    int remainder = 0;
+
+                    if ((remainder = (int)(longCheckSize - lp)) > 0)
+                    {
+                        byte* lb = (byte*)lp;
+                        byte* rb = (byte*)rp;
+
+                        for (int ii = 0; ii < remainder; ii++, lb++, rb++)
+                        {
+                            if (*lb != *rb)
+                            {
+                                return false;
+                            }
+                        }
+                    }
                 }
             }
 

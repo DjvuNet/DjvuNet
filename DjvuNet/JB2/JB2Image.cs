@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using DjvuNet.DataChunks;
 using DjvuNet.Graphics;
 using DjvuNet.Utilities;
 
@@ -178,6 +179,43 @@ namespace DjvuNet.JB2
             }
 
             return bm;
+        }
+
+        public PixelMap GetPixelMap(ColorPalette palette, int subsample, int align)
+        {
+            Verify.SubsampleRange(subsample);
+
+            if ((Width == 0) || (Height == 0))
+            {
+                throw new DjvuFormatException(
+                    $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
+            }
+
+            int swidth = ((Width + subsample) - 1) / subsample;
+            int sheight = ((Height + subsample) - 1) / subsample;
+            int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
+
+            PixelMap pixelMap = new PixelMap(new sbyte[swidth*sheight*3], swidth, sheight);
+
+            for (int blitno = 0; blitno < Blits.Count; blitno++)
+            //Parallel.For(
+            //    0,
+            //    Blits.Count,
+            //    blitno =>
+            //    {
+            {
+                JB2Blit pblit = GetBlit(blitno);
+                JB2Shape pshape = GetShape(pblit.ShapeNumber);
+                Pixel color = palette.PaletteColors[palette.BlitColors[blitno]];
+
+                if (pshape.Bitmap != null)
+                {
+                    pixelMap.Blit(pshape.Bitmap, pblit.Left, pblit.Bottom, color);
+                }
+                //});
+            }
+
+            return pixelMap;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
