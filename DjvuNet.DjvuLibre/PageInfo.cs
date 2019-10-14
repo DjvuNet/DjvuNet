@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.DjvuLibre
 {
@@ -10,7 +11,7 @@ namespace DjvuNet.DjvuLibre
         /// Page width in pixels
         /// </summary>
         public int Width;
-        
+
         /// <summary>
         /// Page height in pixels
         /// </summary>

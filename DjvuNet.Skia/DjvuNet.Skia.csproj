@@ -23,21 +23,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp" Version="1.59.0.0" />
+    <PackageReference Include="SkiaSharp" Version="1.68" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="DjvuSkiaGraphics.cs" />
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
     <Compile Include="SkImageCodec.cs" />
     <Compile Include="SkImageCodecProperty.cs" />
     <Compile Include="SkImageCodecSettings.cs" />
     <Content Include="Properties\AssemblyInfo.Template.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Include="..\DjvuNet\DjvuNet.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SkiaSharp" Version="$(SkiaSharpPackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,6 +48,5 @@
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
-  <Import Project="..\packages\SkiaSharp.1.59.1\build\net45\SkiaSharp.targets" Condition="Exists('..\packages\SkiaSharp.1.59.1\build\net45\SkiaSharp.targets')" />
 
 </Project>

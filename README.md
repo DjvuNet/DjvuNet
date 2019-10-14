@@ -76,7 +76,7 @@ DjVuLibre used for format support validation is licensed under [GPL v2](https://
 
 ## Building
 
-### Windows for .NET Framework
+### Windows for .NET Core 3.0 and later
 
 #### Prerequisites
 
@@ -109,7 +109,7 @@ Debug, Release  (example: -c Debug),  default value Debug
 Available platforms:
 DjvuNet.DjvuLibre and libdjvulibre are built only for x86 and x64 platforms
 `````
-x86, x64, arm, arm64 (example /p:Platform=x64, default value AnyCPU is temporarily not supported for CI builds)
+x86, x64, arm, arm64 (example -p x64, default value AnyCPU is temporarily not supported for CI builds)
 `````
 Available targets:
 `````

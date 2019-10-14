@@ -53,9 +53,6 @@ namespace DjvuNet.JB2
 
             // TODO test bitmap copy logic
 
-            //if (retval.Bitmap != null)
-            //    retval.Bitmap = retval.Bitmap.Duplicate();
-
             return retval;
         }
 

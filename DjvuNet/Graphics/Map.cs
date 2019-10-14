@@ -30,7 +30,7 @@ namespace DjvuNet.Graphics
         private int _width;
 
         /// <summary>
-        /// Gets or sets the width of the image (ncolumns)
+        /// Gets or sets the width of the image
         /// </summary>
         public int Width
         {
@@ -41,7 +41,7 @@ namespace DjvuNet.Graphics
         private int _height;
 
         /// <summary>
-        /// Gets or sets the height of the image (nrows)
+        /// Gets or sets the height of the image
         /// </summary>
         public int Height
         {
@@ -194,23 +194,28 @@ namespace DjvuNet.Graphics
         /// <returns></returns>
         public System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
         {
-            PixelFormat format = PixelFormat.Undefined;
-
+            PixelFormat format;
             if (BytesPerPixel == 1) format = PixelFormat.Format8bppIndexed;
             else if (BytesPerPixel == 2) format = PixelFormat.Format16bppRgb555;
             else if (BytesPerPixel == 3) format = PixelFormat.Format24bppRgb;
             else if (BytesPerPixel == 4) format = PixelFormat.Format32bppArgb;
             else if (BytesPerPixel == 6) format = PixelFormat.Format48bppRgb;
             else if (BytesPerPixel == 8) format = PixelFormat.Format64bppArgb;
-            else
-                throw new DjvuFormatException($"Unknown pixel format for byte count: {BytesPerPixel}");
+            else throw new DjvuFormatException($"Unknown pixel format for byte count: {BytesPerPixel}");
+
+            int bytesPerRow = this switch
+            {
+                Bitmap { BytesPerRow: int bitmapBytesPerRow } => bitmapBytesPerRow,
+                PixelMap _ => BytesPerPixel * Width,
+                { } => throw new DjvuNotSupportedException($"Unsupported type: {this.GetType()}"),
+            };
 
             GCHandle hData = default(GCHandle);
             System.Drawing.Bitmap image = null;
             try
             {
                 hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-                image = CopyDataToBitmap(Width, Height, hData.AddrOfPinnedObject(), Data.Length, format);
+                image = CopyDataToBitmap(Width, Height, hData.AddrOfPinnedObject(), Data.Length, format, bytesPerRow);
             }
             catch(ArgumentException aex)
             {
@@ -251,12 +256,16 @@ namespace DjvuNet.Graphics
         /// <param name="format">
         /// Format of image pixel expressed with <see cref="System.Drawing.Imaging.PixelFormat"/> enumeration
         /// </param>
+        /// <param name="bytesPerSrcRow">
+        /// Defines the stride (size of pixel row with padding) for source data. Default value is 0 what
+        /// causes function to use as a stride value multiplier of pixel size and image width.
+        /// </param>
         /// <returns>
         /// <see cref="System.Drawing.Bitmap"/> created with data copied from Data buffer
         /// of this instance of <see cref="DjvuNet.Graphics.Map"/>
         /// </returns>
         public static System.Drawing.Bitmap CopyDataToBitmap(
-        int width, int height, IntPtr data, long length, PixelFormat format)
+        int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
         {
             System.Drawing.Bitmap bmp = null;
             BitmapData bmpData = null;
@@ -267,8 +276,8 @@ namespace DjvuNet.Graphics
                 bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                                      ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-                uint pixelSize = (uint) DjvuImage.GetPixelSize(bmp.PixelFormat);
-                uint bytesPerRow = (uint) bmp.Width * pixelSize;
+                int pixelSize = DjvuImage.GetPixelSize(bmp.PixelFormat);
+                int bytesPerRow = bytesPerSrcRow == 0 ? bmp.Width * pixelSize : bytesPerSrcRow;
 
                 IntPtr dataPtr = bmpData.Scan0;
 

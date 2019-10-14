@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DjvuNet.DjvuLibre
 {
@@ -19,15 +14,21 @@ namespace DjvuNet.DjvuLibre
         public DjvuPageInfo(DjvuDocumentInfo docInfo, int pageNumber)
         {
             if (docInfo == null)
+            {
                 throw new ArgumentNullException(nameof(docInfo));
+            }
 
             if ((_Info = docInfo.GetPageInfo(pageNumber)) == null)
+            {
                 throw new ArgumentException(
                     $"{nameof(DjvuDocumentInfo)} object {nameof(docInfo)} is not fully initialized.",
                     nameof(docInfo));
+            }
 
             if (pageNumber < 0 || pageNumber >= docInfo.PageCount)
+            {
                 throw new ArgumentOutOfRangeException(nameof(pageNumber));
+            }
 
             _DocumentInfo = docInfo;
             Number = pageNumber;
@@ -40,16 +41,24 @@ namespace DjvuNet.DjvuLibre
             {
                 status = NativeMethods.GetDjvuJobStatus(Page);
                 if ((int)status >= 2)
+                {
                     break;
+                }
                 else
+                {
                     messagesList.AddRange(DjvuDocumentInfo.ProcessMessage(docInfo.Context, true));
+                }
             }
 
             if (status == DjvuJobStatus.Failed)
+            {
                 throw new ApplicationException($"Failed to parse document page: {pageNumber}");
+            }
             else if (status == DjvuJobStatus.Stopped)
+            {
                 throw new ApplicationException(
-                    $"Parsing of DjVu document page interrupted by user. Page number: {pageNumber}");
+                   $"Parsing of DjVu document page interrupted by user. Page number: {pageNumber}");
+            }
 
             if (_Info != null)
             {
@@ -75,10 +84,12 @@ namespace DjvuNet.DjvuLibre
             GC.SuppressFinalize(this);
         }
 
-        protected void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (_Disposed)
+            {
                 return;
+            }
 
             if (disposing)
             {
@@ -121,7 +132,9 @@ namespace DjvuNet.DjvuLibre
             get
             {
                 if (_PageType != PageType.Unknown)
+                {
                     return _PageType;
+                }
                 else
                 {
                     _PageType = NativeMethods.GetDjvuPageType(Page);
@@ -144,7 +157,9 @@ namespace DjvuNet.DjvuLibre
             get
             {
                 if (_Text != null)
+                {
                     return _Text;
+                }
                 else
                 {
                     try
@@ -156,7 +171,9 @@ namespace DjvuNet.DjvuLibre
                     {
                         // Avoid repeating search for null
                         if (_Text == null)
+                        {
                             _Text = String.Empty;
+                        }
                     }
 
                     return _Text;
@@ -169,7 +186,9 @@ namespace DjvuNet.DjvuLibre
             get
             {
                 if (_Annotation != null)
+                {
                     return _Annotation;
+                }
                 else
                 {
                     IntPtr miniexp = IntPtr.Zero;
@@ -181,9 +200,14 @@ namespace DjvuNet.DjvuLibre
                     finally
                     {
                         if (_Annotation == null)
+                        {
                             _Annotation = String.Empty;
+                        }
+
                         if (miniexp != IntPtr.Zero)
+                        {
                             NativeMethods.ReleaseDjvuMiniexp(_DocumentInfo.Document, miniexp);
+                        }
                     }
 
                     return _Annotation;
@@ -197,11 +221,15 @@ namespace DjvuNet.DjvuLibre
             string text = null;
 
             text = NativeMethods.GetMiniexpString(miniexp);
-            if (!String.IsNullOrWhiteSpace(text))
+            if (!string.IsNullOrWhiteSpace(text))
+            {
                 return text;
+            }
 
             if (count == 0)
+            {
                 count = NativeMethods.MiniexpLength(miniexp);
+            }
 
             for (int i = 0; i < count; i++)
             {
@@ -212,20 +240,26 @@ namespace DjvuNet.DjvuLibre
                     int count2 = NativeMethods.MiniexpLength(element);
 
                     text = ExtractTextFromMiniexp(document, element, count2);
-                    if (!String.IsNullOrWhiteSpace(text))
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
                         return text;
+                    }
 
                     if (NativeMethods.IsMiniexpString(element))
                     {
                         text = NativeMethods.GetMiniexpString(miniexp);
-                        if (!String.IsNullOrWhiteSpace(text))
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
                             return text;
+                        }
                     }
                 }
                 finally
                 {
                     if (element != IntPtr.Zero)
+                    {
                         NativeMethods.ReleaseDjvuMiniexp(document, element);
+                    }
                 }
             }
             return text;
@@ -268,8 +302,10 @@ namespace DjvuNet.DjvuLibre
                     format, (uint)Width * 3, buffer);
 
                 if (result == 0)
+                {
                     throw new DjvuLibreException(
                         $"Failed to render image at this time - result: {result}. Try later again.");
+                }
             }
             catch(Exception ex)
             {
@@ -281,7 +317,9 @@ namespace DjvuNet.DjvuLibre
                 string message = "Error while rendering page. Check InnerException message for details.";
 
                 if (ex is DjvuLibreException)
+                {
                     throw new DjvuLibreException(message, ex);
+                }
 
                 throw new AggregateException(message, ex);
             }

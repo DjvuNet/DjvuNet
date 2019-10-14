@@ -20,7 +20,7 @@ namespace DjvuNet.DjvuLibre
             Document = document;
             Path = filePath;
 
-            //_MessageCallbackDelegate = 
+            //_MessageCallbackDelegate =
             //    new NativeMethods.DjvuMessageCallbackDelegate(this.DjvuMessageCallback);
             //IntPtr callback = Marshal.GetFunctionPointerForDelegate(_MessageCallbackDelegate);
             //NativeMethods.DjvuSetMessageCallback(Context, callback, IntPtr.Zero);
@@ -33,17 +33,23 @@ namespace DjvuNet.DjvuLibre
         public static DjvuDocumentInfo CreateDjvuDocumentInfo(string filePath)
         {
             if (filePath == null)
+            {
                 throw new ArgumentNullException(nameof(filePath));
+            }
 
-            if (String.IsNullOrWhiteSpace(filePath))
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
                 throw new ArgumentException(nameof(filePath));
+            }
 
             if (!File.Exists(filePath))
+            {
                 throw new FileNotFoundException($"File was not found - path: {filePath}");
+            }
 
             Process proc = Process.GetCurrentProcess();
             string fileName = System.IO.Path.GetFileNameWithoutExtension(filePath);
-            string programName = $"{proc.ProcessName}:{proc.Id:0000#}:{fileName}:{DateTime.UtcNow}"; 
+            string programName = $"{proc.ProcessName}:{proc.Id:0000#}:{fileName}:{DateTime.UtcNow}";
 
             IntPtr context = IntPtr.Zero;
             IntPtr document = IntPtr.Zero;
@@ -53,29 +59,43 @@ namespace DjvuNet.DjvuLibre
 
                 context = NativeMethods.CreateDjvuContext(programName);
                 if (context == IntPtr.Zero)
+                {
                     throw new ApplicationException("Failed to create native ddjvu_context object");
+                }
 
                 document = NativeMethods.LoadDjvuDocument(context, filePath, 1);
                 if (document == IntPtr.Zero)
+                {
                     throw new ApplicationException($"Failed to open native djvu_document: {filePath}");
+                }
 
                 DjvuJobStatus status = DjvuJobStatus.NotStarted;
                 while (true)
                 {
                     status = NativeMethods.GetDjvuJobStatus(document);
                     if ((int)status >= 2)
+                    {
                         break;
+                    }
                     else
+                    {
                         ProcessMessage(context, true);
+                    }
                 }
 
                 if (status == DjvuJobStatus.OK)
+                {
                     return new DjvuDocumentInfo(context, document, filePath);
+                }
                 else if (status == DjvuJobStatus.Failed)
+                {
                     throw new ApplicationException($"Failed to parse document: {filePath}");
+                }
                 else if (status == DjvuJobStatus.Stopped)
+                {
                     throw new ApplicationException(
-                        $"Parsing of DjVu document interrupted by user. Document path: {filePath}");
+                       $"Parsing of DjVu document interrupted by user. Document path: {filePath}");
+                }
 
                 throw new ApplicationException($"Unknown error: \"{status}\" while processing document: {filePath}");
             }
@@ -112,7 +132,9 @@ namespace DjvuNet.DjvuLibre
         protected void Dispose(bool disposing)
         {
             if (_Disposed)
+            {
                 return;
+            }
 
             if (disposing)
             {
@@ -153,13 +175,17 @@ namespace DjvuNet.DjvuLibre
         internal static List<object> ProcessMessage(IntPtr context, bool wait = true)
         {
             if (context == IntPtr.Zero)
+            {
                 return null;
+            }
 
             IntPtr message = IntPtr.Zero;
 
             // Wait for message
             if (wait)
+            {
                 message = NativeMethods.DjvuWaitMessage(context);
+            }
 
             List<object> messages = new List<object>();
             // Pop all messages currently in the queue
@@ -219,7 +245,9 @@ namespace DjvuNet.DjvuLibre
         public PageInfo GetPageInfo(int pageNumber)
         {
             if (pageNumber < 0 || pageNumber >= PageCount)
+            {
                 throw new ArgumentOutOfRangeException(nameof(pageNumber));
+            }
 
             PageInfo info = null;
             int status = 0;
@@ -230,9 +258,13 @@ namespace DjvuNet.DjvuLibre
             {
                 status = NativeMethods.GetDjvuDocumentPageInfo(Document, pageNumber, buffer, size);
                 if (status >= 2)
+                {
                     break;
+                }
                 else
+                {
                     ProcessMessage(Context, true);
+                }
             }
 
             if (status == 2)
@@ -242,13 +274,17 @@ namespace DjvuNet.DjvuLibre
                 return info;
             }
             else
+            {
                 throw new ApplicationException($"Failed to get PageInfo for page number: {pageNumber}");
+            }
         }
 
         public DjvuFileInfo GetFileInfo(int fileNumber)
         {
             if (fileNumber < 0 || fileNumber >= FileCount)
+            {
                 throw new ArgumentOutOfRangeException(nameof(fileNumber));
+            }
 
             DjvuFileInfo info = null;
             int status = 0;
@@ -259,7 +295,9 @@ namespace DjvuNet.DjvuLibre
 
             // DjvuDocumentInfo is not initialized
             if (status < 2)
+            {
                 return null;
+            }
 
             if (status == 2)
             {
@@ -268,7 +306,9 @@ namespace DjvuNet.DjvuLibre
                 return info;
             }
             else
+            {
                 throw new ApplicationException($"Failed to get PageInfo for page number: {fileNumber}");
+            }
         }
 
         public string DumpDocumentData(bool json = true)
@@ -297,22 +337,28 @@ namespace DjvuNet.DjvuLibre
                     // TODO - improve data extraction from miniexp - only part is recovered now
                     string result = DjvuPageInfo.ExtractTextFromMiniexp(Document, miniexp);
                     if (result == null)
-                        return String.Empty;
+                    {
+                        return string.Empty;
+                    }
                     else
+                    {
                         return result;
+                    }
                 }
                 return null;
             }
             finally
             {
                 if (miniexp != IntPtr.Zero)
+                {
                     NativeMethods.ReleaseDjvuMiniexp(Document, miniexp);
+                }
             }
         }
 
         public string GetPageText(int pageNumber)
         {
-            return String.Empty;
+            return string.Empty;
         }
     }
 }

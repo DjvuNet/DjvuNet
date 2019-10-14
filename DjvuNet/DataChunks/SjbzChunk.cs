@@ -88,18 +88,24 @@ namespace DjvuNet.DataChunks
 
                     if (includes?.Count > 0)
                     {
-                        string includeID = includes
-                            .FirstOrDefault<InclChunk>(x => x.ChunkType == ChunkType.Incl)?.IncludeID;
+                        var includeIDs = includes
+                            .Where<InclChunk>(x => x.ChunkType == ChunkType.Incl);
                         var root = Document.RootForm as DjvmChunk;
-                        DirmComponent component = root?.Dirm.Components
-                            .Where<DirmComponent>(x => x.ID == includeID).FirstOrDefault();
+                        DjbzChunk djbzItem = null;
 
-                        var includeForm =
-                            root.Includes
-                            .FirstOrDefault<IDjviChunk>(x => x.DataOffset == (component.Offset + 12));
+                        foreach (InclChunk iChunk in includeIDs)
+                        {
+                            DirmComponent component = root?.Dirm.Components
+                                .Where<DirmComponent>(x => x.ID == iChunk.IncludeID).FirstOrDefault();
 
-                        var djbzItem = includeForm?.Children
-                            .FirstOrDefault(x => x.ChunkType == ChunkType.Djbz) as DjbzChunk;
+                            var includeForm = root.Includes
+                                .FirstOrDefault<IDjviChunk>(x => x.DataOffset == (component.Offset + 12));
+
+                            djbzItem = includeForm?.Children
+                                .FirstOrDefault(x => x.ChunkType == ChunkType.Djbz) as DjbzChunk;
+
+                            if (djbzItem != null) break;
+                        }
 
                         includedDictionary = djbzItem?.ShapeDictionary;
                     }

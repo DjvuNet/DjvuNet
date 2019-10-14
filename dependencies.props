@@ -25,8 +25,9 @@
     <MicrosoftBuildPackageVersion>16.3.0</MicrosoftBuildPackageVersion>
     <LibGit2SharpPackageVersion>0.26.1</LibGit2SharpPackageVersion>
     <LibGit2SharpNativeBinariesPackageVersion>2.0.289</LibGit2SharpNativeBinariesPackageVersion>
-    <SystemDrawingCommonPackageVersion>4.5.1</SystemDrawingCommonPackageVersion>
-    <SystemRuntimeCompilerServicesUnsafePackageVersion>4.5.2</SystemRuntimeCompilerServicesUnsafePackageVersion>
+    <SystemDrawingCommonPackageVersion>4.6.0</SystemDrawingCommonPackageVersion>
+    <SystemRuntimeCompilerServicesUnsafePackageVersion>4.6.0</SystemRuntimeCompilerServicesUnsafePackageVersion>
+    <SkiaSharpPackageVersion>1.68.0</SkiaSharpPackageVersion>
   </PropertyGroup>
 
   <!-- ILLink.Tasks package version -->
