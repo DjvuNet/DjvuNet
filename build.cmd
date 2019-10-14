@@ -56,7 +56,7 @@ set _DefaultNetFX=net472
 set _NetFXId=.NETFramework
 set _NetFXTFM=.NETFramework,Version=v4.7.2
 set _Framework=%_DefaultNetCoreApp%
-set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.8.0.1/
+set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.8.0.2/
 
 REM Parse command line
 
