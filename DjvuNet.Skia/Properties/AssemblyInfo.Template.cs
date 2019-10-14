@@ -4,11 +4,11 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
-// General Information about an assembly is controlled through the following 
+// General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("DjvuNet.Skia")]
-[assembly: AssemblyDescription("DjvuNet Library for handling of DjVu documents.")]
+[assembly: AssemblyDescription("DjvuNet Library SkiaSharp interface for handling of DjVu documents.")]
 [assembly: AssemblyConfiguration("__LIBRARY_CONFIGURATION__")]
 [assembly: AssemblyPlatform("__LIBRARY_PLATFORM__")]
 [assembly: AssemblyCulture("")]
