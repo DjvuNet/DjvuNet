@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using DjvuNet.DataChunks;
@@ -410,7 +411,7 @@ namespace DjvuNet
                     // Build all the images
                     GetBackgroundImage(1, true);
                     GetForegroundImage(1, true);
-                    GetTextImage(1, true);
+                    GetMaskImage(1, true);
 
                     _HasLoaded = true;
                 }
@@ -560,30 +561,14 @@ namespace DjvuNet
 
             lock (_LoadingLock)
             {
-                Stopwatch stopWatch = Stopwatch.StartNew();
-
                 System.Drawing.Bitmap background = GetBackgroundImage(subsample, true);
-
-                stopWatch.Stop();
 
                 // TODO ETW logging goes here
 
-                stopWatch.Restart();
-
                 using (System.Drawing.Bitmap foreground = GetForegroundImage(subsample, true))
                 {
-                    stopWatch.Stop();
-                    // TODO ETW logging goes here
-
-                    stopWatch.Restart();
-
-                    using (System.Drawing.Bitmap mask = GetTextImage(subsample, true))
+                    using (System.Drawing.Bitmap mask = GetMaskImage(subsample, true))
                     {
-                        stopWatch.Stop();
-                        // TODO ETW logging goes here
-
-                        stopWatch.Restart();
-
                         _HasLoaded = true;
 
                         BitmapData backgroundData =
@@ -682,13 +667,15 @@ namespace DjvuNet
                         foreground.UnlockBits(foregroundData);
                         background.UnlockBits(backgroundData);
 
-                        stopWatch.Stop();
-                        // TODO ETW logging goes here
-
                         return background;
                     }
                 }
             }
+        }
+
+        public Graphics.Map BuildImageMap()
+        {
+            return null;
         }
 
         /// <summary>
@@ -731,7 +718,39 @@ namespace DjvuNet
             }
         }
 
-        internal System.Drawing.Bitmap GetTextImage(int subsample, bool resizeImage = false)
+        internal DjvuNet.Graphics.Map GetForegroundMap()
+        {
+            lock (_LoadingLock)
+            {
+                DjvuNet.Graphics.Map result = null;
+                JB2Image jb2image = null;
+                IInterWavePixelMap iwPixelMap = _Page.ForegroundIWPixelMap;
+
+                if (iwPixelMap != null)
+                {
+                    result = _Page.ForegroundIWPixelMap.GetPixelMap();
+                }
+                else if ((jb2image = _Page.ForegroundJB2Image) != null)
+                {
+                    if (_Page.ForegroundPalette == null)
+                    {
+                        result = jb2image.GetBitmap(1, GBitmap.BorderSize);
+                    }
+                    else
+                    {
+                        result = jb2image.GetPixelMap(_Page.ForegroundPalette, 1, 16);
+                    }
+                }
+                else if (iwPixelMap == null && jb2image == null)
+                {
+                    result = new GBitmap(_Page.Height, _Page.Width, GBitmap.BorderSize);
+                }
+
+                return result;
+            }
+        }
+
+        internal System.Drawing.Bitmap GetMaskImage(int subsample, bool resizeImage = false)
         {
             Verify.SubsampleRange(subsample);
 
@@ -744,6 +763,14 @@ namespace DjvuNet
             {
                 Bitmap result = _Page.ForegroundJB2Image.GetBitmap(subsample, GBitmap.BorderSize).ToImage();
                 return resizeImage ? DjvuImage.ResizeImage(result, _Page.Width / subsample, _Page.Height / subsample) : result;
+            }
+        }
+
+        internal GBitmap GetMaskBitmap()
+        {
+            lock (_LoadingLock)
+            {
+                return _Page.ForegroundJB2Image?.GetBitmap(1, GBitmap.BorderSize) ?? null;
             }
         }
 
@@ -801,6 +828,54 @@ namespace DjvuNet
             {
                 return result;
             }
+        }
+
+        internal DjvuNet.Graphics.Map GetBackgroundMap(bool rebuild = false)
+        {
+            if (!rebuild && _IsBackgroundDecoded)
+            {
+                return _Page.PageForm?.GetChildrenItems<BG44Chunk>().FirstOrDefault()?.BackgroundImage.GetPixelMap() ?? null;
+            }
+            else if (rebuild && _IsBackgroundDecoded)
+            {
+                _IsBackgroundDecoded = false;
+            }
+
+            int width = _Page.Width;
+            int height = _Page.Height;
+
+            BG44Chunk[] backgrounds = _Page.PageForm?.GetChildrenItems<BG44Chunk>();
+
+            if ((backgrounds == null || backgrounds.Length == 0) && width > 0 && height > 0)
+            {
+                return new Graphics.PixelMap(new sbyte[width * height], width, height);
+            }
+
+            // Get the composite background image
+            Wavelet.IInterWavePixelMap backgroundMap = null;
+
+            lock (_LoadingLock)
+            {
+                foreach (BG44Chunk background in backgrounds)
+                {
+                    if (backgroundMap == null)
+                    {
+                        // Get the initial image
+                        backgroundMap = background.BackgroundImage;
+                    }
+                    else
+                    {
+                        if (!_IsBackgroundDecoded)
+                        {
+                            background.ProgressiveDecodeBackground(backgroundMap);
+                        }
+                    }
+                }
+
+                _IsBackgroundDecoded = true;
+            }
+
+            return backgroundMap.GetPixelMap();
         }
 
         internal static unsafe System.Drawing.Bitmap InvertImage(System.Drawing.Bitmap sourceBitmap)

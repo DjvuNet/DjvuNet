@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using DjvuNet.DjvuLibre;
 using DjvuNet.Serialization;
@@ -264,24 +266,258 @@ namespace DjvuNet.Tests
             }
         }
 
+        private static bool IsImageBinaryComparable(Bitmap image1, Bitmap image2)
+        {
+            bool result = true;
+
+            if (image1 == null || image2 == null)
+            {
+                result = false;
+            }
+            else if (image1.PixelFormat != image2.PixelFormat)
+            {
+                result = false;
+            }
+            else if (image1.Width != image2.Width || image1.Height != image2.Height)
+            {
+                result = false;
+            }
+
+            return result;
+        }
+
+        private static bool IsImageBinaryComparable(BitmapData image1, BitmapData image2)
+        {
+            bool result = true;
+
+            if (image1 == null || image2 == null)
+            {
+                result = false;
+            }
+            else if (image1.PixelFormat != image2.PixelFormat)
+            {
+                result = false;
+            }
+            else if (image1.Width != image2.Width || image1.Height != image2.Height)
+            {
+                result = false;
+            }
+
+            return result;
+        }
+
+        public static bool CompareBinarySimilarImages(Bitmap image1, Bitmap image2, double diffThreshold = 0.05, bool logDiff = false, string message = null)
+        {
+            double diff;
+            bool result = CompareBinarySimilarImages(image1, image2, out diff, diffThreshold);
+
+            if (logDiff)
+            {
+                Console.WriteLine((message != null ? message : "") + $" Image diff: {diff:#0.0000}, passed: {result}");
+            }
+
+            return result;
+        }
+
+        public static bool CompareBinarySimilarImages(Bitmap image1, Bitmap image2, out double diffValue, double diffThreshold = 0.05)
+        {
+            bool result = IsImageBinaryComparable(image1, image2);
+            diffValue =double.NaN;
+
+            if (result)
+            {
+                Rectangle rect = new Rectangle(0, 0, image1.Width, image1.Height);
+                BitmapData img1 = image1.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
+                BitmapData img2 = image2.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
+
+                result = (diffValue = ImageBinarySimilarity(img1, img2)) < diffThreshold;
+
+                image1.UnlockBits(img1);
+                image2.UnlockBits(img2);
+            }
+
+            return result;
+        }
+
+        public static double ImageBinarySimilarity(BitmapData imageData1, BitmapData imageData2)
+        {
+            if (IsImageBinaryComparable(imageData1, imageData2))
+            {
+                return imageData1.PixelFormat switch
+                {
+                    PixelFormat.Format24bppRgb => ImageBinaryDiff(imageData1, imageData2),
+                    _ => throw new ArgumentException("Unsupported Image PixelFormat", nameof(imageData1.PixelFormat))
+                };
+            }
+            else
+            {
+                return 1.0;
+            }
+        }
+
+        internal static unsafe double ImageBinaryDiff(BitmapData imageData1, BitmapData imageData2)
+        {
+            uint pixelSizeInBytes = (uint) Image.GetPixelFormatSize(imageData1.PixelFormat) / 8;
+            uint width = (uint)imageData1.Width;
+            uint height = (uint)imageData1.Height;
+            uint widthBytes = width * pixelSizeInBytes;
+
+            double result = 0.0;
+
+            if (Avx2.IsSupported)
+            {
+                uint widthBytesAvx2LRem = widthBytes % 128;
+                uint widthBytesAvx2L = widthBytes - widthBytesAvx2LRem;
+                uint widthBytesAvx2SRem = widthBytesAvx2LRem % 32;
+                uint oneVectorRounds = widthBytesAvx2LRem / 32;
+
+                Vector256<double> mask = Vector256.Create((double)0x0010000000000000);
+
+                for (uint i = 0; i < height; i++)
+                {
+                    byte* pixelRow1 = (byte*)((long)imageData1.Scan0 + (i * imageData1.Stride));
+                    byte* pixelRow2 = (byte*)((long)imageData2.Scan0 + (i * imageData2.Stride));
+                    uint rowPos = i * width;
+
+                    for (uint wb = 0; wb < widthBytesAvx2L; wb += 32)
+                    {
+                        Vector256<byte> r11 = Avx2.LoadDquVector256(pixelRow1 + wb);
+                        Vector256<byte> r21 = Avx2.LoadDquVector256(pixelRow2 + wb);
+
+                        Vector256<byte> r12 = Avx2.LoadDquVector256(pixelRow1 + (wb += 32));
+                        Vector256<byte> r22 = Avx2.LoadDquVector256(pixelRow2 + wb);
+
+                        Vector256<ushort> diff1 = Avx2.SumAbsoluteDifferences(r11, r21);
+
+                        Vector256<byte> r13 = Avx2.LoadDquVector256(pixelRow1 + (wb += 32));
+                        Vector256<byte> r23 = Avx2.LoadDquVector256(pixelRow2 + wb);
+
+                        Vector256<ushort> diff2 = Avx2.SumAbsoluteDifferences(r12, r22);
+
+                        Vector256<byte> r14 = Avx2.LoadDquVector256(pixelRow1 + (wb += 32));
+                        Vector256<byte> r24 = Avx2.LoadDquVector256(pixelRow2 + wb);
+
+                        Vector256<ushort> diff3 = Avx2.SumAbsoluteDifferences(r13, r23);
+                        Vector256<ushort> diff4 = Avx2.SumAbsoluteDifferences(r14, r24);
+
+                        Vector256<ulong> tmpVec1 = Avx2.Or(diff1.AsUInt64(), mask.AsUInt64());
+                        Vector256<ulong> tmpVec2 = Avx2.Or(diff2.AsUInt64(), mask.AsUInt64());
+                        Vector256<ulong> tmpVec3 = Avx2.Or(diff3.AsUInt64(), mask.AsUInt64());
+                        Vector256<ulong> tmpVec4 = Avx2.Or(diff4.AsUInt64(), mask.AsUInt64());
+
+                        Vector256<double> diff1Double = Avx2.Subtract(tmpVec1.AsDouble(), mask);
+                        Vector256<double> diff2Double = Avx2.Subtract(tmpVec2.AsDouble(), mask);
+                        Vector256<double> diff3Double = Avx2.Subtract(tmpVec3.AsDouble(), mask);
+                        Vector256<double> diff4Double = Avx2.Subtract(tmpVec4.AsDouble(), mask);
+
+                        Vector256<double> result1 = Avx2.HorizontalAdd(diff1Double, diff2Double);
+                        Vector256<double> result2 = Avx2.HorizontalAdd(diff3Double, diff4Double);
+
+                        result1 = Avx2.HorizontalAdd(result1, result2);
+                        result1 = Avx2.HorizontalAdd(result1, result1);
+
+                        Vector128<double> lowVec = Avx2.ExtractVector128(result1, 0b0);
+                        Vector128<double> hiVec = Avx2.ExtractVector128(result1, 0b1);
+                        Vector128<double> resultVec = Avx2.AddScalar(lowVec, hiVec);
+
+                        result += resultVec.GetElement(0);
+                    }
+
+                    if (oneVectorRounds > 0)
+                    {
+                        uint rounds = oneVectorRounds;
+                        pixelRow1 += widthBytesAvx2L;
+                        pixelRow2 += widthBytesAvx2L;
+
+                        while (rounds > 0)
+                        {
+                            Vector256<byte> r11 = Avx2.LoadDquVector256(pixelRow1);
+                            Vector256<byte> r21 = Avx2.LoadDquVector256(pixelRow2);
+                            Vector256<ushort> diff1 = Avx2.SumAbsoluteDifferences(r11, r21);
+
+                            Vector256<ulong> tmpVec1 = Avx2.Or(diff1.AsUInt64(), mask.AsUInt64());
+                            Vector256<double> diff1Double = Avx2.Subtract(tmpVec1.AsDouble(), mask);
+
+                            Vector256<double> result1 = Avx2.HorizontalAdd(diff1Double, diff1Double);
+
+                            Vector128<double> lowVec = Avx2.ExtractVector128(result1, 0b0);
+                            Vector128<double> hiVec = Avx2.ExtractVector128(result1, 0b1);
+                            Vector128<double> resultVec = Avx2.AddScalar(lowVec, hiVec);
+
+                            result += resultVec.GetElement(0);
+
+                            pixelRow1 += 32;
+                            pixelRow2 += 32;
+                            rounds--;
+                        }
+                    }
+
+                    if (widthBytesAvx2SRem > 0)
+                    {
+                        uint pixelReminder = widthBytesAvx2SRem % 3;
+                        uint pixelsBytesRemaining = widthBytesAvx2SRem - pixelReminder;
+
+                        for (uint p = 0; p < pixelsBytesRemaining; p += 3, pixelRow1 += 3, pixelRow2 += 3)
+                        {
+                            result += GetPixelDiff(pixelRow1, pixelRow2);
+                        }
+
+                        while (pixelReminder > 0)
+                        {
+                            result += (MathF.Abs((float)*(pixelRow1++) - (float)*(pixelRow2++)));
+                            pixelReminder--;
+                        }
+                    }
+                }
+            }
+            /// TODO: Add SSE optimizations
+            else // Avx2.IsSupported
+            {
+                for (uint i = 0; i < height; i++)
+                {
+                    byte* pixelRow1 = (byte*)((long)imageData1.Scan0 + (i * imageData1.Stride));
+                    byte* pixelRow2 = (byte*)((long)imageData2.Scan0 + (i * imageData2.Stride));
+                    uint rowPos = i * width;
+
+                    for (uint wb = 0, w = 0; wb < widthBytes; wb += pixelSizeInBytes, w++)
+                    {
+                        result += GetPixelDiff(pixelRow1 + wb, pixelRow2 + wb);
+                    }
+                }
+            }
+
+            return result / (width * height * 3 * 255.0d);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe double GetPixelDiff(byte* pixel1, byte* pixel2)
+        {
+            float r1 = (float)(*pixel1);
+            float g1 = (float)(*(++pixel1));
+            float b1 = (float)(*(++pixel1));
+
+            float r2 = (float)(*pixel2);
+            float g2 = (float)(*(++pixel2));
+            float b2 = (float)(*(++pixel2));
+
+            return MathF.Abs(r1 - r2) + MathF.Abs(g1 - g2) + MathF.Abs(b1 - b2);
+        }
+
         public static bool CompareImages(Bitmap image1, Bitmap image2)
         {
-            if (image1 == null || image2 == null)
-                return false;
+            bool result = IsImageBinaryComparable(image1, image2);
 
-            if (image1.PixelFormat != image2.PixelFormat)
-                return false;
-            if (image1.Width != image2.Width || image1.Height != image2.Height)
-                return false;
+            if (result)
+            {
+                Rectangle rect = new Rectangle(0, 0, image1.Width, image1.Height);
+                BitmapData img1 = image1.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
+                BitmapData img2 = image2.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
 
-            Rectangle rect = new Rectangle(0, 0, image1.Width, image1.Height);
-            BitmapData img1 = image1.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
-            BitmapData img2 = image2.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
+                result = CompareImagesInternal(img1, img2);
 
-            bool result = CompareImagesInternal(img1, img2);
-
-            image1.UnlockBits(img1);
-            image2.UnlockBits(img2);
+                image1.UnlockBits(img1);
+                image2.UnlockBits(img2);
+            }
 
             return result;
         }
