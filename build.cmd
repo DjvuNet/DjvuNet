@@ -364,15 +364,17 @@ call :build_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
 if not defined _Test (
     if not defined _BuildTests (
         goto exit_success
-    ) else if not exist .\artifacts\test001C.djvu (
+    )
+)
+
+if not exist .\artifacts\test001C.djvu (
+    echo.
+    echo %__MsgPrefix%Cloning test data from https://github.com/DjvuNet/artifacts.git
+    call git clone --depth 1 https://github.com/DjvuNet/artifacts.git
+    if not [%ERRORLEVEL%]==[0] (
         echo.
-        echo %__MsgPrefix%Cloning test data from https://github.com/DjvuNet/artifacts.git
-        call git clone --depth 1 https://github.com/DjvuNet/artifacts.git
-        if not [%ERRORLEVEL%]==[0] (
-            echo.
-            echo %__MsgPrefix%Error: git clone returned error
-            goto exit_error
-        )
+        echo %__MsgPrefix%Error: git clone returned error
+        goto exit_error
     )
 )
 
