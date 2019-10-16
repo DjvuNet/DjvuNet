@@ -17,7 +17,6 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <NetFXTargetFrameworkVersion>net472</NetFXTargetFrameworkVersion>
     <DotNetCoreFrameworkVersion>netcoreapp3.0</DotNetCoreFrameworkVersion>
     <DotNetStandardVersion>netstandard2.1</DotNetStandardVersion>
   </PropertyGroup>
@@ -169,11 +168,6 @@
     <PlatformTarget>Arm64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
-
-  <ItemGroup Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)">
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\AssemblyInfoCommon.cs" />
-  </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework) != $(NetFXTargetFrameworkVersion)">
     <Compile Include="Properties\AssemblyInfo.$(TargetFramework).cs" />
