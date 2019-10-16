@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>$(NetFXTargetFrameworkVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
+    <TargetFrameworks>$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>DjvuNet.Git.Tasks.Tests</RootNamespace>

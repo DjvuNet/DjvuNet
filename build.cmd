@@ -45,6 +45,7 @@ set _Verbosity=normal
 set _Processors=%NUMBER_OF_PROCESSORS%
 set _OS=Windows_NT
 set _SkipNative=
+set _BuildTests=
 set _Test=
 set _DefaultNetCoreApp=netcoreapp3.0
 set _NetCoreAppId=.NETCoreApp
@@ -69,6 +70,8 @@ if /i "%~1"=="-Platform"            (set "_MSB_Platform=%2"&shift&shift&goto :pa
 if /i "%~1"=="-p"                   (set "_MSB_Platform=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-Target"              (set "_MSB_Target=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-t"                   (set "_MSB_Target=%2"&shift&shift&goto :parse)
+if /i "%~1"=="-BuildTests"          (set "_BuildTests=1"&shift&goto :parse)
+if /i "%~1"=="-bt"                  (set "_BuildTests=1"&shift&goto :parse)
 if /i "%~1"=="-Test"                (set "_Test=1"&shift&goto :parse)
 if /i "%~1"=="-Framework"           (set "_Framework=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-f"                   (set "_Framework=%2"&shift&shift&goto :parse)
@@ -102,8 +105,6 @@ if /i [%_Framework%] == [netcoreapp] (set "_Framework=%_DefaultNetCoreApp%"&set 
 if /i [%_Framework%] == [%_DefaultNetCoreApp%] (set __TargetFrameworkMoniker=%_NetCoreAppTFM%&goto :end_check_framework)
 if /i [%_Framework%] == [netstandard] (set "_Framework=%_DefaultNetStandard%"&set __TargetFrameworkMoniker=%_NetStandardTFM%&goto :end_check_framework)
 if /i [%_Framework%] == [%_DefaultNetStandard%] (set TargetFrameworkIdentifier=.NETStandard&set __TargetFrameworkMoniker=%_NetStandardTFM%&goto :end_check_framework)
-if /i [%_Framework%] == [netfx] (set "_Framework=%_DefaultNetFX%"&set __TargetFrameworkMoniker=%_NetFXTFM%&goto :end_check_framework)
-if /i [%_Framework%] == [%_DefaultNetFX%] (set __TargetFrameworkMoniker=%_NetFXTFM%&goto :end_check_framework)
 
 echo Invalid command line parameter -f/-Framework: %_Framework%
 goto usage
@@ -181,8 +182,13 @@ echo %__MsgPrefix%Managed Platform:      %__ManagedPlatform%
 echo %__MsgPrefix%Framework:             %_Framework%
 
 if defined _Test (
+    echo %__MsgPrefix%Build Tests:           True
     echo %__MsgPrefix%Run Tests:             True
 ) else (
+
+    if defined _BuildTests (
+        echo %__MsgPrefix%Build Tests:           True
+    )
     echo %__MsgPrefix%Run Tests:             False
 )
 
@@ -262,47 +268,21 @@ if /i "%_Framework%" == "%_DefaultNetStandard%" (
     set __Framework=%_DefaultNetStandard%
     set __BuildLibDjvuLibre=0
 )
-if /i "%_Framework%" == "%_DefaultNetFX%" (
-    set __RestoreCmd=msbuild /t:Restore
-    set __BuildCommand=msbuild
-    set __Framework=%_DefaultNetFX%
-    if /i [%__ManagedPlatform%] neq [AnyCPU] set __BuildLibDjvuLibre=1
-    if /i [%__ManagedPlatform%] == [AnyCPU] set __SkipNativeTests=1
-)
 
 set __SystemAttrProj=System.Attributes/System.Attributes.csproj
 set __DjvuNetGitTasksProj=build/tools/DjvuNet.Git.Tasks/DjvuNet.Git.Tasks.csproj
 set __DjvuNetProj=DjvuNet/DjvuNet.csproj
+set __DjvuNetDrawingProj=DjvuNet.Drawing/DjvuNet.Drawing.csproj
+set __DjvuNetSkiaProj=DjvuNet.Skia/DjvuNet.Skia.csproj
 set __DjvuNetDjvuLibreProj=DjvuNet.DjvuLibre/DjvuNet.DjvuLibre.csproj
 
 set __OutputDir=!__RootBuildDir!!OS!.!__ManagedPlatform!.!_MSB_Configuration!/binaries/!__Framework!/
-if /i "%_Framework%" neq "%_DefaultNetFX%" set __PublishDir=!__OutputDir!!__RuntimeIdentifier!/publish/
-if /i "%_Framework%" == "%_DefaultNetFX%" set __PublishDir=!__OutputDir!publish/
+set __PublishDir=!__OutputDir!!__RuntimeIdentifier!/publish/
 
 echo %__MsgPrefix%__OutputDir [!__OutputDir!]
 echo %__MsgPrefix%__PublishDir [!__PublishDir!]
 
 if /i "%_MSB_Target%" == "Clean" goto :end_dotnet_restore
-
-if /i "%_Framework%" == "%_DefaultNetFX%" (
-    set "__BuildCommandArgs=-p:Configuration=!_MSB_Configuration! -p:Platform=!__ManagedPlatform! -p:TargetFramework=!__Framework! -p:PublishDir=!__PublishDir! -v:!_Verbosity! -m:!_Processors! -nologo -nr:false"
-    set __RestoreCmdArgs=!__BuildCommandArgs!
-    set __DjvuTargetSolution=DjvuNet.sln
-
-    set __OutputDir=%__RootBuildDir%%OS%.%__ManagedPlatform%.%_MSB_Configuration%\binaries\%__Framework%\
-
-    echo %__MsgPrefix%Restoring nuget packages
-    echo %__MsgPrefix%Calling: !__RestoreCmd! !__RestoreCmdArgs! !__DjvuTargetSolution!
-    call !__RestoreCmd! !__RestoreCmdArgs! !__DjvuTargetSolution!
-
-    if not [%ERRORLEVEL%]==[0] (
-        echo %__MsgPrefix%Error: nuget restore of !__DjvuTargetSolution! returned error
-        goto exit_error
-    ) else (
-        echo %__MsgPrefix%Success: nuget restore of !__DjvuTargetSolution! finished
-    )
-    goto end_dotnet_restore
-)
 
 if /i "%_Framework%" == "%_DefaultNetStandard%" goto :dotnet_restore
 if /i "%_Framework%" == "%_DefaultNetCoreApp%" goto :dotnet_restore
@@ -316,6 +296,8 @@ set "__RestoreCmdArgs=!__BuildCommandArgs!"
 call :restore_dotnet_proj !__SystemAttrProj!
 call :restore_dotnet_proj !__DjvuNetGitTasksProj!
 call :restore_dotnet_proj !__DjvuNetProj!
+call :restore_dotnet_proj !__DjvuNetDrawingProj!
+call :restore_dotnet_proj !__DjvuNetSkiaProj!
 
 if defined _SkipNative goto :end_dotnet_restore
 call :restore_dotnet_proj !__DjvuNetDjvuLibreProj!
@@ -371,6 +353,8 @@ set __LogsDir=!__RootBuildDir!!OS!.!_MSB_Platform!.!_MSB_Configuration!\logs\
 call :build_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
 call :build_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Git.Tasks.csproj
 call :build_dotnet_proj !__DjvuNetProj! DjvuNet.csproj
+call :build_dotnet_proj !__DjvuNetDrawingProj! DjvuNet.Drawing.csproj
+call :build_dotnet_proj !__DjvuNetSkiaProj! DjvuNet.Skia.csproj
 
 if defined _SkipNative goto skip_djvulibre_build
 call :build_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
@@ -378,15 +362,17 @@ call :build_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
 :skip_djvulibre_build
 
 if not defined _Test (
-    goto exit_success
-) else if not exist .\artifacts\test001C.djvu (
-    echo.
-    echo %__MsgPrefix%Cloning test data from https://github.com/DjvuNet/artifacts.git
-    call git clone --depth 1 https://github.com/DjvuNet/artifacts.git
-    if not [%ERRORLEVEL%]==[0] (
+    if not defined _BuildTests (
+        goto exit_success
+    ) else if not exist .\artifacts\test001C.djvu (
         echo.
-        echo %__MsgPrefix%Error: git clone returned error
-        goto exit_error
+        echo %__MsgPrefix%Cloning test data from https://github.com/DjvuNet/artifacts.git
+        call git clone --depth 1 https://github.com/DjvuNet/artifacts.git
+        if not [%ERRORLEVEL%]==[0] (
+            echo.
+            echo %__MsgPrefix%Error: git clone returned error
+            goto exit_error
+        )
     )
 )
 
@@ -400,19 +386,13 @@ if /i "%_Framework%" == "%_DefaultNetCoreApp%" (
     set __TestFramework=%_DefaultNetCoreApp%
 )
 
-if /i "%_Framework%" == "%_DefaultNetFX%" (
-    set __TestFramework=%_DefaultNetFX%
-)
-
 set __TestOutputDir=%__OutputDir%
 set __DjvuNetTestsProj=DjvuNet.Tests/DjvuNet.Tests.csproj
 set __DjvuNetWaveletTestsProj=DjvuNet.Wavelet.Tests/DjvuNet.Wavelet.Tests.csproj
 set __DjvuNetTestExeProj=DjvuNetTest/DjvuNetTest.csproj
 set __DjvuNetDjvuLibreTestsProj=DjvuNet.DjvuLibre.Tests/DjvuNet.DjvuLibre.Tests.csproj
 
-REM Restore test projects - only netcoreapp and netstandard targets
-
-if /i "%_Framework%" == "%_DefaultNetFX%" goto :skip_djvunet_tests_restore
+REM Restore test projects
 
 call :restore_dotnet_proj !__DjvuNetTestsProj!
 call :restore_dotnet_proj !__DjvuNetWaveletTestsProj!
@@ -424,15 +404,19 @@ call :restore_dotnet_proj !__DjvuNetDjvuLibreTestsProj!
 
 :skip_djvunet_tests_restore
 
-REM Build and publish tests
+REM Build tests
 
 call :build_dotnet_proj !__DjvuNetTestsProj! DjvuNet.Tests.csproj
 call :build_dotnet_proj !__DjvuNetWaveletTestsProj! DjvuNet.Wavelet.Tests.csproj
 call :build_dotnet_proj !__DjvuNetTestExeProj! DjvuNetTest.exe.csproj
 
 if defined _SkipNative goto skip_djvulibre_tests_proj
+
 call :build_dotnet_proj !__DjvuNetDjvuLibreTestsProj! DjvuNet.DjvuLibre.Tests.csproj
+
 :skip_djvulibre_tests_proj
+
+if not defined _Test goto exit_success
 
 REM Prepare for running tests
 
@@ -611,7 +595,7 @@ echo.
 echo  Options:
 echo.
 echo     -Framework           defines framework target, default "%_DefaultNetCoreApp%",
-echo     -f                   allowed values [ %_DefaultNetFX% ^| netfx ^| %_DefaultNetCoreApp% ^| netcoreapp ^| %_DefaultNetStandard% ^| netstandard ]
+echo     -f                   allowed values [ %_DefaultNetCoreApp% ^| netcoreapp ^| %_DefaultNetStandard% ^| netstandard ]
 echo.
 echo     -Configuration       defines build configuration, default "Debug",
 echo     -c                   allowed values [ Release ^| Checked ^| Debug ]
@@ -632,6 +616,9 @@ echo     -v                   allowed values [ q[uiet], m[inimal], n[ormal], d[e
 echo.
 echo     -Processors          defines number of processes which should be used ^for build parallelization,
 echo     -proc                default on this machine "%NUMBER_OF_PROCESSORS%"
+echo.
+echo     -BuildTests          build tests but do not run them, when "-Test" option is defined forces tests to run
+echo     -bt
 echo.
 echo     -Test                build and run tests, when not used tests are not build and their execution is skipped
 echo.
