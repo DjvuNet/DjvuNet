@@ -45,17 +45,17 @@ set _Verbosity=normal
 set _Processors=%NUMBER_OF_PROCESSORS%
 set _OS=Windows_NT
 set _SkipNative=
+set _BuildDjvuNet=
 set _BuildTests=
+set _RunTests=
 set _Test=
+set _Pack=
 set _DefaultNetCoreApp=netcoreapp3.0
 set _NetCoreAppId=.NETCoreApp
 set _NetCoreAppTFM=.NETCoreApp,Version=v3.0
 set _DefaultNetStandard=netstandard2.1
 set _NetStandardId=.NETStandard
 set _NetStandardTFM=.NETStandard,Version=v2.1
-set _DefaultNetFX=net472
-set _NetFXId=.NETFramework
-set _NetFXTFM=.NETFramework,Version=v4.7.2
 set _Framework=%_DefaultNetCoreApp%
 set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.8.0.2/
 
@@ -70,8 +70,12 @@ if /i "%~1"=="-Platform"            (set "_MSB_Platform=%2"&shift&shift&goto :pa
 if /i "%~1"=="-p"                   (set "_MSB_Platform=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-Target"              (set "_MSB_Target=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-t"                   (set "_MSB_Target=%2"&shift&shift&goto :parse)
+if /i "%~1"=="-BuildDjvuNet"        (set "_BuildDjvuNet=1"&shift&goto :parse)
+if /i "%~1"=="-DjvuNet"             (set "_BuildDjvuNet=1"&shift&goto :parse)
 if /i "%~1"=="-BuildTests"          (set "_BuildTests=1"&shift&goto :parse)
 if /i "%~1"=="-bt"                  (set "_BuildTests=1"&shift&goto :parse)
+if /i "%~1"=="-RunTests"            (set "_RunTests=1"&shift&goto :parse)
+if /i "%~1"=="-rt"                  (set "_RunTests=1"&shift&goto :parse)
 if /i "%~1"=="-Test"                (set "_Test=1"&shift&goto :parse)
 if /i "%~1"=="-Framework"           (set "_Framework=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-f"                   (set "_Framework=%2"&shift&shift&goto :parse)
@@ -136,6 +140,7 @@ REM Accepted Target values
 if /i [%_MSB_Target%] == [Build] goto :end_check_target
 if /i [%_MSB_Target%] == [Clean] goto :end_check_target
 if /i [%_MSB_Target%] == [Rebuild] goto :end_check_target
+if /i [%_MSB_Target%] == [Pack] goto :end_check_target
 
 echo Invalid command line parameter value -t/-Target: %_MSB_Target%
 goto usage
@@ -172,6 +177,11 @@ goto usage
 
 :end_check_params
 
+if not defined _BuildDjvuNet (
+    if defined _BuildTests set _BuildDjvuNet=1
+    if defined _Test set _BuildDjvuNet=1&set _BuildTests=1& set _RunTests=1
+)
+
 set __RootBuildDir=%__RepoRootDir%build\bin\
 
 echo %__MsgPrefix%Starting Build of DjvuNet at %DATE% %TIME%
@@ -181,14 +191,21 @@ echo %__MsgPrefix%Native Platform:       %_MSB_Platform%
 echo %__MsgPrefix%Managed Platform:      %__ManagedPlatform%
 echo %__MsgPrefix%Framework:             %_Framework%
 
-if defined _Test (
+if defined _BuildDjvuNet (
+    echo %__MsgPrefix%Build DjvuNet:         True
+) else (
+    echo %__MsgPrefix%Build DjvuNet:         False
+)
+
+if defined _BuildTests (
     echo %__MsgPrefix%Build Tests:           True
+) else (
+    echo %__MsgPrefix%Build Tests:           False
+)
+
+if defined _RunTests (
     echo %__MsgPrefix%Run Tests:             True
 ) else (
-
-    if defined _BuildTests (
-        echo %__MsgPrefix%Build Tests:           True
-    )
     echo %__MsgPrefix%Run Tests:             False
 )
 
@@ -283,6 +300,7 @@ echo %__MsgPrefix%__OutputDir [!__OutputDir!]
 echo %__MsgPrefix%__PublishDir [!__PublishDir!]
 
 if /i "%_MSB_Target%" == "Clean" goto :end_dotnet_restore
+if not defined _BuildDjvuNet goto :skip_djvulibre_build
 
 if /i "%_Framework%" == "%_DefaultNetStandard%" goto :dotnet_restore
 if /i "%_Framework%" == "%_DefaultNetCoreApp%" goto :dotnet_restore
@@ -357,14 +375,23 @@ call :build_dotnet_proj !__DjvuNetDrawingProj! DjvuNet.Drawing.csproj
 call :build_dotnet_proj !__DjvuNetSkiaProj! DjvuNet.Skia.csproj
 
 if defined _SkipNative goto skip_djvulibre_build
+
 call :build_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
 
 :skip_djvulibre_build
 
 if not defined _Test (
     if not defined _BuildTests (
-        goto exit_success
+        if defined _RunTests (
+            echo %__MsgPrefix%Preparing to run tests on %_DefaultNetCoreApp%
+        ) else (
+            goto exit_success
+        )
+    ) else (
+        echo %__MsgPrefix%Preparing to build tests
     )
+) else (
+        echo %__MsgPrefix%Preparing to build and run tests
 )
 
 if not exist .\artifacts\test001C.djvu (
@@ -380,19 +407,23 @@ if not exist .\artifacts\test001C.djvu (
 
 REM Setup test environment
 
-if /i "%_Framework%" == "%_DefaultNetStandard%" (
-    set __TestFramework=%_DefaultNetCoreApp%
-)
+:test_environment_setup
 
-if /i "%_Framework%" == "%_DefaultNetCoreApp%" (
-    set __TestFramework=%_DefaultNetCoreApp%
-)
+set __TestFramework=%_DefaultNetCoreApp%
 
 set __TestOutputDir=%__OutputDir%
 set __DjvuNetTestsProj=DjvuNet.Tests/DjvuNet.Tests.csproj
 set __DjvuNetWaveletTestsProj=DjvuNet.Wavelet.Tests/DjvuNet.Wavelet.Tests.csproj
 set __DjvuNetTestExeProj=DjvuNetTest/DjvuNetTest.csproj
 set __DjvuNetDjvuLibreTestsProj=DjvuNet.DjvuLibre.Tests/DjvuNet.DjvuLibre.Tests.csproj
+
+if not defined _Test (
+    if not defined _BuildTests (
+        if defined _RunTests (
+            goto run_tests
+        )
+    )
+)
 
 REM Restore test projects
 
@@ -418,9 +449,12 @@ call :build_dotnet_proj !__DjvuNetDjvuLibreTestsProj! DjvuNet.DjvuLibre.Tests.cs
 
 :skip_djvulibre_tests_proj
 
+if defined _RunTests goto run_tests
 if not defined _Test goto exit_success
 
 REM Prepare for running tests
+
+:run_tests
 
 set _DjvuNet_Tests=%__TestOutputDir%DjvuNet.Tests.dll
 set _DjvuNet_DjvuLibre_Tests=%__TestOutputDir%DjvuNet.DjvuLibre.Tests.dll
