@@ -675,7 +675,7 @@ namespace DjvuNet
 
         public Graphics.Map BuildImageMap()
         {
-            return null;
+            throw new NotImplementedException();
         }
 
         /// <summary>

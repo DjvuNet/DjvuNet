@@ -2,6 +2,7 @@
 
 namespace DjvuNet.Errors
 {
+    [Serializable]
     public class DjvuArgumentNullException  : ArgumentNullException
     {
         public DjvuArgumentNullException() : base()
@@ -20,11 +21,9 @@ namespace DjvuNet.Errors
         {
         }
 
-#if !NETSTANDARD2_0
         public DjvuArgumentNullException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base (info, context)
         {
         }
-#endif
     }
 }

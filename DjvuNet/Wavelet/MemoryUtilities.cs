@@ -2,7 +2,7 @@
 
 namespace DjvuNet.Wavelet
 {
-    internal static class MemoryUtilities
+    public static class MemoryUtilities
     {
         public static unsafe void MoveMemory(void* dest, void* src, long length)
         {

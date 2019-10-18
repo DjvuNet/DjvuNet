@@ -3,6 +3,7 @@ using System.IO;
 
 namespace DjvuNet.Errors
 {
+    [Serializable]
     public class DjvuFileNotFoundException : FileNotFoundException
     {
         public DjvuFileNotFoundException() : base()
@@ -21,12 +22,10 @@ namespace DjvuNet.Errors
         {
         }
 
-#if !NETSTANDARD2_0
         public DjvuFileNotFoundException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base (info, context)
         {
         }
-#endif
 
         public DjvuFileNotFoundException(string message, string fileName, Exception innerException)
             : base(message, fileName, innerException)

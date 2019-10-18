@@ -2,6 +2,7 @@
 
 namespace DjvuNet.Errors
 {
+    [Serializable]
     public class DjvuInvalidOperationException : InvalidOperationException
     {
         public DjvuInvalidOperationException() : base()
@@ -17,11 +18,9 @@ namespace DjvuNet.Errors
         {
         }
 
-#if !NETSTANDARD2_0
         public DjvuInvalidOperationException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base (info, context)
         {
         }
-#endif
     }
 }

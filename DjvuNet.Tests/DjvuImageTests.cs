@@ -706,6 +706,8 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
+                    Assert.NotNull(testImage);
+
                     bool result = Util.CompareBinarySimilarImages(testImage, image, 0.1485, true, "Testing Djvu mask: test075C.png, ");
 
                     Assert.True(result);
