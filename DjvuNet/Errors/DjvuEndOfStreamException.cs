@@ -3,6 +3,7 @@ using System.IO;
 
 namespace DjvuNet.Errors
 {
+    [Serializable]
     public class DjvuEndOfStreamException : EndOfStreamException
     {
         public DjvuEndOfStreamException() : base()
@@ -18,11 +19,9 @@ namespace DjvuNet.Errors
         {
         }
 
-#if !NETSTANDARD2_0
         public DjvuEndOfStreamException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base (info, context)
         {
         }
-#endif
     }
 }

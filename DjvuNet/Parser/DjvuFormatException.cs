@@ -2,9 +2,7 @@
 
 namespace DjvuNet
 {
-#if !NETSTANDARD2_0
     [Serializable]
-#endif
     public class DjvuFormatException : System.FormatException
     {
         //
@@ -43,7 +41,6 @@ namespace DjvuNet
         {
         }
 
-#if !NETSTANDARD2_0
         //
         // Summary:
         //     Initializes a new instance of the DjvuNet.IFFParsingException class with serialized
@@ -59,6 +56,5 @@ namespace DjvuNet
             base (info, context)
         {
         }
-#endif
     }
 }

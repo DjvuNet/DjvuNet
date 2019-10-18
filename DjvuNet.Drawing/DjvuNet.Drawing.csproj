@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!--
       DjvuNetPackaging.props should go always first due to pack target requirements:
@@ -49,6 +49,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="DjvuGraphics.cs" />
     <Compile Include="DjvuNetBitmap.cs" />
   </ItemGroup>
 
@@ -57,12 +58,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Condition="$(TargetFrmework) != $(NetFXTargetFrameworkVersion)" Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
+    <ProjectReference Include="$(RepoRootDir)DjvuNet\DjvuNet.csproj" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
