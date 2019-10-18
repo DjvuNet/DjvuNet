@@ -122,6 +122,7 @@
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.runner.console" Version="$(XunitPackageVersion)" >
       <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
+      <!--<CopyToOutputDirectory Condition="$(TargetFramework) == $(NetFXTargetFrameworkVersion)">tools/$(NetFXTargetFrameworkVersion)/*.*</CopyToOutputDirectory>-->
     </PackageReference>
     <PackageReference Include="xunit.console" Version="$(XunitPackageVersion)" >
       <CopyToOutputDirectory Condition="$(TargetFramework) == $(DotNetCoreFrameworkVersion)">tools/netcoreapp2.0/*.*</CopyToOutputDirectory>
