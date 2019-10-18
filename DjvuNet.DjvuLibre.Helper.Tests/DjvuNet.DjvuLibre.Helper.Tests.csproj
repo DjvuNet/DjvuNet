@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="$(NewtonSoftJsonPackageVersion)" />
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="xunit" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.core" Version="$(XunitPackageVersion)" />
     <PackageReference Include="xunit.extensibility.execution" Version="$(XunitPackageVersion)" />
@@ -50,7 +51,7 @@
     <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
   </ItemGroup>
 
-  <Import Project="$(RepoRootDir)DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.projitems" />
+  <Import Project="$(RepoRootDir)DjvuNet.Shared.Tests\DjvuNet.Shared.Tests.props" />
   <ItemGroup>
     <Compile Remove="$(RepoRootDir)DjvuNet.Shared.Tests\DjvuDocumentUtil.cs" />
   </ItemGroup>

@@ -3,7 +3,8 @@
   <PropertyGroup>
     <IntermediateOutputPath>$(MSBuildThisFileDirectory)/build/bin/$(OS).$(Platform).$(Configuration)/obj/$(AssemblyName)/</IntermediateOutputPath>
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
-    <GitTasksAssembly Condition="$(GitTasksAssembly) == ''">$(MSBuildThisFileDirectory)Tools/DjvuNet/$(DotNetCoreFrameworkVersion)/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And '$(MSBuildRuntimeType)' == 'Core'">$(MSBuildThisFileDirectory)Tools/DjvuNet/$(DotNetCoreFrameworkVersion)/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
+    <GitTasksAssembly Condition="$(GitTasksAssembly) == '' And '$(MSBuildRuntimeType)' != 'Core'">$(MSBuildThisFileDirectory)Tools/DjvuNet/$(NetFXTargetFrameworkVersion)/DjvuNet.Git.Tasks.dll</GitTasksAssembly>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -55,15 +56,25 @@
     <Message Importance="High"
              Text="Building [$(TargetName)] target framework: [$(TargetFramework)], assembly version: [$(DjvuAssemblyVersion)], file version: [$(FullBuildVersion)], configuration: [$(Configuration)], platform [$(Platform)], branch: [$(BuildBranch)] commit: [$(CommitVersion)]"/>
 
-    <Copy Condition="$(TargetFramework) != ''" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
+    <Copy Condition="$(TargetFramework) == 'net472'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
+          DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.cs"/>
+    <Copy Condition="$(TargetFramework) == 'net472'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
+          DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.cs"/>
+
+    <Copy Condition="$(TargetFramework) != 'net472'" SourceFiles="$(ProjectDir)Properties/AssemblyInfo.Template.cs"
       DestinationFiles="$(ProjectDir)Properties/AssemblyInfo.$(TargetFramework).cs"/>
-    <Copy Condition="$(TargetFramework) != ''" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
+    <Copy Condition="$(TargetFramework) != 'net472'" SourceFiles="$(MSBuildThisFileDirectory)Templates/AssemblyInfoCommon.Template.cs"
           DestinationFiles="$(ProjectDir)Properties/AssemblyInfoCommon.$(TargetFramework).cs"/>
 
     <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates/UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true"
           DestinationFiles="$(ProjectDir)../DjvuNet.Shared.Tests/UtilRoot.cs"/>
 
-    <ItemGroup Condition="$(TargetFramework) != ''">
+    <ItemGroup Condition="$(TargetFramework) == 'net472'">
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.cs' />
+      <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.cs' />
+    </ItemGroup>
+
+    <ItemGroup Condition="$(TargetFramework) != 'net472'">
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfo.$(TargetFramework).cs' />
       <WriteFiles Include='$(ProjectDir)Properties/AssemblyInfoCommon.$(TargetFramework).cs' />
     </ItemGroup>
