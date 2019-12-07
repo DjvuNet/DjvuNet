@@ -352,7 +352,7 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Correct the colors with a gamma subsample normalized to 1.0 for no correction.
+        /// Correct the colors of the <see cref="DjvuNet.Graphics.PixelMap"/> instance with a gamma subsample normalized to 1.0 for no correction.
         /// </summary>
         /// <param name="gamma">
         /// Color gamma correction
@@ -362,6 +362,11 @@ namespace DjvuNet.Graphics
             ApplyGamma(gamma, Data);
         }
 
+        /// <summary>
+        /// Apply gamma correction to passed image data.
+        /// </summary>
+        /// <param name="gamma"></param>
+        /// <param name="data"></param>
         public static void ApplyGamma(double gamma, sbyte[] data)
         {
             if ((gamma > 0.999D) && (gamma < 1.0009999999999999D))
@@ -1194,7 +1199,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         public PixelMap Init(IMap2 source, Rectangle rect)
         {
-            Init(rect.Height, rect.Width, ((null)));
+            Init(rect.Height, rect.Width, null);
 
             Rectangle rect2 = new Rectangle(0, 0, source.Width, source.Height);
             rect2.Intersect(rect2, rect);
@@ -1241,7 +1246,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         public PixelMap Init(IMap2 source)
         {
-            Init(source.Height, source.Width, ((null)));
+            Init(source.Height, source.Width, null);
 
             var pixel = CreateGPixelReference(0);
 

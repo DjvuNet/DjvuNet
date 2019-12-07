@@ -274,12 +274,12 @@ namespace DjvuNet.Graphics
 
 #region Methods
 
-/// <summary>
-/// Method creates bitmap and initializes it with deserialized data read from supplied Stream.
-/// </summary>
-/// <param name="stream">Stream with serialized data source.</param>
-/// <param name="border">Size of border surrounding bitmap data from all sides.</param>
-/// <returns>Bitmap initialized with data read from stream.</returns>
+        /// <summary>
+        /// Method creates bitmap and initializes it with deserialized data read from supplied Stream.
+        /// </summary>
+        /// <param name="stream">Stream with serialized data source.</param>
+        /// <param name="border">Size of border surrounding bitmap data from all sides.</param>
+        /// <returns>Bitmap initialized with data read from stream.</returns>
 #if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
 # endif
@@ -1097,7 +1097,7 @@ namespace DjvuNet.Graphics
             {
                 BlueOffset = BlueOffset,
                 Border = Border,
-                Data = Data,  /// TODO: Fix me
+                Data = (sbyte[]) Data.Clone(),  /// TODO: Fix me
                 Grays = Grays,
                 GreenOffset = GreenOffset,
                 _MaxRowOffset = _MaxRowOffset,
@@ -1105,8 +1105,8 @@ namespace DjvuNet.Graphics
                 Width = Width,
                 IsRampNeeded = IsRampNeeded,
                 Height = Height,
-                Properties = Properties,
-                _RampData = _RampData,
+                Properties = Properties,    /// TODO: Fix me
+                _RampData = _RampData,      /// TODO: Fix me
                 RedOffset = RedOffset,
                 BytesPerRow = BytesPerRow
             };
