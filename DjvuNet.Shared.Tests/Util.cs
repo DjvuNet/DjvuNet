@@ -355,7 +355,7 @@ namespace DjvuNet.Tests
                     BitmapData img1 = bmp1?.LockBits(rect, ImageLockMode.ReadOnly, bmp1.PixelFormat) ?? image1.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
                     BitmapData img2 = bmp2?.LockBits(rect, ImageLockMode.ReadOnly, bmp2.PixelFormat) ?? image2.LockBits(rect, ImageLockMode.ReadOnly, image2.PixelFormat);
 
-                    result = (diffValue = ImageBinarySimilarity(img1, img2)) < diffThreshold;
+                    result = (diffValue = ImageBinarySimilarity(img1, img2)) <= diffThreshold;
 
                     if (bmp1 != null)
                     {
@@ -404,7 +404,10 @@ namespace DjvuNet.Tests
             {
                 return imageData1.PixelFormat switch
                 {
+                    PixelFormat.Format32bppArgb => ImageBinaryDiff(imageData1, imageData2, 32),
                     PixelFormat.Format24bppRgb => ImageBinaryDiff(imageData1, imageData2),
+                    PixelFormat.Format8bppIndexed => ImageBinaryDiff(imageData1, imageData2, 8),
+                    PixelFormat.Format16bppGrayScale => ImageBinaryDiff(imageData1, imageData2, 16, 16),
                     _ => throw new ArgumentException("Unsupported Image PixelFormat", nameof(imageData1.PixelFormat))
                 };
             }
@@ -414,8 +417,13 @@ namespace DjvuNet.Tests
             }
         }
 
-        internal static unsafe double ImageBinaryDiff(BitmapData imageData1, BitmapData imageData2)
+        internal static unsafe double ImageBinaryDiff(BitmapData imageData1, BitmapData imageData2, int pixelSize = 24, int channelSize = 8)
         {
+            if (channelSize % 8 != 0)
+            {
+                throw new ArgumentException("Method supports only multiple of 8 bits channel sizes");
+            }
+
             uint pixelSizeInBytes = (uint) Image.GetPixelFormatSize(imageData1.PixelFormat) / 8;
             uint width = (uint)imageData1.Width;
             uint height = (uint)imageData1.Height;
@@ -431,6 +439,7 @@ namespace DjvuNet.Tests
                 uint oneVectorRounds = widthBytesAvx2LRem / 32;
 
                 Vector256<double> mask = Vector256.Create((double)0x0010000000000000);
+                Vector256<ulong> resultVecU = Vector256<ulong>.Zero;
 
                 for (uint i = 0; i < height; i++)
                 {
@@ -459,27 +468,11 @@ namespace DjvuNet.Tests
                         Vector256<ushort> diff3 = Avx2.SumAbsoluteDifferences(r13, r23);
                         Vector256<ushort> diff4 = Avx2.SumAbsoluteDifferences(r14, r24);
 
-                        Vector256<ulong> tmpVec1 = Avx2.Or(diff1.AsUInt64(), mask.AsUInt64());
-                        Vector256<ulong> tmpVec2 = Avx2.Or(diff2.AsUInt64(), mask.AsUInt64());
-                        Vector256<ulong> tmpVec3 = Avx2.Or(diff3.AsUInt64(), mask.AsUInt64());
-                        Vector256<ulong> tmpVec4 = Avx2.Or(diff4.AsUInt64(), mask.AsUInt64());
+                        Vector256<ulong> diff12 = Avx2.Add(diff1.AsUInt64(), diff2.AsUInt64());
+                        Vector256<ulong> diff34 = Avx2.Add(diff3.AsUInt64(), diff4.AsUInt64());
 
-                        Vector256<double> diff1Double = Avx2.Subtract(tmpVec1.AsDouble(), mask);
-                        Vector256<double> diff2Double = Avx2.Subtract(tmpVec2.AsDouble(), mask);
-                        Vector256<double> diff3Double = Avx2.Subtract(tmpVec3.AsDouble(), mask);
-                        Vector256<double> diff4Double = Avx2.Subtract(tmpVec4.AsDouble(), mask);
-
-                        Vector256<double> result1 = Avx2.HorizontalAdd(diff1Double, diff2Double);
-                        Vector256<double> result2 = Avx2.HorizontalAdd(diff3Double, diff4Double);
-
-                        result1 = Avx2.HorizontalAdd(result1, result2);
-                        result1 = Avx2.HorizontalAdd(result1, result1);
-
-                        Vector128<double> lowVec = Avx2.ExtractVector128(result1, 0b0);
-                        Vector128<double> hiVec = Avx2.ExtractVector128(result1, 0b1);
-                        Vector128<double> resultVec = Avx2.AddScalar(lowVec, hiVec);
-
-                        result += resultVec.GetElement(0);
+                        diff12 = Avx2.Add(diff12, diff34);
+                        resultVecU = Avx2.Add(resultVecU, diff12);
                     }
 
                     if (oneVectorRounds > 0)
@@ -494,16 +487,7 @@ namespace DjvuNet.Tests
                             Vector256<byte> r21 = Avx2.LoadDquVector256(pixelRow2);
                             Vector256<ushort> diff1 = Avx2.SumAbsoluteDifferences(r11, r21);
 
-                            Vector256<ulong> tmpVec1 = Avx2.Or(diff1.AsUInt64(), mask.AsUInt64());
-                            Vector256<double> diff1Double = Avx2.Subtract(tmpVec1.AsDouble(), mask);
-
-                            Vector256<double> result1 = Avx2.HorizontalAdd(diff1Double, diff1Double);
-
-                            Vector128<double> lowVec = Avx2.ExtractVector128(result1, 0b0);
-                            Vector128<double> hiVec = Avx2.ExtractVector128(result1, 0b1);
-                            Vector128<double> resultVec = Avx2.AddScalar(lowVec, hiVec);
-
-                            result += resultVec.GetElement(0);
+                            resultVecU = Avx2.Add(resultVecU, diff1.AsUInt64());
 
                             pixelRow1 += 32;
                             pixelRow2 += 32;
@@ -528,9 +512,20 @@ namespace DjvuNet.Tests
                         }
                     }
                 }
-            }
-            /// TODO: Add SSE optimizations
-            else // Avx2.IsSupported
+
+                Vector256<ulong> tmpVec1 = Avx2.Or(resultVecU, mask.AsUInt64());
+                Vector256<double> diff1Double = Avx2.Subtract(tmpVec1.AsDouble(), mask);
+
+                Vector256<double> result1 = Avx2.HorizontalAdd(diff1Double, diff1Double);
+
+                Vector128<double> lowVec = Avx2.ExtractVector128(result1, 0b0);
+                Vector128<double> hiVec = Avx2.ExtractVector128(result1, 0b1);
+                Vector128<double> resultVec = Avx2.AddScalar(lowVec, hiVec);
+
+                result += resultVec.GetElement(0);
+            } // end of: if (Avx2.IsSupported) {}
+            // else if (Sse2.IsSupported) {}
+            else
             {
                 for (uint i = 0; i < height; i++)
                 {
@@ -538,14 +533,15 @@ namespace DjvuNet.Tests
                     byte* pixelRow2 = (byte*)((long)imageData2.Scan0 + (i * imageData2.Stride));
                     uint rowPos = i * width;
 
-                    for (uint wb = 0, w = 0; wb < widthBytes; wb += pixelSizeInBytes, w++)
+                    for (uint wb = 0; wb < widthBytes; wb += pixelSizeInBytes)
                     {
                         result += GetPixelDiff(pixelRow1 + wb, pixelRow2 + wb);
                     }
                 }
             }
 
-            return result / (width * height * 3 * 255.0d);
+            double maxChannelValue = (1 << channelSize) - 1;
+            return result / (width * height * ((double)pixelSize / channelSize) * maxChannelValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

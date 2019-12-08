@@ -495,18 +495,39 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, docNumber == 75 ? 0.1485 : 0.0585, true, $"Testing Djvu doc: test{docNumber:00#}C.png, ");
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, docNumber == 75 ? 0.1485 : 0.0585, true, $"Testing Djvu doc image: test{docNumber:00#}C.png, ");
 
 #if DUMP_IMAGES
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-djvunet.tif"));
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-djvunet.png"));
 #endif
                     Assert.True(result, $"Test failed: ");
                 }
             }
         }
 
-        [DjvuTheory(Skip = "Not implemented"), Trait("Category", "Skip")]
-        [MemberData(nameof(BuildImageSourceDocs))]
+        public static IEnumerable<object[]> BuildBackgroundImageSourceDocs
+        {
+            get
+            {
+                List<object[]> retVal = new List<object[]>();
+
+                for (int i = 1; i <= 77; i++)
+                {
+                    /// DjvuView is unable to render png background image for the following docs
+                    /// TODO: Dump images directly from libdjvulibre
+                    ///
+                    if (i == 25 || i == 31 || i == 34 || i == 54)
+                    {
+                        continue;
+                    }
+                    retVal.Add(new object[] { i });
+                }
+                return retVal;
+            }
+        }
+
+        [DjvuTheory]
+        [MemberData(nameof(BuildBackgroundImageSourceDocs))]
         public void BuildBackgroundImage_Theory(int docNumber)
         {
             int pageCount = 0;
@@ -514,8 +535,7 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
                 IDjvuPage page = document.FirstPage;
-                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C.tif");
-                Console.WriteLine($"Test image path: {testImagePath}");
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", $"test{docNumber:00#}CBgnd.png");
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
                 using (Bitmap image = djvuImage.GetBackgroundImage(1))
@@ -524,11 +544,26 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
+                    Bitmap resizedImage = null;
+                    if (image.Width != testImage.Width || image.Height != testImage.Height)
+                    {
+                        resizedImage = DjvuImage.ResizeImage(image, testImage.Width, testImage.Height);
+                    }
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, resizedImage != null ? resizedImage : image, 0.025, true, $"Testing Djvu doc background: test{docNumber:00#}C.png, ");
 
 #if DUMP_IMAGES
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-bg-djvunet.tif"));
+                    if (resizedImage == null)
+                    {
+                        image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-bg-djvunet.png"));
+                    }
+                    else
+                    {
+                        resizedImage.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-bg-djvunet.png"));
+                    }
 #endif
+                    resizedImage?.Dispose();
+
                     Assert.True(result);
                 }
             }
@@ -556,7 +591,7 @@ namespace DjvuNet.Tests
                     bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
 
 #if DUMP_IMAGES
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-fg-djvunet.tif"));
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-fg-djvunet.png"));
 #endif
                     Assert.True(result);
                 }
@@ -585,7 +620,7 @@ namespace DjvuNet.Tests
                     bool result = Util.CompareImagesForBinarySimilarity(testImage, image, docNumber == 75 ? 0.1485 : 0.0585, true, $"Testing Djvu mask: test{docNumber:00#}C.png, ");
 
 #if DUMP_IMAGES
-                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-stencil-djvunet.tif"));
+                    image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-stencil-djvunet.png"));
 #endif
                     Assert.True(result);
                 }
