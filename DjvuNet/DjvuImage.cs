@@ -29,9 +29,10 @@ namespace DjvuNet
         /// True if the page has been previously loaded, false otherwise
         /// </summary>
         private bool _HasLoaded;
-        private object _LoadingLock = new object();
         private bool _IsBackgroundDecoded;
         private bool _IsInverted;
+
+        public object LoadingLock = new object();
 
         public IDjvuPage Page { get { return _Page; } }
 
@@ -54,8 +55,6 @@ namespace DjvuNet
             }
         }
 
-        #region IsPageImageCached
-
         private bool _IsPageImageCached;
 
         /// <summary>
@@ -76,7 +75,32 @@ namespace DjvuNet
             }
         }
 
-        #endregion IsPageImageCached
+        public bool IsBackgroundDecoded
+        {
+            get { return _IsBackgroundDecoded; }
+            set
+            {
+                if (_IsBackgroundDecoded != value)
+                {
+                    _IsBackgroundDecoded = value;
+                    OnPropertyChanged(nameof(IsBackgroundDecoded));
+                }
+            }
+        }
+
+
+        public bool HasLoaded
+        {
+            get { return _HasLoaded; }
+            set
+            {
+                if (_HasLoaded != value)
+                {
+                    _HasLoaded = value;
+                    OnPropertyChanged(nameof(HasLoaded));
+                }
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -404,16 +428,16 @@ namespace DjvuNet
         /// </summary>
         public void Preload()
         {
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
-                if (!_HasLoaded)
+                if (!HasLoaded)
                 {
                     // Build all the images
                     GetBackgroundImage(1, true);
                     GetForegroundImage(1, true);
                     GetMaskImage(1, true);
 
-                    _HasLoaded = true;
+                    HasLoaded = true;
                 }
             }
         }
@@ -442,23 +466,6 @@ namespace DjvuNet
         public System.Drawing.Bitmap ResizeImage(int newWidth, int newHeight)
         {
             return DjvuImage.ResizeImage(Image, newWidth, newHeight);
-        }
-
-        /// <summary>
-        /// Extracts a thumbnail image for the page
-        /// </summary>
-        /// <returns></returns>
-        public Bitmap ExtractThumbnailImage()
-        {
-            if (_Page.Thumbnail != null)
-            {
-                return _Page.Thumbnail.Image.ToImage();
-            }
-
-            Bitmap result = BuildImage();
-            var scaleAmount = (double)128 / result.Width;
-
-            return DjvuImage.ResizeImage(result, (int)(result.Width * scaleAmount), (int)(result.Height * scaleAmount));
         }
 
         /// <summary>
@@ -559,7 +566,7 @@ namespace DjvuNet
         {
             Verify.SubsampleRange(subsample);
 
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
                 System.Drawing.Bitmap background = GetBackgroundImage(subsample, true);
 
@@ -569,7 +576,7 @@ namespace DjvuNet
                 {
                     using (System.Drawing.Bitmap mask = GetMaskImage(subsample, true))
                     {
-                        _HasLoaded = true;
+                        HasLoaded = true;
 
                         BitmapData backgroundData =
                             background.LockBits(new System.Drawing.Rectangle(0, 0, background.Width, background.Height),
@@ -679,6 +686,23 @@ namespace DjvuNet
         }
 
         /// <summary>
+        /// Extracts a thumbnail image for the page
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap ExtractThumbnailImage()
+        {
+            if (_Page.Thumbnail != null)
+            {
+                return _Page.Thumbnail.Image.ToImage();
+            }
+
+            Bitmap result = BuildImage();
+            var scaleAmount = (double)128 / result.Width;
+
+            return DjvuImage.ResizeImage(result, (int)(result.Width * scaleAmount), (int)(result.Height * scaleAmount));
+        }
+
+        /// <summary>
         /// Gets the foreground image for the page
         /// </summary>
         /// <param name="resizeToPage"></param>
@@ -687,7 +711,7 @@ namespace DjvuNet
         {
             Verify.SubsampleRange(subsample);
 
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
                 Bitmap result = null;
 
@@ -720,7 +744,7 @@ namespace DjvuNet
 
         internal DjvuNet.Graphics.Map GetForegroundMap()
         {
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
                 DjvuNet.Graphics.Map result = null;
                 JB2Image jb2image = null;
@@ -759,7 +783,7 @@ namespace DjvuNet
                 return new System.Drawing.Bitmap(_Page.Width / subsample, _Page.Height / subsample, PixelFormat.Format8bppIndexed);
             }
 
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
                 Bitmap result = _Page.ForegroundJB2Image.GetBitmap(subsample, GBitmap.BorderSize).ToImage();
                 return resizeImage ? DjvuImage.ResizeImage(result, _Page.Width / subsample, _Page.Height / subsample) : result;
@@ -768,7 +792,7 @@ namespace DjvuNet
 
         internal GBitmap GetMaskBitmap()
         {
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
                 return _Page.ForegroundJB2Image?.GetBitmap(1, GBitmap.BorderSize) ?? null;
             }
@@ -795,7 +819,7 @@ namespace DjvuNet
             // Get the composite background image
             Wavelet.IInterWavePixelMap backgroundMap = null;
 
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
                 foreach (BG44Chunk background in backgrounds)
                 {
@@ -806,14 +830,14 @@ namespace DjvuNet
                     }
                     else
                     {
-                        if (!_IsBackgroundDecoded)
+                        if (!IsBackgroundDecoded)
                         {
                             background.ProgressiveDecodeBackground(backgroundMap);
                         }
                     }
                 }
 
-                _IsBackgroundDecoded = true;
+                IsBackgroundDecoded = true;
             }
 
             Bitmap result = backgroundMap.GetPixelMap().ToImage();
@@ -832,13 +856,13 @@ namespace DjvuNet
 
         internal DjvuNet.Graphics.Map GetBackgroundMap(bool rebuild = false)
         {
-            if (!rebuild && _IsBackgroundDecoded)
+            if (!rebuild && IsBackgroundDecoded)
             {
                 return _Page.PageForm?.GetChildrenItems<BG44Chunk>().FirstOrDefault()?.BackgroundImage.GetPixelMap() ?? null;
             }
-            else if (rebuild && _IsBackgroundDecoded)
+            else if (rebuild && IsBackgroundDecoded)
             {
-                _IsBackgroundDecoded = false;
+                IsBackgroundDecoded = false;
             }
 
             int width = _Page.Width;
@@ -854,7 +878,7 @@ namespace DjvuNet
             // Get the composite background image
             Wavelet.IInterWavePixelMap backgroundMap = null;
 
-            lock (_LoadingLock)
+            lock (LoadingLock)
             {
                 foreach (BG44Chunk background in backgrounds)
                 {
@@ -865,14 +889,14 @@ namespace DjvuNet
                     }
                     else
                     {
-                        if (!_IsBackgroundDecoded)
+                        if (!IsBackgroundDecoded)
                         {
                             background.ProgressiveDecodeBackground(backgroundMap);
                         }
                     }
                 }
 
-                _IsBackgroundDecoded = true;
+                IsBackgroundDecoded = true;
             }
 
             return backgroundMap.GetPixelMap();

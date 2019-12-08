@@ -266,17 +266,18 @@ namespace DjvuNet.Tests
             }
         }
 
-        private static bool IsImageBinaryComparable(Bitmap image1, Bitmap image2)
+        private static bool IsImageBinaryComparable(Bitmap image1, Bitmap image2, out bool pixelFormatMismatch)
         {
             bool result = true;
+            pixelFormatMismatch = false;
 
             if (image1 == null || image2 == null)
             {
                 result = false;
             }
-            else if (image1.PixelFormat != image2.PixelFormat)
+            else if (image1.PixelFormat != image2.PixelFormat || image1.PixelFormat != PixelFormat.Format24bppRgb)
             {
-                result = false;
+                pixelFormatMismatch = true;
             }
             else if (image1.Width != image2.Width || image1.Height != image2.Height)
             {
@@ -306,10 +307,10 @@ namespace DjvuNet.Tests
             return result;
         }
 
-        public static bool CompareBinarySimilarImages(Bitmap image1, Bitmap image2, double diffThreshold = 0.05, bool logDiff = false, string message = null)
+        public static bool CompareImagesForBinarySimilarity(Bitmap image1, Bitmap image2, double diffThreshold = 0.05, bool logDiff = false, string message = null)
         {
             double diff;
-            bool result = CompareBinarySimilarImages(image1, image2, out diff, diffThreshold);
+            bool result = CompareImagesForBinarySimilarity(image1, image2, out diff, diffThreshold);
 
             if (logDiff)
             {
@@ -319,26 +320,84 @@ namespace DjvuNet.Tests
             return result;
         }
 
-        public static bool CompareBinarySimilarImages(Bitmap image1, Bitmap image2, out double diffValue, double diffThreshold = 0.05)
+        public static bool CompareImagesForBinarySimilarity(Bitmap image1, Bitmap image2, out double diffValue, double diffThreshold = 0.05)
         {
-            bool result = IsImageBinaryComparable(image1, image2);
-            diffValue =double.NaN;
+            bool formatMismatch;
+            bool result = IsImageBinaryComparable(image1, image2, out formatMismatch);
 
-            if (result)
+            diffValue = double.NaN;
+            Bitmap bmp1 = null;
+            Bitmap bmp2 = null;
+
+            try
             {
-                Rectangle rect = new Rectangle(0, 0, image1.Width, image1.Height);
-                BitmapData img1 = image1.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
-                BitmapData img2 = image2.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
 
-                result = (diffValue = ImageBinarySimilarity(img1, img2)) < diffThreshold;
+                if (result && formatMismatch)
+                {
+                    if (image1.PixelFormat != PixelFormat.Format24bppRgb)
+                    {
+                        bmp1 = new Bitmap(image1.Width, image1.Height, PixelFormat.Format24bppRgb);
+                        using var gfx = System.Drawing.Graphics.FromImage(bmp1);
+                        gfx.DrawImage(image1, new Rectangle(0, 0, image1.Width, image1.Height));
+                    }
 
-                image1.UnlockBits(img1);
-                image2.UnlockBits(img2);
+                    if (image2.PixelFormat != PixelFormat.Format24bppRgb)
+                    {
+                        bmp2 = new Bitmap(image2.Width, image2.Height, PixelFormat.Format24bppRgb);
+                        using var gfx = System.Drawing.Graphics.FromImage(bmp2);
+                        gfx.DrawImage(image2, new Rectangle(0, 0, image2.Width, image2.Height));
+                    }
+                }
+
+                if (result)
+                {
+                    Rectangle rect = new Rectangle(0, 0, image1.Width, image1.Height);
+                    BitmapData img1 = bmp1?.LockBits(rect, ImageLockMode.ReadOnly, bmp1.PixelFormat) ?? image1.LockBits(rect, ImageLockMode.ReadOnly, image1.PixelFormat);
+                    BitmapData img2 = bmp2?.LockBits(rect, ImageLockMode.ReadOnly, bmp2.PixelFormat) ?? image2.LockBits(rect, ImageLockMode.ReadOnly, image2.PixelFormat);
+
+                    result = (diffValue = ImageBinarySimilarity(img1, img2)) < diffThreshold;
+
+                    if (bmp1 != null)
+                    {
+                        bmp1?.UnlockBits(img1);
+                    }
+                    else
+                    {
+                        image1.UnlockBits(img1);
+                    }
+
+                    if (bmp2 != null)
+                    {
+                        bmp2.UnlockBits(img2);
+                    }
+                    else
+                    {
+                        image2.UnlockBits(img2);
+                    }
+                }
+            }
+            finally
+            {
+                if (bmp1 != null)
+                {
+                    bmp1.Dispose();
+                }
+
+                if (bmp2 != null)
+                {
+                    bmp2.Dispose();
+                }
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Calculate average pixel binary diff between images
+        /// </summary>
+        /// <param name="imageData1"></param>
+        /// <param name="imageData2"></param>
+        /// <returns></returns>
         public static double ImageBinarySimilarity(BitmapData imageData1, BitmapData imageData2)
         {
             if (IsImageBinaryComparable(imageData1, imageData2))
@@ -505,7 +564,8 @@ namespace DjvuNet.Tests
 
         public static bool CompareImages(Bitmap image1, Bitmap image2)
         {
-            bool result = IsImageBinaryComparable(image1, image2);
+            bool pixelFormatMismatch = false;
+            bool result = IsImageBinaryComparable(image1, image2, out pixelFormatMismatch);
 
             if (result)
             {

@@ -11,8 +11,7 @@
     <Title>$(PackageId) - DjVu Document .NET Library System.Drawing Support</Title>
     <Description>DjvuNet is a managed library for working with a DjVu documents. It is binary compatible with a reference implementation - DjvuLibre.</Description>
     <TargetFramework Condition="$(TargetFramework) != ''">$(TargetFramework)</TargetFramework>
-    <TargetFrameworks>$(DotNetStandardVersion);$(DotNetCoreFrameworkVersion)</TargetFrameworks>
-    <NETStandardImplicitPackageVersion>$(NETStandardPackageVersion)</NETStandardImplicitPackageVersion>
+    <TargetFrameworks>$(DotNetCoreFrameworkVersion)</TargetFrameworks>
     <RuntimeIdentifiers>linux-x64;osx-x64;win-x64</RuntimeIdentifiers>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -51,6 +50,7 @@
   <ItemGroup>
     <Compile Include="DjvuGraphics.cs" />
     <Compile Include="DjvuNetBitmap.cs" />
+    <Compile Include="DjvuPageVisuals.cs" />
   </ItemGroup>
 
   <PropertyGroup>

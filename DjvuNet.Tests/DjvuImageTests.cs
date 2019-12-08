@@ -331,7 +331,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
 
                     Assert.True(result);
                 }
@@ -356,7 +356,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
 
                     Assert.True(result);
                 }
@@ -381,7 +381,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
 
                     Assert.True(result);
                 }
@@ -406,7 +406,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image, 0.0585);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.0585);
 
                     Assert.True(result);
                 }
@@ -431,7 +431,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image, 0.05);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.05);
 
                     Assert.True(result);
                 }
@@ -456,7 +456,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image, 0.15);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.15);
 
                     Assert.True(result);
                 }
@@ -495,7 +495,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image, docNumber == 75 ? 0.1485 : 0.0585, true, $"Testing Djvu doc: test{docNumber:00#}C.png, ");
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, docNumber == 75 ? 0.1485 : 0.0585, true, $"Testing Djvu doc: test{docNumber:00#}C.png, ");
 
 #if DUMP_IMAGES
                     image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-djvunet.tif"));
@@ -524,7 +524,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
 
 #if DUMP_IMAGES
                     image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-bg-djvunet.tif"));
@@ -553,7 +553,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image);
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
 
 #if DUMP_IMAGES
                     image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-fg-djvunet.tif"));
@@ -582,7 +582,7 @@ namespace DjvuNet.Tests
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image, docNumber == 75 ? 0.1485 : 0.0585, true, $"Testing Djvu mask: test{docNumber:00#}C.png, ");
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, docNumber == 75 ? 0.1485 : 0.0585, true, $"Testing Djvu mask: test{docNumber:00#}C.png, ");
 
 #if DUMP_IMAGES
                     image.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}C-stencil-djvunet.tif"));
@@ -687,7 +687,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [Fact]
         public void GetMaskImage075()
         {
             int pageCount = 0;
@@ -708,7 +708,7 @@ namespace DjvuNet.Tests
 
                     Assert.NotNull(testImage);
 
-                    bool result = Util.CompareBinarySimilarImages(testImage, image, 0.1485, true, "Testing Djvu mask: test075C.png, ");
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.3, true, "Testing Djvu mask: test075C.png, ");
 
                     Assert.True(result);
                 }

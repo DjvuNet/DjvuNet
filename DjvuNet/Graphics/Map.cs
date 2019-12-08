@@ -265,7 +265,7 @@ namespace DjvuNet.Graphics
         /// of this instance of <see cref="DjvuNet.Graphics.Map"/>
         /// </returns>
         public static System.Drawing.Bitmap CopyDataToBitmap(
-        int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
+            int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
         {
             System.Drawing.Bitmap bmp = null;
             BitmapData bmpData = null;

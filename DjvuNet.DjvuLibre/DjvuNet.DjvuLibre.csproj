@@ -83,7 +83,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
-    <ProjectReference Condition="$(TargetFramework) == 'net472' And '$(__ManagedPlatform)' == ''" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
+    <ProjectReference Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />
