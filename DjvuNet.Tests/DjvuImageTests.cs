@@ -708,7 +708,7 @@ namespace DjvuNet.Tests
 
                     Assert.NotNull(testImage);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.1485, true, "Testing Djvu mask: test075C.png, ");
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.3, true, "Testing Djvu mask: test075C.png, ");
 
                     Assert.True(result);
                 }
