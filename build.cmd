@@ -57,7 +57,7 @@ set _DefaultNetStandard=netstandard2.1
 set _NetStandardId=.NETStandard
 set _NetStandardTFM=.NETStandard,Version=v2.1
 set _Framework=%_DefaultNetCoreApp%
-set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.8.0.2/
+set __GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/v0.8.0.3/
 
 REM Parse command line
 
