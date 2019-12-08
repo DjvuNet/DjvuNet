@@ -686,6 +686,23 @@ namespace DjvuNet
         }
 
         /// <summary>
+        /// Extracts a thumbnail image for the page
+        /// </summary>
+        /// <returns></returns>
+        public Bitmap ExtractThumbnailImage()
+        {
+            if (_Page.Thumbnail != null)
+            {
+                return _Page.Thumbnail.Image.ToImage();
+            }
+
+            Bitmap result = BuildImage();
+            var scaleAmount = (double)128 / result.Width;
+
+            return DjvuImage.ResizeImage(result, (int)(result.Width * scaleAmount), (int)(result.Height * scaleAmount));
+        }
+
+        /// <summary>
         /// Gets the foreground image for the page
         /// </summary>
         /// <param name="resizeToPage"></param>
