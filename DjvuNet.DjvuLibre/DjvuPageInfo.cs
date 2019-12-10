@@ -275,23 +275,32 @@ namespace DjvuNet.DjvuLibre
                 Width = (uint)Width
             };
 
-            return RenderPage(mode, ref targetRect);
+            return RenderPage(mode, ref targetRect, ref targetRect);
         }
 
-        public IntPtr RenderPage(RenderMode mode, ref DjvuRectangle targetRect)
+        public IntPtr RenderPage(RenderMode mode, ref DjvuRectangle pageRect, ref DjvuRectangle targetRect)
         {
             IntPtr format = NativeMethods.CreateDjvuFormat(FormatStyle.BGR24, 0, IntPtr.Zero);
             NativeMethods.SetDjvuFormatRowOrder(format, 1);
             NativeMethods.SetDjvuFormatYDirection(format, 1);
             NativeMethods.SetDjvuFormatDitherBits(format, 24);
 
-            DjvuRectangle pageRect = new DjvuRectangle
+            return RenderPage(mode, ref pageRect, ref targetRect, format);
+        }
+
+        public IntPtr RenderPage(RenderMode mode, ref DjvuRectangle pageRect, ref DjvuRectangle targetRect, IntPtr format)
+        {
+
+            if (pageRect.Width <= 0 || pageRect.Height <= 0)
             {
-                X = 0,
-                Y = 0,
-                Height = (uint) Height,
-                Width = (uint) Width
-            };
+                pageRect = new DjvuRectangle
+                {
+                    X = 0,
+                    Y = 0,
+                    Height = (uint)Height,
+                    Width = (uint)Width
+                };
+            }
 
             IntPtr buffer = DjvuMarshal.AllocHGlobal((uint)(Width * 3 * Height));
             int result = 0;
@@ -304,7 +313,7 @@ namespace DjvuNet.DjvuLibre
                 if (result == 0)
                 {
                     throw new DjvuLibreException(
-                        $"Failed to render image at this time - result: {result}. Try later again.");
+                        $"Failed to render image this time - result: {result}. Try again later.");
                 }
             }
             catch(Exception ex)

@@ -1,6 +1,5 @@
 ﻿namespace DjvuNet.DjvuLibre
 {
-
     /// <summary>
     /// Various ways to render a page.
     /// </summary>
