@@ -83,7 +83,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(RepoRootDir)System.Attributes\System.Attributes.csproj" />
-    <ProjectReference Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
+    <!-- Allow to run vcxproj build only from .NET Framework MSBuild -->
+    <ProjectReference Condition="$(SolutionFileName) == 'DjvuNet.sln'" Include="..\DjVuLibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj" />
   </ItemGroup>
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.targets))\DjvuNetBuild.targets" />

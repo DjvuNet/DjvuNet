@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DjvuNet.DjvuLibre;
 using DjvuNet.Tests;
+using DjvuNet.Tests.Xunit;
 using Xunit;
 
 namespace DjvuNet.DjvuLibre.Tests
@@ -732,24 +733,29 @@ namespace DjvuNet.DjvuLibre.Tests
                     Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
 
                     BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-                    CopyMemory(data.Scan0, buffer, (uint)(bmp.Width * bmp.Height * 3));
-                    DjvuMarshal.FreeHGlobal(buffer);
 
-                    BitmapData testData = testBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
 
-                    bool result = Util.CompareImages(data, testData);
-
-                    testBmp.UnlockBits(testData);
                     bmp.UnlockBits(data);
 
-                    Assert.True(result);
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test003CImg.png"));
+#endif
 
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc image: \ttest003C.png, ");
+                    Assert.True(result);
                 }
+                DjvuMarshal.FreeHGlobal(buffer);
             }
         }
 
         [Fact, Trait("Category", "DjvuLibre")]
-        public void RenderPage_RenderMode003BackgroundImage()
+        public void RenderPage_RenderMode003Background()
         {
             using (DjvuDocumentInfo document =
                     DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
@@ -760,9 +766,22 @@ namespace DjvuNet.DjvuLibre.Tests
                 Assert.Equal<int>(101, pageCount);
 
                 DjvuPageInfo page = new DjvuPageInfo(document, 0);
+
+                DjvuRectangle targetRect = new DjvuRectangle
+                {
+                    Width = (uint) page.Width,
+                    Height = (uint) page.Height
+                };
+
+                DjvuRectangle pageRect = new DjvuRectangle
+                {
+                    Width = targetRect.Width,
+                    Height = targetRect.Height
+                };
+
                 IntPtr buffer = page.RenderPage(RenderMode.Background);
 
-                using (Bitmap bmp = new Bitmap(page.Width, page.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap bmp = new Bitmap((int)targetRect.Width, (int)targetRect.Height, PixelFormat.Format24bppRgb))
                 using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test003CB.png")))
                 {
                     PixelFormat pf = testBmp.PixelFormat;
@@ -771,25 +790,29 @@ namespace DjvuNet.DjvuLibre.Tests
                     Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
 
                     BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-                    CopyMemory(data.Scan0, buffer, (uint)(bmp.Width * bmp.Height * 3));
-                    DjvuMarshal.FreeHGlobal(buffer);
 
-                    BitmapData testData = testBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
 
-                    bool result = Util.CompareImages(data, testData);
-
-                    testBmp.UnlockBits(testData);
                     bmp.UnlockBits(data);
 
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test003CBgnd.png"));
+#endif
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc background: \ttest003C.png, ");
                     Assert.True(result);
-
                 }
+                DjvuMarshal.FreeHGlobal(buffer);
             }
-
         }
 
         [Fact, Trait("Category", "DjvuLibre")]
-        public void RenderPage_RenderMode003ForegroundImage()
+        public void RenderPage_RenderMode003Foreground()
         {
             using (DjvuDocumentInfo document =
                     DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
@@ -811,20 +834,378 @@ namespace DjvuNet.DjvuLibre.Tests
                     Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
 
                     BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
-                    CopyMemory(data.Scan0, buffer, (uint)(bmp.Width * bmp.Height * 3));
-                    DjvuMarshal.FreeHGlobal(buffer);
 
-                    BitmapData testData = testBmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
 
-                    bool result = Util.CompareImages(data, testData);
-
-                    testBmp.UnlockBits(testData);
                     bmp.UnlockBits(data);
 
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test003CFgnd.png"));
+#endif
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc foreground: \ttest003C.png, ");
                     Assert.True(result);
                 }
-            }
 
+                DjvuMarshal.FreeHGlobal(buffer);
+            }
         }
+
+        [Fact, Trait("Category", "DjvuLibre")]
+        public void RenderPage_RenderMode003Mask()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(3)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                Assert.Equal<int>(101, pageCount);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+
+                DjvuRectangle targetRect = new DjvuRectangle
+                {
+                    Width = (uint)page.Width,
+                    Height = (uint)page.Height
+                };
+
+                DjvuRectangle pageRect = new DjvuRectangle
+                {
+                    Width = targetRect.Width,
+                    Height = targetRect.Height
+                };
+
+                IntPtr format = NativeMethods.CreateDjvuFormat(FormatStyle.BGR24, 0, IntPtr.Zero);
+                NativeMethods.SetDjvuFormatRowOrder(format, 1);
+                NativeMethods.SetDjvuFormatYDirection(format, 1);
+                NativeMethods.SetDjvuFormatDitherBits(format, 24);
+
+                IntPtr buffer = page.RenderPage(RenderMode.MaskOnly, ref pageRect, ref targetRect, format);
+
+                using (Bitmap bmp = new Bitmap(page.Width, page.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test003CMask.png")))
+                {
+                    PixelFormat pf = testBmp.PixelFormat;
+                    Assert.Equal<PixelFormat>(PixelFormat.Format24bppRgb, pf);
+
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    for (int i = 0; i < targetRect.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
+
+                    bmp.UnlockBits(data);
+
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test003CMask.png"));
+#endif
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc mask: \t\ttest003C.png, ");
+                    Assert.True(result);
+                }
+                DjvuMarshal.FreeHGlobal(buffer);
+            }
+        }
+
+        [Fact, Trait("Category", "DjvuLibre")]
+        public void RenderPage_RenderMode074Foreground()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(74)))
+            {
+                Assert.NotNull(document);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+
+                DjvuRectangle targetRect = new DjvuRectangle
+                {
+                    Width = (uint)page.Width,
+                    Height = (uint)page.Height
+                };
+
+                DjvuRectangle pageRect = new DjvuRectangle
+                {
+                    Width = targetRect.Width,
+                    Height = targetRect.Height
+                };
+
+                IntPtr buffer = page.RenderPage(RenderMode.Foreground, ref pageRect, ref targetRect);
+
+                using (Bitmap bmp = new Bitmap((int)targetRect.Width, (int)targetRect.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test074CFgnd.png")))
+                {
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
+
+                    bmp.UnlockBits(data);
+
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test074CFgnd.png"));
+#endif
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc foreground: \ttest074C.png, ");
+                    Assert.True(result);
+                }
+                DjvuMarshal.FreeHGlobal(buffer);
+            }
+        }
+
+        [Fact, Trait("Category", "DjvuLibre")]
+        public void RenderPage_RenderMode074Background()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(74)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                //Assert.Equal<int>(101, pageCount);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+
+                DjvuRectangle targetRect = new DjvuRectangle
+                {
+                    Width = (uint)page.Width,
+                    Height = (uint)page.Height
+                };
+
+                DjvuRectangle pageRect = new DjvuRectangle
+                {
+                    Width = targetRect.Width,
+                    Height = targetRect.Height
+                };
+
+                IntPtr buffer = page.RenderPage(RenderMode.Background);
+
+                using (Bitmap bmp = new Bitmap((int)targetRect.Width, (int)targetRect.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test074CBgnd.png")))
+                {
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
+
+                    bmp.UnlockBits(data);
+
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test074CBgnd.png"));
+#endif
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc background: \ttest074C.png, ");
+                    Assert.True(result);
+                }
+                DjvuMarshal.FreeHGlobal(buffer);
+            }
+        }
+
+        [Fact, Trait("Category", "DjvuLibre")]
+        public void RenderPage_RenderMode074Mask()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(74)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                //Assert.Equal<int>(101, pageCount);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+
+                DjvuRectangle targetRect = new DjvuRectangle
+                {
+                    Width = (uint)page.Width,
+                    Height = (uint)page.Height
+                };
+
+                DjvuRectangle pageRect = new DjvuRectangle
+                {
+                    Width = targetRect.Width,
+                    Height = targetRect.Height
+                };
+
+                IntPtr buffer = page.RenderPage(RenderMode.MaskOnly);
+
+                using (Bitmap bmp = new Bitmap((int)targetRect.Width, (int)targetRect.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test074CMask.png")))
+                {
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
+
+                    bmp.UnlockBits(data);
+
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test074CMask.png"));
+#endif
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc mask: \t\ttest074C.png, ");
+                    Assert.True(result);
+                }
+                DjvuMarshal.FreeHGlobal(buffer);
+            }
+        }
+
+        [Fact, Trait("Category", "DjvuLibre")]
+        public void RenderPage_RenderMode074Image()
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(74)))
+            {
+                Assert.NotNull(document);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+
+                DjvuRectangle targetRect = new DjvuRectangle
+                {
+                    Width = (uint)page.Width,
+                    Height = (uint)page.Height
+                };
+
+                DjvuRectangle pageRect = new DjvuRectangle
+                {
+                    Width = targetRect.Width,
+                    Height = targetRect.Height
+                };
+
+                IntPtr buffer = page.RenderPage(RenderMode.Color, ref pageRect, ref targetRect);
+
+                using (Bitmap bmp = new Bitmap((int)targetRect.Width, (int)targetRect.Height, PixelFormat.Format24bppRgb))
+                using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test074C.png")))
+                {
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
+
+                    bmp.UnlockBits(data);
+
+#if DUMP_IMAGES
+                    bmp.Save(Path.Combine(Util.RepoRoot, "artifacts", "refdumps", "test074CImg.png"));
+#endif
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc image: \ttest074C.png, ");
+                    Assert.True(result);
+                }
+                DjvuMarshal.FreeHGlobal(buffer);
+            }
+        }
+
+        public static IEnumerable<object[]> SourceDocs
+        {
+            get
+            {
+                List<object[]> retVal = new List<object[]>();
+
+                for (int i = 1; i <= 77; i++)
+                {
+                    /// DjvuView does not use foreground/mask images for the following docs
+                    if (i == 35 || i == 42 || i == 43 || i == 44 || i == 47 || i == 55 || i == 60 || i == 63 || i == 66 || i == 67 || i == 71)
+                    {
+                        continue;
+                    }
+                    retVal.Add(new object[] { i });
+                }
+                return retVal;
+            }
+        }
+
+        [Theory(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [MemberData(nameof(SourceDocs))]
+        public void RenderPageTheory_RenderModeMask(int docNumber)
+        {
+            using (DjvuDocumentInfo document =
+                    DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(docNumber)))
+            {
+                Assert.NotNull(document);
+
+                int pageCount = document.PageCount;
+                //Assert.Equal<int>(101, pageCount);
+
+                DjvuPageInfo page = new DjvuPageInfo(document, 0);
+
+                DjvuRectangle targetRect = new DjvuRectangle
+                {
+                    Width = (uint)page.Width,
+                    Height = (uint)page.Height
+                };
+
+                DjvuRectangle pageRect = new DjvuRectangle
+                {
+                    Width = targetRect.Width,
+                    Height = targetRect.Height
+                };
+
+                IntPtr buffer = page.RenderPage(RenderMode.Foreground);
+
+                using (Bitmap bmp = new Bitmap((int)targetRect.Width, (int)targetRect.Height, PixelFormat.Format24bppRgb))
+                //using (Bitmap testBmp = new Bitmap(Path.Combine(Util.RepoRoot, "artifacts", "data", "test074CMask.png")))
+                {
+                    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+
+                    BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadWrite, PixelFormat.Format24bppRgb);
+
+                    for (int i = 0; i < bmp.Height; i++)
+                    {
+                        IntPtr dst = data.Scan0 + (i * data.Stride);
+                        IntPtr src = buffer + (i * bmp.Width * 3);
+                        CopyMemory(dst, src, (uint)(bmp.Width * 3));
+                    }
+
+                    bmp.UnlockBits(data);
+
+                    //#if DUMP_IMAGES
+                    string pathToDump = Path.Combine(Util.RepoRoot, "artifacts", "refdumps", $"test{docNumber:00#}CFgnd_dump.png");
+                    if (File.Exists(pathToDump))
+                    {
+                        File.Delete(pathToDump);
+                    }
+                    bmp.Save(pathToDump);
+                    //#endif
+
+                    //bool result = Util.CompareImagesForBinarySimilarity(testBmp, bmp, 0.0100, true, $"Testing libdjvulibre doc mask: \t\ttest074C.png, ");
+                    //Assert.True(result);
+                }
+                DjvuMarshal.FreeHGlobal(buffer);
+            }
+        }
+
     }
 }
