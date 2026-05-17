@@ -645,8 +645,17 @@ if defined __BuildLibDjvuLibre (
     if defined __GlobalVcpkgRoot set "__VcpkgRootArg=/p:VcpkgRoot=!__GlobalVcpkgRoot!"
     set "__VcpkgManifestArg=/p:VcpkgManifestDir=%__RepoRootDir%%__DjvuLibreDir%"
 
-    echo %__MsgPrefix%Calling: msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /p:VcpkgEnableManifest=true !__VcpkgManifestArg! !__VcpkgRootArg! /t:%_MSB_Target% /v:%_Verbosity% /m:%_Processors% /nologo /nr:false !__MsbuildLogging! "%__RepoRootDir%%__DjvuLibreDir%\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
-    call msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /p:VcpkgEnableManifest=true !__VcpkgManifestArg! !__VcpkgRootArg! /t:%_MSB_Target% /v:%_Verbosity% /m:%_Processors% /nologo /nr:false !__MsbuildLogging! "%__RepoRootDir%%__DjvuLibreDir%\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
+    set "__PlatformToolsetArg="
+    if defined VisualStudioVersion (
+        if "!VisualStudioVersion:~0,3!"=="17." (
+            echo %__MsgPrefix%WARNING: Falling back to Visual Studio 2022 ^(v143^) toolset. This is an unsupported build configuration.
+            set "__PlatformToolsetArg=/p:PlatformToolset=v143"
+        )
+        if "!VisualStudioVersion:~0,3!"=="18." set "__PlatformToolsetArg=/p:PlatformToolset=v145"
+    )
+
+    echo %__MsgPrefix%Calling: msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /p:VcpkgEnableManifest=true !__VcpkgManifestArg! !__VcpkgRootArg! !__PlatformToolsetArg! /t:%_MSB_Target% /v:%_Verbosity% /m:%_Processors% /nologo /nr:false !__MsbuildLogging! "%__RepoRootDir%%__DjvuLibreDir%\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
+    call msbuild /p:Configuration=%_MSB_Configuration% /p:Platform=%_MSB_Platform% /p:TargetFramework=%__Framework% /p:VcpkgEnableManifest=true !__VcpkgManifestArg! !__VcpkgRootArg! !__PlatformToolsetArg! /t:%_MSB_Target% /v:%_Verbosity% /m:%_Processors% /nologo /nr:false !__MsbuildLogging! "%__RepoRootDir%%__DjvuLibreDir%\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj"
 
     if not [!ERRORLEVEL!]==[0] (
         echo %__MsgPrefix%Error: native libdjvulibre library build failed. Refer to the build log files for details:

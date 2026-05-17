@@ -68,6 +68,7 @@
   <PropertyGroup>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <RuntimeIdentifiers>linux-x64;osx-x64;win-x64;linux-arm64;osx-arm64;win-arm64</RuntimeIdentifiers>
   </PropertyGroup>
 
 
