@@ -203,11 +203,15 @@ goto usage
 :end_check_verbosity
 
 REM Accepted OS values
-if /i [%_TargetOS%] == [Windows] goto :end_check_os
-if /i [%_TargetOS%] == [Linux] goto :end_check_os
-if /i [%_TargetOS%] == [OSX] goto :end_check_os
+if /i [!_TargetOS!] == [Windows] goto :end_check_os
+if /i [!_TargetOS!] == [Linux] goto :end_check_os
+if /i [!_TargetOS!] == [OSX] goto :end_check_os
+if /i [!_TargetOS!] == [macOS] (
+    set "_TargetOS=OSX"
+    goto :end_check_os
+)
 
-echo Invalid command line parameter value -OS: %_TargetOS%
+echo Invalid command line parameter value -OS: !_TargetOS!
 goto usage
 
 :end_check_os

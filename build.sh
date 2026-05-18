@@ -1315,6 +1315,7 @@ if [ -z "$_SkipNative" ]; then
         __VcpkgOS=$(echo "$_OS" | tr '[:upper:]' '[:lower:]')
         if [ "$__VcpkgOS" == "windows_nt" ]; then __VcpkgOS="windows"; fi
         if [ "$__VcpkgOS" == "osx" ]; then __VcpkgOS="osx"; fi
+        if [ "$__VcpkgOS" == "macos" ]; then __VcpkgOS="osx"; fi
         __VcpkgTriplet="${_MSB_Platform}-${__VcpkgOS}"
 
         echo "BUILD: Building native libdjvulibre via Autotools ($__VcpkgTriplet)"
@@ -1395,6 +1396,21 @@ if [ -z "$_SkipNative" ]; then
             cd "$__ProjectRoot" || exit 1
         fi
 
+        _NativeFailed=0
+        for cmd in "${__FailedCommands[@]}"; do
+            case "$cmd" in
+                vcpkg_bootstrap|vcpkg_install|djvulibre_clean|djvulibre_autogen|djvulibre_configure|djvulibre_make)
+                    _NativeFailed=1
+                    ;;
+            esac
+        done
+
+        if [ "$_NativeFailed" == "1" ]; then
+            __FailedBuilds+=("libdjvulibre")
+        else
+            __SuccessfulBuilds+=("libdjvulibre")
+        fi
+
         if [ ${#__FailedCommands[@]} -gt 0 ] || [ ${#__FailedClones[@]} -gt 0 ]; then
             _SkipNative=1
         fi
@@ -1407,13 +1423,21 @@ if [ -n "$_BuildDjvuNet" ]; then
     restore_dotnet_proj "$__LibGit2SharpProj" "LibGit2Sharp.csproj"
     restore_dotnet_proj "$__DjvuNetGitTasksProj" "DjvuNet.Build.Tasks.csproj"
     restore_dotnet_proj "$__DjvuNetProj" "DjvuNet.csproj"
-    if [ -z "$_SkipNative" ]; then restore_dotnet_proj "$__DjvuNetDjvuLibreProj" "DjvuNet.DjvuLibre.csproj"; fi
+    if [ -z "$_SkipNative" ]; then
+        restore_dotnet_proj "$__DjvuNetDjvuLibreProj" "DjvuNet.DjvuLibre.csproj"
+    elif [ "$_NativeFailed" == "1" ]; then
+        __FailedRestores+=("DjvuNet.DjvuLibre.csproj")
+    fi
 
     build_dotnet_proj "$__SystemAttrProj" "System.Attributes.csproj"
     build_dotnet_proj "$__LibGit2SharpProj" "LibGit2Sharp.csproj"
     build_dotnet_proj "$__DjvuNetGitTasksProj" "DjvuNet.Build.Tasks.csproj"
     build_dotnet_proj "$__DjvuNetProj" "DjvuNet.csproj"
-    if [ -z "$_SkipNative" ]; then build_dotnet_proj "$__DjvuNetDjvuLibreProj" "DjvuNet.DjvuLibre.csproj"; fi
+    if [ -z "$_SkipNative" ]; then
+        build_dotnet_proj "$__DjvuNetDjvuLibreProj" "DjvuNet.DjvuLibre.csproj"
+    elif [ "$_NativeFailed" == "1" ]; then
+        __FailedBuilds+=("DjvuNet.DjvuLibre.csproj")
+    fi
 fi
 
 if [ -n "$_BuildTests" ]; then
@@ -1439,12 +1463,20 @@ if [ -n "$_BuildTests" ]; then
     restore_dotnet_proj "$__DjvuNetTestsProj" "DjvuNet.Tests.csproj"
     restore_dotnet_proj "$__DjvuNetWaveletTestsProj" "DjvuNet.Wavelet.Tests.csproj"
     restore_dotnet_proj "$__DjvuNetTestExeProj" "DjvuNetTest.csproj"
-    if [ -z "$_SkipNative" ]; then restore_dotnet_proj "$__DjvuNetDjvuLibreTestsProj" "DjvuNet.DjvuLibre.Tests.csproj"; fi
+    if [ -z "$_SkipNative" ]; then
+        restore_dotnet_proj "$__DjvuNetDjvuLibreTestsProj" "DjvuNet.DjvuLibre.Tests.csproj"
+    elif [ "$_NativeFailed" == "1" ]; then
+        __FailedRestores+=("DjvuNet.DjvuLibre.Tests.csproj")
+    fi
 
     build_dotnet_proj "$__DjvuNetTestsProj" "DjvuNet.Tests.csproj"
     build_dotnet_proj "$__DjvuNetWaveletTestsProj" "DjvuNet.Wavelet.Tests.csproj"
     build_dotnet_proj "$__DjvuNetTestExeProj" "DjvuNetTest.csproj"
-    if [ -z "$_SkipNative" ]; then build_dotnet_proj "$__DjvuNetDjvuLibreTestsProj" "DjvuNet.DjvuLibre.Tests.csproj"; fi
+    if [ -z "$_SkipNative" ]; then
+        build_dotnet_proj "$__DjvuNetDjvuLibreTestsProj" "DjvuNet.DjvuLibre.Tests.csproj"
+    elif [ "$_NativeFailed" == "1" ]; then
+        __FailedBuilds+=("DjvuNet.DjvuLibre.Tests.csproj")
+    fi
 fi
 
 print_build_summary() {
