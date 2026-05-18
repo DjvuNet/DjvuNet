@@ -15,25 +15,17 @@ jobs:
       matrix:
         include:
           # Windows
-          # Specs: https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-VS2026-Readme.md
-          - os: windows-2025-vs2026
-            platform: x64
           # Specs: https://github.com/actions/runner-images/blob/main/images/windows/Windows11-Arm64-Readme.md
           - os: windows-11-arm
             platform: arm64
 
           # Linux
           # Specs: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
-          - os: ubuntu-latest
-            platform: x64
           - os: ubuntu-24.04-arm
             platform: arm64
 
           # macOS
-          # Specs: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md
-          #        https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
-          - os: macos-26-intel
-            platform: x64
+          # Specs: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
           - os: macos-latest  # Automatically points to Apple Silicon (arm64)
             platform: arm64
 
@@ -59,22 +51,35 @@ jobs:
         # cmake, jq, ninja, apple-clang, pkg-config are pre-installed
         brew install autoconf automake libtool mono-libgdiplus
 
+    - name: Enable ARM64 Diagnostics
+      if: matrix.platform == 'arm64'
+      shell: bash
+      run: |
+        echo "MSBUILDDEBUGENGINE=1" >> $GITHUB_ENV
+        echo "MSBUILDDEBUGPATH=${{ github.workspace }}/MSBuildLogs" >> $GITHUB_ENV
+        echo "DOTNET_HOST_TRACE=1" >> $GITHUB_ENV
+        echo "DOTNET_HOST_TRACEFILE=${{ github.workspace }}/host_trace.txt" >> $GITHUB_ENV
+        echo "DOTNET_HOST_TRACE_VERBOSITY=4" >> $GITHUB_ENV
+
     - name: Run Build (Windows)
       if: runner.os == 'Windows'
       shell: cmd
       run: |
-        build.cmd -p ${{ matrix.platform }} -c Release -f net10.0 -Test -OS ${{ runner.os }}
+        build.cmd -p ${{ matrix.platform }} -c Release -f net10.0 -t Build -OS ${{ runner.os }} -sn
 
     - name: Run Build (Linux/macOS)
       if: runner.os != 'Windows'
       shell: bash
       run: |
-        ./build.sh -p ${{ matrix.platform }} -c Release -f net10.0 -Test -OS ${{ runner.os }}
+        ./build.sh -p ${{ matrix.platform }} -c Release -f net10.0 -t Build -OS ${{ runner.os }} -sn
 
     - name: Upload Diagnostic Logs
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: failure()
       with:
         name: msbuild-logs-${{ matrix.os }}-${{ matrix.platform }}
-        path: build/bin/**/logs/
+        path: |
+          build/bin/**/logs/
+          MSBuildLogs/
+          host_trace.txt
         retention-days: 2
