@@ -16,15 +16,15 @@ jobs:
         include:
           # Windows
           # Specs: https://github.com/actions/runner-images/blob/main/images/windows/Windows2022-Readme.md
-          #- os: windows-latest
-          #  platform: x64
+          - os: windows-latest
+            platform: x64
           - os: windows-11-arm
             platform: arm64
             
           # Linux
           # Specs: https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
-          #- os: ubuntu-latest
-          #  platform: x64
+          - os: ubuntu-latest
+            platform: x64
           - os: ubuntu-24.04-arm
             platform: arm64
             
@@ -73,4 +73,4 @@ jobs:
       with:
         name: msbuild-logs-${{ matrix.os }}-${{ matrix.platform }}
         path: build/bin/**/logs/
-        retention-days: 5
+        retention-days: 2
