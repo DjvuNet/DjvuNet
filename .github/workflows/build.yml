@@ -29,7 +29,10 @@ jobs:
             platform: arm64
             
           # macOS
-          # Specs: https://github.com/actions/runner-images/blob/main/images/macos/macos-14-Readme.md
+          # Specs: https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md
+          #        https://github.com/actions/runner-images/blob/main/images/macos/macos-26-arm64-Readme.md
+          - os: macos-26-intel
+            platform: x64
           - os: macos-latest  # Automatically points to Apple Silicon (arm64)
             platform: arm64
 
