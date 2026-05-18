@@ -70,6 +70,7 @@ if !_Processors! EQU 0 set "_Processors=%NUMBER_OF_PROCESSORS%"
 set "_TargetOS=Windows"
 set "_SkipNative="
 set "_BuildDjvuNet=1"
+set "_BuildTools="
 set "_BuildTests="
 set "_RunTests="
 set "_Test="
@@ -110,6 +111,8 @@ if /i "%~1"=="-Target"              (set "_MSB_Target=%2"&shift&shift&goto :pars
 if /i "%~1"=="-t"                   (set "_MSB_Target=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-BuildDjvuNet"        (set "_BuildDjvuNet=1"&shift&goto :parse)
 if /i "%~1"=="-DjvuNet"             (set "_BuildDjvuNet=1"&shift&goto :parse)
+if /i "%~1"=="-Tools"               (set "_BuildTools=1"&shift&goto :parse)
+if /i "%~1"=="-ts"                  (set "_BuildTools=1"&shift&goto :parse)
 if /i "%~1"=="-BuildTests"          (set "_BuildTests=1"&shift&goto :parse)
 if /i "%~1"=="-bt"                  (set "_BuildTests=1"&shift&goto :parse)
 if /i "%~1"=="-RunTests"            (set "_RunTests=1"&shift&goto :parse)
@@ -313,7 +316,7 @@ if not exist ".\deps\" (
 REM Download and initialize our own .NETCore SDK
 
 set "__GlobalJson=%__RepoRootDir%global.json"
-set "__TmpPsScript=%__RootBuildDir%GetLatestSdk_%RANDOM%.ps1"
+set "__TmpPsScript=%TEMP%\GetLatestSdk_%RANDOM%.ps1"
 if not exist "%__RootBuildDir%" mkdir "%__RootBuildDir%"
 
 (
@@ -567,22 +570,24 @@ set "__DjvuNetGitTasksProj=eng/tools/DjvuNet.Build.Tasks/DjvuNet.Build.Tasks.csp
 set "__DjvuNetProj=DjvuNet/DjvuNet.csproj"
 set "__DjvuNetDjvuLibreProj=DjvuNet.DjvuLibre/DjvuNet.DjvuLibre.csproj"
 
-if not exist "!__RepoRootDir!!__LibGit2SharpProj!" (
-    echo !__MsgPrefix!Setting up libgit2sharp
-    set "__Lg2sArchiveUrl=!__LibGit2SharpRepoUri!/archive/refs/tags/!__ArtifactsReleaseTag!.tar.gz"
-    echo !__MsgPrefix!Downloading release archive of libgit2sharp for tag !__ArtifactsReleaseTag!
-    call :download_retry "!__Lg2sArchiveUrl!" "libgit2sharp.tar.gz"
-    if !ERRORLEVEL! EQU 0 (
-        echo !__MsgPrefix!Extracting libgit2sharp archive
-        if not exist "!__RepoRootDir!eng\tools\libgit2sharp" mkdir "!__RepoRootDir!eng\tools\libgit2sharp"
-        tar.exe -xzf libgit2sharp.tar.gz -C "!__RepoRootDir!eng\tools\libgit2sharp" --strip-components=1
-        del /f /q libgit2sharp.tar.gz
-    ) else (
-        echo !__MsgPrefix!Download failed, falling back to git clone
-        call :git_clone_retry ^
-            "!__LibGit2SharpRepoUri!.git" ^
-            "eng\tools\libgit2sharp" ^
-            "--depth 1 -c core.autocrlf=false"
+if defined _BuildTools (
+    if not exist "!__RepoRootDir!!__LibGit2SharpProj!" (
+        echo !__MsgPrefix!Setting up libgit2sharp
+        REM set "__Lg2sArchiveUrl=!__LibGit2SharpRepoUri!/archive/refs/tags/!__ArtifactsReleaseTag!.tar.gz"
+        REM echo !__MsgPrefix!Downloading release archive of libgit2sharp for tag !__ArtifactsReleaseTag!
+        REM call :download_retry "!__Lg2sArchiveUrl!" "libgit2sharp.tar.gz"
+        REM if !ERRORLEVEL! EQU 0 (
+        REM     echo !__MsgPrefix!Extracting libgit2sharp archive
+        REM     if not exist "!__RepoRootDir!eng\tools\libgit2sharp" mkdir "!__RepoRootDir!eng\tools\libgit2sharp"
+        REM     tar.exe -xzf libgit2sharp.tar.gz -C "!__RepoRootDir!eng\tools\libgit2sharp" --strip-components=1
+        REM     del /f /q libgit2sharp.tar.gz
+        REM ) else (
+            echo !__MsgPrefix!Download failed, falling back to git clone
+            call :git_clone_retry ^
+                "!__LibGit2SharpRepoUri!.git" ^
+                "eng\tools\libgit2sharp" ^
+                "--depth 1 -c core.autocrlf=false"
+        REM )
     )
 )
 
@@ -594,6 +599,8 @@ if not exist "!__LogsDir!" md "!__LogsDir!"
 echo %__MsgPrefix%__OutputDir [!__OutputDir!]
 echo %__MsgPrefix%__PublishDir [!__PublishDir!]
 echo %__MsgPrefix%__LogsDir [!__LogsDir!]
+
+call :get_time __BuildStartTime
 
 if /i "%_MSB_Target%" == "Clean" goto :end_dotnet_restore
 if not defined _BuildDjvuNet goto :skip_djvulibre_build
@@ -607,8 +614,12 @@ set "__BuildCommandArgs=-p:Configuration=!_MSB_Configuration! -p:Platform=!__Man
 set "__RestoreCmdArgs=!__BuildCommandArgs!"
 
 call :restore_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
-call :restore_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp.csproj
-call :restore_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks.csproj
+
+if defined _BuildTools (
+    call :restore_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp.csproj
+    call :restore_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks.csproj
+)
+
 call :restore_dotnet_proj !__DjvuNetProj! DjvuNet.csproj
 
 :end_dotnet_restore
@@ -692,8 +703,32 @@ set "__LogsDir=!__RootBuildDir!!_TargetOS!.!_MSB_Platform!.!_MSB_Configuration!/
 if not exist "!__LogsDir!" md "!__LogsDir!"
 
 call :build_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
-call :build_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp.csproj
-call :build_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks.csproj
+
+if defined _BuildTools (
+    call :build_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp.csproj
+    call :build_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks.csproj
+
+    REM Only package tools if DjvuNet.Build.Tasks.csproj succeeded both Build and Publish phases
+    if defined __SuccessfulBuilds (
+        if defined __SuccessfulPublishes (
+            if not "!__SuccessfulBuilds:DjvuNet.Build.Tasks.csproj=!"=="!__SuccessfulBuilds!" (
+                if not "!__SuccessfulPublishes:DjvuNet.Build.Tasks.csproj=!"=="!__SuccessfulPublishes!" (
+                    set "__TmpPackageScript=!TEMP!\Package_!RANDOM!.ps1"
+                    (
+                        echo $ErrorActionPreference = 'Stop'
+                        echo ^& '!__RepoRootDir!eng\scripts\PackageTools.ps1' -RepoRoot '!__RepoRootDir!'
+                        echo exit $LASTEXITCODE
+                    ) > "!__TmpPackageScript!"
+                    
+                    call :run_custom_command "!__PSCmd! -NoProfile -ExecutionPolicy Bypass -File !__TmpPackageScript!" "PackageTools.ps1"
+                    
+                    if exist "!__TmpPackageScript!" del "!__TmpPackageScript!"
+                )
+            )
+        )
+    )
+)
+
 call :build_dotnet_proj !__DjvuNetProj! DjvuNet.csproj
 
 if defined _SkipNative (
@@ -706,7 +741,7 @@ if defined _SkipNative (
 
 echo %__MsgPrefix%Restoring DjvuNet.DjvuLibre project:
 call :restore_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
-echo
+echo.
 echo %__MsgPrefix%Building DjvuNet.DjvuLibre project:
 call :build_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
 
@@ -717,6 +752,10 @@ if not defined _Test (
         if defined _RunTests (
             echo %__MsgPrefix%Preparing to run tests on %_DefaultNetCoreApp%
         ) else (
+            if not "!__FailedCommands!" == "" goto exit_error
+            if not "!__FailedRestores!" == "" goto exit_error
+            if not "!__FailedBuilds!" == "" goto exit_error
+            if not "!__FailedPublishes!" == "" goto exit_error
             goto exit_success
         )
     ) else (
@@ -807,11 +846,14 @@ REM Prepare for running tests
 
 :run_tests
 call :print_build_summary
+
 echo.
 echo %__MsgPrefix%======================================================================
 echo %__MsgPrefix%                           STARTING TESTS
 echo %__MsgPrefix%======================================================================
 echo.
+
+call :get_time __TestPhaseStartTime
 
 set "_DjvuNet_Tests=%__TestOutputDir%DjvuNet.Tests.exe"
 set "_DjvuNet_DjvuLibre_Tests=%__TestOutputDir%DjvuNet.DjvuLibre.Tests.exe"
@@ -865,6 +907,9 @@ call :run_dotnet_test "!_DjvuNet_DjvuLibre_Tests!" "DjvuNet.DjvuLibre.Tests"
 
 call :run_dotnet_test "!_DjvuNet_Wavelet_Tests!" "DjvuNet.Wavelet.Tests"
 
+call :get_time __TestPhaseEndTime
+call :calc_duration !__TestPhaseStartTime! !__TestPhaseEndTime! __TestPhaseDuration
+
 if not "!__FailedBuilds!" == "" goto test_error
 if not "!__FailedTests!" == "" goto test_error
 goto test_success
@@ -890,6 +935,11 @@ call :print_full_summary
 exit /b 1
 
 :print_build_summary
+REM Capture build end time only once, exactly when the first report is printed
+if not defined __BuildEndTime (
+    call :get_time __BuildEndTime
+    call :calc_duration !__BuildStartTime! !__BuildEndTime! __BuildDuration
+)
 echo.
 echo %__MsgPrefix%======================================================================
 echo %__MsgPrefix%                           BUILD SUMMARY
@@ -946,6 +996,35 @@ if not "!__FailedTests!" == "" (
     echo %__MsgPrefix%Failed tests:
     for %%A in (!__FailedTests!) do echo %__MsgPrefix%  - %%A
 )
+echo.
+echo %__MsgPrefix%======================================================================
+echo %__MsgPrefix%                           TIMING SUMMARY
+echo %__MsgPrefix%======================================================================
+set "bp=Build Phase:                                     "
+set "bp=!bp:~0,41!"
+set "bdur=         !__BuildDuration!"
+set "bdur=!bdur:~-9!"
+echo %__MsgPrefix%!bp!!bdur!
+if defined __TestPhaseDuration (
+    set "tp=Test Phase:                                      "
+    set "tp=!tp:~0,41!"
+    set "tdur=         !__TestPhaseDuration!"
+    set "tdur=!tdur:~-9!"
+    echo %__MsgPrefix%!tp!!tdur!
+)
+if not "!__TestTimings!" == "" (
+    echo %__MsgPrefix%Individual Tests:
+    for %%T in (!__TestTimings!) do (
+        for /f "tokens=1,2,3,4 delims=|" %%A in ("%%T") do (
+            set "tname=  - %%A                                        "
+            set "tname=!tname:~0,41!"
+            set "tdur=         %%B"
+            set "tdur=!tdur:~-9!"
+            echo %__MsgPrefix%!tname!!tdur!
+        )
+    )
+)
+echo %__MsgPrefix%======================================================================
 echo.
 goto :eof
 
@@ -1062,8 +1141,35 @@ if not exist "!__DjvuTargetTestExe!" (
 ) else (
     echo %__MsgPrefix%Running tests from !__DjvuTargetTestName! assembly
     echo %__MsgPrefix%calling: "!__DjvuTargetTestExe!" !_Test_Options! "-!__TestOutputFormat!" "!__TestResOutputDir!!__DjvuTargetTestName!.!__TestOutputFormat!"
+    call :get_time __TestAsmStart
     call "!__DjvuTargetTestExe!" !_Test_Options! "-!__TestOutputFormat!" "!__TestResOutputDir!!__DjvuTargetTestName!.!__TestOutputFormat!"
-    if not [!ERRORLEVEL!]==[0] (
+    set "__TestErr=!ERRORLEVEL!"
+    call :get_time __TestAsmEnd
+
+    set "__ExtractedDuration="
+    if /i "!__TestOutputFormat!"=="xml" (
+        set "__TmpPsScript=!TEMP!\ExtractTime_!RANDOM!.ps1"
+        (
+            echo $xmlPath = '!__TestResOutputDir!!__DjvuTargetTestName!.!__TestOutputFormat!'
+            echo $xml = Select-Xml -Path $xmlPath -XPath '//assembly'
+            echo Write-Output $xml.Node.time
+        ) > "!__TmpPsScript!"
+
+        for /f "usebackq" %%d in (`!__PSCmd! -NoProfile -ExecutionPolicy ByPass -File "!__TmpPsScript!" 2^>nul`) do (
+            set "__ExtractedDuration=%%ds"
+        )
+        if exist "!__TmpPsScript!" del "!__TmpPsScript!"
+    )
+
+    if defined __ExtractedDuration (
+        set "__TestAsmDuration=!__ExtractedDuration!"
+    ) else (
+        call :calc_duration !__TestAsmStart! !__TestAsmEnd! __TestAsmDuration
+    )
+
+    echo %__MsgPrefix%Test assembly !__DjvuTargetTestName! completed in !__TestAsmDuration!
+    set "__TestTimings=!__TestTimings! !__DjvuTargetTestName!|!__TestAsmDuration!|!__TestAsmStart!|!__TestAsmEnd!"
+    if not [!__TestErr!]==[0] (
         set "__FailedTests=!__FailedTests! !__DjvuTargetTestName!"
         if defined _FastFail goto exit_error
     ) else (
@@ -1088,6 +1194,10 @@ echo   -f, -Framework ^<tfm^>           Target framework (net10.0, netstandard2.
 echo.
 echo   -DjvuNet, -BuildDjvuNet          Build the core DjvuNet managed projects. Default: True.
 echo.
+echo   -ts, -Tools                      Build the custom DjvuNet build tasks and
+echo                                    package them into cross-platform archives.
+echo                                    Default: False.
+echo.
 echo   -bt, -BuildTests                 Build the test projects. Default: False.
 echo.
 echo   -rt, -RunTests                   Build and run the test projects. Default: False.
@@ -1111,6 +1221,20 @@ echo.
 echo   -h, -?, -help                    Show this usage message.
 echo.
 exit /b 1
+
+:get_time
+set "t=%TIME: =0%"
+set /a "h=1%t:~0,2%-100", "m=1%t:~3,2%-100", "s=1%t:~6,2%-100", "c=1%t:~9,2%-100"
+set /a "%~1=(h*360000)+(m*6000)+(s*100)+c"
+goto :eof
+
+:calc_duration
+set /a "diff=%~2 - %~1"
+if !diff! LSS 0 set /a "diff+=8640000"
+set /a "sec=diff / 100", "cs=diff %% 100"
+if !cs! LSS 10 set "cs=0!cs!"
+set "%~3=!sec!.!cs!0s"
+goto :eof
 
 :run_custom_command
 set "__CommandToRun=%~1"
@@ -1206,3 +1330,4 @@ ping 127.0.0.1 -n !delay! > nul
 set /a "delay=!delay! * 2"
 set /a "attempt=!attempt! + 1"
 goto git_clone_loop
+

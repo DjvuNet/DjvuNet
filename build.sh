@@ -31,6 +31,10 @@ usage()
     echo ""
     echo "  -DjvuNet, -BuildDjvuNet        Build the core DjvuNet managed projects. Default: True."
     echo ""
+    echo "  -ts, -Tools                    Build the custom DjvuNet build tasks and"
+    echo "                                 package them into cross-platform archives."
+    echo "                                 Default: False."
+    echo ""
     echo "  -bt, -BuildTests               Build the test projects. Default: False."
     echo ""
     echo "  -rt, -RunTests                 Build and run the test projects. Default: False."
@@ -876,6 +880,7 @@ _Processors=$__NumProc
 _OS="Linux"
 _SkipNative=""
 _BuildDjvuNet="1"
+_BuildTools=""
 _BuildTests=""
 _RunTests=""
 _Test=""
@@ -918,6 +923,8 @@ while [[ $# -gt 0 ]]; do
         _MSB_Target="$2"; shift 2 ;;
         -BuildDjvuNet|-DjvuNet)
         _BuildDjvuNet=1; shift 1 ;;
+        -Tools|-ts)
+        _BuildTools=1; shift 1 ;;
         -BuildTests|-bt)
         _BuildTests=1; shift 1 ;;
         -RunTests|-rt)
@@ -1054,7 +1061,13 @@ fi
 check_prereqs
 
 __RootBuildDir="${__ProjectRoot}/build/bin/"
-__RuntimeIdentifier="linux-${_MSB_Platform}"
+if [ "$__HostOS" == "osx" ]; then
+    __RuntimeIdentifier="osx-${_MSB_Platform}"
+elif [ "$__HostOS" == "freebsd" ]; then
+    __RuntimeIdentifier="freebsd-${_MSB_Platform}"
+else
+    __RuntimeIdentifier="linux-${_MSB_Platform}"
+fi
 
 __BuildToolsUri="${__GithubDjvuNetReleaseUri}Tools.tar.gz"
 if [ ! -f "Tools.tar.gz" ] || [ ! -d "Tools" ]; then
@@ -1080,19 +1093,21 @@ __DjvuNetGitTasksProj="eng/tools/DjvuNet.Build.Tasks/DjvuNet.Build.Tasks.csproj"
 __DjvuNetProj="DjvuNet/DjvuNet.csproj"
 __DjvuNetDjvuLibreProj="DjvuNet.DjvuLibre/DjvuNet.DjvuLibre.csproj"
 
-if [ ! -f "${__ProjectRoot}/${__LibGit2SharpProj}" ]; then
-    echo "BUILD: Setting up libgit2sharp"
-    __Lg2sArchiveUrl="${__LibGit2SharpRepoUri}/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
-    echo "BUILD: Downloading release archive of libgit2sharp for tag ${__ArtifactsReleaseTag}"
-    download_retry "$__Lg2sArchiveUrl" "libgit2sharp.tar.gz"
-    if [ $? -eq 0 ]; then
-        echo "BUILD: Extracting libgit2sharp archive"
-        mkdir -p "${__ProjectRoot}/eng/tools/libgit2sharp"
-        tar -xzf libgit2sharp.tar.gz -C "${__ProjectRoot}/eng/tools/libgit2sharp" --strip-components=1
-        rm libgit2sharp.tar.gz
-    else
-        echo "BUILD: Download failed, falling back to git clone"
-        git_clone_retry "${__LibGit2SharpRepoUri}.git" "eng/tools/libgit2sharp" "--depth 1 -c core.autocrlf=false"
+if [[ -n "$_BuildTools" ]]; then
+    if [ ! -f "${__ProjectRoot}/${__LibGit2SharpProj}" ]; then
+        echo "BUILD: Setting up libgit2sharp"
+        # __Lg2sArchiveUrl="${__LibGit2SharpRepoUri}/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
+        # echo "BUILD: Downloading release archive of libgit2sharp for tag ${__ArtifactsReleaseTag}"
+        # download_retry "$__Lg2sArchiveUrl" "libgit2sharp.tar.gz"
+        # if [ $? -eq 0 ]; then
+        #     echo "BUILD: Extracting libgit2sharp archive"
+        #     mkdir -p "${__ProjectRoot}/eng/tools/libgit2sharp"
+        #     tar -xzf libgit2sharp.tar.gz -C "${__ProjectRoot}/eng/tools/libgit2sharp" --strip-components=1
+        #     rm libgit2sharp.tar.gz
+        # else
+            echo "BUILD: Download failed, falling back to git clone"
+            git_clone_retry "${__LibGit2SharpRepoUri}.git" "eng/tools/libgit2sharp" "--depth 1 -c core.autocrlf=false"
+        # fi
     fi
 fi
 
@@ -1183,6 +1198,10 @@ build_dotnet_proj() {
 run_dotnet_test() {
     local __DjvuTargetTestExe=$1
     local __DjvuTargetTestName=$2
+
+    if [ "$__HostOS" == "osx" ]; then
+        export DYLD_FALLBACK_LIBRARY_PATH="/opt/homebrew/lib:/usr/local/lib:${DYLD_FALLBACK_LIBRARY_PATH:-}"
+    fi
 
     echo ""
     if [ ! -f "$__DjvuTargetTestExe" ]; then
@@ -1420,8 +1439,12 @@ fi
 if [ -n "$_BuildDjvuNet" ]; then
     # Build core projects
     restore_dotnet_proj "$__SystemAttrProj" "System.Attributes.csproj"
-    restore_dotnet_proj "$__LibGit2SharpProj" "LibGit2Sharp.csproj"
-    restore_dotnet_proj "$__DjvuNetGitTasksProj" "DjvuNet.Build.Tasks.csproj"
+    
+    if [[ -n "$_BuildTools" ]]; then
+        restore_dotnet_proj "$__LibGit2SharpProj" "LibGit2Sharp.csproj"
+        restore_dotnet_proj "$__DjvuNetGitTasksProj" "DjvuNet.Build.Tasks.csproj"
+    fi
+    
     restore_dotnet_proj "$__DjvuNetProj" "DjvuNet.csproj"
     if [ -z "$_SkipNative" ]; then
         restore_dotnet_proj "$__DjvuNetDjvuLibreProj" "DjvuNet.DjvuLibre.csproj"
@@ -1430,8 +1453,26 @@ if [ -n "$_BuildDjvuNet" ]; then
     fi
 
     build_dotnet_proj "$__SystemAttrProj" "System.Attributes.csproj"
-    build_dotnet_proj "$__LibGit2SharpProj" "LibGit2Sharp.csproj"
-    build_dotnet_proj "$__DjvuNetGitTasksProj" "DjvuNet.Build.Tasks.csproj"
+    
+    if [[ -n "$_BuildTools" ]]; then
+        build_dotnet_proj "$__LibGit2SharpProj" "LibGit2Sharp.csproj"
+        build_dotnet_proj "$__DjvuNetGitTasksProj" "DjvuNet.Build.Tasks.csproj"
+        
+        # Only package tools if DjvuNet.Build.Tasks.csproj succeeded both Build and Publish phases
+        local __TasksBuildFailed=0
+        for failed in "${__FailedBuilds[@]}"; do
+            if [[ "$failed" == "DjvuNet.Build.Tasks.csproj" ]]; then __TasksBuildFailed=1; fi
+        done
+        local __TasksPublishFailed=0
+        for failed in "${__FailedPublishes[@]}"; do
+            if [[ "$failed" == "DjvuNet.Build.Tasks.csproj" ]]; then __TasksPublishFailed=1; fi
+        done
+
+        if [[ "$__TasksBuildFailed" == "0" && "$__TasksPublishFailed" == "0" ]]; then
+            run_custom_command "PackageTools.ps1" "pwsh" "-NoProfile" "-ExecutionPolicy" "Bypass" "-File" "${__ProjectRoot}/eng/scripts/PackageTools.ps1" "-RepoRoot" "${__ProjectRoot}"
+        fi
+    fi
+    
     build_dotnet_proj "$__DjvuNetProj" "DjvuNet.csproj"
     if [ -z "$_SkipNative" ]; then
         build_dotnet_proj "$__DjvuNetDjvuLibreProj" "DjvuNet.DjvuLibre.csproj"

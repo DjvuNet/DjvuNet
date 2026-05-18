@@ -34,8 +34,7 @@ eng/tools/DjvuNet.Artifacts.Build/
 eng/tools/DjvuNet.Build.Tasks.Tests/
 eng/tools/libgit2sharp/
 
-# Ignore scripts
-eng/scripts/
+
 
 
 # Test related content

@@ -1,8 +1,15 @@
 ﻿<Project>
 
   <PropertyGroup>
-    <CalculatedPlatform Condition="$(PlatformTarget) == 'AnyCPU' And $(CalculatedPlatform) == ''">x64</CalculatedPlatform>
-    <CalculatedPlatform Condition="$(CalculatedPlatform) == ''">$(PlatformTarget)</CalculatedPlatform>
+    <!-- Prefer native architecture defined by RuntimeIdentifier (e.g., win-arm64 -> arm64) -->
+    <CalculatedPlatform Condition="'$(CalculatedPlatform)' == '' And '$(RuntimeIdentifier)' != '' And $(RuntimeIdentifier.EndsWith('arm64'))">arm64</CalculatedPlatform>
+    <CalculatedPlatform Condition="'$(CalculatedPlatform)' == '' And '$(RuntimeIdentifier)' != '' And $(RuntimeIdentifier.EndsWith('x86'))">x86</CalculatedPlatform>
+    <CalculatedPlatform Condition="'$(CalculatedPlatform)' == '' And '$(RuntimeIdentifier)' != '' And $(RuntimeIdentifier.EndsWith('arm'))">arm</CalculatedPlatform>
+    <CalculatedPlatform Condition="'$(CalculatedPlatform)' == '' And '$(RuntimeIdentifier)' != '' And $(RuntimeIdentifier.EndsWith('x64'))">x64</CalculatedPlatform>
+    
+    <!-- Legacy fallback for standard desktop builds -->
+    <CalculatedPlatform Condition="'$(CalculatedPlatform)' == '' And '$(PlatformTarget)' == 'AnyCPU'">x64</CalculatedPlatform>
+    <CalculatedPlatform Condition="'$(CalculatedPlatform)' == ''">$(PlatformTarget)</CalculatedPlatform>
   </PropertyGroup>
 
   <ItemGroup>

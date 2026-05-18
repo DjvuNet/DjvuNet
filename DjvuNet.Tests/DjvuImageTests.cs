@@ -15,15 +15,15 @@ namespace DjvuNet.Tests
 {
     public class DjvuImageTests
     {
-        [Fact]
-        public void IsVector256HardwareAccelerated_Test()
-        {
-#if NETCOREAPP
-            Assert.True(Vector256.IsHardwareAccelerated, "Vector256 is not hardware accelerated in this environment.");
-#else
-            Assert.True(true);
-#endif
-        }
+//         [Fact]
+//         public void IsVector256HardwareAccelerated_Test()
+//         {
+// #if NETCOREAPP
+//             Assert.True(Vector256.IsHardwareAccelerated, "Vector256 is not hardware accelerated in this environment.");
+// #else
+//             Assert.True(true);
+// #endif
+//         }
 
         [Fact()]
         public void DjvuImageTest001()

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="RuntimeIdentifier;Platform;PlatformTarget">
   <!--
       DjvuNetPackaging.props should go always first due to pack target requirements:
       first PropertyGroup in project defines packaging props
@@ -7,6 +7,12 @@
     Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetPackaging.props))\DjvuNetPackaging.props" />
   <Import
     Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
+
+  <PropertyGroup>
+    <RuntimeIdentifier></RuntimeIdentifier>
+    <Platform>AnyCPU</Platform>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
 
   <PropertyGroup>
     <!--
