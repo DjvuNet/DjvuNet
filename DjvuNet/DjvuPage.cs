@@ -33,7 +33,6 @@ namespace DjvuNet
     {
         #region Private Members
 
-        private object _LoadingLock = new object();
         private DjvuImage _DjvuImage;
         private ITH44Chunk _Thumbnail;
         private IDjvuDocument _Document;
