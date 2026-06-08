@@ -11,9 +11,7 @@ namespace DjvuNet.Wavelet
             Init(map);
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public int CodeSlice(IDataCoder coder)
         {
             if (_CurrentBitPlane >= 0)
@@ -44,9 +42,7 @@ namespace DjvuNet.Wavelet
             return 0;
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public void DecodeBuckets(IDataCoder coder, int bit, int band,
             InterWaveBlock blk, int fbucket, int nbucket)
         {
@@ -319,9 +315,7 @@ namespace DjvuNet.Wavelet
         /// <param name="bit"></param>
         /// <param name="band"></param>
         /// <returns></returns>
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public bool IsNullSlice(int bit, int band)
         {
             if (band == 0)

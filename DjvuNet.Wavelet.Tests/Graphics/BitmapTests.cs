@@ -94,9 +94,7 @@ namespace DjvuNet.Graphics.Tests
             return bmp;
         }
 
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public static void WriteBitmap(int width, int height, IBitmap bmp)
         {
             string format = "x4";
@@ -133,9 +131,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public void GetBooleanAtTest001()
         {
             int width = 16;
@@ -240,9 +236,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public void GetByteAtTest001()
         {
             int width = 16;

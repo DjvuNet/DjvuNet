@@ -1,6 +1,7 @@
 using Xunit;
 using DjvuNet.Wavelet;
 using System;
+using DjvuNet.Errors;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,9 +61,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public void DuplicateTest002()
         {
             InterWaveBlock block = new InterWaveBlock();
@@ -97,9 +96,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public void GetBlockTest()
         {
             InterWaveBlock block = new InterWaveBlock();
@@ -110,9 +107,7 @@ namespace DjvuNet.Wavelet.Tests
         }
 
         [Fact()]
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public void GetInitializedBlockTest()
         {
             InterWaveBlock block = new InterWaveBlock();
@@ -121,6 +116,10 @@ namespace DjvuNet.Wavelet.Tests
                 Assert.Equal(0, data[i]);
         }
 
+        /// <summary>
+        /// Verifies that GetValue correctly calculates and retrieves the expected 
+        /// value (1011) from a standard, monotonically initialized PData array.
+        /// </summary>
         [Fact()]
         public void GetValueTest001()
         {
@@ -130,6 +129,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(valueIndex, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that GetValue correctly retrieves data when initialized with a slope multiplier.
+        /// </summary>
         [Fact()]
         public void GetValueTest002()
         {
@@ -140,6 +142,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(valueIndex * slope, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that GetValue correctly retrieves data when initialized with both a slope and a base offset.
+        /// </summary>
         [Fact()]
         public void GetValueTest003()
         {
@@ -151,6 +156,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(valueIndex * slope + baseVal, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that GetValue safely returns 0 when querying a completely uninitialized (null) PData structure.
+        /// </summary>
         [Fact()]
         public void GetValueTest004()
         {
@@ -159,6 +167,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(0, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that SetValue correctly overwrites an existing coordinate with short.MaxValue.
+        /// </summary>
         [Fact()]
         public void SetValueTest001()
         {
@@ -171,6 +182,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(testValue, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that SetValue correctly overwrites an existing sloped coordinate with short.MaxValue.
+        /// </summary>
         [Fact()]
         public void SetValueTest002()
         {
@@ -185,6 +199,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(testValue, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that SetValue correctly overwrites an existing coordinate with short.MinValue.
+        /// </summary>
         [Fact()]
         public void SetValueTest003()
         {
@@ -199,6 +216,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(testValue, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that SetValue correctly overwrites an existing coordinate with a negative value (-1).
+        /// </summary>
         [Fact()]
         public void SetValueTest004()
         {
@@ -213,6 +233,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(testValue, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that SetValue correctly overwrites an existing coordinate with a positive value (1).
+        /// </summary>
         [Fact()]
         public void SetValueTest005()
         {
@@ -227,6 +250,9 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(testValue, block.GetValue(valueIndex));
         }
 
+        /// <summary>
+        /// Verifies that SetValue correctly overwrites an existing coordinate with zero.
+        /// </summary>
         [Fact()]
         public void SetValueTest006()
         {
@@ -241,16 +267,97 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(testValue, block.GetValue(valueIndex));
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        /// <summary>
+        /// Verifies that WriteLiftBlock safely handles extraction from a completely 
+        /// uninitialized (null) PData structure, returning an array of pure zeros 
+        /// without throwing a NullReferenceException.
+        /// </summary>
+        [Fact]
         public void WriteLiftBlockTest()
         {
-            Assert.Fail("This test needs an implementation");
+            // Unit Test: Verify WriteLiftBlock handles null/uninitialized blocks safely
+            InterWaveBlock block = new InterWaveBlock();
+            
+            // We explicitly DO NOT initialize PData. It remains entirely null.
+            short[] output = new short[1024];
+            
+            // Should not throw NullReferenceException
+            block.WriteLiftBlock(output, 0, 64);
+            
+            // Because PData is null, WriteLiftBlock should treat all coefficients as 0
+            Assert.All(output, val => Assert.Equal(0, val));
         }
 
+        /// <summary>
+        /// A comprehensive data integrity test that verifies the exact mathematical inversion 
+        /// of the sparse zigzag storage layout. It inserts a flat array of random coefficients 
+        /// into the sparse PData arrays via ReadLiftBlock, manually verifies the zigzag routing, 
+        /// and then extracts them back to a flat array via WriteLiftBlock, asserting bit-for-bit parity.
+        /// </summary>
+        [Fact]
+        public void ReadWriteLiftBlock_RoundTrip_PreservesDataIntegrity()
+        {
+            // 1. Arrange: Create pseudo-random flat coefficient data
+            short[] originalCoeff = new short[1024];
+            Random rng = new Random(12345);
+            for (int i = 0; i < 1024; i++)
+            {
+                originalCoeff[i] = (short)rng.Next(short.MinValue, short.MaxValue);
+            }
+
+            InterWaveBlock block = new InterWaveBlock();
+
+            // 2. Act: Insert into jagged PData using zigzag mapping
+            block.ReadLiftBlock(originalCoeff);
+
+            // 3. Assert (Insertion): Verify structural integrity of PData
+            Assert.NotNull(block._PData);
+            for (int bucketIdx = 0; bucketIdx < 64; bucketIdx++)
+            {
+                short[] bucket = block.GetBlock(bucketIdx);
+                Assert.NotNull(bucket);
+                for (int localIdx = 0; localIdx < 16; localIdx++)
+                {
+                    int flatIdx = InterWaveBlock._Zigzagloc[(bucketIdx * 16) + localIdx];
+                    Assert.Equal(originalCoeff[flatIdx], bucket[localIdx]);
+                }
+            }
+
+            // 4. Act: Extract back to flat array
+            short[] extractedCoeff = new short[1024];
+            block.WriteLiftBlock(extractedCoeff, 0, 64);
+
+            // 5. Assert (Extraction): Verify exact binary parity
+            Assert.Equal(originalCoeff, extractedCoeff);
+        }
+
+        /// <summary>
+        /// Verifies that WriteLiftBlock clears the target array properly when extracting a subset 
+        /// of buckets (e.g., during progressive rendering of incomplete wavelet chunks).
+        /// </summary>
+        [Fact]
+        public void WriteLiftBlock_PartialExtraction_ZerosRemainingArray()
+        {
+            // Verify that WriteLiftBlock clears the target array properly 
+            // when extracting a subset (e.g. progressive rendering)
+            InterWaveBlock block = new InterWaveBlock();
+            short[] extractedCoeff = new short[1024];
+            for (int i = 0; i < 1024; i++) extractedCoeff[i] = -1; // Dirty the buffer
+
+            // Extract only the first 16 buckets (bmin 0, bmax 16)
+            block.WriteLiftBlock(extractedCoeff, 0, 16);
+
+            // Verify the array was zeroed out beyond the extracted boundaries
+            int nonZeroCount = extractedCoeff.Count(x => x != 0);
+            Assert.Equal(0, nonZeroCount); // Because PData was empty, it should be entirely zeroes
+        }
+
+        /// <summary>
+        /// Verifies that ClearBlock successfully nullifies a specific bucket within the 
+        /// initialized PData sparse array hierarchy.
+        /// </summary>
         [Fact()]
-#if NETCOREAPP
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public void ClearBlockTest()
         {
             InterWaveBlock block = new InterWaveBlock();
@@ -267,6 +374,10 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Null(block.GetBlock(0x3e));
         }
 
+        /// <summary>
+        /// Validates that the static, hardcoded ZigZag coordinate mapping array matches 
+        /// the exact expected sequential traversal of the 32x32 macroblock frequencies.
+        /// </summary>
         [Fact()]
         public void BuildZigZagDataTest()
         {
@@ -396,15 +507,90 @@ namespace DjvuNet.Wavelet.Tests
             for (short i = 0; i < coeff.Length; i++)
                 coeff[i] = (short)(i * 3 % 793);
 
+            // Unit Test: Verify ReadLiftBlock allocates and initializes the sparse PData arrays
+            Assert.Null(block._PData[0]); // Initially null
+            
             block.ReadLiftBlock(coeff);
-        }
+            
+            // Verify allocation occurred
+            Assert.NotNull(block._PData[0]);
+            
+            // Spot check a specific zigzag mapped value
+            // coeff[0] maps to _PData[0][0][0] because Zigzagloc[0] == 0
+            Assert.Equal(0, block._PData[0][0][0]);
 
-        [Fact()]
-        public void SizeOfBlockTest()
-        {
+            // Sparse index 4 (bucket 0, offset 4) maps to _Zigzagloc[4] == 8
+            Assert.Equal(coeff[8], block._PData[0][0][4]);
+            }
+
+            /// <summary>
+            /// Verifies that passing a null array to WriteLiftBlock safely triggers 
+            /// a DjvuArgumentNullException before unsafe memory access occurs.
+            /// </summary>
+            [Fact]
+            public void WriteLiftBlock_NullCoeff_ThrowsArgumentNullException()
+            {
+            InterWaveBlock block = new InterWaveBlock();
+            Assert.Throws<DjvuArgumentNullException>(() => block.WriteLiftBlock(null, 0, 64));
+            }
+
+            /// <summary>
+            /// Verifies that passing an array smaller than 1024 elements to WriteLiftBlock 
+            /// safely triggers a DjvuArgumentOutOfRangeException to prevent unsafe buffer overruns.
+            /// </summary>
+            [Fact]
+            public void WriteLiftBlock_ShortCoeff_ThrowsArgumentException()
+            {
+            InterWaveBlock block = new InterWaveBlock();
+            short[] shortCoeff = new short[500]; // Expected 1024
+
+            // Initialization creates blocks to extract
+            block.ReadLiftBlock(new short[1024]);
+
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => block.WriteLiftBlock(shortCoeff, 0, 64));
+            }
+
+            /// <summary>
+            /// Verifies that passing a null array to ReadLiftBlock safely triggers 
+            /// a DjvuArgumentNullException before unsafe memory access occurs.
+            /// </summary>
+            [Fact]
+            public void ReadLiftBlock_NullCoeff_ThrowsArgumentNullException()
+            {
+            InterWaveBlock block = new InterWaveBlock();
+            Assert.Throws<DjvuArgumentNullException>(() => block.ReadLiftBlock(null));
+            }
+
+            /// <summary>
+            /// Verifies that passing an array smaller than 1024 elements to ReadLiftBlock 
+            /// safely triggers a DjvuArgumentOutOfRangeException to prevent unsafe buffer overruns.
+            /// </summary>
+            [Fact]
+            public void ReadLiftBlock_ShortCoeff_ThrowsArgumentException()
+            {
+            InterWaveBlock block = new InterWaveBlock();
+            short[] shortCoeff = new short[500]; // Expected 1024
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => block.ReadLiftBlock(shortCoeff));
+            }
+
+            /// <summary>
+            /// Verifies that attempting to clear a bucket index outside the valid 0-63 range
+            /// safely triggers a DjvuArgumentOutOfRangeException prior to array access.
+            /// </summary>
+            [Fact]
+            public void ClearBlock_OutOfBounds_ThrowsArgumentOutOfRangeException()
+            {
+            InterWaveBlock block = new InterWaveBlock();
+            // Valid indices are 0 to 63. 64 >> 4 = 4, which is out of bounds for _PData (length 4)
+            Assert.Throws<DjvuNet.Errors.DjvuArgumentOutOfRangeException>(() => block.ClearBlock(64));
+            Assert.Throws<DjvuNet.Errors.DjvuArgumentOutOfRangeException>(() => block.ClearBlock(-1));
+            }
+
+            [Fact()]
+            public void SizeOfBlockTest()
+            {
             Assert.Throws<ArgumentException>(() => Marshal.SizeOf<InterWaveBlock>());
-        }
+            }
 
-
-    }
-}
+            }
+            }

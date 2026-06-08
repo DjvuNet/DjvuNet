@@ -25,35 +25,23 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the image data
         /// </summary>
-        public sbyte[] Data { get; set; }
-
-        private int _width;
+        public sbyte[] Data { get; protected set; }
 
         /// <summary>
         /// Gets or sets the width of the image
         /// </summary>
-        public int Width
-        {
-            get { return _width; }
-            set { _width = Math.Abs(value); }
-        }
-
-        private int _height;
+        public int Width { get; private set; }
 
         /// <summary>
         /// Gets or sets the height of the image
         /// </summary>
-        public int Height
-        {
-            get { return _height; }
-            set { _height = Math.Abs(value); }
-        }
+        public int Height { get; private set; }
 
 
         /// <summary>
         /// Gets or sets the number of bytes per pixel (NColumns)
         /// </summary>
-        public int BytesPerPixel { get; set; }
+        public int BytesPerPixel { get; protected set; }
 
 
         /// <summary>
@@ -80,6 +68,12 @@ namespace DjvuNet.Graphics
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the Map class.
+        /// </summary>
+        /// <remarks>
+        /// See <see cref="Map"/> class remarks for architectural limits regarding maximum dimensions.
+        /// </remarks>
         public Map(int ncolors, int redOffset, int greenOffset, int blueOffset, bool isRampNeeded)
         {
             Properties = Hashtable.Synchronized(new Hashtable());
@@ -94,22 +88,63 @@ namespace DjvuNet.Graphics
 
         #region Public Methods
 
+        /// <summary>
+        /// Explicitly sets the width of the image map.
+        /// </summary>
+        public virtual void SetWidth(int width)
+        {
+            if (width < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width cannot be negative.");
+            }
+            Width = width;
+        }
+
+        /// <summary>
+        /// Explicitly sets the height of the image map.
+        /// </summary>
+        public virtual void SetHeight(int height)
+        {
+            if (height < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height cannot be negative.");
+            }
+            Height = height;
+        }
+
         public static uint ReadInteger(ref char @char, Stream stream)
         {
+            if (stream == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(stream));
+            }
+
             uint xinteger = 0;
 
             while (@char == ' ' || @char == '\t' || @char == '\r' || @char == '\n' || @char == '#')
             {
                 if (@char == '#')
                 {
+                    int b;
                     do
                     {
-                        @char = (char)stream.ReadByte();
+                        b = stream.ReadByte();
+                        if (b < 0)
+                        {
+                            DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream while parsing Map header comment.");
+                        }
+                        @char = (char)b;
                     }
                     while (@char != '\n' && @char != '\r');
                 }
                 @char = (char)0;
-                @char = (char)stream.ReadByte();
+
+                int nextByte = stream.ReadByte();
+                if (nextByte < 0)
+                {
+                    DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream while parsing Map header whitespace.");
+                }
+                @char = (char)nextByte;
             }
 
             if (@char < '0' || @char > '9')
@@ -119,9 +154,26 @@ namespace DjvuNet.Graphics
 
             while (@char >= '0' && @char <= '9')
             {
-                xinteger = xinteger * 10 + @char - '0';
+                checked
+                {
+                    try
+                    {
+                        xinteger = (xinteger * 10) + (uint)(@char - '0');
+                    }
+                    catch (OverflowException ex)
+                    {
+                        throw new DjvuFormatException("Parsed integer exceeds maximum representable bounds for uint.", ex);
+                    }
+                }
                 @char = (char)0;
-                @char = (char)stream.ReadByte();
+
+                int valByte = stream.ReadByte();
+                if (valByte < 0) 
+                {
+                    // EOF while reading digits is valid (it means we reached the end of the number at the end of the file)
+                    break;
+                }
+                @char = (char)valByte;
             }
 
             return xinteger;
@@ -151,8 +203,65 @@ namespace DjvuNet.Graphics
         /// <param name="scansize">
         /// The distance from one row of pixels to the next in the array
         /// </param>
+        /// <remarks>
+        /// See <see cref="Map"/> class remarks for architectural limits regarding maximum dimensions.
+        /// </remarks>
         public void FillRgbPixels(int x, int y, int w, int h, int[] pixels, int off, int scansize)
         {
+            if (pixels == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(pixels));
+            }
+
+            // Reference: DjVuLibre explicitly throws on negative dimensions via (unsigned short) casting
+            // but explicitly supports 0 via (npix > 0) allocation guards. (See GPixmap.cpp / GBitmap.cpp).
+            if (w < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(w), w, "Width cannot be negative.");
+            }
+
+            if (h < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(h), h, "Height cannot be negative.");
+            }
+
+            if (x < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(x), x, "X coordinate cannot be negative.");
+            }
+
+            if (y < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(y), y, "Y coordinate cannot be negative.");
+            }
+
+            if (x + w > Width)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(w), w, "Region exceeds horizontal bounds.");
+            }
+
+            if (y + h > Height)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(h), h, "Region exceeds vertical bounds.");
+            }
+
+            if (off < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(off), off, "Offset cannot be negative.");
+            }
+
+            if (scansize < w)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(scansize), scansize, "Scansize cannot be smaller than width.");
+            }
+
+            // Calculate required buffer space to prevent buffer over-writes in the nested PixelReference loops.
+            long requiredSpace = (h > 0) ? (long)off + ((long)(h - 1) * scansize) + w : off;
+            if (requiredSpace > pixels.Length)
+            {
+                DjvuExceptionUtil.ThrowInvalidOperation($"Destination buffer too small. Required: {requiredSpace}, Actual: {pixels.Length}.");
+            }
+
             CreateGPixelReference(0).FillRgbPixels(x, y, w, h, pixels, off, scansize);
         }
 
@@ -194,6 +303,16 @@ namespace DjvuNet.Graphics
         /// <returns></returns>
         public System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
         {
+            if (Data == null)
+            {
+                DjvuExceptionUtil.ThrowInvalidOperation($"Cannot create image: {nameof(Data)} buffer is null.");
+            }
+
+            if (Width <= 0 || Height <= 0)
+            {
+                DjvuExceptionUtil.ThrowInvalidOperation($"Cannot create image: Dimensions must be greater than zero. Actual: {Width}x{Height}.");
+            }
+
             PixelFormat format;
             if (BytesPerPixel == 1) format = PixelFormat.Format8bppIndexed;
             else if (BytesPerPixel == 2) format = PixelFormat.Format16bppRgb555;
@@ -210,17 +329,22 @@ namespace DjvuNet.Graphics
                 { } => throw new DjvuNotSupportedException($"Unsupported type: {this.GetType()}"),
             };
 
+            int dataOffset = this switch
+            {
+                Bitmap { Border: int border } => border,
+                _ => 0
+            };
+
             GCHandle hData = default(GCHandle);
             System.Drawing.Bitmap image = null;
             try
             {
                 hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-                image = CopyDataToBitmap(Width, Height, hData.AddrOfPinnedObject(), Data.Length, format, bytesPerRow);
+                IntPtr offsetPointer = (IntPtr)((long)hData.AddrOfPinnedObject() + dataOffset);
+                image = CopyDataToBitmap(Width, Height, offsetPointer, Data.Length - dataOffset, format, bytesPerRow);
             }
-            catch(ArgumentException aex)
-            {
-                throw new DjvuAggregateException("Failed to copy data to Sytem.Drawing.Bitmap.", aex);
-            }
+            // Let ArgumentExceptions (including DjvuArgumentOutOfRangeException) bubble up
+            // so callers can accurately diagnose bounds and pixel format failures.
             finally
             {
                 if (hData.IsAllocated)
@@ -261,8 +385,6 @@ namespace DjvuNet.Graphics
             return image;
         }
 
-
-
         /// <summary>
         /// Fast copy of managed pixel array data into System.Drawing.Bitmap image.
         /// No checking of passed parameters, therefore, it is a caller responsibility
@@ -291,9 +413,20 @@ namespace DjvuNet.Graphics
         /// <see cref="System.Drawing.Bitmap"/> created with data copied from Data buffer
         /// of this instance of <see cref="DjvuNet.Graphics.Map"/>
         /// </returns>
-        public static System.Drawing.Bitmap CopyDataToBitmap(
+        protected System.Drawing.Bitmap CopyDataToBitmap(
             int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
         {
+            int pixelSize = DjvuImage.GetPixelSize(format);
+            int bytesPerRow = bytesPerSrcRow == 0 ? width * pixelSize : bytesPerSrcRow;
+
+            // SECURITY FIX: Prevent buffer overruns and AccessViolationExceptions when copying to GDI+ memory
+            long requiredBufferLength = (long)height * bytesPerRow;
+            if (requiredBufferLength > length)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(length), length,
+                    $"The source buffer length ({length} bytes) is insufficient for the requested image dimensions and stride ({requiredBufferLength} bytes required).");
+            }
+
             System.Drawing.Bitmap bmp = null;
             BitmapData bmpData = null;
 
@@ -303,9 +436,6 @@ namespace DjvuNet.Graphics
                 bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                                      ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-                int pixelSize = DjvuImage.GetPixelSize(bmp.PixelFormat);
-                int bytesPerRow = bytesPerSrcRow == 0 ? bmp.Width * pixelSize : bytesPerSrcRow;
-
                 IntPtr dataPtr = bmpData.Scan0;
 
                 for (int i = 0; i < height; i++)
@@ -314,10 +444,6 @@ namespace DjvuNet.Graphics
                     dataPtr = (IntPtr)((long)dataPtr + bmpData.Stride);
                     data = (IntPtr)((long)data + bytesPerRow);
                 }
-            }
-            catch(Exception ex)
-            {
-                throw new DjvuAggregateException(ex);
             }
             finally
             {

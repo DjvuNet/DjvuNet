@@ -7,15 +7,15 @@ namespace DjvuNet.Graphics
     {
         int BlueOffset { get; set; }
 
-        int BytesPerPixel { get; set; }
+        int BytesPerPixel { get; }
 
-        sbyte[] Data { get; set; }
+        sbyte[] Data { get; }
 
         int GreenOffset { get; set; }
 
-        int Height { get; set; }
+        int Height { get; }
 
-        int Width { get; set; }
+        int Width { get; }
 
         bool IsRampNeeded { get; set; }
 

@@ -13,65 +13,57 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Gets or sets the left edge of the rectangle - xmax
         /// </summary>
-        public int Left;
+        private int _XMax;
 
         /// <summary>
         /// Gets or sets the XMax value
         /// </summary>
         public int XMax
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return Left; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { Left = value; }
+            get { return _XMax; }
+            set { _XMax = value; }
         }
 
         /// <summary>
         /// Gets or sets the right edge of the rectangle - xmin
         /// </summary>
-        public int Right;
+        private int _XMin;
 
         /// <summary>
         /// Gets or sets the x min value
         /// </summary>
         public int XMin
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return Right; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { Right = value; }
+            get { return _XMin; }
+            set { _XMin = value; }
         }
 
         /// <summary>
         /// Gets or sets the top edge of the rectangle - ymax
         /// </summary>
-        public int Top;
+        private int _YMax;
 
         /// <summary>
         /// Gets or sets the y max value
         /// </summary>
         public int YMax
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return Top; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { Top = value; }
+            get { return _YMax; }
+            set { _YMax = value; }
         }
 
         /// <summary>
         /// Gets or sets the bottom of the rectangle - ymin
         /// </summary>
-        public int Bottom;
+        private int _YMin;
 
         /// <summary>
         /// Gets or sets the y min value
         /// </summary>
         public int YMin
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return Bottom; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { Bottom = value; }
+            get { return _YMin; }
+            set { _YMin = value; }
         }
 
         /// <summary>
@@ -79,8 +71,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public bool Empty
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (Right == Left) || (Bottom == Top); }
+            get { return (XMin == XMax) || (YMin == YMax); }
         }
 
         /// <summary>
@@ -88,8 +79,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public long Area
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return (long) Math.Abs( (Left - Right) * (Top - Bottom)); }
+            get { return (long) Math.Abs( (XMax - XMin) * (YMax - YMin)); }
         }
 
         /// <summary>
@@ -97,8 +87,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int Height
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return Top - Bottom; }
+            get { return YMax - YMin; }
         }
 
         /// <summary>
@@ -106,8 +95,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         public int Width
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return Left - Right; }
+            get { return XMax - XMin; }
         }
 
         #endregion Public Properties
@@ -136,13 +124,12 @@ namespace DjvuNet.Graphics
         /// <param name="height">
         /// vertical length
         /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Rectangle(int right, int bottom, int width, int height)
         {
-            Right = right;
-            Bottom = bottom;
-            Left = right + width;
-            Top = bottom + height;
+            XMin = right;
+            YMin = bottom;
+            XMax = right + width;
+            YMax = bottom + height;
         }
 
         #endregion Constructors
@@ -155,17 +142,15 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// the newly created copy
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Rectangle Duplicate()
         {
-            return new Rectangle { Left = Left, Right = Right, Top = Top, Bottom = Bottom };
+            return new Rectangle { XMax = XMax, XMin = XMin, YMax = YMax, YMin = YMin };
         }
 
         /// <summary> Reset this rectangle with all edges at the origin.</summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Clear()
         {
-            Right = Left = Bottom = Top = 0;
+            XMin = XMax = YMin = YMax = 0;
         }
 
         /// <summary>
@@ -182,10 +167,9 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// true if the point is within this rectangle
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual bool Contains(int x, int y)
         {
-            return (x >= Right) && (x <= Left) && (y >= Bottom) && (y <= Top);
+            return (x >= XMin) && (x <= XMax) && (y >= YMin) && (y <= YMax);
         }
 
         /// <summary>
@@ -200,7 +184,6 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// true if the rectangle is contained within this rectangle
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual bool Contains(Rectangle rect)
         {
             // First check for special cases
@@ -213,10 +196,10 @@ namespace DjvuNet.Graphics
             // Test point coordinates on 2D plane
             if (this.Empty && rect.Empty)
             {
-                return (this.Right == rect.Right) && (this.Bottom == rect.Bottom);
+                return (this.XMin == rect.XMin) && (this.YMin == rect.YMin);
             }
 
-            return (Contains(rect.Right, rect.Bottom) && Contains(rect.Left - 1, rect.Top - 1));
+            return (Contains(rect.XMin, rect.YMin) && Contains(rect.XMax - 1, rect.YMax - 1));
         }
 
         /// <summary>
@@ -228,7 +211,6 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// true if all the edges are equal
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
             Rectangle r = obj as Rectangle;
@@ -238,7 +220,7 @@ namespace DjvuNet.Graphics
                 bool isempty2 = r.Empty;
 
                 return ((isempty1 || isempty2) && isempty1 && isempty2) ||
-                       ((Right == r.Right) && (Left == r.Left) && (Bottom == r.Bottom) && (Top == r.Top));
+                       ((XMin == r.XMin) && (XMax == r.XMax) && (YMin == r.YMin) && (YMax == r.YMax));
             }
 
             return false;
@@ -246,7 +228,7 @@ namespace DjvuNet.Graphics
 
         public override int GetHashCode()
         {
-            return (Right.GetHashCode() - Width.GetHashCode() + Bottom.GetHashCode()
+            return (XMin.GetHashCode() - Width.GetHashCode() + YMin.GetHashCode()
                 - Height.GetHashCode()).GetHashCode();
         }
 
@@ -265,10 +247,10 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Inflate(int dx, int dy)
         {
-            Right -= dx;
-            Left += dx;
-            Bottom -= dy;
-            Top += dy;
+            XMin -= dx;
+            XMax += dx;
+            YMin -= dy;
+            YMax += dy;
         }
 
         /// <summary>
@@ -283,13 +265,12 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// true if the intersection is not empty
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Intersect(Rectangle rect1, Rectangle rect2)
         {
-            Right = Math.Max(rect1.Right, rect2.Right);
-            Left = Math.Min(rect1.Left, rect2.Left);
-            Bottom = Math.Max(rect1.Bottom, rect2.Bottom);
-            Top = Math.Min(rect1.Top, rect2.Top);
+            XMin = Math.Max(rect1.XMin, rect2.XMin);
+            XMax = Math.Min(rect1.XMax, rect2.XMax);
+            YMin = Math.Max(rect1.YMin, rect2.YMin);
+            YMax = Math.Min(rect1.YMax, rect2.YMax);
         }
 
         /// <summary>
@@ -304,15 +285,14 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// true if the results are non-empty
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Recthull(Rectangle rect1, Rectangle rect2)
         {
             if (!rect1.Empty && !rect2.Empty)
             {
-                Right = Math.Min(rect1.Right, rect2.Right);
-                Left = Math.Max(rect1.Left, rect2.Left);
-                Bottom = Math.Min(rect1.Bottom, rect2.Bottom);
-                Top = Math.Max(rect1.Top, rect2.Top);
+                XMin = Math.Min(rect1.XMin, rect2.XMin);
+                XMax = Math.Max(rect1.XMax, rect2.XMax);
+                YMin = Math.Min(rect1.YMin, rect2.YMin);
+                YMax = Math.Max(rect1.YMax, rect2.YMax);
             }
 
             ProcessEmptyRect(rect1, rect2);
@@ -323,19 +303,19 @@ namespace DjvuNet.Graphics
         {
             if (rect1.Empty)
             {
-                Right = rect2.Right;
-                Left = rect2.Left;
-                Bottom = rect2.Bottom;
-                Top = rect2.Top;
+                XMin = rect2.XMin;
+                XMax = rect2.XMax;
+                YMin = rect2.YMin;
+                YMax = rect2.YMax;
 
                 return !Empty;
             }
             else if (rect2.Empty)
             {
-                Right = rect1.Right;
-                Left = rect1.Left;
-                Bottom = rect1.Bottom;
-                Top = rect1.Top;
+                XMin = rect1.XMin;
+                XMax = rect1.XMax;
+                YMin = rect1.YMin;
+                YMax = rect1.YMax;
 
                 return !Empty;
             }
@@ -353,27 +333,24 @@ namespace DjvuNet.Graphics
         /// <param name="dy">
         /// Vertical translation distance dY.
         /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Translate(int dx, int dy)
         {
-            Right += dx;
-            Left += dx;
-            Bottom += dy;
-            Top += dy;
+            XMin += dx;
+            XMax += dx;
+            YMin += dy;
+            YMax += dy;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Rectangle other)
         {
             return this == other;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Rectangle first, Rectangle second)
         {
             if (null != (object)first && null != (object)second)
             {
-                return first.Left == second.Left && first.Top == second.Top && first.Width == second.Width && first.Height == second.Height;
+                return first.XMax == second.XMax && first.YMax == second.YMax && first.Width == second.Width && first.Height == second.Height;
             }
             else
             {
@@ -381,12 +358,11 @@ namespace DjvuNet.Graphics
             }
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Rectangle first, Rectangle second)
         {
             if (null != (object)first && null != (object)second)
             {
-                return first.Left != second.Left || first.Top != second.Top || first.Width != second.Width || first.Height != second.Height;
+                return first.XMax != second.XMax || first.YMax != second.YMax || first.Width != second.Width || first.Height != second.Height;
             }
             else
             {
@@ -404,7 +380,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         public static implicit operator System.Drawing.Rectangle(Rectangle rect)
         {
-            return new System.Drawing.Rectangle(rect.Left, rect.Top, rect.Width, rect.Height);
+            return new System.Drawing.Rectangle(rect.XMax, rect.YMax, rect.Width, rect.Height);
         }
 
         #endregion Public Methods

@@ -626,22 +626,22 @@ namespace DjvuNet
                 {
                     GRect xrect = new GRect
                     {
-                        Right = (int)Math.Floor(rect.Right * 4D / 3D),
-                        Bottom = (int)Math.Floor(rect.Bottom * 4D / 3D),
-                        Left = (int)Math.Ceiling((double)rect.Left * 4D / 3D),
-                        Top = (int)Math.Ceiling((double)rect.Top * 4D / 3D)
+                        XMin = (int)Math.Floor(rect.XMin * 4D / 3D),
+                        YMin = (int)Math.Floor(rect.YMin * 4D / 3D),
+                        XMax = (int)Math.Ceiling((double)rect.XMax * 4D / 3D),
+                        YMax = (int)Math.Ceiling((double)rect.YMax * 4D / 3D)
                     };
 
                     GRect nrect = new GRect(0, 0, rect.Width, rect.Height);
 
-                    if (xrect.Left > iwWidth)
+                    if (xrect.XMax > iwWidth)
                     {
-                        xrect.Left = iwWidth;
+                        xrect.XMax = iwWidth;
                     }
 
-                    if (xrect.Top > iwHeight)
+                    if (xrect.YMax > iwHeight)
                     {
-                        xrect.Top = iwHeight;
+                        xrect.YMax = iwHeight;
                     }
 
                     GPixmap iwPMap = bgIWPixmap.GetPixelMap(1, xrect, null);

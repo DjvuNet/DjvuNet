@@ -92,7 +92,7 @@ set "_DefaultNetCoreApp=net10.0"
 set "_NetCoreAppId=.NETCoreApp"
 set "_NetCoreAppTFM=.NETCoreApp,Version=v10.0"
 set "_Framework=%_DefaultNetCoreApp%"
-set "__ArtifactsReleaseTag=v0.10.26146.0"
+set "__ArtifactsReleaseTag=v0.10.26159.0"
 set "__GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/%__ArtifactsReleaseTag%/"
 set "__ArtifactsTestDataUri=https://github.com/DjvuNet/artifacts/archive/refs/tags/%__ArtifactsReleaseTag%.zip"
 set "__ArtifactsDirName=artifacts-%__ArtifactsReleaseTag:v=%"
@@ -437,12 +437,12 @@ if not exist ".\%__DjvuLibreDir%\win32\djvulibre\libdjvulibre\libdjvulibre.vcxpr
     echo %__MsgPrefix%Downloading release archive of DjVuLibre for tag !__ArtifactsReleaseTag!
     call :download_retry "!__ArchiveUrl!" "djvulibre.tar.gz"
     if !ERRORLEVEL! EQU 0 (
-        echo %__MsgPrefix%Extracting DjVuLibre archive
-        if not exist "%__DjvuLibreDir%" mkdir "%__DjvuLibreDir%"
-        tar -xzf djvulibre.tar.gz -C "%__DjvuLibreDir%" --strip-components=1
-        del /f /q djvulibre.tar.gz
+         echo %__MsgPrefix%Extracting DjVuLibre archive
+         if not exist "%__DjvuLibreDir%" mkdir "%__DjvuLibreDir%"
+         tar -xzf djvulibre.tar.gz -C "%__DjvuLibreDir%" --strip-components=1
+         del /f /q djvulibre.tar.gz
     ) else (
-        echo %__MsgPrefix%Download failed, falling back to git clone
+        echo %__MsgPrefix%Bypassing archive download, executing git clone
         call :git_clone_retry ^
             "https://github.com/DjvuNet/DjVuLibre.git" ^
             "%__DjvuLibreDir%" ^

@@ -48,6 +48,7 @@
     <Compile Include="PigeonHybridTransformTests.cs" />
     <Compile Include="PigeonVector128TransformTests.cs" />
     <Compile Include="PigeonTransformTests.cs" />
+    <Compile Include="IW44CompatibilityTests.cs" />
   </ItemGroup>
 
  <ItemGroup>

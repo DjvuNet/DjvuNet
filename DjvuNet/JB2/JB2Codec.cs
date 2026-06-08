@@ -351,7 +351,7 @@ namespace DjvuNet.JB2
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.Left) - lmatch.Right, (1 + lmatch.Top) - lmatch.Bottom, 4);
+                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
                         CodeBitmapByCrossCoding(bm, cbm, jshp.Parent);
 
                         break;
@@ -519,7 +519,7 @@ namespace DjvuNet.JB2
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.Left) - lmatch.Right, (1 + lmatch.Top) - lmatch.Bottom, 4);
+                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
 
                         //          verbose("2.d time="+System.currentTimeMillis()+",rectype="+rectype);
                         CodeBitmapByCrossCoding(bm, cbm, match);
@@ -543,7 +543,7 @@ namespace DjvuNet.JB2
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.Left) - lmatch.Right, (1 + lmatch.Top) - lmatch.Bottom, 4);
+                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
 
                         break;
                     }
@@ -561,7 +561,7 @@ namespace DjvuNet.JB2
 
                         var cbm = jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.Left) - lmatch.Right, (1 + lmatch.Top) - lmatch.Bottom, 4);
+                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
                         CodeBitmapByCrossCoding(bm, cbm, match);
                         CodeRelativeLocation(jblt, bm.Height, bm.Width);
 
@@ -580,14 +580,14 @@ namespace DjvuNet.JB2
                         bm = jim.GetShape(jblt.ShapeNumber).Bitmap;
 
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        jblt.Left += lmatch.Right;
-                        jblt.Bottom += lmatch.Bottom;
+                        jblt.Left += lmatch.XMin;
+                        jblt.Bottom += lmatch.YMin;
 
-                        CodeRelativeLocation(jblt, (1 + lmatch.Top) - lmatch.Bottom,
-                                               (1 + lmatch.Left) - lmatch.Right);
+                        CodeRelativeLocation(jblt, (1 + lmatch.YMax) - lmatch.YMin,
+                                               (1 + lmatch.XMax) - lmatch.XMin);
 
-                        jblt.Left -= lmatch.Right;
-                        jblt.Bottom -= lmatch.Bottom;
+                        jblt.Left -= lmatch.XMin;
+                        jblt.Bottom -= lmatch.YMin;
 
                         break;
                     }
@@ -817,8 +817,8 @@ namespace DjvuNet.JB2
                 //int xd2c = ((1 + (dw / 2)) - dw) - ((((1 + lmatch.Left) - lmatch.Right) / 2) - lmatch.Left);
                 //int yd2c = ((1 + (dh / 2)) - dh) - ((((1 + lmatch.Top) - lmatch.Bottom) / 2) - lmatch.Top);
 
-                int xd2c = ((1 + (dw >> 1)) - dw) - ((((1 + lmatch.Left) - lmatch.Right) >> 1) - lmatch.Left);
-                int yd2c = ((1 + (dh >> 1)) - dh) - ((((1 + lmatch.Top) - lmatch.Bottom) >> 1) - lmatch.Top);
+                int xd2c = ((1 + (dw >> 1)) - dw) - ((((1 + lmatch.XMax) - lmatch.XMin) >> 1) - lmatch.XMax);
+                int yd2c = ((1 + (dh >> 1)) - dh) - ((((1 + lmatch.YMax) - lmatch.YMin) >> 1) - lmatch.YMax);
 
                 bm.MinimumBorder = 2;
                 cbm.MinimumBorder = 2 - xd2c;

@@ -713,7 +713,7 @@ _DefaultNetStandard="netstandard2.1"
 _NetStandardId=".NETStandard"
 _NetStandardTFM=".NETStandard,Version=v2.1"
 _Framework="$_DefaultNetCoreApp"
-__ArtifactsReleaseTag="v0.10.26146.0"
+__ArtifactsReleaseTag="v0.10.26159.0"
 __GithubDjvuNetReleaseUri="https://github.com/DjvuNet/artifacts/releases/download/${__ArtifactsReleaseTag}/"
 __ArtifactsTestDataUri="https://github.com/DjvuNet/artifacts/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
 __ArtifactsDirName="artifacts-${__ArtifactsReleaseTag#v}"
@@ -1118,7 +1118,7 @@ if [ -z "$_SkipNative" ]; then
             tar -xzf djvulibre.tar.gz -C "$__DjvuLibreDir" --strip-components=1
             rm djvulibre.tar.gz
         else
-            echo "BUILD: Download failed, falling back to git clone"
+            echo "BUILD: Bypassing archive download, executing git clone"
             git_clone_retry "https://github.com/DjvuNet/DjVuLibre.git" "$__DjvuLibreDir" --depth 1 -c core.autocrlf=false
         fi
         if [ $? -ne 0 ]; then _SkipNative=1; fi

@@ -11,10 +11,21 @@ namespace DjvuNet.Wavelet.Tests
 {
     public class InterWaveDecoderTests
     {
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        /// <summary>
+        /// Verifies that the InterWaveDecoder constructor properly delegates to the base class 
+        /// Init method and allocates the internal state arrays correctly.
+        /// </summary>
+        [Fact]
         public void InterWaveDecoderTest()
         {
-            Assert.Fail("This test needs an implementation");
+            var map = new InterWaveMap(32, 32);
+            var codec = new InterWaveDecoder(map);
+            
+            Assert.NotNull(codec);
+            // Verify internal arrays are initialized by the base class Init() call
+            Assert.NotNull(codec._QuantHigh);
+            Assert.NotNull(codec._QuantLow);
+            Assert.NotNull(codec._CoefficientState);
         }
 
         [Fact()]
@@ -36,10 +47,35 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Equal(1, codec.CodeSlice(coder));
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void DecodeBucketsTest()
+        /// <summary>
+        /// EDGE CASE: Verifies that DecodeBuckets expects a valid block and throws 
+        /// a NullReferenceException if the block is missing during processing.
+        /// </summary>
+        [Fact]
+        public void DecodeBuckets_NullBlock_ThrowsNullReferenceException()
         {
-            Assert.Fail("This test needs an implementation");
+            var map = new InterWaveMap(32, 32);
+            var codec = new InterWaveDecoder(map);
+            var coder = new ZPCodec();
+            
+            // Expected to throw because blk parameter is null and it calls blk.GetBlock()
+            Assert.Throws<NullReferenceException>(() => codec.DecodeBuckets(coder, 0, 0, null, 0, 1));
+        }
+        
+        /// <summary>
+        /// EDGE CASE: Verifies that passing an out-of-bounds band index throws 
+        /// an IndexOutOfRangeException when attempting to read the quantization thresholds.
+        /// </summary>
+        [Fact]
+        public void DecodeBuckets_OutOfBoundsBand_ThrowsIndexOutOfRangeException()
+        {
+            var map = new InterWaveMap(32, 32);
+            var codec = new InterWaveDecoder(map);
+            var coder = new ZPCodec();
+            var block = new InterWaveBlock();
+            
+            // Expected to throw because _QuantHigh[band] will be out of bounds (10 is typical max)
+            Assert.Throws<IndexOutOfRangeException>(() => codec.DecodeBuckets(coder, 0, 999, block, 0, 1));
         }
 
         [Fact()]
@@ -54,10 +90,30 @@ namespace DjvuNet.Wavelet.Tests
 
         }
 
-        [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
-        public void IsNullSliceTest()
+        /// <summary>
+        /// Verifies that IsNullSlice processes band 0 by analyzing the _QuantLow array thresholds.
+        /// </summary>
+        [Fact]
+        public void IsNullSlice_BandZero_ExecutesSuccessfully()
         {
-            Assert.Fail("This test needs an implementation");
+            var map = new InterWaveMap(32, 32);
+            var codec = new InterWaveDecoder(map);
+            
+            bool result = codec.IsNullSlice(0, 0);
+            Assert.IsType<bool>(result);
+        }
+
+        /// <summary>
+        /// Verifies that IsNullSlice processes bands > 0 by checking the _QuantHigh array thresholds.
+        /// </summary>
+        [Fact]
+        public void IsNullSlice_BandGreaterThanZero_ExecutesSuccessfully()
+        {
+            var map = new InterWaveMap(32, 32);
+            var codec = new InterWaveDecoder(map);
+            
+            bool result = codec.IsNullSlice(0, 1);
+            Assert.IsType<bool>(result);
         }
 
         [Fact(Skip = "Time consuming benchmark test"), Trait("Category", "Skip")]

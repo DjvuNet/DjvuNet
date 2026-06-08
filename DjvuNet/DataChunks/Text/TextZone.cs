@@ -357,8 +357,8 @@ namespace DjvuNet.DataChunks
 
             if (sibling == null)
             {
-                X += parent.Rectangle.Right;
-                Y = parent.Rectangle.Top - (Y + Height);
+                X += parent.Rectangle.XMin;
+                Y = parent.Rectangle.YMax - (Y + Height);
                 TextOffset += parent.TextOffset;
             }
             else
@@ -366,14 +366,14 @@ namespace DjvuNet.DataChunks
                 if (sibling.ZoneType == ZoneTypes.Page || sibling.ZoneType == ZoneTypes.Paragraph 
                     || sibling.ZoneType == ZoneTypes.Line)
                 {
-                    X += sibling.Rectangle.Right;
-                    Y = sibling.Rectangle.Bottom - (Y + Height);
+                    X += sibling.Rectangle.XMin;
+                    Y = sibling.Rectangle.YMin - (Y + Height);
                 }
                 else if (sibling.ZoneType == ZoneTypes.Column || sibling.ZoneType == ZoneTypes.Word 
                     || sibling.ZoneType == ZoneTypes.Character)
                 {
-                    X += sibling.Rectangle.Left;
-                    Y += sibling.Rectangle.Bottom;
+                    X += sibling.Rectangle.XMax;
+                    Y += sibling.Rectangle.YMin;
                 }
 
                 TextOffset += sibling.TextOffset + sibling.TextLength;

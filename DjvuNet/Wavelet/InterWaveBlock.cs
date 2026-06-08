@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Wavelet
 {
@@ -176,6 +177,15 @@ namespace DjvuNet.Wavelet
         /// </param>
         public void WriteLiftBlock(short[] coeff, int bmin, int bmax)
         {
+            if (coeff == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(coeff));
+            }
+            if (coeff.Length < 1024)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(coeff), coeff.Length, "Coefficient array must be at least 1024 elements long.");
+            }
+
             int n = bmin << 4;
 
             int coeffLength = coeff.Length;
@@ -210,6 +220,15 @@ namespace DjvuNet.Wavelet
 
         public void ReadLiftBlock(short[] coeff)
         {
+            if (coeff == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(coeff));
+            }
+            if (coeff.Length < 1024)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(coeff), coeff.Length, "Coefficient array must be at least 1024 elements long.");
+            }
+
             int n = 0;
             for (int n1 = 0; n1 < 64; n1++)
             {
@@ -231,6 +250,11 @@ namespace DjvuNet.Wavelet
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ClearBlock(int n)
         {
+            if (n < 0 || n > 63)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(n), n, "Bucket index must be between 0 and 63.");
+            }
+
             int nms = n >> 4;
             if (_PData[nms] != null)
             {

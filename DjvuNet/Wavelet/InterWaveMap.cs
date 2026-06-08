@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using DjvuNet.Errors;
 using DjvuNet.Graphics;
 
@@ -57,11 +58,32 @@ namespace DjvuNet.Wavelet
 
         public InterWaveMap(int width, int height)
         {
+            if (width <= 0)
+            {
+                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be greater than zero.");
+            }
+            if (height <= 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be greater than zero.");
+            }
+
             Width = width;
             Height = height;
+
+            // Align dimensions to the 32x32 macroblock grid
             BlockWidth = ((width + 0x20) - 1) & unchecked((int)0xffffffe0);
             BlockHeight = ((height + 0x20) - 1) & unchecked((int)0xffffffe0);
-            BlockNumber = (BlockWidth * BlockHeight) / 1024;
+
+            // Calculate total pixels, detecting integer overflow from malicious dimensions
+            long totalPixels = (long)BlockWidth * (long)BlockHeight;
+            if (totalPixels > int.MaxValue || totalPixels <= 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), $"{width}x{height}",
+                    "Calculated pixel count exceeds maximum allowable memory dimensions or integer bounds.");
+            }
+
+            long totalBlocks = totalPixels / 1024;
+            BlockNumber = (int)totalBlocks;
             Blocks = new InterWaveBlock[BlockNumber];
 
             for (int i = 0; i < Blocks.Length; i++)
@@ -255,14 +277,11 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
-        /// Add docs
+        /// Extracted internal method to build the unified spatial data array from the sparse blocks.
+        /// This provides the structural boundary tested prior to SIMD unified memory refactoring.
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="img8"></param>
-        /// <param name="rowsize"></param>
-        /// <param name="pixsep"></param>
-        /// <param name="fast"></param>
-        public void Image(int index, sbyte[] img8, int rowsize, int pixsep, bool fast)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal short[] BuildUnifiedData()
         {
             short[] data16 = new short[BlockWidth * BlockHeight];
             short[] liftblock = new short[1024];
@@ -287,6 +306,21 @@ namespace DjvuNet.Wavelet
                     }
                 }
             }
+            return data16;
+        }
+
+        /// <summary>
+        /// Add docs
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="img8"></param>
+        /// <param name="rowsize"></param>
+        /// <param name="pixsep"></param>
+        /// <param name="fast"></param>
+        public void Image(int index, sbyte[] img8, int rowsize, int pixsep, bool fast)
+        {
+            short[] data16 = BuildUnifiedData();
+            int pidx = 0;
 
             if (fast)
             {
@@ -362,11 +396,11 @@ namespace DjvuNet.Wavelet
             Rectangle irect = new Rectangle(
                 0, 0, ((Width + subsample) - 1) / subsample, ((Height + subsample) - 1) / subsample);
 
-            if ((rect.Right < 0) || (rect.Bottom < 0) || (rect.Left > irect.Left) || (rect.Top > irect.Top))
+            if ((rect.XMin < 0) || (rect.YMin < 0) || (rect.XMax > irect.XMax) || (rect.YMax > irect.YMax))
             {
                 throw new DjvuArgumentException(
-                    "Rectangle is out of bounds: " + rect.Right + "," + rect.Bottom +
-                    "," + rect.Left + "," + rect.Top + "," + irect.Left + "," + irect.Top, nameof(rect));
+                    "Rectangle is out of bounds: " + rect.XMin + "," + rect.YMin +
+                    "," + rect.XMax + "," + rect.YMax + "," + irect.XMax + "," + irect.YMax, nameof(rect));
             }
 
             Rectangle[] needed = new Rectangle[8];
@@ -388,39 +422,39 @@ namespace DjvuNet.Wavelet
                 needed[i].Inflate(3 * r, 3 * r);
                 needed[i].Intersect(needed[i], irect);
                 r += r;
-                recomp[i].Right = ((needed[i].Right + r) - 1) & ~(r - 1);
-                recomp[i].Left = needed[i].Left & ~(r - 1);
-                recomp[i].Bottom = ((needed[i].Bottom + r) - 1) & ~(r - 1);
-                recomp[i].Top = needed[i].Top & ~(r - 1);
+                recomp[i].XMin = ((needed[i].XMin + r) - 1) & ~(r - 1);
+                recomp[i].XMax = needed[i].XMax & ~(r - 1);
+                recomp[i].YMin = ((needed[i].YMin + r) - 1) & ~(r - 1);
+                recomp[i].YMax = needed[i].YMax & ~(r - 1);
             }
 
             Rectangle work = new Rectangle();
-            work.Right = needed[0].Right & ~(boxsize - 1);
-            work.Bottom = needed[0].Bottom & ~(boxsize - 1);
-            work.Left = ((needed[0].Left - 1) & ~(boxsize - 1)) + boxsize;
-            work.Top = ((needed[0].Top - 1) & ~(boxsize - 1)) + boxsize;
+            work.XMin = needed[0].XMin & ~(boxsize - 1);
+            work.YMin = needed[0].YMin & ~(boxsize - 1);
+            work.XMax = ((needed[0].XMax - 1) & ~(boxsize - 1)) + boxsize;
+            work.YMax = ((needed[0].YMax - 1) & ~(boxsize - 1)) + boxsize;
 
             int dataw = work.Width;
             short[] data = new short[dataw * work.Height];
             int blkw = BlockWidth >> 5;
-            int lblock = ((work.Bottom >> nlevel) * blkw) + (work.Right >> nlevel);
+            int lblock = ((work.YMin >> nlevel) * blkw) + (work.XMin >> nlevel);
 
             short[] liftblock = new short[1024];
 
-            for (int by = work.Bottom, ldata = 0;
-                 by < work.Top;
+            for (int by = work.YMin, ldata = 0;
+                 by < work.YMax;
                  by += boxsize, ldata += (dataw << nlevel), lblock += blkw)
             {
-                for (int bx = work.Right, bidx = lblock, rdata = ldata;
-                     bx < work.Left;
+                for (int bx = work.XMin, bidx = lblock, rdata = ldata;
+                     bx < work.XMax;
                      bx += boxsize, bidx++, rdata += boxsize)
                 {
                     InterWaveBlock block = Blocks[bidx];
                     int mlevel = nlevel;
 
                     if ((nlevel > 2) &&
-                        (((bx + 31) < needed[2].Right) || (bx > needed[2].Left) || ((by + 31) < needed[2].Bottom) ||
-                         (by > needed[2].Top)))
+                        (((bx + 31) < needed[2].XMin) || (bx > needed[2].XMax) || ((by + 31) < needed[2].YMin) ||
+                         (by > needed[2].YMax)))
                     {
                         mlevel = 2;
                     }
@@ -449,15 +483,15 @@ namespace DjvuNet.Wavelet
             for (int i = 0; i < nlevel; i++)
             {
                 Rectangle comp = needed[i];
-                comp.Right = comp.Right & ~(r - 1);
-                comp.Bottom = comp.Bottom & ~(r - 1);
-                comp.Translate(-work.Right, -work.Bottom);
+                comp.XMin = comp.XMin & ~(r - 1);
+                comp.YMin = comp.YMin & ~(r - 1);
+                comp.Translate(-work.XMin, -work.YMin);
 
                 if (fast && (i >= 4))
                 {
-                    for (int ii = comp.Bottom, pp = (comp.Bottom * dataw); ii < comp.Top; ii += 2, pp += (dataw + dataw))
+                    for (int ii = comp.YMin, pp = (comp.YMin * dataw); ii < comp.YMax; ii += 2, pp += (dataw + dataw))
                     {
-                        for (int jj = comp.Right; jj < comp.Left; jj += 2)
+                        for (int jj = comp.XMin; jj < comp.XMax; jj += 2)
                         {
                             data[pp + jj + dataw] = data[pp + jj + dataw + 1] = data[pp + jj + 1] = data[pp + jj];
                         }
@@ -466,18 +500,18 @@ namespace DjvuNet.Wavelet
                     break;
                 }
 
-                Backward(data, (comp.Bottom * dataw) + comp.Right, comp.Width, comp.Height, dataw, r, r >> 1);
+                Backward(data, (comp.YMin * dataw) + comp.XMin, comp.Width, comp.Height, dataw, r, r >> 1);
                 r >>= 1;
             }
 
             Rectangle nrect = rect.Duplicate();
-            nrect.Translate(-work.Right, -work.Bottom);
+            nrect.Translate(-work.XMin, -work.YMin);
 
-            for (int i = nrect.Bottom, pidx = (nrect.Bottom * dataw), ridx = index;
-                 i++ < nrect.Top;
+            for (int i = nrect.YMin, pidx = (nrect.YMin * dataw), ridx = index;
+                 i++ < nrect.YMax;
                  ridx += rowsize, pidx += dataw)
             {
-                for (int j = nrect.Right, pixidx = ridx; j < nrect.Left; j++, pixidx += pixsep)
+                for (int j = nrect.XMin, pixidx = ridx; j < nrect.XMax; j++, pixidx += pixsep)
                 {
                     int x = (data[pidx + j] + 32) >> 6;
 

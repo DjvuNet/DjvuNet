@@ -119,8 +119,8 @@ namespace DjvuNet.JB2
 
             Verify.SubsampleRange(subsample);
 
-            int rxmin = rect.Right * subsample;
-            int rymin = rect.Bottom * subsample;
+            int rxmin = rect.XMin * subsample;
+            int rymin = rect.YMin * subsample;
             int swidth = rect.Width;
             int sheight = rect.Height;
             int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
@@ -158,23 +158,24 @@ namespace DjvuNet.JB2
 
             Verify.SubsampleRange(subsample);
 
-            int rxmin = rect.Right * subsample;
-            int rymin = rect.Bottom * subsample;
+            int rxmin = rect.XMin * subsample;
+            int rymin = rect.YMin * subsample;
             int swidth = rect.Width;
             int sheight = rect.Height;
             int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
+            
             Bitmap bm = new Bitmap();
             bm.Init(sheight, swidth, border);
             bm.Grays = (1 + (subsample * subsample));
 
-            for (int blitno = 0; blitno < Blits.Count; )
+            for (int blitno = 0; blitno < Blits.Count; blitno++)
             {
-                JB2Blit pblit = GetBlit(blitno++);
+                JB2Blit pblit = GetBlit(blitno);
                 JB2Shape pshape = GetShape(pblit.ShapeNumber);
 
                 if (pshape.Bitmap != null && bm.Blit(pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample))
                 {
-                    components.Add((blitno - 1));
+                    components.Add((blitno));
                 }
             }
 

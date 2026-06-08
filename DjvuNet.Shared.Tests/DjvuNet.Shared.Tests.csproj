@@ -70,6 +70,7 @@
     <Compile Include="SynchronizedBase.cs" />
     <Compile Include="TestExecution\AppVeyorTestManager.cs" />
     <Compile Include="TestExecution\DjvuDocFixture.cs" />
+    <Compile Include="TestExecution\SingleDocFixture.cs" />
     <Compile Include="TestExecution\ITestManager.cs" />
     <Compile Include="TestExecution\TestManager.cs" />
     <Compile Include="Util.cs" />

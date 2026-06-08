@@ -1603,5 +1603,141 @@ namespace DjvuNet.DjvuLibre
         /// <returns>True if the transformation was successful, otherwise false.</returns>
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_rgb_to_ycbcr", CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool RgbToYCbCr(IntPtr pixels, int width, int height, int rowSizeInPixels, IntPtr outY, IntPtr outCb, IntPtr outCr, int outRowSizeInBytes);
+
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_create_from_chunk", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern IntPtr CreateIW44ImageFromChunk(IntPtr chunkData, int chunkSize, int isColor);
+
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_decode_chunk", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool DecodeIW44Chunk(IntPtr iw44Handle, IntPtr chunkData, int chunkSize);
+
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_free", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern void FreeIW44Image(IntPtr iw44Handle);
+
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_get_map_info", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool GetIW44MapInfo(IntPtr iw44Handle, int mapIndex, out int bw, out int bh, out int nb);
+
+        /// <summary>
+        /// Extracts exactly 1024 raw wavelet coefficients for a specific 32x32 macroblock.
+        ///
+        /// STATE CONTEXT: The coefficients returned by this method represent the pristine,
+        /// entropy-decoded (ZP) state of the block *immediately after* decompression from the
+        /// chunk stream, but *before* any spatial lifting filters or inverse wavelet
+        /// transformations are applied. This is critical for isolating entropy parser parity.
+        /// </summary>
+        /// <param name="iw44Handle">The native handle to the decoded IW44Image.</param>
+        /// <param name="mapIndex">The color map index (0=Y, 1=Cb, 2=Cr).</param>
+        /// <param name="blockIndex">The linear index of the 32x32 macroblock within the map.</param>
+        /// <param name="outCoeff">A pinned pointer to a managed array to receive the data.</param>
+        /// <param name="coeffLength">Must be exactly 1024 to prevent native buffer overflow.</param>
+        /// <returns>True if the block was successfully extracted, False otherwise.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_get_block_data", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool GetIW44BlockData(IntPtr iw44Handle, int mapIndex, int blockIndex, IntPtr outCoeff, int coeffLength);
+
+        /// <summary>
+        /// Extracts exactly 1024 raw background wavelet coefficients directly from a loaded DjVu page.
+        ///
+        /// STATE CONTEXT: The coefficients returned by this method represent the pristine,
+        /// entropy-decoded (ZP) state of the block *immediately after* decompression from the
+        /// chunk stream, but *before* any spatial lifting filters or inverse wavelet
+        /// transformations are applied. This is critical for isolating entropy parser parity.
+        /// </summary>
+        /// <param name="pageHandle">The native handle to the ddjvu_page_t.</param>
+        /// <param name="mapIndex">The color map index (0=Y, 1=Cb, 2=Cr).</param>
+        /// <param name="blockIndex">The linear index of the 32x32 macroblock within the map.</param>
+        /// <param name="outCoeff">A pinned pointer to a managed array to receive the data.</param>
+        /// <param name="coeffLength">Must be exactly 1024 to prevent native buffer overflow.</param>
+        /// <returns>True if the block was successfully extracted, False otherwise.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_iw44_block_data", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool GetPageIW44BlockData(IntPtr pageHandle, int mapIndex, int blockIndex, IntPtr outCoeff, int coeffLength);
+
+        /// <summary>
+        /// Executes the high-level forward IW44 wavelet transformation (encoding path).
+        ///
+        /// STATE & LAYOUT: This is a destructive, in-place transformation. The input buffer
+        /// must be a continuous 1D array representing a 2D image matrix. The pointer `p`
+        /// points to the top-left element. Navigation to the next row is strictly defined
+        /// by the `rowSize` stride.
+        ///
+        /// BEFORE: The buffer contains physical spatial pixel data (e.g., YCbCr values).
+        /// AFTER: The buffer is mutated in-place into frequency-domain wavelet coefficients,
+        /// ready to be compressed by the ZP entropy coder.
+        /// </summary>
+        /// <param name="p">Pinned pointer to the continuous buffer.</param>
+        /// <param name="w">Width of the image/map.</param>
+        /// <param name="h">Height of the image/map.</param>
+        /// <param name="rowSize">The row stride in elements (not bytes).</param>
+        /// <param name="begin">The starting scale level.</param>
+        /// <param name="end">The ending scale level.</param>
+        /// <returns>True if the transformation succeeded, False on invalid parameters.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_transform_forward", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool IW44TransformForward(IntPtr p, int w, int h, int rowSize, int begin, int end);
+
+        /// <summary>
+        /// Executes the high-level backward IW44 wavelet transformation (decoding path).
+        ///
+        /// STATE & LAYOUT: This is a destructive, in-place transformation. The input buffer
+        /// must be a continuous 1D array representing a 2D image matrix. The pointer `p`
+        /// points to the top-left element. Navigation to the next row is strictly defined
+        /// by the `rowSize` stride.
+        ///
+        /// BEFORE: The buffer contains frequency-domain wavelet coefficients (entropy-decoded ZP state).
+        /// AFTER: The buffer is mutated in-place back into physical spatial pixel data
+        /// (e.g., YCbCr values) ready for rendering or RGB conversion.
+        /// </summary>
+        /// <param name="p">Pinned pointer to the continuous buffer.</param>
+        /// <param name="w">Width of the image/map.</param>
+        /// <param name="h">Height of the image/map.</param>
+        /// <param name="rowSize">The row stride in elements (not bytes).</param>
+        /// <param name="begin">The starting scale level.</param>
+        /// <param name="end">The ending scale level.</param>
+        /// <returns>True if the transformation succeeded, False on invalid parameters.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_transform_backward", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool IW44TransformBackward(IntPtr p, int w, int h, int rowSize, int begin, int end);
+
+        /// <summary>
+        /// Executes the backward horizontal spatial lifting filter.
+        /// LAYOUT: Destructive, in-place mutation of the continuous buffer.
+        /// BEFORE: Coefficients represent horizontal frequency data.
+        /// AFTER: Coefficients are partially lifted into the spatial domain along the X axis.
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_filter_bh", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool FilterBh(IntPtr p, int w, int h, int rowSize, int scale);
+
+        /// <summary>
+        /// Executes the backward vertical spatial lifting filter.
+        /// LAYOUT: Destructive, in-place mutation of the continuous buffer using `rowSize` stride.
+        /// BEFORE: Coefficients represent vertical frequency data.
+        /// AFTER: Coefficients are partially lifted into the spatial domain along the Y axis.
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_filter_bv", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool FilterBv(IntPtr p, int w, int h, int rowSize, int scale);
+
+        /// <summary>
+        /// Executes the forward horizontal spatial lifting filter.
+        /// LAYOUT: Destructive, in-place mutation of the continuous buffer.
+        /// BEFORE: Buffer contains spatial data along the X axis.
+        /// AFTER: Buffer is separated into horizontal high and low frequency components.
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_filter_fh", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool FilterFh(IntPtr p, int w, int h, int rowSize, int scale);
+
+        /// <summary>
+        /// Executes the forward vertical spatial lifting filter.
+        /// LAYOUT: Destructive, in-place mutation of the continuous buffer using `rowSize` stride.
+        /// BEFORE: Buffer contains spatial data along the Y axis.
+        /// AFTER: Buffer is separated into vertical high and low frequency components.
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_filter_fv", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool FilterFv(IntPtr p, int w, int h, int rowSize, int scale);
+
+        /// <summary>
+        /// Retrieves the last native exception message captured on the current thread.
+        /// </summary>
+        /// <returns>The UTF-8 formatted error string, or an empty string if no error occurred.</returns>
+#pragma warning disable CA2101 // Specify marshaling for P/Invoke string arguments
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_get_last_error", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+#pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
+        [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
+        internal static extern string GetLastError();
     }
 }

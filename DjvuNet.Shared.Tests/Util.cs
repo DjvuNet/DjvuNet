@@ -21,24 +21,6 @@ namespace DjvuNet.Tests
 {
     public static partial class Util
     {
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowArgumentNull(string paramName, string message)
-        {
-            throw new DjvuArgumentNullException(paramName, message);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowArgumentOutOfRange(string paramName, object actualValue, string message)
-        {
-            throw new DjvuArgumentOutOfRangeException(paramName, actualValue, message);
-        }
-
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void ThrowArgument(string message, string paramName)
-        {
-            throw new DjvuArgumentException(message, paramName);
-        }
-
         private static string _ArtifactsPath;
         private static string _ArtifactsContentPath;
         private static string _ArtifactsDataPath;
@@ -571,15 +553,15 @@ namespace DjvuNet.Tests
         /// <returns>A ratio between 0.0 (identical) and 1.0 (completely opposite) representing the average pixel difference.</returns>
         internal static unsafe double ImageBinaryDiff(byte* ptr1, byte* ptr2, int width, int height, int stride, int pixelSize = 24, int channelSize = 8)
         {
-            if (ptr1 == null) ThrowArgumentNull(nameof(ptr1), "First image buffer pointer cannot be null.");
-            if (ptr2 == null) ThrowArgumentNull(nameof(ptr2), "Second image buffer pointer cannot be null.");
-            if (width <= 0) ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height <= 0) ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (ptr1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(ptr1), "First image buffer pointer cannot be null.");
+            if (ptr2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(ptr2), "Second image buffer pointer cannot be null.");
+            if (width <= 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            if (height <= 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             uint widthBytes = (uint)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
 
             int threadCount = GetThreadCountForImageBinaryDiff((long)width * height);
 
@@ -662,10 +644,10 @@ namespace DjvuNet.Tests
         /// <returns>A ratio between 0.0 (identical) and 1.0 (completely opposite) representing the average pixel difference.</returns>
         internal static unsafe double ImageBinaryDiff(BitmapData imageData1, BitmapData imageData2, int pixelSize = 24, int channelSize = 8)
         {
-            if (imageData1 == null) ThrowArgumentNull(nameof(imageData1), "First image data cannot be null.");
-            if (imageData2 == null) ThrowArgumentNull(nameof(imageData2), "Second image data cannot be null.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (imageData1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(imageData1), "First image data cannot be null.");
+            if (imageData2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(imageData2), "Second image data cannot be null.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             if (imageData1.Stride != imageData2.Stride)
             {
@@ -714,15 +696,15 @@ namespace DjvuNet.Tests
         /// </remarks>
         internal static unsafe double ImageBinaryDiffCore(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize, int channelSize)
         {
-            if (scan0_1 == null) ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
 
             uint pixelSizeInBytes = (uint)pixelSize / 8;
             double result = 0.0;
@@ -899,15 +881,15 @@ namespace DjvuNet.Tests
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         internal static unsafe double ImageDiffVector256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize = 24, int channelSize = 8)
         {
-            if (scan0_1 == null) ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
 
             if (!Avx2.IsSupported)
             {
@@ -1009,15 +991,15 @@ namespace DjvuNet.Tests
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         internal static unsafe double ImageDiffVector128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize = 24, int channelSize = 8)
         {
-            if (scan0_1 == null) ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
 
             if (!Vector128.IsHardwareAccelerated)
             {
@@ -1106,15 +1088,15 @@ namespace DjvuNet.Tests
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         internal static unsafe double ImageDiffParallel256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, ParallelOptions options, int pixelSize = 24, int channelSize = 8)
         {
-            if (scan0_1 == null) ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
 
             if (!Avx2.IsSupported) throw new PlatformNotSupportedException("AVX2 hardware acceleration is not supported on this platform.");
             if (widthBytes < 32) throw new DjvuArgumentOutOfRangeException(nameof(width), widthBytes, "Buffer width must be at least 32 bytes to fill a Vector256 (AVX2) register.");
@@ -1205,15 +1187,15 @@ namespace DjvuNet.Tests
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
         internal static unsafe double ImageDiffParallel128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, ParallelOptions options, int pixelSize = 24, int channelSize = 8)
         {
-            if (scan0_1 == null) ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
 
             if (!Vector128.IsHardwareAccelerated) throw new PlatformNotSupportedException("Vector128 hardware acceleration is not supported on this platform.");
             if (widthBytes < 16) throw new DjvuArgumentOutOfRangeException(nameof(width), widthBytes, "Buffer width must be at least 16 bytes to fill a Vector128 register.");
@@ -1389,15 +1371,15 @@ namespace DjvuNet.Tests
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static unsafe double ImageBinaryDiffScalar(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize = 24, int channelSize = 8)
         {
-            if (scan0_1 == null) ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
 
             ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
 
             ulong result = ImageBinaryDiffSimdFallback(scan0_1, scan0_2, (uint)widthBytes, height, stride);
             double maxChannelValue = (1L << channelSize) - 1;

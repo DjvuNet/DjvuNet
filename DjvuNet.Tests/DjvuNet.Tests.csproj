@@ -93,6 +93,7 @@
     <Compile Include="SerializationTests.cs" />
     <Compile Include="Util\GenericComparerTests.cs" />
     <Compile Include="Util\DjvuDocFixtureTests.cs" />
+    <Compile Include="Util\SingleDocFixtureTests.cs" />
     <Compile Include="Util\ReportingEngineTests.cs" />
     <Compile Include="Util\VerifyTests.cs" />
     <Compile Include="Util\ImageBinaryDiffTests.cs" />

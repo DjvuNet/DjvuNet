@@ -32,7 +32,7 @@ namespace DjvuNet.Extentions
         /// <returns></returns>
         public static System.Drawing.Rectangle OrientRectangle(this Graphics.Rectangle rectangle, int pageHeight)
         {
-            return new System.Drawing.Rectangle(rectangle.Right, pageHeight - rectangle.Bottom - rectangle.Height, rectangle.Width, rectangle.Height);
+            return new System.Drawing.Rectangle(rectangle.XMin, pageHeight - rectangle.YMin - rectangle.Height, rectangle.Width, rectangle.Height);
         }
 
     }

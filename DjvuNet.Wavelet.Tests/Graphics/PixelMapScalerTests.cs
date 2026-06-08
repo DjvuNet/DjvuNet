@@ -467,18 +467,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = 47,
-                Bottom = 0,
-                Top = 27
+                XMin = 0,
+                XMax = 47,
+                YMin = 0,
+                YMax = 27
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 32,
-                Left = 0,
-                Bottom = 0,
-                Top = 18
+                XMin = 32,
+                XMax = 0,
+                YMin = 0,
+                YMax = 18
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -499,18 +499,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = 48,
-                Bottom = 0,
-                Top = 23
+                XMin = 0,
+                XMax = 48,
+                YMin = 0,
+                YMax = 23
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = 32,
-                Bottom = 0,
-                Top = 18
+                XMin = 0,
+                XMax = 32,
+                YMin = 0,
+                YMax = 18
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -531,20 +531,20 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = 48,
-                Bottom = 0,
-                Top = 27
+                XMin = 0,
+                XMax = 48,
+                YMin = 0,
+                YMax = 27
             };
 
             srcRect.XMin += 1;
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = 32,
-                Bottom = 0,
-                Top = 18
+                XMin = 0,
+                XMax = 32,
+                YMin = 0,
+                YMax = 18
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -565,20 +565,20 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = 48,
-                Bottom = 0,
-                Top = 27
+                XMin = 0,
+                XMax = 48,
+                YMin = 0,
+                YMax = 27
             };
 
             srcRect.YMin += 1;
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = 32,
-                Bottom = 0,
-                Top = 18
+                XMin = 0,
+                XMax = 32,
+                YMin = 0,
+                YMax = 18
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -599,20 +599,20 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = 48,
-                Bottom = 0,
-                Top = 27
+                XMin = 0,
+                XMax = 48,
+                YMin = 0,
+                YMax = 27
             };
 
             srcRect.XMax -= 1;
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = 32,
-                Bottom = 0,
-                Top = 18
+                XMin = 0,
+                XMax = 32,
+                YMin = 0,
+                YMax = 18
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -633,20 +633,20 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = 48,
-                Bottom = 0,
-                Top = 27
+                XMin = 0,
+                XMax = 48,
+                YMin = 0,
+                YMax = 27
             };
 
             srcRect.YMax -= 1;
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = 32,
-                Bottom = 0,
-                Top = 18
+                XMin = 0,
+                XMax = 32,
+                YMin = 0,
+                YMax = 18
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -667,18 +667,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = 48,
-                Bottom = 0,
-                Top = 27
+                XMin = 0,
+                XMax = 48,
+                YMin = 0,
+                YMax = 27
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = 32,
-                Bottom = 0,
-                Top = 18
+                XMin = 0,
+                XMax = 32,
+                YMin = 0,
+                YMax = 18
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -702,18 +702,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = srcWidth,
-                Bottom = 0,
-                Top = srcHeight
+                XMin = 0,
+                XMax = srcWidth,
+                YMin = 0,
+                YMax = srcHeight
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -737,18 +737,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 1,
-                Left = srcWidth + 1,
-                Bottom = 0,
-                Top = srcHeight
+                XMin = 1,
+                XMax = srcWidth + 1,
+                YMin = 0,
+                YMax = srcHeight
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -769,18 +769,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = srcWidth,
-                Bottom = 1,
-                Top = srcHeight + 1
+                XMin = 0,
+                XMax = srcWidth,
+                YMin = 1,
+                YMax = srcHeight + 1
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -801,18 +801,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = -1,
-                Left = srcWidth - 1,
-                Bottom = 0,
-                Top = srcHeight
+                XMin = -1,
+                XMax = srcWidth - 1,
+                YMin = 0,
+                YMax = srcHeight
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -833,18 +833,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = srcWidth,
-                Bottom = -1,
-                Top = srcHeight - 1
+                XMin = 0,
+                XMax = srcWidth,
+                YMin = -1,
+                YMax = srcHeight - 1
             };
 
             Rectangle targetRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -865,18 +865,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = srcWidth,
-                Bottom = 0,
-                Top = srcHeight
+                XMin = 0,
+                XMax = srcWidth,
+                YMin = 0,
+                YMax = srcHeight
             };
 
             Rectangle redRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -903,18 +903,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = srcWidth,
-                Bottom = 0,
-                Top = srcHeight
+                XMin = 0,
+                XMax = srcWidth,
+                YMin = 0,
+                YMax = srcHeight
             };
 
             Rectangle redRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -941,18 +941,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = srcWidth,
-                Bottom = 0,
-                Top = srcHeight
+                XMin = 0,
+                XMax = srcWidth,
+                YMin = 0,
+                YMax = srcHeight
             };
 
             Rectangle redRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
@@ -979,18 +979,18 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle srcRect = new Rectangle
             {
-                Right = 0,
-                Left = srcWidth,
-                Bottom = 0,
-                Top = srcHeight
+                XMin = 0,
+                XMax = srcWidth,
+                YMin = 0,
+                YMax = srcHeight
             };
 
             Rectangle redRect = new Rectangle
             {
-                Right = 0,
-                Left = targetWidth,
-                Bottom = 0,
-                Top = targetHeight
+                XMin = 0,
+                XMax = targetWidth,
+                YMin = 0,
+                YMax = targetHeight
             };
 
             IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);

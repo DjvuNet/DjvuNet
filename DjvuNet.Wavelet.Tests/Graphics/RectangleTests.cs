@@ -21,15 +21,15 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(target2.Empty);
             target2.Clear();
             Assert.True(target2.Empty);
-            Assert.Equal<int>(0, target2.Right);
-            Assert.Equal<int>(0, target2.Bottom);
+            Assert.Equal<int>(0, target2.XMin);
+            Assert.Equal<int>(0, target2.YMin);
 
             var target3 = new Rectangle(1, 100, 1, 10);
             Assert.False(target3.Empty);
             target3.Clear();
             Assert.True(target3.Empty);
-            Assert.Equal<int>(0, target3.Right);
-            Assert.Equal<int>(0, target3.Bottom);
+            Assert.Equal<int>(0, target3.XMin);
+            Assert.Equal<int>(0, target3.YMin);
             Assert.Equal<int>(0, target3.Width);
             Assert.Equal<int>(0, target3.Height);
         }
@@ -69,14 +69,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = 0,
-                Top = 0
+                XMax = 0,
+                YMax = 0
             };
 
             Assert.False(rect2.Contains(rect1));
@@ -132,15 +132,15 @@ namespace DjvuNet.Graphics.Tests
             Assert.True(target2.Empty);
             var result2 = target2.Duplicate();
             Assert.True(result2.Empty);
-            Assert.Equal<int>(target2.Right, result2.Right);
-            Assert.Equal<int>(target2.Bottom, result2.Bottom);
+            Assert.Equal<int>(target2.XMin, result2.XMin);
+            Assert.Equal<int>(target2.YMin, result2.YMin);
 
             var target3 = new Rectangle(1, 100, 1, 10);
             Assert.False(target3.Empty);
             var result3 = target3.Duplicate();
             Assert.True(result3.Equals(target3));
-            Assert.Equal<int>(target3.Right, result3.Right);
-            Assert.Equal<int>(target3.Bottom, result3.Bottom);
+            Assert.Equal<int>(target3.XMin, result3.XMin);
+            Assert.Equal<int>(target3.YMin, result3.YMin);
             Assert.Equal<int>(target3.Width, result3.Width);
             Assert.Equal<int>(target3.Height, result3.Height);
         }
@@ -218,10 +218,10 @@ namespace DjvuNet.Graphics.Tests
         {
             Rectangle rect = new Rectangle
             {
-                Left = 0,
-                Bottom = 0,
-                Right = 100,
-                Top = 1000,
+                XMax = 0,
+                YMin = 0,
+                XMin = 100,
+                YMax = 1000,
             };
 
             Assert.Equal(100 * 1000, rect.Area);
@@ -232,10 +232,10 @@ namespace DjvuNet.Graphics.Tests
         {
             Rectangle rect = new Rectangle
             {
-                Left = -11,
-                Bottom = -200,
-                Right = 100,
-                Top = 1000,
+                XMax = -11,
+                YMin = -200,
+                XMin = 100,
+                YMax = 1000,
             };
 
             Assert.Equal((1000 + 200) * (11 + 100), rect.Area);
@@ -249,14 +249,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Assert.True(rect1 == rect2);
@@ -270,14 +270,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Assert.False(rect1 != rect2);
@@ -291,14 +291,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Assert.True(rect1.Equals((object) rect2));
@@ -312,14 +312,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Assert.False(rect1.Equals((object)null));
@@ -334,10 +334,10 @@ namespace DjvuNet.Graphics.Tests
                 dict.Add(
                     new Rectangle
                     {
-                        Top = (i * 2 + 1) * 2,
-                        Right = (i * 3 + 2) * 3,
-                        Left = 0,
-                        Bottom = 0,
+                        YMax = (i * 2 + 1) * 2,
+                        XMin = (i * 3 + 2) * 3,
+                        XMax = 0,
+                        YMin = 0,
                     }, i);
             }
         }
@@ -362,14 +362,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rectEmpty = new Rectangle
@@ -387,14 +387,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rectEmpty = new Rectangle
@@ -412,14 +412,14 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect1 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rect2 = new Rectangle
             {
-                Left = width,
-                Top = height
+                XMax = width,
+                YMax = height
             };
 
             Rectangle rectEmpty = new Rectangle

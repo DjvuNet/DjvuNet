@@ -23,49 +23,35 @@ namespace DjvuNet.Wavelet
 
         public int Bytes
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _CBytes; }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal set { _CBytes = value; }
         }
 
         public int Serial
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _CSerial; }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal set { _CSerial = value; }
         }
 
         public int Slices
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _CSlices; }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal set { _CSlices = value; }
         }
 
         public float DbFrac
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _dBFrac; }
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { _dBFrac = value; }
         }
 
         public int Height
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return (_YMap != null) ? _YMap.Height : 0; }
         }
 
         public int Width
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return (_YMap != null) ? _YMap.Width : 0; }
         }
 

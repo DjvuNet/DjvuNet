@@ -522,10 +522,10 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                Left = 0,
-                Bottom = 0,
-                Right = width,
-                Top = height,
+                XMax = width,
+                YMin = 0,
+                XMin = 0,
+                YMax = height,
             };
 
             map.Downsample(map, subsample, rect);
@@ -545,10 +545,10 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                Left = 0,
-                Bottom = 0,
-                Right = width / 2,
-                Top = height,
+                XMax = width / 2,
+                YMin = 0,
+                XMin = -5,
+                YMax = height,
             };
 
             Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
@@ -566,10 +566,10 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                Left = 0,
-                Bottom = -32,
-                Right = width,
-                Top = height,
+                XMax = 0,
+                YMin = -32,
+                XMin = width,
+                YMax = height,
             };
 
             Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
@@ -587,10 +587,10 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                Left = 32,
-                Bottom = 0,
-                Right = width,
-                Top = height,
+                XMax = 32,
+                YMin = -1,
+                XMin = 0,
+                YMax = height,
             };
 
             Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
@@ -608,10 +608,10 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                Left = 0,
-                Bottom = 0,
-                Right = width,
-                Top = height * 2,
+                XMax = 0,
+                YMin = 0,
+                XMin = width,
+                YMax = height * 2,
             };
 
             Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect", () => map.Downsample(map, subsample, rect));
@@ -651,7 +651,7 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(512, 512, Pixel.BluePixel);
             var map2 = CreateInitVerifyPixelMap(1024, 1024, Pixel.GreenPixel);
             Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect",
-                () => map.Downsample43(map2, new Rectangle { Left = 0, Bottom = 0, Top = -100, Right = -2048}));
+                () => map.Downsample43(map2, new Rectangle { XMax = 0, YMin = 0, YMax = -100, XMin = -2048}));
         }
 
         [Fact]
@@ -828,7 +828,7 @@ namespace DjvuNet.Graphics.Tests
             int width = 128;
             int height = 128;
             Pixel color = Pixel.WhitePixel;
-            Rectangle rect = new Rectangle { Left = -10, Bottom = -10, Right = 200, Top = 200 };
+            Rectangle rect = new Rectangle { XMax = -10, YMin = -10, XMin = 200, YMax = 200 };
 
             IBitmap bmp = BitmapTests.CreateIntiFillVerifyBitmap(width, height, 0, -1);
             IPixelMap map = CreateInitVerifyPixelMap(width, height, color);
@@ -843,7 +843,7 @@ namespace DjvuNet.Graphics.Tests
             int height = 128;
             Pixel color = new Pixel(107, 125, 93);
             Pixel color2 = new Pixel(-77, -77, -77);
-            Rectangle rect = new Rectangle { Left = 100, Bottom = 0, Right = 0, Top = 100 };
+            Rectangle rect = new Rectangle { XMax = 100, YMin = 0, XMin = 0, YMax = 100 };
 
             IBitmap bmp = BitmapTests.CreateIntiFillVerifyBitmap(width, height, 0, 127);
             bmp.Grays = 256;
@@ -859,7 +859,7 @@ namespace DjvuNet.Graphics.Tests
             int height = 128;
             Pixel color = new Pixel(107, 125, 93);
             Pixel color2 = new Pixel(-77, -77, -77);
-            Rectangle rect = new Rectangle { Left = 100, Bottom = 0, Right = 0, Top = 100 };
+            Rectangle rect = new Rectangle { XMax = 100, YMin = 0, XMin = 0, YMax = 100 };
 
             IBitmap bmp = BitmapTests.CreateIntiFillVerifyBitmap(width/2, height/2, 0, 127);
             bmp.Grays = 256;
