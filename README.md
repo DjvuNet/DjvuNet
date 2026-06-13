@@ -3,9 +3,11 @@ DjvuNet Library
 
 ## CI status of master branch
 
-| Windows | Linux | macOS |
-| :---: | :---: | :---: |
-| ![Image](https://ci.appveyor.com/api/projects/status/github/djvunet/djvunet?svg=true) | [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet) | [![Build Status](https://travis-ci.org/DjvuNet/DjvuNet.svg?branch=dev)](https://travis-ci.org/DjvuNet/DjvuNet) |
+| OS / Architecture | x64 | arm64 |
+| :--- | :---: | :---: |
+| **Windows** | [![CI Build](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml) | [![CI Build](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml) |
+| **Linux** | [![CI Build](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml) | [![CI Build](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml) |
+| **macOS** | [![CI Build](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml) | [![CI Build](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/DjvuNet/DjvuNet/actions/workflows/build.yml) |
 
 
 ## Introduction
@@ -233,7 +235,13 @@ cd djvunet
 `````
 Here one can run build.cmd script from command line (command accepts multiple configuration parameters)
 `````
-build -p x64 -c Release -t Rebuild -Test -f netcoreapp10.0 (execute build -h to see all available options)
+build -p x64 -c Release -t Rebuild -Test -f net10.0 (execute build -h to see all available options)
+`````
+Available dependencies fetching modes:
+`````
+By default, immutable tar.gz snapshots from latest tagged release are downloaded.
+Use -cdps or -CloneDeps [full] to bypass tar.gz tagged release downloads and execute git clone for artifacts, djvulibre, and libgit2sharp.
+This allows building with repository states unsynchronized to given tags between tagged releases based on latest commits.
 `````
 Available configurations:
 `````
@@ -267,7 +275,7 @@ All tests should pass except for skipped.
 
 Performance tests can be run with help of DjvuNetTest project.
 
-### Windows for netcoreapp10.0 target
+### Windows for net10.0 target
 
 #### Prerequisites
 
@@ -316,7 +324,7 @@ command line switches to build script:
 build -c {Configuration} -p {Platform} -f {Framework} -Test -sn
 `````
 
-### Linux for netcoreapp10.0 target
+### Linux for net10.0 target
 
 #### Prerequisites
 
@@ -345,19 +353,19 @@ Use build script * build.sh * which will automatically install required .NET Cor
 
 Building with script:
 `````
-./build.sh -t Rebuild -c Release -p x64 -f netcoreapp10.0
+./build.sh -t Rebuild -c Release -p x64 -f net10.0
 `````
 
 #### Testing
 
 The easiest way to run tests is to use build.sh script with -Test command line switch. Script will automatically download required test artifacts if not present, build the repository, and run tests:
 `````
-./build.sh -t Build -c Release -p x64 -f netcoreapp10.0 -Test
+./build.sh -t Build -c Release -p x64 -f net10.0 -Test
 `````
 
 If you want to build tests only and run them manually use -BuildTests switch:
 `````
-./build.sh -t Build -c Release -p x64 -f netcoreapp10.0 -BuildTests
+./build.sh -t Build -c Release -p x64 -f net10.0 -BuildTests
 `````
 
 Required for tests data and files can be downloaded manually - use latest available release.
@@ -385,17 +393,23 @@ dotnet publish/path/DjvuNet.Wavelet.Tests.dll
 `````
 
 
-### macOS for netcoreapp10.0 target
+### macOS for net10.0 target
 
-### Temporarily not supported by scripts and not tested after dependency updates, however, one can try to build manually following Linux instructions as there should be no significant differences in build and test process on macOS. We will try to fix scripts and test on macOS as soon as possible.
+The macOS build and test process has full parity with Linux and is fully supported by the unified `build.sh` script.
 
 #### Prerequisites
 
-Download and install the .NET Core SDK from [.NET Downloads](https://www.microsoft.com/net/download/core).
+Install required tools and dependencies using Homebrew:
+
+`````
+brew install autoconf automake libtool mono-libgdiplus
+`````
+
+Download and install the .NET 10.0 SDK from [.NET Downloads](https://dotnet.microsoft.com/download/dotnet/10.0).
 
 #### Building and Testing
 
-Follow Linux instructions for Building and Testing
+Follow the Linux instructions for Building and Testing using the `./build.sh` script.
 
 ### Fast Developer Loop (Targeted Build, Test and Benchmark Execution)
 

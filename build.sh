@@ -42,8 +42,13 @@ usage()
     echo "  -Test                          Alias for -RunTests. Build and run the test projects."
     echo ""
     echo "  -sn, -SkipNative               Skip cloning, building, and testing of native components"
-    echo "                                 (libdjvulibre) and its managed wrapper (DjvuNet.DjvuLibre)."
+    echo "                                 (libdjvulibre) and its managed wrapper (DjvuNet.DjvuLibre)"
+    echo "                                 and tests depending on it."
     echo "                                 When omitted, native dependencies are processed (SkipNative=False)."
+    echo ""
+    echo "  -cdps, -CloneDeps [full]       Bypass tar.gz snapshot downloads for dependencies (DjVuLibre,"
+    echo "                                 artifacts, libgit2sharp) and use git clone instead."
+    echo "                                 Defaults to shallow clone (--depth 1). Pass 'full' for full history."
     echo ""
     echo "  -v, -Verbosity <level>         Verbosity (q[uiet], m[inimal], n[ormal], d[etailed], diag[nostic]). Default: normal."
     echo ""
@@ -687,6 +692,7 @@ _Verbosity="normal"
 _Processors=$__NumProc
 _OS="Linux"
 _SkipNative=""
+_CloneDeps=""
 _BuildDjvuNet="1"
 _BuildTools=""
 _BuildTests=""
@@ -747,6 +753,16 @@ while [[ $# -gt 0 ]]; do
         _Framework="$2"; shift 2 ;;
         -SkipNative|-sn)
         _SkipNative=1; shift 1 ;;
+        -CloneDeps|-cdps)
+        _CloneDepsLower=$(echo "$2" | tr '[:upper:]' '[:lower:]')
+        if [[ "$_CloneDepsLower" == "full" ]]; then
+            _CloneDeps="full"
+            shift 2
+        else
+            _CloneDeps=1
+            shift 1
+        fi
+        ;;
         -Verbosity|-v)
         _Verbosity="$2"; shift 2 ;;
         -Processors|-proc)
@@ -930,16 +946,30 @@ if [[ -n "$_BuildTools" ]]; then
     if [ ! -f "${__ProjectRoot}/${__LibGit2SharpProj}" ]; then
         echo "BUILD: Setting up libgit2sharp"
         __Lg2sArchiveUrl="${__LibGit2SharpRepoUri}/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
-        echo "BUILD: Downloading release archive of libgit2sharp for tag ${__ArtifactsReleaseTag}"
-        download_retry "$__Lg2sArchiveUrl" "libgit2sharp.tar.gz"
-        if [ $? -eq 0 ]; then
-            echo "BUILD: Extracting libgit2sharp archive"
-            mkdir -p "${__ProjectRoot}/eng/tools/libgit2sharp"
-            tar -xzf libgit2sharp.tar.gz -C "${__ProjectRoot}/eng/tools/libgit2sharp" --strip-components=1
-            rm libgit2sharp.tar.gz
+        
+        _ForceCloneLibGit2Sharp=""
+        if [ -n "$_CloneDeps" ]; then
+            _ForceCloneLibGit2Sharp=1
         else
-            echo "BUILD: Download failed, falling back to git clone"
-            git_clone_retry "${__LibGit2SharpRepoUri}.git" "eng/tools/libgit2sharp" "--depth 1 -c core.autocrlf=false"
+            echo "BUILD: Downloading release archive of libgit2sharp for tag ${__ArtifactsReleaseTag}"
+            download_retry "$__Lg2sArchiveUrl" "libgit2sharp.tar.gz"
+            if [ $? -eq 0 ]; then
+                echo "BUILD: Extracting libgit2sharp archive"
+                mkdir -p "${__ProjectRoot}/eng/tools/libgit2sharp"
+                tar -xzf libgit2sharp.tar.gz -C "${__ProjectRoot}/eng/tools/libgit2sharp" --strip-components=1
+                rm libgit2sharp.tar.gz
+            else
+                _ForceCloneLibGit2Sharp=1
+            fi
+        fi
+        
+        if [ -n "$_ForceCloneLibGit2Sharp" ]; then
+            echo "BUILD: Download bypassed or failed, falling back to git clone"
+            __CloneArgs="-c core.autocrlf=false"
+            if [[ ! "$_CloneDeps" == "full" ]]; then
+                __CloneArgs="--depth 1 $__CloneArgs"
+            fi
+            git_clone_retry "${__LibGit2SharpRepoUri}.git" "eng/tools/libgit2sharp" $__CloneArgs
         fi
     fi
 fi
@@ -1110,17 +1140,32 @@ if [ -z "$_SkipNative" ]; then
     if [ ! -f "$__ProjectRoot/$__DjvuLibreDir/autogen.sh" ]; then
         echo "BUILD: Setting up DjVuLibre"
         __ArchiveUrl="https://github.com/DjvuNet/DjVuLibre/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
-        echo "BUILD: Downloading release archive of DjVuLibre for tag ${__ArtifactsReleaseTag}"
-        download_retry "$__ArchiveUrl" "djvulibre.tar.gz"
-        if [ $? -eq 0 ]; then
-            echo "BUILD: Extracting DjVuLibre archive"
-            mkdir -p "$__DjvuLibreDir"
-            tar -xzf djvulibre.tar.gz -C "$__DjvuLibreDir" --strip-components=1
-            rm djvulibre.tar.gz
+        
+        _ForceCloneDjvuLibre=""
+        if [ -n "$_CloneDeps" ]; then
+            _ForceCloneDjvuLibre=1
         else
-            echo "BUILD: Bypassing archive download, executing git clone"
-            git_clone_retry "https://github.com/DjvuNet/DjVuLibre.git" "$__DjvuLibreDir" --depth 1 -c core.autocrlf=false
+            echo "BUILD: Downloading release archive of DjVuLibre for tag ${__ArtifactsReleaseTag}"
+            download_retry "$__ArchiveUrl" "djvulibre.tar.gz"
+            if [ $? -eq 0 ]; then
+                echo "BUILD: Extracting DjVuLibre archive"
+                mkdir -p "$__DjvuLibreDir"
+                tar -xzf djvulibre.tar.gz -C "$__DjvuLibreDir" --strip-components=1
+                rm djvulibre.tar.gz
+            else
+                _ForceCloneDjvuLibre=1
+            fi
         fi
+
+        if [ -n "$_ForceCloneDjvuLibre" ]; then
+            echo "BUILD: Bypassing archive download, executing git clone"
+            __CloneArgs="-c core.autocrlf=false"
+            if [[ ! "$_CloneDeps" == "full" ]]; then
+                __CloneArgs="--depth 1 $__CloneArgs"
+            fi
+            git_clone_retry "https://github.com/DjvuNet/DjVuLibre.git" "$__DjvuLibreDir" $__CloneArgs
+        fi
+        
         if [ $? -ne 0 ]; then _SkipNative=1; fi
     else
         echo "BUILD: DjvuLibre already cloned"
@@ -1345,13 +1390,37 @@ if [ -n "$_BuildTests" ]; then
     # Clone test data
     if [ ! -f "./artifacts/test001C.djvu" ]; then
         echo ""
-        echo "BUILD: Downloading release archive of artifacts for tag ${__ArtifactsReleaseTag}"
-        download_retry "${__ArtifactsTestDataUri}" "artifacts.tar.gz"
-        if [ $? -eq 0 ]; then
+        
+        _ForceCloneArtifacts=""
+        if [ -n "$_CloneDeps" ]; then
+            _ForceCloneArtifacts=1
+        else
+            echo "BUILD: Downloading release archive of artifacts for tag ${__ArtifactsReleaseTag}"
+            download_retry "${__ArtifactsTestDataUri}" "artifacts.tar.gz"
+            if [ $? -eq 0 ]; then
+                rm -rf artifacts
+                mkdir artifacts
+                tar -xzf artifacts.tar.gz -C artifacts --strip-components=1
+                rm artifacts.tar.gz
+            else
+                _ForceCloneArtifacts=1
+            fi
+        fi
+        
+        if [ -n "$_ForceCloneArtifacts" ]; then
+            echo "BUILD: Download bypassed or failed, executing git clone for artifacts"
             rm -rf artifacts
-            mkdir artifacts
-            tar -xzf artifacts.tar.gz -C artifacts --strip-components=1
-            rm artifacts.tar.gz
+            __CloneArgs=""
+            if [[ ! "$_CloneDeps" == "full" ]]; then
+                __CloneArgs="--depth 1"
+            fi
+            git_clone_retry "https://github.com/DjvuNet/artifacts.git" "artifacts" $__CloneArgs
+            
+            if [ $? -ne 0 ]; then
+                echo ""
+                echo "BUILD: Error: artifacts git clone returned error"
+                exit 1
+            fi
         fi
     fi
 

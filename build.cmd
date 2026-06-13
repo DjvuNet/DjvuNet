@@ -69,6 +69,7 @@ for /f "tokens=2 delims==" %%A in ('wmic cpu get NumberOfCores /value 2^>nul') d
 if !_Processors! EQU 0 set "_Processors=%NUMBER_OF_PROCESSORS%"
 set "_TargetOS=Windows"
 set "_SkipNative="
+set "_CloneDeps="
 set "_BuildDjvuNet=1"
 set "_BuildTools="
 set "_BuildTests="
@@ -126,6 +127,12 @@ if /i "%~1"=="-Framework"           (set "_Framework=%2"&shift&shift&goto :parse
 if /i "%~1"=="-f"                   (set "_Framework=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-SkipNative"          (set "_SkipNative=1"&shift&goto :parse)
 if /i "%~1"=="-sn"                  (set "_SkipNative=1"&shift&goto :parse)
+if /i "%~1"=="-CloneDeps" (
+    if /i "%~2"=="full" (set "_CloneDeps=full"&shift&shift&goto :parse) else (set "_CloneDeps=1"&shift&goto :parse)
+)
+if /i "%~1"=="-cdps" (
+    if /i "%~2"=="full" (set "_CloneDeps=full"&shift&shift&goto :parse) else (set "_CloneDeps=1"&shift&goto :parse)
+)
 if /i "%~1"=="-Verbosity"           (set "_Verbosity=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-v"                   (set "_Verbosity=%2"&shift&shift&goto :parse)
 if /i "%~1"=="-Processors"          (set "_Processors=%2"&shift&shift&goto :parse)
@@ -434,19 +441,31 @@ if not exist ".\%__DjvuLibreDir%\win32\djvulibre\libdjvulibre\libdjvulibre.vcxpr
     echo %__MsgPrefix%Setting up DjVuLibre
 
     set "__ArchiveUrl=https://github.com/DjvuNet/DjVuLibre/archive/refs/tags/!__ArtifactsReleaseTag!.tar.gz"
-    echo %__MsgPrefix%Downloading release archive of DjVuLibre for tag !__ArtifactsReleaseTag!
-    call :download_retry "!__ArchiveUrl!" "djvulibre.tar.gz"
-    if !ERRORLEVEL! EQU 0 (
-         echo %__MsgPrefix%Extracting DjVuLibre archive
-         if not exist "%__DjvuLibreDir%" mkdir "%__DjvuLibreDir%"
-         tar -xzf djvulibre.tar.gz -C "%__DjvuLibreDir%" --strip-components=1
-         del /f /q djvulibre.tar.gz
+    
+    set "_ForceCloneDjvuLibre="
+    if defined _CloneDeps (
+        set "_ForceCloneDjvuLibre=1"
     ) else (
+        echo %__MsgPrefix%Downloading release archive of DjVuLibre for tag !__ArtifactsReleaseTag!
+        call :download_retry "!__ArchiveUrl!" "djvulibre.tar.gz"
+        if !ERRORLEVEL! EQU 0 (
+             echo %__MsgPrefix%Extracting DjVuLibre archive
+             if not exist "%__DjvuLibreDir%" mkdir "%__DjvuLibreDir%"
+             tar -xzf djvulibre.tar.gz -C "%__DjvuLibreDir%" --strip-components=1
+             del /f /q djvulibre.tar.gz
+        ) else (
+            set "_ForceCloneDjvuLibre=1"
+        )
+    )
+
+    if defined _ForceCloneDjvuLibre (
         echo %__MsgPrefix%Bypassing archive download, executing git clone
+        set "__CloneArgs=-c core.autocrlf=false"
+        if not "!_CloneDeps!"=="full" set "__CloneArgs=--depth 1 !__CloneArgs!"
         call :git_clone_retry ^
             "https://github.com/DjvuNet/DjVuLibre.git" ^
             "%__DjvuLibreDir%" ^
-            "--depth 1 -c core.autocrlf=false"
+            "!__CloneArgs!"
     )
 
     if not [!ERRORLEVEL!]==[0] goto :skip_native_setup
@@ -592,19 +611,31 @@ if defined _BuildTools (
     if not exist "!__RepoRootDir!!__LibGit2SharpProj!" (
         echo !__MsgPrefix!Setting up libgit2sharp
         set "__Lg2sArchiveUrl=!__LibGit2SharpRepoUri!/archive/refs/tags/!__ArtifactsReleaseTag!.tar.gz"
-        echo !__MsgPrefix!Downloading release archive of libgit2sharp for tag !__ArtifactsReleaseTag!
-        call :download_retry "!__Lg2sArchiveUrl!" "libgit2sharp.tar.gz"
-        if !ERRORLEVEL! EQU 0 (
-            echo !__MsgPrefix!Extracting libgit2sharp archive
-            if not exist "!__RepoRootDir!eng\tools\libgit2sharp" mkdir "!__RepoRootDir!eng\tools\libgit2sharp"
-            tar.exe -xzf libgit2sharp.tar.gz -C "!__RepoRootDir!eng\tools\libgit2sharp" --strip-components=1
-            del /f /q libgit2sharp.tar.gz
+        
+        set "_ForceCloneLibGit2Sharp="
+        if defined _CloneDeps (
+            set "_ForceCloneLibGit2Sharp=1"
         ) else (
-            echo !__MsgPrefix!Download failed, falling back to git clone
+            echo !__MsgPrefix!Downloading release archive of libgit2sharp for tag !__ArtifactsReleaseTag!
+            call :download_retry "!__Lg2sArchiveUrl!" "libgit2sharp.tar.gz"
+            if !ERRORLEVEL! EQU 0 (
+                echo !__MsgPrefix!Extracting libgit2sharp archive
+                if not exist "!__RepoRootDir!eng\tools\libgit2sharp" mkdir "!__RepoRootDir!eng\tools\libgit2sharp"
+                tar.exe -xzf libgit2sharp.tar.gz -C "!__RepoRootDir!eng\tools\libgit2sharp" --strip-components=1
+                del /f /q libgit2sharp.tar.gz
+            ) else (
+                set "_ForceCloneLibGit2Sharp=1"
+            )
+        )
+        
+        if defined _ForceCloneLibGit2Sharp (
+            echo !__MsgPrefix!Download bypassed or failed, falling back to git clone
+            set "__CloneArgs=-c core.autocrlf=false"
+            if not "!_CloneDeps!"=="full" set "__CloneArgs=--depth 1 !__CloneArgs!"
             call :git_clone_retry ^
                 "!__LibGit2SharpRepoUri!.git" ^
                 "eng\tools\libgit2sharp" ^
-                "--depth 1 -c core.autocrlf=false"
+                "!__CloneArgs!"
         )
     )
 )
@@ -785,22 +816,43 @@ if not defined _Test (
 
 if not exist .\artifacts\test001C.djvu (
     echo.
-    echo !__MsgPrefix!Downloading release archive of artifacts for tag !__ArtifactsReleaseTag!
-    call :download_retry "!__ArtifactsTestDataUri!" "artifacts.tar.gz"
-    if not [!ERRORLEVEL!]==[0] (
-        echo.
-        echo !__MsgPrefix!Error: artifacts download returned error
-        goto exit_error
+    set "_ForceCloneArtifacts="
+    if defined _CloneDeps (
+        set "_ForceCloneArtifacts=1"
+    ) else (
+        echo !__MsgPrefix!Downloading release archive of artifacts for tag !__ArtifactsReleaseTag!
+        call :download_retry "!__ArtifactsTestDataUri!" "artifacts.tar.gz"
+        if !ERRORLEVEL! EQU 0 (
+            if exist artifacts\ rmdir /s /q artifacts
+            mkdir artifacts
+            tar.exe -xzf artifacts.tar.gz -C artifacts --strip-components=1
+            if not [!ERRORLEVEL!]==[0] (
+                echo.
+                echo !__MsgPrefix!Error: artifacts extraction returned error
+                goto exit_error
+            )
+            del artifacts.tar.gz
+        ) else (
+            set "_ForceCloneArtifacts=1"
+        )
     )
-    if exist artifacts\ rmdir /s /q artifacts
-    mkdir artifacts
-    tar.exe -xzf artifacts.tar.gz -C artifacts --strip-components=1
-    if not [!ERRORLEVEL!]==[0] (
-        echo.
-        echo !__MsgPrefix!Error: artifacts extraction returned error
-        goto exit_error
+    
+    if defined _ForceCloneArtifacts (
+        echo !__MsgPrefix!Download bypassed or failed, executing git clone for artifacts
+        if exist artifacts\ rmdir /s /q artifacts
+        set "__CloneArgs="
+        if not "!_CloneDeps!"=="full" set "__CloneArgs=--depth 1"
+        call :git_clone_retry ^
+            "https://github.com/DjvuNet/artifacts.git" ^
+            "artifacts" ^
+            "!__CloneArgs!"
+            
+        if not [!ERRORLEVEL!]==[0] (
+            echo.
+            echo !__MsgPrefix!Error: artifacts git clone returned error
+            goto exit_error
+        )
     )
-    del artifacts.tar.gz
     echo.
 )
 
@@ -1255,8 +1307,13 @@ echo                                    Default is False (Late Fail): collects a
 echo                                    build, publish and test failures and reports them at the end.
 echo.
 echo   -sn, -SkipNative                 Skip cloning, building, and testing of native components
-echo                                    (libdjvulibre) and its managed wrapper (DjvuNet.DjvuLibre).
+echo                                    (libdjvulibre) and its managed wrapper (DjvuNet.DjvuLibre)
+echo                                    and tests depending on it.
 echo                                    When omitted, native dependencies are processed (SkipNative=False).
+echo.
+echo   -cdps, -CloneDeps [full]         Bypass tar.gz snapshot downloads for dependencies (DjVuLibre,
+echo                                    artifacts, libgit2sharp) and use git clone instead.
+echo                                    Defaults to shallow clone (--depth 1). Pass 'full' for full history.
 echo.
 echo   -v, -Verbosity ^<level^>         Verbosity (q[uiet], m[inimal], n[ormal], d[etailed], diag[nostic]). Default: normal.
 echo.
