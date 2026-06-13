@@ -42,13 +42,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="JB2BlitTests.cs" />
-    <Compile Include="InclChunkTests.cs" />
     <Compile Include="DirmChunkTests.cs" />
-    <Compile Include="PigeonHybridTransformTests.cs" />
-    <Compile Include="PigeonVector128TransformTests.cs" />
-    <Compile Include="PigeonTransformTests.cs" />
+    <Compile Include="InclChunkTests.cs" />
     <Compile Include="IW44CompatibilityTests.cs" />
+    <Compile Include="JB2BlitTests.cs" />
+    <Compile Include="PigeonHybridTransformTests.cs" />
+    <Compile Include="PigeonTransformTests.cs" />
+    <Compile Include="PigeonVector128TransformTests.cs" />
+    <Compile Include="RectangleTests.cs" />
   </ItemGroup>
 
  <ItemGroup>

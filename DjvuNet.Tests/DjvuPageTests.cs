@@ -270,7 +270,7 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width / subsample, page.Height / subsample);
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, (page.Width / subsample), (page.Height / subsample));
                 Graphics.PixelMap map = new Graphics.PixelMap();
                 var result = page.GetBgPixmap(rect, subsample, 2.2, map);
                 Assert.NotNull(result);
@@ -293,7 +293,7 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                DjvuNet.Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width / 12, page.Height / 12);
+                DjvuNet.Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, (page.Width / 12), (page.Height / 12));
                 // By setting subsample 1, align 0 one gets AccessViolationException
                 // subsample 0, align 0 - 10 gives ArgumentException
                 // subsample 12, align 0 gives NullReferenceException
@@ -351,7 +351,7 @@ namespace DjvuNet.Tests
 
                 var page = document.FirstPage;
 
-                Graphics.Rectangle rect = new Graphics.Rectangle(page.Width / 2, 0, page.Width / 2, page.Height);
+                Graphics.Rectangle rect = new Graphics.Rectangle(page.Width / 2, 0, (page.Width / 2), page.Height);
                 var result = page.GetTextForLocation(rect);
                 Assert.NotNull(result);
                 Assert.IsType<string>(result);
@@ -471,7 +471,7 @@ namespace DjvuNet.Tests
 
                         VerifyPixelMap(result);
 
-                        Graphics.Rectangle rect12 = new Graphics.Rectangle(0, 0, page.Width / 12, page.Height / 12);
+                        Graphics.Rectangle rect12 = new Graphics.Rectangle(0, 0, (page.Width / 12), (page.Height / 12));
                         Graphics.PixelMap map2 = new Graphics.PixelMap();
                         result = null;
 

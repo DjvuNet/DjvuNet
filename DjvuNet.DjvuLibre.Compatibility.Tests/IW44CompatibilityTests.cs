@@ -317,11 +317,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                 
                 if (diff > 0.0)
                 {
-                    int diffCount = 1; // Mark as failed
-                    
                     // --- Uncomment for deep scalar debugging ---
                     /*
-                    diffCount = 0;
+                    int diffCount = 0;
                     int maxPreviewLines = 256;
                     StringBuilder errorLog = new StringBuilder();
                     for (int y = 0; y < height; y++)

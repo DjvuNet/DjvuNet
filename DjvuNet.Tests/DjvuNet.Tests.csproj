@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
 
@@ -83,7 +83,7 @@
     <Compile Include="DjvuDocumentTests.cs" />
     <Compile Include="DjvuImageTests.cs" />
     <Compile Include="Errors\DjvuExceptionUtilTests.cs" />
-    <Compile Include="Extentions\ExtentionMethodsTests.cs" />
+    <Compile Include="Extensions\ExtensionMethodsTests.cs" />
     <Compile Include="IO\DjvuReaderTests.cs" />
     <Compile Include="IO\DjvuWriterTests.cs" />
     <Compile Include="Parser\DjvuFormatExceptionTests.cs" />

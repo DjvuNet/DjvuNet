@@ -684,14 +684,14 @@ namespace DjvuNet.Graphics
         {
             Utilities.Verify.SubsampleRange(subsample);
 
-            if (src == this && ((targetRect == null || targetRect == BoundingRectangle) && subsample == 1))
+            if (src == this && ((targetRect.Empty || targetRect == BoundingRectangle) && subsample == 1))
             {
                 return;
             }
 
             Rectangle rect = BoundingRectangle;
 
-            if (targetRect != null)
+            if (!targetRect.Empty)
             {
                 if ((targetRect.XMin < rect.XMin) || (targetRect.YMin < rect.YMin) ||
                     (targetRect.XMax > rect.XMax) || (targetRect.YMax > rect.YMax))
@@ -704,8 +704,9 @@ namespace DjvuNet.Graphics
             }
             else
             {
-                rect = new Rectangle(0, 0, ((src.Width + subsample) - 1) / subsample,
-                                      ((src.Height + subsample) - 1) / subsample);
+                int width =  (((src.Width + subsample) - 1) / subsample);
+                int height =  (((src.Height + subsample) - 1) / subsample);
+                rect = new Rectangle(0, 0, width, height);
             }
 
             Init(rect.Height, rect.Width, null);
@@ -806,13 +807,13 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Downsample43(IMap2 src, Rectangle targetRect)
         {
-            int srcwidth = src.Width;
-            int srcheight = src.Height;
-            int destwidth = (int)Math.Ceiling(srcwidth * 0.75D);
-            int destheight = (int)Math.Ceiling(srcheight * 0.75D);
-            Rectangle rect = new Rectangle(0, 0, destwidth, destheight);
+            int srcWidth = src.Width;
+            int srcHeight = src.Height;
+            int destWidth = (int)Math.Ceiling(srcWidth * 0.75D);
+            int destHeight = (int)Math.Ceiling(srcHeight * 0.75D);
+            Rectangle rect = new Rectangle(0, 0, destWidth, destHeight);
 
-            if (targetRect != null)
+            if (!targetRect.Empty)
             {
                 if ((targetRect.XMin < rect.XMin) || (targetRect.YMin < rect.YMin) || (targetRect.XMax > rect.XMax) || (targetRect.YMax > rect.YMax))
                 {
@@ -822,11 +823,11 @@ namespace DjvuNet.Graphics
                 }
 
                 rect = targetRect;
-                destwidth = rect.Width;
-                destheight = rect.Height;
+                destWidth = rect.Width;
+                destHeight = rect.Height;
             }
 
-            Init(destheight, destwidth, null);
+            Init(destHeight, destWidth, null);
 
             int sy = rect.YMin / 3;
             int dy = rect.YMin - (3 * sy);
@@ -856,25 +857,25 @@ namespace DjvuNet.Graphics
             var dpix0 = CreateGPixelReference(0);
             var dpix1 = CreateGPixelReference(0);
             var dpix2 = CreateGPixelReference(0);
-            while (dy < destheight)
+            while (dy < destHeight)
             {
                 spix0.SetOffset(sy++, sxz);
 
-                if (sy >= srcheight)
+                if (sy >= srcHeight)
                 {
                     sy--;
                 }
 
                 spix1.SetOffset(sy++, sxz);
 
-                if (sy >= srcheight)
+                if (sy >= srcHeight)
                 {
                     sy--;
                 }
 
                 spix2.SetOffset(sy++, sxz);
 
-                if (sy >= srcheight)
+                if (sy >= srcHeight)
                 {
                     sy--;
                 }
@@ -883,14 +884,14 @@ namespace DjvuNet.Graphics
 
                 dpix0.SetOffset((dy < 0) ? 0 : dy, dxz);
 
-                if (++dy >= destheight)
+                if (++dy >= destHeight)
                 {
                     dy--;
                 }
 
                 dpix1.SetOffset((dy < 0) ? 0 : dy, dxz);
 
-                if (++dy >= destheight)
+                if (++dy >= destHeight)
                 {
                     dy--;
                 }
@@ -903,7 +904,7 @@ namespace DjvuNet.Graphics
                 var pix1 = src.PixelRamp(spix1);
                 var pix2 = src.PixelRamp(spix2);
                 var pix3 = src.PixelRamp(spix3);
-                while (dx < destwidth)
+                while (dx < destWidth)
                 {
                     int s00b = pix0.Blue;
                     int s00g = pix0.Green;
@@ -918,7 +919,7 @@ namespace DjvuNet.Graphics
                     int s03g = pix3.Green;
                     int s03r = pix3.Red;
 
-                    if (++sx < srcwidth)
+                    if (++sx < srcWidth)
                     {
                         spix0.IncOffset();
                         spix1.IncOffset();
@@ -943,7 +944,7 @@ namespace DjvuNet.Graphics
                     int s13g = pix3.Green;
                     int s13r = pix3.Red;
 
-                    if (++sx < srcwidth)
+                    if (++sx < srcWidth)
                     {
                         spix0.IncOffset();
                         spix1.IncOffset();
@@ -968,7 +969,7 @@ namespace DjvuNet.Graphics
                     int s23g = pix3.Green;
                     int s23r = pix3.Red;
 
-                    if (++sx < srcwidth)
+                    if (++sx < srcWidth)
                     {
                         spix0.IncOffset();
                         spix1.IncOffset();
@@ -993,7 +994,7 @@ namespace DjvuNet.Graphics
                     int s33g = pix3.Green;
                     int s33r = pix3.Red;
 
-                    if (++sx < srcwidth)
+                    if (++sx < srcWidth)
                     {
                         spix0.IncOffset();
                         spix1.IncOffset();
@@ -1015,7 +1016,7 @@ namespace DjvuNet.Graphics
                     dpix2.Green = (sbyte)(((11 * s03g) + (2 * (s02g + s13g)) + s12g + 8) >> 4);
                     dpix2.Red = (sbyte)(((11 * s03r) + (2 * (s02r + s13r)) + s12r + 8) >> 4);
 
-                    if (++dx < destwidth)
+                    if (++dx < destWidth)
                     {
                         dpix0.IncOffset();
                         dpix1.IncOffset();
@@ -1032,7 +1033,7 @@ namespace DjvuNet.Graphics
                     dpix2.Green = (sbyte)(((7 * (s13g + s23g)) + s12g + s22g + 8) >> 4);
                     dpix2.Red = (sbyte)(((7 * (s13r + s23r)) + s12r + s22r + 8) >> 4);
 
-                    if (++dx < destwidth)
+                    if (++dx < destWidth)
                     {
                         dpix0.IncOffset();
                         dpix1.IncOffset();
@@ -1049,7 +1050,7 @@ namespace DjvuNet.Graphics
                     dpix2.Green = (sbyte)(((11 * s33g) + (2 * (s32g + s23g)) + s22g + 8) >> 4);
                     dpix2.Red = (sbyte)(((11 * s33r) + (2 * (s32r + s23r)) + s22r + 8) >> 4);
 
-                    if (++dx < destwidth)
+                    if (++dx < destWidth)
                     {
                         dpix0.IncOffset();
                         dpix1.IncOffset();
@@ -1327,10 +1328,11 @@ namespace DjvuNet.Graphics
         int subsample, Rectangle bounds, double gamma)
         {
             // Check arguments
-            Rectangle rect = new Rectangle(0, 0, ((foregroundMap.Width * supersample) + subsample - 1) / subsample,
-                                   ((foregroundMap.Height * supersample) + subsample - 1) / subsample);
+            int width = (((foregroundMap.Width * supersample) + subsample - 1) / subsample);
+            int height = (((foregroundMap.Height * supersample) + subsample - 1) / subsample);
+            Rectangle rect = new Rectangle(0, 0, width, height);
 
-            if (bounds != null)
+            if (!bounds.Empty)
             {
                 if ((bounds.XMin < rect.XMin) || (bounds.YMin < rect.YMin) || (bounds.XMax > rect.XMax) ||
                     (bounds.YMax > rect.YMax))

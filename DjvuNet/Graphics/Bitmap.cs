@@ -1072,7 +1072,6 @@ namespace DjvuNet.Graphics
                 _MaxRowOffset = _MaxRowOffset,
                 BytesPerPixel = BytesPerPixel,
                 IsRampNeeded = IsRampNeeded,
-                Properties = Properties,    /// TODO: Fix me
                 _RampData = _RampData,      /// TODO: Fix me
                 RedOffset = RedOffset,
             };

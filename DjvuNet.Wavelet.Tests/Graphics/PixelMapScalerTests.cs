@@ -320,7 +320,7 @@ namespace DjvuNet.Graphics.Tests
 
             };
 
-            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(ref des,ref red));
         }
 
         [Fact()]
@@ -346,7 +346,7 @@ namespace DjvuNet.Graphics.Tests
 
             };
 
-            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(ref des, ref red));
         }
 
         [Fact()]
@@ -372,7 +372,7 @@ namespace DjvuNet.Graphics.Tests
 
             };
 
-            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(ref des, ref red));
         }
 
         [Fact()]
@@ -398,7 +398,7 @@ namespace DjvuNet.Graphics.Tests
 
             };
 
-            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(des, red));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => sclr.CreateRectangles(ref des, ref red));
         }
 
         [Fact()]
@@ -423,7 +423,7 @@ namespace DjvuNet.Graphics.Tests
             {
             };
 
-            sclr.CreateRectangles(des, red);
+            sclr.CreateRectangles(ref des, ref red);
         }
 
         [Fact()]
@@ -452,7 +452,7 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 1080
             };
 
-            sclr.CreateRectangles(des, red);
+            sclr.CreateRectangles(ref des, ref red);
         }
 
         [Fact()]

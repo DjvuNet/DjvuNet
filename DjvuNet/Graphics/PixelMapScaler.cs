@@ -111,7 +111,7 @@ namespace DjvuNet.Graphics
         public Rectangle GetRequiredRect(Rectangle targetRect)
         {
             Rectangle red = new Rectangle();
-            return CreateRectangles(targetRect, red);
+            return CreateRectangles(ref targetRect, ref red);
         }
 
         public void SetSrcSize(int srcWidth, int srcHeight)
@@ -160,7 +160,7 @@ namespace DjvuNet.Graphics
             PrepareCoord(_VCoord, _Redh, _DestHeight, denominator, numerator);
         }
 
-        public Rectangle CreateRectangles(Rectangle desired, Rectangle red)
+        public Rectangle CreateRectangles(ref Rectangle desired, ref Rectangle red)
         {
             Rectangle inp = new Rectangle();
 
@@ -237,7 +237,7 @@ namespace DjvuNet.Graphics
 
             // Compute rectangles
             Rectangle required_red = new Rectangle();
-            Rectangle sourceRect = CreateRectangles(targetRect, required_red);
+            Rectangle sourceRect = CreateRectangles(ref targetRect, ref required_red);
 
             if ( (srcRect.XMin > sourceRect.XMin) || (srcRect.YMin > sourceRect.YMin)
               || (srcRect.XMax < sourceRect.XMax) || (srcRect.YMax < sourceRect.YMax))

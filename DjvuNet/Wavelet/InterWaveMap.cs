@@ -393,8 +393,9 @@ namespace DjvuNet.Wavelet
                 throw new DjvuArgumentException("Rectangle is empty", nameof(rect));
             }
 
-            Rectangle irect = new Rectangle(
-                0, 0, ((Width + subsample) - 1) / subsample, ((Height + subsample) - 1) / subsample);
+            int width =  (((Width + subsample) - 1) / subsample);
+            int height =  (((Height + subsample) - 1) / subsample);
+            Rectangle irect = new Rectangle(0, 0, width, height);
 
             if ((rect.XMin < 0) || (rect.YMin < 0) || (rect.XMax > irect.XMax) || (rect.YMax > irect.YMax))
             {
@@ -413,8 +414,8 @@ namespace DjvuNet.Wavelet
             }
 
             int r = 1;
-            needed[nlevel] = (Rectangle)rect.Duplicate();
-            recomp[nlevel] = (Rectangle)rect.Duplicate();
+            needed[nlevel] = rect;
+            recomp[nlevel] = rect;
 
             for (int i = nlevel - 1; i >= 0; i--)
             {
@@ -504,7 +505,7 @@ namespace DjvuNet.Wavelet
                 r >>= 1;
             }
 
-            Rectangle nrect = rect.Duplicate();
+            Rectangle nrect = rect;
             nrect.Translate(-work.XMin, -work.YMin);
 
             for (int i = nrect.YMin, pidx = (nrect.YMin * dataw), ridx = index;

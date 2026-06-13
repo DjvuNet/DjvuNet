@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <!--
       DjvuNetPackaging.props should go always first due to pack target requirements:
       first PropertyGroup in project defines packaging props
@@ -140,7 +140,7 @@
     <Compile Include="Errors\DjvuFileNotFoundException.cs" />
     <Compile Include="Errors\DjvuInvalidOperationException.cs" />
     <Compile Include="Errors\DjvuNotSupportedException.cs" />
-    <Compile Include="Extentions\ExtentionMethods.cs" />
+    <Compile Include="Extensions\ExtensionMethods.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
     <Compile Include="Graphics\IBitmap.cs" />

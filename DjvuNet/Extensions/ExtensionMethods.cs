@@ -1,16 +1,16 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="ExtentionMethods.cs" company="">
+// -----------------------------------------------------------------------
+// <copyright file="ExtensionMethods.cs" company="">
 // TODO: Update copyright text.
 // </copyright>
 // -----------------------------------------------------------------------
 
-namespace DjvuNet.Extentions
+namespace DjvuNet.Extensions
 {
 
     /// <summary>
     /// TODO: Update summary.
     /// </summary>
-    public static class ExtentionMethods
+    public static class ExtensionMethods
     {
 
         /// <summary>

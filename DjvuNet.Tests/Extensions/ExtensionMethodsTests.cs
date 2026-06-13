@@ -1,14 +1,14 @@
 using Xunit;
-using DjvuNet.Extentions;
+using DjvuNet.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DjvuNet.Extentions.Tests
+namespace DjvuNet.Extensions.Tests
 {
-    public class ExtentionMethodsTests
+    public class ExtensionMethodsTests
     {
         [Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
         public void OrientRectangleTest()

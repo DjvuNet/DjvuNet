@@ -19,8 +19,6 @@ namespace DjvuNet.Graphics
 
         bool IsRampNeeded { get; set; }
 
-        Hashtable Properties { get; }
-
         int RedOffset { get; set; }
 
         IPixelReference CreateGPixelReference(int offset);
@@ -29,7 +27,7 @@ namespace DjvuNet.Graphics
 
         void FillRgbPixels(int x, int y, int w, int h, int[] pixels, int off, int scansize);
 
-        System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX);
+        System.Drawing.Bitmap ToImage();
 
     }
 }

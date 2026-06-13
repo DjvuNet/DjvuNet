@@ -520,7 +520,7 @@ namespace DjvuNet
         {
             Verify.SubsampleRange(subsample);
 
-            if (rect?.Empty != false)
+            if (rect.Empty)
             {
                 return (retval == null) ? (new PixelMap()) : retval.Init(0, 0, null);
             }
@@ -555,9 +555,8 @@ namespace DjvuNet
         /// <param name="gamma"></param>
         /// <param name="retval"></param>
         /// <returns></returns>
-#if NETCOREAPP
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         public GPixmap GetBgPixmap(GRect rect, int subsample, double gamma, GPixmap retval)
         {
             Verify.SubsampleRange(subsample);
@@ -800,9 +799,8 @@ namespace DjvuNet
             return (fgred >= 1) && (fgred <= 12);
         }
 
-#if NETCOREAPP
+
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-#endif
         internal bool Stencil(IPixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
         {
             Verify.SubsampleRange(subsample);

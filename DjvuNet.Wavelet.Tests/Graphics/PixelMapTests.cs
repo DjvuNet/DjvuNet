@@ -419,7 +419,7 @@ namespace DjvuNet.Graphics.Tests
             int width = 32;
             int height = 32;
             var map = CreateInitVerifyPixelMap(width, height, Pixel.WhitePixel);
-            map.Downsample(map, 1, null);
+            map.Downsample(map, 1, default(Rectangle));
             Assert.Equal(width, map.Width);
             Assert.Equal(height, map.Height);
         }
@@ -445,7 +445,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(width, map.Width);
             Assert.Equal(height, map.Height);
 
-            map.Downsample(map, subsample, null);
+            map.Downsample(map, subsample, default(Rectangle));
             Assert.Equal(width/subsample, map.Width);
             Assert.Equal(height/subsample, map.Height);
         }
@@ -460,7 +460,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(width, map.Width);
             Assert.Equal(height, map.Height);
 
-            map.Downsample(map, subsample, null);
+            map.Downsample(map, subsample, default(Rectangle));
             Assert.Equal(width / subsample, map.Width);
             Assert.Equal(height / subsample, map.Height);
         }
@@ -475,7 +475,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(width, map.Width);
             Assert.Equal(height, map.Height);
 
-            map.Downsample(map, subsample, null);
+            map.Downsample(map, subsample, default(Rectangle));
             Assert.Equal(width / subsample, map.Width);
             Assert.Equal(height / subsample, map.Height);
         }
@@ -490,7 +490,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(width, map.Width);
             Assert.Equal(height, map.Height);
 
-            map.Downsample(map, subsample, null);
+            map.Downsample(map, subsample, default(Rectangle));
             Assert.Equal(Math.Round((double)width / subsample, 0), map.Width);
             Assert.Equal(Math.Round((double)height / subsample, 0), map.Height);
         }
@@ -505,7 +505,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(width, map.Width);
             Assert.Equal(height, map.Height);
 
-            map.Downsample(map, subsample, null);
+            map.Downsample(map, subsample, default(Rectangle));
             Assert.Equal(Math.Round((double)width / subsample, 0), map.Width);
             Assert.Equal(Math.Round((double)height / subsample, 0), map.Height);
         }
@@ -566,9 +566,9 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                XMax = 0,
-                YMin = -32,
-                XMin = width,
+                XMax = 64,
+                YMin = 0,
+                XMin = 0,
                 YMax = height,
             };
 
@@ -587,9 +587,9 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                XMax = 32,
-                YMin = -1,
                 XMin = 0,
+                YMin = -1,
+                XMax = 32,
                 YMax = height,
             };
 
@@ -608,9 +608,9 @@ namespace DjvuNet.Graphics.Tests
 
             Rectangle rect = new Rectangle
             {
-                XMax = 0,
+                XMin = 0,
                 YMin = 0,
-                XMin = width,
+                XMax = 1,
                 YMax = height * 2,
             };
 
@@ -628,7 +628,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(height, map.Height);
 
             map.IsRampNeeded = true;
-            map.Downsample(map, subsample, null);
+            map.Downsample(map, subsample, default(Rectangle));
             Assert.Equal(Math.Round((double)width / subsample, 0), map.Width);
             Assert.Equal(Math.Round((double)height / subsample, 0), map.Height);
         }
@@ -651,7 +651,7 @@ namespace DjvuNet.Graphics.Tests
             var map = CreateInitVerifyPixelMap(512, 512, Pixel.BluePixel);
             var map2 = CreateInitVerifyPixelMap(1024, 1024, Pixel.GreenPixel);
             Assert.Throws<DjvuArgumentOutOfRangeException>("targetRect",
-                () => map.Downsample43(map2, new Rectangle { XMax = 0, YMin = 0, YMax = -100, XMin = -2048}));
+                () => map.Downsample43(map2, new Rectangle { XMin = 0, YMin = 0, XMax = 2048, YMax = 2048 }));
         }
 
         [Fact]
@@ -828,12 +828,12 @@ namespace DjvuNet.Graphics.Tests
             int width = 128;
             int height = 128;
             Pixel color = Pixel.WhitePixel;
-            Rectangle rect = new Rectangle { XMax = -10, YMin = -10, XMin = 200, YMax = 200 };
+            Rectangle boundsRect = new Rectangle { XMin = 0, YMin = 0, XMax = 200, YMax = 200 };
 
             IBitmap bmp = BitmapTests.CreateIntiFillVerifyBitmap(width, height, 0, -1);
             IPixelMap map = CreateInitVerifyPixelMap(width, height, color);
             IPixelMap map2 = CreateInitVerifyPixelMap(width, height, Pixel.BlackPixel);
-            Assert.Throws<DjvuArgumentOutOfRangeException>("bounds", () => map.Stencil(bmp, map2, 1, 1, rect, 2.2));
+            Assert.Throws<DjvuArgumentOutOfRangeException>("bounds", () => map.Stencil(bmp, map2, 1, 1, boundsRect, 2.2));
         }
 
         [Fact()]

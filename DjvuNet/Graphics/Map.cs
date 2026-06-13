@@ -18,11 +18,6 @@ namespace DjvuNet.Graphics
         #region Public Properties
 
         /// <summary>
-        /// Gets the property values
-        /// </summary>
-        public Hashtable Properties { get; internal set; }
-
-        /// <summary>
         /// Gets or sets the image data
         /// </summary>
         public sbyte[] Data { get; protected set; }
@@ -76,7 +71,6 @@ namespace DjvuNet.Graphics
         /// </remarks>
         public Map(int ncolors, int redOffset, int greenOffset, int blueOffset, bool isRampNeeded)
         {
-            Properties = Hashtable.Synchronized(new Hashtable());
             BytesPerPixel = ncolors;
             IsRampNeeded = isRampNeeded;
             RedOffset = redOffset;
@@ -298,10 +292,22 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Converts the pixel data to an image
+        /// Allocates a System.Drawing.Bitmap and copies the pixel data into its buffer.
         /// </summary>
-        /// <returns></returns>
-        public System.Drawing.Bitmap ToImage(RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
+        /// <remarks>
+        /// <para>
+        /// <b>Coordinate System Mapping:</b><br/>
+        /// The DjVu format stores image data using a Cartesian coordinate system where the origin (0,0) maps to index 0 of the pixel array.
+        /// System.Drawing.Bitmap uses Screen coordinates where the origin (0,0) maps to the Scan0 memory address.
+        /// </para>
+        /// <para>
+        /// This method transforms the data from Cartesian to Screen coordinates during the copy operation.
+        /// The copy operation starts at the first image row and writes to the last Bitmap row, effectively inverting the image
+        /// along a line parallel to the X axis located at 1/2 image height, which acts as a rotation axis.
+        /// </para>
+        /// </remarks>
+        /// <returns>The populated System.Drawing.Bitmap object.</returns>
+        public System.Drawing.Bitmap ToImage()
         {
             if (Data == null)
             {
@@ -313,21 +319,43 @@ namespace DjvuNet.Graphics
                 DjvuExceptionUtil.ThrowInvalidOperation($"Cannot create image: Dimensions must be greater than zero. Actual: {Width}x{Height}.");
             }
 
-            PixelFormat format;
-            if (BytesPerPixel == 1) format = PixelFormat.Format8bppIndexed;
-            else if (BytesPerPixel == 2) format = PixelFormat.Format16bppRgb555;
-            else if (BytesPerPixel == 3) format = PixelFormat.Format24bppRgb;
-            else if (BytesPerPixel == 4) format = PixelFormat.Format32bppArgb;
-            else if (BytesPerPixel == 6) format = PixelFormat.Format48bppRgb;
-            else if (BytesPerPixel == 8) format = PixelFormat.Format64bppArgb;
-            else throw new DjvuFormatException($"Unknown pixel format for byte count: {BytesPerPixel}");
+            PixelFormat format = default(PixelFormat);
+            if (BytesPerPixel == 1)
+                format = PixelFormat.Format8bppIndexed;
+            else if (BytesPerPixel == 2)
+                format = PixelFormat.Format16bppRgb555;
+            else if (BytesPerPixel == 3)
+                format = PixelFormat.Format24bppRgb;
+            else if (BytesPerPixel == 4)
+                format = PixelFormat.Format32bppArgb;
+            else if (BytesPerPixel == 6)
+                format = PixelFormat.Format48bppRgb;
+            else if (BytesPerPixel == 8)
+                format = PixelFormat.Format64bppArgb;
+            else
+                DjvuExceptionUtil.ThrowFormatException($"Unknown pixel format for byte count: {BytesPerPixel}");
 
-            int bytesPerRow = this switch
+            int bytesPerRow = -1;
+            if (this is Bitmap bitmap)
             {
-                Bitmap { BytesPerRow: int bitmapBytesPerRow } => bitmapBytesPerRow,
-                PixelMap _ => BytesPerPixel * Width,
-                { } => throw new DjvuNotSupportedException($"Unsupported type: {this.GetType()}"),
-            };
+                bytesPerRow = bitmap.BytesPerRow;
+            }
+            else if (this is PixelMap)
+            {
+                // Cast to long to prevent 32-bit integer overflow during stride calculation
+                long calculatedBytesPerRow = (long)BytesPerPixel * Width;
+                if (calculatedBytesPerRow > int.MaxValue)
+                {
+                    DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(Width), Width, "Calculated stride exceeds Int32 limits.");
+                }
+                bytesPerRow = (int)calculatedBytesPerRow;
+            }
+            else
+            {
+                // TODO: Rearchitect Map hierarchy to eliminate type-sniffing in the base class. 
+                // Consider extracting BytesPerRow/Stride calculation into an abstract or virtual property.
+                DjvuExceptionUtil.ThrowNotSupported($"Unsupported Map derived type: {this.GetType().FullName}");
+            }
 
             int dataOffset = this switch
             {
@@ -353,8 +381,6 @@ namespace DjvuNet.Graphics
                 }
             }
 
-            image.RotateFlip(rotation);
-
             if (format == PixelFormat.Format8bppIndexed)
             {
                 System.Drawing.Imaging.ColorPalette palette = image.Palette;
@@ -374,8 +400,10 @@ namespace DjvuNet.Graphics
                     for (int i = 0; i < 256; i++)
                     {
                         int g = 255 - (i * 255 / Math.Max(1, grays - 1));
-                        if (g < 0) g = 0;
-                        if (g > 255) g = 255;
+                        if (g < 0)
+                            g = 0;
+                        if (g > 255)
+                            g = 255;
                         palette.Entries[i] = System.Drawing.Color.FromArgb(g, g, g);
                     }
                 }
@@ -417,9 +445,15 @@ namespace DjvuNet.Graphics
             int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
         {
             int pixelSize = DjvuImage.GetPixelSize(format);
-            int bytesPerRow = bytesPerSrcRow == 0 ? width * pixelSize : bytesPerSrcRow;
+            
+            long calculatedBytesPerRow = bytesPerSrcRow == 0 ? (long)width * pixelSize : bytesPerSrcRow;
+            if (calculatedBytesPerRow > int.MaxValue)
+            {
+                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, 
+                    $"Image dimensions require a row stride ({calculatedBytesPerRow} bytes) that exceeds the 32-bit limits of GDI+.");
+            }
+            int bytesPerRow = (int)calculatedBytesPerRow;
 
-            // SECURITY FIX: Prevent buffer overruns and AccessViolationExceptions when copying to GDI+ memory
             long requiredBufferLength = (long)height * bytesPerRow;
             if (requiredBufferLength > length)
             {
@@ -436,12 +470,19 @@ namespace DjvuNet.Graphics
                 bmpData = bmp.LockBits(new System.Drawing.Rectangle(0, 0, bmp.Width, bmp.Height),
                                      ImageLockMode.WriteOnly, bmp.PixelFormat);
 
-                IntPtr dataPtr = bmpData.Scan0;
+                // Start writing at the LAST row of the GDI+ bitmap memory
+                IntPtr dataPtr = (IntPtr)((long)bmpData.Scan0 + ((long)height - 1) * bmpData.Stride);
+
+                int bytesToCopy = width * pixelSize;
 
                 for (int i = 0; i < height; i++)
                 {
-                    MemoryUtilities.MoveMemory(dataPtr, data, bytesPerRow);
-                    dataPtr = (IntPtr)((long)dataPtr + bmpData.Stride);
+                    MemoryUtilities.MoveMemory(dataPtr, data, bytesToCopy);
+
+                    // Move the GDI+ pointer UP one row
+                    dataPtr = (IntPtr)((long)dataPtr - bmpData.Stride);
+
+                    // Move the Djvu pointer DOWN one row (as normal)
                     data = (IntPtr)((long)data + bytesPerRow);
                 }
             }
@@ -452,6 +493,7 @@ namespace DjvuNet.Graphics
 
             return bmp;
         }
+
 
         #endregion Public Methods
     }

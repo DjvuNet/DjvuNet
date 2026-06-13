@@ -1739,5 +1739,142 @@ namespace DjvuNet.DjvuLibre
 #pragma warning restore CA2101 // Specify marshaling for P/Invoke string arguments
         [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(UTF8StringMarshaler))]
         internal static extern string GetLastError();
+
+        /* -------------------------------------------------- */
+        /* COMPATIBILITY TESTING HOOKS: GRect                 */
+        /* -------------------------------------------------- */
+
+        //class DJVUAPI GRect
+        //{
+        //public:
+        //    /** Constructs an empty rectangle */
+        //    GRect();
+        //    /** Constructs a rectangle given its minimal coordinates #xmin# and #ymin#,
+        //        and its measurements #width# and #height#. Setting #width# or #height# to zero
+        //        produces an empty rectangle.  */
+        //    GRect(int xmin, int ymin, unsigned int width = 0, unsigned int height = 0);
+        //    /** Returns the rectangle width. */
+        //    int width() const;
+        //    /** Returns the rectangle height. */
+        //    int height() const;
+        //    /** Returns the area of the rectangle. */
+        //    int area() const;
+        //    /** Returns true if the rectangle is empty. */
+        //    bool isempty() const;
+        //    /** Returns true if the rectangle contains pixel (#x#,#y#).  A rectangle
+        //        contains all pixels with horizontal pixel coordinates in range #xmin#
+        //        (inclusive) to #xmax# (exclusive) and vertical coordinates #ymin#
+        //        (inclusive) to #ymax# (exclusive). */
+        //    int contains(int x, int y) const;
+        //    /** Returns true if this rectangle contains the passed rectangle #rect#.
+        //        The function basically checks, that the intersection of this rectangle
+        //        with #rect# is #rect#. */
+        //    int contains(const GRect & rect) const;
+        //    /** Returns true if rectangles #r1# and #r2# are equal. */
+        //    friend int operator ==(const GRect & r1, const GRect & r2);
+        //    /** Returns true if rectangles #r1# and #r2# are not equal. */
+        //    friend int operator !=(const GRect & r1, const GRect & r2);
+        //    /** Resets the rectangle to the empty rectangle */
+        //    void clear();
+        //    /** Fatten the rectangle. Both vertical sides of the rectangle are pushed
+        //        apart by #dx# units. Both horizontal sides of the rectangle are pushed
+        //        apart by #dy# units. Setting arguments #dx# (resp. #dy#) to a negative
+        //        value reduces the rectangle horizontal (resp. vertical) size. */
+        //    int inflate(int dx, int dy);
+        //    /** Translate the rectangle. The new rectangle is composed of all the points
+        //        of the old rectangle translated by #dx# units horizontally and #dy#
+        //        units vertically. */
+        //    int translate(int dx, int dy);
+        //    /** Sets the rectangle to the intersection of rectangles #rect1# and #rect2#.
+        //        This function returns true if the intersection rectangle is not empty. */
+        //    int intersect(const GRect &rect1, const GRect &rect2);
+        //    /** Sets the rectangle to the smallest rectangle containing the points of
+        //    both rectangles #rect1# and #rect2#. This function returns true if the
+        //    created rectangle is not empty. */
+        //    int recthull(const GRect &rect1, const GRect &rect2);
+        //    /** Multiplies xmin, ymin, xmax, ymax by factor and scales the rectangle*/
+        //    void scale(float factor);
+        //    /** Multiplies xmin, xmax by xfactor and ymin, ymax by yfactor and scales the rectangle*/
+        //    void scale(float xfactor, float yfactor);
+        //    /** Minimal horizontal point coordinate of the rectangle. */
+        //    int xmin;
+        //    /** Minimal vertical point coordinate of the rectangle. */
+        //    int ymin;
+        //    /** Maximal horizontal point coordinate of the rectangle. */
+        //    int xmax;
+        //    /** Maximal vertical point coordinate of the rectangle. */
+        //    int ymax;
+        //};
+
+        /// <summary>
+        /// Checks if two rectangles are geometrically equal.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// <b>WARNING: Unintuitive Equality Logic</b><br/>
+        /// This method proxies to the native <c>GRect::operator==</c>.
+        /// The native implementation considers <i>any</i> two empty rectangles to be mathematically equal,
+        /// completely ignoring their actual spatial coordinate origins. If <c>r1</c> and <c>r2</c> are both
+        /// Empty, this method returns <c>true</c>.
+        /// </para>
+        /// <para>
+        /// <b>Original DjVuLibre Implementation Reference (GRect.cpp):</b>
+        /// <code>
+        /// int operator==(const GRect &amp; r1, const GRect &amp; r2) {
+        ///   bool isempty1 = r1.isempty();
+        ///   bool isempty2 = r2.isempty();
+        ///   if (isempty1 || isempty2)
+        ///     if (isempty1 &amp;&amp; isempty2)
+        ///       return 1;
+        ///   if ( r1.xmin==r2.xmin &amp;&amp; r1.xmax==r2.xmax
+        ///        &amp;&amp; r1.ymin==r2.ymin &amp;&amp; r1.ymax==r2.ymax )
+        ///     return 1;
+        ///   return 0;
+        /// }
+        /// </code>
+        /// </para>
+        /// </remarks>
+        /// <param name="r1">Reference to the first rectangle.</param>
+        /// <param name="r2">Reference to the second rectangle.</param>
+        /// <returns><c>true</c> if the rectangles are exactly equal or if both are Empty; otherwise <c>false</c>.</returns>
+        //  DDJVUAPI int ddjvu_grect_equals(const struct ddjvu_grect* r1, const struct ddjvu_grect* r2);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_equals", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GRectEquals(ref Graphics.Rectangle r1, ref Graphics.Rectangle r2);
+
+        //  DDJVUAPI int ddjvu_grect_isempty(const struct ddjvu_grect* rect);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_isempty", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool IsEmptyGRect(ref Graphics.Rectangle rect);
+
+        //  DDJVUAPI int ddjvu_grect_contains_point(const struct ddjvu_grect* rect, int x, int y);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_contains_point", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GRectContainsPoint(ref Graphics.Rectangle rect, int x, int y);
+
+        //  DDJVUAPI int ddjvu_grect_contains_rect(const struct ddjvu_grect* rect, const struct ddjvu_grect* other);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_contains_rect", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GRectContainsRect(ref Graphics.Rectangle rect, ref Graphics.Rectangle other);
+
+        //  DDJVUAPI int ddjvu_grect_intersect(struct ddjvu_grect* out_rect, const struct ddjvu_grect* r1, const struct ddjvu_grect* r2);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_intersect", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GRectIntersect(out Graphics.Rectangle outRect, ref Graphics.Rectangle r1, ref Graphics.Rectangle r2);
+
+        //  DDJVUAPI int ddjvu_grect_recthull(struct ddjvu_grect* out_rect, const struct ddjvu_grect* r1, const struct ddjvu_grect* r2);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_recthull", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GRectRecthull(out Graphics.Rectangle outRect, ref Graphics.Rectangle r1, ref Graphics.Rectangle r2);
+
+        //  DDJVUAPI void ddjvu_grect_inflate(struct ddjvu_grect* rect, int dx, int dy);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_inflate", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern void GRectInflate(ref Graphics.Rectangle rect, int dx, int dy);
+
+        //  DDJVUAPI void ddjvu_grect_translate(struct ddjvu_grect* rect, int dx, int dy);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_translate", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern void GRectTranslate(ref Graphics.Rectangle rect, int dx, int dy);
+
+        //  DDJVUAPI int ddjvu_grect_scale(struct ddjvu_grect* rect, float factor);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_scale", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GRectScale(ref Graphics.Rectangle rect, float factor);
+
+        //  DDJVUAPI int ddjvu_grect_scale_xy(struct ddjvu_grect* rect, float xfactor, float yfactor);
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_scale_xy", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GRectScale(ref Graphics.Rectangle rect, float xfactor, float yfactor);
     }
 }

@@ -4,6 +4,7 @@ using DjvuNet.Errors;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -271,7 +272,7 @@ namespace DjvuNet.Graphics.Tests
             map.SetHeight(10);
 
             var ex = Assert.Throws<DjvuNotSupportedException>(() => map.ToImage());
-            Assert.Contains("Unsupported type", ex.Message);
+            Assert.Contains("Unsupported Map derived type", ex.Message);
         }
 
         /// <summary>
@@ -360,6 +361,55 @@ namespace DjvuNet.Graphics.Tests
                 Assert.Equal(width, bmp.Width);
                 Assert.Equal(height, bmp.Height);
             }
+        }
+
+        private class TestMap : Map
+        {
+            public TestMap(int bytesPerPixel = 3) : base(bytesPerPixel, 0, 0, 0, false) { }
+
+            public System.Drawing.Bitmap TestCopyDataToBitmap(int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
+            {
+                return CopyDataToBitmap(width, height, data, length, format, bytesPerSrcRow);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the internal CopyDataToBitmap method correctly promotes arithmetic
+        /// to 64-bit prior to multiplying the height by the stride. Without 64-bit promotion,
+        /// a high-resolution image causes an Int32 overflow, generating a negative memory 
+        /// offset that throws an AccessViolationException or corrupts unmanaged memory.
+        /// </summary>
+        [Theory]
+        // 1. Massive Height, Normal Width (height * stride > Int32.MaxValue)
+        // 100,000 height * 10,000 width * 3 bytes/pixel = 3 GB
+        [InlineData(10000, 100000, 3, "is insufficient for the requested image dimensions")] 
+        
+        // 2. Normal Height, Massive Width (height * stride > Int32.MaxValue)
+        // 10,000 height * 100,000 width * 3 bytes/pixel = 3 GB
+        [InlineData(100000, 10000, 3, "is insufficient for the requested image dimensions")] 
+        
+        // 3. Both Dimensions Massive (Square, ~3.6 GB)
+        [InlineData(30000, 30000, 4, "is insufficient for the requested image dimensions")]
+        
+        // 4. Exact Int32.MaxValue boundary condition (Stride causes immediate overflow)
+        // (Int32.MaxValue / 4) + 1 = 536870912. 
+        // 536870912 width * 4 bpp = 2147483648 stride (Int32.MaxValue + 1)
+        [InlineData(536870912, 2, 4, "exceeds the 32-bit limits of GDI+")]
+        public void CopyDataToBitmap_LargeDimensions_Avoids_Int32_Overflow(int width, int height, int bytesPerPixel, string expectedMessageFragment)
+        {
+            TestMap map = new TestMap(bytesPerPixel);
+            
+            // We use a dummy data pointer. The test is designed to verify the memory *address calculation*
+            // doesn't overflow to a negative number before it tries to allocate or move memory.
+            IntPtr dummyPtr = new IntPtr(1);
+            long dummyLength = 100; // Small length to trip the buffer bounds check gracefully
+
+            PixelFormat format = bytesPerPixel == 3 ? PixelFormat.Format24bppRgb : PixelFormat.Format32bppArgb;
+
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => 
+                map.TestCopyDataToBitmap(width, height, dummyPtr, dummyLength, format, 0));
+            
+            Assert.Contains(expectedMessageFragment, ex.Message);
         }
     }
 }

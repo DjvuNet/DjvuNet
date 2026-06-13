@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="TextZone.cs" company="">
 // TODO: Update copyright text.
 // </copyright>
@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DjvuNet.Extentions;
+using DjvuNet.Extensions;
 using DjvuNet.Graphics;
 
 namespace DjvuNet.DataChunks

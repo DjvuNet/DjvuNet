@@ -17,7 +17,8 @@ namespace DjvuNet.Errors
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowArgumentNull(string paramName, string message = null)
         {
-            if (message == null) throw new DjvuArgumentNullException(paramName);
+            if (message == null)
+                throw new DjvuArgumentNullException(paramName);
             throw new DjvuArgumentNullException(paramName, message);
         }
 
@@ -25,8 +26,16 @@ namespace DjvuNet.Errors
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowArgumentOutOfRange(string paramName, string message = null)
         {
-            if (message == null) throw new DjvuArgumentOutOfRangeException(paramName);
+            if (message == null)
+                throw new DjvuArgumentOutOfRangeException(paramName);
             throw new DjvuArgumentOutOfRangeException(paramName, message);
+        }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowArgumentOutOfRange(string message, Exception innerException)
+        {
+            throw new DjvuArgumentOutOfRangeException(message, innerException);
         }
 
         [DoesNotReturn]
@@ -40,7 +49,8 @@ namespace DjvuNet.Errors
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowArgument(string message, string paramName = null)
         {
-            if (paramName == null) throw new DjvuArgumentException(message);
+            if (paramName == null)
+                throw new DjvuArgumentException(message);
             throw new DjvuArgumentException(message, paramName);
         }
 
@@ -48,7 +58,8 @@ namespace DjvuNet.Errors
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowInvalidOperation(string message, Exception innerException = null)
         {
-            if (innerException == null) throw new DjvuInvalidOperationException(message);
+            if (innerException == null)
+                throw new DjvuInvalidOperationException(message);
             throw new DjvuInvalidOperationException(message, innerException);
         }
 
@@ -56,7 +67,8 @@ namespace DjvuNet.Errors
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowNotSupported(string message, Exception innerException = null)
         {
-            if (innerException == null) throw new DjvuNotSupportedException(message);
+            if (innerException == null)
+                throw new DjvuNotSupportedException(message);
             throw new DjvuNotSupportedException(message, innerException);
         }
 
@@ -64,7 +76,8 @@ namespace DjvuNet.Errors
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowFileNotFound(string message, string fileName = null)
         {
-            if (fileName == null) throw new DjvuFileNotFoundException(message);
+            if (fileName == null)
+                throw new DjvuFileNotFoundException(message);
             throw new DjvuFileNotFoundException(message, fileName);
         }
 
@@ -72,7 +85,8 @@ namespace DjvuNet.Errors
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowEndOfStream(string message, Exception innerException = null)
         {
-            if (innerException == null) throw new DjvuEndOfStreamException(message);
+            if (innerException == null)
+                throw new DjvuEndOfStreamException(message);
             throw new DjvuEndOfStreamException(message, innerException);
         }
 
@@ -81,6 +95,15 @@ namespace DjvuNet.Errors
         public static void ThrowAggregate(string message, IEnumerable<Exception> innerExceptions)
         {
             throw new DjvuAggregateException(message, innerExceptions);
+        }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowFormatException(string message, Exception innerException = null)
+        {
+            if (innerException == null)
+                throw new DjvuFormatException(message);
+            throw new DjvuFormatException(message, innerException);
         }
     }
 }
