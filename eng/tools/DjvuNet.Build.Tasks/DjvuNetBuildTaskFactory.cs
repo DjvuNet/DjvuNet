@@ -35,6 +35,7 @@ namespace DjvuNet.Build.Tasks
 
         private bool IsSupportedRuntime(string runtime)
         {
+#if NETCOREAPP
             if (string.IsNullOrWhiteSpace(runtime)) 
             {
                 // If the user didn't specify a runtime, MSBuild defaults to "Any". 
@@ -45,6 +46,11 @@ namespace DjvuNet.Build.Tasks
             // Only explicitly modern .NET MSBuild runtimes are safe for our APIs.
             return runtime.Equals("NET", StringComparison.OrdinalIgnoreCase) ||
                    runtime.Equals("Core", StringComparison.OrdinalIgnoreCase);
+#else
+            // .NET Framework execution implies Visual Studio in-process hosting.
+            // We explicitly bypass the modern runtime check because the net472 polyfills are active.
+            return true;
+#endif
         }
 
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)

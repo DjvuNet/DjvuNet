@@ -253,7 +253,14 @@ if defined _Test (
 )
 
 if defined _BuildTests set _BuildDjvuNet=1
-if defined _RunTests set _BuildDjvuNet=1
+
+if defined _RunTests (
+    if not defined _BuildTests (
+        if not defined _Test (
+            set "_BuildDjvuNet="
+        )
+    )
+)
 
 set "__RootBuildDir=%__RepoRootDir%build\bin\"
 
@@ -430,6 +437,168 @@ if "!__UseSystemDotnetSdk!"=="1" (
 for /f "usebackq tokens=*" %%v in (`!__DotNetCmd! --version`) do set __UsedDotNetVersion=%%v
 if "!__UseSystemDotnetSdk!"=="0" echo %__MsgPrefix%Using Isolated Repository-Local .NET SDK: !__UsedDotNetVersion!
 
+REM Set target specific environment values
+if /i "%_Framework%" == "%_DefaultNetCoreApp%" (
+    set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+    set DOTNET_MULTILEVEL_LOOKUP=0
+    set "__RestoreCmd=!__DotNetCmd! msbuild /t:Restore"
+    set "__BuildCommand=!__DotNetCmd! msbuild"
+    set "__Framework=%_DefaultNetCoreApp%"
+    set "__BuildLibDjvuLibre=0"
+    if /i [%_TargetOS%] == [Windows] set "__RuntimeIdentifier=win-"
+    if /i [%_TargetOS%] == [Linux] set "__RuntimeIdentifier=linux-"
+    if /i [%_TargetOS%] == [OSX] set "__RuntimeIdentifier=osx-"
+    set "__RuntimeIdentifier=!__RuntimeIdentifier!!_MSB_Platform!"
+)
+
+set "__SystemAttrProj=System.Attributes/System.Attributes.csproj"
+set "__LibGit2SharpProj=eng/tools/libgit2sharp/LibGit2Sharp/LibGit2Sharp.csproj"
+set "__DjvuNetGitTasksProj=eng/tools/DjvuNet.Build.Tasks/DjvuNet.Build.Tasks.csproj"
+set "__DjvuNetProj=DjvuNet/DjvuNet.csproj"
+set "__DjvuNetDjvuLibreProj=DjvuNet.DjvuLibre/DjvuNet.DjvuLibre.csproj"
+
+if defined _BuildTools (
+    if not exist "!__RepoRootDir!!__LibGit2SharpProj!" (
+        echo !__MsgPrefix!Setting up libgit2sharp
+        set "__Lg2sArchiveUrl=!__LibGit2SharpRepoUri!/archive/refs/tags/!__ArtifactsReleaseTag!.tar.gz"
+
+        set "_ForceCloneLibGit2Sharp="
+        if defined _CloneDeps (
+            set "_ForceCloneLibGit2Sharp=1"
+        ) else (
+            echo !__MsgPrefix!Downloading release archive of libgit2sharp for tag !__ArtifactsReleaseTag!
+            call :download_retry "!__Lg2sArchiveUrl!" "libgit2sharp.tar.gz"
+            if !ERRORLEVEL! EQU 0 (
+                echo !__MsgPrefix!Extracting libgit2sharp archive
+                if not exist "!__RepoRootDir!eng\tools\libgit2sharp" mkdir "!__RepoRootDir!eng\tools\libgit2sharp"
+                tar.exe -xzf libgit2sharp.tar.gz -C "!__RepoRootDir!eng\tools\libgit2sharp" --strip-components=1
+                del /f /q libgit2sharp.tar.gz
+            ) else (
+                set "_ForceCloneLibGit2Sharp=1"
+            )
+        )
+
+        if defined _ForceCloneLibGit2Sharp (
+            echo !__MsgPrefix!Download bypassed or failed, falling back to git clone
+            set "__CloneArgs=-c core.autocrlf=false"
+            if not "!_CloneDeps!"=="full" set "__CloneArgs=--depth 1 !__CloneArgs!"
+            call :git_clone_retry ^
+                "!__LibGit2SharpRepoUri!.git" ^
+                "eng\tools\libgit2sharp" ^
+                "!__CloneArgs!"
+        )
+    )
+)
+
+set "__OutputDir=!__RootBuildDir!!_TargetOS!.!__ManagedPlatform!.!_MSB_Configuration!/binaries/!__Framework!/"
+set "__PublishDir=!__OutputDir!!__RuntimeIdentifier!/publish/"
+set "__LogsDir=!__RootBuildDir!!_TargetOS!.!__ManagedPlatform!.!_MSB_Configuration!/logs/!__Framework!/"
+if not exist "!__LogsDir!" md "!__LogsDir!"
+
+echo %__MsgPrefix%__OutputDir [!__OutputDir!]
+echo %__MsgPrefix%__PublishDir [!__PublishDir!]
+echo %__MsgPrefix%__LogsDir [!__LogsDir!]
+
+call :get_time __BuildStartTime
+
+if defined _BuildTools (
+    REM 1. Standard net10.0 Tools Restore
+    set "__BuildCommandArgs=-property:Configuration=!_MSB_Configuration! -property:Platform=!__ManagedPlatform! -property:TargetFramework=!__Framework! -p:RuntimeIdentifier=!__RuntimeIdentifier! -v:!_Verbosity! -m:!_Processors! -nologo -nr:false"
+    REM Omit TargetFramework during restore to allow multi-targeted projects to generate unified project.assets.json
+    set "__RestoreCmdArgs=-property:Configuration=!_MSB_Configuration! -property:Platform=!__ManagedPlatform! -p:RuntimeIdentifier=!__RuntimeIdentifier! -v:!_Verbosity! -m:!_Processors! -nologo -nr:false"
+
+    call :restore_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+    call :restore_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp_!!__Framework!.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+    call :restore_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks_!!__Framework!.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+    REM 2. Standard net10.0 Tools Build
+    call :build_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+    call :build_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp_!!__Framework!.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+    call :build_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks_!!__Framework!.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+    REM 3. Visual Studio net472 Tools Build (Only on Windows)
+    if /i "!_TargetOS!" == "Windows" (
+        echo %__MsgPrefix%======================================================================
+        echo %__MsgPrefix% Building Tools for Visual Studio in-process execution ^(net472^)
+        echo %__MsgPrefix%======================================================================
+
+        REM Backup original environment
+        set "__OrigFramework=!__Framework!"
+        set "__OrigManagedPlatform=!__ManagedPlatform!"
+        set "__OrigBuildCommandArgs=!__BuildCommandArgs!"
+        set "__OrigRestoreCmdArgs=!__RestoreCmdArgs!"
+        set "__OrigOutputDir=!__OutputDir!"
+        set "__OrigPublishDir=!__PublishDir!"
+        set "__OrigLogsDir=!__LogsDir!"
+
+        REM Set net472 environment
+        set "__Framework=net472"
+        set "__ManagedPlatform=AnyCPU"
+
+        set "__BuildCommandArgs=-property:Configuration=!_MSB_Configuration! -property:Platform=!__ManagedPlatform! -property:TargetFramework=!__Framework! -v:!_Verbosity! -m:!_Processors! -nologo -nr:false"
+        set "__RestoreCmdArgs=!__BuildCommandArgs!"
+
+        REM Recalculate paths exactly matching the tools output architecture
+        set "__OutputDir=!__RootBuildDir!!_TargetOS!.!__ManagedPlatform!.!_MSB_Configuration!/tools/binaries/!__Framework!/"
+        set "__PublishDir=!__RepoRootDir!Tools/DjvuNet/!__Framework!/"
+        set "__LogsDir=!__RootBuildDir!!_TargetOS!.!__ManagedPlatform!.!_MSB_Configuration!/logs/!__Framework!/"
+        if not exist "!__LogsDir!" md "!__LogsDir!"
+
+        echo %__MsgPrefix%Switched Framework to: !__Framework!
+        echo %__MsgPrefix%Updated OutputDir:   !__OutputDir!
+        echo %__MsgPrefix%Updated PublishDir:  !__PublishDir!
+        echo %__MsgPrefix%Updated LogsDir:     !__LogsDir!
+
+        REM Restore phase skipped for net472. Multi-targeted project.assets.json was generated during the net10.0 restore phase.
+
+        call :build_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
+        if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+        call :build_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp_!!__Framework!.csproj
+        if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+        call :build_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks_!!__Framework!.csproj
+        if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+        echo %__MsgPrefix%Restoring original environment properties...
+        set "__Framework=!__OrigFramework!"
+        set "__ManagedPlatform=!__OrigManagedPlatform!"
+        set "__BuildCommandArgs=!__OrigBuildCommandArgs!"
+        set "__RestoreCmdArgs=!__OrigRestoreCmdArgs!"
+        set "__OutputDir=!__OrigOutputDir!"
+        set "__PublishDir=!__OrigPublishDir!"
+        set "__LogsDir=!__OrigLogsDir!"
+    )
+
+    REM 4. Package Tools
+    if defined __SuccessfulBuilds (
+        if defined __SuccessfulPublishes (
+            if not "!__SuccessfulBuilds:DjvuNet.Build.Tasks_%_DefaultNetCoreApp%.csproj=!"=="!__SuccessfulBuilds!" (
+                if not "!__SuccessfulPublishes:DjvuNet.Build.Tasks_%_DefaultNetCoreApp%.csproj=!"=="!__SuccessfulPublishes!" (
+                    set "__TmpPackageScript=!TEMP!\Package_!RANDOM!.ps1"
+                    (
+                        echo $ErrorActionPreference = 'Stop'
+                        echo ^& '!__RepoRootDir!eng\scripts\PackageTools.ps1' -RepoRoot '!__RepoRootDir!' -Configuration '!_MSB_Configuration!'
+                        echo exit $LASTEXITCODE
+                    ) > "!__TmpPackageScript!"
+                    call :run_custom_command "!__PSCmd! -NoProfile -ExecutionPolicy Bypass -File !__TmpPackageScript!" "PackageTools.ps1"
+                    if exist "!__TmpPackageScript!" del "!__TmpPackageScript!"
+                )
+            )
+        )
+    )
+)
+
 if defined _SkipNative goto :no_djvulibre
 
 REM Clone libdjvulibre if needed
@@ -441,7 +610,7 @@ if not exist ".\%__DjvuLibreDir%\win32\djvulibre\libdjvulibre\libdjvulibre.vcxpr
     echo %__MsgPrefix%Setting up DjVuLibre
 
     set "__ArchiveUrl=https://github.com/DjvuNet/DjVuLibre/archive/refs/tags/!__ArtifactsReleaseTag!.tar.gz"
-    
+
     set "_ForceCloneDjvuLibre="
     if defined _CloneDeps (
         set "_ForceCloneDjvuLibre=1"
@@ -586,90 +755,26 @@ goto :no_djvulibre
 set "_SkipNative=1"
 :no_djvulibre
 
-REM Set target specific environment values
-
-if /i "%_Framework%" == "%_DefaultNetCoreApp%" (
-    set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-    set DOTNET_MULTILEVEL_LOOKUP=0
-    set "__RestoreCmd=!__DotNetCmd! msbuild /t:Restore"
-    set "__BuildCommand=!__DotNetCmd! msbuild"
-    set "__Framework=%_DefaultNetCoreApp%"
-    set "__BuildLibDjvuLibre=0"
-    if /i [%_TargetOS%] == [Windows] set "__RuntimeIdentifier=win-"
-    if /i [%_TargetOS%] == [Linux] set "__RuntimeIdentifier=linux-"
-    if /i [%_TargetOS%] == [OSX] set "__RuntimeIdentifier=osx-"
-    set "__RuntimeIdentifier=!__RuntimeIdentifier!!_MSB_Platform!"
-)
-
-set "__SystemAttrProj=System.Attributes/System.Attributes.csproj"
-set "__LibGit2SharpProj=eng/tools/libgit2sharp/LibGit2Sharp/LibGit2Sharp.csproj"
-set "__DjvuNetGitTasksProj=eng/tools/DjvuNet.Build.Tasks/DjvuNet.Build.Tasks.csproj"
-set "__DjvuNetProj=DjvuNet/DjvuNet.csproj"
-set "__DjvuNetDjvuLibreProj=DjvuNet.DjvuLibre/DjvuNet.DjvuLibre.csproj"
-
-if defined _BuildTools (
-    if not exist "!__RepoRootDir!!__LibGit2SharpProj!" (
-        echo !__MsgPrefix!Setting up libgit2sharp
-        set "__Lg2sArchiveUrl=!__LibGit2SharpRepoUri!/archive/refs/tags/!__ArtifactsReleaseTag!.tar.gz"
-        
-        set "_ForceCloneLibGit2Sharp="
-        if defined _CloneDeps (
-            set "_ForceCloneLibGit2Sharp=1"
-        ) else (
-            echo !__MsgPrefix!Downloading release archive of libgit2sharp for tag !__ArtifactsReleaseTag!
-            call :download_retry "!__Lg2sArchiveUrl!" "libgit2sharp.tar.gz"
-            if !ERRORLEVEL! EQU 0 (
-                echo !__MsgPrefix!Extracting libgit2sharp archive
-                if not exist "!__RepoRootDir!eng\tools\libgit2sharp" mkdir "!__RepoRootDir!eng\tools\libgit2sharp"
-                tar.exe -xzf libgit2sharp.tar.gz -C "!__RepoRootDir!eng\tools\libgit2sharp" --strip-components=1
-                del /f /q libgit2sharp.tar.gz
-            ) else (
-                set "_ForceCloneLibGit2Sharp=1"
-            )
-        )
-        
-        if defined _ForceCloneLibGit2Sharp (
-            echo !__MsgPrefix!Download bypassed or failed, falling back to git clone
-            set "__CloneArgs=-c core.autocrlf=false"
-            if not "!_CloneDeps!"=="full" set "__CloneArgs=--depth 1 !__CloneArgs!"
-            call :git_clone_retry ^
-                "!__LibGit2SharpRepoUri!.git" ^
-                "eng\tools\libgit2sharp" ^
-                "!__CloneArgs!"
-        )
-    )
-)
-
-set "__OutputDir=!__RootBuildDir!!_TargetOS!.!__ManagedPlatform!.!_MSB_Configuration!/binaries/!__Framework!/"
-set "__PublishDir=!__OutputDir!!__RuntimeIdentifier!/publish/"
-set "__LogsDir=!__RootBuildDir!!_TargetOS!.!__ManagedPlatform!.!_MSB_Configuration!/logs/!__Framework!/"
-if not exist "!__LogsDir!" md "!__LogsDir!"
-
-echo %__MsgPrefix%__OutputDir [!__OutputDir!]
-echo %__MsgPrefix%__PublishDir [!__PublishDir!]
-echo %__MsgPrefix%__LogsDir [!__LogsDir!]
-
-call :get_time __BuildStartTime
-
 if /i "%_MSB_Target%" == "Clean" goto :end_dotnet_restore
 if not defined _BuildDjvuNet goto :skip_djvulibre_build
 
 if /i "%_Framework%" == "%_DefaultNetCoreApp%" goto :dotnet_restore
 
 goto :end_dotnet_restore
+
 :dotnet_restore
 
-set "__BuildCommandArgs=-p:Configuration=!_MSB_Configuration! -p:Platform=!__ManagedPlatform! -p:TargetFramework=!__Framework! -p:RuntimeIdentifier=!__RuntimeIdentifier! -v:!_Verbosity! -m:!_Processors! -nologo -nr:false"
+REM Reset args for standard repository restore
+set "__BuildCommandArgs=-property:Configuration=!_MSB_Configuration! -property:Platform=!__ManagedPlatform! -property:TargetFramework=!__Framework! -p:RuntimeIdentifier=!__RuntimeIdentifier! -v:!_Verbosity! -m:!_Processors! -nologo -nr:false"
 set "__RestoreCmdArgs=!__BuildCommandArgs!"
 
-call :restore_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
-
-if defined _BuildTools (
-    call :restore_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp.csproj
-    call :restore_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks.csproj
+if not defined _BuildTools (
+    call :restore_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 )
 
 call :restore_dotnet_proj !__DjvuNetProj! DjvuNet.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 :end_dotnet_restore
 
@@ -751,34 +856,13 @@ REM } Scope environment changes end
 set "__LogsDir=!__RootBuildDir!!_TargetOS!.!_MSB_Platform!.!_MSB_Configuration!/logs/!__Framework!/"
 if not exist "!__LogsDir!" md "!__LogsDir!"
 
-call :build_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
-
-if defined _BuildTools (
-    call :build_dotnet_proj !__LibGit2SharpProj! LibGit2Sharp.csproj
-    call :build_dotnet_proj !__DjvuNetGitTasksProj! DjvuNet.Build.Tasks.csproj
-
-    REM Only package tools if DjvuNet.Build.Tasks.csproj succeeded both Build and Publish phases
-    if defined __SuccessfulBuilds (
-        if defined __SuccessfulPublishes (
-            if not "!__SuccessfulBuilds:DjvuNet.Build.Tasks.csproj=!"=="!__SuccessfulBuilds!" (
-                if not "!__SuccessfulPublishes:DjvuNet.Build.Tasks.csproj=!"=="!__SuccessfulPublishes!" (
-                    set "__TmpPackageScript=!TEMP!\Package_!RANDOM!.ps1"
-                    (
-                        echo $ErrorActionPreference = 'Stop'
-                        echo ^& '!__RepoRootDir!eng\scripts\PackageTools.ps1' -RepoRoot '!__RepoRootDir!'
-                        echo exit $LASTEXITCODE
-                    ) > "!__TmpPackageScript!"
-
-                    call :run_custom_command "!__PSCmd! -NoProfile -ExecutionPolicy Bypass -File !__TmpPackageScript!" "PackageTools.ps1"
-
-                    if exist "!__TmpPackageScript!" del "!__TmpPackageScript!"
-                )
-            )
-        )
-    )
+if not defined _BuildTools (
+    call :build_dotnet_proj !__SystemAttrProj! System.Attributes.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 )
 
 call :build_dotnet_proj !__DjvuNetProj! DjvuNet.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 if defined _SkipNative (
     if "!_NativeFailed!"=="1" (
@@ -790,9 +874,12 @@ if defined _SkipNative (
 
 echo %__MsgPrefix%Restoring DjvuNet.DjvuLibre project:
 call :restore_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 echo.
+
 echo %__MsgPrefix%Building DjvuNet.DjvuLibre project:
 call :build_dotnet_proj !__DjvuNetDjvuLibreProj! DjvuNet.DjvuLibre.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 :skip_djvulibre_build
 
@@ -836,17 +923,17 @@ if not exist .\artifacts\test001C.djvu (
             set "_ForceCloneArtifacts=1"
         )
     )
-    
+
     if defined _ForceCloneArtifacts (
         echo !__MsgPrefix!Download bypassed or failed, executing git clone for artifacts
         if exist artifacts\ rmdir /s /q artifacts
-        set "__CloneArgs="
-        if not "!_CloneDeps!"=="full" set "__CloneArgs=--depth 1"
+        set "__CloneArgs=-c core.autocrlf=false"
+        if not "!_CloneDeps!"=="full" set "__CloneArgs=--depth 1 !__CloneArgs!"
         call :git_clone_retry ^
             "https://github.com/DjvuNet/artifacts.git" ^
             "artifacts" ^
             "!__CloneArgs!"
-            
+
         if not [!ERRORLEVEL!]==[0] (
             echo.
             echo !__MsgPrefix!Error: artifacts git clone returned error
@@ -883,22 +970,34 @@ REM Restore test projects
 
 if defined _TestAll (
     call :restore_dotnet_proj !__DjvuNetAllTestsProj! DjvuNet.All.Tests.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
     goto :skip_djvunet_tests_restore
 )
 
 call :restore_dotnet_proj !__DjvuNetTestsProj! DjvuNet.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :restore_dotnet_proj !__DjvuNetWaveletTestsProj! DjvuNet.Wavelet.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :restore_dotnet_proj !__DjvuNetTestExeProj! DjvuNetTest.csproj
-call :restore_dotnet_proj !__DjvuNetBenchmarksProj! DjvuNet.Benchmarks.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 if defined _SkipNative (
     if "!_NativeFailed!"=="1" set "__FailedRestores=!__FailedRestores! DjvuNet.DjvuLibre.Tests.csproj"
     if "!_NativeFailed!"=="1" set "__FailedRestores=!__FailedRestores! DjvuNet.DjvuLibre.Compatibility.Tests.csproj"
+    if "!_NativeFailed!"=="1" set "__FailedRestores=!__FailedRestores! DjvuNet.Benchmarks.csproj"
     goto :skip_djvunet_tests_restore
 )
 
 call :restore_dotnet_proj !__DjvuNetDjvuLibreTestsProj! DjvuNet.DjvuLibre.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :restore_dotnet_proj !__DjvuNetDjvuLibreCompatTestsProj! DjvuNet.DjvuLibre.Compatibility.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
+call :restore_dotnet_proj !__DjvuNetBenchmarksProj! DjvuNet.Benchmarks.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 :skip_djvunet_tests_restore
 
@@ -906,13 +1005,21 @@ REM Build and publish tests
 
 if defined _TestAll (
     call :build_dotnet_proj !__DjvuNetAllTestsProj! DjvuNet.All.Tests.csproj
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
     goto skip_djvulibre_tests_proj
 )
 
 call :build_dotnet_proj !__DjvuNetTestsProj! DjvuNet.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :build_dotnet_proj !__DjvuNetWaveletTestsProj! DjvuNet.Wavelet.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :build_dotnet_proj !__DjvuNetTestExeProj! DjvuNetTest.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :build_dotnet_proj !__DjvuNetBenchmarksProj! DjvuNet.Benchmarks.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 if defined _SkipNative (
     if "!_NativeFailed!"=="1" set "__FailedBuilds=!__FailedBuilds! DjvuNet.DjvuLibre.Tests.csproj"
@@ -920,7 +1027,11 @@ if defined _SkipNative (
     goto skip_djvulibre_tests_proj
 )
 call :build_dotnet_proj !__DjvuNetDjvuLibreTestsProj! DjvuNet.DjvuLibre.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :build_dotnet_proj !__DjvuNetDjvuLibreCompatTestsProj! DjvuNet.DjvuLibre.Compatibility.Tests.csproj
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 :skip_djvulibre_tests_proj
 
 if defined _RunTests goto run_tests
@@ -980,20 +1091,26 @@ REM Run tests
 :xUnit_tests
 if defined _TestAll (
     call :run_dotnet_test "!_DjvuNet_All_Tests!" "DjvuNet.All.Tests"
+    if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
     goto :skip_granular_tests_run
 )
 
 call :run_dotnet_test "!_DjvuNet_Tests!" "DjvuNet.Tests"
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 if defined _SkipNative goto :no_djvulibre_tests
 if defined __SkipNativeTests goto :no_djvulibre_tests
 
 call :run_dotnet_test "!_DjvuNet_DjvuLibre_Tests!" "DjvuNet.DjvuLibre.Tests"
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
+
 call :run_dotnet_test "!_DjvuNet_DjvuLibreCompat_Tests!" "DjvuNet.DjvuLibre.Compatibility.Tests"
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 :no_djvulibre_tests
 
 call :run_dotnet_test "!_DjvuNet_Wavelet_Tests!" "DjvuNet.Wavelet.Tests"
+if defined _FastFail if not !ERRORLEVEL! EQU 0 goto exit_error
 
 :skip_granular_tests_run
 
@@ -1015,7 +1132,12 @@ goto exit_success
 :exit_success
 call :print_full_summary
 echo.
-echo %__MsgPrefix%Success: Build and tests passed at %DATE% %TIME%
+if defined _RunTests (
+    echo %__MsgPrefix%Success: Build and tests passed at %DATE% %TIME%
+) else (
+    echo %__MsgPrefix%Success: Build passed at %DATE% %TIME%
+)
+call :print_build_options
 exit /b 0
 
 :exit_error
@@ -1126,6 +1248,33 @@ echo %__MsgPrefix%==============================================================
 echo.
 goto :eof
 
+:print_build_options
+set "__CmdLine=build.cmd"
+set "__CmdLine=!__CmdLine! -c !_MSB_Configuration!"
+set "__CmdLine=!__CmdLine! -p !_MSB_Platform!"
+set "__CmdLine=!__CmdLine! -t !_MSB_Target!"
+set "__CmdLine=!__CmdLine! -f !_Framework!"
+set "__CmdLine=!__CmdLine! -OS !_TargetOS!"
+set "__CmdLine=!__CmdLine! -v !_Verbosity!"
+set "__CmdLine=!__CmdLine! -proc !_Processors!"
+if defined _BuildDjvuNet set "__CmdLine=!__CmdLine! -DjvuNet"
+if defined _BuildTools set "__CmdLine=!__CmdLine! -ts"
+if defined _BuildTests set "__CmdLine=!__CmdLine! -bt"
+if defined _RunTests set "__CmdLine=!__CmdLine! -rt"
+if defined _SkipNative set "__CmdLine=!__CmdLine! -sn"
+if defined _CloneDeps (
+    if "!_CloneDeps!"=="full" (
+        set "__CmdLine=!__CmdLine! -cdps full"
+    ) else (
+        set "__CmdLine=!__CmdLine! -cdps"
+    )
+)
+if defined _FastFail set "__CmdLine=!__CmdLine! -ff"
+
+echo.
+echo %__MsgPrefix%Executed Command: !__CmdLine!
+goto :eof
+
 :restore_dotnet_proj
 
 set "__DjvuTargetProject=%~1"
@@ -1147,7 +1296,7 @@ call !__RestoreCmd! !__RestoreCmdArgs! !__MsbuildLogging! !__DjvuTargetProject!
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: nuget restore of %__DjvuTargetProject% returned error
     set "__FailedRestores=!__FailedRestores! %__DjvuTargetProject%"
-    if defined _FastFail goto exit_error
+    if defined _FastFail exit /b 1
 ) else (
     echo %__MsgPrefix%Success: nuget restore of %__DjvuTargetProject% finished
     set "__SuccessfulRestores=!__SuccessfulRestores! %__DjvuTargetProject%"
@@ -1174,8 +1323,8 @@ set "__MsbuildLogging=!__MsbuildLog! !__MsbuildWrn! !__MsbuildErr!"
 
 echo.
 echo %__MsgPrefix%Building %__BuildProj%
-echo %__MsgPrefix%calling !__BuildCommand! !__BuildCommandArgs! -t:%_MSB_Target% !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
-call !__BuildCommand! !__BuildCommandArgs! -t:%_MSB_Target% !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
+echo %__MsgPrefix%calling !__BuildCommand! !__BuildCommandArgs! -restore:false -t:%_MSB_Target% !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
+call !__BuildCommand! !__BuildCommandArgs! -restore:false -t:%_MSB_Target% !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
 
 if not [%ERRORLEVEL%]==[0] (
     echo %__MsgPrefix%Error: %__BuildProj% build failed. Refer to the build log files ^for details:
@@ -1183,7 +1332,7 @@ if not [%ERRORLEVEL%]==[0] (
     echo     !__BuildWrn!
     echo     !__BuildErr!
     set "__FailedBuilds=!__FailedBuilds! %__BuildProjName%"
-    if defined _FastFail goto exit_error
+    if defined _FastFail exit /b 1
     goto :eof
 ) else (
     set "__SuccessfulBuilds=!__SuccessfulBuilds! %__BuildProjName%"
@@ -1203,8 +1352,8 @@ if not defined __SkipPublish (
 
     echo.
     echo %__MsgPrefix%Publishing %__BuildProj%
-    echo %__MsgPrefix%calling !__BuildCommand! !__BuildCommandArgs! -t:Publish !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
-    call !__BuildCommand! !__BuildCommandArgs! -t:Publish !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
+    echo %__MsgPrefix%calling !__BuildCommand! !__BuildCommandArgs! -restore:false -t:Publish !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
+    call !__BuildCommand! !__BuildCommandArgs! -restore:false -t:Publish !__MsbuildLogging! "!__RepoRootDir!!__BuildProj!"
 
     if not [%ERRORLEVEL%]==[0] (
         echo %__MsgPrefix%Error: %__BuildProj% publish failed. Refer to the publish log files ^for details:
@@ -1269,7 +1418,7 @@ if not exist "!__DjvuTargetTestExe!" (
     set "__TestTimings=!__TestTimings! !__DjvuTargetTestName!|!__TestAsmDuration!|!__TestAsmStart!|!__TestAsmEnd!"
     if not [!__TestErr!]==[0] (
         set "__FailedTests=!__FailedTests! !__DjvuTargetTestName!"
-        if defined _FastFail goto exit_error
+        if defined _FastFail exit /b 1
     ) else (
         set "__SuccessfulTests=!__SuccessfulTests! !__DjvuTargetTestName!"
     )
@@ -1282,13 +1431,13 @@ echo Usage: build.cmd [options]
 echo.
 echo Options:
 echo.
-echo   -c, -Configuration ^<config^>    Build configuration (Debug, Release, Checked). Default: Debug.
+echo   -c, -Configuration [config]     Build configuration (Debug, Release, Checked). Default: Debug.
 echo.
-echo   -p, -Platform ^<platform^>       Build platform (x64, x86, arm, arm64, AnyCPU). Default: x64.
+echo   -p, -Platform [platform]        Build platform (x64, x86, arm, arm64, AnyCPU). Default: x64.
 echo.
-echo   -t, -Target ^<target^>           MSBuild target (Build, Rebuild, Clean, Pack). Default: Build.
+echo   -t, -Target [target]            MSBuild target (Build, Rebuild, Clean, Pack). Default: Build.
 echo.
-echo   -f, -Framework ^<tfm^>           Target framework (net10.0, netstandard2.1, net472). Default: net10.0.
+echo   -f, -Framework [tfm]            Target framework (net10.0, netstandard2.1, net472). Default: net10.0.
 echo.
 echo   -DjvuNet, -BuildDjvuNet          Build the core DjvuNet managed projects. Default: True.
 echo.
@@ -1315,11 +1464,11 @@ echo   -cdps, -CloneDeps [full]         Bypass tar.gz snapshot downloads for dep
 echo                                    artifacts, libgit2sharp) and use git clone instead.
 echo                                    Defaults to shallow clone (--depth 1). Pass 'full' for full history.
 echo.
-echo   -v, -Verbosity ^<level^>         Verbosity (q[uiet], m[inimal], n[ormal], d[etailed], diag[nostic]). Default: normal.
+echo   -v, -Verbosity [n]               Verbosity (q[uiet], m[inimal], n[ormal], d[etailed], diag[nostic]). Default: normal.
 echo.
-echo   -proc, -Processors ^<count^>     Number of build processes. Default: !NUMBER_OF_PROCESSORS!
+echo   -proc, -Processors [8]           Number of build processes. Default: !NUMBER_OF_PROCESSORS!
 echo.
-echo   -OS ^<os^>                       Target OS (Windows, Linux, OSX). Default: Windows.
+echo   -OS [OSX]                        Target OS (Windows, Linux, OSX). Default: Windows.
 echo.
 echo   -h, -?, -help                    Show this usage message.
 echo.

@@ -304,7 +304,9 @@ __pycache__/
 /Performance tests.txt
 *.runsettings
 /deps.zip
+/deps.tar.gz
 /Tools.zip
+/Tools.tar.gz
 
 # Locally generated build and security artifacts
 .build.version

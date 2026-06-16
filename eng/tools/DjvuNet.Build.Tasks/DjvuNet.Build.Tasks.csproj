@@ -8,6 +8,16 @@
   <Import
     Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
+    <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+     <TargetFramework></TargetFramework>
+     <TargetFrameworks>net10.0;net472</TargetFrameworks>
+   </PropertyGroup>
+
+   <!-- Clear the RID exclusively for the net472 inner build to prevent legacy MSBuild cross-OS asset collisions -->
+   <PropertyGroup Condition="'$(TargetFramework)' == 'net472'">
+     <RuntimeIdentifier></RuntimeIdentifier>
+   </PropertyGroup>
+
   <PropertyGroup>
     <RuntimeIdentifier></RuntimeIdentifier>
     <Platform>AnyCPU</Platform>
@@ -30,6 +40,7 @@
     <GenerateDependencyFile>true</GenerateDependencyFile>
     <IncludeRuntimeDependencyGraph>true</IncludeRuntimeDependencyGraph>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
     <RuntimeIdentifiers>
       win-x64;win-x86;win-arm64;linux-arm;linux-arm64;linux-musl-arm;linux-musl-arm64;linux-musl-x64;linux-x64;osx-arm64;osx-x64;win</RuntimeIdentifiers>
   </PropertyGroup>

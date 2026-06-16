@@ -219,6 +219,9 @@ initTargetDistroRid()
     fi
 }
 
+# Obtain the location of the bash script to figure out where the root of the repo is.
+__ProjectRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 setup_dirs()
 {
     echo "Setting up directories for build"
@@ -569,12 +572,20 @@ check_prereqs()
 
         export DOTNET_ROOT="$__LocalDotNetDir"
         export PATH="${__LocalDotNetDir}:$PATH"
-        __DotnetVer=$(dotnet --version | tr -d '\r\n')
+        export __DotnetCmd="$__LocalDotNetDir/dotnet"
+        __DotnetVer=$("$__DotnetCmd" --version | tr -d '\r\n')
     fi
-    export __DotnetCmd="dotnet"
+    
+    if [ -z "$__DotnetCmd" ]; then
+        export __DotnetCmd="dotnet"
+    fi
+
+    if [ -z "$__DotnetVer" ]; then
+        __DotnetVer=$("$__DotnetCmd" --version | tr -d '\r\n')
+    fi
 
     echo "dotnet $__DotnetVer installed"
-    __MSBuildVer=$(dotnet msbuild /nologo /version)
+    __MSBuildVer=$("$__DotnetCmd" msbuild /nologo /version)
     if [[ -z "$__MSBuildVer" ]]; then
         echo "dotnet sdk not installed $__MSBuildVer"
         exit 1
@@ -602,9 +613,6 @@ echo ; echo "BUILD: Starting Build of DjvuNet at $(date +"%Y-%m-%d %H:%M:%S.%2N"
 # Build configuration   - valid values are: Debug, Release
 #
 # Set the default arguments for build
-
-# Obtain the location of the bash script to figure out where the root of the repo is.
-__ProjectRoot="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Detect OS Family based on TestPlatforms matrix
 __UnameOS=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -865,6 +873,14 @@ if [[ -n "$_Test" ]]; then _BuildDjvuNet=1; _BuildTests=1; _RunTests=1; fi
 
 if [[ -z "$_BuildDjvuNet" ]]; then
     if [[ -n "$_BuildTests" ]]; then _BuildDjvuNet=1; fi
+fi
+
+if [[ -n "$_RunTests" ]]; then
+    if [[ -z "$_BuildTests" ]]; then
+        if [[ -z "$_Test" ]]; then
+            _BuildDjvuNet=""
+        fi
+    fi
 fi
 
 # init the host distro name
@@ -1410,9 +1426,9 @@ if [ -n "$_BuildTests" ]; then
         if [ -n "$_ForceCloneArtifacts" ]; then
             echo "BUILD: Download bypassed or failed, executing git clone for artifacts"
             rm -rf artifacts
-            __CloneArgs=""
+            __CloneArgs="-c core.autocrlf=false"
             if [[ ! "$_CloneDeps" == "full" ]]; then
-                __CloneArgs="--depth 1"
+                __CloneArgs="--depth 1 $__CloneArgs"
             fi
             git_clone_retry "https://github.com/DjvuNet/artifacts.git" "artifacts" $__CloneArgs
             
@@ -1439,11 +1455,12 @@ if [ -n "$_BuildTests" ]; then
         restore_dotnet_proj "$__DjvuNetTestsProj" "DjvuNet.Tests.csproj"
         restore_dotnet_proj "$__DjvuNetWaveletTestsProj" "DjvuNet.Wavelet.Tests.csproj"
         restore_dotnet_proj "$__DjvuNetTestExeProj" "DjvuNetTest.csproj"
-        restore_dotnet_proj "$__DjvuNetBenchmarksProj" "DjvuNet.Benchmarks.csproj"
         if [ -z "$_SkipNative" ]; then
+            restore_dotnet_proj "$__DjvuNetBenchmarksProj" "DjvuNet.Benchmarks.csproj"
             restore_dotnet_proj "$__DjvuNetDjvuLibreTestsProj" "DjvuNet.DjvuLibre.Tests.csproj"
             restore_dotnet_proj "$__DjvuNetDjvuLibreCompatTestsProj" "DjvuNet.DjvuLibre.Compatibility.Tests.csproj"
         elif [ "$_NativeFailed" == "1" ]; then
+            __FailedRestores+=("DjvuNet.Benchmarks.csproj")
             __FailedRestores+=("DjvuNet.DjvuLibre.Tests.csproj")
             __FailedRestores+=("DjvuNet.DjvuLibre.Compatibility.Tests.csproj")
         fi
@@ -1455,16 +1472,44 @@ if [ -n "$_BuildTests" ]; then
         build_dotnet_proj "$__DjvuNetTestsProj" "DjvuNet.Tests.csproj"
         build_dotnet_proj "$__DjvuNetWaveletTestsProj" "DjvuNet.Wavelet.Tests.csproj"
         build_dotnet_proj "$__DjvuNetTestExeProj" "DjvuNetTest.csproj"
-        build_dotnet_proj "$__DjvuNetBenchmarksProj" "DjvuNet.Benchmarks.csproj"
         if [ -z "$_SkipNative" ]; then
+            build_dotnet_proj "$__DjvuNetBenchmarksProj" "DjvuNet.Benchmarks.csproj"
             build_dotnet_proj "$__DjvuNetDjvuLibreTestsProj" "DjvuNet.DjvuLibre.Tests.csproj"
             build_dotnet_proj "$__DjvuNetDjvuLibreCompatTestsProj" "DjvuNet.DjvuLibre.Compatibility.Tests.csproj"
         elif [ "$_NativeFailed" == "1" ]; then
+            __FailedBuilds+=("DjvuNet.Benchmarks.csproj")
             __FailedBuilds+=("DjvuNet.DjvuLibre.Tests.csproj")
             __FailedBuilds+=("DjvuNet.DjvuLibre.Compatibility.Tests.csproj")
         fi
     fi
 fi
+
+print_build_options() {
+    local __CmdLine="./build.sh"
+    __CmdLine+=" -c $_MSB_Configuration"
+    __CmdLine+=" -p $_MSB_Platform"
+    __CmdLine+=" -t $_MSB_Target"
+    __CmdLine+=" -f $_Framework"
+    __CmdLine+=" -OS $_OS"
+    __CmdLine+=" -v $_Verbosity"
+    __CmdLine+=" -proc $_Processors"
+    if [ -n "$_BuildDjvuNet" ]; then __CmdLine+=" -DjvuNet"; fi
+    if [ -n "$_BuildTools" ]; then __CmdLine+=" -ts"; fi
+    if [ -n "$_BuildTests" ]; then __CmdLine+=" -bt"; fi
+    if [ -n "$_RunTests" ]; then __CmdLine+=" -rt"; fi
+    if [ -n "$_SkipNative" ]; then __CmdLine+=" -sn"; fi
+    if [ -n "$_CloneDeps" ]; then
+        if [ "$_CloneDeps" == "full" ]; then
+            __CmdLine+=" -cdps full"
+        else
+            __CmdLine+=" -cdps"
+        fi
+    fi
+    if [ -n "$_FastFail" ]; then __CmdLine+=" -ff"; fi
+
+    echo ""
+    echo "BUILD: Executed Command: $__CmdLine"
+}
 
 print_build_summary() {
     if [ -z "$__BuildEndTime" ]; then
@@ -1593,6 +1638,10 @@ if [ -n "$_RunTests" ]; then
     fi
     _Test_Options="$_Test_Options -trait- Category=Skip -nologo -nocolor"
 
+    if [ -n "$_FastFail" ]; then
+        _Test_Options="$_Test_Options -stoponfail"
+    fi
+
     _DjvuNet_Tests_Error="false"
 
     if [ -n "$_TestAll" ]; then
@@ -1612,16 +1661,41 @@ if [ -n "$_RunTests" ]; then
     __TestPhaseDuration="$((__TestPhaseEndTime - __TestPhaseStartTime)).000s"
 fi
 
-if [ ${#__FailedRestores[@]} -ne 0 ] || [ ${#__FailedBuilds[@]} -ne 0 ] || [ ${#__FailedPublishes[@]} -ne 0 ] || [ ${#__FailedTests[@]} -ne 0 ] || [ ${#__FailedClones[@]} -ne 0 ] || [ ${#__FailedCommands[@]} -ne 0 ]; then
-    echo ""
-    print_full_summary
-    echo "BUILD: Error: Build Failed at $(date +"%Y-%m-%d %H:%M:%S.%2N")"
-    echo ""
-    exit 1
+__HasBuildErrors=0
+if [ ${#__FailedRestores[@]} -ne 0 ] || [ ${#__FailedBuilds[@]} -ne 0 ] || [ ${#__FailedPublishes[@]} -ne 0 ] || [ ${#__FailedClones[@]} -ne 0 ] || [ ${#__FailedCommands[@]} -ne 0 ]; then
+    __HasBuildErrors=1
+fi
+
+__HasTestErrors=0
+if [ ${#__FailedTests[@]} -ne 0 ]; then
+    __HasTestErrors=1
 fi
 
 echo ""
 print_full_summary
-echo "BUILD: Success: Build and tests passed at $(date +"%Y-%m-%d %H:%M:%S.%2N")"
-echo ""
-exit 0
+
+if [ $__HasBuildErrors -eq 1 ] && [ $__HasTestErrors -eq 1 ]; then
+    echo "BUILD: Error: Build Failed and Tests Failed at $(date +"%Y-%m-%d %H:%M:%S.%2N")"
+    print_build_options
+    echo ""
+    exit 1
+elif [ $__HasBuildErrors -eq 1 ]; then
+    echo "BUILD: Error: Build Failed at $(date +"%Y-%m-%d %H:%M:%S.%2N")"
+    print_build_options
+    echo ""
+    exit 1
+elif [ $__HasTestErrors -eq 1 ]; then
+    echo "BUILD: Error: Build Succeeded but Tests Failed at $(date +"%Y-%m-%d %H:%M:%S.%2N")"
+    print_build_options
+    echo ""
+    exit 1
+else
+    if [ -n "$_RunTests" ]; then
+        echo "BUILD: Success: Build and tests passed at $(date +"%Y-%m-%d %H:%M:%S.%2N")"
+    else
+        echo "BUILD: Success: Build passed at $(date +"%Y-%m-%d %H:%M:%S.%2N")"
+    fi
+    print_build_options
+    echo ""
+    exit 0
+fi

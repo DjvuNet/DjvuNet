@@ -7,12 +7,22 @@ using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using System.Runtime.CompilerServices;
 
+#if !NETCOREAPP
+namespace System.Runtime.CompilerServices
+{
+    [AttributeUsage(AttributeTargets.Method, Inherited = false)]
+    internal sealed class ModuleInitializerAttribute : Attribute { }
+}
+#endif
+
 namespace DjvuNet.Build.Tasks
 {
     public static class Init
     {
         // 0 = false, 1 = true
+#pragma warning disable CS0414
         private static int _initialized = 0;
+#pragma warning restore CS0414
 
         private static bool _resolverRegistered = false;
         private static List<(bool isWarning, string message)> _deferredLogs = new List<(bool, string)>();
@@ -52,6 +62,7 @@ namespace DjvuNet.Build.Tasks
 
             if (_resolverRegistered) return;
 
+#if NETCOREAPP
             try
             {
                 NativeLibrary.SetDllImportResolver(typeof(LibGit2Sharp.Repository).Assembly, (libraryName, assembly, searchPath) =>
@@ -126,6 +137,7 @@ namespace DjvuNet.Build.Tasks
             {
                 LogOrDefer(loggingEngine, true, "DjvuNet.Build.Tasks : warning : Failed to set NativeLibrary DllImportResolver for DjvuNet.Build.Tasks native dependencies. Another resolver may already be registered.");
             }
+#endif
         }
 
         private static void LogOrDefer(IBuildEngine loggingEngine, bool isWarning, string message)
@@ -154,6 +166,7 @@ namespace DjvuNet.Build.Tasks
         }
 
 
+#if NETCOREAPP
         private static string GetRuntimeIdentifier()
         {
             string os = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "win" :
@@ -170,5 +183,6 @@ namespace DjvuNet.Build.Tasks
 
             return $"{os}-{arch}";
         }
+#endif
     }
 }

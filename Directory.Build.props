@@ -68,7 +68,7 @@
   </Target>
 
   <PropertyGroup>
-    <BaseIntermediateOutputPath>$(RepoRootDir)/build/bin/obj/$(TargetOS).$(TargetPlatform).$(Configuration)/$(TargetFramework)/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>$([MSBuild]::EnsureTrailingSlash('$(RepoRootDir)'))build/bin/obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
     <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
     <RestoreOutputPath>$(BaseIntermediateOutputPath)</RestoreOutputPath>
   </PropertyGroup>

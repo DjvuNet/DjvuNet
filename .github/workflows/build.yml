@@ -63,13 +63,13 @@ jobs:
       if: runner.os == 'Windows'
       shell: cmd
       run: |
-        build.cmd -p ${{ matrix.platform }} -c Release -f net10.0 -Test -OS ${{ runner.os }}
+        build.cmd -p ${{ matrix.platform }} -c Release -f net10.0 -Test -cdps -OS ${{ runner.os }}
 
     - name: Run Build (Linux/macOS)
       if: runner.os != 'Windows'
       shell: bash
       run: |
-        ./build.sh -p ${{ matrix.platform }} -c Release -f net10.0 -Test -OS ${{ runner.os }}
+        ./build.sh -p ${{ matrix.platform }} -c Release -f net10.0 -Test -cdps -OS ${{ runner.os }}
 
     - name: Upload Test Results and Benchmarks
       uses: actions/upload-artifact@v7

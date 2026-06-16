@@ -3,17 +3,30 @@
   <PropertyGroup>
     <!-- <IntermediateOutputPath>$(MSBuildThisFileDirectory)/build/bin/obj/$(TargetOS).$(TargetPlatform).$(Configuration)/$(AssemblyName)/</IntermediateOutputPath> -->
     <DefineConstants Condition="$(APPVEYOR) == 'True'">_APPVEYOR;$(DefineConstans)</DefineConstants>
-    
+
     <!-- STAGE 3 CLEANUP -->
     <UseDjvuNetTaskFactory>true</UseDjvuNetTaskFactory>
-    <GitTasksAssembly>$(MSBuildThisFileDirectory)Tools/DjvuNet/$(TargetFramework)/DjvuNet.Build.Tasks.dll</GitTasksAssembly>
+
+    <TaskRuntimeFolderName Condition="'$(MSBuildRuntimeType)' == 'Core'">net10.0</TaskRuntimeFolderName>
+    <TaskRuntimeFolderName Condition="'$(MSBuildRuntimeType)' != 'Core'">net472</TaskRuntimeFolderName>
+    <GitTasksAssembly>$(MSBuildThisFileDirectory)Tools/DjvuNet/$(TaskRuntimeFolderName)/DjvuNet.Build.Tasks.dll</GitTasksAssembly>
   </PropertyGroup>
 
-  <!-- New Tooling / Stage 2+ (With TaskFactory, New Namespace) -->
-  <UsingTask TaskName="DjvuNet.Build.Tasks.BuildMajorVersion" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
-  <UsingTask TaskName="DjvuNet.Build.Tasks.GetLastCommit" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
-  <UsingTask TaskName="DjvuNet.Build.Tasks.GetDateTime" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
-  <UsingTask TaskName="MSBuild.Community.Tasks.FileUpdate" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+      <Target Name="ValidateDjvuNetTFM" BeforeTargets="BeforeBuild;BeforeRestore" Condition="'$(IsTool)' != 'true' And '$(MSBuildProjectName)' != 'System.Attributes'">
+        <Error Condition="'$(TargetFramework)' == 'net472'" Text="The net472 target framework is deprecated and inherently incompatible with the required native cross-platform build tasks. Please use net10.0 or a .NET Standard target." />
+      </Target>
+
+      <!-- CI Build (.NET Core MSBuild) -> Force out-of-process TaskHost to guarantee native cross-platform resolution -->
+      <UsingTask Condition="'$(MSBuildRuntimeType)' == 'Core'" TaskName="DjvuNet.Build.Tasks.BuildMajorVersion" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+      <UsingTask Condition="'$(MSBuildRuntimeType)' == 'Core'" TaskName="DjvuNet.Build.Tasks.GetLastCommit" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+      <UsingTask Condition="'$(MSBuildRuntimeType)' == 'Core'" TaskName="DjvuNet.Build.Tasks.GetDateTime" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+      <UsingTask Condition="'$(MSBuildRuntimeType)' == 'Core'" TaskName="MSBuild.Community.Tasks.FileUpdate" Runtime="NET" Architecture="CurrentArchitecture" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+
+      <!-- Visual Studio Build (.NET Framework MSBuild) -> In-process execution for IDE convenience -->
+      <UsingTask Condition="'$(MSBuildRuntimeType)' != 'Core'" TaskName="DjvuNet.Build.Tasks.BuildMajorVersion" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+      <UsingTask Condition="'$(MSBuildRuntimeType)' != 'Core'" TaskName="DjvuNet.Build.Tasks.GetLastCommit" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+      <UsingTask Condition="'$(MSBuildRuntimeType)' != 'Core'" TaskName="DjvuNet.Build.Tasks.GetDateTime" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
+      <UsingTask Condition="'$(MSBuildRuntimeType)' != 'Core'" TaskName="MSBuild.Community.Tasks.FileUpdate" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
 
   <Target Name="CalculateVersion" BeforeTargets="InjectVersion">
     <ReadLinesFromFile File="$(MSBuildThisFileDirectory)library.version">
@@ -79,7 +92,7 @@
           Inputs="$(MSBuildThisFileDirectory).build.version;$(ProjectDir)Properties\AssemblyInfo.Template.cs;$(MSBuildThisFileDirectory)Templates\AssemblyInfoCommon.Template.cs"
           Outputs="$(ProjectDir)Properties\AssemblyInfo.$(TargetFramework).cs;$(ProjectDir)Properties\AssemblyInfoCommon.$(TargetFramework).cs">
 
-    <Error Condition="'$(TargetFramework)' == 'net472'" Text="The net472 target framework is deprecated and no longer supported in this build pipeline." />
+    <Error Condition="'$(TargetFramework)' == 'net472' And '$(IsTool)' != 'true' And '$(MSBuildProjectName)' != 'System.Attributes'" Text="The net472 target framework is deprecated and no longer supported in this build pipeline." />
 
     <PropertyGroup>
       <UtilRepoRootUpdate>$(ProjectName.EndsWith(`.Tests`))</UtilRepoRootUpdate>

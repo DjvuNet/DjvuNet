@@ -17,6 +17,10 @@
     <IsDjvuNetTestProject>false</IsDjvuNetTestProject>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+     <TargetFramework></TargetFramework>
+     <TargetFrameworks>net10.0;net472</TargetFrameworks>
+  </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
   </PropertyGroup>
