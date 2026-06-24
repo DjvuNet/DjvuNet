@@ -16,9 +16,7 @@ namespace DjvuNet.JB2
         /// </summary>
         public int Bottom
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return 0xffff & _bottom; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { _bottom = (short)value; }
         }
 
@@ -29,9 +27,7 @@ namespace DjvuNet.JB2
         /// </summary>
         public int Left
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return 0xffff & _left; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set { _left = (short)value; }
         }
 

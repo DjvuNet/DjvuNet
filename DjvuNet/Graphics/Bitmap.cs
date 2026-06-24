@@ -3,6 +3,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using DjvuNet.Compression;
 using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
@@ -37,17 +38,31 @@ namespace DjvuNet.Graphics
     /// MinBorder.  The border pixels are initialized to zero and therefore
     /// represent white pixels. You should never write anything into border
     /// pixels because they are shared between images and between lines.
+    ///
+    /// <para>
+    /// <b>ARCHITECTURAL LIMITATION (Image Dimensions):</b><br/>
+    /// The maximum supported image size is strictly constrained by a combination of two factors in the current implementation:
+    /// <br/>1. The fixed data type is <c>sbyte</c>/<c>byte</c> (1 byte allocated per pixel, regardless of visual color depth).
+    /// <br/>2. The underlying data structure is a single standard .NET array (<c>sbyte[] Data</c>), which uses <c>Int32</c> for its index.
+    /// <br/>Therefore, the total number of bytes required (Height * BytesPerRow + Border) cannot exceed <c>int.MaxValue</c> (~2GB).
+    /// Attempting to decode or allocate images exceeding this size will safely throw a <see cref="DjvuArgumentOutOfRangeException"/>.
+    /// </para>
     /// </remarks>
-    public class Bitmap : Map, IBitmap
+    public sealed class Bitmap : Map, IBitmap
     {
         // TODO Verify if this change does not break rendering
 
         // As this is read and assigned from instance methods changing
         // to instance field - will verify results but perhaps it is
         // one of the bugs which prevents proper image rendering
-        private Object[] RampRefArray = new Object[256];
+        private Object[] RampRefArray = new Object[257];
 
         private const int RunOverflow = 0xc0;
+        /// <summary>
+        /// Hard limitation of the DjVu RLE format.
+        /// 2-byte runs are encoded as ((byte1 & 0x3F) << 8) | byte2.
+        /// The mathematical maximum is (63 << 8) | 255 = 16383 (0x3FFF).
+        /// </summary>
         private const int MaxRunSize = 0x3fff;
         private const int RunMsbMask = 0x3f;
         private const int RunLsbMask = 0xff;
@@ -68,22 +83,6 @@ namespace DjvuNet.Graphics
         #endregion Private Members
 
         #region Properties
-
-        /// <summary>
-        /// Gets or sets the number of pixel rows.
-        /// </summary>
-        internal int Rows
-        {
-            set
-            {
-                if (value != Height)
-                {
-                    SetHeight(value);
-                    _MaxRowOffset = RowOffset(Height);
-                }
-            }
-            get { return Height; }
-        }
 
         private int _Grays;
 
@@ -113,19 +112,71 @@ namespace DjvuNet.Graphics
         private int _Border;
 
         /// <summary>
-        /// Gets or sets the number of border pixels
+        /// Gets the number of border pixels
         /// </summary>
         public int Border
         {
             get { return _Border; }
-            set
+        }
+
+        private void Resize(int width, int height, int border, int bytesPerRow)
+        {
+            Resize(width, height, border, bytesPerRow, Data);
+        }
+
+        private void Resize(int width, int height, int border, int bytesPerRow, sbyte[] newDataBuffer)
+        {
+            // Stride validation: DjvuNet Bitmap uses 8bpp (8 bits per pixel) memory layout,
+            // allocating 1 byte per pixel regardless of visual color depth (Grays).
+            // Therefore, the row stride (BytesPerRow) must physically accommodate width + border.
+            if (bytesPerRow > 0 && bytesPerRow < width + border)
             {
-                if (_Border != value)
-                {
-                    _Border = value;
-                    _MaxRowOffset = RowOffset(Height);
-                }
+                DjvuExceptionUtil.ThrowArgument("BytesPerRow (stride) is insufficient to hold the image width and border padding.", nameof(bytesPerRow));
             }
+
+            // Promote to long to prevent 32-bit integer overflow during malicious/massive allocations.
+            long maxOffsetCalc = ((long)height * bytesPerRow) + border;
+
+            // ARCHITECTURAL LIMITATION:
+            // The limit is imposed by a combination of two factors in the current Bitmap implementation:
+            // 1. The fixed data type is sbyte/byte (1 byte per pixel).
+            // 2. The underlying data structure is a standard .NET array (sbyte[]), which uses Int32 for its index.
+            // Therefore, the total number of bytes required (maxOffsetCalc) cannot exceed int.MaxValue (2GB).
+            // Future work to remove image size limits will require migrating away from a single 1D array
+            // or utilizing advanced memory structures like MemoryMappedFiles or pointer arrays.
+            if (maxOffsetCalc > int.MaxValue || maxOffsetCalc < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Image dimensions cause memory boundary calculation to exceed maximum integer size.");
+            }
+
+            int newMaxRowOffset = (int)maxOffsetCalc;
+
+            if (newDataBuffer != null && newMaxRowOffset > 0 && newDataBuffer.Length < newMaxRowOffset)
+            {
+                DjvuExceptionUtil.ThrowInvalidOperation(
+                    $"Provided data buffer length ({newDataBuffer.Length}) is too small for the specified dimensions. Required: {newMaxRowOffset}");
+            }
+
+            base.SetHeight(height);
+            base.SetWidth(width);
+            _Border = border;
+            _BytesPerRow = bytesPerRow;
+            _MaxRowOffset = newMaxRowOffset;
+
+            if (Data != newDataBuffer)
+            {
+                Data = newDataBuffer;
+            }
+        }
+
+        protected override void SetHeight(int height)
+        {
+            Resize(Width, height, Border, BytesPerRow);
+        }
+
+        protected override void SetWidth(int width)
+        {
+            Resize(width, Height, Border, BytesPerRow);
         }
 
         public Pixel[] Ramp
@@ -192,34 +243,35 @@ namespace DjvuNet.Graphics
         public int BytesPerRow
         {
             get { return _BytesPerRow; }
-            internal set
-            {
-                if (_BytesPerRow != value)
-                {
-                    _BytesPerRow = value;
-                    _MaxRowOffset = RowOffset(Height);
-                }
-            }
+            set {_BytesPerRow = value; }
         }
 
         /// <summary>
         /// Set the minimum border needed
         /// </summary>
-        public int MinimumBorder
+        public void SetMinimumBorder(int value)
         {
-            set
+            if (value < 0)
             {
-                if (_Border < value)
-                {
-                    if (Data != null)
-                    {
-                        Bitmap tmp = (Bitmap)new Bitmap().Init(this, value);
-                        BytesPerRow = tmp.GetRowSize();
-                        Data = tmp.Data;
-                        tmp.Data = null;
-                    }
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(value), value, "Minimum border cannot be negative.");
+            }
 
-                    _Border = value;
+            if (_Border < value)
+            {
+                if (Data != null)
+                {
+                    Bitmap tmp = (Bitmap)new Bitmap().Init(this, value);
+                    Resize(Width, Height, value, tmp.GetRowSize(), tmp.Data);
+                    tmp.Data = null;
+                }
+                else
+                {
+                    long newStrideCalc = (long)BytesPerRow - _Border + value;
+                    if (newStrideCalc > int.MaxValue || newStrideCalc < 0)
+                    {
+                        DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(value), value, "Calculated stride exceeds bounds.");
+                    }
+                    Resize(Width, Height, value, (int)newStrideCalc);
                 }
             }
         }
@@ -231,26 +283,22 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Creates a new Bitmap object.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Bitmap()
             : base(1, 0, 0, 0, true)
         {
             IsRampNeeded = true;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Bitmap(int height, int width, int border = Bitmap.BorderSize) : base(1, 0, 0, 0, true)
         {
             Init(height, width, border);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Bitmap(IBitmap bmp) : base(1, 0, 0, 0, true)
         {
             Init(bmp, bmp.Border);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Bitmap(sbyte[] data, int height, int width, int border = Bitmap.BorderSize)
             : base(1, 0, 0, 0, true)
         {
@@ -345,8 +393,8 @@ namespace DjvuNet.Graphics
             try
             {
                 byte* row = (byte*)(dataPtr + Border);
-                row += (Rows - 1) * BytesPerRow;
-                for (int n = Rows - 1; n >= 0; n--)
+                row += (Height - 1) * BytesPerRow;
+                for (int n = Height - 1; n >= 0; n--)
                 {
                     for (int c = 0; c < Width; c++)
                     {
@@ -399,7 +447,7 @@ namespace DjvuNet.Graphics
             try
             {
                 byte* row = (byte*)(dataPtr + Border);
-                row += (Rows - 1) * BytesPerRow;
+                row += (Height - 1) * BytesPerRow;
                 char lookahead = '\n';
 
                 byte[] ramp = new byte[maxval + 1];
@@ -409,7 +457,7 @@ namespace DjvuNet.Graphics
                     ramp[i] = (byte)(i < maxval ? ((Grays - 1) * (maxval - i) + maxval / 2) / maxval : 0);
                 }
 
-                for (int n = Rows - 1; n >= 0; n--)
+                for (int n = Height - 1; n >= 0; n--)
                 {
                     for (int c = 0; c < Width; c++)
                     {
@@ -436,8 +484,8 @@ namespace DjvuNet.Graphics
             try
             {
                 byte* row = (byte*)(dataPtr + Border);
-                row += (Rows - 1) * BytesPerRow;
-                for (int n = Rows - 1; n >= 0; n--)
+                row += (Height - 1) * BytesPerRow;
+                for (int n = Height - 1; n >= 0; n--)
                 {
                     byte acc = 0;
                     byte mask = 0;
@@ -497,8 +545,8 @@ namespace DjvuNet.Graphics
             {
                 byte* bramp = (byte*)rampPtr;
                 byte* row = (byte*)(dataPtr + Border);
-                row += (Rows - 1) * BytesPerRow;
-                for (int n = Rows - 1; n >= 0; n--)
+                row += (Height - 1) * BytesPerRow;
+                for (int n = Height - 1; n >= 0; n--)
                 {
                     if (maxbin > 256)
                     {
@@ -554,7 +602,7 @@ namespace DjvuNet.Graphics
                 int hInt = 0;
                 byte p = 0;
                 byte* row = (byte*)(dataPtr + Border);
-                int n = Rows - 1;
+                int n = Height - 1;
                 row += n * BytesPerRow;
                 int c = 0;
 
@@ -639,8 +687,9 @@ namespace DjvuNet.Graphics
                     Compress();
                 }
 
-                fixed (byte* runs = _RleData)
+                fixed (byte* runsPtr = _RleData)
                 {
+                    byte* runs = runsPtr;
                     byte* runs_end = runs + _RleData.Length;
                     int count = (Width + 7) >> 3;
                     byte[] byteBuff = new byte[count];
@@ -648,7 +697,7 @@ namespace DjvuNet.Graphics
                     {
                         while (runs < runs_end)
                         {
-                            Rle2Bitmap(Width, runs, buf, false);
+                            Rle2Bitmap(Width, ref runs, buf, false);
                             stream.Write(byteBuff, 0, count);
                         }
                     }
@@ -794,7 +843,7 @@ namespace DjvuNet.Graphics
         {
             if (Grays > 2)
             {
-                throw new DjvuInvalidOperationException($"Cannot compress data with Grays: {Grays}");
+                DjvuExceptionUtil.ThrowInvalidOperation($"Cannot compress data with Grays: {Grays}");
             }
 
             //GMonitorLock lock (monitor()) ;
@@ -805,6 +854,7 @@ namespace DjvuNet.Graphics
                 if (rleLength > 0)
                 {
                     Data = null;
+                    _RleData = grle;
                 }
             }
         }
@@ -846,7 +896,6 @@ namespace DjvuNet.Graphics
 
             // encode bitmap as rle
             fixed (sbyte* bytes = Data)
-            fixed (byte* runs = runsBuff)
             {
                 byte* row = (byte*) bytes + Border;
                 int n = Height - 1;
@@ -859,12 +908,15 @@ namespace DjvuNet.Graphics
                         Array.Resize(ref runsBuff, maxpos);
                     }
 
-                    byte* runs_pos = runs + pos;
-                    byte* runs_pos_start = runs_pos;
+                    fixed (byte* runs = runsBuff)
+                    {
+                        byte* runs_pos = runs + pos;
+                        byte* runs_pos_start = runs_pos;
 
-                    AppendLine(runs_pos, row, Width);
+                        AppendLine(ref runs_pos, row, Width);
 
-                    pos += (runs_pos - runs_pos_start);
+                        pos += (int)(runs_pos - runs_pos_start);
+                    }
                     row -= BytesPerRow;
                     n -= 1;
                 }
@@ -881,13 +933,20 @@ namespace DjvuNet.Graphics
             // initialize pixel array
             if (Width == 0 || Height == 0)
             {
-                throw new DjvuInvalidOperationException("Bitmap is not properly initialized.");
+                DjvuExceptionUtil.ThrowInvalidOperation("Bitmap is not properly initialized.");
             }
 
-            BytesPerRow = Width + Border;
+            long newStrideCalc = (long)Width + Border;
+            if (newStrideCalc > int.MaxValue || newStrideCalc < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(Width), Width, "Calculated stride exceeds bounds.");
+            }
+
+            Resize(Width, Height, Border, (int)newStrideCalc);
+
             if (runs == (byte*) 0)
             {
-                throw new DjvuArgumentNullException(nameof(runs));
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(runs));
             }
 
             long npixels = Height * BytesPerRow + Border;
@@ -909,11 +968,11 @@ namespace DjvuNet.Graphics
                 c = 0;
                 while (n >= 0)
                 {
-                    int x = ReadRun(runs);
+                    int x = ReadRun(ref runs);
 
                     if (c + x > Width)
                     {
-                        throw new DjvuFormatException("Invalid RLE encoded data.");
+                        DjvuExceptionUtil.ThrowFormatException("Invalid RLE encoded data.");
                     }
 
                     while (x-- > 0)
@@ -936,10 +995,11 @@ namespace DjvuNet.Graphics
             _RleData = null;
         }
 
-        internal unsafe void AppendLine(byte* data, byte* row, int rowLength, bool invert = false)
+        internal unsafe void AppendLine(ref byte* data, byte* row, int rowLength, bool invert = false)
         {
             byte* rowEnd = row + rowLength;
             bool p = !invert;
+
             while(row < rowEnd)
             {
                 int count = 0;
@@ -954,11 +1014,11 @@ namespace DjvuNet.Graphics
                 {
                     for(++count, ++row; (row < rowEnd) && *row == 0; ++count, ++row);
                 }
-                AppendRun(data, count);
+                AppendRun(ref data, count);
             }
         }
 
-        internal unsafe void AppendRun(byte* data, int count)
+        internal unsafe void AppendRun(ref byte* data, int count)
         {
             if (count < RunOverflow)
             {
@@ -973,11 +1033,15 @@ namespace DjvuNet.Graphics
             }
             else
             {
-                AppendLongRun(data, count);
+                AppendLongRun(ref data, count);
             }
         }
 
-        internal unsafe void AppendLongRun(byte* data, int count)
+        /// <summary>
+        /// Encodes runs larger than the 16383 format limit by chaining maximum-size segments
+        /// separated by 0-length runs of the alternating color.
+        /// </summary>
+        internal unsafe void AppendLongRun(ref byte* data, int count)
         {
             while (count > MaxRunSize)
             {
@@ -1000,14 +1064,14 @@ namespace DjvuNet.Graphics
             }
         }
 
-        internal unsafe int ReadRun(byte* data)
+        internal unsafe int ReadRun(ref byte* data)
         {
             int z = *data++;
             return (z >= RunOverflow) ? ((z & ~RunOverflow) << 8) | (*data++) : z;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        internal unsafe void Rle2Bitmap(int width, byte* runs, byte* bitmap, bool invert = false)
+        internal unsafe void Rle2Bitmap(int width, ref byte* runs, byte* bitmap, bool invert = false)
         {
             int obyte_def = invert ? 0xff : 0;
             int obyte_ndef = invert ? 0 : 0xff;
@@ -1015,7 +1079,7 @@ namespace DjvuNet.Graphics
 
             for(int c = width; c > 0 ;)
             {
-                int x = ReadRun(runs);
+                int x = ReadRun(ref runs);
                 c -= x;
 
                 while((x--) > 0)
@@ -1035,7 +1099,7 @@ namespace DjvuNet.Graphics
 
                 if(c > 0)
                 {
-                    x = ReadRun(runs);
+                    x = ReadRun(ref runs);
                     c -= x;
                     while((x--) > 0)
                     {
@@ -1061,24 +1125,37 @@ namespace DjvuNet.Graphics
             }
         }
 
-        public IBitmap Duplicate()
+        public unsafe IBitmap Duplicate()
         {
-            Bitmap clone = new Bitmap
+            Bitmap clone = new Bitmap();
+
+            clone.BlueOffset = BlueOffset;
+            clone.Grays = Grays;
+            clone.GreenOffset = GreenOffset;
+            clone.BytesPerPixel = BytesPerPixel;
+            clone.IsRampNeeded = IsRampNeeded;
+            clone.RedOffset = RedOffset;
+
+            clone.Resize(Width, Height, Border, BytesPerRow);
+
+            if (Data != null)
             {
-                BlueOffset = BlueOffset,
-                Data = (sbyte[]) Data.Clone(),  /// TODO: Fix me
-                Grays = Grays,
-                GreenOffset = GreenOffset,
-                _MaxRowOffset = _MaxRowOffset,
-                BytesPerPixel = BytesPerPixel,
-                IsRampNeeded = IsRampNeeded,
-                _RampData = _RampData,      /// TODO: Fix me
-                RedOffset = RedOffset,
-            };
-            clone.SetWidth(Width);
-            clone.SetHeight(Height);
-            clone.Border = Border;
-            clone.BytesPerRow = BytesPerRow;
+                sbyte[] newData = new sbyte[Data.Length];
+                Buffer.BlockCopy(Data, 0, newData, 0, Data.Length);
+                clone.Data = newData;
+            }
+
+            if (_RampData != null)
+            {
+                Pixel[] newRamp = new Pixel[_RampData.Length];
+                int byteCount = _RampData.Length * sizeof(Pixel);
+                fixed (void* src = _RampData, dst = newRamp)
+                {
+                    Unsafe.CopyBlock(dst, src, (uint)byteCount);
+                }
+                clone._RampData = newRamp;
+            }
+
             return clone;
         }
 
@@ -1096,10 +1173,9 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// True if zero
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool GetBooleanAt(int offset)
         {
-            return (offset < Border) || (offset >= _MaxRowOffset) || (Data[offset] == 0);
+            return /* (offset < Border) || (offset >= _MaxRowOffset) || */ (Data[offset] == 0);
         }
 
         /// <summary>
@@ -1111,13 +1187,12 @@ namespace DjvuNet.Graphics
         /// <param name="value">
         /// gray scale value to set
         /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void SetByteAt(int offset, sbyte value)
         {
-            if ((offset >= Border) || (offset < _MaxRowOffset))
-            {
+            //if ((offset >= Border) || (offset < _MaxRowOffset))
+            //{
                 Data[offset] = (sbyte)value;
-            }
+            //}
         }
 
         /// <summary>
@@ -1129,7 +1204,6 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// The gray scale value
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public unsafe int GetByteAt(int offset)
         {
             fixed (sbyte* dataLocation = Data)
@@ -1160,6 +1234,11 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public bool Blit(IBitmap bm, int xh, int yh, int subsample)
         {
+            if (bm == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(bm), "Cannot blit a null source bitmap onto the target.");
+            }
+
             int pidx = 0;
             int qidx = 0;
 
@@ -1242,7 +1321,18 @@ namespace DjvuNet.Graphics
         /// <param name="threshold"></param>
         public void BinarizeGrays(int threshold)
         {
-            throw new NotImplementedException();
+            if (Data != null)
+            {
+                for (int row = 0; row < Height; row++)
+                {
+                    int offset = RowOffset(row);
+                    for (int c = 0; c < Width; c++)
+                    {
+                        Data[offset + c] = (Data[offset + c] & 0xFF) > threshold ? (sbyte)1 : (sbyte)0;
+                    }
+                }
+            }
+            Grays = 2;
         }
 
         /// <summary>
@@ -1254,11 +1344,30 @@ namespace DjvuNet.Graphics
         public void ChangeGrays(int grays)
         {
             if (grays < 2 || grays > 256)
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(grays), grays, "Gray levels outside of range");
+
+            int ng = grays - 1;
+            int og = Grays - 1;
+            Grays = grays;
+
+            byte[] conv = new byte[256];
+            for (int i = 0; i < 256; i++)
             {
-                throw new DjvuArgumentOutOfRangeException(nameof(grays));
+                if (i > og) conv[i] = (byte)ng;
+                else        conv[i] = (byte)((i * ng + og / 2) / og);
             }
 
-            throw new NotImplementedException();
+            if (Data != null)
+            {
+                for (int row = 0; row < Height; row++)
+                {
+                    int offset = RowOffset(row);
+                    for (int n = 0; n < Width; n++)
+                    {
+                        Data[offset + n] = (sbyte)conv[Data[offset + n] & 0xFF];
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -1270,7 +1379,6 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// The offset to the pixel data
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int RowOffset(int row)
         {
             return (row * BytesPerRow) + Border;
@@ -1282,7 +1390,6 @@ namespace DjvuNet.Graphics
         /// <returns>
         /// Bytes per row
         /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetRowSize()
         {
             return BytesPerRow;
@@ -1294,7 +1401,6 @@ namespace DjvuNet.Graphics
         /// <param name="value">
         /// Gray scale value to assign to all pixels
         /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Fill(short value)
         {
             int idx = 0;
@@ -1323,7 +1429,6 @@ namespace DjvuNet.Graphics
         /// <param name="dy">
         /// Vertical position to insert at
         /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Fill(IMap2 source, int dx, int dy)
         {
             InsertMap((IBitmap)source, dx, dy, false);
@@ -1350,6 +1455,11 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public unsafe bool InsertMap(IBitmap bit, int dx, int dy, bool doBlit)
         {
+            if (bit == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(bit), "Cannot insert a null source map into the target.");
+            }
+
             int x0 = (dx > 0) ? dx : 0;
             int y0 = (dy > 0) ? dy : 0;
             int x1 = (dx < 0) ? (-dx) : 0;
@@ -1433,19 +1543,34 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IBitmap Init(int height, int width, int border)
         {
+            if (width < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width cannot be negative.");
+            }
+
+            if (height < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height cannot be negative.");
+            }
+
+            if (border < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(border), border, "Border cannot be negative.");
+            }
+
             Data = null;
             Grays = 2;
-            SetHeight(height);
-            SetWidth(width);
-            Border = border;
-            BytesPerRow = (Width + Border);
-            // TODO: Verify if value of Bitmap.Border is double sided or single sided?
 
-            int npixels = RowOffset(Height);
+            // The allocation logic matches C++ DjVuLibre GBitmap::init parity:
+            // BytesPerRow represents single-sided row padding (Width + Border).
+            // RowOffset(Height) calculates: (Height * BytesPerRow) + Border
+            // which adds one final border cap at the very end of the contiguous memory buffer.
+            int bytesPerRow = width + border;
+            Resize(width, height, border, bytesPerRow);
 
-            if (npixels > 0)
+            if (_MaxRowOffset > 0)
             {
-                Data = new sbyte[npixels];
+                Data = new sbyte[_MaxRowOffset];
             }
 
             return this;
@@ -1454,22 +1579,38 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public IBitmap Init(sbyte[] data, int height, int width, int border)
         {
+            if (width < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width cannot be negative.");
+            }
+
+            if (height < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height cannot be negative.");
+            }
+
+            if (border < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(border), border, "Border cannot be negative.");
+            }
+
             Data = null;
             Grays = 2;
-            SetHeight(height);
-            SetWidth(width);
-            Border = border;
-            BytesPerRow = (Width + Border);
 
-            int npixels = RowOffset(Height);
+            // The allocation logic matches C++ DjVuLibre GBitmap::init parity:
+            // BytesPerRow represents single-sided row padding (Width + Border).
+            // RowOffset(Height) calculates: (Height * BytesPerRow) + Border
+            // which adds one final border cap at the very end of the contiguous memory buffer.
+            int bytesPerRow = width + border;
+            Resize(width, height, border, bytesPerRow);
 
-            if (npixels > 0 && data != null && data.Length == npixels)
+            if (_MaxRowOffset > 0 && data != null && data.Length == _MaxRowOffset)
             {
                 Data = data;
             }
-            else
+            else if (_MaxRowOffset > 0)
             {
-                throw new DjvuArgumentException(
+                DjvuExceptionUtil.ThrowArgument(
                    "Mismatch in data size and Bitmap dimensions.", nameof(data));
             }
 
@@ -1506,7 +1647,7 @@ namespace DjvuNet.Graphics
             }
             else if (border > Border)
             {
-                MinimumBorder = border;
+                SetMinimumBorder(border);
             }
 
             return this;
@@ -1533,11 +1674,7 @@ namespace DjvuNet.Graphics
             {
                 Bitmap tmp = new Bitmap();
                 tmp.Grays = (Grays);
-                tmp.Border = ((short)border);
-                tmp.BytesPerRow = (BytesPerRow);
-                tmp.SetWidth(Width);
-                tmp.SetHeight(Height);
-                tmp.Data = Data;
+                tmp.Resize(Width, Height, Border, BytesPerRow, Data);
                 Data = null;
                 Init(tmp, rect, border);
             }
@@ -1560,9 +1697,9 @@ namespace DjvuNet.Graphics
                         dstIdx = RowOffset(y);
                         srcIdx = source.RowOffset(y + rect.YMin);
 
-                        for (int x = rect2.XMin; x < rect2.YMax; x++)
+                        for (int x = rect2.XMin; x < rect2.XMax; x++)
                         {
-                            Data[dstIdx + x] = source.Data[srcIdx + x];
+                            Data[dstIdx + x] = source.Data[srcIdx + x + rect.XMin];
                         }
                     }
                 }
@@ -1606,10 +1743,13 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Convert the pixel to 24 bit color.
         /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // TODO: The current PixelRamp implementation recalculates the 256-level color gradient
+        // inline on every call. Since this is executed per-pixel during rendering, it is a massive
+        // bottleneck. Consider moving this logic entirely into PixelMap and vectorizing it (SIMD)
+        // over the whole buffer rather than calculating it per-pixel here.
         public IPixel PixelRamp(IPixelReference pixRef)
         {
-            return Ramp[pixRef.Blue];
+            return Ramp[pixRef.Blue & 0xFF];
         }
 
         /// <summary>
@@ -1621,83 +1761,100 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public Rectangle ComputeBoundingBox()
         {
-            lock (_SyncObject)
+            if (Data == null && Width > 0 && Height > 0)
             {
-                int w = Width;
-                int h = Height;
-                int s = GetRowSize();
-
-                int xmin, xmax, ymin, ymax;
-                for (xmax = w - 1; xmax >= 0; xmax--)
-                {
-                    int p = RowOffset(0) + xmax;
-                    int pe = p + (s * h);
-
-                    while ((p < pe) && GetBooleanAt(p))
-                    {
-                        p += s;
-                    }
-
-                    if (p < pe)
-                    {
-                        break;
-                    }
-                }
-
-                for (ymax = h - 1; ymax >= 0; ymax--)
-                {
-                    int p = RowOffset(ymax);
-                    int pe = p + w;
-
-                    while ((p < pe) && GetBooleanAt(p))
-                    {
-                        ++p;
-                    }
-
-                    if (p < pe)
-                    {
-                        break;
-                    }
-                }
-
-                for (xmin = 0; xmin <= xmax; xmin++)
-                {
-                    int p = RowOffset(0) + xmin;
-                    int pe = p + (s * h);
-
-                    while ((p < pe) && GetBooleanAt(p))
-                    {
-                        p += s;
-                    }
-
-                    if (p < pe)
-                    {
-                        break;
-                    }
-                }
-
-                for (ymin = 0; ymin <= ymax; ymin++)
-                {
-                    int p = RowOffset(ymin);
-                    int pe = p + w;
-
-                    while ((p < pe) && GetBooleanAt(p))
-                    {
-                        ++p;
-                    }
-
-                    if (p < pe)
-                    {
-                        break;
-                    }
-                }
-                Rectangle retval = new Rectangle();
-                retval.XMin = xmin;
-                retval.XMax = xmax;
-                retval.YMin = ymin;
-                retval.YMax = ymax;
-                return retval;
+                DjvuNet.Errors.DjvuExceptionUtil.ThrowNullReference($"Cannot compute bounding box: the underlying data buffer is null. Width: {Width}, Height: {Height}");
             }
+
+            int w = Width;
+            int h = Height;
+            int s = GetRowSize();
+
+            int xmin, xmax, ymin, ymax;
+            for (xmax = w - 1; xmax >= 0; xmax--)
+            {
+                int p = RowOffset(0) + xmax;
+                int pe = p + (s * h);
+
+                while ((p < pe) && GetBooleanAt(p))
+                {
+                    p += s;
+                }
+
+                if (p < pe)
+                {
+                    break;
+                }
+            }
+
+            for (ymax = h - 1; ymax >= 0; ymax--)
+            {
+                int p = RowOffset(ymax);
+                int pe = p + w;
+
+                while ((p < pe) && GetBooleanAt(p))
+                {
+                    ++p;
+                }
+
+                if (p < pe)
+                {
+                    break;
+                }
+            }
+
+            for (xmin = 0; xmin <= xmax; xmin++)
+            {
+                int p = RowOffset(0) + xmin;
+                int pe = p + (s * h);
+
+                while ((p < pe) && GetBooleanAt(p))
+                {
+                    p += s;
+                }
+
+                if (p < pe)
+                {
+                    break;
+                }
+            }
+
+            for (ymin = 0; ymin <= ymax; ymin++)
+            {
+                int p = RowOffset(ymin);
+                int pe = p + w;
+
+                while ((p < pe) && GetBooleanAt(p))
+                {
+                    ++p;
+                }
+
+                if (p < pe)
+                {
+                    break;
+                }
+            }
+
+            if (xmin > xmax || ymin > ymax)
+            {
+                return new Rectangle();
+            }
+
+            // Establish 64-bit arithmetic to safely detect underflow/overflow
+            // matching the architectural pattern used throughout Bitmap.cs
+            long rWidthCalc = (long)xmax - xmin;
+            long rHeightCalc = (long)ymax - ymin;
+
+            if (rWidthCalc > int.MaxValue || rWidthCalc < 0 ||
+                rHeightCalc > int.MaxValue || rHeightCalc < 0)
+            {
+                return new Rectangle();
+            }
+
+            int rWidth = (int)rWidthCalc;
+            int rHeight = (int)rHeightCalc;
+
+            return new Rectangle(xmin, ymin, rWidth, rHeight);
         }
 
         #endregion Methods

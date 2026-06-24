@@ -105,5 +105,15 @@ namespace DjvuNet.Errors
                 throw new DjvuFormatException(message);
             throw new DjvuFormatException(message, innerException);
         }
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowNullReference(string message = null, Exception innerException = null)
+        {
+            if (message == null && innerException == null)
+                throw new DjvuNullReferenceException();
+            if (innerException == null)
+                throw new DjvuNullReferenceException(message);
+            throw new DjvuNullReferenceException(message, innerException);
+        }
     }
 }

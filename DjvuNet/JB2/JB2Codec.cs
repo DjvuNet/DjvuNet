@@ -692,23 +692,23 @@ namespace DjvuNet.JB2
             _ShortListPos = 0;
         }
 
-        protected int GetCrossContext(IBitmap bm, IBitmap cbm, int up1, int up0, int xup1, int xup0, int xdn1,
+        protected int GetCrossContext(Bitmap bm, Bitmap cbm, int up1, int up0, int xup1, int xup0, int xdn1,
                                                  int column)
         {
-            return ((bm.GetByteAt((up1 + column) - 1) << 10) | (bm.GetByteAt(up1 + column) << 9) |
-                    (bm.GetByteAt(up1 + column + 1) << 8) | (bm.GetByteAt((up0 + column) - 1) << 7) |
-                    (cbm.GetByteAt(xup1 + column) << 6) | (cbm.GetByteAt((xup0 + column) - 1) << 5) |
-                    (cbm.GetByteAt(xup0 + column) << 4) | (cbm.GetByteAt(xup0 + column + 1) << 3) |
+            return ((bm.GetByteAt((up1 + column) - 1) << 10)  | (bm.GetByteAt(up1 + column) << 9) |
+                    (bm.GetByteAt(up1 + column + 1) << 8)     | (bm.GetByteAt((up0 + column) - 1) << 7) |
+                    (cbm.GetByteAt(xup1 + column) << 6)       | (cbm.GetByteAt((xup0 + column) - 1) << 5) |
+                    (cbm.GetByteAt(xup0 + column) << 4)       | (cbm.GetByteAt(xup0 + column + 1) << 3) |
                     (cbm.GetByteAt((xdn1 + column) - 1) << 2) | (cbm.GetByteAt(xdn1 + column) << 1) |
                     (cbm.GetByteAt(xdn1 + column + 1)));
         }
 
-        protected int GetDirectContext(IBitmap bm, int up2, int up1, int up0, int column)
+        protected int GetDirectContext(Bitmap bm, int up2, int up1, int up0, int column)
         {
             return ((bm.GetByteAt((up2 + column) - 1) << 9) | (bm.GetByteAt(up2 + column) << 8) |
-                    (bm.GetByteAt(up2 + column + 1) << 7) | (bm.GetByteAt((up1 + column) - 2) << 6) |
+                    (bm.GetByteAt(up2 + column + 1) << 7)   | (bm.GetByteAt((up1 + column) - 2) << 6) |
                     (bm.GetByteAt((up1 + column) - 1) << 5) | (bm.GetByteAt(up1 + column) << 4) |
-                    (bm.GetByteAt(up1 + column + 1) << 3) | (bm.GetByteAt(up1 + column + 2) << 2) |
+                    (bm.GetByteAt(up1 + column + 1) << 3)   | (bm.GetByteAt(up1 + column + 2) << 2) |
                     (bm.GetByteAt((up0 + column) - 2) << 1) | (bm.GetByteAt((up0 + column) - 1)));
         }
 
@@ -776,7 +776,7 @@ namespace DjvuNet.JB2
             }
         }
 
-        protected int ShiftCrossContext(IBitmap bm, IBitmap cbm, int context, int n, int up1, int up0,
+        protected int ShiftCrossContext(Bitmap bm, Bitmap cbm, int context, int n, int up1, int up0,
                                                    int xup1, int xup0, int xdn1, int column)
         {
             return (((context << 1) & 0x636) | (bm.GetByteAt(up1 + column + 1) << 8) |
@@ -784,7 +784,7 @@ namespace DjvuNet.JB2
                     (cbm.GetByteAt(xdn1 + column + 1)) | (n << 7));
         }
 
-        protected int ShiftDirectContext(IBitmap bm, int context, int next, int up2, int up1, int up0,
+        protected int ShiftDirectContext(Bitmap bm, int context, int next, int up2, int up1, int up0,
                                                     int column)
         {
             return ((context << 1) & 0x37a) | (bm.GetByteAt(up1 + column + 2) << 2) |
@@ -820,9 +820,9 @@ namespace DjvuNet.JB2
                 int xd2c = ((1 + (dw >> 1)) - dw) - ((((1 + lmatch.XMax) - lmatch.XMin) >> 1) - lmatch.XMax);
                 int yd2c = ((1 + (dh >> 1)) - dh) - ((((1 + lmatch.YMax) - lmatch.YMin) >> 1) - lmatch.YMax);
 
-                bm.MinimumBorder = 2;
-                cbm.MinimumBorder = 2 - xd2c;
-                cbm.MinimumBorder = (2 + dw + xd2c) - cw;
+                bm.SetMinimumBorder(2);
+                cbm.SetMinimumBorder(2 - xd2c);
+                cbm.SetMinimumBorder((2 + dw + xd2c) - cw);
 
                 int dy = dh - 1;
                 int cy = dy + yd2c;
@@ -836,7 +836,7 @@ namespace DjvuNet.JB2
         {
             lock (bm)
             {
-                bm.MinimumBorder = 3;
+                bm.SetMinimumBorder(3);
 
                 int dy = bm.Height - 1;
                 CodeBitmapDirectly(bm, bm.Width, dy, bm.RowOffset(dy + 2), bm.RowOffset(dy + 1), bm.RowOffset(dy));

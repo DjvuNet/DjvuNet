@@ -164,8 +164,8 @@ New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 
 Write-Host "6. Creating Tools.zip..."
 $ZipPath = "$OutputDir/Tools.zip"
-# Compress the contents of the Tools directory
-Compress-Archive -Path "$ToolsDir/*" -DestinationPath $ZipPath -Force
+# Compress only the DjvuNet folder
+Compress-Archive -Path "$ToolsDir/DjvuNet" -DestinationPath $ZipPath -Force
 
 Write-Host "7. Creating Tools.tar.gz..."
 $TarGzPath = "$OutputDir/Tools.tar.gz"

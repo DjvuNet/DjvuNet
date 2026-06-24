@@ -93,7 +93,7 @@ set "_DefaultNetCoreApp=net10.0"
 set "_NetCoreAppId=.NETCoreApp"
 set "_NetCoreAppTFM=.NETCoreApp,Version=v10.0"
 set "_Framework=%_DefaultNetCoreApp%"
-set "__ArtifactsReleaseTag=v0.10.26159.0"
+set "__ArtifactsReleaseTag=v0.11.26175.0"
 set "__GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/%__ArtifactsReleaseTag%/"
 set "__ArtifactsTestDataUri=https://github.com/DjvuNet/artifacts/archive/refs/tags/%__ArtifactsReleaseTag%.zip"
 set "__ArtifactsDirName=artifacts-%__ArtifactsReleaseTag:v=%"
@@ -1144,6 +1144,7 @@ exit /b 0
 call :print_full_summary
 echo.
 echo %__MsgPrefix%Error: Build Failed at %DATE% %TIME%
+call :print_build_options
 exit /b 1
 
 :print_build_summary

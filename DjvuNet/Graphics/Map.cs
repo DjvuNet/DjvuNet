@@ -85,7 +85,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Explicitly sets the width of the image map.
         /// </summary>
-        public virtual void SetWidth(int width)
+        protected virtual void SetWidth(int width)
         {
             if (width < 0)
             {
@@ -97,7 +97,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Explicitly sets the height of the image map.
         /// </summary>
-        public virtual void SetHeight(int height)
+        protected virtual void SetHeight(int height)
         {
             if (height < 0)
             {
@@ -162,7 +162,7 @@ namespace DjvuNet.Graphics
                 @char = (char)0;
 
                 int valByte = stream.ReadByte();
-                if (valByte < 0) 
+                if (valByte < 0)
                 {
                     // EOF while reading digits is valid (it means we reached the end of the number at the end of the file)
                     break;
@@ -352,7 +352,7 @@ namespace DjvuNet.Graphics
             }
             else
             {
-                // TODO: Rearchitect Map hierarchy to eliminate type-sniffing in the base class. 
+                // TODO: Rearchitect Map hierarchy to eliminate type-sniffing in the base class.
                 // Consider extracting BytesPerRow/Stride calculation into an abstract or virtual property.
                 DjvuExceptionUtil.ThrowNotSupported($"Unsupported Map derived type: {this.GetType().FullName}");
             }
@@ -445,11 +445,11 @@ namespace DjvuNet.Graphics
             int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
         {
             int pixelSize = DjvuImage.GetPixelSize(format);
-            
+
             long calculatedBytesPerRow = bytesPerSrcRow == 0 ? (long)width * pixelSize : bytesPerSrcRow;
             if (calculatedBytesPerRow > int.MaxValue)
             {
-                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, 
+                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width,
                     $"Image dimensions require a row stride ({calculatedBytesPerRow} bytes) that exceeds the 32-bit limits of GDI+.");
             }
             int bytesPerRow = (int)calculatedBytesPerRow;
@@ -471,13 +471,11 @@ namespace DjvuNet.Graphics
                                      ImageLockMode.WriteOnly, bmp.PixelFormat);
 
                 // Start writing at the LAST row of the GDI+ bitmap memory
-                IntPtr dataPtr = (IntPtr)((long)bmpData.Scan0 + ((long)height - 1) * bmpData.Stride);
-
-                int bytesToCopy = width * pixelSize;
+                IntPtr dataPtr = (IntPtr)((long)bmpData.Scan0 + (height - 1) * bmpData.Stride);
 
                 for (int i = 0; i < height; i++)
                 {
-                    MemoryUtilities.MoveMemory(dataPtr, data, bytesToCopy);
+                    MemoryUtilities.MoveMemory(dataPtr, data, bytesPerRow);
 
                     // Move the GDI+ pointer UP one row
                     dataPtr = (IntPtr)((long)dataPtr - bmpData.Stride);
@@ -493,7 +491,6 @@ namespace DjvuNet.Graphics
 
             return bmp;
         }
-
 
         #endregion Public Methods
     }

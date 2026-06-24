@@ -755,6 +755,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.DjvuLibre.Compatibi
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdjvulibre", "djvulibre\win32\djvulibre\libdjvulibre\libdjvulibre.vcxproj", "{AAA67337-AABD-4D04-A3CC-0A7F341F216C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGit2Sharp", "eng\tools\libgit2sharp\LibGit2Sharp\LibGit2Sharp.csproj", "{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -1379,6 +1381,46 @@ Global
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.ReleaseStatic|x64.Build.0 = ReleaseStatic|x64
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.ReleaseStatic|x86.ActiveCfg = ReleaseStatic|Win32
 		{AAA67337-AABD-4D04-A3CC-0A7F341F216C}.ReleaseStatic|x86.Build.0 = ReleaseStatic|Win32
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|Arm.ActiveCfg = Debug|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|Arm.Build.0 = Debug|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|Arm64.ActiveCfg = Debug|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|Arm64.Build.0 = Debug|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|x64.ActiveCfg = Debug|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|x64.Build.0 = Debug|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|x86.ActiveCfg = Debug|x86
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Debug|x86.Build.0 = Debug|x86
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|AnyCPU.ActiveCfg = Debug|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|AnyCPU.Build.0 = Debug|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|Arm.ActiveCfg = Debug|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|Arm.Build.0 = Debug|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|Arm64.ActiveCfg = Debug|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|Arm64.Build.0 = Debug|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|x64.ActiveCfg = Debug|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|x64.Build.0 = Debug|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|x86.ActiveCfg = Debug|x86
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.DebugStatic|x86.Build.0 = Debug|x86
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|AnyCPU.Build.0 = Release|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|Arm.ActiveCfg = Release|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|Arm.Build.0 = Release|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|Arm64.ActiveCfg = Release|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|Arm64.Build.0 = Release|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|x64.ActiveCfg = Release|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|x64.Build.0 = Release|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|x86.ActiveCfg = Release|x86
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.Release|x86.Build.0 = Release|x86
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|AnyCPU.ActiveCfg = Release|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|AnyCPU.Build.0 = Release|Any CPU
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|Arm.ActiveCfg = Release|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|Arm.Build.0 = Release|arm
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|Arm64.ActiveCfg = Release|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|Arm64.Build.0 = Release|arm64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|x64.ActiveCfg = Release|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|x64.Build.0 = Release|x64
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|x86.ActiveCfg = Release|x86
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1388,6 +1430,7 @@ Global
 		{1C4777B0-B3DC-4EF4-A14F-CA6753E9DBCE} = {6575B4E4-C4C2-4CAE-8642-ADF4BACE2607}
 		{1DB249CA-99B3-45D1-B045-AE9434115D9B} = {80502DC2-0A63-448F-BD4F-2E651AFD0662}
 		{004B17AF-8587-4793-B838-803799BFC587} = {1C4777B0-B3DC-4EF4-A14F-CA6753E9DBCE}
+		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53} = {1C4777B0-B3DC-4EF4-A14F-CA6753E9DBCE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AD0C50D2-F3E4-4ADD-ABB9-77BBABE5A6A7}

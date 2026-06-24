@@ -19,6 +19,12 @@ using Xunit;
 
 namespace DjvuNet.Tests
 {
+    public enum TestCoverage
+    {
+        All,
+        UniqueOnly
+    }
+
     public static partial class Util
     {
         private static string _ArtifactsPath;
@@ -358,11 +364,11 @@ namespace DjvuNet.Tests
             }
         }
 
-        public static List<String> TestUnicodeStrings
+        public static List<string> TestUnicodeStrings
         {
             get
             {
-                List<String> retVal = new List<string>(new string[]
+                List<string> retVal = new List<string>(new string[]
                 {
                     "免去于革胜的全国社会保障基金理事会副理事长",
                     "재정난이 심해져 조직 내 구조조정과 임금 삭감이",
@@ -436,7 +442,7 @@ namespace DjvuNet.Tests
 
             if (logDiff)
             {
-                Console.WriteLine((message != null ? message : "") + $" Image diff: {diff:#0.0000}, passed: {result}");
+                Console.WriteLine((message != null ? message : "") + $" Image diff: {diff:#0.000000}, passed: {result}");
             }
 
             return result;
@@ -1577,6 +1583,86 @@ namespace DjvuNet.Tests
                 }
             }
             return result;
+        }
+
+        public static IEnumerable<object[]> GetJB2ImageTestData(int[] skipDocs = null, string[] skipChunks = null, TestCoverage coverage = TestCoverage.All)
+        {
+            string mapPath = Path.Combine(ArtifactsDataPath, "extracted", "jb2_chunk_map.json");
+            if (!File.Exists(mapPath)) yield break;
+            
+            HashSet<string> seenDjbz = new HashSet<string>();
+
+            string json = File.ReadAllText(mapPath, new UTF8Encoding(false));
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            {
+                foreach (JsonElement element in doc.RootElement.EnumerateArray())
+                {
+                    int docIndex = element[0].GetInt32();
+                    if (skipDocs != null && skipDocs.Contains(docIndex))
+                        continue;
+
+                    string djbzName = element[2].ValueKind == JsonValueKind.Null ? null : element[2].GetString();
+                    string sjbzName = element[3].GetString();
+
+                    if (skipChunks != null && skipChunks.Contains(sjbzName))
+                        continue;
+
+                    if (coverage == TestCoverage.UniqueOnly && djbzName != null)
+                    {
+                        if (!seenDjbz.Add(djbzName))
+                            continue;
+                    }
+
+                    yield return new object[] 
+                    {
+                        // Get names and sanitize Json escapes if present
+                        djbzName != null ? Path.Combine("extracted", djbzName.Replace(@"\", @"")) : null, 
+                        Path.Combine("extracted", sjbzName.Replace(@"\", @"")) 
+                    };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> GetJB2DictionaryTestData(int[] skipDocs = null, string[] skipChunks = null)
+        {
+            string mapPath = Path.Combine(ArtifactsDataPath, "extracted", "jb2_chunk_map.json");
+            if (!File.Exists(mapPath)) yield break;
+            
+            HashSet<string> seen = new HashSet<string>();
+
+            string json = File.ReadAllText(mapPath, new UTF8Encoding(false));
+            using (JsonDocument doc = JsonDocument.Parse(json))
+            {
+                foreach (JsonElement element in doc.RootElement.EnumerateArray())
+                {
+                    int docIndex = element[0].GetInt32();
+                    if (skipDocs != null && skipDocs.Contains(docIndex))
+                        continue;
+
+                    string djbzName = element[2].ValueKind == JsonValueKind.Null ? null : element[2].GetString();
+
+                    if (djbzName == null) continue;
+
+                    if (skipChunks != null && skipChunks.Contains(djbzName))
+                        continue;
+
+                    if (seen.Add(djbzName))
+                    {
+                        yield return new object[] { Path.Combine("extracted", djbzName.Replace(@"\", @"")) };
+                    }
+                }
+            }
+        }
+
+        public static int CalculateBufferSize(int height, int rowSize, int border = 0)
+        {
+            long requiredSize = ((long)height * rowSize) + border;
+            if (requiredSize > int.MaxValue || requiredSize < 0)
+            {
+                DjvuExceptionUtil.ThrowInvalidOperation(
+                    $"Calculated buffer size exceeds maximum allowed limit. Height: {height}, RowSize: {rowSize}, Border: {border}");
+            }
+            return (int)requiredSize;
         }
     }
 }

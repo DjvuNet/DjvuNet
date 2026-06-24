@@ -575,7 +575,7 @@ check_prereqs()
         export __DotnetCmd="$__LocalDotNetDir/dotnet"
         __DotnetVer=$("$__DotnetCmd" --version | tr -d '\r\n')
     fi
-    
+
     if [ -z "$__DotnetCmd" ]; then
         export __DotnetCmd="dotnet"
     fi
@@ -727,7 +727,7 @@ _DefaultNetStandard="netstandard2.1"
 _NetStandardId=".NETStandard"
 _NetStandardTFM=".NETStandard,Version=v2.1"
 _Framework="$_DefaultNetCoreApp"
-__ArtifactsReleaseTag="v0.10.26159.0"
+__ArtifactsReleaseTag="v0.11.26175.0"
 __GithubDjvuNetReleaseUri="https://github.com/DjvuNet/artifacts/releases/download/${__ArtifactsReleaseTag}/"
 __ArtifactsTestDataUri="https://github.com/DjvuNet/artifacts/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
 __ArtifactsDirName="artifacts-${__ArtifactsReleaseTag#v}"
@@ -962,7 +962,7 @@ if [[ -n "$_BuildTools" ]]; then
     if [ ! -f "${__ProjectRoot}/${__LibGit2SharpProj}" ]; then
         echo "BUILD: Setting up libgit2sharp"
         __Lg2sArchiveUrl="${__LibGit2SharpRepoUri}/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
-        
+
         _ForceCloneLibGit2Sharp=""
         if [ -n "$_CloneDeps" ]; then
             _ForceCloneLibGit2Sharp=1
@@ -978,7 +978,7 @@ if [[ -n "$_BuildTools" ]]; then
                 _ForceCloneLibGit2Sharp=1
             fi
         fi
-        
+
         if [ -n "$_ForceCloneLibGit2Sharp" ]; then
             echo "BUILD: Download bypassed or failed, falling back to git clone"
             __CloneArgs="-c core.autocrlf=false"
@@ -1156,7 +1156,7 @@ if [ -z "$_SkipNative" ]; then
     if [ ! -f "$__ProjectRoot/$__DjvuLibreDir/autogen.sh" ]; then
         echo "BUILD: Setting up DjVuLibre"
         __ArchiveUrl="https://github.com/DjvuNet/DjVuLibre/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
-        
+
         _ForceCloneDjvuLibre=""
         if [ -n "$_CloneDeps" ]; then
             _ForceCloneDjvuLibre=1
@@ -1181,7 +1181,7 @@ if [ -z "$_SkipNative" ]; then
             fi
             git_clone_retry "https://github.com/DjvuNet/DjVuLibre.git" "$__DjvuLibreDir" $__CloneArgs
         fi
-        
+
         if [ $? -ne 0 ]; then _SkipNative=1; fi
     else
         echo "BUILD: DjvuLibre already cloned"
@@ -1406,7 +1406,7 @@ if [ -n "$_BuildTests" ]; then
     # Clone test data
     if [ ! -f "./artifacts/test001C.djvu" ]; then
         echo ""
-        
+
         _ForceCloneArtifacts=""
         if [ -n "$_CloneDeps" ]; then
             _ForceCloneArtifacts=1
@@ -1422,7 +1422,7 @@ if [ -n "$_BuildTests" ]; then
                 _ForceCloneArtifacts=1
             fi
         fi
-        
+
         if [ -n "$_ForceCloneArtifacts" ]; then
             echo "BUILD: Download bypassed or failed, executing git clone for artifacts"
             rm -rf artifacts
@@ -1431,7 +1431,7 @@ if [ -n "$_BuildTests" ]; then
                 __CloneArgs="--depth 1 $__CloneArgs"
             fi
             git_clone_retry "https://github.com/DjvuNet/artifacts.git" "artifacts" $__CloneArgs
-            
+
             if [ $? -ne 0 ]; then
                 echo ""
                 echo "BUILD: Error: artifacts git clone returned error"

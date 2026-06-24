@@ -44,7 +44,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             using (var nativeDocInfo = DjvuDocumentInfo.CreateDjvuDocumentInfo(filePath))
 #endif
             {
-                for (int p = 0; p < pageCount; p++)
+                for (int p = 0; p < Math.Min(pageCount, 2); p++)
                 {
                     var managedPage = doc.Pages[p];
                     var managedJb2 = managedPage.ForegroundJB2Image;

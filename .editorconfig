@@ -13,6 +13,7 @@ insert_final_newline = false
 
 [*.{cs,c,cpp,h,hpp,json,ps1,py,sh,yml,editorconfig}]
 indent_size = 4
+end_of_line = lf
 
 [*.{cmd,bat}]
 indent_size = 4
@@ -20,11 +21,11 @@ end_of_line = crlf
 
 # Xml project files
 [*.{csproj,vcxproj,vcxproj.filters,proj,nativeproj,locproj}]
-indent_size = 2
+indent_size = 4
 
 # Xml config files
 [*.{props,targets,config,nuspec}]
-indent_size = 2
+indent_size = 4
 
 # C# files
 [*.cs]

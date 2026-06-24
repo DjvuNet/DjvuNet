@@ -142,10 +142,14 @@ namespace DjvuNet.JB2
             bm.Init(ysize, xsize, border);
         }
 
-        protected override void CodeBitmapByCrossCoding(IBitmap bm, IBitmap cbm, int xd2c, int dw, int dy,
+        protected override void CodeBitmapByCrossCoding(IBitmap ibm, IBitmap icbm, int xd2c, int dw, int dy,
                                                                      int cy, int up1, int up0, int xup1, int xup0,
                                                                      int xdn1)
         {
+
+            Bitmap bm = (Bitmap)ibm;
+            Bitmap cbm = (Bitmap)icbm;
+
             while (dy >= 0)
             {
                 int context = GetCrossContext(bm, cbm, up1, up0, xup1, xup0, xdn1, 0);
@@ -165,8 +169,9 @@ namespace DjvuNet.JB2
             }
         }
 
-        protected override void CodeBitmapDirectly(IBitmap bm, int dw, int dy, int up2, int up1, int up0)
+        protected override void CodeBitmapDirectly(IBitmap ibm, int dw, int dy, int up2, int up1, int up0)
         {
+            Bitmap bm = (Bitmap)ibm;
             while (dy >= 0)
             {
                 int context = GetDirectContext(bm, up2, up1, up0, 0);

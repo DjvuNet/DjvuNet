@@ -1,14 +1,14 @@
-﻿namespace DjvuNet.Graphics
+namespace DjvuNet.Graphics
 {
     public interface IBitmap : IMap2
     {
-        int Border { get; set; }
+        int Border { get; }
 
         int BytesPerRow { get; }
 
         int Grays { get; set; }
 
-        int MinimumBorder { set; }
+        void SetMinimumBorder(int value);
 
         Pixel[] Ramp { get; }
 

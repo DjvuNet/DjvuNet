@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
   <Import Project="$(MSBuildThisFileDirectory)..\DjvuNet.DjvuLibre\DjvuNet.DjvuLibre.props" />
@@ -44,8 +44,10 @@
   <ItemGroup>
     <Compile Include="DirmChunkTests.cs" />
     <Compile Include="InclChunkTests.cs" />
+    <Compile Include="JB2ImageTests.cs" />
     <Compile Include="IW44CompatibilityTests.cs" />
     <Compile Include="JB2BlitTests.cs" />
+    <Compile Include="JB2ShapeTests.cs" />
     <Compile Include="PigeonHybridTransformTests.cs" />
     <Compile Include="PigeonTransformTests.cs" />
     <Compile Include="PigeonVector128TransformTests.cs" />

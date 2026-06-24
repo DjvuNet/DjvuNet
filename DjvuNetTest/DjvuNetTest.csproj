@@ -13,9 +13,9 @@
     <_HasReferenceToSystemRuntime>true</_HasReferenceToSystemRuntime>
   </PropertyGroup>
 
-  <!-- <ItemGroup>
-    <Compile Include="Program.cs" />
-  </ItemGroup> -->
+  <ItemGroup>
+    <Compile Include="DjvuNetPerfTest.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Include="TestFiles\Mcguffey%27s_Primer.djvu" />

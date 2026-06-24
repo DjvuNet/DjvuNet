@@ -492,6 +492,32 @@ namespace DjvuNet.Tests
             }
         }
 
+        [Fact]
+        public void BuildPageImage023()
+        {
+            int pageCount = 0;
+            using (DjvuDocument document = Util.GetTestDocument(23, out pageCount))
+            {
+                Util.VerifyDjvuDocument(pageCount, document);
+
+                IDjvuPage page = document.FirstPage;
+                //var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test075C.png");
+
+                DjvuImage djvuImage = page.Image as DjvuImage;
+                using (Bitmap image = djvuImage.BuildImage())
+                //using (Bitmap testImage = new Bitmap(testImagePath))
+                {
+                    Assert.NotNull(image);
+                    Assert.IsType<Bitmap>(image);
+
+                    //bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.15);
+
+                    //Assert.True(result);
+                }
+            }
+        }
+
+
         public static IEnumerable<object[]> BuildImageSourceDocs
         {
             get
@@ -649,29 +675,11 @@ namespace DjvuNet.Tests
                     // Special casing for huge errors which should be investigated
                     switch ((int)i[0])
                     {
-                        case 33:
-                            retVal.Add(new object[] { i[0], 0.7374 });
-                            break;
-                        case 40:
-                            retVal.Add(new object[] { i[0], 0.0948 });
-                            break;
-                        case 41:
-                            retVal.Add(new object[] { i[0], 0.1518 });
-                            break;
-                        case 46:
-                            retVal.Add(new object[] { i[0], 0.1346 });
-                            break;
-                        case 52:
-                            retVal.Add(new object[] { i[0], 0.1221 });
-                            break;
-                        case 54:
-                            retVal.Add(new object[] { i[0], 0.1529 });
-                            break;
                         case 75:
-                            retVal.Add(new object[] { i[0], 0.2973 });
+                            retVal.Add(new object[] { i[0], 0.000001 });
                             break;
                         default:
-                            retVal.Add(new object[] { i[0], 0.09 });
+                            retVal.Add(new object[] { i[0], 0.000001 });
                             break;
                     }
                 }

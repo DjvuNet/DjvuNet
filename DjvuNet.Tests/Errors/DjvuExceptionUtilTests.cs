@@ -230,5 +230,38 @@ namespace DjvuNet.Tests.Errors
             Assert.Equal("Custom message", ex.Message);
             Assert.Same(inner, ex.InnerException);
         }
+        /// <summary>
+        /// Verifies that ThrowNullReference correctly constructs a parameterless exception.
+        /// </summary>
+        [Fact]
+        public void ThrowNullReference_NoMessageNoInner_ThrowsCorrectly()
+        {
+            var ex = Assert.Throws<DjvuNullReferenceException>(() => DjvuExceptionUtil.ThrowNullReference());
+            Assert.Null(ex.InnerException);
+            // Default NullReferenceException message is implementation defined, so we don't assert it strictly.
+        }
+
+        /// <summary>
+        /// Verifies that ThrowNullReference correctly constructs the exception with just a message.
+        /// </summary>
+        [Fact]
+        public void ThrowNullReference_WithMessage_ThrowsCorrectly()
+        {
+            var ex = Assert.Throws<DjvuNullReferenceException>(() => DjvuExceptionUtil.ThrowNullReference("Custom null message"));
+            Assert.Equal("Custom null message", ex.Message);
+            Assert.Null(ex.InnerException);
+        }
+
+        /// <summary>
+        /// Verifies that ThrowNullReference correctly nests an inner exception when provided.
+        /// </summary>
+        [Fact]
+        public void ThrowNullReference_WithMessageAndInner_ThrowsCorrectly()
+        {
+            var inner = new Exception("Inner exception");
+            var ex = Assert.Throws<DjvuNullReferenceException>(() => DjvuExceptionUtil.ThrowNullReference("Custom null message", inner));
+            Assert.Equal("Custom null message", ex.Message);
+            Assert.Same(inner, ex.InnerException);
+        }
     }
 }

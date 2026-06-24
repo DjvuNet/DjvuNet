@@ -1,4 +1,4 @@
-﻿
+
 
 
 using System;
@@ -1450,6 +1450,66 @@ namespace DjvuNet.DjvuLibre
 
         [DllImport(DjVuLibrePath, EntryPoint = "miniexp_print", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern IntPtr MiniexpPrint(IntPtr miniexp);
+
+
+        /// <summary>
+        /// Retrieves the total number of unique shapes present in the JB2 foreground image dictionary of the specified page.
+        /// </summary>
+        /// <param name="page">A pointer to the native ddjvu_page_t object.</param>
+        /// <param name="count">When the method returns, contains the total number of shapes in the JB2 dictionary.</param>
+        /// <returns>True if the count was successfully retrieved; otherwise, false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_jb2_shape_count", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetDjvuPageJb2ShapeCount(IntPtr page, out int count);
+
+        /// <summary>
+        /// Retrieves the raw pixel data and dimensions for a specific JB2 shape from the native dictionary.
+        /// </summary>
+        /// <param name="page">A pointer to the native ddjvu_page_t object.</param>
+        /// <param name="shapeNo">The zero-based index of the shape to retrieve.</param>
+        /// <param name="width">When the method returns, contains the width (columns) of the shape's bitmap.</param>
+        /// <param name="height">When the method returns, contains the height (rows) of the shape's bitmap.</param>
+        /// <param name="rowsize">When the method returns, contains the memory row stride (in bytes) of the shape's bitmap.</param>
+        /// <param name="pixels">An array to receive the raw bitmap pixels. Set to null to just query dimensions.</param>
+        /// <returns>True if the shape was successfully retrieved; otherwise, false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_jb2_shape", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetDjvuPageJb2Shape(IntPtr page, int shapeNo, out int width, out int height, out int rowsize, [Out] byte[] pixels);
+
+        // --------------------------------------------------------------------------
+        // JB2 Isolated Chunk Decoding & Bitmap Extraction Hooks
+        // --------------------------------------------------------------------------
+
+        /// <summary>
+        /// Instantiates a pristine native JB2Dict from a raw chunk stream (djbz).
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2dict_create_from_chunk", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool CreateDjvuJb2DictFromChunk(IntPtr chunkData, int chunkSize, out int shapeCount, out IntPtr outHandle);
+
+        /// <summary>
+        /// Instantiates a pristine native JB2Image from a raw chunk stream (sjbz).
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_create_from_chunk", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool CreateDjvuJb2ImageFromChunk(IntPtr sjbzData, int sjbzSize, IntPtr djbzData, int djbzSize, out IntPtr outHandle);
+
+        /// <summary>
+        /// Frees the opaque handle returned by CreateDjvuJb2DictFromChunk.
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2dict_free", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool FreeDjvuJb2Dict(IntPtr handle);
+
+        /// <summary>
+        /// Frees the opaque handle returned by CreateDjvuJb2ImageFromChunk.
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_free", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool FreeDjvuJb2Image(IntPtr handle);
+
+        /// <summary>
+        /// Extracts the pristine 8bpp native bitmap from an isolated JB2Image handle.
+        /// </summary>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_get_bitmap", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetDjvuJb2ImageBitmap(
+            IntPtr handle, int align, 
+            out int width, out int height, out int rowsize, out int border,
+            IntPtr buffer, int bufferSize);
 
         /* ddjvu_page_get_jb2_blit_count ---
            Populates the count pointer with the total number of blits in the foreground JB2 image.

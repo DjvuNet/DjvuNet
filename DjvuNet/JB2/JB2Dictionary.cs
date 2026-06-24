@@ -27,7 +27,6 @@ namespace DjvuNet.JB2
         /// </summary>
         public virtual bool ImageData
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return false; }
         }
 
@@ -38,9 +37,7 @@ namespace DjvuNet.JB2
         /// </summary>
         public JB2Dictionary InheritedDictionary
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _inheritedDictionary; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set
             {
                 if (_inheritedDictionary != value)
@@ -60,7 +57,6 @@ namespace DjvuNet.JB2
         /// </summary>
         public int ShapeCount
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return InheritedShapes + _Shapes.Count; }
         }
 
@@ -68,7 +64,6 @@ namespace DjvuNet.JB2
 
         #region Constructors
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public JB2Dictionary() : base()
         {
             _Shapes = new List<JB2Item>();
@@ -78,7 +73,6 @@ namespace DjvuNet.JB2
 
         #region Public Methods
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Decode(IBinaryReader pool)
         {
             Decode(pool, null);
