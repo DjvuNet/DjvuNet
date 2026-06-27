@@ -54,10 +54,11 @@ Write-Host "================================================================"
 $isGitRoot = $false
 $gitTopLevel = (git rev-parse --show-toplevel 2>$null)
 if ($gitTopLevel) {
-    # Resolve paths to handle trailing slashes and normalize separators
-    $gitTopLevelNorm = (Resolve-Path $gitTopLevel).Path
-    $resolvedPathNorm = (Resolve-Path ".").Path
-    if ($gitTopLevelNorm -eq $resolvedPathNorm) {
+    # Check if we are at the top level of the git repository using --show-cdup.
+    # It returns an empty string if we are at the root, and a relative path if in a subdirectory.
+    # This correctly handles junctions, symlinks, and worktrees where path string comparison fails.
+    $cdup = (git rev-parse --show-cdup 2>$null)
+    if ([string]::IsNullOrEmpty($cdup)) {
         $isGitRoot = $true
     }
 }
@@ -66,8 +67,12 @@ if ($isGitRoot) {
     Write-Host "`n--- Git Status ---"
     git status
 
-    Write-Host "`n--- Git Diff HEAD ---"
-    git diff HEAD
+    Write-Host "`n--- Git Diff HEAD (Summary) ---"
+    git diff --stat HEAD
+    
+    # Always dump full diff to a file to prevent terminal flooding while preserving data
+    git diff HEAD > repo_status_diff.patch
+    Write-Host "  -> Full diff dumped to: repo_status_diff.patch"
 
     Write-Host "`n--- Recent Commits (Local) ---"
     git log -n 3

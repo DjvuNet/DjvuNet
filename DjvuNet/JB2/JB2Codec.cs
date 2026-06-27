@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using DjvuNet.Compression;
 using DjvuNet.Graphics;
+using DjvuNet.Errors;
 
 namespace DjvuNet.JB2
 {
@@ -132,7 +133,7 @@ namespace DjvuNet.JB2
 
             if (ictx >= _BitCells.Count)
             {
-                throw new IndexOutOfRangeException("Image bad MutableValue<int>");
+                DjvuExceptionUtil.ThrowIndexOutOfRange("JB2 decoding failed: Invalid numerical context state.");
             }
 
             for (int phase = 1, range = -1; range != 1; ictx = ctx.Value)
@@ -381,7 +382,8 @@ namespace DjvuNet.JB2
                     break;
 
                 default:
-                    throw new DjvuFormatException("Image bad type");
+                    DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Invalid or unknown record type.");
+                    break;
             }
 
             if (!_Encoding)
@@ -622,7 +624,8 @@ namespace DjvuNet.JB2
                     break;
 
                 default:
-                    throw new ArgumentException("Image unknown type");
+                    DjvuExceptionUtil.ThrowArgument("JB2 decoding failed: Unrecognized record type encountered.");
+                    break;
             }
 
             if (!_Encoding)
@@ -847,7 +850,7 @@ namespace DjvuNet.JB2
         {
             if (!_GotStartRecordP)
             {
-                throw new DjvuFormatException("Image no start");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Missing required start record.");
             }
 
             int bottom = 0;

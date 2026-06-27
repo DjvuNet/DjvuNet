@@ -58,6 +58,7 @@
     <Compile Include="Graphics\RectangleTests.cs" />
     <Compile Include="JB2\JB2BlitTests.cs" />
     <Compile Include="JB2\JB2DecoderTests.cs" />
+    <Compile Include="JB2\JB2EncoderTests.cs" />
     <Compile Include="JB2\JB2DictionaryTests.cs" />
     <Compile Include="JB2\JB2ImageTests.cs" />
     <Compile Include="JB2\JB2ShapeTests.cs" />

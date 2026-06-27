@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Utilities
@@ -13,9 +13,9 @@ namespace DjvuNet.Utilities
         {
             if (subsample < SubsambpleMin || subsample > SubsampleMax)
             {
-                throw new ArgumentException(
+                DjvuNet.Errors.DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(subsample), subsample,
                     $"Argument is outside of allowed values expected from {SubsambpleMin} to {SubsampleMax}" +
-                    $" actual value {subsample}", nameof(subsample));
+                    $" actual value {subsample}");
             }
         }
     }

@@ -141,6 +141,8 @@
     <Compile Include="Errors\DjvuInvalidOperationException.cs" />
     <Compile Include="Errors\DjvuNotSupportedException.cs" />
     <Compile Include="Errors\DjvuNullReferenceException.cs" />
+    <Compile Include="Errors\DjvuIndexOutOfRangeException.cs" />
+    <Compile Include="Errors\DjvuNotImplementedException.cs" />
     <Compile Include="Extensions\ExtensionMethods.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Graphics\Bitmap.cs" />

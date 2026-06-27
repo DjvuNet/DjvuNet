@@ -166,11 +166,23 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             },
             coverage: TestCoverage.UniqueOnly
         );
+        [Theory]
+        [InlineData("extracted\\test003C_D453132.djbz", "extracted\\test003C_P53.sjbz")]
+        [InlineData("extracted\\test003C_D453132.djbz", "extracted\\test003C_P54.sjbz")]
+        public void Decode_Tokens6And8_Success(string djbzFileName, string sjbzFileName)
+        {
+            DecodeInternal(djbzFileName, sjbzFileName);
+        }
+
 
         [Theory]
         [MemberData(nameof(JB2ImageTestData))]
-        //[InlineData("extracted\\test071C_D171878.djbz", "extracted\\test071C_P09.sjbz")]
         public unsafe void DecodeTest(string djbzFileName, string sjbzFileName)
+        {
+            DecodeInternal(djbzFileName, sjbzFileName);
+        }
+
+        private unsafe void DecodeInternal(string djbzFileName, string sjbzFileName)
         {
 
             string sjbzFilePath = Path.Combine(Util.ArtifactsDataPath, sjbzFileName);

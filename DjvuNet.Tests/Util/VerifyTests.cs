@@ -1,5 +1,6 @@
-﻿using Xunit;
+using Xunit;
 using DjvuNet.Utilities;
+using DjvuNet.Errors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +14,13 @@ namespace DjvuNet.Utilities.Tests
         [Fact()]
         public void SubsampleRangeTest001()
         {
-            Assert.Throws<ArgumentException>("subsample", () => Verify.SubsampleRange(0));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => Verify.SubsampleRange(0));
         }
 
         [Fact()]
         public void SubsampleRangeTest002()
         {
-            Assert.Throws<ArgumentException>("subsample", () => Verify.SubsampleRange(13));
+            Assert.Throws<DjvuArgumentOutOfRangeException>(() => Verify.SubsampleRange(13));
         }
 
         [Fact()]

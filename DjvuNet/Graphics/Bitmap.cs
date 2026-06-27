@@ -99,7 +99,7 @@ namespace DjvuNet.Graphics
                 {
                     if ((value < 2) || (value > 256))
                     {
-                        throw new DjvuArgumentOutOfRangeException(nameof(value),
+                        DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(value),
                             "Gray levels outside of range");
                     }
 
@@ -243,7 +243,6 @@ namespace DjvuNet.Graphics
         public int BytesPerRow
         {
             get { return _BytesPerRow; }
-            set {_BytesPerRow = value; }
         }
 
         /// <summary>
@@ -324,7 +323,7 @@ namespace DjvuNet.Graphics
             byte[] magic = new byte[2];
             int b0 = stream.ReadByte();
             int b1 = stream.ReadByte();
-            if (b0 == -1 || b1 == -1) throw new EndOfStreamException();
+            if (b0 == -1 || b1 == -1) DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
             magic[0] = (byte)b0;
             magic[1] = (byte)b1;
 
@@ -347,7 +346,7 @@ namespace DjvuNet.Graphics
                         maxval = (int)ReadInteger(ref lookahead, stream);
                         if (maxval > 65535)
                         {
-                            throw new DjvuFormatException("Cannot read PGM formatted data with depth greater than 16 bits.");
+                            DjvuExceptionUtil.ThrowFormatException("Cannot read PGM formatted data with depth greater than 16 bits.");
                         }
 
                         bitmap.Grays = (maxval > 255 ? 256 : maxval + 1);
@@ -363,7 +362,7 @@ namespace DjvuNet.Graphics
                         maxval = (int)ReadInteger(ref lookahead, stream);
                         if (maxval > 65535)
                         {
-                            throw new DjvuFormatException("Cannot read PGM formatted data with depth greater than 16 bits.");
+                            DjvuExceptionUtil.ThrowFormatException("Cannot read PGM formatted data with depth greater than 16 bits.");
                         }
 
                         bitmap.Grays = maxval > 255 ? 256 : maxval + 1;
@@ -382,7 +381,8 @@ namespace DjvuNet.Graphics
                 }
             }
 
-            throw new DjvuFormatException("Data format error.");
+            DjvuExceptionUtil.ThrowFormatException("Data format error.");
+            return null;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
@@ -407,7 +407,7 @@ namespace DjvuNet.Graphics
                             bitInt = stream.ReadByte();
                             if (bitInt == -1)
                             {
-                                throw new DjvuEndOfStreamException(
+                                DjvuExceptionUtil.ThrowEndOfStream(
                                     $"End of stream reached. Stream: {nameof(stream)}, Position: {stream.Position}");
                             }
 
@@ -424,7 +424,7 @@ namespace DjvuNet.Graphics
                         }
                         else
                         {
-                            throw new DjvuFormatException("Corrupted PBM data.");
+                            DjvuExceptionUtil.ThrowFormatException("Corrupted PBM data.");
                         }
                     }
                     row -= BytesPerRow;
@@ -496,7 +496,7 @@ namespace DjvuNet.Graphics
                             int accInt = stream.ReadByte();
                             if (accInt == -1)
                             {
-                                throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                                DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
                             }
 
                             acc = (byte)accInt;
@@ -539,8 +539,8 @@ namespace DjvuNet.Graphics
             GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
             IntPtr dataPtr = hData.AddrOfPinnedObject();
 
-            GCHandle hRamp = GCHandle.Alloc(Data, GCHandleType.Pinned);
-            IntPtr rampPtr = hData.AddrOfPinnedObject();
+            GCHandle hRamp = GCHandle.Alloc(ramp, GCHandleType.Pinned);
+            IntPtr rampPtr = hRamp.AddrOfPinnedObject();
             try
             {
                 byte* bramp = (byte*)rampPtr;
@@ -554,7 +554,7 @@ namespace DjvuNet.Graphics
                         {
                             int b0 = stream.ReadByte();
                             int b1 = stream.ReadByte();
-                            if (b0 == -1 || b1 == -1) throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                            if (b0 == -1 || b1 == -1) DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
                             byte[] x = new byte[2];
                             x[0] = (byte)b0;
                             x[1] = (byte)b1;
@@ -568,7 +568,7 @@ namespace DjvuNet.Graphics
                             int xInt = stream.ReadByte();
                             if (xInt == -1)
                             {
-                                throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                                DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
                             }
 
                             row[c] = bramp[xInt];
@@ -611,7 +611,7 @@ namespace DjvuNet.Graphics
                     hInt = stream.ReadByte();
                     if (hInt == -1)
                     {
-                        throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                        DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
                     }
 
                     int x = hInt;
@@ -620,7 +620,7 @@ namespace DjvuNet.Graphics
                         hInt = stream.ReadByte();
                         if (hInt == -1)
                         {
-                            throw new DjvuEndOfStreamException("Unexpected and of stream.");
+                            DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
                         }
 
                         x = hInt + ((x - RunOverflow) << 8);
@@ -628,7 +628,7 @@ namespace DjvuNet.Graphics
 
                     if (c + x > Width)
                     {
-                        throw new DjvuFormatException("Bitmap RLE format data are not in sync");
+                        DjvuExceptionUtil.ThrowFormatException("Bitmap RLE format data are not in sync");
                     }
 
                     while (x-- > 0)
@@ -669,7 +669,7 @@ namespace DjvuNet.Graphics
             // check arguments
             if (Grays > 2)
             {
-                throw new DjvuFormatException(
+                DjvuExceptionUtil.ThrowFormatException(
                     $"Only bi-level bitmaps can be saved in PBM format. Grays: {Grays}");
             }
 
@@ -682,7 +682,7 @@ namespace DjvuNet.Graphics
             // body
             if (raw)
             {
-                if (_RleData != null)
+                if (_RleData == null)
                 {
                     Compress();
                 }
@@ -807,13 +807,13 @@ namespace DjvuNet.Graphics
             // checks
             if (Width == 0 || Height == 0)
             {
-                throw new DjvuInvalidOperationException("Bitmap is not properly initialized.");
+                DjvuExceptionUtil.ThrowInvalidOperation("Bitmap is not properly initialized.");
             }
 
             //GMonitorLock lock (monitor()) ;
             if (Grays > 2)
             {
-                throw new DjvuInvalidOperationException(
+                DjvuExceptionUtil.ThrowInvalidOperation(
                     $"Only bi-level bitmaps can be saved in PBM format. Grays: {Grays}");
             }
 
@@ -937,6 +937,11 @@ namespace DjvuNet.Graphics
             }
 
             long newStrideCalc = (long)Width + Border;
+            
+            // This condition should be unreachable under normal circumstances because 
+            // the Init() and Resize() methods strictly validate memory boundaries beforehand. 
+            // If this throws, it indicates that encapsulation has been bypassed or a required 
+            // upstream check is missing.
             if (newStrideCalc > int.MaxValue || newStrideCalc < 0)
             {
                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(Width), Width, "Calculated stride exceeds bounds.");
@@ -1763,7 +1768,9 @@ namespace DjvuNet.Graphics
         {
             if (Data == null && Width > 0 && Height > 0)
             {
-                DjvuNet.Errors.DjvuExceptionUtil.ThrowNullReference($"Cannot compute bounding box: the underlying data buffer is null. Width: {Width}, Height: {Height}");
+                // This state should be statically unreachable due to encapsulation safeguards.
+                // If it throws, it means an initialization check was bypassed or memory was externally corrupted.
+                DjvuExceptionUtil.ThrowNullReference($"Cannot compute bounding box: the underlying data buffer is null. Width: {Width}, Height: {Height}");
             }
 
             int w = Width;

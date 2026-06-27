@@ -19,7 +19,7 @@ namespace DjvuNet.Wavelet.Tests
             string outDir = Path.Combine(Util.ArtifactsPath, "data", "extracted");
             Directory.CreateDirectory(outDir);
 
-            for (int i = 1; i <= 77; i++)
+            for (int i = 1; i <= 79; i++)
             {
                 string filePath = Util.GetTestFilePath(i);
                 if (!File.Exists(filePath))

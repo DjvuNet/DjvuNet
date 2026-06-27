@@ -318,3 +318,6 @@ autom4te.cache/
 desktopfiles/
 LibGit2Sharp/Properties/AssemblyInfoCommon.net10.0.cs**/Properties/AssemblyInfo.net*.cs
 **/Properties/AssemblyInfoCommon.net*.cs
+
+# Agent generated artifacts
+repo_status_diff.patch

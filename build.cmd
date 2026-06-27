@@ -1448,9 +1448,9 @@ echo                                    Default: False.
 echo.
 echo   -bt, -BuildTests                 Build the test projects. Default: False.
 echo.
-echo   -rt, -RunTests                   Build and run the test projects. Default: False.
+echo   -rt, -RunTests                   Run the test projects (does not build them). Default: False.
 echo.
-echo   -Test                            Alias for -RunTests. Build and run the test projects.
+echo   -Test                            Build and run the test projects (equivalent to -bt and -rt).
 echo.
 echo   -ff, -FastFail                   Fail immediately on the first error.
 echo                                    Default is False (Late Fail): collects all project restore,

@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using DjvuNet.DataChunks;
 using DjvuNet.Graphics;
 using DjvuNet.Utilities;
+using DjvuNet.Errors;
 
 namespace DjvuNet.JB2
 {
@@ -62,7 +63,7 @@ namespace DjvuNet.JB2
 
             if ((Width == 0) || (Height == 0))
             {
-                throw new DjvuFormatException(
+                DjvuExceptionUtil.ThrowFormatException(
                     $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
             }
 
@@ -113,7 +114,7 @@ namespace DjvuNet.JB2
         {
             if ((Width == 0) || (Height == 0))
             {
-                throw new DjvuFormatException(
+                DjvuExceptionUtil.ThrowFormatException(
                     $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
             }
 
@@ -152,7 +153,7 @@ namespace DjvuNet.JB2
 
             if ((Width == 0) || (Height == 0))
             {
-                throw new DjvuFormatException(
+                DjvuExceptionUtil.ThrowFormatException(
                     $"Image is empty can not be used to create bitmap. Width: {Width}, Height {Height}");
             }
 
@@ -188,7 +189,7 @@ namespace DjvuNet.JB2
 
             if ((Width == 0) || (Height == 0))
             {
-                throw new DjvuFormatException(
+                DjvuExceptionUtil.ThrowFormatException(
                     $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
             }
 
@@ -198,6 +199,11 @@ namespace DjvuNet.JB2
 
             PixelMap pixelMap = new PixelMap(new sbyte[swidth*sheight*3], swidth, sheight);
 
+            // NOTE (Optimization Opportunity): 
+            // The C++ reference implementation (DjVuImage::get_pixmap) optimizes this rendering 
+            // by grouping all blits that share the exact same palette color index into a single batch,
+            // and performing one bulk pm->blit for that entire layer before moving to the next color.
+            // This C# implementation skips that batching and sequentially resolves/draws each blit.
             for (int blitno = 0; blitno < Blits.Count; blitno++)
             //Parallel.For(
             //    0,
@@ -227,9 +233,9 @@ namespace DjvuNet.JB2
 
         public virtual int AddBlit(JB2Blit jb2Blit)
         {
-            if (jb2Blit.ShapeNumber >= ShapeCount)
+            if (jb2Blit.ShapeNumber < 0 || jb2Blit.ShapeNumber >= ShapeCount)
             {
-                throw new ArgumentException("Image bad shape", nameof(jb2Blit));
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(jb2Blit), jb2Blit.ShapeNumber, "JB2 decoding failed: Illegal shape number in JB2Blit.");
             }
 
             int retval = _Blits.Count;

@@ -115,5 +115,27 @@ namespace DjvuNet.Errors
                 throw new DjvuNullReferenceException(message);
             throw new DjvuNullReferenceException(message, innerException);
         }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowIndexOutOfRange(string message = null, Exception innerException = null)
+        {
+            if (message == null && innerException == null)
+                throw new DjvuIndexOutOfRangeException();
+            if (innerException == null)
+                throw new DjvuIndexOutOfRangeException(message);
+            throw new DjvuIndexOutOfRangeException(message, innerException);
+        }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowNotImplemented(string message = null, Exception innerException = null)
+        {
+            if (message == null && innerException == null)
+                throw new DjvuNotImplementedException();
+            if (innerException == null)
+                throw new DjvuNotImplementedException(message);
+            throw new DjvuNotImplementedException(message, innerException);
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using DjvuNet.Errors;
 using DjvuNet.Interfaces;
 
 namespace DjvuNet.JB2
@@ -82,7 +83,7 @@ namespace DjvuNet.JB2
         {
             if (jb2Shape.Parent >= ShapeCount)
             {
-                throw new ArgumentException("Image bad parent shape");
+                DjvuExceptionUtil.ThrowArgument("JB2 decoding failed: Illegal parent shape number in JB2Shape.", nameof(jb2Shape));
             }
 
             int retval = InheritedShapes + _Shapes.Count;
@@ -102,22 +103,17 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual JB2Shape GetShape(int shapeNum)
         {
-            JB2Shape retval;
+            if (shapeNum < 0 || shapeNum >= ShapeCount)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(shapeNum), shapeNum, "Shape number is outside the bounds of the dictionary.");
+            }
 
             if (shapeNum >= InheritedShapes)
             {
-                retval = (JB2Shape)_Shapes[shapeNum - InheritedShapes];
-            }
-            else if (InheritedDictionary != null)
-            {
-                retval = InheritedDictionary.GetShape(shapeNum);
-            }
-            else
-            {
-                throw new DjvuFormatException("Bad image number");
+                return (JB2Shape)_Shapes[shapeNum - InheritedShapes];
             }
 
-            return retval;
+            return InheritedDictionary.GetShape(shapeNum);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,12 +136,12 @@ namespace DjvuNet.JB2
             {
                 if (_Shapes.Count > 0)
                 {
-                    throw new DjvuFormatException("Can not set image.");
+                    DjvuExceptionUtil.ThrowInvalidOperation("JB2 decoding failed: Cannot set dictionary after adding shapes.");
                 }
 
                 if (InheritedDictionary != null)
                 {
-                    throw new DjvuFormatException("Image can not be changed.");
+                    DjvuExceptionUtil.ThrowInvalidOperation("JB2 decoding failed: Cannot change dictionary once set.");
                 }
             }
 

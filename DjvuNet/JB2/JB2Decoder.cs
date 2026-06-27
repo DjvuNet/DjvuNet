@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using DjvuNet.Compression;
 using DjvuNet.Graphics;
+using DjvuNet.Errors;
 
 namespace DjvuNet.JB2
 {
@@ -59,7 +60,7 @@ namespace DjvuNet.JB2
 
             if (!_GotStartRecordP)
             {
-                throw new DjvuFormatException("Image has no start record");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Missing required start record.");
             }
         }
 
@@ -74,7 +75,7 @@ namespace DjvuNet.JB2
 
             if (!_GotStartRecordP)
             {
-                throw new DjvuFormatException("Image has no start record");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Missing required start record.");
             }
         }
 
@@ -119,7 +120,7 @@ namespace DjvuNet.JB2
         {
             if (!_GotStartRecordP)
             {
-                throw new DjvuFormatException("Image no start");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Missing required start record.");
             }
 
             int left = CodeNum(1, _ImageColumns, _AbsLocX);
@@ -136,7 +137,7 @@ namespace DjvuNet.JB2
 
             if ((xsize != (0xffff & xsize)) || (ysize != (0xffff & ysize)))
             {
-                throw new DjvuFormatException("Image bad number");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Decoded value falls outside permitted bounds.");
             }
 
             bm.Init(ysize, xsize, border);
@@ -210,7 +211,7 @@ namespace DjvuNet.JB2
 
             if ((w != 0) || (h != 0))
             {
-                throw new DjvuFormatException("Image bad dict 2");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Dictionary contains non-zero image dimensions.");
             }
 
             base.CodeImageSize(jim);
@@ -223,7 +224,7 @@ namespace DjvuNet.JB2
 
             if ((_ImageColumns == 0) || (_ImageRows == 0))
             {
-                throw new DjvuFormatException("Image with zero size");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Image dimensions cannot be zero.");
             }
 
             jim.Width = _ImageColumns;
@@ -245,13 +246,13 @@ namespace DjvuNet.JB2
                 }
                 else
                 {
-                    throw new DjvuFormatException("Image dictionary not provided");
+                    DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: A shape dictionary is required but was not provided.");
                 }
             }
 
             if ((dict != null) && (size != dict.ShapeCount))
             {
-                throw new DjvuFormatException("Image dictionary is invalid");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Shape dictionary size mismatch.");
             }
         }
 
@@ -279,7 +280,7 @@ namespace DjvuNet.JB2
 
             if ((xsize != (0xffff & xsize)) || (ysize != (0xffff & ysize)))
             {
-                throw new DjvuFormatException("Image decoder value");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Decoded value falls outside permitted bounds.");
             }
 
             bm.Init(ysize, xsize, border);
