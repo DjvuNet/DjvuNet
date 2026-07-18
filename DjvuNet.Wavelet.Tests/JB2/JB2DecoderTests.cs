@@ -1,16 +1,18 @@
 using System;
 using System.IO;
+using System.Linq;
 using Xunit;
 using DjvuNet.JB2;
 using DjvuNet.Tests;
 using DjvuNet.Compression;
+using DjvuNet.Errors;
 
 namespace DjvuNet.JB2.Tests
 {
     public class JB2DecoderTests
     {
         [Fact]
-        public void JB2Decoder_Creation_Success()
+        public void JB2Decoder_Creation()
         {
             using (JB2Decoder decoder = new JB2Decoder())
             {
@@ -21,7 +23,7 @@ namespace DjvuNet.JB2.Tests
         [Theory]
         [InlineData("testE002_001.djbz")]
         [InlineData("testE003_001.djbz")]
-        public void JB2Decoder_Init_Success(string djbzFileName)
+        public void JB2Decoder_Init(string djbzFileName)
         {
             using (JB2Decoder decoder = new JB2Decoder())
             {
@@ -37,7 +39,7 @@ namespace DjvuNet.JB2.Tests
         [Theory]
         [InlineData("testE002_001.djbz")]
         [InlineData("testE003_001.djbz")]
-        public void JB2Decoder_CodeJB2Dictionary_Success(string djbzFileName)
+        public void JB2Decoder_CodeJB2Dictionary(string djbzFileName)
         {
             using (JB2Decoder decoder = new JB2Decoder())
             {
@@ -56,11 +58,11 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Theory]
-        [InlineData(@"extracted\test002C_D1868.djbz", @"extracted\test002C_P01.sjbz")]
-        [InlineData(@"extracted\test002C_D1868.djbz", @"extracted\test002C_P02.sjbz")]
-        [InlineData(@"extracted\test007C_D584.djbz", @"extracted\test007C_P02.sjbz")] // Triggers CodeRecordB Tokens 2, 3, 5, 6
-        [InlineData(@"extracted\test011C_D384.djbz", @"extracted\test011C_P03.sjbz")] // Triggers CodeRecordB Tokens 2, 5, 6
-        public void JB2Decoder_CodeJB2Image_Success(string djbzFileName, string sjbzFileName)
+        [InlineData(@"extracted/test002C_D1868.djbz", @"extracted/test002C_P01.sjbz")]
+        [InlineData(@"extracted/test002C_D1868.djbz", @"extracted/test002C_P02.sjbz")]
+        [InlineData(@"extracted/test007C_D584.djbz", @"extracted/test007C_P02.sjbz")] // Triggers CodeRecordB Tokens 2, 3, 5, 6
+        [InlineData(@"extracted/test011C_D384.djbz", @"extracted/test011C_P03.sjbz")] // Triggers CodeRecordB Tokens 2, 5, 6
+        public void JB2Decoder_CodeJB2Image(string djbzFileName, string sjbzFileName)
         {
             JB2Dictionary dictionary = null;
             if (!string.IsNullOrWhiteSpace(djbzFileName))
@@ -91,10 +93,10 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Decoder_Code_RequiredDictOrReset_Success()
+        public void JB2Decoder_Code_RequiredDictOrReset()
         {
             JB2Dictionary dict = new JB2Dictionary();
-            byte[] dictPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, @"extracted\test076C_D244.djbz"));
+            byte[] dictPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, @"extracted/test076C_D244.djbz"));
             using (var ms = new MemoryStream(dictPayload))
             using (var reader = new DjvuReader(ms))
             {
@@ -103,7 +105,7 @@ namespace DjvuNet.JB2.Tests
 
             using (JB2Decoder decoder = new JB2Decoder())
             {
-                byte[] imagePayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, @"extracted\test076C_P01.sjbz"));
+                byte[] imagePayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, @"extracted/test076C_P01.sjbz"));
                 using (var ms = new MemoryStream(imagePayload))
                 using (var reader = new DjvuReader(ms))
                 {
@@ -117,11 +119,11 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Decoder_Code_ZeroSize_ThrowsDjvuFormatException()
+        public void JB2Decoder_Code_ZeroSize_Throws()
         {
             using (JB2Decoder decoder = new JB2Decoder())
             {
-                byte[] dictPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, @"extracted\test076C_D244.djbz"));
+                byte[] dictPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, @"extracted/test076C_D244.djbz"));
                 using (var ms = new MemoryStream(dictPayload))
                 using (var reader = new DjvuReader(ms))
                 {
@@ -135,11 +137,11 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Theory]
-        [InlineData(@"extracted\test076C_D244.djbz", @"extracted\test076C_P01.sjbz")]
-        [InlineData(@"extracted\test076C_D244.djbz", @"extracted\test076C_P05.sjbz")]
-        [InlineData(@"extracted\test076C_D244.djbz", @"extracted\test076C_P10.sjbz")]
-        [InlineData(@"extracted\test076C_D244.djbz", @"extracted\test076C_P18.sjbz")]
-        public void JB2Decoder_Code_PreservedComment_Success(string dictPath, string imagePath)
+        [InlineData(@"extracted/test076C_D244.djbz", @"extracted/test076C_P01.sjbz")]
+        [InlineData(@"extracted/test076C_D244.djbz", @"extracted/test076C_P05.sjbz")]
+        [InlineData(@"extracted/test076C_D244.djbz", @"extracted/test076C_P10.sjbz")]
+        [InlineData(@"extracted/test076C_D244.djbz", @"extracted/test076C_P18.sjbz")]
+        public void JB2Decoder_Code_PreservedComment(string dictPath, string imagePath)
         {
             JB2Dictionary dict = new JB2Dictionary();
             byte[] dictPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, dictPath));
@@ -164,7 +166,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Decoder_Code_ZeroSizeImage_ThrowsDjvuFormatException()
+        public void JB2Decoder_Code_ZeroSizeImage_Throws()
         {
             // Fighting ZPCoder: an empty byte array forces ZPCodec to decode 0 bits.
             // RecordType 0 = StartOfData.
@@ -210,36 +212,6 @@ namespace DjvuNet.JB2.Tests
             }
         }
 
-        [Fact]
-        public void JB2Decoder_DecodeAll_ExtractCoverage()
-        {
-            var dataDir = Path.Combine(Util.ArtifactsDataPath, "extracted");
-            var sjbzFiles = Directory.GetFiles(dataDir, "*.sjbz");
-            foreach (var sjbz in sjbzFiles)
-            {
-                var prefix = Path.GetFileName(sjbz).Split('_')[0];
-                var djbz = System.Linq.Enumerable.FirstOrDefault(Directory.GetFiles(dataDir, $"{prefix}*.djbz"));
-                
-                try 
-                {
-                    JB2Dictionary dict = null;
-                    if (djbz != null) 
-                    {
-                        dict = new JB2Dictionary();
-                        using (var reader = new DjvuReader(File.OpenRead(djbz))) { dict.Decode(reader); }
-                    }
-                    
-                    using (JB2Decoder decoder = new JB2Decoder())
-                    using (var reader = new DjvuReader(File.OpenRead(sjbz)))
-                    {
-                        decoder.Init(reader, dict);
-                        JB2Image image = new JB2Image();
-                        decoder.Code(image);
-                    }
-                } 
-                catch (Exception) { /* ignore */ }
-            }
-        }
 
         [Fact]
         public void JB2Decoder_Code_NoStartRecord_Throws()
@@ -278,16 +250,89 @@ namespace DjvuNet.JB2.Tests
 
                 return CodeRecordTypeOverrideValue;
             }
+        }
 
-            protected override int CodeNum(int low, int high, MutableValue<int> ctx)
+        internal class RecordTypeInjectorDecoder : JB2Decoder
+        {
+            public int TargetToken { get; set; }
+            private bool _injected = false;
+
+            protected override int CodeRecordType(int ignored)
             {
-                // TEST-ONLY SAFEGUARD: Kills the runner if an infinite loop is detected
-                if (++_callCount > _maxCallCount)
+                if (_injected) return JB2Codec.EndOfData; // Stop decoding after injection to prevent misalignment crashes
+
+                int rectype = base.CodeRecordType(ignored);
+                
+                // Intercept the first shape record
+                if (rectype == JB2Codec.NewMarkLibraryOnly || rectype == JB2Codec.NewMark)
                 {
-                    Environment.FailFast("Safeguard process terminating exception: Infinite loop detected in test.");
+                    _injected = true;
+                    return TargetToken;
                 }
 
-                return CodeNumOverrideValue;
+                return rectype;
+            }
+        }
+
+        [Theory]
+        [InlineData(JB2Codec.NewMark)]
+        [InlineData(JB2Codec.NewMarkImageOnly)]
+        [InlineData(JB2Codec.MatchedRefine)]
+        [InlineData(JB2Codec.MatchedRefineImageOnly)]
+        [InlineData(JB2Codec.NonMarkData)]
+        [InlineData(99)]
+        public void JB2Decoder_CodeJB2Dictionary_InvalidRecordType_Throws(int invalidToken)
+        {
+            var djbzPath = Path.Combine(Util.ArtifactsDataPath, "extracted", "test002C_D1868.djbz");
+
+            using (var decoder = new RecordTypeInjectorDecoder { TargetToken = invalidToken })
+            using (var reader = new DjvuReader(File.OpenRead(djbzPath)))
+            {
+                decoder.Init(reader, null);
+                JB2Dictionary dict = new JB2Dictionary();
+                var ex = Assert.ThrowsAny<DjvuFormatException>(() => decoder.Code(dict));
+                Assert.Contains("Invalid or unknown record type", ex.Message);
+            }
+        }
+
+        [Fact]
+        public void JB2Decoder_CodeJB2Image_InvalidRecordType_Throws()
+        {
+            // Decoding sjbz chunk with injected invalid record targets CodeRecordB exception
+            var sjbzPath = Path.Combine(Util.ArtifactsDataPath, "extracted", "test001C_P01.sjbz");
+
+            using (var decoder = new RecordTypeInjectorDecoder { TargetToken = 99 })
+            using (var reader = new DjvuReader(File.OpenRead(sjbzPath)))
+            {
+                decoder.Init(reader, null);
+                JB2Image image = new JB2Image();
+                var ex = Assert.ThrowsAny<DjvuArgumentException>(() => decoder.Code(image));
+                Assert.Contains("Invalid or unknown record type", ex.Message);
+                Assert.Contains("CodeRecordB", ex.StackTrace);
+            }
+        }
+
+        [Fact]
+        public void JB2Decoder_Code_NonMarkData()
+        {
+            var sjbzPath = Path.Combine(Util.ArtifactsDataPath, "extracted", "test003C_P41.sjbz");
+            var djbzPath = Path.Combine(Util.ArtifactsDataPath, "extracted", "test003C_D355022.djbz");
+
+            JB2Dictionary dict = new JB2Dictionary();
+            using (var reader = new DjvuReader(File.OpenRead(djbzPath))) { dict.Decode(reader); }
+
+            using (var decoder = new RecordTypeInjectorDecoder { TargetToken = JB2Codec.NonMarkData })
+            using (var reader = new DjvuReader(File.OpenRead(sjbzPath)))
+            {
+                decoder.Init(reader, dict);
+                JB2Image image = new JB2Image();
+                decoder.Code(image);
+
+                // Verification
+                Assert.True(image.ShapeCount > 0);
+                JB2Shape shape = image.GetShape(image.ShapeCount - 1);
+                // NonMarkData sets Parent to -2
+                Assert.Equal(-2, shape.Parent);
             }
         }
     }

@@ -594,17 +594,6 @@ check_prereqs()
     fi
 }
 
-
-
-
-
-
-
-
-
-
-
-
 echo ; echo "BUILD: Starting Build of DjvuNet at $(date +"%Y-%m-%d %H:%M:%S.%2N")"; echo "";
 
 # Argument types supported by this script:
@@ -727,7 +716,7 @@ _DefaultNetStandard="netstandard2.1"
 _NetStandardId=".NETStandard"
 _NetStandardTFM=".NETStandard,Version=v2.1"
 _Framework="$_DefaultNetCoreApp"
-__ArtifactsReleaseTag="v0.11.26175.0"
+__ArtifactsReleaseTag="v0.12.26199.0"
 __GithubDjvuNetReleaseUri="https://github.com/DjvuNet/artifacts/releases/download/${__ArtifactsReleaseTag}/"
 __ArtifactsTestDataUri="https://github.com/DjvuNet/artifacts/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
 __ArtifactsDirName="artifacts-${__ArtifactsReleaseTag#v}"

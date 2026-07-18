@@ -10,6 +10,7 @@ namespace DjvuNet.JB2
     {
         #region Constants
 
+        protected const sbyte StartOfData = 0;
         internal const sbyte NewMark = 1;
         internal const sbyte NewMarkLibraryOnly = 2;
         internal const sbyte NewMarkImageOnly = 3;
@@ -20,13 +21,14 @@ namespace DjvuNet.JB2
         internal const sbyte NonMarkData = 8;
         internal const sbyte RequiredDictOrReset = 9;
         internal const sbyte PreservedComment = 10;
+        protected const sbyte EndOfData = 11;
 
         internal const Int32 MinusOneObject = -1;
 
-        protected const int Bigpositive = 262142;
-        protected const int Bignegative = -262143;
-        protected const sbyte StartOfData = 0;
-        protected const sbyte EndOfData = 11;
+        protected const int BigPositive = 262142;
+        protected const int BigNegative = -262143;
+        protected const int CellChunk = 20000;
+        protected const int MaxParentDepth = 256;
 
         #endregion Constans
 
@@ -52,7 +54,7 @@ namespace DjvuNet.JB2
         internal readonly MutableValue<int> _RelLocYLast;
 
         internal readonly List<MutableValue<int>> _RightCell;
-        internal readonly List<int> _Shape2Lib;
+        internal List<int> _Shape2Lib;
 
         internal readonly int[] _ShortList;
         internal int _ShortListPos;
@@ -124,7 +126,7 @@ namespace DjvuNet.JB2
 
         #region Protected Methods
 
-        protected virtual int CodeNum(int low, int high, MutableValue<int> ctx, int v)
+        protected int CodeNum(int low, int high, MutableValue<int> ctx, int v)
         {
             bool negative = false;
             int cutoff = 0;
@@ -372,7 +374,7 @@ namespace DjvuNet.JB2
                         }
                         else
                         {
-                            ResetNumcoder();
+                            ResetNumCoder();
                         }
 
                         break;
@@ -615,7 +617,7 @@ namespace DjvuNet.JB2
                         if (!_GotStartRecordP)
                             CodeInheritedShapeCount(jim);
                         else
-                            ResetNumcoder();
+                            ResetNumCoder();
 
                         break;
                     }
@@ -624,7 +626,7 @@ namespace DjvuNet.JB2
                     break;
 
                 default:
-                    DjvuExceptionUtil.ThrowArgument("JB2 decoding failed: Unrecognized record type encountered.");
+                    DjvuExceptionUtil.ThrowArgument("JB2 decoding failed: Invalid or unknown record type.");
                     break;
             }
 
@@ -733,7 +735,7 @@ namespace DjvuNet.JB2
             return libno;
         }
 
-        protected virtual void ResetNumcoder()
+        protected virtual void ResetNumCoder()
         {
             _DistCommentByte.Value = 0;
             _DistCommentLength.Value = 0;

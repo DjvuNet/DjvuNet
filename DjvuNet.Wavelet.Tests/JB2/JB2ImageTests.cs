@@ -19,12 +19,15 @@ namespace DjvuNet.JB2.Tests
 
         public static IEnumerable<object[]> JB2ImageTestData => Util.GetJB2ImageTestData(
             skipDocs: new int[] { },
-            skipChunks: new string[] { }
+            skipChunks: new string[] { },
+            TestCoverage.UniqueOnly
         );
 
+        public static IEnumerable<object[]> ExtractedRareVariantTestData => Util.GetExtractedRareVariantPayloads(encoderCoverage: JB2EncoderTestCoverage.AllVariants);
+
         [Theory]
-        [InlineData("extracted\\test003C_D453132.djbz", "extracted\\test003C_P53.sjbz")]
-        [InlineData("extracted\\test003C_D453132.djbz", "extracted\\test003C_P54.sjbz")]
+        [InlineData(@"extracted/test003C_D453132.djbz", @"extracted/test003C_P53.sjbz")]
+        [InlineData(@"extracted/test003C_D453132.djbz", @"extracted/test003C_P54.sjbz")]
         public void Decode_Tokens6And8_Success(string djbzFileName, string sjbzFileName)
         {
             DecodeInternal(djbzFileName, sjbzFileName);
@@ -35,6 +38,59 @@ namespace DjvuNet.JB2.Tests
         public void DecodeTest(string djbzFileName, string sjbzFileName)
         {
             DecodeInternal(djbzFileName, sjbzFileName);
+        }
+
+        [Theory]
+        [MemberData(nameof(ExtractedRareVariantTestData))]
+        public void Decode_GeneratedVariants(string variantFile, string originalSjbzPath, string djbzPath)
+        {
+            JB2Dictionary jb2Dict = null;
+            
+            if (djbzPath != null)
+            {
+                jb2Dict = new JB2Dictionary();
+                byte[] djbzPayload = File.ReadAllBytes(djbzPath);
+                using (var ms = new MemoryStream(djbzPayload))
+                using (var reader = new DjvuReader(ms))
+                {
+                    jb2Dict.Decode(reader);
+                }
+                Assert.True(jb2Dict.ShapeCount > 0, "Managed dictionary decoded 0 shapes.");
+            }
+
+            byte[] origPayload = File.ReadAllBytes(originalSjbzPath);
+            JB2Image originalImage = new JB2Image();
+            using (var ms = new MemoryStream(origPayload))
+            using (var reader = new DjvuReader(ms))
+            {
+                originalImage.Decode(reader, jb2Dict);
+            }
+
+            byte[] sjbzPayload = File.ReadAllBytes(variantFile);
+            JB2Image variantImage = new JB2Image();
+            
+            using (var ms = new MemoryStream(sjbzPayload))
+            using (var reader = new DjvuReader(ms))
+            {
+                variantImage.Decode(reader, jb2Dict);
+            }
+            
+            Bitmap origBitmap = originalImage.GetBitmap();
+            Bitmap varBitmap = variantImage.GetBitmap();
+
+            Assert.Equal(origBitmap.Width, varBitmap.Width);
+            Assert.Equal(origBitmap.Height, varBitmap.Height);
+
+            double diff;
+            unsafe
+            {
+                fixed (sbyte* pOrig = origBitmap.Data)
+                fixed (sbyte* pVar = varBitmap.Data)
+                {
+                    diff = Util.ImageBinaryDiff((byte*)pOrig + origBitmap.Border, (byte*)pVar + varBitmap.Border, origBitmap.Width, origBitmap.Height, origBitmap.BytesPerRow, 8);
+                }
+            }
+            Assert.True(diff == 0.0, $"Managed pixel parity mismatch! Diff: {diff}. Variant: {Path.GetFileName(variantFile)} vs {Path.GetFileName(originalSjbzPath)}");
         }
 
         private void DecodeInternal(string djbzFileName, string sjbzFileName)
@@ -102,7 +158,7 @@ namespace DjvuNet.JB2.Tests
         {
             var image = new JB2Image { Width = width, Height = height };
             Assert.Throws<DjvuFormatException>(() => image.GetBitmap());
-            Assert.Throws<DjvuFormatException>(() => image.GetBitmap(new DjvuNet.Graphics.Rectangle(0, 0, 10, 10)));
+            Assert.Throws<DjvuFormatException>(() => image.GetBitmap(new Rectangle(0, 0, 10, 10)));
         }
 
         [Fact]
@@ -135,7 +191,7 @@ namespace DjvuNet.JB2.Tests
         {
             var image = CreateTestImage(width, height);
             
-            var bm = image.GetBitmap(subsample, align);
+            Bitmap bm = image.GetBitmap(subsample, align);
             
             Assert.Equal(expectedHeight, bm.Height); 
             Assert.Equal(expectedWidth, bm.Width);
@@ -155,9 +211,9 @@ namespace DjvuNet.JB2.Tests
             int expectedWidth, int expectedBorder)
         {
             var image = CreateTestImage(100, 100);
-            var rect = new DjvuNet.Graphics.Rectangle(x, y, w, h);
+            var rect = new Rectangle(x, y, w, h);
             
-            var bm = image.GetBitmap(rect, subsample, align, dispy);
+            Bitmap bm = image.GetBitmap(rect, subsample, align, dispy);
             
             Assert.Equal(expectedWidth, bm.Width);
             Assert.Equal(h, bm.Height); // Rectangle Height determines bitmap height directly
@@ -192,7 +248,7 @@ namespace DjvuNet.JB2.Tests
             var image = CreateTestImage(100, 100);
             var rect = new Rectangle(0, 0, 20, 20);
             
-            var bm = image.GetBitmap(rect, 1, 1, 0, null);
+            Bitmap bm = image.GetBitmap(rect, 1, 1, 0, null);
             Assert.NotNull(bm);
         }
 
@@ -232,7 +288,7 @@ namespace DjvuNet.JB2.Tests
             // Empty image with no blits to avoid NullReferenceException on null palette
             var image = new JB2Image { Width = width, Height = height }; 
 
-            var pm = image.GetPixelMap(null, subsample, align);
+            PixelMap pm = image.GetPixelMap(null, subsample, align);
             
             Assert.NotNull(pm);
             Assert.Equal(expectedWidth, pm.Width);
@@ -258,7 +314,7 @@ namespace DjvuNet.JB2.Tests
         public void JB2Image_GetBitmap_Parameterless_ExecutesSuccessfully()
         {
             var image = CreateTestImage(50, 50);
-            var bm = image.GetBitmap();
+            Bitmap bm = image.GetBitmap();
             Assert.NotNull(bm);
         }
 
@@ -266,7 +322,7 @@ namespace DjvuNet.JB2.Tests
         public void JB2Image_GetBitmap_Subsample_ExecutesSuccessfully()
         {
             var image = CreateTestImage(50, 50);
-            var bm = image.GetBitmap(1);
+            Bitmap bm = image.GetBitmap(1);
             Assert.NotNull(bm);
         }
 
@@ -274,8 +330,8 @@ namespace DjvuNet.JB2.Tests
         public void JB2Image_GetBitmap_Rectangle_ExecutesSuccessfully()
         {
             var image = CreateTestImage(50, 50);
-            var rect = new DjvuNet.Graphics.Rectangle(0, 0, 20, 20);
-            var bm = image.GetBitmap(rect);
+            var rect = new Rectangle(0, 0, 20, 20);
+            Bitmap bm = image.GetBitmap(rect);
             Assert.NotNull(bm);
         }
 
@@ -283,8 +339,8 @@ namespace DjvuNet.JB2.Tests
         public void JB2Image_GetBitmap_RectangleSubsample_ExecutesSuccessfully()
         {
             var image = CreateTestImage(50, 50);
-            var rect = new DjvuNet.Graphics.Rectangle(0, 0, 20, 20);
-            var bm = image.GetBitmap(rect, 1);
+            var rect = new Rectangle(0, 0, 20, 20);
+            Bitmap bm = image.GetBitmap(rect, 1);
             Assert.NotNull(bm);
         }
 
@@ -292,8 +348,8 @@ namespace DjvuNet.JB2.Tests
         public void JB2Image_GetBitmap_RectangleSubsampleAlign_ExecutesSuccessfully()
         {
             var image = CreateTestImage(50, 50);
-            var rect = new DjvuNet.Graphics.Rectangle(0, 0, 20, 20);
-            var bm = image.GetBitmap(rect, 1, 4);
+            var rect = new Rectangle(0, 0, 20, 20);
+            Bitmap bm = image.GetBitmap(rect, 1, 4);
             Assert.NotNull(bm);
         }
 
@@ -321,8 +377,8 @@ namespace DjvuNet.JB2.Tests
         public void JB2Image_GetBitmap_NullComponents_FallsBackCorrectly()
         {
             var image = CreateTestImage(20, 20);
-            var rect = new DjvuNet.Graphics.Rectangle(0, 0, 20, 20);
-            var bm = image.GetBitmap(rect, 1, 4, 0, null);
+            var rect = new Rectangle(0, 0, 20, 20);
+            Bitmap bm = image.GetBitmap(rect, 1, 4, 0, null);
             Assert.NotNull(bm);
         }
 
@@ -335,7 +391,7 @@ namespace DjvuNet.JB2.Tests
             image.AddShape(shape);
             image.AddBlit(new JB2Blit { ShapeNumber = 0, Left = 5, Bottom = 5 });
 
-            var bm = image.GetBitmap();
+            Bitmap bm = image.GetBitmap();
             Assert.NotNull(bm);
             Assert.Equal(0, bm.Data.Count(b => b != 0)); // Blank bitmap
         }
@@ -348,7 +404,7 @@ namespace DjvuNet.JB2.Tests
             // Create image with 10x10 shape placed at (10, 10)
             var image = CreateTestImage(50, 50); 
             
-            var bm = image.GetBitmap(subsample);
+            Bitmap bm = image.GetBitmap(subsample);
             Assert.True(bm.Data.Count(x => x > 0) > 0); 
         }
 
@@ -360,8 +416,8 @@ namespace DjvuNet.JB2.Tests
             // Create image with 10x10 shape placed at (10, 10)
             var image = CreateTestImage(50, 50); 
             
-            var rect = new DjvuNet.Graphics.Rectangle(rx, ry, rw, rh); 
-            var bm = image.GetBitmap(rect);
+            var rect = new Rectangle(rx, ry, rw, rh); 
+            Bitmap bm = image.GetBitmap(rect);
             
             if (expectedToHit)
             {
@@ -390,7 +446,7 @@ namespace DjvuNet.JB2.Tests
             palette.PaletteColors = new [] { Pixel.RedPixel }; 
             palette.BlitColors = new int[] { 0 };
 
-            var pm = image.GetPixelMap(palette, 1, 4);
+            PixelMap pm = image.GetPixelMap(palette, 1, 4);
 
             Assert.NotNull(pm);
             Assert.Equal(20, pm.Width);

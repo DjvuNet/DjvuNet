@@ -166,14 +166,25 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             },
             coverage: TestCoverage.UniqueOnly
         );
+
         [Theory]
-        [InlineData("extracted\\test003C_D453132.djbz", "extracted\\test003C_P53.sjbz")]
-        [InlineData("extracted\\test003C_D453132.djbz", "extracted\\test003C_P54.sjbz")]
-        public void Decode_Tokens6And8_Success(string djbzFileName, string sjbzFileName)
+        [InlineData("extracted/test003C_D453132.djbz", "extracted/test003C_P53.sjbz")]
+        [InlineData("extracted/test003C_D453132.djbz", "extracted/test003C_P54.sjbz")]
+        public void Decode_Tokens6And8(string djbzFileName, string sjbzFileName)
         {
             DecodeInternal(djbzFileName, sjbzFileName);
         }
 
+        [Theory]
+        [InlineData("extracted/test002C_D1868.djbz", "extracted/test002C_P02_nonmark.sjbz")]
+        [InlineData("extracted/test002C_D1868.djbz", "extracted/test002C_P03_nonmark.sjbz")]
+        [InlineData("extracted/test003C_D1030.djbz", "extracted/test003C_P07_nonmark.sjbz")]
+        [InlineData("extracted/test003C_D1030.djbz", "extracted/test003C_P09_nonmark.sjbz")]
+        [InlineData("extracted/test003C_D76090.djbz", "extracted/test003C_P11_nonmark.sjbz")]
+        public void Decode_AllZero_NonMarkData(string djbzFileName, string sjbzFileName)
+        {
+            DecodeInternal(djbzFileName, sjbzFileName);
+        }
 
         [Theory]
         [MemberData(nameof(JB2ImageTestData))]

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using DjvuNet.Compression;
@@ -79,10 +80,15 @@ namespace DjvuNet.JB2
             }
         }
 
-        public void Init(IBinaryReader gbs, JB2Dictionary zdict)
+        public void Init(Stream stream, JB2Dictionary zdict)
         {
             this._ZDict = zdict;
-            _Coder = new ZPCodec(gbs.BaseStream);
+            _Coder = new ZPCodec(stream);
+        }
+
+        public void Init(IBinaryReader gbs, JB2Dictionary zdict)
+        {
+            Init(gbs.BaseStream, zdict);
         }
 
         #endregion Public Methods
@@ -109,7 +115,7 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected virtual int CodeNum(int low, int high, MutableValue<int> ctx)
+        protected int CodeNum(int low, int high, MutableValue<int> ctx)
         {
             int result = CodeNum(low, high, ctx, 0);
             return result;
@@ -132,8 +138,8 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void CodeAbsoluteMarkSize(IBitmap bm, int border)
         {
-            int xsize = CodeNum(0, Bigpositive, _AbsSizeX);
-            int ysize = CodeNum(0, Bigpositive, _AbsSizeY);
+            int xsize = CodeNum(0, BigPositive, _AbsSizeX);
+            int ysize = CodeNum(0, BigPositive, _AbsSizeY);
 
             if ((xsize != (0xffff & xsize)) || (ysize != (0xffff & ysize)))
             {
@@ -193,7 +199,7 @@ namespace DjvuNet.JB2
 
         protected override String CodeComment(String comment)
         {
-            int size = CodeNum(0, Bigpositive, _DistCommentLength);
+            int size = CodeNum(0, BigPositive, _DistCommentLength);
             byte[] combuf = new byte[size];
 
             for (int i = 0; i < combuf.Length; i++)
@@ -206,8 +212,8 @@ namespace DjvuNet.JB2
 
         protected override void CodeImageSize(JB2Dictionary jim)
         {
-            int w = CodeNum(0, Bigpositive, _ImageSizeDist);
-            int h = CodeNum(0, Bigpositive, _ImageSizeDist);
+            int w = CodeNum(0, BigPositive, _ImageSizeDist);
+            int h = CodeNum(0, BigPositive, _ImageSizeDist);
 
             if ((w != 0) || (h != 0))
             {
@@ -219,8 +225,8 @@ namespace DjvuNet.JB2
 
         protected override void CodeImageSize(JB2Image jim)
         {
-            _ImageColumns = CodeNum(0, Bigpositive, _ImageSizeDist);
-            _ImageRows = CodeNum(0, Bigpositive, _ImageSizeDist);
+            _ImageColumns = CodeNum(0, BigPositive, _ImageSizeDist);
+            _ImageRows = CodeNum(0, BigPositive, _ImageSizeDist);
 
             if ((_ImageColumns == 0) || (_ImageRows == 0))
             {
@@ -234,7 +240,7 @@ namespace DjvuNet.JB2
 
         protected override void CodeInheritedShapeCount(JB2Dictionary jim)
         {
-            int size = CodeNum(0, Bigpositive, _InheritedShapeCountDist);
+            int size = CodeNum(0, BigPositive, _InheritedShapeCountDist);
             JB2Dictionary dict = jim.InheritedDictionary;
 
             if ((dict == null) && (size > 0))
@@ -273,8 +279,8 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override void CodeRelativeMarkSize(IBitmap bm, int cw, int ch, int border)
         {
-            int xdiff = CodeNum(Bignegative, Bigpositive, _RelSizeX);
-            int ydiff = CodeNum(Bignegative, Bigpositive, _RelSizeY);
+            int xdiff = CodeNum(BigNegative, BigPositive, _RelSizeX);
+            int ydiff = CodeNum(BigNegative, BigPositive, _RelSizeY);
             int xsize = cw + xdiff;
             int ysize = ch + ydiff;
 
@@ -289,7 +295,7 @@ namespace DjvuNet.JB2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected override int GetDiff(int ignored, MutableValue<int> rel_loc)
         {
-            int result = CodeNum(Bignegative, Bigpositive, rel_loc);
+            int result = CodeNum(BigNegative, BigPositive, rel_loc);
             return result;
         }
 

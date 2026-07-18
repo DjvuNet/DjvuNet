@@ -38,6 +38,8 @@
     <Compile Include="DjvuDocumentInfoTests.cs" />
     <Compile Include="NativeDjvuDocFixture.cs" />
     <Compile Include="NativeDjvuDocFixtureTests.cs" />
+    <Compile Include="NativeMethodsTests.cs" />
+    <Compile Include="JB2EncodingContext.cs" />
   </ItemGroup>
 
   <ItemGroup>

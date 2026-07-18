@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
+using SysGraphics = System.Drawing.Graphics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -19,10 +20,23 @@ using Xunit;
 
 namespace DjvuNet.Tests
 {
+    [Flags]
+    public enum JB2EncoderTestCoverage
+    {
+        Default = 1,
+        AllZero = 2,
+        Marks = 4,
+        Shared = 8,
+        AllVariants = AllZero | Marks | Shared,
+        All = Default | AllVariants
+    }
+
+    [Flags]
     public enum TestCoverage
     {
         All,
-        UniqueOnly
+        UniqueOnly,
+        DjbzNotNull
     }
 
     public static partial class Util
@@ -465,14 +479,14 @@ namespace DjvuNet.Tests
                     if (image1.PixelFormat != PixelFormat.Format24bppRgb)
                     {
                         bmp1 = new Bitmap(image1.Width, image1.Height, PixelFormat.Format24bppRgb);
-                        using var gfx = System.Drawing.Graphics.FromImage(bmp1);
+                        using SysGraphics gfx = SysGraphics.FromImage(bmp1);
                         gfx.DrawImage(image1, new Rectangle(0, 0, image1.Width, image1.Height));
                     }
 
                     if (image2.PixelFormat != PixelFormat.Format24bppRgb)
                     {
                         bmp2 = new Bitmap(image2.Width, image2.Height, PixelFormat.Format24bppRgb);
-                        using var gfx = System.Drawing.Graphics.FromImage(bmp2);
+                        using SysGraphics gfx = SysGraphics.FromImage(bmp2);
                         gfx.DrawImage(image2, new Rectangle(0, 0, image2.Width, image2.Height));
                     }
                 }
@@ -1572,7 +1586,7 @@ namespace DjvuNet.Tests
         {
             Bitmap result = new Bitmap(source.Width, source.Height, source.PixelFormat);
 
-            using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(result))
+            using (SysGraphics g = SysGraphics.FromImage(result))
             {
                 using (ImageAttributes attributes = new ImageAttributes())
                 {
@@ -1585,16 +1599,17 @@ namespace DjvuNet.Tests
             return result;
         }
 
-        public static IEnumerable<object[]> GetJB2ImageTestData(int[] skipDocs = null, string[] skipChunks = null, TestCoverage coverage = TestCoverage.All)
+        public static IEnumerable<object[]> GetJB2ImageTestData(int[] skipDocs = null, string[] skipChunks = null, TestCoverage coverage = TestCoverage.All, int step = 1)
         {
             string mapPath = Path.Combine(ArtifactsDataPath, "extracted", "jb2_chunk_map.json");
             if (!File.Exists(mapPath)) yield break;
-            
+
             HashSet<string> seenDjbz = new HashSet<string>();
 
             string json = File.ReadAllText(mapPath, new UTF8Encoding(false));
             using (JsonDocument doc = JsonDocument.Parse(json))
             {
+                int index = 0;
                 foreach (JsonElement element in doc.RootElement.EnumerateArray())
                 {
                     int docIndex = element[0].GetInt32();
@@ -1607,17 +1622,26 @@ namespace DjvuNet.Tests
                     if (skipChunks != null && skipChunks.Contains(sjbzName))
                         continue;
 
-                    if (coverage == TestCoverage.UniqueOnly && djbzName != null)
+                    if (coverage.HasFlag(TestCoverage.UniqueOnly) && djbzName != null)
                     {
                         if (!seenDjbz.Add(djbzName))
                             continue;
                     }
 
-                    yield return new object[] 
+                    string extractedDjbzName = djbzName != null ? Path.Combine("extracted", djbzName.Replace(@"\", @"")) : null;
+                    sjbzName = (coverage.HasFlag(TestCoverage.DjbzNotNull) && djbzName == null) ? null : Path.Combine("extracted", sjbzName.Replace(@"\", @""));
+
+                    if (sjbzName == null)
+                        continue;
+
+                    index++;
+                    if (index % step != 0)
+                        continue;
+
+                    yield return new object[]
                     {
                         // Get names and sanitize Json escapes if present
-                        djbzName != null ? Path.Combine("extracted", djbzName.Replace(@"\", @"")) : null, 
-                        Path.Combine("extracted", sjbzName.Replace(@"\", @"")) 
+                        extractedDjbzName, sjbzName
                     };
                 }
             }
@@ -1627,7 +1651,7 @@ namespace DjvuNet.Tests
         {
             string mapPath = Path.Combine(ArtifactsDataPath, "extracted", "jb2_chunk_map.json");
             if (!File.Exists(mapPath)) yield break;
-            
+
             HashSet<string> seen = new HashSet<string>();
 
             string json = File.ReadAllText(mapPath, new UTF8Encoding(false));
@@ -1663,6 +1687,136 @@ namespace DjvuNet.Tests
                     $"Calculated buffer size exceeds maximum allowed limit. Height: {height}, RowSize: {rowSize}, Border: {border}");
             }
             return (int)requiredSize;
+        }
+
+        public static IEnumerable<object[]> GetExtractedRareVariantPayloads(
+            int[] skipDocs = null,
+            string[] skipChunks = null,
+            TestCoverage coverage = TestCoverage.All,
+            JB2EncoderTestCoverage encoderCoverage = JB2EncoderTestCoverage.AllVariants,
+            int step = 1)
+        {
+            string outDir = Path.Combine(ArtifactsDataPath, "extracted");
+            if (!Directory.Exists(outDir)) yield break;
+
+            var suffixes = new List<string>();
+            if (encoderCoverage.HasFlag(JB2EncoderTestCoverage.AllZero)) suffixes.Add("_allzero");
+            if (encoderCoverage.HasFlag(JB2EncoderTestCoverage.Shared)) suffixes.Add("_shared");
+            if (encoderCoverage.HasFlag(JB2EncoderTestCoverage.Marks)) suffixes.Add("_marks");
+
+            int count = 0;
+            foreach (object[] testData in GetJB2ImageTestData(skipDocs, skipChunks, coverage))
+            {
+                string djbzRelative = (string)testData[0];
+                string sjbzRelative = (string)testData[1];
+
+                string sjbzName = Path.GetFileName(sjbzRelative);
+                string baseName = Path.GetFileNameWithoutExtension(sjbzName);
+                string ext = Path.GetExtension(sjbzName);
+
+                string originalSjbzPath = Path.Combine(ArtifactsDataPath, sjbzRelative);
+                string djbzPath = djbzRelative != null ? Path.Combine(ArtifactsDataPath, djbzRelative) : null;
+
+                if (encoderCoverage.HasFlag(JB2EncoderTestCoverage.Default))
+                {
+                    if (count++ % step == 0) yield return new object[] { originalSjbzPath, originalSjbzPath, djbzPath };
+                }
+
+                foreach (string suffix in suffixes)
+                {
+                    string variantFile = Path.Combine(outDir, baseName + suffix + ext);
+                    if (File.Exists(variantFile))
+                    {
+                        if (count++ % step == 0) yield return new object[] { variantFile, originalSjbzPath, djbzPath };
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> ZeroEncodingJB2ImageTestData()
+        {
+            string[] zeroFiles = new string[]
+            {
+                "test002C_P02.sjbz", "test008C_P07.sjbz", "test015C_P10.sjbz", "test023C_P09.sjbz", "test059C_P04.sjbz",
+                "test002C_P03.sjbz", "test009C_P03.sjbz", "test015C_P11.sjbz", "test023C_P11.sjbz", "test059C_P08.sjbz",
+                "test002C_P06.sjbz", "test009C_P07.sjbz", "test016C_P02.sjbz", "test023C_P12.sjbz", "test059C_P14.sjbz",
+                "test002C_P10.sjbz", "test010C_P02.sjbz", "test016C_P03.sjbz", "test023C_P14.sjbz", "test059C_P44.sjbz",
+                "test002C_P11.sjbz", "test010C_P03.sjbz", "test016C_P05.sjbz", "test023C_P15.sjbz", "test059C_P93.sjbz",
+                "test003C_P07.sjbz", "test010C_P05.sjbz", "test016C_P07.sjbz", "test023C_P17.sjbz", "test061C_P106.sjbz",
+                "test003C_P09.sjbz", "test010C_P06.sjbz", "test016C_P09.sjbz", "test023C_P18.sjbz", "test061C_P116.sjbz",
+                "test003C_P11.sjbz", "test010C_P07.sjbz", "test016C_P10.sjbz", "test023C_P19.sjbz", "test061C_P123.sjbz",
+                "test003C_P12.sjbz", "test010C_P08.sjbz", "test016C_P11.sjbz", "test023C_P23.sjbz", "test061C_P88.sjbz",
+                "test003C_P13.sjbz", "test010C_P09.sjbz", "test016C_P12.sjbz", "test023C_P24.sjbz", "test065C_P01.sjbz",
+                "test003C_P19.sjbz", "test010C_P10.sjbz", "test016C_P13.sjbz", "test023C_P25.sjbz", "test072C_P16.sjbz",
+                "test003C_P20.sjbz", "test010C_P11.sjbz", "test016C_P14.sjbz", "test023C_P26.sjbz", "test074C_P05.sjbz",
+                "test003C_P24.sjbz", "test010C_P12.sjbz", "test016C_P16.sjbz", "test023C_P27.sjbz", "test076C_P04.sjbz",
+                "test003C_P27.sjbz", "test011C_P09.sjbz", "test016C_P17.sjbz", "test023C_P28.sjbz", "test076C_P05.sjbz",
+                "test003C_P28.sjbz", "test011C_P10.sjbz", "test016C_P18.sjbz", "test023C_P30.sjbz", "test076C_P06.sjbz",
+                "test003C_P31.sjbz", "test011C_P12.sjbz", "test016C_P19.sjbz", "test023C_P31.sjbz", "test076C_P10.sjbz",
+                "test003C_P32.sjbz", "test012C_P03.sjbz", "test017C_P02.sjbz", "test023C_P32.sjbz", "test076C_P11.sjbz",
+                "test003C_P34.sjbz", "test012C_P05.sjbz", "test018C_P04.sjbz", "test023C_P33.sjbz", "test076C_P13.sjbz",
+                "test003C_P35.sjbz", "test012C_P07.sjbz", "test018C_P05.sjbz", "test024C_P02.sjbz", "test076C_P14.sjbz",
+                "test003C_P36.sjbz", "test012C_P10.sjbz", "test018C_P06.sjbz", "test024C_P03.sjbz", "test076C_P15.sjbz",
+                "test003C_P39.sjbz", "test012C_P11.sjbz", "test018C_P07.sjbz", "test024C_P04.sjbz", "test076C_P16.sjbz",
+                "test003C_P41.sjbz", "test012C_P12.sjbz", "test018C_P08.sjbz", "test024C_P05.sjbz", "test076C_P17.sjbz",
+                "test003C_P44.sjbz", "test012C_P13.sjbz", "test018C_P09.sjbz", "test024C_P07.sjbz", "test076C_P18.sjbz",
+                "test003C_P46.sjbz", "test013C_P03.sjbz", "test019C_P04.sjbz", "test024C_P08.sjbz", "test077C_P02.sjbz",
+                "test003C_P47.sjbz", "test013C_P05.sjbz", "test019C_P05.sjbz", "test024C_P11.sjbz", "test077C_P03.sjbz",
+                "test003C_P51.sjbz", "test013C_P06.sjbz", "test019C_P06.sjbz", "test024C_P12.sjbz", "test077C_P04.sjbz",
+                "test003C_P64.sjbz", "test013C_P07.sjbz", "test019C_P07.sjbz", "test025C_P02.sjbz", "test077C_P06.sjbz",
+                "test003C_P69.sjbz", "test013C_P08.sjbz", "test019C_P08.sjbz", "test026C_P04.sjbz", "test077C_P07.sjbz",
+                "test003C_P70.sjbz", "test013C_P09.sjbz", "test019C_P09.sjbz", "test027C_P06.sjbz", "test077C_P08.sjbz",
+                "test003C_P71.sjbz", "test013C_P10.sjbz", "test019C_P11.sjbz", "test028C_P02.sjbz", "test077C_P09.sjbz",
+                "test003C_P76.sjbz", "test013C_P11.sjbz", "test020C_P04.sjbz", "test028C_P04.sjbz", "test077C_P10.sjbz",
+                "test003C_P82.sjbz", "test013C_P12.sjbz", "test020C_P05.sjbz", "test028C_P05.sjbz", "test077C_P11.sjbz",
+                "test003C_P84.sjbz", "test013C_P13.sjbz", "test020C_P06.sjbz", "test028C_P06.sjbz", "test077C_P12.sjbz",
+                "test003C_P87.sjbz", "test013C_P14.sjbz", "test020C_P08.sjbz", "test028C_P07.sjbz", "test077C_P16.sjbz",
+                "test003C_P89.sjbz", "test013C_P15.sjbz", "test020C_P09.sjbz", "test028C_P08.sjbz", "test077C_P17.sjbz",
+                "test003C_P90.sjbz", "test013C_P16.sjbz", "test020C_P10.sjbz", "test028C_P09.sjbz", "test077C_P18.sjbz",
+                "test003C_P91.sjbz", "test013C_P17.sjbz", "test020C_P11.sjbz", "test028C_P10.sjbz", "test077C_P19.sjbz",
+                "test003C_P92.sjbz", "test013C_P18.sjbz", "test020C_P13.sjbz", "test028C_P12.sjbz", "test077C_P20.sjbz",
+                "test003C_P94.sjbz", "test014C_P02.sjbz", "test020C_P14.sjbz", "test028C_P14.sjbz", "test079C_P02.sjbz",
+                "test003C_P95.sjbz", "test014C_P03.sjbz", "test021C_P02.sjbz", "test028C_P16.sjbz", "test079C_P03.sjbz",
+                "test003C_P96.sjbz", "test014C_P04.sjbz", "test021C_P06.sjbz", "test028C_P17.sjbz", "test079C_P04.sjbz",
+                "test003C_P97.sjbz", "test014C_P05.sjbz", "test022C_P02.sjbz", "test028C_P19.sjbz", "test079C_P07.sjbz",
+                "test003C_P98.sjbz", "test014C_P06.sjbz", "test022C_P03.sjbz", "test028C_P20.sjbz", "test079C_P08.sjbz",
+                "test003C_P99.sjbz", "test014C_P07.sjbz", "test022C_P04.sjbz", "test029C_P02.sjbz", "test079C_P09.sjbz",
+                "test004C_P05.sjbz", "test014C_P08.sjbz", "test022C_P05.sjbz", "test029C_P07.sjbz", "test079C_P15.sjbz",
+                "test005C_P03.sjbz", "test014C_P09.sjbz", "test022C_P06.sjbz", "test029C_P08.sjbz", "test079C_P16.sjbz",
+                "test005C_P06.sjbz", "test014C_P10.sjbz", "test022C_P07.sjbz", "test045C_P02.sjbz", "test079C_P17.sjbz",
+                "test005C_P07.sjbz", "test014C_P11.sjbz", "test022C_P09.sjbz", "test053C_P02.sjbz", "test079C_P19.sjbz",
+                "test005C_P10.sjbz", "test014C_P12.sjbz", "test022C_P10.sjbz", "test053C_P04.sjbz", "test079C_P20.sjbz",
+                "test006C_P07.sjbz", "test014C_P14.sjbz", "test022C_P11.sjbz", "test054C_P30.sjbz", "test079C_P22.sjbz",
+                "test007C_P02.sjbz", "test014C_P15.sjbz", "test022C_P13.sjbz", "test056C_P06.sjbz", "test079C_P23.sjbz",
+                "test007C_P04.sjbz", "test015C_P02.sjbz", "test022C_P14.sjbz", "test058C_P03.sjbz", "test079C_P24.sjbz",
+                "test007C_P05.sjbz", "test015C_P03.sjbz", "test022C_P15.sjbz", "test058C_P05.sjbz", "test079C_P25.sjbz",
+                "test007C_P06.sjbz", "test015C_P04.sjbz", "test022C_P16.sjbz", "test058C_P17.sjbz", "test079C_P26.sjbz",
+                "test007C_P09.sjbz", "test015C_P05.sjbz", "test022C_P18.sjbz", "test058C_P21.sjbz", "test079C_P33.sjbz",
+                "test007C_P10.sjbz", "test015C_P06.sjbz", "test023C_P02.sjbz", "test058C_P23.sjbz", "test079C_P34.sjbz",
+                "test007C_P11.sjbz", "test015C_P07.sjbz", "test023C_P03.sjbz", "test058C_P27.sjbz", "test079C_P35.sjbz",
+                "test008C_P02.sjbz", "test015C_P08.sjbz", "test023C_P05.sjbz", "test058C_P29.sjbz", "test079C_P36.sjbz",
+                "test008C_P06.sjbz", "test015C_P09.sjbz", "test023C_P06.sjbz", "test059C_P02.sjbz"
+            };
+
+            var baseMapping = new Dictionary<string, Tuple<string, string>>();
+            foreach (object[] data in GetJB2ImageTestData(null, null, TestCoverage.All))
+            {
+                string djbz = (string)data[0];
+                string sjbz = (string)data[1];
+                if (sjbz != null)
+                {
+                    string baseSjbz = Path.GetFileName(sjbz);
+                    baseMapping[baseSjbz] = new Tuple<string, string>(djbz, sjbz);
+                }
+            }
+
+            foreach (string baseName in zeroFiles)
+            {
+                if (baseMapping.TryGetValue(baseName, out Tuple<string, string> originalData))
+                {
+                    yield return new object[] { originalData.Item1, originalData.Item2};
+                }
+            }
         }
     }
 }

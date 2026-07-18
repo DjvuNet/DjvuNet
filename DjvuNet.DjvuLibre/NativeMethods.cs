@@ -1491,6 +1491,47 @@ namespace DjvuNet.DjvuLibre
         internal static extern bool CreateDjvuJb2ImageFromChunk(IntPtr sjbzData, int sjbzSize, IntPtr djbzData, int djbzSize, out IntPtr outHandle);
 
         /// <summary>
+        /// Encodes a JB2Image AST into a raw bitstream payload.
+        /// </summary>
+        /// <param name="imageHandle">Pointer to the native JB2Image instance.</param>
+        /// <param name="outData">Pointer receiving the allocated byte array containing the encoded bitstream.</param>
+        /// <param name="outSize">Receives the size of the encoded bitstream in bytes.</param>
+        /// <returns>True if successful, false otherwise.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_encode_to_chunk", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool EncodeDjvuJb2ImageToChunk(IntPtr imageHandle, out IntPtr outData, out int outSize);
+
+        /// <summary>
+        /// Mutates the parent index of a specific shape in a JB2Image AST.
+        /// Used primarily to test edge-case encoder bitstreams like NON_MARK_DATA.
+        /// </summary>
+        /// <param name="imageHandle">Pointer to the native JB2Image instance.</param>
+        /// <param name="shapeIndex">The index of the shape to modify.</param>
+        /// <param name="newParent">The new parent index (e.g., &lt; -1 to trigger non-character flags).</param>
+        /// <returns>True if successful, false if parameters are invalid.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_set_shape_parent", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool SetDjvuJb2ShapeParent(IntPtr imageHandle, int shapeIndex, int newParent);
+
+        /// <summary>
+        /// Gets the parent index of a specific shape in a JB2Image AST.
+        /// </summary>
+        /// <param name="imageHandle">Pointer to the native JB2Image instance.</param>
+        /// <param name="shapeIndex">The index of the shape to query.</param>
+        /// <param name="outParent">Receives the parent index.</param>
+        /// <returns>True if successful, false if parameters are invalid.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_get_shape_parent", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetDjvuJb2ShapeParent(IntPtr imageHandle, int shapeIndex, out int shapeCount, out int inheritedShapeCount, out int outParent);
+
+        /// <summary>
+        /// Encodes a JB2Dict AST into a raw bitstream payload.
+        /// </summary>
+        /// <param name="dictHandle">Pointer to the native JB2Dict instance.</param>
+        /// <param name="outData">Pointer receiving the allocated byte array containing the encoded bitstream.</param>
+        /// <param name="outSize">Receives the size of the encoded bitstream in bytes.</param>
+        /// <returns>True if successful, false otherwise.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2dict_encode_to_chunk", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool EncodeDjvuJb2DictToChunk(IntPtr dictHandle, out IntPtr outData, out int outSize);
+
+        /// <summary>
         /// Frees the opaque handle returned by CreateDjvuJb2DictFromChunk.
         /// </summary>
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2dict_free", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
@@ -1507,7 +1548,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_get_bitmap", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern bool GetDjvuJb2ImageBitmap(
-            IntPtr handle, int align, 
+            IntPtr handle, int align,
             out int width, out int height, out int rowsize, out int border,
             IntPtr buffer, int bufferSize);
 
@@ -1936,5 +1977,32 @@ namespace DjvuNet.DjvuLibre
         //  DDJVUAPI int ddjvu_grect_scale_xy(struct ddjvu_grect* rect, float xfactor, float yfactor);
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_grect_scale_xy", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern bool GRectScale(ref Graphics.Rectangle rect, float xfactor, float yfactor);
+
+        /* -------------------------------------------------- */
+        /* JB2 ENCODING CONFIGURATION                         */
+        /* -------------------------------------------------- */
+
+        /// <summary>
+        /// Set the encoding options for the JB2 dictionary.
+        /// This function allows runtime configuration of the dictionary encoding strategies.
+        /// </summary>
+        /// <param name="contains_all">Non-zero to enable LIBRARY_CONTAINS_ALL (default: 1).</param>
+        /// <param name="contains_shared">Non-zero to enable LIBRARY_CONTAINS_SHARED (default: 0).</param>
+        /// <param name="contains_marks">Non-zero to enable LIBRARY_CONTAINS_MARKS (default: 0).</param>
+        /// <returns>True if successful, false otherwise.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_set_jb2_encoding_options", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool SetJb2EncodingOptions(int contains_all, int contains_shared, int contains_marks);
+
+        /// <summary>
+        /// Get the current encoding options for the JB2 dictionary.
+        /// Retrieves the current values of the JB2 dictionary encoding strategies.
+        /// </summary>
+        /// <param name="contains_all">Receives the LIBRARY_CONTAINS_ALL state.</param>
+        /// <param name="contains_shared">Receives the LIBRARY_CONTAINS_SHARED state.</param>
+        /// <param name="contains_marks">Receives the LIBRARY_CONTAINS_MARKS state.</param>
+        /// <returns>True if successful, false if any pointer is NULL.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_get_jb2_encoding_options", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetJb2EncodingOptions(out int contains_all, out int contains_shared, out int contains_marks);
     }
 }
+
