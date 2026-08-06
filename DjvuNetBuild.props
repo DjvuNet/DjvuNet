@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 
   <ItemGroup>
     <RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
@@ -137,6 +137,12 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>Arm64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <UtilTestOS Condition="'$(TargetOS)' == 'Windows_NT' or '$(TargetOS)' == 'Windows'">Win</UtilTestOS>
+    <UtilTestOS Condition="'$(UtilTestOS)' == ''">Unix</UtilTestOS>
+    <UtilTestFile Condition="$(MSBuildProjectName.EndsWith('.Tests'))">$(RepoRootDir)DjvuNet.Shared.Tests\UtilRoot.$(UtilTestOS).cs</UtilTestFile>
   </PropertyGroup>
 
 </Project>

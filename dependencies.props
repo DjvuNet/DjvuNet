@@ -10,21 +10,20 @@
 
   <!-- Project dependency versions. -->
   <PropertyGroup>
-    <MicrosoftNETCorePlatformsPackageVersion>10.0.7</MicrosoftNETCorePlatformsPackageVersion>
-    <MicrosoftNETCoreAppPackageVersion>10.0.7</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>10.0.10</MicrosoftNETCorePlatformsPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>10.0.10</MicrosoftNETCoreAppPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <MicrosoftNETCoreDotNetAppHostPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotNetAppHostPackageVersion>
     <MicrosoftNETCoreDotnetHostResolverPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotnetHostResolverPackageVersion>
     <MicrosoftNETCoreDotnetHostPolicyPackageVersion>$(MicrosoftNETCoreAppPackageVersion)</MicrosoftNETCoreDotnetHostPolicyPackageVersion>
     <XunitPackageVersion>3.2.2</XunitPackageVersion>
     <MoqPackageVersion>4.20.72</MoqPackageVersion>
-    <MicrosoftBuildPackageVersion>18.4.0</MicrosoftBuildPackageVersion>
+    <MicrosoftBuildPackageVersion>18.7.1</MicrosoftBuildPackageVersion>
     <LibGit2SharpPackageVersion>0.31.0</LibGit2SharpPackageVersion>
     <LibGit2SharpNativeBinariesPackageVersion>2.0.323</LibGit2SharpNativeBinariesPackageVersion>
     <MinVerPackageVersion>7.0.0</MinVerPackageVersion>
     <SystemDrawingCommonPackageVersion Condition="'$(TargetOS)' == 'Windows'">$(MicrosoftNETCoreAppPackageVersion)</SystemDrawingCommonPackageVersion>
     <SystemDrawingCommonPackageVersion Condition="'$(TargetOS)' != 'Windows'">6.0.0</SystemDrawingCommonPackageVersion>
-    <SystemRuntimeCompilerServicesUnsafePackageVersion>6.1.2</SystemRuntimeCompilerServicesUnsafePackageVersion>
     <SkiaSharpPackageVersion>3.119.2</SkiaSharpPackageVersion>
     <SystemCommandLinePackageVersion>2.0.8</SystemCommandLinePackageVersion>
   </PropertyGroup>

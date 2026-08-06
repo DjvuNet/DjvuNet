@@ -716,7 +716,7 @@ _DefaultNetStandard="netstandard2.1"
 _NetStandardId=".NETStandard"
 _NetStandardTFM=".NETStandard,Version=v2.1"
 _Framework="$_DefaultNetCoreApp"
-__ArtifactsReleaseTag="v0.12.26199.0"
+__ArtifactsReleaseTag="v0.13.26218.0"
 __GithubDjvuNetReleaseUri="https://github.com/DjvuNet/artifacts/releases/download/${__ArtifactsReleaseTag}/"
 __ArtifactsTestDataUri="https://github.com/DjvuNet/artifacts/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
 __ArtifactsDirName="artifacts-${__ArtifactsReleaseTag#v}"
@@ -1256,6 +1256,10 @@ if [ -z "$_SkipNative" ]; then
         export PKG_CONFIG=$(command -v pkg-config)
         echo "BUILD: Diagnostic - PKG_CONFIG resolved to: $PKG_CONFIG"
         export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig:${PKG_CONFIG_PATH:-}"
+        
+        # Bypass GitHub Actions runner defaults that force system CMake on ARM (which skips vcpkg-tools.json version checks)
+        unset VCPKG_FORCE_SYSTEM_BINARIES
+        
         run_custom_command "vcpkg_install" "$__GlobalVcpkgRoot/vcpkg" "install" "--x-manifest-root=$__ProjectRoot/$__DjvuLibreDir" "--triplet" "$__VcpkgTriplet"
 
         if [ $? -eq 0 ]; then

@@ -58,7 +58,7 @@ if ($gitTopLevel) {
     # It returns an empty string if we are at the root, and a relative path if in a subdirectory.
     # This correctly handles junctions, symlinks, and worktrees where path string comparison fails.
     $cdup = (git rev-parse --show-cdup 2>$null)
-    if ([string]::IsNullOrEmpty($cdup)) {
+    if ([string]::IsNullOrWhiteSpace($cdup)) {
         $isGitRoot = $true
     }
 }

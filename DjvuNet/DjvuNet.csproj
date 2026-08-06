@@ -250,7 +250,6 @@
     <Reference Include="System.Drawing.Common, Version=6.0.0.0, Culture=neutral, PublicKeyToken=9a0646c3e445b595" Condition="'$(TargetOS)' != 'Windows'">
       <HintPath>$(RepoRootDir)deps/AnyCPU/$(Configuration)/Unix/System.Drawing.Common.dll</HintPath>
     </Reference>
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
   </ItemGroup>
 
   <ItemGroup>

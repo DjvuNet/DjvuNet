@@ -28,7 +28,7 @@
       <HintPath>$(RepoRootDir)deps/AnyCPU/$(Configuration)/Unix/System.Drawing.Common.dll</HintPath>
     </Reference>
     <PackageReference Include="xunit.v3" Version="$(XunitPackageVersion)" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafePackageVersion)" />
+
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(RepoRootDir)DjvuNet\DjvuNet.csproj" />

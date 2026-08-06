@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 
   <PropertyGroup>
     <!-- <IntermediateOutputPath>$(MSBuildThisFileDirectory)/build/bin/obj/$(TargetOS).$(TargetPlatform).$(Configuration)/$(AssemblyName)/</IntermediateOutputPath> -->
@@ -90,13 +90,12 @@
 
   <Target Name="InjectVersion" BeforeTargets="CoreCompile" DependsOnTargets="UpdateVersionCache"
           Inputs="$(MSBuildThisFileDirectory).build.version;$(ProjectDir)Properties\AssemblyInfo.Template.cs;$(MSBuildThisFileDirectory)Templates\AssemblyInfoCommon.Template.cs"
-          Outputs="$(ProjectDir)Properties\AssemblyInfo.$(TargetFramework).cs;$(ProjectDir)Properties\AssemblyInfoCommon.$(TargetFramework).cs">
+          Outputs="$(ProjectDir)Properties\AssemblyInfo.$(TargetFramework).cs;$(ProjectDir)Properties\AssemblyInfoCommon.$(TargetFramework).cs;$(UtilTestFile)">
 
     <Error Condition="'$(TargetFramework)' == 'net472' And '$(IsTool)' != 'true' And '$(MSBuildProjectName)' != 'System.Attributes'" Text="The net472 target framework is deprecated and no longer supported in this build pipeline." />
 
     <PropertyGroup>
       <UtilRepoRootUpdate>$(ProjectName.EndsWith(`.Tests`))</UtilRepoRootUpdate>
-      <UtilTestFile>$(RepoRootDir)DjvuNet.Shared.Tests/UtilRoot*.cs</UtilTestFile>
     </PropertyGroup>
 
     <Message Importance="High"
@@ -108,7 +107,7 @@
           DestinationFiles="$(ProjectDir)Properties\AssemblyInfoCommon.$(TargetFramework).cs"/>
 
     <Copy SourceFiles="$(MSBuildThisFileDirectory)Templates\UtilRoot.Template.cs" Condition="$(UtilRepoRootUpdate) == true"
-          DestinationFiles="$(RepoRootDir)DjvuNet.Shared.Tests/UtilRoot.cs"/>
+          DestinationFiles="$(UtilTestFile)"/>
 
     <ItemGroup>
       <WriteFiles Include='$(ProjectDir)Properties\AssemblyInfo.$(TargetFramework).cs' />

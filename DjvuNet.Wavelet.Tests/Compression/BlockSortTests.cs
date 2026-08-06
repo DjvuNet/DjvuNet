@@ -319,6 +319,16 @@ namespace DjvuNet.Compression.Tests
         public void BlockSortValidate_Theory(string source, string expected)
         {
             byte[] sourceData = Util.ReadFileToEnd(source);
+
+            // Normalize all line endings to CRLF to match historical pre-calculated test data (.bsr)
+            // regardless of the current git core.autocrlf or eol settings.
+            if (source.EndsWith(".json") || source.EndsWith(".txt"))
+            {
+                string text = System.Text.Encoding.UTF8.GetString(sourceData);
+                text = text.Replace("\r\n", "\n").Replace("\n", "\r\n");
+                sourceData = System.Text.Encoding.UTF8.GetBytes(text);
+            }
+
             byte[] expectedData = Util.ReadFileToEnd(expected);
             byte[] buffer = new byte[sourceData.Length + 1];
             Buffer.BlockCopy(sourceData, 0, buffer, 0, sourceData.Length);

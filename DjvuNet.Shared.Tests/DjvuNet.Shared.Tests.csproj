@@ -75,7 +75,9 @@
     <Compile Include="TestExecution\TestManager.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="UtilJson.cs" />
-    <Compile Include="UtilRoot.cs" />
+    <Compile Remove="UtilRoot*.cs" />
+    <Compile Include="UtilRoot.Win.cs" Condition="'$(TargetOS)' == 'Windows' or '$(TargetOS)' == 'Windows_NT'" />
+    <Compile Include="UtilRoot.Unix.cs" Condition="'$(TargetOS)' != 'Windows' and '$(TargetOS)' != 'Windows_NT'" />
     <Compile Include="xunit\DjvuTheoryAttribute.cs" />
     <Compile Include="xunit\DjvuTheoryDiscoverer.cs" />
     <Compile Include="xunit\SkipOnTargetFrameworkAttribute.cs" />
