@@ -1,18 +1,15 @@
 using System;
-using System.IO;
-using System.IO.Compression;
-using System.Formats.Tar;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Runtime.Intrinsics.X86;
-using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
+using DjvuNet.Tests;
 using Xunit;
-using DjvuNet.Errors;
 
-namespace DjvuNet.Tests.UtilTests
+namespace DjvuNet.Shared.Tests
 {
     public class ImageBinaryDiffTests
     {

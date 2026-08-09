@@ -1,22 +1,25 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
-using SysGraphics = System.Drawing.Graphics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
+using System.Runtime.ExceptionServices;
 using System.Runtime.Intrinsics;
-using System.Runtime.Intrinsics.X86;
 using System.Runtime.Intrinsics.Arm;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using DjvuNet.DjvuLibre;
 using DjvuNet.Errors;
 using DjvuNet.Serialization;
 using Xunit;
+using SysGraphics = System.Drawing.Graphics;
 
 namespace DjvuNet.Tests
 {
@@ -41,6 +44,7 @@ namespace DjvuNet.Tests
 
     public static partial class Util
     {
+        public const int DefaultCleanupTimeout = 500;
         private static string _ArtifactsPath;
         private static string _ArtifactsContentPath;
         private static string _ArtifactsDataPath;
@@ -1815,6 +1819,158 @@ namespace DjvuNet.Tests
                 if (baseMapping.TryGetValue(baseName, out Tuple<string, string> originalData))
                 {
                     yield return new object[] { originalData.Item1, originalData.Item2};
+                }
+            }
+        }
+
+        /// <summary>
+        /// Executes a setup action on the main test thread while holding a lock, 
+        /// triggers an action on a separate background thread, 
+        /// and safely releases the lock before validating that the background thread 
+        /// threw the expected exception.
+        /// </summary>
+        /// <typeparam name="TException">
+        /// The type of Exception expected to be thrown by the background action.
+        /// </typeparam>
+        /// <param name="lockAcquisition">
+        /// The delegate executing lock acquisition logic on the main thread. 
+        /// Designed to support OS-thread-affine primitives (e.g., System.Threading.Lock, Monitor). 
+        /// Asynchronous locking patterns utilizing the async state machine 
+        /// (e.g., SemaphoreSlim.WaitAsync) must be avoided within this delegate.
+        /// </param>
+        /// <param name="lockRelease">
+        /// The delegate executing lock release logic on the main thread.
+        /// </param>
+        /// <param name="backgroundAction">
+        /// The delegate executing the test logic on the isolated background thread.
+        /// </param>
+        /// <param name="timeout">
+        /// The duration in milliseconds to wait for the background thread to finish execution.
+        /// </param>
+        /// <param name="cleanupTimeout">
+        /// The duration in milliseconds to wait for an unresponsive background thread 
+        /// to gracefully terminate after an interrupt is issued, before abandoning it. 
+        /// Defaults to DefaultCleanupTimeout (500).
+        /// </param>
+        /// <returns>
+        /// A Task returning the exception of type <typeparamref name="TException"/> 
+        /// thrown by the background action.
+        /// </returns>
+        /// <remarks>
+        /// This method executes synchronously and utilizes blocking operations (Wait) 
+        /// instead of asynchronous yields (await). Synchronous blocking guarantees that 
+        /// the execution does not yield the thread to the ThreadPool.
+        /// 
+        /// This mechanism preserves OS-thread affinity for lock synchronization 
+        /// primitives (e.g., System.Threading.Lock), ensuring that the <paramref name="lockAcquisition"/> 
+        /// and <paramref name="lockRelease"/> delegates execute on the same managed thread.
+        /// 
+        /// While sync-over-async is documented as an anti-pattern in production code, 
+        /// it is utilized here in the test infrastructure to prevent 
+        /// SynchronizationLockException when testing thread-affine locks.
+        /// </remarks>
+        public static Task<TException> ThrowsAsync<TException>(
+            Action lockAcquisition,
+            Action lockRelease,
+            Action backgroundAction,
+            int timeout = 5000,
+            int cleanupTimeout = DefaultCleanupTimeout) where TException : Exception
+        {
+            // Do not use 'using' to prevent ObjectDisposedException on background threads if a timeout occurs
+            var backgroundCanStart = new SemaphoreSlim(0, 1);
+            var backgroundIsDone = new SemaphoreSlim(0, 1);
+
+            // 1. Acquire the lock on the main test thread
+            lockAcquisition();
+
+            Exception backgroundException = null;
+            Thread backgroundThread = null;
+
+            try
+            {
+                // 2. Provision a separate background thread using Thread
+                backgroundThread = new Thread(() =>
+                {
+                    try
+                    {
+                        try
+                        {
+                            // Wait for the main thread signal
+                            if (!backgroundCanStart.Wait(timeout))
+                            {
+                                DjvuExceptionUtil.ThrowTimeoutException("Test timed out waiting for the background thread to be allowed to start.");
+                            }
+
+                            backgroundAction();
+                        }
+                        catch (Exception ex)
+                        {
+                            backgroundException = ex;
+                        }
+                        finally
+                        {
+                            // Signal the main thread that the background work hit its exception/block
+                            backgroundIsDone.Release();
+                        }
+                    }
+                    catch (Exception globalEx)
+                    {
+                        // Prevent unhandled exceptions from terminating the test host process.
+                        // Catches exceptions thrown by SemaphoreSlim.Release or thread abort mechanisms.
+                        Debug.WriteLine($"[ThrowsAsync Background Error] {globalEx}");
+                        Console.WriteLine($"[ThrowsAsync Background Error] {globalEx}");
+                    }
+                });
+                
+                backgroundThread.IsBackground = true;
+                backgroundThread.Name = "ThrowsAsync_BackgroundWorker";
+                backgroundThread.Start();
+
+                // 3. Allow background thread to run
+                backgroundCanStart.Release();
+
+                // 4. Main thread blocks SYNCHRONOUSLY here until the background action performs its work.
+                // This guarantees we never yield the OS thread, strictly preserving Lock affinity.
+                if (!backgroundIsDone.Wait(timeout))
+                {
+                    DjvuExceptionUtil.ThrowTimeoutException("Test timed out waiting for the background thread to finish execution.");
+                }
+
+                // Capture exception state while lock is still held
+                if (backgroundException != null)
+                {
+                    // Execute Assert.Throws on the exact captured exception to satisfy xUnit formatting
+                    var exception = Assert.Throws<TException>(() => ExceptionDispatchInfo.Capture(backgroundException).Throw());
+                    return Task.FromResult(exception);
+                }
+
+                // If no exception occurred, trigger failure by passing empty action
+                var missingEx = Assert.Throws<TException>(() => { });
+                return Task.FromResult(missingEx);
+            }
+            finally
+            {
+                try
+                {
+                    // 5. CRITICAL: Guarantee the lock is freed on the main thread no matter what
+                    lockRelease();
+                }
+                finally
+                {
+                    // 6. If the thread is still alive after lock release, forcefully interrupt it
+                    if (backgroundThread != null && backgroundThread.IsAlive)
+                    {
+                        try
+                        {
+                            backgroundThread.Interrupt();
+                            backgroundThread.Join(cleanupTimeout);
+                        }
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine($"[ThrowsAsync Teardown Warning] {ex}");
+                            Console.WriteLine($"[ThrowsAsync Teardown Warning] {ex}");
+                        }
+                    }
                 }
             }
         }

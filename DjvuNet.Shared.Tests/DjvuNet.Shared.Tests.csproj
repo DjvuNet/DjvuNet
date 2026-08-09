@@ -80,6 +80,7 @@
     <Compile Include="UtilRoot.Unix.cs" Condition="'$(TargetOS)' != 'Windows' and '$(TargetOS)' != 'Windows_NT'" />
     <Compile Include="xunit\DjvuTheoryAttribute.cs" />
     <Compile Include="xunit\DjvuTheoryDiscoverer.cs" />
+    <Compile Include="xunit\JsonXunitSerializer.cs" />
     <Compile Include="xunit\SkipOnTargetFrameworkAttribute.cs" />
     <Compile Include="xunit\TargetFrameworkMonikers.cs" />
     <Compile Include="xunit\WindowsOnlyFactAttribute.cs" />

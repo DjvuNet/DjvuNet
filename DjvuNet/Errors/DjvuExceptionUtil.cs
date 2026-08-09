@@ -137,5 +137,32 @@ namespace DjvuNet.Errors
                 throw new DjvuNotImplementedException(message);
             throw new DjvuNotImplementedException(message, innerException);
         }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowTimeoutException(string message = null, Exception innerException = null)
+        {
+            if (message == null && innerException == null)
+                throw new DjvuTimeoutException();
+            if (innerException == null)
+                throw new DjvuTimeoutException(message);
+            throw new DjvuTimeoutException(message, innerException);
+        }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowObjectDisposed(string objectName, string message = null)
+        {
+            if (message == null)
+                throw new DjvuObjectDisposedException(objectName);
+            throw new DjvuObjectDisposedException(objectName, message);
+        }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowObjectDisposed(string message, Exception innerException)
+        {
+            throw new DjvuObjectDisposedException(message, innerException);
+        }
     }
 }

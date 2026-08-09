@@ -13,7 +13,7 @@ namespace DjvuNet.Tests.Errors
         /// to the underlying system exception signature.
         /// </summary>
         [Fact]
-        public void ThrowArgumentNull_NoMessage_ThrowsCorrectly()
+        public void ThrowArgumentNull_NoMessage()
         {
             var ex = Assert.Throws<DjvuArgumentNullException>(() => DjvuExceptionUtil.ThrowArgumentNull("testParam"));
             Assert.Equal("testParam", ex.ParamName);
@@ -24,7 +24,7 @@ namespace DjvuNet.Tests.Errors
         /// with both a parameter name and a custom message. This tests the overload resolution inside the helper.
         /// </summary>
         [Fact]
-        public void ThrowArgumentNull_WithMessage_ThrowsCorrectly()
+        public void ThrowArgumentNull_WithMessage()
         {
             var ex = Assert.Throws<DjvuArgumentNullException>(() => DjvuExceptionUtil.ThrowArgumentNull("testParam", "Custom message"));
             Assert.Equal("testParam", ex.ParamName);
@@ -36,7 +36,7 @@ namespace DjvuNet.Tests.Errors
         /// Essential for validating the helper doesn't default to incorrect underlying constructors.
         /// </summary>
         [Fact]
-        public void ThrowArgumentOutOfRange_NoValueNoMessage_ThrowsCorrectly()
+        public void ThrowArgumentOutOfRange_NoValueNoMessage()
         {
             var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => DjvuExceptionUtil.ThrowArgumentOutOfRange("testParam"));
             Assert.Equal("testParam", ex.ParamName);
@@ -46,7 +46,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowArgumentOutOfRange correctly handles a custom message alongside the parameter name.
         /// </summary>
         [Fact]
-        public void ThrowArgumentOutOfRange_NoValueWithMessage_ThrowsCorrectly()
+        public void ThrowArgumentOutOfRange_NoValueWithMessage()
         {
             var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => DjvuExceptionUtil.ThrowArgumentOutOfRange("testParam", "Custom message"));
             Assert.Equal("testParam", ex.ParamName);
@@ -59,7 +59,7 @@ namespace DjvuNet.Tests.Errors
         /// and that the value is correctly passed into the exception's ActualValue property.
         /// </summary>
         [Fact]
-        public void ThrowArgumentOutOfRangeGeneric_WithValue_ThrowsCorrectly()
+        public void ThrowArgumentOutOfRangeGeneric_WithValue()
         {
             int badValue = 42;
             var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => DjvuExceptionUtil.ThrowArgumentOutOfRange("testParam", badValue, "Custom message"));
@@ -72,7 +72,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowArgument maps correctly to DjvuArgumentException when only a custom message is provided.
         /// </summary>
         [Fact]
-        public void ThrowArgument_NoParamName_ThrowsCorrectly()
+        public void ThrowArgument_NoParamName()
         {
             var ex = Assert.Throws<DjvuArgumentException>(() => DjvuExceptionUtil.ThrowArgument("Custom message"));
             Assert.Equal("Custom message", ex.Message);
@@ -83,7 +83,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowArgument maps correctly to DjvuArgumentException when both a message and parameter name are provided.
         /// </summary>
         [Fact]
-        public void ThrowArgument_WithParamName_ThrowsCorrectly()
+        public void ThrowArgument_WithParamName()
         {
             var ex = Assert.Throws<DjvuArgumentException>(() => DjvuExceptionUtil.ThrowArgument("Custom message", "testParam"));
             Assert.Contains("Custom message", ex.Message);
@@ -94,7 +94,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowInvalidOperation correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowInvalidOperation_NoInner_ThrowsCorrectly()
+        public void ThrowInvalidOperation_NoInner()
         {
             var ex = Assert.Throws<DjvuInvalidOperationException>(() => DjvuExceptionUtil.ThrowInvalidOperation("Custom message"));
             Assert.Equal("Custom message", ex.Message);
@@ -106,7 +106,7 @@ namespace DjvuNet.Tests.Errors
         /// ensuring the stack trace chain is preserved by the helper.
         /// </summary>
         [Fact]
-        public void ThrowInvalidOperation_WithInner_ThrowsCorrectly()
+        public void ThrowInvalidOperation_WithInner()
         {
             var inner = new Exception("Inner");
             var ex = Assert.Throws<DjvuInvalidOperationException>(() => DjvuExceptionUtil.ThrowInvalidOperation("Custom message", inner));
@@ -118,7 +118,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNotSupported correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowNotSupported_NoInner_ThrowsCorrectly()
+        public void ThrowNotSupported_NoInner()
         {
             var ex = Assert.Throws<DjvuNotSupportedException>(() => DjvuExceptionUtil.ThrowNotSupported("Custom message"));
             Assert.Equal("Custom message", ex.Message);
@@ -129,7 +129,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNotSupported correctly nests an inner exception when provided.
         /// </summary>
         [Fact]
-        public void ThrowNotSupported_WithInner_ThrowsCorrectly()
+        public void ThrowNotSupported_WithInner()
         {
             var inner = new Exception("Inner");
             var ex = Assert.Throws<DjvuNotSupportedException>(() => DjvuExceptionUtil.ThrowNotSupported("Custom message", inner));
@@ -141,7 +141,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowFileNotFound correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowFileNotFound_NoFileName_ThrowsCorrectly()
+        public void ThrowFileNotFound_NoFileName()
         {
             var ex = Assert.Throws<DjvuFileNotFoundException>(() => DjvuExceptionUtil.ThrowFileNotFound("Custom message"));
             Assert.Equal("Custom message", ex.Message);
@@ -152,7 +152,7 @@ namespace DjvuNet.Tests.Errors
         /// which is critical for IO debugging.
         /// </summary>
         [Fact]
-        public void ThrowFileNotFound_WithFileName_ThrowsCorrectly()
+        public void ThrowFileNotFound_WithFileName()
         {
             var ex = Assert.Throws<DjvuFileNotFoundException>(() => DjvuExceptionUtil.ThrowFileNotFound("Custom message", "missing.txt"));
             Assert.Equal("Custom message", ex.Message);
@@ -163,7 +163,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowEndOfStream correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowEndOfStream_NoInner_ThrowsCorrectly()
+        public void ThrowEndOfStream_NoInner()
         {
             var ex = Assert.Throws<DjvuEndOfStreamException>(() => DjvuExceptionUtil.ThrowEndOfStream("Custom message"));
             Assert.Equal("Custom message", ex.Message);
@@ -174,7 +174,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowEndOfStream correctly nests an inner exception when provided.
         /// </summary>
         [Fact]
-        public void ThrowEndOfStream_WithInner_ThrowsCorrectly()
+        public void ThrowEndOfStream_WithInner()
         {
             var inner = new Exception("Inner");
             var ex = Assert.Throws<DjvuEndOfStreamException>(() => DjvuExceptionUtil.ThrowEndOfStream("Custom message", inner));
@@ -187,7 +187,7 @@ namespace DjvuNet.Tests.Errors
         /// ensuring the helper successfully maps IEnumerable arguments to the AggregateException constructor.
         /// </summary>
         [Fact]
-        public void ThrowAggregate_ThrowsCorrectly()
+        public void ThrowAggregate()
         {
             var innerList = new List<Exception> { new Exception("1"), new Exception("2") };
             var ex = Assert.Throws<DjvuAggregateException>(() => DjvuExceptionUtil.ThrowAggregate("Custom message", innerList));
@@ -200,7 +200,7 @@ namespace DjvuNet.Tests.Errors
         /// with a custom message.
         /// </summary>
         [Fact]
-        public void ThrowArgumentOutOfRange_WithInner_ThrowsCorrectly()
+        public void ThrowArgumentOutOfRange_WithInner()
         {
             var inner = new Exception("Inner");
             var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => DjvuExceptionUtil.ThrowArgumentOutOfRange("Custom message", inner));
@@ -212,7 +212,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowFormatException correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowFormatException_NoInner_ThrowsCorrectly()
+        public void ThrowFormatException_NoInner()
         {
             var ex = Assert.Throws<DjvuFormatException>(() => DjvuExceptionUtil.ThrowFormatException("Custom message"));
             Assert.Equal("Custom message", ex.Message);
@@ -223,7 +223,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowFormatException correctly nests an inner exception when provided.
         /// </summary>
         [Fact]
-        public void ThrowFormatException_WithInner_ThrowsCorrectly()
+        public void ThrowFormatException_WithInner()
         {
             var inner = new Exception("Inner");
             var ex = Assert.Throws<DjvuFormatException>(() => DjvuExceptionUtil.ThrowFormatException("Custom message", inner));
@@ -234,7 +234,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNullReference correctly constructs a parameterless exception.
         /// </summary>
         [Fact]
-        public void ThrowNullReference_NoMessageNoInner_ThrowsCorrectly()
+        public void ThrowNullReference_NoMessageNoInner()
         {
             var ex = Assert.Throws<DjvuNullReferenceException>(() => DjvuExceptionUtil.ThrowNullReference());
             Assert.Null(ex.InnerException);
@@ -245,7 +245,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNullReference correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowNullReference_WithMessage_ThrowsCorrectly()
+        public void ThrowNullReference_WithMessage()
         {
             var ex = Assert.Throws<DjvuNullReferenceException>(() => DjvuExceptionUtil.ThrowNullReference("Custom null message"));
             Assert.Equal("Custom null message", ex.Message);
@@ -256,7 +256,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNullReference correctly nests an inner exception when provided.
         /// </summary>
         [Fact]
-        public void ThrowNullReference_WithMessageAndInner_ThrowsCorrectly()
+        public void ThrowNullReference_WithMessageAndInner()
         {
             var inner = new Exception("Inner exception");
             var ex = Assert.Throws<DjvuNullReferenceException>(() => DjvuExceptionUtil.ThrowNullReference("Custom null message", inner));
@@ -268,7 +268,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowIndexOutOfRange correctly constructs a parameterless exception.
         /// </summary>
         [Fact]
-        public void ThrowIndexOutOfRange_NoMessageNoInner_ThrowsCorrectly()
+        public void ThrowIndexOutOfRange_NoMessageNoInner()
         {
             var ex = Assert.Throws<DjvuIndexOutOfRangeException>(() => DjvuExceptionUtil.ThrowIndexOutOfRange());
             Assert.Null(ex.InnerException);
@@ -278,7 +278,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowIndexOutOfRange correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowIndexOutOfRange_WithMessage_ThrowsCorrectly()
+        public void ThrowIndexOutOfRange_WithMessage()
         {
             var ex = Assert.Throws<DjvuIndexOutOfRangeException>(() => DjvuExceptionUtil.ThrowIndexOutOfRange("Custom index message"));
             Assert.Equal("Custom index message", ex.Message);
@@ -289,7 +289,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowIndexOutOfRange correctly nests an inner exception when provided.
         /// </summary>
         [Fact]
-        public void ThrowIndexOutOfRange_WithMessageAndInner_ThrowsCorrectly()
+        public void ThrowIndexOutOfRange_WithMessageAndInner()
         {
             var inner = new Exception("Inner exception");
             var ex = Assert.Throws<DjvuIndexOutOfRangeException>(() => DjvuExceptionUtil.ThrowIndexOutOfRange("Custom index message", inner));
@@ -301,7 +301,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNotImplemented correctly constructs a parameterless exception.
         /// </summary>
         [Fact]
-        public void ThrowNotImplemented_NoMessage_ThrowsCorrectly()
+        public void ThrowNotImplemented_NoMessage()
         {
             var ex = Assert.Throws<DjvuNotImplementedException>(() => DjvuExceptionUtil.ThrowNotImplemented());
             Assert.Null(ex.InnerException);
@@ -311,7 +311,7 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNotImplemented correctly constructs the exception with just a message.
         /// </summary>
         [Fact]
-        public void ThrowNotImplemented_WithMessage_ThrowsCorrectly()
+        public void ThrowNotImplemented_WithMessage()
         {
             var ex = Assert.Throws<DjvuNotImplementedException>(() => DjvuExceptionUtil.ThrowNotImplemented("Custom not implemented message"));
             Assert.Equal("Custom not implemented message", ex.Message);
@@ -322,12 +322,121 @@ namespace DjvuNet.Tests.Errors
         /// Verifies that ThrowNotImplemented correctly nests an inner exception when provided.
         /// </summary>
         [Fact]
-        public void ThrowNotImplemented_WithMessageAndInner_ThrowsCorrectly()
+        public void ThrowNotImplemented_WithMessageAndInner()
         {
             var inner = new Exception("Inner exception");
             var ex = Assert.Throws<DjvuNotImplementedException>(() => DjvuExceptionUtil.ThrowNotImplemented("Custom not implemented message", inner));
             Assert.Equal("Custom not implemented message", ex.Message);
             Assert.Same(inner, ex.InnerException);
+        }
+
+        /// <summary>
+        /// Verifies that ThrowTimeoutException correctly constructs the exception with no arguments.
+        /// </summary>
+        [Fact]
+        public void ThrowTimeoutException_NoMessageNoInner()
+        {
+            var ex = Assert.Throws<DjvuTimeoutException>(() => DjvuExceptionUtil.ThrowTimeoutException());
+            Assert.NotNull(ex.Message); // Default system message
+            Assert.Null(ex.InnerException);
+        }
+
+        /// <summary>
+        /// Verifies that ThrowTimeoutException correctly constructs the exception with just a message.
+        /// </summary>
+        [Fact]
+        public void ThrowTimeoutException_WithMessageNoInner()
+        {
+            var ex = Assert.Throws<DjvuTimeoutException>(() => DjvuExceptionUtil.ThrowTimeoutException("Custom message"));
+            Assert.Equal("Custom message", ex.Message);
+            Assert.Null(ex.InnerException);
+        }
+
+        /// <summary>
+        /// Verifies that ThrowTimeoutException correctly constructs the exception with no message but an inner exception.
+        /// </summary>
+        [Fact]
+        public void ThrowTimeoutException_NoMessageWithInner()
+        {
+            var inner = new Exception("Inner exception");
+            var ex = Assert.Throws<DjvuTimeoutException>(() => DjvuExceptionUtil.ThrowTimeoutException(null, inner));
+            Assert.NotNull(ex.Message); // Default system message
+            Assert.Same(inner, ex.InnerException);
+        }
+
+        /// <summary>
+        /// Verifies that ThrowTimeoutException correctly constructs the exception with a message and an inner exception.
+        /// </summary>
+        [Fact]
+        public void ThrowTimeoutException_WithMessageAndInner()
+        {
+            var inner = new Exception("Inner exception");
+            var ex = Assert.Throws<DjvuTimeoutException>(() => DjvuExceptionUtil.ThrowTimeoutException("Custom message", inner));
+            Assert.Equal("Custom message", ex.Message);
+            Assert.Same(inner, ex.InnerException);
+        }
+
+        // --- OVERLOAD 1: ThrowObjectDisposed(string objectName, string message = null) ---
+
+        [Fact]
+        public void ThrowObjectDisposed_ObjectName()
+        {
+            var ex = Assert.Throws<DjvuObjectDisposedException>(() => DjvuExceptionUtil.ThrowObjectDisposed("TestObject"));
+            Assert.Equal("TestObject", ex.ObjectName);
+            Assert.Null(ex.InnerException);
+        }
+
+        [Fact]
+        public void ThrowObjectDisposed_ObjectNameAndMessage()
+        {
+            var ex = Assert.Throws<DjvuObjectDisposedException>(() => DjvuExceptionUtil.ThrowObjectDisposed("TestObject", "Custom message"));
+            Assert.Equal("TestObject", ex.ObjectName);
+            Assert.Contains("Custom message", ex.Message);
+            Assert.Null(ex.InnerException);
+        }
+
+        [Fact]
+        public void ThrowObjectDisposed_NullObjectNameNoMessage()
+        {
+            var ex = Assert.Throws<DjvuObjectDisposedException>(() => DjvuExceptionUtil.ThrowObjectDisposed((string)null));
+            Assert.Equal("", ex.ObjectName); // BCL ObjectDisposedException defaults null objectName to empty string
+            Assert.NotNull(ex.Message); // System default
+        }
+
+        [Fact]
+        public void ThrowObjectDisposed_NullObjectNameWithMessage()
+        {
+            var ex = Assert.Throws<DjvuObjectDisposedException>(() => DjvuExceptionUtil.ThrowObjectDisposed((string)null, "Custom message"));
+            Assert.Equal("", ex.ObjectName); // BCL ObjectDisposedException defaults null objectName to empty string
+            Assert.Contains("Custom message", ex.Message);
+        }
+
+        // --- OVERLOAD 2: ThrowObjectDisposed(string message, Exception innerException) ---
+
+        [Fact]
+        public void ThrowObjectDisposed_MessageAndInner()
+        {
+            var inner = new Exception("Inner exception");
+            var ex = Assert.Throws<DjvuObjectDisposedException>(() => DjvuExceptionUtil.ThrowObjectDisposed("Custom message", inner));
+            Assert.Contains("Custom message", ex.Message);
+            Assert.Same(inner, ex.InnerException);
+        }
+
+        [Fact]
+        public void ThrowObjectDisposed_NullMessageAndInner()
+        {
+            var inner = new Exception("Inner exception");
+            var ex = Assert.Throws<DjvuObjectDisposedException>(() => DjvuExceptionUtil.ThrowObjectDisposed(null, inner));
+            Assert.NotNull(ex.Message); // System default
+            Assert.Same(inner, ex.InnerException);
+        }
+
+        [Fact]
+        public void ThrowObjectDisposed_MessageAndNullInner()
+        {
+            var ex = Assert.Throws<DjvuObjectDisposedException>(() => DjvuExceptionUtil.ThrowObjectDisposed("Custom message", (Exception)null));
+            Assert.Contains("Custom message", ex.Message);
+            Assert.Null(ex.InnerException);
         }
     }
 }
