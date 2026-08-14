@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 using DjvuNet.Graphics.Tests;
 using DjvuNet.Graphics;
 using System.IO;
@@ -19,9 +20,9 @@ namespace DjvuNet.Wavelet.Tests
 {
     public class InterWavePixelMapEncoderTests
     {
-        public static IPixelMap PixelMapFromBitmap(System.Drawing.Bitmap bmp)
+        public static PixelMap PixelMapFromBitmap(System.Drawing.Bitmap bmp)
         {
-            IPixelMap pixMap = PixelMapTests.CreateInitVerifyPixelMap(bmp.Width, bmp.Height, Pixel.WhitePixel);
+            PixelMap pixMap = PixelMapTests.CreateInitVerifyPixelMap(bmp.Width, bmp.Height, Pixel.WhitePixel);
             BitmapData data = null;
 
             try
@@ -82,10 +83,10 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
-                map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
+                map.InitializeEncoder(pixMap, ref Unsafe.NullRef<Bitmap>(), YCrCbMode.Full);
 
                 const int nchunks = 4;
                 int[] slices = new int[] { 74, 90, 98, 103 };
@@ -212,11 +213,11 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 map._CrCbDelay = 0;
-                map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
+                map.InitializeEncoder(pixMap, ref Unsafe.NullRef<Bitmap>(), YCrCbMode.Full);
 
                 const int nchunks = 4;
                 float[] decibel = new float[] { 25.0f, 25.2f, 25.2647f, 25.7f };
@@ -288,11 +289,11 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 map._CrCbDelay = 0;
-                map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
+                map.InitializeEncoder(pixMap, ref Unsafe.NullRef<Bitmap>(), YCrCbMode.Full);
 
                 const int nchunks = 4;
                 int[] slices = new int[] { 111, 152, 184, 200 };
@@ -363,11 +364,11 @@ namespace DjvuNet.Wavelet.Tests
                 bmp.RotateFlip(System.Drawing.RotateFlipType.Rotate180FlipX);
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 map._CrCbDelay = 0;
-                map.InitializeEncoder(pixMap, null, YCrCbMode.Full);
+                map.InitializeEncoder(pixMap, ref Unsafe.NullRef<Bitmap>(), YCrCbMode.Full);
 
                 const int nchunks = 4;
                 int[] slices = new int[] { 111, 152, 184, 200 };
@@ -435,7 +436,7 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Fail("This test needs an implementation");
         }
 
-        private static void TestVerifyEncoderInitialization(IPixelMap pixMap, InterWavePixelMapEncoder map)
+        private static void TestVerifyEncoderInitialization(PixelMap pixMap, InterWavePixelMapEncoder map)
         {
             Assert.Null(map._YEncoder);
             Assert.Null(map._YMap);
@@ -444,7 +445,7 @@ namespace DjvuNet.Wavelet.Tests
             Assert.Null(map._CrEncoder);
             Assert.Null(map._CrMap);
 
-            map.InitializeEncoder(pixMap);
+            map.InitializeEncoder(pixMap, ref Unsafe.NullRef<Bitmap>());
 
             Assert.Null(map._YEncoder);
             Assert.NotNull(map._YMap);
@@ -462,7 +463,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);
@@ -477,7 +478,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);
@@ -492,7 +493,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);
@@ -507,7 +508,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 int width = bmp.Width;
                 int height = bmp.Height;
-                IPixelMap pixMap = PixelMapFromBitmap(bmp);
+                PixelMap pixMap = PixelMapFromBitmap(bmp);
 
                 var map = new InterWavePixelMapEncoder();
                 TestVerifyEncoderInitialization(pixMap, map);

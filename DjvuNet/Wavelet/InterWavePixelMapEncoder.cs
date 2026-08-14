@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using DjvuNet.Compression;
@@ -6,6 +6,7 @@ using DjvuNet.DataChunks;
 using DjvuNet.Errors;
 using DjvuNet.Graphics;
 using DjvuNet.Parser;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Wavelet
 {
@@ -209,13 +210,13 @@ namespace DjvuNet.Wavelet
         /// <param name="bm"></param>
         /// <param name="mask"></param>
         /// <param name="mode"></param>
-        public unsafe void InitializeEncoder(IPixelMap pm, Bitmap gmask = null, YCrCbMode crcbmode = YCrCbMode.Normal)
+        public unsafe void InitializeEncoder(PixelMap pm, ref Bitmap gMask, YCrCbMode crCbMode = YCrCbMode.Normal)
         {
             /* Free */
             CloseEncoder();
 
             // Handle CRCB mode
-            switch (crcbmode)
+            switch (crCbMode)
             {
                 case YCrCbMode.None:
                     _CrCbHalf = true;
@@ -239,96 +240,78 @@ namespace DjvuNet.Wavelet
             sbyte* msk8 = (sbyte*)IntPtr.Zero;
             int mskrowsize = 0;
 
-            Bitmap mask = gmask;
-            GCHandle hMask = default(GCHandle);
-
-            if (mask != null)
+            if (!Unsafe.IsNullRef(ref gMask) && gMask.Data != null)
             {
-                hMask = GCHandle.Alloc(mask.Data, GCHandleType.Pinned);
-                msk8 = (sbyte*)hMask.AddrOfPinnedObject();
-                mskrowsize = mask.GetRowSize();
+                msk8 = gMask.DataPointer;
+                mskrowsize = gMask.GetRowSize();
             }
 
             /* Create */
             int width = pm.Width;
             int height = pm.Height;
-            sbyte[] sYBuffer = new sbyte[width * height];
-            GCHandle hYBuffer = GCHandle.Alloc(sYBuffer, GCHandleType.Pinned);
-            sbyte* yBuffer = (sbyte*)hYBuffer.AddrOfPinnedObject();
+            
+            sbyte[] sYBuffer = GC.AllocateUninitializedArray<sbyte>(width * height, pinned: true);
+            sbyte* yBuffer = (sbyte*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(sYBuffer));
 
             // Create maps
             InterWaveMapEncoder eymap = new InterWaveMapEncoder(width, height);
             _YMap = eymap;
 
-            GCHandle hData = GCHandle.Alloc(pm.Data, GCHandleType.Pinned);
-            Pixel* pData = (Pixel*)hData.AddrOfPinnedObject();
-
-            // Create chrominance maps
-            if (_CrCbDelay >= 0)
+            fixed (sbyte* pDataBytes = pm.Data)
             {
-                sbyte[] sCbBuffer = new sbyte[width * height];
-                GCHandle hCbBuffer = GCHandle.Alloc(sCbBuffer, GCHandleType.Pinned);
-                sbyte* cbBuffer = (sbyte*)hCbBuffer.AddrOfPinnedObject();
-
-                sbyte[] sCrBuffer = new sbyte[width * height];
-                GCHandle hCrBuffer = GCHandle.Alloc(sCrBuffer, GCHandleType.Pinned);
-                sbyte* crBuffer = (sbyte*)hCrBuffer.AddrOfPinnedObject();
-
-                InterWaveMapEncoder ecbmap = new InterWaveMapEncoder(width, height);
-                _CbMap = ecbmap;
-
-                InterWaveMapEncoder ecrmap = new InterWaveMapEncoder(width, height);
-                _CrMap = ecrmap;
-
-                // Color space conversion from RGB to YCbCr and channel separation
-                InterWaveTransform.Rgb2YCbCr(pData, width, height, width * 3, yBuffer, cbBuffer, crBuffer, width);
-
-                // Create YMap
-                eymap.Create(yBuffer, width, msk8, mskrowsize);
-                // Create CbMap
-                ecbmap.Create(cbBuffer, width, msk8, mskrowsize);
-                // Create CrMap
-                ecrmap.Create(crBuffer, width, msk8, mskrowsize);
-
-                // Perform chrominance reduction (CrCbHalf)
-                if (_CrCbHalf)
+                Pixel* pData = (Pixel*)pDataBytes;
+                // Create chrominance maps
+                if (_CrCbDelay >= 0)
                 {
-                    ecbmap.Slashres(2);
-                    ecrmap.Slashres(2);
+                    sbyte[] sCbBuffer = GC.AllocateUninitializedArray<sbyte>(width * height, pinned: true);
+                    sbyte* cbBuffer = (sbyte*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(sCbBuffer));
+
+                    sbyte[] sCrBuffer = GC.AllocateUninitializedArray<sbyte>(width * height, pinned: true);
+                    sbyte* crBuffer = (sbyte*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(sCrBuffer));
+
+                    InterWaveMapEncoder ecbmap = new InterWaveMapEncoder(width, height);
+                    _CbMap = ecbmap;
+
+                    InterWaveMapEncoder ecrmap = new InterWaveMapEncoder(width, height);
+                    _CrMap = ecrmap;
+
+                    // Color space conversion from RGB to YCbCr and channel separation
+                    InterWaveTransform.Rgb2YCbCr(pData, width, height, width * 3, yBuffer, cbBuffer, crBuffer, width);
+
+                    // Create YMap
+                    eymap.Create(yBuffer, width, msk8, mskrowsize);
+                    // Create CbMap
+                    ecbmap.Create(cbBuffer, width, msk8, mskrowsize);
+                    // Create CrMap
+                    ecrmap.Create(crBuffer, width, msk8, mskrowsize);
+
+                    // Perform chrominance reduction (CrCbHalf)
+                    if (_CrCbHalf)
+                    {
+                        ecbmap.Slashres(2);
+                        ecrmap.Slashres(2);
+                    }
+
+                    GC.KeepAlive(sCbBuffer);
+                    GC.KeepAlive(sCrBuffer);
                 }
-
-                if (hCbBuffer.IsAllocated)
+                else
                 {
-                    hCbBuffer.Free();
-                }
+                    // Fill buffer with luminance information
+                    InterWaveTransform.Rgb2Y(pData, width, height, pm.GetRowSize(), yBuffer, width);
+                    // Create YMAP
+                    eymap.Create(yBuffer, width, msk8, mskrowsize);
 
-                if (hCrBuffer.IsAllocated)
-                {
-                    hCrBuffer.Free();
-                }
-            }
-            else
-            {
-                // Fill buffer with luminance information
-                InterWaveTransform.Rgb2Y(pData, width, height, pm.GetRowSize(), yBuffer, width);
-                // Create YMAP
-                eymap.Create(yBuffer, width, msk8, mskrowsize);
-
-                // Inversion for gray images
-                sbyte* e = yBuffer + width * height;
-                for (sbyte* b = yBuffer; b < e; b++)
-                {
-                    *b = (sbyte)(255 - *b);
+                    // Inversion for gray images
+                    sbyte* e = yBuffer + width * height;
+                    for (sbyte* b = yBuffer; b < e; b++)
+                    {
+                        *b = (sbyte)(255 - *b);
+                    }
                 }
             }
 
-            if (hMask.IsAllocated)
-            {
-                hMask.Free();
-            }
-
-            hData.Free();
-            hYBuffer.Free();
+            GC.KeepAlive(sYBuffer);
         }
 
         #endregion Methods

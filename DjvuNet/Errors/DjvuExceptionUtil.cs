@@ -11,7 +11,7 @@ namespace DjvuNet.Errors
     /// for the caller by removing the cold-path exception initialization logic
     /// from the caller's instruction stream.
     /// </summary>
-    internal static class DjvuExceptionUtil
+    public static class DjvuExceptionUtil
     {
         [DoesNotReturn]
         [MethodImpl(MethodImplOptions.NoInlining)]

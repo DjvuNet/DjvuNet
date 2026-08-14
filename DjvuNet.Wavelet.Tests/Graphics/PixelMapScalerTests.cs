@@ -481,8 +481,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 18
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -513,8 +513,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 18
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -547,8 +547,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 18
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -581,8 +581,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 18
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -615,8 +615,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 18
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -649,8 +649,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 18
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -681,8 +681,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = 18
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             sclr.SetHorzRatio(32, 48);
             sclr.SetVertRatio(18, 27);
@@ -716,8 +716,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             sclr.SetHorzRatio(targetWidth, srcWidth);
             sclr.SetVertRatio(targetHeight, srcHeight);
@@ -751,8 +751,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -783,8 +783,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -815,8 +815,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -847,8 +847,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             Assert.Throws<DjvuArgumentException>(() => sclr.Scale(srcRect, srcMap, targetRect, destMap));
         }
@@ -879,8 +879,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             sclr._PixelMap1 = srcMap;
             sclr._PixelMap2 = destMap;
@@ -917,8 +917,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             sclr._PixelMap1 = srcMap;
             sclr._PixelMap2 = destMap;
@@ -955,8 +955,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             sclr._PixelMap1 = srcMap;
             sclr._PixelMap2 = destMap;
@@ -993,8 +993,8 @@ namespace DjvuNet.Graphics.Tests
                 YMax = targetHeight
             };
 
-            IPixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
-            IPixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
 
             sclr._PixelMap1 = srcMap;
             sclr._PixelMap2 = destMap;

@@ -23,12 +23,12 @@ namespace DjvuNet.JB2.Tests
             TestCoverage.UniqueOnly
         );
 
-        public static IEnumerable<object[]> ExtractedRareVariantTestData => Util.GetExtractedRareVariantPayloads(encoderCoverage: JB2EncoderTestCoverage.AllVariants);
+        public static IEnumerable<object[]> ExtractedRareVariantData => Util.GetExtractedRareVariantPayloads(encoderCoverage: JB2EncoderTestCoverage.AllVariants);
 
         [Theory]
         [InlineData(@"extracted/test003C_D453132.djbz", @"extracted/test003C_P53.sjbz")]
         [InlineData(@"extracted/test003C_D453132.djbz", @"extracted/test003C_P54.sjbz")]
-        public void Decode_Tokens6And8_Success(string djbzFileName, string sjbzFileName)
+        public void Decode_Tokens6And8(string djbzFileName, string sjbzFileName)
         {
             DecodeInternal(djbzFileName, sjbzFileName);
         }
@@ -41,7 +41,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Theory]
-        [MemberData(nameof(ExtractedRareVariantTestData))]
+        [MemberData(nameof(ExtractedRareVariantData))]
         public void Decode_GeneratedVariants(string variantFile, string originalSjbzPath, string djbzPath)
         {
             JB2Dictionary jb2Dict = null;
@@ -142,10 +142,10 @@ namespace DjvuNet.JB2.Tests
             shape.Bitmap.Init(10, 10, 0);
             shape.Bitmap.Data[0] = 1;
 
-            image.AddShape(shape);
+            image.AddShape(ref shape);
             
             var blit = new JB2Blit { Left = 10, Bottom = 10, ShapeNumber = 0 };
-            image.AddBlit(blit);
+            image.AddBlit(ref blit);
 
             return image;
         }
@@ -154,7 +154,7 @@ namespace DjvuNet.JB2.Tests
         [InlineData(0, 10)]
         [InlineData(10, 0)]
         [InlineData(0, 0)]
-        public void JB2Image_GetBitmap_EmptyDimensions_ThrowsFormatException(int width, int height)
+        public void GetBitmap_EmptyDimensions_Throws(int width, int height)
         {
             var image = new JB2Image { Width = width, Height = height };
             Assert.Throws<DjvuFormatException>(() => image.GetBitmap());
@@ -162,7 +162,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetPixelMap_EmptyDimensions_ThrowsFormatException()
+        public void GetPixelMap_EmptyDimensions_Throws()
         {
             var image = new JB2Image();
             Assert.Throws<DjvuFormatException>(() => image.GetPixelMap(null, 1, 1));
@@ -185,7 +185,7 @@ namespace DjvuNet.JB2.Tests
         [InlineData(10000, 10000, 1, 1, 10000, 10000, 0)]
         [InlineData(10000, 10000, 4, 4, 2500, 2500, 0)]
         [InlineData(9999, 9999, 4, 4, 2500, 2500, 0)]
-        public void JB2Image_GetBitmap_CalculatesDimensionsAndBorderCorrectly(
+        public void GetBitmap_DimensionsBorder(
             int width, int height, int subsample, int align, 
             int expectedWidth, int expectedHeight, int expectedBorder)
         {
@@ -206,7 +206,7 @@ namespace DjvuNet.JB2.Tests
         [InlineData(-100, -100, 200, 200, 1, 1, 0, 200, 0)] // Negative origin rect
         [InlineData(0, 0, 1, 1, 1, 16, 10, 1, 15)] // Tiny rect, huge align
         [InlineData(500, 500, 10, 10, 4, 4, -5, 10, 2)] // Rect outside bounds, negative dispy
-        public void JB2Image_GetBitmap_Rectangle_CalculatesDimensionsCorrectly(
+        public void GetBitmap_RectangleDimensions(
             int x, int y, int w, int h, int subsample, int align, int dispy, 
             int expectedWidth, int expectedBorder)
         {
@@ -227,7 +227,7 @@ namespace DjvuNet.JB2.Tests
         [InlineData(20, 20, 50, 50, 1, 1, 0, 0)] // Rect misses blit
         [InlineData(10, 10, 1, 1, 1, 1, 0, 1)] // Rect perfectly touches blit
         [InlineData(0, 0, 50, 50, 2, 1, 0, 1)] // Intersect during subsampling
-        public void JB2Image_GetBitmap_RectangleComponents_EvaluatesIntersections(
+        public void GetBitmap_Rectangle_Intersections(
             int x, int y, int w, int h, int subsample, int align, int dispy, 
             int expectedComponentCount)
         {
@@ -243,17 +243,17 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_WithComponents_NullComponents_Delegates()
+        public void GetBitmap_ComponentsNull()
         {
             var image = CreateTestImage(100, 100);
             var rect = new Rectangle(0, 0, 20, 20);
             
             Bitmap bm = image.GetBitmap(rect, 1, 1, 0, null);
-            Assert.NotNull(bm);
+            Assert.NotEqual<Bitmap>(bm, default);
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_WithComponents_EmptyImage_Throws()
+        public void GetBitmap_Components_EmptyImage_Throws()
         {
             var image = new JB2Image { Width = 0, Height = 0 };
             var rect = new Rectangle(0, 0, 20, 20);
@@ -263,10 +263,10 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_WithComponents_ShapeBitmapNull_SkipsBlit()
+        public void GetBitmap_Components_ShapeBitmapNull_SkipsBlit()
         {
             var image = CreateTestImage(100, 100);
-            image.GetShape(0).Bitmap = null; // Invalidate the shape's bitmap
+            image.GetShape(0).Bitmap = default; // Invalidate the shape's bitmap
             var rect = new Rectangle(0, 0, 50, 50); // Encompasses the blit
             var components = new List<int>();
             
@@ -281,7 +281,7 @@ namespace DjvuNet.JB2.Tests
         [InlineData(100, 100, 2, 4, 50, 50)]
         [InlineData(101, 101, 2, 4, 51, 51)]
         [InlineData(10, 10, 12, 1, 1, 1)]
-        public void JB2Image_GetPixelMap_CalculatesDimensionsCorrectly(
+        public void GetPixelMap_Dimensions(
             int width, int height, int subsample, int align, 
             int expectedWidth, int expectedHeight)
         {
@@ -300,18 +300,18 @@ namespace DjvuNet.JB2.Tests
         [InlineData(0)]
         [InlineData(999)]
         [InlineData(int.MaxValue)]
-        public void JB2Image_AddBlit_InvalidShapeNumber_ThrowsDjvuArgumentException(int shapeNumber)
+        public void AddBlit_InvalidShapeNumber_Throws(int shapeNumber)
         {
             JB2Image image = new JB2Image();
             JB2Blit blit = new JB2Blit { ShapeNumber = shapeNumber };
 
-            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => image.AddBlit(blit));
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => image.AddBlit(ref blit));
             Assert.Contains("JB2 decoding failed: Illegal shape number in JB2Blit.", ex.Message);
             Assert.Equal("jb2Blit", ex.ParamName);
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_Parameterless_ExecutesSuccessfully()
+        public void GetBitmap_Parameterless()
         {
             var image = CreateTestImage(50, 50);
             Bitmap bm = image.GetBitmap();
@@ -319,7 +319,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_Subsample_ExecutesSuccessfully()
+        public void GetBitmap_Subsample()
         {
             var image = CreateTestImage(50, 50);
             Bitmap bm = image.GetBitmap(1);
@@ -327,7 +327,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_Rectangle_ExecutesSuccessfully()
+        public void GetBitmap_Rectangle()
         {
             var image = CreateTestImage(50, 50);
             var rect = new Rectangle(0, 0, 20, 20);
@@ -336,7 +336,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_RectangleSubsample_ExecutesSuccessfully()
+        public void GetBitmap_RectangleSubsample()
         {
             var image = CreateTestImage(50, 50);
             var rect = new Rectangle(0, 0, 20, 20);
@@ -345,7 +345,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_RectangleSubsampleAlign_ExecutesSuccessfully()
+        public void GetBitmap_RectangleSubsampleAlign()
         {
             var image = CreateTestImage(50, 50);
             var rect = new Rectangle(0, 0, 20, 20);
@@ -357,7 +357,7 @@ namespace DjvuNet.JB2.Tests
         [InlineData(0)]
         [InlineData(13)]
         [InlineData(-1)]
-        public void JB2Image_GetBitmap_InvalidSubsample_Throws(int subsample)
+        public void GetBitmap_InvalidSubsample_Throws(int subsample)
         {
             var image = new JB2Image { Width = 10, Height = 10 };
             Assert.Throws<DjvuArgumentOutOfRangeException>(() => image.GetBitmap(subsample));
@@ -367,14 +367,14 @@ namespace DjvuNet.JB2.Tests
         [InlineData(0)]
         [InlineData(13)]
         [InlineData(-1)]
-        public void JB2Image_GetPixelMap_InvalidSubsample_Throws(int subsample)
+        public void GetPixelMap_InvalidSubsample_Throws(int subsample)
         {
             var image = new JB2Image { Width = 10, Height = 10 };
             Assert.Throws<DjvuArgumentOutOfRangeException>(() => image.GetPixelMap(null, subsample, 1));
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_NullComponents_FallsBackCorrectly()
+        public void GetBitmap_NullComponents()
         {
             var image = CreateTestImage(20, 20);
             var rect = new Rectangle(0, 0, 20, 20);
@@ -383,13 +383,14 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetBitmap_NullShapeBitmap_IgnoresSilently()
+        public void GetBitmap_NullShapeBitmap_IgnoresSilently()
         {
             var image = new JB2Image { Width = 20, Height = 20 };
             var shape = new JB2Shape().Init(-1);
-            shape.Bitmap = null; // explicitly null
-            image.AddShape(shape);
-            image.AddBlit(new JB2Blit { ShapeNumber = 0, Left = 5, Bottom = 5 });
+            shape.Bitmap = default; // explicitly null
+            image.AddShape(ref shape);
+            JB2Blit blit = new JB2Blit { ShapeNumber = 0, Left = 5, Bottom = 5 };
+            image.AddBlit(ref blit);
 
             Bitmap bm = image.GetBitmap();
             Assert.NotNull(bm);
@@ -399,7 +400,7 @@ namespace DjvuNet.JB2.Tests
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public void JB2Image_GetBitmap_SubsamplingCorrectness_RendersPixels(int subsample)
+        public void GetBitmap_SubsampleRendersPixels(int subsample)
         {
             // Create image with 10x10 shape placed at (10, 10)
             var image = CreateTestImage(50, 50); 
@@ -411,7 +412,7 @@ namespace DjvuNet.JB2.Tests
         [Theory]
         [InlineData(5, 5, 20, 20, true)] // Viewport clipping correctly includes the shape
         [InlineData(30, 30, 20, 20, false)] // Viewport clipping correctly excludes the shape
-        public void JB2Image_GetBitmap_RectangleIntersection_EvaluatesCorrectly(int rx, int ry, int rw, int rh, bool expectedToHit)
+        public void GetBitmap_RectangleIntersection(int rx, int ry, int rw, int rh, bool expectedToHit)
         {
             // Create image with 10x10 shape placed at (10, 10)
             var image = CreateTestImage(50, 50); 
@@ -430,7 +431,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_GetPixelMap_RendersCorrectly_WithPalette()
+        public void GetPixelMap_RendersWithPalette()
         {
             var image = new JB2Image { Width = 20, Height = 20 };
             var shape = new JB2Shape().Init(-1);
@@ -438,8 +439,9 @@ namespace DjvuNet.JB2.Tests
             shape.Bitmap.Init(2, 2, 0); 
             shape.Bitmap.Data[0] = 1; shape.Bitmap.Data[1] = 1;
             shape.Bitmap.Data[2] = 1; shape.Bitmap.Data[3] = 1; 
-            image.AddShape(shape);
-            image.AddBlit(new JB2Blit { ShapeNumber = 0, Left = 5, Bottom = 5 });
+            image.AddShape(ref shape);
+            JB2Blit blit = new JB2Blit { ShapeNumber = 0, Left = 5, Bottom = 5 };
+            image.AddBlit(ref blit);
 
             var palette = (ColorPalette)RuntimeHelpers.GetUninitializedObject(typeof(ColorPalette));
             // Single red color in palette, map blit 0 to color 0
@@ -457,14 +459,14 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Image_Init_ClearsState()
+        public void Init_ClearsState()
         {
             var image = CreateTestImage(100, 100);
             image.Init();
 
             Assert.Equal(0, image.Width);
             Assert.Equal(0, image.Height);
-            Assert.Empty(image.Blits);
+            Assert.Equal(image.Blits.Length, 0);
         }
     }
 }

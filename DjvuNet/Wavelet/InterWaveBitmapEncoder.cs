@@ -7,7 +7,7 @@ namespace DjvuNet.Wavelet
     public class InterWaveBitmapEncoder : InterWaveBitmap
     {
 
-        public void Initialize(IBitmap bitmap, IBitmap mask)
+        public void Initialize(ref Bitmap bitmap, ref Bitmap mask)
         {
             throw new NotImplementedException();
         }

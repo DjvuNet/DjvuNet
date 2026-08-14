@@ -1,12 +1,14 @@
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using DjvuNet.Graphics;
 
 namespace DjvuNet.JB2
 {
-    public class JB2Shape : JB2Item
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct JB2Shape : IEquatable<JB2Shape>
     {
-
-        #region Public Properties
-
         /// <summary>
         /// Gets or sets the parent for the shape
         /// </summary>
@@ -17,12 +19,14 @@ namespace DjvuNet.JB2
         /// </summary>
         public long UserData;
 
+        private Bitmap _bitmap;
+
         /// <summary>
         /// Gets or sets the bitmap for the shape
         /// </summary>
-        public IBitmap Bitmap;
-
-        #endregion Public Properties
+        [JsonIgnore]
+        [UnscopedRef]
+        public ref Bitmap Bitmap => ref _bitmap;
 
         #region Constructors
 
@@ -42,25 +46,47 @@ namespace DjvuNet.JB2
 
         #region Public Methods
 
-        public virtual JB2Shape Duplicate()
+        public JB2Shape Duplicate()
         {
-            JB2Shape retval = new JB2Shape
-            {
-                Bitmap = Bitmap?.Duplicate(),
-                Parent = Parent,
-                UserData = UserData
-            };
-
-            // TODO test bitmap copy logic
+            JB2Shape retval = new JB2Shape();
+            retval.Bitmap = Bitmap.Duplicate();
+            retval.Parent = Parent;
+            retval.UserData = UserData;
 
             return retval;
         }
 
-        public virtual JB2Shape Init(int parent)
+        [UnscopedRef]
+        public ref JB2Shape Init(int parent)
         {
             Parent = parent;
-            Bitmap = new Bitmap();
-            return this;
+            Bitmap = default;
+            return ref this;
+        }
+
+        public bool Equals(JB2Shape other)
+        {
+            return this == other;
+        }
+
+        public override bool Equals([NotNullWhen(true)] object obj)
+        {
+            return obj is JB2Shape other && this == other;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Parent, UserData, _bitmap.GetHashCode());
+        }
+
+        public static bool operator ==(JB2Shape shape1, JB2Shape shape2)
+        {
+            return shape1.Parent == shape2.Parent && shape1.UserData == shape2.UserData && shape1._bitmap == shape2._bitmap;
+        }
+
+        public static bool operator !=(JB2Shape shape1, JB2Shape shape2)
+        {
+            return !(shape1 == shape2);
         }
 
         #endregion Public Methods

@@ -1,4 +1,4 @@
-﻿// -----------------------------------------------------------------------
+// -----------------------------------------------------------------------
 // <copyright file="DjvuPage.cs" company="">
 // TODO: Update copyright text.
 // </copyright>
@@ -17,10 +17,11 @@ using DjvuNet.Utilities;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
 using ColorPalette = DjvuNet.DataChunks.ColorPalette;
-using GBitmap = DjvuNet.Graphics.IBitmap;
-using GMap = DjvuNet.Graphics.IMap;
+using GBitmap = DjvuNet.Graphics.Bitmap;
+using PixelMap = DjvuNet.Graphics.PixelMap;
 using GPixelReference = DjvuNet.Graphics.IPixelReference;
-using GPixmap = DjvuNet.Graphics.IPixelMap;
+using GPixmap = DjvuNet.Graphics.PixelMap;
+using CPixmap = DjvuNet.Graphics.PixelMap;
 using GRect = DjvuNet.Graphics.Rectangle;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -509,11 +510,10 @@ namespace DjvuNet
             return text.ToString().Trim();
         }
 
-        public GBitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align, Bitmap retVal)
+        public GBitmap BuildBitmap(Graphics.Rectangle rect, int subsample, int align)
         {
-            // TODO verify use of seemingly excessive retVal parameter
             Verify.SubsampleRange(subsample);
-            return GetBitmap(rect, subsample, align, null);
+            return GetBitmap(rect, subsample, align);
         }
 
         public GPixmap GetPixelMap(GRect rect, int subsample, double gamma, GPixmap retval)
@@ -643,9 +643,9 @@ namespace DjvuNet
                         xrect.YMax = iwHeight;
                     }
 
-                    GPixmap iwPMap = bgIWPixmap.GetPixelMap(1, xrect, null);
+                    CPixmap iwPMap = (CPixmap) bgIWPixmap.GetPixelMap(1, xrect, null);
                     pMap = (retval != null) ? retval : new PixelMap();
-                    pMap.Downsample43(iwPMap, nrect);
+                    pMap.DownSample43(iwPMap, nrect);
                 }
                 else
                 {
@@ -690,10 +690,10 @@ namespace DjvuNet
             }
         }
 
-        public GBitmap GetBitmap(GRect rect, int subsample, int align, GBitmap retval)
+        public GBitmap GetBitmap(GRect rect, int subsample, int align)
         {
             Verify.SubsampleRange(subsample);
-            return GetBitmapList(rect, 1, 1, null);
+            return GetBitmapList(rect, subsample, align, null);
         }
 
         public GBitmap GetBitmapList(GRect rect, int subsample, int align, List<int> components)
@@ -715,23 +715,7 @@ namespace DjvuNet
                 return fgJb2.GetBitmap(rect, subsample, align, 0, components);
             }
 
-            return null;
-        }
-
-        public GMap GetMap(GRect segment, int subsample, GMap retval)
-        {
-            Verify.SubsampleRange(subsample);
-
-            if (IsColor)
-            {
-                retval = GetPixelMap(segment, subsample, 0.0D, (retval is GPixmap) ? (GPixmap)retval : null);
-            }
-            else
-            {
-                retval = GetBitmap(segment, subsample, 1, (retval is GBitmap) ? (GBitmap)retval : null);
-            }
-
-            return retval;
+            return default;
         }
 
         #region Private Methods
@@ -801,7 +785,7 @@ namespace DjvuNet
 
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        internal bool Stencil(IPixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
+        public bool Stencil(PixelMap pm, Graphics.Rectangle rect, int subsample, double gamma)
         {
             Verify.SubsampleRange(subsample);
 
@@ -840,9 +824,9 @@ namespace DjvuNet
                     List<int> components = new List<int>();
                     GBitmap bm = GetBitmapList(rect, subsample, 1, components);
 
-                    if (fgJb2.Blits.Count != fgPalette.BlitColors?.Length)
+                    if (fgJb2.Blits.Length != fgPalette.BlitColors?.Length)
                     {
-                        pm.Attenuate(bm, 0, 0);
+                        pm.Attenuate(ref bm, 0, 0);
 
                         return false;
                     }
@@ -882,7 +866,7 @@ namespace DjvuNet
 
                             if (fgPalette.BlitColors[blitno] == colorindex)
                             {
-                                JB2Shape pshape = fgJb2.GetShape(pblit.ShapeNumber);
+                                ref JB2Shape pshape = ref fgJb2.GetShape(pblit.ShapeNumber);
                                 GRect xrect = new GRect(pblit.Left, pblit.Bottom,
                                     pshape.Bitmap.Width, pshape.Bitmap.Height);
 
@@ -918,9 +902,9 @@ namespace DjvuNet
                         {
                             int blitno = ((int)compset[pos]);
                             JB2Blit pblit = fgJb2.Blits[blitno];
-                            JB2Shape pshape = fgJb2.GetShape(pblit.ShapeNumber);
+                            ref JB2Shape pshape = ref fgJb2.GetShape(pblit.ShapeNumber);
                             bm.Blit(
-                              pshape.Bitmap,
+                              ref pshape.Bitmap,
                               pblit.Left - rxmin,
                               pblit.Bottom - rymin,
                               subsample);
@@ -928,7 +912,7 @@ namespace DjvuNet
 
                         color.SetOffset(colorindex);
                         pm.Blit(
-                          bm,
+                          ref bm,
                           comprect.XMin - rect.XMin,
                           comprect.YMin - rect.YMin,
                           color);
@@ -942,9 +926,9 @@ namespace DjvuNet
 
                 if (fgIWPixmap != null)
                 {
-                    GBitmap bm = GetBitmap(rect, subsample, 1, null);
+                    GBitmap bm = GetBitmap(rect, subsample, 1);
 
-                    if (bm != null && pm != null)
+                    if (bm != default && pm != null)
                     {
                         GPixmap fgPixmap = ForegroundPixelMap;
                         int w = fgPixmap.Width;
@@ -968,7 +952,7 @@ namespace DjvuNet
                         //
                         //            return 1;
                         //          }
-                        pm.Stencil(bm, fgPixmap, red, subsample, rect, gammaCorr);
+                        pm.Stencil(ref bm, fgPixmap, red, subsample, rect, gammaCorr);
                         return true;
                     }
                 }

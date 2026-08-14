@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.Wavelet
 {
     public static class MemoryUtilities
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void MoveMemory(void* dest, void* src, long length)
         {
             Buffer.MemoryCopy(src, dest, length, length);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe void MoveMemory(IntPtr dest, IntPtr src, long length)
         {
             Buffer.MemoryCopy((void*)src, (void*)dest, length, length);

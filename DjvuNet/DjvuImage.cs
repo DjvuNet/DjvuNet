@@ -1,21 +1,23 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using GdiColorPalette = System.Drawing.Imaging.ColorPalette;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using DjvuNet.DataChunks;
 using DjvuNet.Errors;
+using DjvuNet.Extensions;
 using DjvuNet.JB2;
 using DjvuNet.Utilities;
 using DjvuNet.Wavelet;
 using Bitmap = System.Drawing.Bitmap;
 using GdiGraphics = System.Drawing.Graphics;
-using GMap = DjvuNet.Graphics.IMap;
+using PixelMap = DjvuNet.Graphics.PixelMap;
 using GBitmap = DjvuNet.Graphics.Bitmap;
 using GRect = DjvuNet.Graphics.Rectangle;
 using Rectangle = System.Drawing.Rectangle;
@@ -156,42 +158,6 @@ namespace DjvuNet
             return newBackground;
         }
 
-        /// <summary>
-        /// Utility conversion method allowing to convert object implementing <see cref="DjvuNet.Graphics.IMap"/>
-        /// interface to <see cref="System.Drawing.Bitmap"/> object.
-        /// </summary>
-        /// <param name="map"></param>
-        /// <param name="rect"></param>
-        /// <param name="format"></param>
-        /// <returns>Returns <see cref="System.Drawing.Bitmap"/> object which should be disposed after use by caller. </returns>
-        public static Bitmap ImageFromMap(GMap map, Rectangle rect, PixelFormat format)
-        {
-            Bitmap retVal = new Bitmap(rect.Width, rect.Height, format);
-
-            BitmapData bmpData = retVal.LockBits(rect, ImageLockMode.WriteOnly, format);
-
-            int pixelSize = GetPixelSize(format);
-            int bytesPerRow = pixelSize * rect.Width;
-
-            GCHandle hMapData = GCHandle.Alloc(map.Data, GCHandleType.Pinned);
-            IntPtr pMapData = hMapData.AddrOfPinnedObject();
-
-            for (int i = 0; i < rect.Height; i++)
-            {
-                IntPtr destPtr = bmpData.Scan0 + (bmpData.Stride * i);
-                IntPtr srcPtr = (IntPtr)((long) pMapData + (i * bytesPerRow));
-
-                MemoryUtilities.MoveMemory(destPtr, srcPtr, bytesPerRow);
-            }
-
-            if (hMapData.IsAllocated)
-            {
-                hMapData.Free();
-            }
-
-            retVal.UnlockBits(bmpData);
-            return retVal;
-        }
 
         /// <summary>
         /// Resizes the image to the new dimensions
@@ -637,60 +603,82 @@ namespace DjvuNet
 
             int width = _Page.Width / subsample;
             int height = _Page.Height / subsample;
-            GMap map = null;
             Rectangle rect = new Rectangle(0, 0, width, height);
             Bitmap retVal = null;
 
             if (rebuild || _Image == null)
             {
-                map = _Page.GetMap(new GRect(0, 0, width, height), subsample, null);
-                if (map == null)
+                if (_Page.IsColor)
                 {
-                    return new Bitmap(width, height);
-                }
+                    PixelMap pixelMap = _Page.GetPixelMap(new GRect(0, 0, width, height), subsample, 0.0D, null);
+                    if (pixelMap == null)
+                    {
+                        return new Bitmap(width, height);
+                    }
+                    retVal = pixelMap.ToImage();
 
-                if (map.BytesPerPixel == 3)
-                {
-                    const PixelFormat format = PixelFormat.Format24bppRgb;
-                    retVal = DjvuImage.ImageFromMap(map, rect, format);
+                    if (IsInverted)
+                    {
+                        retVal = DjvuImage.InvertColor(retVal);
+                    }
                 }
-                else if (map.BytesPerPixel == 1)
+                else
                 {
-                    const PixelFormat format = PixelFormat.Format8bppIndexed;
-                    retVal = DjvuImage.ImageFromMap(map, rect, format);
+                    GBitmap gBitmap = _Page.GetBitmap(new GRect(0, 0, width, height), subsample, 1);
+                    if (gBitmap.Data == null)
+                    {
+                        return new Bitmap(width, height);
+                    }
+                    
+                    retVal = gBitmap.ToImage();
+
+                    GdiColorPalette palette = retVal.Palette;
+
+                    if (!IsInverted)
+                    {
+                        for (int i = 0; i < 256; i++)
+                        {
+                            palette.Entries[i] = Color.FromArgb(i, i, i);
+                        }
+                    }
+                    else
+                    {
+                        int j = 0;
+                        for (int i = 0; i < 256; i++)
+                        {
+                            j = 255 - i;
+                            palette.Entries[i] = Color.FromArgb(j, j, j);
+                        }
+                    }
+                    
+                    retVal.Palette = palette;
                 }
             }
             else
             {
                 retVal = _Image;
-            }
 
-            if (map.BytesPerPixel == 3 && IsInverted)
-            {
-                retVal = DjvuImage.InvertColor(retVal);
-            }
-            else if (map.BytesPerPixel == 1)
-            {
-                System.Drawing.Imaging.ColorPalette palette = retVal.Palette;
-
-                if (!IsInverted)
+                // Handle cached image inversion
+                if (IsInverted)
                 {
-                    for (int i = 0; i < 256; i++)
+                    if (_Page.IsColor)
                     {
-                        palette.Entries[i] = Color.FromArgb(i, i, i);
+                        retVal = DjvuImage.InvertColor(retVal);
                     }
-
-                    retVal.Palette = palette;
-                }
-                else
-                {
-                    int j = 0;
-                    for (int i = 0; i < 256; i++)
+                    else
                     {
-                        j = 255 - i;
-                        palette.Entries[i] = Color.FromArgb(j, j, j);
+                        // Clone utilizes a lightweight GDI+ copy-on-write mechanism. It shares the 
+                        // underlying pixel memory but isolates the ColorPalette in the metadata,
+                        // allowing us to safely mutate the clone's palette without a race condition.
+                        retVal = retVal.Clone(new Rectangle(0, 0, retVal.Width, retVal.Height), retVal.PixelFormat);
+                        GdiColorPalette palette = retVal.Palette;
+                        for (int i = 0; i < 256; i++)
+                        {
+                            int j = 255 - i;
+                            palette.Entries[i] = Color.FromArgb(j, j, j);
+                        }
+                        retVal.Palette = palette;
                     }
-                    retVal.Palette = palette;
                 }
             }
 
@@ -871,7 +859,7 @@ namespace DjvuNet
             }
         }
 
-        public Graphics.Map BuildImageMap()
+        public Graphics.PixelMap BuildImageMap()
         {
             throw new NotImplementedException();
         }
@@ -884,7 +872,7 @@ namespace DjvuNet
         {
             if (_Page.Thumbnail != null)
             {
-                return _Page.Thumbnail.Image.ToImage();
+                return ((Graphics.PixelMap)_Page.Thumbnail.Image).ToImage();
             }
 
             Bitmap result = Image;
@@ -906,25 +894,26 @@ namespace DjvuNet
             {
                 Bitmap result = null;
 
-                JB2Image jb2image = null;
+                JB2Image jb2Image = null;
                 IInterWavePixelMap iwPixelMap = _Page.ForegroundIWPixelMap;
 
                 if (iwPixelMap != null)
                 {
                     result = _Page.ForegroundIWPixelMap.GetPixelMap().ToImage();
                 }
-                else if ((jb2image = _Page.ForegroundJB2Image) != null)
+                else if ((jb2Image = _Page.ForegroundJB2Image) != null)
                 {
                     if (_Page.ForegroundPalette == null)
                     {
-                        result = jb2image.GetBitmap(1, GBitmap.BorderSize).ToImage();
+                        GBitmap bmp = jb2Image.GetBitmap(1, GBitmap.BorderSize);
+                        result = bmp.ToImage();
                     }
                     else
                     {
-                        result = jb2image.GetPixelMap(_Page.ForegroundPalette, 1, 16).ToImage();
+                        result = jb2Image.GetPixelMap(_Page.ForegroundPalette, 1, 16).ToImage();
                     }
                 }
-                else if (iwPixelMap == null && jb2image == null)
+                else if (iwPixelMap == null && jb2Image == null)
                 {
                     result = CreateBlankImage(Brushes.Black, _Page.Width / subsample, _Page.Height / subsample);
                 }
@@ -933,37 +922,37 @@ namespace DjvuNet
             }
         }
 
-        internal DjvuNet.Graphics.Map GetForegroundMap()
-        {
-            lock (LoadingLock)
-            {
-                DjvuNet.Graphics.Map result = null;
-                JB2Image jb2image = null;
-                IInterWavePixelMap iwPixelMap = _Page.ForegroundIWPixelMap;
+        //internal DjvuNet.Graphics.IMap GetForegroundMap()
+        //{
+        //    lock (LoadingLock)
+        //    {
+        //        DjvuNet.Graphics.IMap result = null;
+        //        JB2Image jb2image = null;
+        //        IInterWavePixelMap iwPixelMap = _Page.ForegroundIWPixelMap;
 
-                if (iwPixelMap != null)
-                {
-                    result = _Page.ForegroundIWPixelMap.GetPixelMap();
-                }
-                else if ((jb2image = _Page.ForegroundJB2Image) != null)
-                {
-                    if (_Page.ForegroundPalette == null)
-                    {
-                        result = jb2image.GetBitmap(1, GBitmap.BorderSize);
-                    }
-                    else
-                    {
-                        result = jb2image.GetPixelMap(_Page.ForegroundPalette, 1, 16);
-                    }
-                }
-                else if (iwPixelMap == null && jb2image == null)
-                {
-                    result = new GBitmap(_Page.Height, _Page.Width, GBitmap.BorderSize);
-                }
+        //        if (iwPixelMap != null)
+        //        {
+        //            result = _Page.ForegroundIWPixelMap.GetPixelMap();
+        //        }
+        //        else if ((jb2image = _Page.ForegroundJB2Image) != null)
+        //        {
+        //            if (_Page.ForegroundPalette == null)
+        //            {
+        //                result = jb2image.GetBitmap(1, GBitmap.BorderSize);
+        //            }
+        //            else
+        //            {
+        //                result = jb2image.GetPixelMap(_Page.ForegroundPalette, 1, 16);
+        //            }
+        //        }
+        //        else if (iwPixelMap == null && jb2image == null)
+        //        {
+        //            result = new GBitmap(_Page.Height, _Page.Width, GBitmap.BorderSize);
+        //        }
 
-                return result;
-            }
-        }
+        //        return result;
+        //    }
+        //}
 
         internal Bitmap GetMaskImage(int subsample, bool resizeImage = false)
         {
@@ -976,7 +965,9 @@ namespace DjvuNet
 
             lock (LoadingLock)
             {
-                Bitmap result = _Page.ForegroundJB2Image.GetBitmap(subsample, GBitmap.BorderSize).ToImage();
+                JB2Image jb2Image = _Page.ForegroundJB2Image;
+                GBitmap bmp = jb2Image.GetBitmap(subsample, GBitmap.BorderSize);
+                Bitmap result = bmp.ToImage();
                 return resizeImage ? DjvuImage.ResizeImage(result, _Page.Width / subsample, _Page.Height / subsample) : result;
             }
         }
@@ -985,7 +976,15 @@ namespace DjvuNet
         {
             lock (LoadingLock)
             {
-                return _Page.ForegroundJB2Image?.GetBitmap(1, GBitmap.BorderSize) ?? null;
+                JB2Image jb2Image = _Page.ForegroundJB2Image;
+                if (jb2Image != null)
+                {
+                    return jb2Image.GetBitmap(1, GBitmap.BorderSize);
+                }
+                else
+                {
+                    return default;
+                }
             }
         }
 
@@ -1045,7 +1044,7 @@ namespace DjvuNet
             }
         }
 
-        internal DjvuNet.Graphics.Map GetBackgroundMap(bool rebuild = false)
+        internal DjvuNet.Graphics.PixelMap GetBackgroundMap(bool rebuild = false)
         {
             if (!rebuild && IsBackgroundDecoded)
             {

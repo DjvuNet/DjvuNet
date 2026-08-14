@@ -41,7 +41,7 @@ namespace DjvuNetTest
                 IDjvuPage page = document.FirstPage;
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                GBitmap image = djvuImage.GetMaskBitmap();
+                Bitmap image = djvuImage.BuildPageImage();
                 Assert.NotNull(image);
                 Assert.IsType<Bitmap>(image);
             }

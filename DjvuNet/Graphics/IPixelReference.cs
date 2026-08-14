@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace DjvuNet.Graphics
 {
@@ -12,11 +12,10 @@ namespace DjvuNet.Graphics
 
         int BlueOffset { get; }
 
-        IMap2 Parent { get; }
+        PixelMap Parent { get; }
 
         int Offset { get; }
 
-        void FillRgbPixels(int x, int y, int w, int h, int[] pixels, int off, int scansize);
 
         void IncOffset();
 
@@ -29,7 +28,5 @@ namespace DjvuNet.Graphics
         void SetPixels(IPixelReference source, int length);
 
         IPixel ToPixel();
-
-        void Ycc2Rgb(int count);
     }
 }

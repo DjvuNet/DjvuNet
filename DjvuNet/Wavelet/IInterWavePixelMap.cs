@@ -1,4 +1,4 @@
-﻿using DjvuNet.Graphics;
+using DjvuNet.Graphics;
 
 namespace DjvuNet.Wavelet
 {
@@ -16,6 +16,6 @@ namespace DjvuNet.Wavelet
 
         PixelMap GetPixelMap();
 
-        IPixelMap GetPixelMap(int subsample, Rectangle rect, IPixelMap retval);
+        PixelMap GetPixelMap(int subsample, Rectangle rect, PixelMap retval);
     }
 }

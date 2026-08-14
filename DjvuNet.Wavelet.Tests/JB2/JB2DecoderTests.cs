@@ -87,7 +87,7 @@ namespace DjvuNet.JB2.Tests
 
                     decoder.Code(image);
 
-                    Assert.True(image.Blits.Count > 0 || image.ShapeCount > 0, "Decoder failed to populate JB2Image.");
+                    Assert.True(image.Blits.Length > 0 || image.ShapeCount > 0, "Decoder failed to populate JB2Image.");
                 }
             }
         }
@@ -113,7 +113,7 @@ namespace DjvuNet.JB2.Tests
                     JB2Image image = new JB2Image();
                     decoder.Code(image);
 
-                    Assert.True(image.ShapeCount > 0 || image.Blits.Count > 0);
+                    Assert.True(image.ShapeCount > 0 || image.Blits.Length > 0);
                 }
             }
         }
@@ -319,7 +319,10 @@ namespace DjvuNet.JB2.Tests
             var djbzPath = Path.Combine(Util.ArtifactsDataPath, "extracted", "test003C_D355022.djbz");
 
             JB2Dictionary dict = new JB2Dictionary();
-            using (var reader = new DjvuReader(File.OpenRead(djbzPath))) { dict.Decode(reader); }
+            using (var reader = new DjvuReader(File.OpenRead(djbzPath)))
+            {
+                dict.Decode(reader);
+            }
 
             using (var decoder = new RecordTypeInjectorDecoder { TargetToken = JB2Codec.NonMarkData })
             using (var reader = new DjvuReader(File.OpenRead(sjbzPath)))

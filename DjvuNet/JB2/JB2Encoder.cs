@@ -69,7 +69,7 @@ namespace DjvuNet.JB2
 
             int firstShape = image.InheritedShapes;
             int nShape = image.ShapeCount;
-            int nBlit = image.Blits.Count;
+            int nBlit = image.Blits.Length;
             
             if (firstShape > 0 && image.InheritedDictionary == null)
             {
@@ -79,7 +79,7 @@ namespace DjvuNet.JB2
             InitLibrary(image);
 
             // Tracks if a shape is already encoded into the stream library
-            /// TODO: optimizations for lowering GC preassure required
+            /// TODO: optimizations for lowering GC pressure required
             int[] shape2lib = new int[nShape];
             for (int i = firstShape; i < nShape; i++)
             {
@@ -89,15 +89,15 @@ namespace DjvuNet.JB2
             // Code headers
             if (image.InheritedShapes > 0)
             {
-                CodeRecordB(RequiredDictOrReset, image, null, null);
+                CodeRecordB(RequiredDictOrReset, image, ref Unsafe.NullRef<JB2Shape>(), ref Unsafe.NullRef<JB2Blit>());
             }
 
-            CodeRecordB(StartOfData, image, null, null);
+            CodeRecordB(StartOfData, image, ref Unsafe.NullRef<JB2Shape>(), ref Unsafe.NullRef<JB2Blit>());
 
-            // Code Comment
+            // Code Comment 
             if (!string.IsNullOrEmpty(image.Comment))
             {
-                CodeRecordB(PreservedComment, image, null, null);
+                CodeRecordB(PreservedComment, image, ref Unsafe.NullRef<JB2Shape>(), ref Unsafe.NullRef<JB2Blit>());
             }
 
             // Encode every blit
@@ -114,9 +114,9 @@ namespace DjvuNet.JB2
                 // Tests if shape already exists in library
                 if (shape2lib[shapeNo] >= 0)
                 {
-                    CodeRecordB(MatchedCopy, image, null, jblt);
+                    CodeRecordB(MatchedCopy, image, ref Unsafe.NullRef<JB2Shape>(), ref jblt);
                 }
-                else if (jshp.Bitmap != null) 
+                else if (jshp.Bitmap != default) 
                 {
                     // Make sure all parents have been coded
                     if (jshp.Parent >= 0)
@@ -132,27 +132,27 @@ namespace DjvuNet.JB2
                     // This forces all shapes to be added to the dictionary, maximizing reuse compression
                     if (jshp.Parent < 0)
                     {
-                        CodeRecordB(NewMark, image, jshp, jblt);
+                        CodeRecordB(NewMark, image, ref jshp, ref jblt);
                     }
                     else
                     {
-                        CodeRecordB(MatchedRefine, image, jshp, jblt);
+                        CodeRecordB(MatchedRefine, image, ref jshp, ref jblt);
                     }
 
                     // Add shape to library
-                    AddLibrary(shapeNo, jshp);
+                    AddLibrary(shapeNo, ref jshp);
                     shape2lib[shapeNo] = 1;
                 }
 
                 // Check numcoder status
                 if (_BitCells.Count > CellChunk)
                 {
-                    CodeRecordB(RequiredDictOrReset, null, null, null);
+                    CodeRecordB(RequiredDictOrReset, null, ref Unsafe.NullRef<JB2Shape>(), ref Unsafe.NullRef<JB2Blit>());
                 }
             }
 
             // Code end of data record
-            CodeRecordB(EndOfData, image, null, null); 
+            CodeRecordB(EndOfData, image, ref Unsafe.NullRef<JB2Shape>(), ref Unsafe.NullRef<JB2Blit>()); 
         }
 
         private void EncodeLibOnlyShape(JB2Image image, int shapeNo, int[] shape2lib, int depth = 0)
@@ -178,8 +178,8 @@ namespace DjvuNet.JB2
             
             int recType = (parent >= 0) ? MatchedRefineLibraryOnly : NewMarkLibraryOnly;
             
-            CodeRecordB(recType, image, jshp, null);
-            AddLibrary(shapeNo, jshp);
+            CodeRecordB(recType, image, ref jshp, ref Unsafe.NullRef<JB2Blit>());
+            AddLibrary(shapeNo, ref jshp);
             shape2lib[shapeNo] = 1;
         }
 
@@ -207,15 +207,15 @@ namespace DjvuNet.JB2
             // Code headers
             if (dict.InheritedShapes > 0)
             {
-                CodeRecordA(RequiredDictOrReset, dict, null);
+                CodeRecordA(RequiredDictOrReset, dict, ref Unsafe.NullRef<JB2Shape>());
             }
 
-            CodeRecordA(StartOfData, dict, null);
+            CodeRecordA(StartOfData, dict, ref Unsafe.NullRef<JB2Shape>());
 
             // Code Comment
             if (!string.IsNullOrEmpty(dict.Comment))
             {
-                CodeRecordA(PreservedComment, dict, null);
+                CodeRecordA(PreservedComment, dict, ref Unsafe.NullRef<JB2Shape>());
             }
 
             // Encode every shape
@@ -227,22 +227,22 @@ namespace DjvuNet.JB2
                     ? MatchedRefineLibraryOnly 
                     : NewMarkLibraryOnly;
 
-                CodeRecordA(recType, dict, jshp);
+                CodeRecordA(recType, dict, ref jshp);
                 
-                AddLibrary(shapeNo, jshp);
+                AddLibrary(shapeNo, ref jshp);
 
                 // Check numcoder status
                 if (_BitCells.Count > CellChunk) 
                 {
-                    CodeRecordA(RequiredDictOrReset, null, null);
+                    CodeRecordA(RequiredDictOrReset, null, ref Unsafe.NullRef<JB2Shape>());
                 }
             }
 
             // Code end of data record
-            CodeRecordA(EndOfData, dict, null); 
+            CodeRecordA(EndOfData, dict, ref Unsafe.NullRef<JB2Shape>()); 
         }
 
-        protected override void CodeAbsoluteLocation(JB2Blit jblt, int rows, int columns)
+        protected override void CodeAbsoluteLocation(ref JB2Blit jblt, int rows, int columns)
         {
             if (!_GotStartRecordP)
                 DjvuExceptionUtil.ThrowFormatException("JB2 encoding failed: Missing required start record.");
@@ -251,7 +251,7 @@ namespace DjvuNet.JB2
             CodeNum(jblt.Bottom + rows, 1, _ImageRows, _AbsLocY);
         }
 
-        protected override void CodeAbsoluteMarkSize(IBitmap bm, int border)
+        protected override void CodeAbsoluteMarkSize(ref Bitmap bm, int border)
         {
             CodeNum(bm.Width, 0, BigPositive, _AbsSizeX);
             CodeNum(bm.Height, 0, BigPositive, _AbsSizeY);
@@ -284,20 +284,17 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        protected override void CodeBitmapByCrossCoding(IBitmap ibm, IBitmap icbm, int xd2c, int dw, int dy, int cy, int up1, int up0, int xup1, int xup0, int xdn1)
+        protected override void CodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm, int xd2c, int dw, int dy, int cy, int up1, int up0, int xup1, int xup0, int xdn1)
         {
-            Bitmap bm = (Bitmap)ibm;
-            Bitmap cbm = (Bitmap)icbm;
-
             for (; dy >= 0;)
             {
-                int context = GetCrossContext(bm, cbm, up1, up0, xup1, xup0, xdn1, 0);
+                int context = GetCrossContext(ref bm, ref cbm, up1, up0, xup1, xup0, xdn1, 0);
                 for (int dx = 0; dx < dw;)
                 {
                     int bit = bm.GetByteAt(up0 + dx);
                     CodeBit(bit == 1, _CBitDist, context);
                     dx++;
-                    context = ShiftCrossContext(bm, cbm, context, bit, up1, up0, xup1, xup0, xdn1, dx);
+                    context = ShiftCrossContext(ref bm, ref cbm, context, bit, up1, up0, xup1, xup0, xdn1, dx);
                 }
                 up1 = up0;
                 up0 = bm.RowOffset(--dy);
@@ -308,23 +305,61 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        protected override void CodeBitmapDirectly(IBitmap ibm, int dw, int dy, int up2, int up1, int up0)
+        protected override unsafe void CodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm, int xd2c, int dw, int dy, int cy, sbyte* pUp1, sbyte* pUp0, sbyte* pXup1, sbyte* pXup0, sbyte* pXdn1)
         {
-            Bitmap bm = (Bitmap)ibm;
-
             for (; dy >= 0;)
             {
-                int context = GetDirectContext(bm, up2, up1, up0, 0);
+                int context = GetCrossContext(pUp1, pUp0, pXup1, pXup0, pXdn1, 0);
+                for (int dx = 0; dx < dw;)
+                {
+                    int bit = pUp0[dx];
+                    CodeBit(bit == 1, _CBitDist, context);
+                    dx++;
+                    context = ShiftCrossContext(context, bit, pUp1, pUp0, pXup1, pXup0, pXdn1, dx);
+                }
+                pUp1 = pUp0;
+                pUp0 = bm.GetRow(--dy);
+                pXup1 = pXup0;
+                pXup0 = pXdn1;
+                pXdn1 = cbm.GetRow((--cy) - 1) + xd2c;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        protected override void CodeBitmapDirectly(ref Bitmap bm, int dw, int dy, int up2, int up1, int up0)
+        {
+            for (; dy >= 0;)
+            {
+                int context = GetDirectContext(ref bm, up2, up1, up0, 0);
                 for (int dx = 0; dx < dw;)
                 {
                     int bit = bm.GetByteAt(up0 + dx);
                     CodeBit(bit == 1, _BitDist, context);
                     dx++;
-                    context = ShiftDirectContext(bm, context, bit, up2, up1, up0, dx);
+                    context = ShiftDirectContext(ref bm, context, bit, up2, up1, up0, dx);
                 }
                 up2 = up1;
                 up1 = up0;
                 up0 = bm.RowOffset(--dy);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        protected override unsafe void CodeBitmapDirectly(ref Bitmap bm, int dw, int dy, sbyte* pUp2, sbyte* pUp1, sbyte* pUp0)
+        {
+            for (; dy >= 0;)
+            {
+                int context = GetDirectContext(pUp2, pUp1, pUp0, 0);
+                for (int dx = 0; dx < dw;)
+                {
+                    int bit = pUp0[dx];
+                    CodeBit(bit == 1, _BitDist, context);
+                    dx++;
+                    context = ShiftDirectContext(context, bit, pUp2, pUp1, pUp0, dx);
+                }
+                pUp2 = pUp1;
+                pUp1 = pUp0;
+                pUp0 = bm.GetRow(--dy);
             }
         }
 
@@ -387,7 +422,7 @@ namespace DjvuNet.JB2
             base.CodeImageSize(jim);
         }
 
-        protected override void CodeRelativeMarkSize(IBitmap bm, int cw, int ch, int border = 0)
+        protected override void CodeRelativeMarkSize(ref Bitmap bm, int cw, int ch, int border = 0)
         {
             CodeNum(bm.Width - cw, BigNegative, BigPositive, _RelSizeX);
             CodeNum(bm.Height - ch, BigNegative, BigPositive, _RelSizeY);

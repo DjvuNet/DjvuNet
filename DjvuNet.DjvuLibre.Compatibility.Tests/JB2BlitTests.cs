@@ -13,7 +13,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
 #if DJVUNET_ALL_TESTS
     [Collection("NativeAndManagedDocCollection")]
 #endif
-    public class JB2CompatibilityTests
+    public class JB2BlitTests
     {
 #if DJVUNET_ALL_TESTS
         private readonly DjvuDocFixture _managedFixture;
@@ -53,7 +53,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                         continue; // Skip pages without JB2 foregrounds
                     }
 
-                    var managedBlits = managedJb2.Blits.ToList();
+                    var managedBlits = managedJb2.Blits;
 
                     // 3. Safely decode the native page via the wrapper
                     using (var nativePageInfo = new DjvuPageInfo(nativeDocInfo, p))
@@ -62,7 +62,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
 
                         bool success = NativeMethods.GetDjvuPageJb2BlitCount(nativePage, out int nativeBlitCount);
                         Assert.True(success, $"Failed to retrieve native JB2 blit count for page {p} in doc {index}");
-                        Assert.Equal(nativeBlitCount, managedBlits.Count);
+                        Assert.Equal(nativeBlitCount, managedBlits.Length);
 
                         for (int b = 0; b < nativeBlitCount; b++)
                         {

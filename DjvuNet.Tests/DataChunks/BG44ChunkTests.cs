@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
+using DjvuNet.Extensions;
 using DjvuNet.Tests;
 using DjvuNet.Tests.Xunit;
 using DjvuNet.Wavelet;

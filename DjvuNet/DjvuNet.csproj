@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!--
       DjvuNetPackaging.props should go always first due to pack target requirements:
       first PropertyGroup in project defines packaging props
@@ -148,7 +148,6 @@
     <Compile Include="Extensions\ExtensionMethods.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
-    <Compile Include="Graphics\IBitmap.cs" />
     <Compile Include="Graphics\IImageCodecProperty.cs" />
     <Compile Include="Graphics\IImageDecoder.cs" />
     <Compile Include="Graphics\IImageEncoder.cs" />
@@ -158,9 +157,8 @@
     <Compile Include="Graphics\IMap.cs" />
     <Compile Include="Graphics\IMap2.cs" />
     <Compile Include="Graphics\IPixel.cs" />
-    <Compile Include="Graphics\IPixelMap.cs" />
     <Compile Include="Graphics\IPixelReference.cs" />
-    <Compile Include="Graphics\Map.cs" />
+    <Compile Include="Graphics\ParserUtil.cs" />
     <Compile Include="Graphics\Pixel.cs" />
     <Compile Include="Graphics\Pixel3B.cs" />
     <Compile Include="Graphics\PixelMapScaler.cs" />
@@ -182,7 +180,6 @@
     <Compile Include="JB2\JB2Dictionary.cs" />
     <Compile Include="JB2\JB2Encoder.cs" />
     <Compile Include="JB2\JB2Image.cs" />
-    <Compile Include="JB2\JB2Item.cs" />
     <Compile Include="JB2\JB2Shape.cs" />
     <Compile Include="Parser\AbstractDocumentTree.cs" />
     <Compile Include="Parser\DjvuFormatException.cs" />

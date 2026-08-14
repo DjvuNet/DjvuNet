@@ -1,16 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using DjvuNet.Errors;
 using DjvuNet.Interfaces;
 
 namespace DjvuNet.JB2
 {
-    public class JB2Dictionary : JB2Item, IDecoder
+    public class JB2Dictionary : IDecoder
     {
         #region Internal Fields
 
-        internal List<JB2Item> _Shapes;
+        internal List<JB2Shape> _Shapes;
 
         #endregion Internal Fields
 
@@ -65,9 +66,9 @@ namespace DjvuNet.JB2
 
         #region Constructors
 
-        public JB2Dictionary() : base()
+        public JB2Dictionary()
         {
-            _Shapes = new List<JB2Item>();
+            _Shapes = new List<JB2Shape>(256);
         }
 
         #endregion Constructors
@@ -79,7 +80,7 @@ namespace DjvuNet.JB2
             Decode(pool, null);
         }
 
-        public virtual int AddShape(JB2Shape jb2Shape)
+        public virtual int AddShape(ref JB2Shape jb2Shape)
         {
             if (jb2Shape.Parent >= ShapeCount)
             {
@@ -88,6 +89,7 @@ namespace DjvuNet.JB2
 
             int retval = InheritedShapes + _Shapes.Count;
             _Shapes.Add(jb2Shape);
+
             return retval;
         }
 
@@ -101,7 +103,7 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public virtual JB2Shape GetShape(int shapeNum)
+        public virtual ref JB2Shape GetShape(int shapeNum)
         {
             if (shapeNum < 0 || shapeNum >= ShapeCount)
             {
@@ -110,10 +112,11 @@ namespace DjvuNet.JB2
 
             if (shapeNum >= InheritedShapes)
             {
-                return (JB2Shape)_Shapes[shapeNum - InheritedShapes];
+                Span<JB2Shape> shapesSpan = CollectionsMarshal.AsSpan(_Shapes);
+                return ref shapesSpan[shapeNum - InheritedShapes];
             }
 
-            return InheritedDictionary.GetShape(shapeNum);
+            return ref InheritedDictionary.GetShape(shapeNum);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -136,12 +139,12 @@ namespace DjvuNet.JB2
             {
                 if (_Shapes.Count > 0)
                 {
-                    DjvuExceptionUtil.ThrowInvalidOperation("JB2 decoding failed: Cannot set dictionary after adding shapes.");
+                    DjvuExceptionUtil.ThrowInvalidOperation("JB2 decoding failed: Cannot set inherited dictionary after adding shapes.");
                 }
 
                 if (InheritedDictionary != null)
                 {
-                    DjvuExceptionUtil.ThrowInvalidOperation("JB2 decoding failed: Cannot change dictionary once set.");
+                    DjvuExceptionUtil.ThrowInvalidOperation("JB2 decoding failed: Cannot change inherited dictionary once set.");
                 }
             }
 

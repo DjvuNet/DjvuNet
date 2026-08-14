@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
+using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.Errors;
 
@@ -11,9 +14,74 @@ namespace DjvuNet.Graphics
     /// <summary>
     /// This class represents 24 bit color image maps.
     /// </summary>
-    public sealed class PixelMap : Map, IPixelMap
+    /// <remarks>
+    /// <para>
+    /// <b>Coordinate System:</b> PixelMap operates on a Cartesian coordinate system where the Y-axis 
+    /// increases from bottom to top. The coordinate (0, 0) represents the bottom-left corner of the image. 
+    /// This aligns with the standard DjVu format and mathematics, contrasting with the top-down (top-left) 
+    /// orientation common in GDI+ and Windows rendering pipelines.
+    /// </para>
+    /// <para>
+    /// <b>Architectural Limits:</b> Maximum image dimensions are constrained by the .NET <see cref="Array.MaxLength"/> 
+    /// limit (2,147,483,591 bytes) for the contiguous 1D sbyte array backing the map. Since each pixel 
+    /// consumes 3 bytes (24bpp), the maximum supported theoretical resolution is bounded such that 
+    /// (Width * Height * 3) &lt;= Array.MaxLength, yielding a maximum area of roughly 715,827,863 pixels.
+    /// </para>
+    /// </remarks>
+    public sealed class PixelMap : IMap2
     {
+        public sbyte[] Data { get; internal set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
+        public int BytesPerPixel => 3;
+        public int BlueOffset => 0;
+        public int GreenOffset => 1;
+        public int RedOffset => 2;
+        public bool IsRampNeeded => false;
+
+        internal void SetWidth(int width)
+        {
+            if (width < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width cannot be negative.");
+            }
+            Width = width;
+        }
+
+        internal void SetHeight(int height)
+        {
+            if (height < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height cannot be negative.");
+            }
+            Height = height;
+        }
         #region Private Members
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static unsafe Pixel* GenerateGrayRamp(int grays, Pixel* ramp)
+        {
+            ramp[0] = Pixel.WhitePixel;
+            int color = 0xff0000;
+            int gmax = (grays > 1) ? (grays - 1) : 1;
+            int i = 1;
+            if (gmax > 1)
+            {
+                int delta = color / gmax;
+                do
+                {
+                    color -= delta;
+                    sbyte c = (sbyte)(color >> 16);
+                    ramp[i++] = new Pixel(c, c, c);
+                } while (i < gmax);
+            }
+
+            while (i < 256)
+            {
+                ramp[i++] = Pixel.BlackPixel;
+            }
+            return ramp;
+        }
 
         /// <summary>
         /// Used to represent division as multiplication.
@@ -45,7 +113,7 @@ namespace DjvuNet.Graphics
         /// </summary>
         private static readonly Object[] _multiplierRefArray = new Object[256];
 
-        private static object _syncObject = new object();
+        private static Lock _syncLock = new();
 
         #endregion Private Members
 
@@ -75,16 +143,26 @@ namespace DjvuNet.Graphics
 
         /// <summary> Creates a new PixelMap object.</summary>
         public PixelMap()
-            : base(3, 2, 1, 0, false)
         {
         }
 
         public PixelMap(sbyte[] data, int width, int height)
-            : base(3, 2, 1, 0, false)
         {
-            Data = data;
+            if (data == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(data), "Data array cannot be null when initializing PixelMap.");
+            }
+
             SetWidth(width);
             SetHeight(height);
+
+            long expectedSize = (long)width * height * 3;
+            if (data.Length < expectedSize)
+            {
+                DjvuExceptionUtil.ThrowArgument($"Data array size {data.Length} is insufficient for a {width}x{height} pixel map. Expected at least {expectedSize} elements.", nameof(data));
+            }
+
+            Data = data;
         }
 
         #endregion Constructors
@@ -108,11 +186,11 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static int[] GetGammaCorrection(double gamma)
         {
-            lock (_syncObject)
+            lock (_syncLock)
             {
                 if ((gamma < 0.10000000000000001D) || (gamma > 10D))
                 {
-                    throw new DjvuArgumentOutOfRangeException(nameof(gamma), $"Gamma out of range: {gamma}");
+                    DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(gamma), $"Gamma out of range: {gamma}");
                 }
 
                 int[] retval;
@@ -152,73 +230,73 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Attenuate the specified bitmap.
         /// </summary>
-        /// <param name="bm">
+        /// <param name="target">
         /// Bitmap to attenuate
         /// </param>
-        /// <param name="xpos">
+        /// <param name="xPos">
         /// horizontal position
         /// </param>
-        /// <param name="ypos">
+        /// <param name="Ppos">
         /// vertical position
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void Attenuate(IBitmap bm, int xpos, int ypos)
+        public void Attenuate(ref Bitmap target, int xPos, int yPos)
         {
-            // Check
+            /// TODO: Needs protection from NullRef generic exception
             // Compute number of rows and columns
-            int xrows = ypos + bm.Height;
+            int rows = yPos + target.Height;
 
-            if (xrows > Height)
+            if (rows > Height)
             {
-                xrows = Height;
+                rows = Height;
             }
 
-            if (ypos > 0)
+            if (yPos > 0)
             {
-                xrows -= ypos;
+                rows -= yPos;
             }
 
-            int xcolumns = xpos + bm.Width;
+            int columns = xPos + target.Width;
 
-            if (xcolumns > Width)
+            if (columns > Width)
             {
-                xcolumns = Width;
+                columns = Width;
             }
 
-            if (xpos > 0)
+            if (xPos > 0)
             {
-                xcolumns -= xpos;
+                columns -= xPos;
             }
 
-            if ((xrows <= 0) || (xcolumns <= 0))
+            if ((rows <= 0) || (columns <= 0))
             {
                 return;
             }
 
             // Precompute multiplier map
-            int maxgray = bm.Grays - 1;
-            int[] multiplier = GetMultiplier(maxgray);
+            int maxGray = target.Grays - 1;
+            int[] multiplier = GetMultiplier(maxGray);
 
             // Compute starting point
-            int src = bm.RowOffset((ypos < 0) ? (-ypos) : 0) - ((xpos < 0) ? xpos : 0);
-            int dst = RowOffset((ypos > 0) ? ypos : 0) + ((xpos > 0) ? xpos : 0);
+            int src = target.RowOffset((yPos < 0) ? (-yPos) : 0) - ((xPos < 0) ? xPos : 0);
+            int dst = RowOffset((yPos > 0) ? yPos : 0) + ((xPos > 0) ? xPos : 0);
 
             IPixelReference dstPixel = CreateGPixelReference(0);
 
             // Loop over rows
-            for (int y = 0; y < xrows; y++)
+            for (int y = 0; y < rows; y++)
             {
                 // Loop over columns
                 dstPixel.SetOffset(dst);
 
-                for (int x = 0; x < xcolumns; dstPixel.IncOffset())
+                for (int x = 0; x < columns; dstPixel.IncOffset())
                 {
-                    int srcpix = bm.GetByteAt(src + (x++));
+                    int srcpix = target.GetByteAt(src + (x++));
 
                     // Perform pixel operation
                     if (srcpix > 0)
                     {
-                        if (srcpix >= maxgray)
+                        if (srcpix >= maxGray)
                         {
                             dstPixel.SetGray(0);
                         }
@@ -233,7 +311,7 @@ namespace DjvuNet.Graphics
 
                 // Next line
                 dst += GetRowSize();
-                src += bm.GetRowSize();
+                src += target.GetRowSize();
             }
         }
 
@@ -243,18 +321,19 @@ namespace DjvuNet.Graphics
         /// <param name="bm">
         /// bitmap to insert
         /// </param>
-        /// <param name="xpos">
+        /// <param name="xPos">
         /// horizontal position
         /// </param>
-        /// <param name="ypos">
+        /// <param name="yPos">
         /// vertical position
         /// </param>
         /// <param name="color">
         /// color to insert bitmap with
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void Blit(IBitmap bm, int xpos, int ypos, IPixel color)
+        public void Blit(ref Bitmap bm, int xPos, int yPos, IPixel color)
         {
+            /// TODO: Needs protection from NullRef generic exception 
             // Check
             if (color == null)
             {
@@ -262,28 +341,28 @@ namespace DjvuNet.Graphics
             }
 
             // Compute number of rows and columns
-            int xrows = ypos + bm.Height;
+            int xrows = yPos + bm.Height;
 
             if (xrows > Height)
             {
                 xrows = Height;
             }
 
-            if (ypos > 0)
+            if (yPos > 0)
             {
-                xrows -= ypos;
+                xrows -= yPos;
             }
 
-            int xcolumns = xpos + bm.Width;
+            int xcolumns = xPos + bm.Width;
 
             if (xcolumns > Width)
             {
                 xcolumns = Width;
             }
 
-            if (xpos > 0)
+            if (xPos > 0)
             {
-                xcolumns -= xpos;
+                xcolumns -= xPos;
             }
 
             if ((xrows <= 0) || (xcolumns <= 0))
@@ -306,8 +385,8 @@ namespace DjvuNet.Graphics
             int gb = color.Blue;
 
             // Compute starting point
-            int src = bm.RowOffset((ypos < 0) ? (-ypos) : 0) - ((xpos < 0) ? xpos : 0);
-            int dst = ((ypos > 0) ? RowOffset(ypos) : 0) + ((xpos > 0) ? xpos : 0);
+            int src = bm.RowOffset((yPos < 0) ? (-yPos) : 0) - ((xPos < 0) ? xPos : 0);
+            int dst = ((yPos > 0) ? RowOffset(yPos) : 0) + ((xPos > 0) ? xPos : 0);
 
             IPixelReference dstPixel = CreateGPixelReference(dst);
 
@@ -587,7 +666,7 @@ namespace DjvuNet.Graphics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public static unsafe void ApllyGamma(byte* pData, int dataLengthRem, int dataLength, int* gammaLUT)
+        public static unsafe void ApplyGamma(byte* pData, int dataLengthRem, int dataLength, int* gammaLUT)
         {
             for (int i = 0; i < dataLength; i++)
             {
@@ -680,7 +759,7 @@ namespace DjvuNet.Graphics
         /// Target bounds
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void Downsample(IMap2 src, int subsample, Rectangle targetRect)
+        public void DownSample(PixelMap src, int subsample, Rectangle targetRect)
         {
             Utilities.Verify.SubsampleRange(subsample);
 
@@ -696,7 +775,7 @@ namespace DjvuNet.Graphics
                 if ((targetRect.XMin < rect.XMin) || (targetRect.YMin < rect.YMin) ||
                     (targetRect.XMax > rect.XMax) || (targetRect.YMax > rect.YMax))
                 {
-                    throw new DjvuArgumentOutOfRangeException(nameof(targetRect),
+                    DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(targetRect),
                         $"Specified rectangle overflows destination PixelMap {nameof(BoundingRectangle)}");
                 }
 
@@ -747,26 +826,12 @@ namespace DjvuNet.Graphics
                     for (int rsy = sy; rsy < lsy; rsy++)
                     {
                         sptr.SetOffset(kidx + sx);
-                        if (!IsRampNeeded)
+                        for (int rsx = lsx - sx; rsx-- > 0; sptr.IncOffset())
                         {
-                            for (int rsx = lsx - sx; rsx-- > 0; sptr.IncOffset())
-                            {
-                                r += sptr.Red;
-                                g += sptr.Green;
-                                b += sptr.Blue;
-                                s++;
-                            }
-                        }
-                        else
-                        {
-                            for (int rsx = lsx - sx; rsx-- > 0; sptr.IncOffset())
-                            {
-                                IPixel pix = src.PixelRamp(sptr);
-                                r += pix.Red;
-                                g += pix.Green;
-                                b += pix.Blue;
-                                s++;
-                            }
+                            r += sptr.Red;
+                            g += sptr.Green;
+                            b += sptr.Blue;
+                            s++;
                         }
 
                         kidx += src.GetRowSize();
@@ -805,7 +870,7 @@ namespace DjvuNet.Graphics
         /// <see cref="DjvuNet.Errors.DjvuArgumentOutOfRangeException"/> if the target rectangle is out of bounds
         /// </throws>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void Downsample43(IMap2 src, Rectangle targetRect)
+        public void DownSample43(PixelMap src, Rectangle targetRect)
         {
             int srcWidth = src.Width;
             int srcHeight = src.Height;
@@ -817,7 +882,7 @@ namespace DjvuNet.Graphics
             {
                 if ((targetRect.XMin < rect.XMin) || (targetRect.YMin < rect.YMin) || (targetRect.XMax > rect.XMax) || (targetRect.YMax > rect.YMax))
                 {
-                    throw new DjvuArgumentOutOfRangeException(nameof(targetRect), "Rectangle out of bounds" + "pdr=(" + targetRect.XMin + "," + targetRect.YMin + "," +
+                    DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(targetRect), "Rectangle out of bounds" + "pdr=(" + targetRect.XMin + "," + targetRect.YMin + "," +
                                                 targetRect.XMax + "," + targetRect.YMax + "),rect=(" + rect.XMin + "," + rect.YMin +
                                                 "," + rect.XMax + "," + rect.YMax + ")");
                 }
@@ -900,10 +965,10 @@ namespace DjvuNet.Graphics
                 int dx = dxz;
                 int sx = sxz;
 
-                var pix0 = src.PixelRamp(spix0);
-                var pix1 = src.PixelRamp(spix1);
-                var pix2 = src.PixelRamp(spix2);
-                var pix3 = src.PixelRamp(spix3);
+                IPixelReference pix0 = spix0;
+                IPixelReference pix1 = spix1;
+                IPixelReference pix2 = spix2;
+                IPixelReference pix3 = spix3;
                 while (dx < destWidth)
                 {
                     int s00b = pix0.Blue;
@@ -925,10 +990,10 @@ namespace DjvuNet.Graphics
                         spix1.IncOffset();
                         spix2.IncOffset();
                         spix3.IncOffset();
-                        pix0 = src.PixelRamp(spix0);
-                        pix1 = src.PixelRamp(spix1);
-                        pix2 = src.PixelRamp(spix2);
-                        pix3 = src.PixelRamp(spix3);
+                        pix0 = spix0;
+                        pix1 = spix1;
+                        pix2 = spix2;
+                        pix3 = spix3;
                     }
 
                     int s10b = pix0.Blue;
@@ -950,10 +1015,10 @@ namespace DjvuNet.Graphics
                         spix1.IncOffset();
                         spix2.IncOffset();
                         spix3.IncOffset();
-                        pix0 = src.PixelRamp(spix0);
-                        pix1 = src.PixelRamp(spix1);
-                        pix2 = src.PixelRamp(spix2);
-                        pix3 = src.PixelRamp(spix3);
+                        pix0 = spix0;
+                        pix1 = spix1;
+                        pix2 = spix2;
+                        pix3 = spix3;
                     }
 
                     int s20b = pix0.Blue;
@@ -975,10 +1040,10 @@ namespace DjvuNet.Graphics
                         spix1.IncOffset();
                         spix2.IncOffset();
                         spix3.IncOffset();
-                        pix0 = src.PixelRamp(spix0);
-                        pix1 = src.PixelRamp(spix1);
-                        pix2 = src.PixelRamp(spix2);
-                        pix3 = src.PixelRamp(spix3);
+                        pix0 = spix0;
+                        pix1 = spix1;
+                        pix2 = spix2;
+                        pix3 = spix3;
                     }
 
                     int s30b = pix0.Blue;
@@ -1000,10 +1065,10 @@ namespace DjvuNet.Graphics
                         spix1.IncOffset();
                         spix2.IncOffset();
                         spix3.IncOffset();
-                        pix0 = src.PixelRamp(spix0);
-                        pix1 = src.PixelRamp(spix1);
-                        pix2 = src.PixelRamp(spix2);
-                        pix3 = src.PixelRamp(spix3);
+                        pix0 = spix0;
+                        pix1 = spix1;
+                        pix2 = spix2;
+                        pix3 = spix3;
                     }
 
                     dpix0.Blue = (sbyte)(((11 * s00b) + (2 * (s01b + s10b)) + s11b + 8) >> 4);
@@ -1072,8 +1137,97 @@ namespace DjvuNet.Graphics
         /// <param name="dy">
         /// Vertical position to insert at
         /// </param>
-        public void Fill(IMap2 source, int dx, int dy)
+        public unsafe void Fill(ref Bitmap source, int dx, int dy)
         {
+            /// TODO: Needs protection from NullRef generic exception
+            if (source == default)
+                DjvuExceptionUtil.ThrowArgument( 
+                    "The source Bitmap cannot be default. Please provide a valid and initialized Bitmap instance.", nameof(source));
+
+            if (source.Width < 0 || source.Height < 0)
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(source), 
+                    $"The source Bitmap has invalid dimensions (Width: {source.Width}, Height: {source.Height}). Dimensions cannot be negative.");
+            
+            // Circuit breaker for empty sources
+            if (source.Width == 0 || source.Height == 0)
+                return;
+
+            if (source.Data == null)
+                DjvuExceptionUtil.ThrowInvalidOperation(
+                    $"The source Bitmap.Data array is null - probably uninitialized. Current state - Width: {source.Width}, Height: {source.Height}, Data: {source.Data}.");
+
+            int x0 = (dx > 0) ? dx : 0;
+            int y0 = (dy > 0) ? dy : 0;
+            int x1 = (dx < 0) ? (-dx) : 0;
+            int y1 = (dy < 0) ? (-dy) : 0;
+            int w0 = Width - x0;
+            int w1 = source.Width - x1;
+            int w = (w0 < w1) ? w0 : w1;
+            int h0 = Height - y0;
+            int h1 = source.Height - y1;
+            int h = (h0 < h1) ? h0 : h1;
+
+            if ((w > 0) && (h > 0))
+            {
+                if (source.Grays == 2)
+                {
+                    FillBitonal(source.Data, this.Data, w, h, source.BytesPerRow, Width * BytesPerPixel, source.RowOffset(y1) + x1, (this.RowOffset(y0) + x0) * BytesPerPixel);
+                }
+                else
+                {
+                    Pixel* localRamp = stackalloc Pixel[256];
+                    Pixel* ramp = GenerateGrayRamp(source.Grays, localRamp);
+                    int bpp = BytesPerPixel;
+                    sbyte[] srcData = source.Data;
+                    sbyte[] dstData = this.Data;
+
+                    int srcStride = source.BytesPerRow;
+                    int dstStride = Width * bpp;
+
+                    int srcIdx = source.RowOffset(y1) + x1;
+                    int dstIdx = (this.RowOffset(y0) + x0) * bpp;
+
+                    do
+                    {
+                        int sIdx = srcIdx;
+                        int dIdx = dstIdx;
+
+                        for (int i = 0; i < w; i++)
+                        {
+                            Pixel p = ramp[(byte)srcData[sIdx++]];
+                            dstData[dIdx++] = p.Blue;
+                            dstData[dIdx++] = p.Green;
+                            dstData[dIdx++] = p.Red;
+                        }
+                        
+                        srcIdx += srcStride;
+                        dstIdx += dstStride;
+                    } while (--h > 0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Insert the reference map at the specified location.
+        /// </summary>
+        public void Fill(PixelMap source, int dx, int dy)
+        {
+            if (source == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), 
+                    "The source PixelMap cannot be null. Please provide a valid PixelMap instance.");
+
+            if (source.Width < 0 || source.Height < 0)
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(source), 
+                    $"The source PixelMap has invalid dimensions (Width: {source.Width}, Height: {source.Height}). Dimensions cannot be negative.");
+            
+            // Circuit breaker for empty sources
+            if (source.Width == 0 || source.Height == 0)
+                return;
+
+            if (source.Data == null)
+                DjvuExceptionUtil.ThrowInvalidOperation(
+                    $"The source PixelMap.Data array is null - probably uninitialized. Current state - Width: {source.Width}, Height: {source.Height}, Data: {source.Data}.");
+
             int x0 = (dx > 0) ? dx : 0;
             int y0 = (dy > 0) ? dy : 0;
             int x1 = (dx < 0) ? (-dx) : 0;
@@ -1094,21 +1248,7 @@ namespace DjvuNet.Graphics
                 {
                     pixel.SetOffset(y0++, x0);
                     refPixel.SetOffset(y1++, x1);
-
-                    if (!IsRampNeeded)
-                    {
-                        pixel.SetPixels(refPixel, w);
-                    }
-                    else
-                    {
-                        int i = w;
-                        do
-                        {
-                            pixel.CopyFrom(source.PixelRamp(refPixel));
-                            pixel.IncOffset();
-                            refPixel.IncOffset();
-                        } while (--i > 0);
-                    }
+                    pixel.SetPixels(refPixel, w);
                 } while (--h > 0);
             }
         }
@@ -1129,11 +1269,10 @@ namespace DjvuNet.Graphics
         /// The initialized PixelMap
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PixelMap Init(int height, int width, IPixel color)
+        private void InitUninitialized(int height, int width)
         {
             if ((height != Height) || (width != Width))
             {
-                Data = null;
                 SetHeight(height);
                 SetWidth(width);
             }
@@ -1142,11 +1281,22 @@ namespace DjvuNet.Graphics
 
             if (npix > 0)
             {
-                if (Data == null)
+                if (Data == null || Data.Length < npix * 3)
                 {
-                    Data = new sbyte[npix * 3];
+                    Data = GC.AllocateUninitializedArray<sbyte>(npix * 3, pinned: false);
                 }
+            }
+        }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public PixelMap Init(int height, int width, IPixel color)
+        {
+            InitUninitialized(height, width);
+
+            int npix = RowOffset(Height);
+
+            if (npix > 0)
+            {
                 if (color != null && (color.Blue != 0 || color.Green != 0 || color.Red != 0 ))
                 {
                     sbyte b = color.Blue;
@@ -1156,7 +1306,7 @@ namespace DjvuNet.Graphics
                     {
                         fixed (sbyte* pdata = Data)
                         {
-                            for (int i = 0; i < Data.Length;)
+                            for (int i = 0; i < npix * 3;)
                             {
                                 pdata[i++] = b;
                                 pdata[i++] = g;
@@ -1165,26 +1315,46 @@ namespace DjvuNet.Graphics
                         }
                     }
                 }
+                else
+                {
+                    Array.Clear(Data, 0, npix * 3);
+                }
             }
 
             return this;
         }
 
         /// <summary>
-        /// Initialize this PixelMap from a segment of another image map.
+        /// Initialize this PixelMap from a segment of another PixelMap.
         /// </summary>
         /// <param name="source">
-        /// Image map to initialize from
+        /// PixelMap to initialize from
         /// </param>
         /// <param name="rect">
-        /// Bounding rectangle to initialize from
+        /// Bounding Rectangle to initialize from
         /// </param>
         /// <returns>
         /// The initialized PixelMap
         /// </returns>
-        public PixelMap Init(IMap2 source, Rectangle rect)
+        public PixelMap Init(PixelMap source, Rectangle rect)
         {
-            Init(rect.Height, rect.Width, null);
+            if (source == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), 
+                    "The source PixelMap cannot be null. Please provide a valid PixelMap instance.");
+
+            if (source.Width < 0 || source.Height < 0)
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(source), 
+                    $"The source PixelMap has invalid dimensions (Width: {source.Width}, Height: {source.Height}). Dimensions cannot be negative.");
+            
+            // Circuit breaker for empty sources
+            if (source.Width == 0 || source.Height == 0)
+                return Init(rect.Height, rect.Width, null);
+
+            if (source.Data == null)
+                DjvuExceptionUtil.ThrowInvalidOperation(
+                    $"The source PixelMap.Data array is null - probably uninitialized. Current state - Width: {source.Width}, Height: {source.Height}, Data: {source.Data}.");
+
+            InitUninitialized(rect.Height, rect.Width);
 
             Rectangle rect2 = new Rectangle(0, 0, source.Width, source.Height);
             rect2.Intersect(rect2, rect);
@@ -1200,19 +1370,9 @@ namespace DjvuNet.Graphics
                     pixel.SetOffset(y, rect2.XMin);
                     refPixel.SetOffset(y + rect.YMin, rect.XMin + rect2.XMin);
 
-                    if (!IsRampNeeded)
+                    for (int x = rect2.XMax - rect2.XMin; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
                     {
-                        for (int x = rect2.XMax - rect2.XMin; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                        {
-                            pixel.CopyFrom(refPixel);
-                        }
-                    }
-                    else
-                    {
-                        for (int x = rect2.XMax - rect2.XMin; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                        {
-                            pixel.CopyFrom(source.PixelRamp(refPixel));
-                        }
+                        pixel.CopyFrom(refPixel);
                     }
                 }
             }
@@ -1221,47 +1381,399 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Initialize this PixelMap from another image map.
+        /// Initialize this PixelMap from Bitmap.
         /// </summary>
         /// <param name="source">
-        /// Image map to initialize from
+        /// Bitmap to initialize from
         /// </param>
         /// <returns>
         /// The initialized PixelMap
         /// </returns>
-        public PixelMap Init(IMap2 source)
+        public unsafe PixelMap Init(ref Bitmap source)
         {
-            Init(source.Height, source.Width, null);
+            /// TODO: Needs protection from NullRef generic exception
+            if (source == default)
+                DjvuExceptionUtil.ThrowArgument( 
+                    "The source Bitmap cannot be default instance. Please provide a valid, initialized Bitmap instance.",
+                    nameof(source));
 
-            var pixel = CreateGPixelReference(0);
+            if (source.Width < 0 || source.Height < 0)
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(source), 
+                    $"The source Bitmap has invalid dimensions (Width: {source.Width}, Height: {source.Height}). Dimensions cannot be negative.");
+
+            // Circuit breaker for empty sources
+            if (source.Width == 0 || source.Height == 0)
+                return Init(0, 0, null);
+
+            if (source.Data == null)
+                DjvuExceptionUtil.ThrowInvalidOperation(
+                    $"The source Bitmap.Data array is null - probably uninitialized. Current state - Width: {source.Width}, Height: {source.Height}, Data: {source.Data}.");
+
+            InitUninitialized(source.Height, source.Width);
 
             if ((Height > 0) && (Width > 0))
             {
-                var refPixel = (source).CreateGPixelReference(0);
-
-                for (int y = 0; y < Height; y++)
+                if (source.Grays == 2)
                 {
-                    pixel.SetOffset(y, 0);
-                    refPixel.SetOffset(y, 0);
+                    FillBitonal(source.Data, this.Data, Width, Height, source.BytesPerRow, Width * BytesPerPixel, source.RowOffset(0), 0);
+                }
+                else
+                {
+                    Pixel* localRamp = stackalloc Pixel[256];
+                    Pixel* ramp = GenerateGrayRamp(source.Grays, localRamp);
+                    
+                    int w = Width;
+                    int h = Height;
+                    int bpp = BytesPerPixel;
 
-                    if (!IsRampNeeded)
+                    sbyte[] srcData = source.Data;
+                    sbyte[] dstData = this.Data;
+
+                    int srcStride = source.BytesPerRow;
+                    int dstStride = w * bpp;
+
+                    int srcIdx = source.RowOffset(0);
+                    int dstIdx = 0;
+
+                    for (int y = 0; y < h; y++)
                     {
-                        for (int x = Width; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
+                        int sIdx = srcIdx;
+                        int dIdx = dstIdx;
+                        for (int x = 0; x < w; x++)
                         {
-                            pixel.CopyFrom(refPixel);
+                            Pixel p = ramp[(byte)srcData[sIdx++]];
+                            dstData[dIdx++] = p.Blue;
+                            dstData[dIdx++] = p.Green;
+                            dstData[dIdx++] = p.Red;
                         }
-                    }
-                    else
-                    {
-                        for (int x = Width; x-- > 0; pixel.IncOffset(), refPixel.IncOffset())
-                        {
-                            pixel.CopyFrom(source.PixelRamp(refPixel));
-                        }
+                        srcIdx += srcStride;
+                        dstIdx += dstStride;
                     }
                 }
             }
 
             return this;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        private static void FillBitonal(sbyte[] srcData, sbyte[] dstData, int width, int height, int srcStride, int dstStride, int srcIdx, int dstIdx)
+        {
+            ReadOnlySpan<sbyte> srcSpan = srcData;
+            Span<sbyte> dstSpan = dstData;
+
+            if (Avx512Vbmi.IsSupported && width >= 64)
+            {
+                ReadOnlySpan<byte> b0 = [ 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7,
+                    8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15,
+                    16, 16, 16, 17, 17, 17, 18, 18, 18, 19, 19, 19, 20, 20, 20, 21 ];
+
+                ReadOnlySpan<byte> b1 = [ 21, 21, 22, 22, 22, 23, 23, 23, 24, 24, 24, 25, 25, 25, 26, 26, 26,
+                    27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30, 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34,
+                    35, 35, 35, 36, 36, 36, 37, 37, 37, 38, 38, 38, 39, 39, 39, 40, 40, 40, 41, 41, 41, 42, 42 ];
+
+                ReadOnlySpan<byte> b2 = [ 42, 43, 43, 43, 44, 44, 44, 45, 45, 45, 46, 46, 46, 47, 47, 47, 48, 48, 48,
+                    49, 49, 49, 50, 50, 50, 51, 51, 51, 52, 52, 52, 53, 53, 53, 54, 54, 54, 55, 55, 55, 56, 56, 56,
+                    57, 57, 57, 58, 58, 58, 59, 59, 59, 60, 60, 60, 61, 61, 61, 62, 62, 62, 63, 63, 63 ];
+                
+                var idx0 = Vector512.Create<byte>(b0);
+                var idx1 = Vector512.Create<byte>(b1);
+                var idx2 = Vector512.Create<byte>(b2);
+
+                int vEnd = width - 64;
+                for (int y = 0; y < height; y++)
+                {
+                    ReadOnlySpan<sbyte> srcRow = srcSpan.Slice(srcIdx, width);
+                    Span<sbyte> dstRow = dstSpan.Slice(dstIdx, width * 3);
+                    int x = 0;
+                    
+                    for (; x <= vEnd; x += 64)
+                    {
+                        var vSrc = Vector512.Create(srcRow.Slice(x));
+                        var vMask = Vector512.Equals(vSrc, Vector512<sbyte>.Zero).AsByte();
+
+                        Avx512Vbmi.PermuteVar64x8(vMask, idx0).AsSByte().CopyTo(dstRow.Slice(x * 3));
+                        Avx512Vbmi.PermuteVar64x8(vMask, idx1).AsSByte().CopyTo(dstRow.Slice(x * 3 + 64));
+                        Avx512Vbmi.PermuteVar64x8(vMask, idx2).AsSByte().CopyTo(dstRow.Slice(x * 3 + 128));
+                    }
+                    
+                    if (x < width)
+                    {
+                        x = width - 64;
+                        var vSrc = Vector512.Create(srcRow.Slice(x));
+                        var vMask = Vector512.Equals(vSrc, Vector512<sbyte>.Zero).AsByte();
+
+                        Avx512Vbmi.PermuteVar64x8(vMask, idx0).AsSByte().CopyTo(dstRow.Slice(x * 3));
+                        Avx512Vbmi.PermuteVar64x8(vMask, idx1).AsSByte().CopyTo(dstRow.Slice(x * 3 + 64));
+                        Avx512Vbmi.PermuteVar64x8(vMask, idx2).AsSByte().CopyTo(dstRow.Slice(x * 3 + 128));
+                    }
+                    srcIdx += srcStride;
+                    dstIdx += dstStride;
+                }
+            }
+            else if (Avx2.IsSupported && width >= 32)
+            {
+                ReadOnlySpan<byte> b0 = [ 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10 ];
+                ReadOnlySpan<byte> b1 = [ 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15, 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5 ];
+                ReadOnlySpan<byte> b2 = [ 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15 ];
+                
+                var idx0 = Vector256.Create<byte>(b0);
+                var idx1 = Vector256.Create<byte>(b1);
+                var idx2 = Vector256.Create<byte>(b2);
+
+                int vEnd = width - 32;
+                for (int y = 0; y < height; y++)
+                {
+                    ReadOnlySpan<sbyte> srcRow = srcSpan.Slice(srcIdx, width);
+                    Span<sbyte> dstRow = dstSpan.Slice(dstIdx, width * 3);
+                    int x = 0;
+
+                    for (; x <= vEnd; x += 32)
+                    {
+                        var vSrc = Vector256.Create(srcRow.Slice(x));
+                        var vMask = Vector256.Equals(vSrc, Vector256<sbyte>.Zero).AsByte();
+
+                        var src0 = Avx2.Permute2x128(vMask.AsInt64(), vMask.AsInt64(), 0x00).AsByte();
+                        var src1 = vMask;
+                        var src2 = Avx2.Permute2x128(vMask.AsInt64(), vMask.AsInt64(), 0x11).AsByte();
+
+                        Avx2.Shuffle(src0, idx0).AsSByte().CopyTo(dstRow.Slice(x * 3));
+                        Avx2.Shuffle(src1, idx1).AsSByte().CopyTo(dstRow.Slice(x * 3 + 32));
+                        Avx2.Shuffle(src2, idx2).AsSByte().CopyTo(dstRow.Slice(x * 3 + 64));
+                    }
+                    
+                    if (x < width)
+                    {
+                        x = width - 32;
+                        var vSrc = Vector256.Create(srcRow.Slice(x));
+                        var vMask = Vector256.Equals(vSrc, Vector256<sbyte>.Zero).AsByte();
+
+                        var src0 = Avx2.Permute2x128(vMask.AsInt64(), vMask.AsInt64(), 0x00).AsByte();
+                        var src1 = vMask;
+                        var src2 = Avx2.Permute2x128(vMask.AsInt64(), vMask.AsInt64(), 0x11).AsByte();
+
+                        Avx2.Shuffle(src0, idx0).AsSByte().CopyTo(dstRow.Slice(x * 3));
+                        Avx2.Shuffle(src1, idx1).AsSByte().CopyTo(dstRow.Slice(x * 3 + 32));
+                        Avx2.Shuffle(src2, idx2).AsSByte().CopyTo(dstRow.Slice(x * 3 + 64));
+                    }
+                    srcIdx += srcStride;
+                    dstIdx += dstStride;
+                }
+            }
+            else if (Vector128.IsHardwareAccelerated && width >= 16)
+            {
+                ReadOnlySpan<byte> b0 = [ 0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5 ];
+                ReadOnlySpan<byte> b1 = [ 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10 ];
+                ReadOnlySpan<byte> b2 = [ 10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15 ];
+                
+                var idx0 = Vector128.Create<byte>(b0);
+                var idx1 = Vector128.Create<byte>(b1);
+                var idx2 = Vector128.Create<byte>(b2);
+
+                int vEnd = width - 16;
+                for (int y = 0; y < height; y++)
+                {
+                    ReadOnlySpan<sbyte> srcRow = srcSpan.Slice(srcIdx, width);
+                    Span<sbyte> dstRow = dstSpan.Slice(dstIdx, width * 3);
+                    int x = 0;
+
+                    for (; x <= vEnd; x += 16)
+                    {
+                        var vSrc = Vector128.Create(srcRow.Slice(x));
+                        var vMask = Vector128.Equals(vSrc, Vector128<sbyte>.Zero).AsByte();
+
+                        Vector128.Shuffle(vMask, idx0).AsSByte().CopyTo(dstRow.Slice(x * 3));
+                        Vector128.Shuffle(vMask, idx1).AsSByte().CopyTo(dstRow.Slice(x * 3 + 16));
+                        Vector128.Shuffle(vMask, idx2).AsSByte().CopyTo(dstRow.Slice(x * 3 + 32));
+                    }
+                    
+                    if (x < width)
+                    {
+                        x = width - 16;
+                        var vSrc = Vector128.Create(srcRow.Slice(x));
+                        var vMask = Vector128.Equals(vSrc, Vector128<sbyte>.Zero).AsByte();
+
+                        Vector128.Shuffle(vMask, idx0).AsSByte().CopyTo(dstRow.Slice(x * 3));
+                        Vector128.Shuffle(vMask, idx1).AsSByte().CopyTo(dstRow.Slice(x * 3 + 16));
+                        Vector128.Shuffle(vMask, idx2).AsSByte().CopyTo(dstRow.Slice(x * 3 + 32));
+                    }
+                    srcIdx += srcStride;
+                    dstIdx += dstStride;
+                }
+            }
+            else
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    ReadOnlySpan<sbyte> srcRow = srcSpan.Slice(srcIdx, width);
+                    Span<sbyte> dstRow = dstSpan.Slice(dstIdx, width * 3);
+                    for (int x = 0; x < width; x++)
+                    {
+                        sbyte color = (srcRow[x] == 0) ? (sbyte)-1 : (sbyte)0;
+                        dstRow[x * 3]     = color;
+                        dstRow[x * 3 + 1] = color;
+                        dstRow[x * 3 + 2] = color;
+                    }
+                    srcIdx += srcStride;
+                    dstIdx += dstStride;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Initialize this PixelMap from PixelMap.
+        /// </summary>
+        /// <param name="source">
+        /// PixelMap to initialize from
+        /// </param>
+        /// <returns>
+        /// The initialized PixelMap
+        /// </returns>
+        public PixelMap Init(PixelMap source)
+        {
+            if (source == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), 
+                    "The source PixelMap cannot be null. Please provide a valid PixelMap instance.");
+
+            if (source.Width < 0 || source.Height < 0)
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(source), 
+                    $"The source PixelMap has invalid dimensions (Width: {source.Width}, Height: {source.Height}). Dimensions cannot be negative.");
+
+            // Circuit breaker for empty sources
+            if (source.Width == 0 || source.Height == 0)
+                return Init(0, 0, null);
+
+            if (source.Data == null)
+                DjvuExceptionUtil.ThrowInvalidOperation(
+                    $"The source PixelMap.Data array is null - probably uninitialized. Current state - Width: {source.Width}, Height: {source.Height}, Data: {source.Data}.");
+
+            InitUninitialized(source.Height, source.Width);
+
+            if ((Height > 0) && (Width > 0))
+            {
+                Buffer.BlockCopy(source.Data, 0, this.Data, 0, Width * Height * BytesPerPixel);
+            }
+
+            return this;
+        }
+
+
+        /// <summary>
+        /// Fills an array of pixels from the specified values.
+        /// </summary>
+        /// <param name="x">
+        /// The x-coordinate of the bottom-left corner of the region of pixels
+        /// </param>
+        /// <param name="y">
+        /// The y-coordinate of the bottom-left corner of the region of pixels
+        /// </param>
+        /// <param name="width">
+        /// The width of the region of pixels
+        /// </param>
+        /// <param name="height">
+        /// The height of the region of pixels
+        /// </param>
+        /// <param name="pixels">
+        /// The array of pixels
+        /// </param>
+        /// <param name="offset">
+        /// The offset into the pixel array
+        /// </param>
+        /// <param name="scanSize">
+        /// The distance from one row of pixels to the next in the array
+        /// </param>
+        /// <remarks>
+        /// See <see cref="Map"/> class remarks for architectural limits regarding maximum dimensions.
+        /// </remarks>
+        public void FillRgbPixels(int x, int y, int width, int height, int[] pixels, int offset, int scanSize)
+        {
+            if (pixels == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(pixels));
+            }
+
+            // Reference: DjVuLibre explicitly throws on negative dimensions via (unsigned short) casting
+            // but explicitly supports 0 via (npix > 0) allocation guards. (See GPixmap.cpp / GBitmap.cpp).
+            if (width < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width cannot be negative.");
+            }
+
+            if (height < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height cannot be negative.");
+            }
+
+            if (x < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(x), x, "X coordinate cannot be negative.");
+            }
+
+            if (y < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(y), y, "Y coordinate cannot be negative.");
+            }
+
+            long right = (long)x + width;
+            if (right > Width || right > int.MaxValue)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Region exceeds horizontal bounds.");
+            }
+
+            long bottom = (long)y + height;
+            if (bottom > Height || bottom > int.MaxValue)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Region exceeds vertical bounds.");
+            }
+
+            if (offset < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(offset), offset, "Offset cannot be negative.");
+            }
+
+            if (scanSize < width)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(scanSize), scanSize, "Scansize cannot be smaller than width.");
+            }
+
+            // Calculate required buffer space to prevent buffer over-writes in the nested PixelReference loops.
+            long requiredSpace = (height > 0) ? (long)offset + ((long)(height - 1) * scanSize) + width : offset;
+            if (requiredSpace > pixels.Length)
+            {
+                DjvuExceptionUtil.ThrowInvalidOperation($"Destination buffer too small. Required: {requiredSpace}, Actual: {pixels.Length}.");
+            }
+
+            new PixelReference(this, 0).FillRgbPixels(x, y, width, height, pixels, offset, scanSize);
+        }
+
+        /// <summary>
+        /// Create a PixelReference (a pixel iterator) that refers to this map
+        /// starting at the specified offset.
+        /// </summary>
+        /// <param name="offset">
+        /// Position of the first pixel to reference
+        /// </param>
+        /// <returns>
+        /// The newly created PixelReference
+        /// </returns>
+        public IPixelReference CreateGPixelReference(int offset)
+        {
+            return new PixelReference(this, offset);
+        }
+
+        /// <summary>
+        /// Create a PixelReference (a pixel iterator) that refers to this map
+        /// starting at the specified position.
+        /// </summary>
+        /// <param name="row">initial vertical position
+        /// </param>
+        /// <param name="column">initial horizontal position
+        ///
+        /// </param>
+        /// <returns> the newly created PixelReference
+        /// </returns>
+        public IPixelReference CreateGPixelReference(int row, int column)
+        {
+            return new PixelReference(this, row, column);
         }
 
         /// <summary>
@@ -1308,10 +1820,10 @@ namespace DjvuNet.Graphics
         /// <param name="foregroundMap">
         /// the foreground colors
         /// </param>
-        /// <param name="supersample">
+        /// <param name="superSample">
         /// rate to upsample the foreground colors
         /// </param>
-        /// <param name="subsample">
+        /// <param name="subSample">
         /// rate to subsample the foreground colors
         /// </param>
         /// <param name="bounds">
@@ -1324,12 +1836,13 @@ namespace DjvuNet.Graphics
         /// <see cref="DjvuNet.Errors.DjvuArgumentOutOfRangeException"/>  if the specified bounds are not contained in the page
         /// </throws>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public unsafe void Stencil(IBitmap mask, IPixelMap foregroundMap, int supersample,
-        int subsample, Rectangle bounds, double gamma)
+        public unsafe void Stencil(ref Bitmap mask, PixelMap foregroundMap, int superSample,
+        int subSample, Rectangle bounds, double gamma)
         {
+            /// TODO: Needs protection from NullRef generic exception
             // Check arguments
-            int width = (((foregroundMap.Width * supersample) + subsample - 1) / subsample);
-            int height = (((foregroundMap.Height * supersample) + subsample - 1) / subsample);
+            int width = (((foregroundMap.Width * superSample) + subSample - 1) / subSample);
+            int height = (((foregroundMap.Height * superSample) + subSample - 1) / subSample);
             Rectangle rect = new Rectangle(0, 0, width, height);
 
             if (!bounds.Empty)
@@ -1337,7 +1850,7 @@ namespace DjvuNet.Graphics
                 if ((bounds.XMin < rect.XMin) || (bounds.YMin < rect.YMin) || (bounds.XMax > rect.XMax) ||
                     (bounds.YMax > rect.YMax))
                 {
-                    throw new DjvuArgumentOutOfRangeException(nameof(bounds),
+                    DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(bounds),
                         "Rectangle out of bounds" + "bounds=(" + bounds.XMin + "," + bounds.YMin +
                                                 "," + bounds.XMax + "," + bounds.YMax + "),rect=(" + rect.XMin + "," +
                                                 rect.YMin + "," + rect.XMax + "," + rect.YMax + ")");
@@ -1384,9 +1897,9 @@ namespace DjvuNet.Graphics
             // Prepare color correction table
             int[] gtable = GetGammaCorrection(gamma);
 
-            double ratioFg = supersample / (double)subsample;
+            double ratioFg = superSample / (double)subSample;
             // Compute starting point in blown up foreground PixelMap
-            int fgy = (rect.YMin * subsample) / supersample;
+            int fgy = (rect.YMin * subSample) / superSample;
             double fgy1 = rect.YMin - ratioFg * fgy;
 
             if (fgy1 < 0)
@@ -1395,7 +1908,7 @@ namespace DjvuNet.Graphics
                 fgy1 += ratioFg;
             }
 
-            int fgxz = (rect.XMin * subsample) / supersample;
+            int fgxz = (rect.XMin * subSample) / superSample;
             double fgx1z = rect.XMin - ratioFg * fgxz;
 
             if (fgx1z < 0)
@@ -1469,21 +1982,21 @@ namespace DjvuNet.Graphics
         /// <param name="dy">
         /// vertical distance to translate
         /// </param>
-        /// <param name="retval">
+        /// <param name="retVal">
         /// an old image to try and reuse for the return value
         /// </param>
         /// <returns> the translated image
         /// </returns>
-        public IMap2 Translate(int dx, int dy, IMap2 retval)
+        public PixelMap Translate(int dx, int dy, PixelMap retVal)
         {
-            if (!(retval is PixelMap) || (retval.Width != Width) || (retval.Height != Height))
+            if (retVal == null || retVal.Width != Width || retVal.Height != Height)
             {
-                retval = new PixelMap().Init(Height, Width, null);
+                retVal = new PixelMap().Init(Height, Width, null);
             }
 
-            retval.Fill(this, -dx, -dy);
+            retVal.Fill(this, -dx, -dy);
 
-            return retval;
+            return retVal;
         }
 
         /// <summary>
@@ -1492,18 +2005,30 @@ namespace DjvuNet.Graphics
         /// <param name="data">
         /// buffer to use
         /// </param>
-        /// <param name="arows">
+        /// <param name="rows">
         /// number of rows
         /// </param>
-        /// <param name="acolumns">
+        /// <param name="columns">
         /// number of columns
         /// </param>
         /// <returns> the initialized PixelMap
         /// </returns>
-        public PixelMap Init(sbyte[] data, int arows, int acolumns)
+        public PixelMap Init(sbyte[] data, int rows, int columns)
         {
-            SetHeight(arows);
-            SetWidth(acolumns);
+            if (data == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(data), "Data array cannot be null when initializing PixelMap.");
+            }
+
+            SetHeight(rows);
+            SetWidth(columns);
+
+            long expectedSize = (long)columns * rows * 3;
+            if (data.Length < expectedSize)
+            {
+                DjvuExceptionUtil.ThrowArgument($"Data array size {data.Length} is insufficient for a {columns}x{rows} pixel map. Expected at least {expectedSize} elements.", nameof(data));
+            }
+
             this.Data = data;
 
             return this;
@@ -1516,7 +2041,7 @@ namespace DjvuNet.Graphics
             bool raw = false;
             bool grey = false;
             ushort magic = reader.ReadUInt16BigEndian();
-            Bitmap bm = null;
+            Bitmap bm = default;
             switch (magic)
             {
                 case (('P' << 8) + '2'):
@@ -1534,7 +2059,7 @@ namespace DjvuNet.Graphics
                 case ('P' << 8) + '4':
                     reader.BaseStream.Seek(0, SeekOrigin.Begin);
                     bm = Bitmap.CreateBitmap(reader.BaseStream);
-                    Init(bm);
+                    Init(ref bm);
                     return this;
                 default:
                     reader.BaseStream.Seek(0, SeekOrigin.Begin);
@@ -1547,13 +2072,13 @@ namespace DjvuNet.Graphics
             char lookahead = '\n';
             int bytesperrow = 0;
             int bytespercomp = 1;
-            uint acolumns = ReadInteger(ref lookahead, reader.BaseStream);
-            uint arows = ReadInteger(ref lookahead, reader.BaseStream);
-            uint maxval = ReadInteger(ref lookahead, reader.BaseStream);
+            uint acolumns = ParserUtil.ReadInteger(ref lookahead, reader.BaseStream);
+            uint arows = ParserUtil.ReadInteger(ref lookahead, reader.BaseStream);
+            uint maxval = ParserUtil.ReadInteger(ref lookahead, reader.BaseStream);
 
             if (maxval > 65535)
             {
-                throw new DjvuFormatException("Cannot read PPM data with depth greater than 48 bits.");
+                DjvuExceptionUtil.ThrowFormatException("Cannot read PPM data with depth greater than 48 bits.");
             }
 
             if (maxval > 255)
@@ -1591,7 +2116,7 @@ namespace DjvuNet.Graphics
                             Pixel* p = (Pixel*)pData + y * bytesperrow;
                             if (reader.Read(line, 0, bytesperrow) < bytesperrow)
                             {
-                                throw new DjvuEndOfStreamException("Unexpected end of stream");
+                                DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream");
                             }
 
                             if (bytespercomp <= 1)
@@ -1624,7 +2149,7 @@ namespace DjvuNet.Graphics
                             byte* rgb = prgb;
                             if (reader.Read(line, 0, bytesperrow) < bytesperrow)
                             {
-                                throw new DjvuEndOfStreamException("Unexpected end of stream");
+                                DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream");
                             }
 
                             if (bytespercomp <= 1)
@@ -1660,13 +2185,13 @@ namespace DjvuNet.Graphics
                         {
                             if (grey)
                             {
-                                p[x].Green = p[x].Blue = p[x].Red = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
+                                p[x].Green = p[x].Blue = p[x].Red = bramp[(int)ParserUtil.ReadInteger(ref lookahead, reader.BaseStream)];
                             }
                             else
                             {
-                                p[x].Red = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
-                                p[x].Green = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
-                                p[x].Blue = bramp[(int)ReadInteger(ref lookahead, reader.BaseStream)];
+                                p[x].Red = bramp[(int)ParserUtil.ReadInteger(ref lookahead, reader.BaseStream)];
+                                p[x].Green = bramp[(int)ParserUtil.ReadInteger(ref lookahead, reader.BaseStream)];
+                                p[x].Blue = bramp[(int)ParserUtil.ReadInteger(ref lookahead, reader.BaseStream)];
                             }
                         }
                     }
@@ -1704,5 +2229,14 @@ namespace DjvuNet.Graphics
         }
 
         #endregion Protected Methods
+
+        #region Object Overrides
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}: Width: {Width}, Height: {Height}, Data: {(Data == null ? "null" : Data.Length.ToString())} sbytes.";
+        }
+
+        #endregion Object Overrides
     }
 }

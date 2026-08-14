@@ -1,15 +1,21 @@
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace DjvuNet.JB2
 {
     /// <summary>
     /// This class represent a JB2 encoded shape.
     /// </summary>
-    public class JB2Blit
+    [StructLayout(LayoutKind.Sequential)]
+    public unsafe struct JB2Blit
     {
-        #region Public Properties
-
         private int _bottom;
+
+        private int _left;
+
+        private int _shapeNumber;
+                      
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets the bottom of the blit
@@ -19,8 +25,6 @@ namespace DjvuNet.JB2
             get { return 0xffff & _bottom; }
             set { _bottom = (short)value; }
         }
-
-        private int _left;
 
         /// <summary>
         /// Gets or sets the left of the blit
@@ -34,7 +38,10 @@ namespace DjvuNet.JB2
         /// <summary>
         /// Gets or sets the shape number of the blit
         /// </summary>
-        public int ShapeNumber;
+        public int ShapeNumber {
+            get => _shapeNumber;
+            set { _shapeNumber = value; }
+        }
 
         #endregion Public Properties
 
@@ -51,9 +58,10 @@ namespace DjvuNet.JB2
 
         #region Public Methods
 
-        public virtual JB2Blit Duplicate()
+        public JB2Blit Duplicate()
         {
-            return (JB2Blit)base.MemberwiseClone();
+            // struct semantics: we return copy
+            return this;
         }
 
         #endregion Public Methods

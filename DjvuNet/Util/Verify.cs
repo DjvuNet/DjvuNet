@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Utilities
 {
@@ -13,7 +14,7 @@ namespace DjvuNet.Utilities
         {
             if (subsample < SubsambpleMin || subsample > SubsampleMax)
             {
-                DjvuNet.Errors.DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(subsample), subsample,
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(subsample), subsample,
                     $"Argument is outside of allowed values expected from {SubsambpleMin} to {SubsampleMax}" +
                     $" actual value {subsample}");
             }

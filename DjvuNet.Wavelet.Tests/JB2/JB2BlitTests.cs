@@ -64,10 +64,13 @@ namespace DjvuNet.JB2.Tests
 
             var duplicate = blit.Duplicate();
 
-            Assert.NotSame(blit, duplicate); // Ensure distinct instance
             Assert.Equal(blit.Bottom, duplicate.Bottom);
             Assert.Equal(blit.Left, duplicate.Left);
             Assert.Equal(blit.ShapeNumber, duplicate.ShapeNumber);
+
+            duplicate.Bottom += 1;
+
+            Assert.NotEqual(blit.Bottom, duplicate.Bottom);
         }
     }
 }

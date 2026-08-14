@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using DjvuNet.Compression;
 using DjvuNet.Graphics;
 using DjvuNet.Errors;
@@ -30,7 +31,7 @@ namespace DjvuNet.JB2
         protected const int CellChunk = 20000;
         protected const int MaxParentDepth = 256;
 
-        #endregion Constans
+        #endregion Constants
 
         #region Fields
 
@@ -252,13 +253,19 @@ namespace DjvuNet.JB2
             return result;
         }
 
-        protected abstract void CodeAbsoluteLocation(JB2Blit jblt, int rows, int columns);
+        protected abstract void CodeAbsoluteLocation(ref JB2Blit jblt, int rows, int columns);
 
-        protected abstract void CodeBitmapByCrossCoding(IBitmap bm, IBitmap cbm, int xd2c, int dw, int dy,
+        protected abstract void CodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm, int xd2c, int dw, int dy,
                                                                      int cy, int up1, int up0, int xup1, int xup0,
                                                                      int xdn1);
 
-        protected abstract void CodeBitmapDirectly(IBitmap bm, int dw, int dy, int up2, int up1, int up0);
+        protected abstract unsafe void CodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm, int xd2c, int dw, int dy,
+                                                                     int cy, sbyte* pUp1, sbyte* pUp0, sbyte* pXup1, sbyte* pXup0,
+                                                                     sbyte* pXdn1);
+
+        protected abstract void CodeBitmapDirectly(ref Bitmap bm, int dw, int dy, int up2, int up1, int up0);
+
+        protected abstract unsafe void CodeBitmapDirectly(ref Bitmap bm, int dw, int dy, sbyte* pUp2, sbyte* pUp1, sbyte* pUp0);
 
         protected virtual void CodeEventualLosslessRefinement()
         {
@@ -267,12 +274,7 @@ namespace DjvuNet.JB2
 
         protected abstract void CodeInheritedShapeCount(JB2Dictionary jim);
 
-        protected void CodeAbsoluteMarkSize(IBitmap bm)
-        {
-            CodeAbsoluteMarkSize(bm, 0);
-        }
-
-        protected abstract void CodeAbsoluteMarkSize(IBitmap bm, int border);
+        protected abstract void CodeAbsoluteMarkSize(ref Bitmap bm, int border);
 
         protected virtual void CodeImageSize(JB2Dictionary ignored)
         {
@@ -292,13 +294,15 @@ namespace DjvuNet.JB2
             _GotStartRecordP = true;
         }
 
-        protected virtual int CodeRecordA(int rectype, JB2Dictionary jim, JB2Shape xjshp)
+        protected virtual int CodeRecordA(int rectype, JB2Dictionary jim, ref JB2Shape xjshp)
         {
-            IBitmap bm = null;
+            Bitmap defaultBitmap = default;
+            ref Bitmap bm = ref defaultBitmap;
             int shapeno = -1;
             rectype = CodeRecordType(rectype);
 
-            JB2Shape jshp = xjshp;
+            JB2Shape defaultShape = default;
+            ref JB2Shape jshp = ref Unsafe.IsNullRef(ref xjshp) ? ref defaultShape : ref xjshp;
 
             switch (rectype)
             {
@@ -309,12 +313,13 @@ namespace DjvuNet.JB2
                         {
                             jshp = new JB2Shape().Init(-1);
                         }
-                        else if (jshp == null)
+                        // We could skip this check as new JB2Shape() creates default struct
+                        else if (jshp == default(JB2Shape))
                         {
                             jshp = new JB2Shape();
                         }
 
-                        bm = jshp.Bitmap;
+                        bm = ref jshp.Bitmap;
 
                         break;
                     }
@@ -337,8 +342,8 @@ namespace DjvuNet.JB2
 
                 case NewMarkLibraryOnly:
                     {
-                        CodeAbsoluteMarkSize(bm, 4);
-                        CodeBitmapDirectly(bm);
+                        CodeAbsoluteMarkSize(ref bm, 4);
+                        CodeBitmapDirectly(ref bm);
 
                         break;
                     }
@@ -352,10 +357,10 @@ namespace DjvuNet.JB2
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
                         }
 
-                        var cbm = jim.GetShape(jshp.Parent).Bitmap;
+                        ref Bitmap cbm = ref jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
-                        CodeBitmapByCrossCoding(bm, cbm, jshp.Parent);
+                        CodeRelativeMarkSize(ref bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
+                        CodeBitmapByCrossCoding(ref bm, ref cbm, jshp.Parent);
 
                         break;
                     }
@@ -395,13 +400,13 @@ namespace DjvuNet.JB2
                     case NewMarkLibraryOnly:
                     case MatchedRefineLibraryOnly:
                         {
-                            if (xjshp != null)
+                            if (!Unsafe.IsNullRef(ref xjshp))
                             {
                                 jshp = jshp.Duplicate();
                             }
 
-                            shapeno = jim.AddShape(jshp);
-                            AddLibrary(shapeno, jshp);
+                            shapeno = jim.AddShape(ref jshp);
+                            AddLibrary(shapeno, ref jshp);
 
                             break;
                         }
@@ -411,12 +416,18 @@ namespace DjvuNet.JB2
             return rectype;
         }
 
-        protected virtual int CodeRecordB(int rectype, JB2Image jim, JB2Shape xjshp, JB2Blit xjblt)
+        protected virtual int CodeRecordB(int rectype, JB2Image jim, ref JB2Shape xjshp, ref JB2Blit xjblt)
         {
-            IBitmap bm = null;
+            Bitmap defaultBitmap = default;
+            ref Bitmap bm = ref defaultBitmap;
             int shapeno = -1;
-            JB2Shape jshp = xjshp;
-            JB2Blit jblt = xjblt;
+
+            JB2Shape defaultShape = default;
+            ref JB2Shape jshp = ref Unsafe.IsNullRef(ref xjshp) ? ref defaultShape : ref xjshp;
+
+            JB2Blit defaultBlit = default;
+            ref JB2Blit jblt = ref Unsafe.IsNullRef(ref xjblt) ? ref defaultBlit : ref xjblt;
+            
             rectype = CodeRecordType(rectype);
 
             switch (rectype)
@@ -427,7 +438,7 @@ namespace DjvuNet.JB2
                 case MatchedRefineImageOnly:
                 case NonMarkData:
                     {
-                        if (jblt == null)
+                        if (Unsafe.IsNullRef(ref xjblt))
                         {
                             jblt = new JB2Blit();
                         }
@@ -442,18 +453,19 @@ namespace DjvuNet.JB2
                         {
                             jshp = new JB2Shape().Init((rectype == NonMarkData) ? (-2) : (-1));
                         }
-                        else if (jshp == null)
+                        // This check can be omitted due to struct conversion of JB2Shape
+                        else if (jshp == default(JB2Shape))
                         {
                             jshp = new JB2Shape();
                         }
 
-                        bm = jshp.Bitmap;
+                        bm = ref jshp.Bitmap;
                         break;
                     }
 
                 case MatchedCopy:
                     {
-                        if (jblt == null)
+                        if (Unsafe.IsNullRef(ref xjblt))
                         {
                             jblt = new JB2Blit();
                         }
@@ -483,9 +495,9 @@ namespace DjvuNet.JB2
                 case NewMark:
                     {
                         needAddBlit = needAddLibrary = true;
-                        CodeAbsoluteMarkSize(bm, 4);
-                        CodeBitmapDirectly(bm);
-                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
+                        CodeAbsoluteMarkSize(ref bm, 4);
+                        CodeBitmapDirectly(ref bm);
+                        CodeRelativeLocation(ref jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -493,8 +505,8 @@ namespace DjvuNet.JB2
                 case NewMarkLibraryOnly:
                     {
                         needAddLibrary = true;
-                        CodeAbsoluteMarkSize(bm, 4);
-                        CodeBitmapDirectly(bm);
+                        CodeAbsoluteMarkSize(ref bm, 4);
+                        CodeBitmapDirectly(ref bm);
 
                         break;
                     }
@@ -502,9 +514,9 @@ namespace DjvuNet.JB2
                 case NewMarkImageOnly:
                     {
                         needAddBlit = true;
-                        CodeAbsoluteMarkSize(bm, 3);
-                        CodeBitmapDirectly(bm);
-                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
+                        CodeAbsoluteMarkSize(ref bm, 3);
+                        CodeBitmapDirectly(ref bm);
+                        CodeRelativeLocation(ref jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -521,15 +533,15 @@ namespace DjvuNet.JB2
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
                         }
 
-                        var cbm = jim.GetShape(jshp.Parent).Bitmap;
+                        ref Bitmap cbm = ref jim.GetShape(jshp.Parent).Bitmap;
                         Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
+                        CodeRelativeMarkSize(ref bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
 
                         //          verbose("2.d time="+System.currentTimeMillis()+",rectype="+rectype);
-                        CodeBitmapByCrossCoding(bm, cbm, match);
+                        CodeBitmapByCrossCoding(ref bm, ref cbm, match);
 
                         //          verbose("2.e time="+System.currentTimeMillis()+",rectype="+rectype);
-                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
+                        CodeRelativeLocation(ref jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -545,9 +557,9 @@ namespace DjvuNet.JB2
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
                         }
 
-                        var cbm = jim.GetShape(jshp.Parent).Bitmap;
-                        Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
+                        ref Bitmap cbm = ref jim.GetShape(jshp.Parent).Bitmap;
+                        Rectangle lmatch = _LibInfo[match];
+                        CodeRelativeMarkSize(ref bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
 
                         break;
                     }
@@ -563,11 +575,11 @@ namespace DjvuNet.JB2
                             jshp.Parent = Convert.ToInt32((_Lib2Shape[match]));
                         }
 
-                        var cbm = jim.GetShape(jshp.Parent).Bitmap;
-                        Rectangle lmatch = (Rectangle)_LibInfo[match];
-                        CodeRelativeMarkSize(bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
-                        CodeBitmapByCrossCoding(bm, cbm, match);
-                        CodeRelativeLocation(jblt, bm.Height, bm.Width);
+                        ref Bitmap cbm = ref jim.GetShape(jshp.Parent).Bitmap;
+                        Rectangle lmatch = _LibInfo[match];
+                        CodeRelativeMarkSize(ref bm, (1 + lmatch.XMax) - lmatch.XMin, (1 + lmatch.YMax) - lmatch.YMin, 4);
+                        CodeBitmapByCrossCoding(ref bm, ref cbm, match);
+                        CodeRelativeLocation(ref jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -581,13 +593,13 @@ namespace DjvuNet.JB2
                             jblt.ShapeNumber = Convert.ToInt32((_Lib2Shape[match]));
                         }
 
-                        bm = jim.GetShape(jblt.ShapeNumber).Bitmap;
+                        bm = ref jim.GetShape(jblt.ShapeNumber).Bitmap;
 
-                        Rectangle lmatch = (Rectangle)_LibInfo[match];
+                        Rectangle lmatch = _LibInfo[match];
                         jblt.Left += lmatch.XMin;
                         jblt.Bottom += lmatch.YMin;
 
-                        CodeRelativeLocation(jblt, (1 + lmatch.YMax) - lmatch.YMin,
+                        CodeRelativeLocation(ref jblt, (1 + lmatch.YMax) - lmatch.YMin,
                                                (1 + lmatch.XMax) - lmatch.XMin);
 
                         jblt.Left -= lmatch.XMin;
@@ -599,9 +611,9 @@ namespace DjvuNet.JB2
                 case NonMarkData:
                     {
                         needAddBlit = true;
-                        CodeAbsoluteMarkSize(bm, 3);
-                        CodeBitmapDirectly(bm);
-                        CodeAbsoluteLocation(jblt, bm.Height, bm.Width);
+                        CodeAbsoluteMarkSize(ref bm, 3);
+                        CodeBitmapDirectly(ref bm);
+                        CodeAbsoluteLocation(ref jblt, bm.Height, bm.Width);
 
                         break;
                     }
@@ -642,29 +654,23 @@ namespace DjvuNet.JB2
                     case MatchedRefineImageOnly:
                     case NonMarkData:
                         {
-                            if (xjshp != null)
+                            if (!Unsafe.IsNullRef(ref xjshp))
                             {
                                 jshp = jshp.Duplicate();
                             }
 
-                            shapeno = jim.AddShape(jshp);
+                            shapeno = jim.AddShape(ref jshp);
                             Shape2Lib(shapeno, MinusOneObject);
 
                             if (needAddLibrary)
                             {
-                                AddLibrary(shapeno, jshp);
+                                AddLibrary(shapeno, ref jshp);
                             }
 
                             if (needAddBlit)
                             {
                                 jblt.ShapeNumber = shapeno;
-
-                                if (xjblt != null)
-                                {
-                                    jblt = (JB2Blit)xjblt.Duplicate();
-                                }
-
-                                jim.AddBlit(jblt);
+                                jim.AddBlit(ref jblt);
                             }
 
                             break;
@@ -672,12 +678,7 @@ namespace DjvuNet.JB2
 
                     case MatchedCopy:
                         {
-                            if (xjblt != null)
-                            {
-                                jblt = (JB2Blit)xjblt.Duplicate();
-                            }
-
-                            jim.AddBlit(jblt);
+                            jim.AddBlit(ref jblt);
                             break;
                         }
                 }
@@ -686,18 +687,13 @@ namespace DjvuNet.JB2
             return rectype;
         }
 
-        protected void CodeRelativeMarkSize(IBitmap bm, int cw, int ch)
-        {
-            CodeRelativeMarkSize(bm, cw, ch, 0);
-        }
-
         protected void FillShortList(int v)
         {
             _ShortList[0] = _ShortList[1] = _ShortList[2] = v;
             _ShortListPos = 0;
         }
 
-        protected int GetCrossContext(Bitmap bm, Bitmap cbm, int up1, int up0, int xup1, int xup0, int xdn1,
+        protected int GetCrossContext(ref Bitmap bm, ref Bitmap cbm, int up1, int up0, int xup1, int xup0, int xdn1,
                                                  int column)
         {
             return ((bm.GetByteAt((up1 + column) - 1) << 10)  | (bm.GetByteAt(up1 + column) << 9) |
@@ -708,7 +704,19 @@ namespace DjvuNet.JB2
                     (cbm.GetByteAt(xdn1 + column + 1)));
         }
 
-        protected int GetDirectContext(Bitmap bm, int up2, int up1, int up0, int column)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected unsafe int GetCrossContext(sbyte* pUp1, sbyte* pUp0, sbyte* pXup1, sbyte* pXup0, sbyte* pXdn1,
+                                                 int column)
+        {
+            return ((pUp1[column - 1] << 10) | (pUp1[column] << 9) |
+                    (pUp1[column + 1] << 8)  | (pUp0[column - 1] << 7) |
+                    (pXup1[column] << 6)     | (pXup0[column - 1] << 5) |
+                    (pXup0[column] << 4)     | (pXup0[column + 1] << 3) |
+                    (pXdn1[column - 1] << 2) | (pXdn1[column] << 1) |
+                    (byte)pXdn1[column + 1]);
+        }
+
+        protected int GetDirectContext(ref Bitmap bm, int up2, int up1, int up0, int column)
         {
             return ((bm.GetByteAt((up2 + column) - 1) << 9) | (bm.GetByteAt(up2 + column) << 8) |
                     (bm.GetByteAt(up2 + column + 1) << 7)   | (bm.GetByteAt((up1 + column) - 2) << 6) |
@@ -717,11 +725,21 @@ namespace DjvuNet.JB2
                     (bm.GetByteAt((up0 + column) - 2) << 1) | (bm.GetByteAt((up0 + column) - 1)));
         }
 
-        protected abstract void CodeRelativeMarkSize(IBitmap bm, int cw, int ch, int border);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected unsafe int GetDirectContext(sbyte* pUp2, sbyte* pUp1, sbyte* pUp0, int column)
+        {
+            return ((pUp2[column - 1] << 9) | (pUp2[column] << 8) |
+                    (pUp2[column + 1] << 7) | (pUp1[column - 2] << 6) |
+                    (pUp1[column - 1] << 5) | (pUp1[column] << 4) |
+                    (pUp1[column + 1] << 3) | (pUp1[column + 2] << 2) |
+                    (pUp0[column - 2] << 1) | (byte)pUp0[column - 1]);
+        }
+
+        protected abstract void CodeRelativeMarkSize(ref Bitmap bm, int cw, int ch, int border);
 
         protected abstract int GetDiff(int ignored, MutableValue<int> rel_loc);
 
-        protected virtual int AddLibrary(int shapeno, JB2Shape jshp)
+        protected virtual int AddLibrary(int shapeno, ref JB2Shape jshp)
         {
             int libno = _Lib2Shape.Count;
             _Lib2Shape.Add(shapeno);
@@ -781,7 +799,7 @@ namespace DjvuNet.JB2
             }
         }
 
-        protected int ShiftCrossContext(Bitmap bm, Bitmap cbm, int context, int n, int up1, int up0,
+        protected int ShiftCrossContext(ref Bitmap bm, ref Bitmap cbm, int context, int n, int up1, int up0,
                                                    int xup1, int xup0, int xdn1, int column)
         {
             return (((context << 1) & 0x636) | (bm.GetByteAt(up1 + column + 1) << 8) |
@@ -789,11 +807,28 @@ namespace DjvuNet.JB2
                     (cbm.GetByteAt(xdn1 + column + 1)) | (n << 7));
         }
 
-        protected int ShiftDirectContext(Bitmap bm, int context, int next, int up2, int up1, int up0,
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected unsafe int ShiftCrossContext(int context, int n, sbyte* pUp1, sbyte* pUp0,
+                                                   sbyte* pXup1, sbyte* pXup0, sbyte* pXdn1, int column)
+        {
+            return (((context << 1) & 0x636) | (pUp1[column + 1] << 8) |
+                    (pXup1[column] << 6) | (pXup0[column + 1] << 3) |
+                    (byte)pXdn1[column + 1] | (n << 7));
+        }
+
+        protected int ShiftDirectContext(ref Bitmap bm, int context, int next, int up2, int up1, int up0,
                                                     int column)
         {
             return ((context << 1) & 0x37a) | (bm.GetByteAt(up1 + column + 2) << 2) |
                     (bm.GetByteAt(up2 + column + 1) << 7) | next;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected unsafe int ShiftDirectContext(int context, int next, sbyte* pUp2, sbyte* pUp1, sbyte* pUp0,
+                                                    int column)
+        {
+            return ((context << 1) & 0x37a) | (pUp1[column + 2] << 2) |
+                    (pUp2[column + 1] << 7) | next;
         }
 
         protected abstract bool CodeBit(bool bit, MutableValue<sbyte> ctx);
@@ -806,15 +841,13 @@ namespace DjvuNet.JB2
 
         protected abstract int CodeRecordType(int rectype);
 
-        protected virtual void CodeBitmapByCrossCoding(IBitmap bm, IBitmap cbm, int libno)
+        protected virtual void CodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm, int libno)
         {
             // Bitmap cbm=new Bitmap();
             // synchronized(xcbm)
             // {
             //   cbm.init(xcbm);
             // }
-            lock (bm)
-            {
                 int cw = cbm.Width;
                 int dw = bm.Width;
                 int dh = bm.Height;
@@ -831,24 +864,30 @@ namespace DjvuNet.JB2
 
                 int dy = dh - 1;
                 int cy = dy + yd2c;
-                CodeBitmapByCrossCoding(bm, cbm, xd2c, dw, dy, cy, bm.RowOffset(dy + 1), bm.RowOffset(dy),
-                                            cbm.RowOffset(cy + 1) + xd2c, cbm.RowOffset(cy) + xd2c,
-                                            cbm.RowOffset(cy - 1) + xd2c);
-            }
+                //CodeBitmapByCrossCoding(ref bm, ref cbm, xd2c, dw, dy, cy, bm.RowOffset(dy + 1), bm.RowOffset(dy),
+                //                            cbm.RowOffset(cy + 1) + xd2c, cbm.RowOffset(cy) + xd2c,
+                //                            cbm.RowOffset(cy - 1) + xd2c);
+                unsafe
+                {
+                    CodeBitmapByCrossCoding(ref bm, ref cbm, xd2c, dw, dy, cy, bm.GetRow(dy + 1), bm.GetRow(dy),
+                                                cbm.GetRow(cy + 1) + xd2c, cbm.GetRow(cy) + xd2c,
+                                                cbm.GetRow(cy - 1) + xd2c);
+                }
         }
 
-        protected virtual void CodeBitmapDirectly(IBitmap bm)
+        protected virtual void CodeBitmapDirectly(ref Bitmap bm)
         {
-            lock (bm)
-            {
                 bm.SetMinimumBorder(3);
 
                 int dy = bm.Height - 1;
-                CodeBitmapDirectly(bm, bm.Width, dy, bm.RowOffset(dy + 2), bm.RowOffset(dy + 1), bm.RowOffset(dy));
-            }
+                //CodeBitmapDirectly(ref bm, bm.Width, dy, bm.RowOffset(dy + 2), bm.RowOffset(dy + 1), bm.RowOffset(dy));
+                unsafe
+                {
+                    CodeBitmapDirectly(ref bm, bm.Width, dy, bm.GetRow(dy + 2), bm.GetRow(dy + 1), bm.GetRow(dy));
+                }
         }
 
-        protected virtual void CodeRelativeLocation(JB2Blit jblt, int rows, int columns)
+        protected virtual void CodeRelativeLocation(ref JB2Blit jblt, int rows, int columns)
         {
             if (!_GotStartRecordP)
             {

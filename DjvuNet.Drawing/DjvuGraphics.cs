@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -10,6 +10,7 @@ using DjvuNet.Graphics;
 using DjvuNet.JB2;
 using DjvuNet.Utilities;
 using DjvuNet.Wavelet;
+using DjvuNet.Extensions;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
 using GBitmap = DjvuNet.Graphics.Bitmap;
@@ -145,6 +146,27 @@ namespace DjvuNet.Drawing
             }
         }
 
+        private static void UpdatePalette(Bitmap image, bool isInverted)
+        {
+            var palette = image.Palette;
+            if (!isInverted)
+            {
+                for (int i = 0; i < 256; i++)
+                {
+                    palette.Entries[i] = Color.FromArgb(i, i, i);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 256; i++)
+                {
+                    int j = 255 - i;
+                    palette.Entries[i] = Color.FromArgb(j, j, j);
+                }
+            }
+            image.Palette = palette;
+        }
+
         /// <summary>
         /// Gets a complete image for the page
         /// </summary>
@@ -158,60 +180,52 @@ namespace DjvuNet.Drawing
 
             int width = image.Page.Width / subsample;
             int height = image.Page.Height / subsample;
-            GMap map = null;
             Rectangle rect = new Rectangle(0, 0, width, height);
             Bitmap retVal = null;
 
             if (rebuild || image.Image == null)
             {
-                map = image.Page.GetMap(new GRect(0, 0, width, height), subsample, null);
-                if (map == null)
+                if (image.Page.IsColor)
                 {
-                    return new Bitmap(width, height);
-                }
+                    PixelMap pixelMap = (PixelMap)image.Page.GetPixelMap(new GRect(0, 0, width, height), subsample, 0.0D, null);
+                    if (pixelMap == null)
+                    {
+                        return new Bitmap(width, height);
+                    }
+                    retVal = pixelMap.ToImage();
 
-                if (map.BytesPerPixel == 3)
-                {
-                    const PixelFormat format = PixelFormat.Format24bppRgb;
-                    retVal = ImageFromMap(map, rect, format);
+                    if (image.IsInverted)
+                    {
+                        retVal = DjvuImage.InvertColor(retVal);
+                    }
                 }
-                else if (map.BytesPerPixel == 1)
+                else
                 {
-                    const PixelFormat format = PixelFormat.Format8bppIndexed;
-                    retVal = ImageFromMap(map, rect, format);
+                    DjvuNet.Graphics.Bitmap gBitmap = image.Page.GetBitmap(new GRect(0, 0, width, height), subsample, 1);
+                    if (gBitmap.Data == null)
+                    {
+                        return new Bitmap(width, height);
+                    }
+                    retVal = gBitmap.ToImage();
+
+                    UpdatePalette(retVal, image.IsInverted);
                 }
             }
             else
             {
                 retVal = image.Image;
-            }
 
-            if (map.BytesPerPixel == 3 && image.IsInverted)
-            {
-                retVal = DjvuImage.InvertColor(retVal);
-            }
-            else if (map.BytesPerPixel == 1)
-            {
-                System.Drawing.Imaging.ColorPalette palette = retVal.Palette;
-
-                if (!image.IsInverted)
+                // Handle cached image inversion
+                if (image.Page.IsColor)
                 {
-                    for (int i = 0; i < 256; i++)
+                    if (image.IsInverted)
                     {
-                        palette.Entries[i] = Color.FromArgb(i, i, i);
+                        retVal = DjvuImage.InvertColor(retVal);
                     }
-
-                    retVal.Palette = palette;
                 }
                 else
                 {
-                    int j = 0;
-                    for (int i = 0; i < 256; i++)
-                    {
-                        j = 255 - i;
-                        palette.Entries[i] = Color.FromArgb(j, j, j);
-                    }
-                    retVal.Palette = palette;
+                    UpdatePalette(retVal, image.IsInverted);
                 }
             }
 
@@ -300,7 +314,7 @@ namespace DjvuNet.Drawing
         {
             if (image.Page.Thumbnail != null)
             {
-                return image.Page.Thumbnail.Image.ToImage();
+                return ((PixelMap)image.Page.Thumbnail.Image).ToImage();
             }
 
             Bitmap result = BuildImage(image);
@@ -386,7 +400,7 @@ namespace DjvuNet.Drawing
                     Graphics.PixelMap pm = new Graphics.PixelMap();
                     pm.Init(height, width, Graphics.Pixel.WhitePixel);
 
-                    if (image.Page.Stencil(pm, new Graphics.GRect(0, 0, width, height), subsample, 0.0D))
+                    if (((DjvuPage)image.Page).Stencil(pm, new Graphics.Rectangle(0, 0, width, height), subsample, 0.0D))
                     {
                         result = pm.ToImage();
                     }
@@ -419,51 +433,40 @@ namespace DjvuNet.Drawing
         {
             Verify.SubsampleRange(subsample);
 
-            if (image.Page.ForegroundJB2Image == null)
+            if (image == null)
             {
-                return new Bitmap(image.Page.Width / subsample, image.Page.Height / subsample, PixelFormat.Format8bppIndexed);
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(image));
             }
+
+            if (image.Page == null)
+            {
+                DjvuExceptionUtil.ThrowArgument(nameof(image), $"{typeof(DjvuImage).FullName}.{nameof(image.Page)} cannot be null.");
+            }
+
+            // Verify.SubsampleRange guarantees subsample is between 1 and 12, preventing division by zero.
+            int targetWidth = image.Page.Width / subsample;
+            int targetHeight = image.Page.Height / subsample;
 
             lock (image.LoadingLock)
             {
-                Bitmap result = image.Page.ForegroundJB2Image.GetBitmap(subsample, GBitmap.BorderSize).ToImage();
-                return resizeImage ? ResizeImage(result, image.Page.Width / subsample, image.Page.Height / subsample) : result;
-            }
-        }
-
-        public static Bitmap CopyDataToBitmap(int width, int height, IntPtr data, long length, PixelFormat format, int bytesPerSrcRow = 0)
-        {
-            Bitmap bmp = null;
-            BitmapData bmpData = null;
-
-            try
-            {
-                bmp = new Bitmap(width, height, format);
-                bmpData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.WriteOnly, bmp.PixelFormat);
-
-                int pixelSize = Image.GetPixelFormatSize(bmp.PixelFormat)/8;
-                int bytesPerRow = bytesPerSrcRow == 0 ? bmp.Width * pixelSize : bytesPerSrcRow;
-
-                IntPtr dataPtr = bmpData.Scan0;
-
-                for (int i = 0; i < height; i++)
+                var jb2Image = image.Page.ForegroundJB2Image;
+                if (jb2Image == null)
                 {
-                    MemoryUtilities.MoveMemory(dataPtr, data, bytesPerRow);
-                    dataPtr = (IntPtr)((long)dataPtr + bmpData.Stride);
-                    data = (IntPtr)((long)data + bytesPerRow);
+                    return new Bitmap(targetWidth, targetHeight, PixelFormat.Format8bppIndexed);
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new DjvuAggregateException(ex);
-            }
-            finally
-            {
-                bmp?.UnlockBits(bmpData);
-            }
 
-            return bmp;
+                GBitmap gbmp = jb2Image.GetBitmap(subsample, GBitmap.BorderSize);
+                if (gbmp.Data == null)
+                {
+                    return new Bitmap(targetWidth, targetHeight, PixelFormat.Format8bppIndexed);
+                }
+                
+                Bitmap result = gbmp.ToImage();
+                return resizeImage ? ResizeImage(result, targetWidth, targetHeight) : result;
+            }
         }
+
+
 
         /// <summary>
         /// Gets the pixel size for the pixel data
@@ -502,39 +505,6 @@ namespace DjvuNet.Drawing
         /// <summary>
         /// Utility conversion method allowing to convert object implementing <see cref="DjvuNet.Graphics.IMap"/>
         /// interface to <see cref="Bitmap"/> object.
-        /// </summary>
-        /// <param name="map"></param>
-        /// <param name="rect"></param>
-        /// <param name="format"></param>
-        /// <returns>Returns <see cref="Bitmap"/> object which should be disposed after use by caller. </returns>
-        public static Bitmap ImageFromMap(GMap map, Rectangle rect, PixelFormat format)
-        {
-            Bitmap retVal = new Bitmap(rect.Width, rect.Height, format);
-
-            BitmapData bmpData = retVal.LockBits(rect, ImageLockMode.WriteOnly, format);
-
-            int pixelSize = GetPixelSize(format);
-            int bytesPerRow = pixelSize * rect.Width;
-
-            GCHandle hMapData = GCHandle.Alloc(map.Data, GCHandleType.Pinned);
-            IntPtr pMapData = hMapData.AddrOfPinnedObject();
-
-            for (int i = 0; i < rect.Height; i++)
-            {
-                IntPtr destPtr = bmpData.Scan0 + (bmpData.Stride * i);
-                IntPtr srcPtr = (IntPtr)((long)pMapData + (i * bytesPerRow));
-
-                MemoryUtilities.MoveMemory(destPtr, srcPtr, bytesPerRow);
-            }
-
-            if (hMapData.IsAllocated)
-            {
-                hMapData.Free();
-            }
-
-            retVal.UnlockBits(bmpData);
-            return retVal;
-        }
 
         /// <summary>
         /// Invert <see cref="Bitmap"/> color.
@@ -631,60 +601,7 @@ namespace DjvuNet.Drawing
             return newImage;
         }
 
-        /// <summary>
-        /// Convert <see cref="DjvuNet.Graphics.Map"/> to <see cref="System.Drawing.Bitmap"/>
-        /// </summary>
-        /// <param name="map">Source image</param>
-        /// <param name="rotation"></param>
-        /// <returns></returns>
-        public static Bitmap ToImage(this Map map, RotateFlipType rotation = RotateFlipType.Rotate180FlipX)
-        {
-            PixelFormat format;
-            if (map.BytesPerPixel == 1)
-                format = PixelFormat.Format8bppIndexed;
-            else if (map.BytesPerPixel == 2)
-                format = PixelFormat.Format16bppRgb555;
-            else if (map.BytesPerPixel == 3)
-                format = PixelFormat.Format24bppRgb;
-            else if (map.BytesPerPixel == 4)
-                format = PixelFormat.Format32bppArgb;
-            else if (map.BytesPerPixel == 6)
-                format = PixelFormat.Format48bppRgb;
-            else if (map.BytesPerPixel == 8)
-                format = PixelFormat.Format64bppArgb;
-            else
-                throw new DjvuFormatException($"Unsupported pixel format for byte count: {map.BytesPerPixel}");
 
-            int bytesPerRow = map switch
-            {
-                DjvuNet.Graphics.Bitmap { BytesPerRow: int bitmapBytesPerRow } => bitmapBytesPerRow,
-                DjvuNet.Graphics.PixelMap _ => map.BytesPerPixel * map.Width,
-                { } => throw new DjvuNotSupportedException($"Unsupported type: {map.GetType()}"),
-            };
-
-            GCHandle hData = default;
-            Bitmap image = null;
-            try
-            {
-                hData = GCHandle.Alloc(map.Data, GCHandleType.Pinned);
-                image = CopyDataToBitmap(map.Width, map.Height, hData.AddrOfPinnedObject(), map.Data.Length, format, bytesPerRow);
-            }
-            catch (ArgumentException aex)
-            {
-                throw new DjvuAggregateException("Failed to copy data to Sytem.Drawing.Bitmap.", aex);
-            }
-            finally
-            {
-                if (hData.IsAllocated)
-                {
-                    hData.Free();
-                }
-            }
-
-            image.RotateFlip(rotation);
-
-            return image;
-        }
 
         /// <summary>
         /// Transform a <see cref="System.Drawing.Bitmap"/> based on tranformation encoded in the <see cref="System.Drawing.Imaging.ColorMatrix"/>.

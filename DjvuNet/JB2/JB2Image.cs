@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using DjvuNet.DataChunks;
+using DjvuNet.Errors;
 using DjvuNet.Graphics;
 using DjvuNet.Utilities;
-using DjvuNet.Errors;
 
 namespace DjvuNet.JB2
 {
@@ -26,12 +27,24 @@ namespace DjvuNet.JB2
         private List<JB2Blit> _Blits;
 
         /// <summary>
-        /// Gets the blits for the image
+        /// Gets the Span of JB2Blit for the image.
         /// </summary>
-        public IReadOnlyList<JB2Blit> Blits
+        /// <remarks>
+        /// <para><b>CRITICAL LIFECYCLE WARNING:</b></para>
+        /// <para>
+        /// This property returns a direct memory span into the active backing array of the underlying <see cref="List{JB2Blit}"/>.
+        /// You <b>MUST NOT</b> mutate the list (e.g., calling <see cref="AddBlit"/>) while holding a reference to this span.
+        /// If the list is resized, the backing array will be reallocated, and this span will become a dangling pointer
+        /// to an abandoned memory block, leading to silent data loss or corruption upon mutation.
+        /// </para>
+        /// </remarks>
+        public Span<JB2Blit> Blits
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _Blits; }
+            get
+            {
+                    return CollectionsMarshal.AsSpan(_Blits);
+            }
         }
 
         #endregion Public Properties
@@ -40,7 +53,7 @@ namespace DjvuNet.JB2
 
         public JB2Image() : base()
         {
-            _Blits = new List<JB2Blit>();
+            _Blits = new List<JB2Blit>(256);
         }
 
         #endregion Constructors
@@ -75,7 +88,7 @@ namespace DjvuNet.JB2
             bm.Init(sheight, swidth, border);
             bm.Grays = (1 + (subsample * subsample));
 
-            for (int blitno = 0; blitno < Blits.Count; blitno++)
+            for (int blitno = 0; blitno < Blits.Length; blitno++)
             //Parallel.For(
             //    0,
             //    Blits.Count,
@@ -83,11 +96,11 @@ namespace DjvuNet.JB2
             //    {
             {
                 JB2Blit pblit = GetBlit(blitno);
-                JB2Shape pshape = GetShape(pblit.ShapeNumber);
+                ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
 
-                if (pshape.Bitmap != null)
+                if (pshape.Bitmap != default)
                 {
-                    bm.Blit(pshape.Bitmap, pblit.Left, pblit.Bottom, subsample);
+                    bm.Blit(ref pshape.Bitmap, pblit.Left, pblit.Bottom, subsample);
                 }
                 //});
             }
@@ -130,14 +143,14 @@ namespace DjvuNet.JB2
             bm.Init(sheight, swidth, border);
             bm.Grays = (1 + (subsample * subsample));
 
-            for (int blitno = 0; blitno < Blits.Count; )
+            for (int blitno = 0; blitno < Blits.Length; )
             {
                 JB2Blit pblit = GetBlit(blitno++);
-                JB2Shape pshape = GetShape(pblit.ShapeNumber);
+                ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
 
-                if (pshape.Bitmap != null)
+                if (pshape.Bitmap != default)
                 {
-                    bm.Blit(pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample);
+                    bm.Blit(ref pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample);
                 }
             }
 
@@ -169,12 +182,12 @@ namespace DjvuNet.JB2
             bm.Init(sheight, swidth, border);
             bm.Grays = (1 + (subsample * subsample));
 
-            for (int blitno = 0; blitno < Blits.Count; blitno++)
+            for (int blitno = 0; blitno < Blits.Length; blitno++)
             {
                 JB2Blit pblit = GetBlit(blitno);
-                JB2Shape pshape = GetShape(pblit.ShapeNumber);
+                ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
 
-                if (pshape.Bitmap != null && bm.Blit(pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample))
+                if (pshape.Bitmap != default && bm.Blit(ref pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample))
                 {
                     components.Add((blitno));
                 }
@@ -204,7 +217,7 @@ namespace DjvuNet.JB2
             // by grouping all blits that share the exact same palette color index into a single batch,
             // and performing one bulk pm->blit for that entire layer before moving to the next color.
             // This C# implementation skips that batching and sequentially resolves/draws each blit.
-            for (int blitno = 0; blitno < Blits.Count; blitno++)
+            for (int blitno = 0; blitno < Blits.Length; blitno++)
             //Parallel.For(
             //    0,
             //    Blits.Count,
@@ -212,12 +225,12 @@ namespace DjvuNet.JB2
             //    {
             {
                 JB2Blit pblit = GetBlit(blitno);
-                JB2Shape pshape = GetShape(pblit.ShapeNumber);
+                ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
                 Pixel color = palette.PaletteColors[palette.BlitColors[blitno]];
 
-                if (pshape.Bitmap != null)
+                if (pshape.Bitmap != default)
                 {
-                    pixelMap.Blit(pshape.Bitmap, pblit.Left, pblit.Bottom, color);
+                    pixelMap.Blit(ref pshape.Bitmap, pblit.Left, pblit.Bottom, color);
                 }
                 //});
             }
@@ -226,12 +239,20 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public JB2Blit GetBlit(int blitno)
+        public JB2Blit GetBlit(int blitNo)
         {
-            return (JB2Blit)_Blits[blitno];
+            if (blitNo >= 0 && blitNo < Blits.Length)
+            {
+                return Blits[blitNo];
+            }
+            else
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(blitNo), $"JB2Blit index out of range {blitNo}");
+                return default;
+            }
         }
 
-        public virtual int AddBlit(JB2Blit jb2Blit)
+        public virtual int AddBlit(ref JB2Blit jb2Blit)
         {
             if (jb2Blit.ShapeNumber < 0 || jb2Blit.ShapeNumber >= ShapeCount)
             {

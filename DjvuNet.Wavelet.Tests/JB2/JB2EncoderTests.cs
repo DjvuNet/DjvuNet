@@ -33,19 +33,19 @@ namespace DjvuNet.JB2.Tests
     {
         private class TestJB2Encoder : JB2Encoder
         {
-            public void InvokeCodeAbsoluteLocation(JB2Blit jblt, int rows, int columns)
+            public void InvokeCodeAbsoluteLocation(ref JB2Blit jblt, int rows, int columns)
             {
-                CodeAbsoluteLocation(jblt, rows, columns);
+                CodeAbsoluteLocation(ref jblt, rows, columns);
             }
 
-            public void InvokeCodeAbsoluteMarkSize(DjvuNet.Graphics.IBitmap bm, int border)
+            public void InvokeCodeAbsoluteMarkSize(ref Bitmap bm, int border)
             {
-                CodeAbsoluteMarkSize(bm, border);
+                CodeAbsoluteMarkSize(ref bm, border);
             }
 
-            public void InvokeCodeRelativeMarkSize(DjvuNet.Graphics.IBitmap bm, int cw, int ch, int border)
+            public void InvokeCodeRelativeMarkSize(ref Bitmap bm, int cw, int ch, int border)
             {
-                CodeRelativeMarkSize(bm, cw, ch, border);
+                CodeRelativeMarkSize(ref bm, cw, ch, border);
             }
 
             public int InvokeGetDiff(int diff, MutableValue<int> rel_loc)
@@ -53,17 +53,39 @@ namespace DjvuNet.JB2.Tests
                 return GetDiff(diff, rel_loc);
             }
 
-            public void InvokeCodeBitmapDirectly(DjvuNet.Graphics.IBitmap bm)
+            public void InvokeCodeBitmapDirectly(ref Bitmap bm)
             {
-                CodeBitmapDirectly(bm);
+                CodeBitmapDirectly(ref bm);
             }
 
-            public void InvokeCodeBitmapByCrossCoding(DjvuNet.Graphics.IBitmap bm, DjvuNet.Graphics.IBitmap cbm)
+            public void CodeBitmapDirectlyLegacy(ref Bitmap bm)
+            {
+                bm.SetMinimumBorder(3);
+                int dy = bm.Height - 1;
+                CodeBitmapDirectly(ref bm, bm.Width, dy, bm.RowOffset(dy + 2), bm.RowOffset(dy + 1), bm.RowOffset(dy));
+            }
+
+            public void InvokeCodeBitmapDirectlyLegacy(ref Bitmap bm)
+            {
+                CodeBitmapDirectlyLegacy(ref bm);
+            }
+
+            public unsafe void InvokeCodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm)
             {
                 bm.SetMinimumBorder(2);
                 cbm.SetMinimumBorder(2);
                 int dy = bm.Height - 1;
-                CodeBitmapByCrossCoding(bm, cbm, 0, bm.Width, dy, dy, 
+                CodeBitmapByCrossCoding(ref bm, ref cbm, 0, bm.Width, dy, dy, 
+                    bm.GetRow(dy + 1), bm.GetRow(dy),
+                    cbm.GetRow(dy + 1), cbm.GetRow(dy), cbm.GetRow(dy - 1));
+            }
+
+            public void InvokeCodeBitmapByCrossCodingLegacy(ref Bitmap bm, ref Bitmap cbm)
+            {
+                bm.SetMinimumBorder(2);
+                cbm.SetMinimumBorder(2);
+                int dy = bm.Height - 1;
+                CodeBitmapByCrossCoding(ref bm, ref cbm, 0, bm.Width, dy, dy, 
                     bm.RowOffset(dy + 1), bm.RowOffset(dy),
                     cbm.RowOffset(dy + 1), cbm.RowOffset(dy), cbm.RowOffset(dy - 1));
             }
@@ -92,19 +114,19 @@ namespace DjvuNet.JB2.Tests
                 return CodeRecordType(0);
             }
 
-            public void DecodeAbsoluteLocation(JB2Blit jblt, int rows, int columns)
+            public void DecodeAbsoluteLocation(ref JB2Blit jblt, int rows, int columns)
             {
-                CodeAbsoluteLocation(jblt, rows, columns);
+                CodeAbsoluteLocation(ref jblt, rows, columns);
             }
 
-            public void DecodeAbsoluteMarkSize(DjvuNet.Graphics.IBitmap bm, int border)
+            public void DecodeAbsoluteMarkSize(ref Bitmap bm, int border)
             {
-                CodeAbsoluteMarkSize(bm, border);
+                CodeAbsoluteMarkSize(ref bm, border);
             }
 
-            public void DecodeRelativeMarkSize(DjvuNet.Graphics.IBitmap bm, int cw, int ch, int border)
+            public void DecodeRelativeMarkSize(ref Bitmap bm, int cw, int ch, int border)
             {
-                CodeRelativeMarkSize(bm, cw, ch, border);
+                CodeRelativeMarkSize(ref bm, cw, ch, border);
             }
 
             public int DecodeGetDiff(MutableValue<int> rel_loc)
@@ -112,17 +134,39 @@ namespace DjvuNet.JB2.Tests
                 return GetDiff(0, rel_loc);
             }
 
-            public void DecodeBitmapDirectly(DjvuNet.Graphics.IBitmap bm)
+            public void DecodeBitmapDirectly(ref Bitmap bm)
             {
-                CodeBitmapDirectly(bm);
+                CodeBitmapDirectly(ref bm);
             }
 
-            public void DecodeBitmapByCrossCoding(DjvuNet.Graphics.IBitmap bm, DjvuNet.Graphics.IBitmap cbm)
+            public void CodeBitmapDirectlyLegacy(ref Bitmap bm)
+            {
+                bm.SetMinimumBorder(3);
+                int dy = bm.Height - 1;
+                CodeBitmapDirectly(ref bm, bm.Width, dy, bm.RowOffset(dy + 2), bm.RowOffset(dy + 1), bm.RowOffset(dy));
+            }
+
+            public void DecodeBitmapDirectlyLegacy(ref Bitmap bm)
+            {
+                CodeBitmapDirectlyLegacy(ref bm);
+            }
+
+            public unsafe void DecodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm)
             {
                 bm.SetMinimumBorder(2);
                 cbm.SetMinimumBorder(2);
                 int dy = bm.Height - 1;
-                CodeBitmapByCrossCoding(bm, cbm, 0, bm.Width, dy, dy, 
+                CodeBitmapByCrossCoding(ref bm, ref cbm, 0, bm.Width, dy, dy, 
+                    bm.GetRow(dy + 1), bm.GetRow(dy),
+                    cbm.GetRow(dy + 1), cbm.GetRow(dy), cbm.GetRow(dy - 1));
+            }
+
+            public void DecodeBitmapByCrossCodingLegacy(ref Bitmap bm, ref Bitmap cbm)
+            {
+                bm.SetMinimumBorder(2);
+                cbm.SetMinimumBorder(2);
+                int dy = bm.Height - 1;
+                CodeBitmapByCrossCoding(ref bm, ref cbm, 0, bm.Width, dy, dy, 
                     bm.RowOffset(dy + 1), bm.RowOffset(dy),
                     cbm.RowOffset(dy + 1), cbm.RowOffset(dy), cbm.RowOffset(dy - 1));
             }
@@ -175,7 +219,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void JB2Encoder_EncodeDictionary_WithInheritedDictionary_RoundTrips()
+        public void JB2Encoder_EncodeDictionary_WithInheritedDictionary_RoundTrip()
         {
             // 1. Establish the inherited parent dictionary (dictA)
             var dictA = new JB2Dictionary();
@@ -204,7 +248,7 @@ namespace DjvuNet.JB2.Tests
             // 3. Add organic delta content to dictB
             JB2Shape baseShape = dictA.GetShape(0);
             var newShape = new JB2Shape { Parent = -1, Bitmap = baseShape.Bitmap };
-            dictB.AddShape(newShape);
+            dictB.AddShape(ref newShape);
 
             // 4. Encode dictB (Organically hits: if (dict.InheritedShapes > 0) CodeRecordA(RequiredDictOrReset...))
             byte[] buffer;
@@ -396,7 +440,7 @@ namespace DjvuNet.JB2.Tests
                     encoder.SetImageSize(100, 100);
                     encoder.EncodeRecordType(JB2Constants.StartOfData);
                     encoder.SetGotStartRecord();
-                    encoder.InvokeCodeAbsoluteLocation(blitIn, 5, 5);
+                    encoder.InvokeCodeAbsoluteLocation(ref blitIn, 5, 5);
                     encoder.Flush();
                 }
                 buffer = ms.ToArray();
@@ -410,7 +454,7 @@ namespace DjvuNet.JB2.Tests
                 decoder.DecodeRecordType();
                 decoder.SetGotStartRecord();
                 var blitOut = new JB2Blit();
-                decoder.DecodeAbsoluteLocation(blitOut, 5, 5);
+                decoder.DecodeAbsoluteLocation(ref blitOut, 5, 5);
                 Assert.Equal(blitIn.Left, blitOut.Left);
                 Assert.Equal(blitIn.Bottom, blitOut.Bottom);
             }
@@ -428,7 +472,7 @@ namespace DjvuNet.JB2.Tests
                 using (var encoder = new TestJB2Encoder())
                 {
                     encoder.Init(ms, null);
-                    encoder.InvokeCodeAbsoluteMarkSize(bmIn, 0);
+                    encoder.InvokeCodeAbsoluteMarkSize(ref bmIn, 0);
                     encoder.Flush();
                 }
                 buffer = ms.ToArray();
@@ -439,7 +483,7 @@ namespace DjvuNet.JB2.Tests
             {
                 decoder.Init(ms, null);
                 var bmOut = new Bitmap();
-                decoder.DecodeAbsoluteMarkSize(bmOut, 0);
+                decoder.DecodeAbsoluteMarkSize(ref bmOut, 0);
                 Assert.Equal(bmIn.Width, bmOut.Width);
                 Assert.Equal(bmIn.Height, bmOut.Height);
             }
@@ -457,7 +501,7 @@ namespace DjvuNet.JB2.Tests
                 using (var encoder = new TestJB2Encoder())
                 {
                     encoder.Init(ms, null);
-                    encoder.InvokeCodeRelativeMarkSize(bmIn, 10, 20, 0);
+                    encoder.InvokeCodeRelativeMarkSize(ref bmIn, 10, 20, 0);
                     encoder.Flush();
                 }
                 buffer = ms.ToArray();
@@ -468,7 +512,7 @@ namespace DjvuNet.JB2.Tests
             {
                 decoder.Init(ms, null);
                 var bmOut = new Bitmap();
-                decoder.DecodeRelativeMarkSize(bmOut, 10, 20, 0);
+                decoder.DecodeRelativeMarkSize(ref bmOut, 10, 20, 0);
                 Assert.Equal(bmIn.Width, bmOut.Width);
                 Assert.Equal(bmIn.Height, bmOut.Height);
             }
@@ -518,7 +562,7 @@ namespace DjvuNet.JB2.Tests
                 using (var encoder = new TestJB2Encoder())
                 {
                     encoder.Init(ms, null);
-                    encoder.InvokeCodeBitmapDirectly(bmIn);
+                    encoder.InvokeCodeBitmapDirectly(ref bmIn);
                     encoder.Flush();
                 }
                 buffer = ms.ToArray();
@@ -530,7 +574,7 @@ namespace DjvuNet.JB2.Tests
                 decoder.Init(ms, null);
                 var bmOut = new Bitmap();
                 bmOut.Init(10, 10, 0);
-                decoder.DecodeBitmapDirectly(bmOut);
+                decoder.DecodeBitmapDirectly(ref bmOut);
 
                 bool match = true;
                 for (int i = 0; i < 100; i++)
@@ -589,7 +633,7 @@ namespace DjvuNet.JB2.Tests
                 using (var encoder = new TestJB2Encoder())
                 {
                     encoder.Init(ms, null);
-                    encoder.InvokeCodeBitmapByCrossCoding(bmIn, cbmIn);
+                    encoder.InvokeCodeBitmapByCrossCoding(ref bmIn, ref cbmIn);
                     encoder.Flush();
                 }
                 buffer = ms.ToArray();
@@ -601,7 +645,7 @@ namespace DjvuNet.JB2.Tests
                 decoder.Init(ms, null);
                 var bmOut = new Bitmap();
                 bmOut.Init(10, 10, 0);
-                decoder.DecodeBitmapByCrossCoding(bmOut, cbmIn);
+                decoder.DecodeBitmapByCrossCoding(ref bmOut, ref cbmIn);
 
                 bool match = true;
                 for (int i = 0; i < 100; i++)
@@ -700,7 +744,7 @@ namespace DjvuNet.JB2.Tests
                 var s1 = dict1.GetShape(i);
                 var s2 = dict2.GetShape(i);
                 Assert.Equal(s1.Parent, s2.Parent);
-                if (s1.Bitmap != null && s2.Bitmap != null)
+                if (s1.Bitmap != default && s2.Bitmap != default)
                 {
                     Assert.Equal(s1.Bitmap.Width, s2.Bitmap.Width);
                     Assert.Equal(s1.Bitmap.Height, s2.Bitmap.Height);
@@ -803,7 +847,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_NullDictionary_ThrowsArgumentNullException()
+        public void Encode_NullDictionary_Throws()
         {
             using (var encoder = new JB2Encoder())
             {
@@ -855,7 +899,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_EmptyJB2Image_Success()
+        public void Encode_EmptyJB2Image()
         {
             var image = new JB2Image(); // No shapes, no blits
             using (var ms = new MemoryStream())
@@ -876,7 +920,7 @@ namespace DjvuNet.JB2.Tests
             var image = new JB2Image();
             image.InheritedShapes = 1; // Explicitly simulate inheritance BEFORE adding shape
             var shape = new JB2Shape { Parent = 0 }; 
-            image.AddShape(shape);
+            image.AddShape(ref shape);
             
             using (var ms = new MemoryStream())
             {
@@ -891,7 +935,7 @@ namespace DjvuNet.JB2.Tests
             }
         }
         [Fact]
-        public void Encode_JB2Image_Uninitialized_ThrowsNullReferenceException()
+        public void Encode_JB2Image_Uninitialized_Throws()
         {
             var image = new JB2Image { Width = 100, Height = 100 };
             
@@ -920,7 +964,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_JB2Image_WithNegativeInheritedShapes_ThrowsIndexOutOfRangeException()
+        public void Encode_JB2Image_WithNegativeInheritedShapes_Throws()
         {
             var image = new JB2Image { Width = 100, Height = 100 };
             image.InheritedShapes = -1;
@@ -937,7 +981,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_NullJB2Dictionary_ThrowsArgumentNullException()
+        public void Encode_NullJB2Dictionary_Throws()
         {
             using (var ms = new MemoryStream())
             {
@@ -953,13 +997,15 @@ namespace DjvuNet.JB2.Tests
 
 
         [Fact]
-        public void Encode_JB2Image_WithOversizedBitmap_ThrowsArgumentOutOfRangeException()
+        public void Encode_JB2Image_WithOversizedBitmap_Throws()
         {
             var image = new JB2Image { Width = 100, Height = 100 };
-            
+
             // Width = 262145 is larger than BigPositive (262142), triggering out of bounds in CodeAbsoluteMarkSize
-            int shapeId = image.AddShape(new JB2Shape { Parent = -1, Bitmap = new Bitmap(1, 262145, 0) });
-            image.AddBlit(new JB2Blit { ShapeNumber = shapeId, Left = 10, Bottom = 10 });
+            JB2Shape shp = new JB2Shape { Parent = -1, Bitmap = new Bitmap(1, 262145, 0) };
+            int shapeId = image.AddShape(ref shp);
+            JB2Blit blit = new JB2Blit { ShapeNumber = shapeId, Left = 10, Bottom = 10 };
+            image.AddBlit(ref blit);
 
             using (var ms = new MemoryStream())
             {
@@ -973,20 +1019,24 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_JB2Image_WithRecursiveUnblittedParents_EncodesCorrectly()
+        public void Encode_JB2Image_WithRecursiveUnblittedParents()
         {
             var image = new JB2Image { Width = 50, Height = 50 };
-            
+
             // Shape A (Parent = -1, never blitted directly)
-            int shapeA = image.AddShape(new JB2Shape { Parent = -1, Bitmap = new Bitmap(5, 5, 0) });
-            
+            JB2Shape shape1 = new JB2Shape { Parent = -1, Bitmap = new Bitmap(5, 5, 0) };
+            int shapeA = image.AddShape(ref shape1);
+
             // Shape B (Parent = Shape A, never blitted directly)
-            int shapeB = image.AddShape(new JB2Shape { Parent = shapeA, Bitmap = new Bitmap(5, 5, 0) });
-            
+            JB2Shape shape2 = new JB2Shape { Parent = shapeA, Bitmap = new Bitmap(5, 5, 0) };
+            int shapeB = image.AddShape(ref shape2);
+
             // Shape C (Parent = Shape B, Blitted)
-            int shapeC = image.AddShape(new JB2Shape { Parent = shapeB, Bitmap = new Bitmap(5, 5, 0) });
-            
-            image.AddBlit(new JB2Blit { ShapeNumber = shapeC, Left = 10, Bottom = 10 });
+            JB2Shape shape3 = new JB2Shape { Parent = shapeB, Bitmap = new Bitmap(5, 5, 0) };
+            int shapeC = image.AddShape(ref shape3);
+
+            JB2Blit blit = new JB2Blit { ShapeNumber = shapeC, Left = 10, Bottom = 10 };
+            image.AddBlit(ref blit);
 
             using (var ms = new MemoryStream())
             {
@@ -1010,7 +1060,7 @@ namespace DjvuNet.JB2.Tests
                 Assert.Equal(1, decodedImage.GetShape(2).Parent);
                 
                 // Assert only 1 blit exists
-                Assert.Single(decodedImage.Blits);
+                Assert.Equal(decodedImage.Blits.Length, 1);
                 Assert.Equal(10, decodedImage.Blits[0].Left);
             }
         }
@@ -1080,8 +1130,9 @@ namespace DjvuNet.JB2.Tests
 
             // Force a new blit reusing an existing shape to explicitly hit MatchedCopy
             int existingShapeId = image.Blits[0].ShapeNumber;
-            image.AddBlit(new JB2Blit { ShapeNumber = existingShapeId, Left = 100, Bottom = 100 });
-            int expectedBlitCount = image.Blits.Count;
+            JB2Blit blit = new JB2Blit { ShapeNumber = existingShapeId, Left = 100, Bottom = 100 };
+            image.AddBlit(ref blit);
+            int expectedBlitCount = image.Blits.Length;
 
             using (var ms = new MemoryStream())
             {
@@ -1099,7 +1150,7 @@ namespace DjvuNet.JB2.Tests
                 }
 
                 Assert.Equal(originalInheritedShapes, decodedImage.InheritedShapes);
-                Assert.Equal(expectedBlitCount, decodedImage.Blits.Count);
+                Assert.Equal(expectedBlitCount, decodedImage.Blits.Length);
                 // Verify the copied blit was successfully decoded
                 Assert.Equal(100, decodedImage.Blits[expectedBlitCount - 1].Left);
             }
@@ -1138,7 +1189,7 @@ namespace DjvuNet.JB2.Tests
             // By using randomized coordinates, the relative distance between blits varies wildly,
             // which forces the JB2 arithmetic coder's binary context tree (_BitCells) to branch 
             // uncontrollably, guaranteeing we hit the CellChunk (20,000) limit organically.
-            int originalBlitCount = image.Blits.Count;
+            int originalBlitCount = image.Blits.Length;
             int targetBlitCount = originalBlitCount + 25000;
             
             // Reuse an existing shape to minimize memory impact during massive expansion
@@ -1147,7 +1198,8 @@ namespace DjvuNet.JB2.Tests
             
             for (int i = originalBlitCount; i < targetBlitCount; i++)
             {
-                image.AddBlit(new JB2Blit { ShapeNumber = existingShapeId, Left = rnd.Next(0, 10000), Bottom = rnd.Next(0, 10000) });
+                JB2Blit blit = new JB2Blit { ShapeNumber = existingShapeId, Left = rnd.Next(0, 10000), Bottom = rnd.Next(0, 10000) };
+                image.AddBlit(ref blit);
             }
 
             using (var ms = new MemoryStream())
@@ -1166,7 +1218,7 @@ namespace DjvuNet.JB2.Tests
                     decoder.Init(reader, dict);
                     decoder.Code(decodedImage);
                     
-                    Assert.Equal(targetBlitCount, decodedImage.Blits.Count);
+                    Assert.Equal(targetBlitCount, decodedImage.Blits.Length);
                     
                     // Verify that the encoded stream organically triggered RequiredDictOrReset 
                     // after StartOfData, causing the decoder to naturally reset the arithmetic coder.
@@ -1185,12 +1237,12 @@ namespace DjvuNet.JB2.Tests
             parentBmp.Fill(1);
             var parentShape = new JB2Shape { Parent = -1 };
             parentShape.Bitmap = parentBmp;
-            int parentId = dict.AddShape(parentShape);
+            int parentId = dict.AddShape(ref parentShape);
             
             // Child shape referencing the parent
             var childShape = new JB2Shape { Parent = parentId };
             childShape.Bitmap = parentBmp; // Same bitmap for simplicity in refinement
-            dict.AddShape(childShape);
+            dict.AddShape(ref childShape);
 
             using (var ms = new MemoryStream())
             {
@@ -1252,7 +1304,8 @@ namespace DjvuNet.JB2.Tests
                 // Use a previously generated 4x4 shape to ensure exact match sizes
                 // This wildly varies CodeMatchIndex and branches _BitCells organically.
                 int parentId = (i == originalShapeCount) ? -1 : rnd.Next(originalShapeCount, i);
-                dict.AddShape(new JB2Shape { Parent = parentId, Bitmap = bmp });
+                JB2Shape shape = new JB2Shape { Parent = parentId, Bitmap = bmp };
+                dict.AddShape(ref shape);
             }
 
             using (var ms = new MemoryStream())
@@ -1281,17 +1334,19 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_ImageWithSelfReferencingShape_ThrowsArgumentOutOfRangeException()
+        public void Encode_ImageWithSelfReferencingShape_Throws()
         {
             // Arrange
             JB2Image image = new JB2Image();
-            JB2Shape maliciousShape = new JB2Shape { Bitmap = new Bitmap(), Parent = -1 };
+            JB2Shape maliciousShape = new JB2Shape { Parent = -1 };
+            maliciousShape.Bitmap.Init(1, 1, 0);
             
-            image.AddShape(maliciousShape);
+            image.AddShape(ref maliciousShape);
             
             // Bypass AddShape validation by creating the cycle AFTER addition
-            maliciousShape.Parent = 0; 
-            image.AddBlit(new JB2Blit { ShapeNumber = 0, Left = 0, Bottom = 0 });
+            image.GetShape(0).Parent = 0;
+            JB2Blit blit = new JB2Blit { ShapeNumber = 0, Left = 0, Bottom = 0 };
+            image.AddBlit(ref blit);
 
             // Act
             using (MemoryStream ms = new MemoryStream())
@@ -1304,20 +1359,23 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_ImageWithCircularShapeReference_ThrowsArgumentOutOfRangeException()
+        public void Encode_ImageWithCircularShapeReference_Throws()
         {
             // Arrange
             JB2Image image = new JB2Image();
-            JB2Shape shape0 = new JB2Shape { Bitmap = new Bitmap(), Parent = -1 }; 
-            JB2Shape shape1 = new JB2Shape { Bitmap = new Bitmap(), Parent = -1 }; 
+            JB2Shape shape0 = new JB2Shape { Parent = -1 }; 
+            shape0.Bitmap.Init(1, 1, 0);
+            JB2Shape shape1 = new JB2Shape { Parent = -1 }; 
+            shape1.Bitmap.Init(1, 1, 0);
             
-            image.AddShape(shape0);
-            image.AddShape(shape1);
+            image.AddShape(ref shape0);
+            image.AddShape(ref shape1);
             
             // Bypass AddShape validation by creating the circular cycle AFTER addition
-            shape0.Parent = 1; 
-            shape1.Parent = 0; 
-            image.AddBlit(new JB2Blit { ShapeNumber = 0, Left = 0, Bottom = 0 });
+            image.GetShape(0).Parent = 1; 
+            image.GetShape(1).Parent = 0;
+            JB2Blit blit = new JB2Blit { ShapeNumber = 0, Left = 0, Bottom = 0 };
+            image.AddBlit(ref blit);
 
             // Act
             using (MemoryStream ms = new MemoryStream())
@@ -1330,7 +1388,7 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_ImageWithDeepLinearParentChain_ThrowsArgumentOutOfRangeException()
+        public void Encode_ImageWithDeepLinearParentChain_Throws()
         {
             // Arrange
             int extremeDepth = 60000; // Increased to 60k to guarantee overflow on x64
@@ -1338,11 +1396,13 @@ namespace DjvuNet.JB2.Tests
             
             for (int i = 0; i < extremeDepth; i++)
             {
-                JB2Shape shape = new JB2Shape { Bitmap = new Bitmap(), Parent = (i == 0) ? -1 : (i - 1) };
-                image.AddShape(shape);
+                JB2Shape shape = new JB2Shape { Parent = (i == 0) ? -1 : (i - 1) };
+                shape.Bitmap.Init(1, 1, 0);
+                image.AddShape(ref shape);
             }
 
-            image.AddBlit(new JB2Blit { ShapeNumber = extremeDepth - 1, Left = 0, Bottom = 0 });
+            JB2Blit blit = new JB2Blit { ShapeNumber = extremeDepth - 1, Left = 0, Bottom = 0 };
+            image.AddBlit(ref blit);
 
             // Act
             using (MemoryStream ms = new MemoryStream())
@@ -1355,15 +1415,18 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_BlitWithInvalidShapeNumber_ThrowsArgumentOutOfRangeException()
+        public void Encode_BlitWithInvalidShapeNumber_Throws()
         {
             JB2Image image = new JB2Image();
-            image.AddShape(new JB2Shape { Bitmap = new Bitmap(), Parent = -1 });
+            var shape = new JB2Shape { Parent = -1 };
+            shape.Bitmap.Init(1, 1, 0);
+            image.AddShape(ref shape);
             JB2Blit blit = new JB2Blit { ShapeNumber = 0, Left = 0, Bottom = 0 };
-            image.AddBlit(blit); 
+            image.AddBlit(ref blit); 
             
             // Bypass AddBlit validation by modifying the ShapeNumber AFTER addition
-            blit.ShapeNumber = 100; 
+            // Mutate via Span because GetBlit now safely returns by value
+            image.Blits[0].ShapeNumber = 100;
 
             using (MemoryStream ms = new MemoryStream())
             using (JB2Encoder encoder = new JB2Encoder())
@@ -1376,15 +1439,17 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
-        public void Encode_ShapeWithInvalidParent_ThrowsArgumentOutOfRangeException()
+        public void Encode_ShapeWithInvalidParent_Throws()
         {
             JB2Image image = new JB2Image();
-            JB2Shape shape0 = new JB2Shape { Bitmap = new Bitmap(), Parent = -1 }; 
-            image.AddShape(shape0);
+            JB2Shape shape0 = new JB2Shape { Parent = -1 }; 
+            shape0.Bitmap.Init(1, 1, 0);
+            image.AddShape(ref shape0);
             
             // Bypass AddShape validation by modifying the parent AFTER addition
-            shape0.Parent = 100; 
-            image.AddBlit(new JB2Blit { ShapeNumber = 0, Left = 0, Bottom = 0 });
+            image.GetShape(0).Parent = 100;
+            JB2Blit blit = new JB2Blit { ShapeNumber = 0, Left = 0, Bottom = 0 };
+            image.AddBlit(ref blit);
 
             using (MemoryStream ms = new MemoryStream())
             using (JB2Encoder encoder = new JB2Encoder())
@@ -1400,14 +1465,16 @@ namespace DjvuNet.JB2.Tests
         public void Encode_DictionaryForwardParentReference_Throws()
         {
             JB2Dictionary dict = new JB2Dictionary();
-            JB2Shape shape0 = new JB2Shape { Bitmap = new Bitmap(), Parent = -1 }; 
-            JB2Shape shape1 = new JB2Shape { Bitmap = new Bitmap(), Parent = -1 }; 
-            dict.AddShape(shape0);
-            dict.AddShape(shape1);
+            JB2Shape shape0 = new JB2Shape { Parent = -1 }; 
+            shape0.Bitmap.Init(1, 1, 0);
+            JB2Shape shape1 = new JB2Shape { Parent = -1 }; 
+            shape1.Bitmap.Init(1, 1, 0);
+            dict.AddShape(ref shape0);
+            dict.AddShape(ref shape1);
 
             // Bypass AddShape validation by modifying the parent AFTER addition
             // Shape 0 now references Shape 1 (a forward reference)
-            shape0.Parent = 1;
+            dict.GetShape(0).Parent = 1;
 
             using (MemoryStream ms = new MemoryStream())
             using (JB2Encoder encoder = new JB2Encoder())
@@ -1434,6 +1501,64 @@ namespace DjvuNet.JB2.Tests
                 var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => encoder.Encode(dict));
                 Assert.Contains("falls outside permitted bounds", ex.Message);
             }
+        }
+
+        private byte[] EncodeCrossCodedBoundaryImage(byte boundaryValue)
+        {
+            var image = new JB2Image();
+
+            Bitmap parentBm = new Bitmap();
+            parentBm.Init(10, 10, 0);
+            
+            parentBm.SetByteAt(parentBm.RowOffset(9) + 0, 1);
+            parentBm.SetByteAt(parentBm.RowOffset(9) + 8, 1);
+
+            JB2Shape parentShape = new JB2Shape();
+            parentShape.Init(-1);
+            parentShape.Bitmap = parentBm;
+            int parentId = image.AddShape(ref parentShape);
+
+            byte[] boundaryPadding = new byte[256];
+            Array.Fill(boundaryPadding, boundaryValue);
+
+            Bitmap childBm = new Bitmap();
+            childBm.Init(10, 10, 0);
+            childBm.SetByteAt(childBm.RowOffset(9) + 0, 1);
+            childBm.SetByteAt(childBm.RowOffset(9) + 8, 1);
+
+            JB2Shape childShape = new JB2Shape();
+            childShape.Init(parentId);
+            childShape.Bitmap = childBm;
+            int childId = image.AddShape(ref childShape);
+
+            JB2Blit blit = new JB2Blit { ShapeNumber = childId, Left = 0, Bottom = 0 };
+            image.AddBlit(ref blit);
+
+            using (var ms = new MemoryStream())
+            using (var encoder = new JB2Encoder())
+            {
+                encoder.Init(ms, null);
+                encoder.Encode(image);
+                
+                GC.KeepAlive(boundaryPadding);
+                
+                return ms.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Validates that extreme vertical coordinate shifts during JB2 cross-coding 
+        /// correctly fall back to the pinned ZeroBuffer via <see cref="Bitmap.GetRow(int)"/>, 
+        /// preventing managed heap over-reads into adjacent allocations.
+        /// </summary>
+        [Fact]
+        public void CodeBitmapByCrossCoding_ProtectedByZeroBuffer()
+        {
+            byte[] outputPass1 = EncodeCrossCodedBoundaryImage(0);
+
+            byte[] outputPass2 = EncodeCrossCodedBoundaryImage(1);
+
+            Assert.Equal(outputPass1, outputPass2);
         }
     }
 }

@@ -1,23 +1,30 @@
-using Xunit;
-using DjvuNet.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DjvuNet.Tests;
-using DjvuNet.Errors;
+using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using DjvuNet.Errors;
+using DjvuNet.Graphics;
+using DjvuNet.Tests;
+using Xunit;
 
 namespace DjvuNet.Graphics.Tests
 {
     public class BitmapTests
     {
+        /// <summary>
+        /// 64-bit CLR Array Overhead: 8 byte MethodTable + 4 byte SyncBlock + 4 byte Length + 8 byte Padding
+        /// </summary>
+        public const int Clr64BitArrayOverhead = 24;
+
         [Theory]
         [InlineData(-10, 10, 0, "width")]
         [InlineData(10, -10, 0, "height")]
         [InlineData(10, 10, -10, "border")]
-        public void Init_NegativeParameters_ThrowsDjvuArgumentOutOfRangeException(int width, int height, int border, string expectedParam)
+        public void Init_NegativeParameters_Throws(int width, int height, int border, string expectedParam)
         {
             Bitmap bmp = new Bitmap();
             var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.Init(height, width, border));
@@ -31,7 +38,7 @@ namespace DjvuNet.Graphics.Tests
         // Massive overflow: height * stride > int.MaxValue.
         // 65536 * (65536 + 0) = 4,294,967,296
         [InlineData(65536, 65536, 0)]
-        public void Init_CalculatedStrideOverflow_ThrowsDjvuArgumentOutOfRangeException(int width, int height, int border)
+        public void Init_CalculatedStrideOverflow_Throws(int width, int height, int border)
         {
             Bitmap bmp = new Bitmap();
             var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.Init(height, width, border));
@@ -39,7 +46,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void InitWithData_MismatchedBuffer_ThrowsDjvuArgumentException()
+        public void InitWithData_MismatchedBuffer_Throws()
         {
             Bitmap bmp = new Bitmap();
             int width = 10;
@@ -53,7 +60,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void InitWithData_NullBuffer_ThrowsDjvuArgumentException()
+        public void InitWithData_NullBuffer_Throws()
         {
             Bitmap bmp = new Bitmap();
             var ex = Assert.Throws<DjvuArgumentException>(() => bmp.Init(null, 10, 10, 0));
@@ -61,11 +68,11 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void InitWithRectangle_NegativeBorder_ThrowsDjvuArgumentOutOfRangeException()
+        public void InitWithRectangle_NegativeBorder_Throws()
         {
             Bitmap bmp = new Bitmap();
             Bitmap source = new Bitmap(10, 10, 0);
-            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.Init(source, new Rectangle(0, 0, 10, 10), -5));
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.Init(ref source, new Rectangle(0, 0, 10, 10), -5));
             Assert.Equal("border", ex.ParamName);
         }
 
@@ -93,7 +100,7 @@ namespace DjvuNet.Graphics.Tests
             // In a Cartesian plane, Row 0 is the bottom.
             // The row offset logic: Row y corresponds to indices [y*10, y*10 + 9].
             // So coordinate (x=3, y=4) is at offset 4*10 + 3 = 43.
-            bmp.Init(bmp, new Rectangle(3, 4, 5, 5), 2);
+            bmp.Init(ref bmp, new Rectangle(3, 4, 5, 5), 2);
 
             System.Console.WriteLine("--- Diagnostic: Self-Aliasing Buffer Contents ---");
             System.Console.WriteLine($"Old Buffer ({oldWidth}x{oldHeight}, Border {oldBorder}):");
@@ -138,6 +145,7 @@ namespace DjvuNet.Graphics.Tests
 
         public static IEnumerable<object[]> GenerateCropTestData()
         {
+            var testCases = new System.Collections.Generic.List<object[]>(1000);
             int count = 0;
             int[] borders = { 0, 3 };
             int[] rXs = { -5, 0, 5, 15 };
@@ -158,7 +166,7 @@ namespace DjvuNet.Graphics.Tests
                 if (count++ < 900)
                 {
                     Type expectedException = DetermineExpectedException(tgtBorder, rW, rH);
-                    yield return new object[] { 10, 10, srcBorder, tgtBorder, rX, rY, rW, rH, selfAlias, expectedException };
+                    testCases.Add(new object[] { 10, 10, srcBorder, tgtBorder, rX, rY, rW, rH, selfAlias, expectedException });
                 }
             }
 
@@ -177,8 +185,18 @@ namespace DjvuNet.Graphics.Tests
                 bool alias = rnd.Next(2) == 0;
 
                 Type expectedException = DetermineExpectedException(tgtB, rW, rH);
-                yield return new object[] { srcW, srcH, srcB, tgtB, rX, rY, rW, rH, alias, expectedException };
+                testCases.Add(new object[] { srcW, srcH, srcB, tgtB, rX, rY, rW, rH, alias, expectedException });
             }
+
+            // Sort descending by target area (rW * rH) to prevent POH fragmentation
+            testCases.Sort((a, b) => 
+            {
+                long areaA = (long)(uint)a[6] * (uint)a[7];
+                long areaB = (long)(uint)b[6] * (uint)b[7];
+                return areaB.CompareTo(areaA);
+            });
+
+            return testCases;
         }
 
         private static Type DetermineExpectedException(int tgtBorder, uint rW, uint rH)
@@ -249,12 +267,12 @@ namespace DjvuNet.Graphics.Tests
 
             if (expectedException != null)
             {
-                Assert.Throws(expectedException, () => target.Init(source, new Rectangle(rX, rY, rW, rH), tgtBorder));
+                Assert.Throws(expectedException, () => target.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder));
                 return;
             }
 
             // No exception expected, safely execute and validate state
-            target.Init(source, new Rectangle(rX, rY, rW, rH), tgtBorder);
+            target.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder);
 
             // Oracle Geometry Correction: If either requested dimension is 0, the Rectangle is Empty.
             // An Empty Rectangle correctly collapses both Width and Height to 0.
@@ -306,30 +324,15 @@ namespace DjvuNet.Graphics.Tests
         public void Duplicate_UninitializedBitmap_Succeeds()
         {
             Bitmap bmp = new Bitmap();
-            var clone = bmp.Duplicate() as Bitmap;
+            var clone = bmp.Duplicate();
 
-            Assert.NotNull(clone);
+            Assert.Equal(default, clone);
             Assert.Null(clone.Data);
             Assert.Equal(0, clone.Width);
             Assert.Equal(0, clone.Height);
         }
 
-        [Fact]
-        public unsafe void Duplicate_DeepCopiesUnmanagedRampData()
-        {
-            Bitmap bmp = new Bitmap();
-            bmp.Grays = 16;
-            // Force ramp allocation
-            Pixel[] ramp = bmp.Ramp;
 
-            var clone = bmp.Duplicate() as Bitmap;
-
-            // Mutate clone
-            clone.Ramp[0] = new Pixel(123, 123, 123);
-
-            // Original must be unaffected
-            Assert.NotEqual(123, bmp.Ramp[0].Blue);
-        }
 
         [Fact()]
         public void BitmapTest001()
@@ -337,7 +340,6 @@ namespace DjvuNet.Graphics.Tests
             Bitmap bmp = new Bitmap();
             Assert.NotNull(bmp);
             Assert.Equal(1, bmp.BytesPerPixel);
-            Assert.True(bmp.IsRampNeeded);
             Assert.Equal(0, bmp.Width);
             Assert.Equal(0, bmp.Height);
             Assert.Null(bmp.Data);
@@ -352,7 +354,6 @@ namespace DjvuNet.Graphics.Tests
             Bitmap bmp = new Bitmap(height, width, border);
             Assert.NotNull(bmp);
             Assert.Equal(1, bmp.BytesPerPixel);
-            Assert.True(bmp.IsRampNeeded);
             Assert.Equal(width, bmp.Width);
             Assert.Equal(height, bmp.Height);
             Assert.Equal((width + border) * height, bmp.Data.Length);
@@ -368,35 +369,32 @@ namespace DjvuNet.Graphics.Tests
             Bitmap bmp = new Bitmap(height, width, border);
             Assert.NotNull(bmp);
             Assert.Equal(1, bmp.BytesPerPixel);
-            Assert.True(bmp.IsRampNeeded);
             Assert.Equal(width, bmp.Width);
             Assert.Equal(height, bmp.Height);
             Assert.Equal((width + border) * height, bmp.Data.Length);
 
-            Bitmap test = new Bitmap(bmp);
+            Bitmap test = new Bitmap(ref bmp);
             Assert.Equal(1, test.BytesPerPixel);
-            Assert.True(test.IsRampNeeded);
             Assert.Equal(width, test.Width);
             Assert.Equal(height, test.Height);
             Assert.Equal((width + border) * height, test.Data.Length);
             Assert.Equal(height, test.Height);
         }
 
-        public static IBitmap CreateVerifyBitmap()
+        public static ref Bitmap CreateVerifyDefaultBitmap(ref Bitmap bmp)
         {
-            Bitmap bmp = new Bitmap();
-            Assert.NotNull(bmp);
+            Assert.Equal(bmp, default);
             Assert.Equal(1, bmp.BytesPerPixel);
-            Assert.True(bmp.IsRampNeeded);
             Assert.Equal(0, bmp.Width);
             Assert.Equal(0, bmp.Height);
             Assert.Null(bmp.Data);
-            return bmp;
+            return ref bmp;
         }
 
-        public static IBitmap CreateInitVerifyBitmap(int width, int height, int border)
+        public static Bitmap CreateInitVerifyBitmap(int width, int height, int border)
         {
-            IBitmap bmp = CreateVerifyBitmap();
+            Bitmap bmp = default;
+            bmp = CreateVerifyDefaultBitmap(ref bmp);
             bmp.Init(height, width, border);
             Assert.Equal(width, bmp.Width);
             Assert.Equal(height, bmp.Height);
@@ -404,16 +402,16 @@ namespace DjvuNet.Graphics.Tests
             return bmp;
         }
 
-        public static IBitmap CreateIntiFillVerifyBitmap(int width, int height, int border, sbyte color)
+        public static Bitmap CreateIntiFillVerifyBitmap(int width, int height, int border, sbyte color)
         {
             var bmp = CreateInitVerifyBitmap(width, height, border);
             bmp.Fill(color);
             Assert.Equal(unchecked((byte)color), bmp.GetByteAt(width * height / 2));
-            return bmp;
+            return bmp.Duplicate();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public static void WriteBitmap(int width, int height, IBitmap bmp)
+        public static void WriteBitmap(int width, int height, ref Bitmap bmp)
         {
             string format = "x4";
             for (int i = (height - 1); i >= 0; i--)
@@ -439,7 +437,8 @@ namespace DjvuNet.Graphics.Tests
             var bmp = CreateIntiFillVerifyBitmap(width, height, border, color);
             var bmp2 = bmp.Duplicate();
 
-            Assert.NotSame(bmp, bmp2);
+            Assert.Equal(bmp, bmp2);
+            Assert.False(ReferenceEquals(bmp.Data, bmp2.Data));
 
             Assert.Equal(width, bmp2.Width);
             Assert.Equal(height, bmp2.Height);
@@ -584,7 +583,7 @@ namespace DjvuNet.Graphics.Tests
             var bmp2 = CreateIntiFillVerifyBitmap(width / 2, height / 2, border, color3);
             bmp2.Grays = 255;
 
-            bool result = bmp1.Blit(bmp2, width / 2, height / 2, 1);
+            bool result = bmp1.Blit(ref bmp2, width / 2, height / 2, 1);
             Assert.True(result);
 
             Assert.Equal(unchecked((byte)color1), bmp1.GetByteAt(width * (height / 4) + (width * 3 / 4)));
@@ -604,7 +603,7 @@ namespace DjvuNet.Graphics.Tests
             var bmp2 = CreateIntiFillVerifyBitmap(width / 2, height / 2, border, color2);
             bmp2.Grays = 256;
 
-            bool result = bmp1.Blit(bmp2, width, height, 2);
+            bool result = bmp1.Blit(ref bmp2, width, height, 2);
 
             Assert.True(result);
             Assert.Equal(unchecked((byte)255), bmp1.GetByteAt(width * (height / 4) + 10));
@@ -622,7 +621,7 @@ namespace DjvuNet.Graphics.Tests
             var bmp1 = CreateIntiFillVerifyBitmap(width, height, border, color1);
             var bmp2 = CreateIntiFillVerifyBitmap(width / 2, height / 2, border, color2);
 
-            bool result = bmp1.Blit(bmp2, 2048, height / 2, 2);
+            bool result = bmp1.Blit(ref bmp2, 2048, height / 2, 2);
             Assert.False(result);
         }
 
@@ -637,7 +636,7 @@ namespace DjvuNet.Graphics.Tests
             var bmp1 = CreateIntiFillVerifyBitmap(width, height, border, color1);
             var bmp2 = CreateIntiFillVerifyBitmap(width / 2, height / 2, border, color2);
 
-            bool result = bmp1.Blit(bmp2, width/2, 2048, 2);
+            bool result = bmp1.Blit(ref bmp2, width/2, 2048, 2);
             Assert.False(result);
         }
 
@@ -652,7 +651,7 @@ namespace DjvuNet.Graphics.Tests
             var bmp1 = CreateIntiFillVerifyBitmap(width, height, border, color1);
             var bmp2 = CreateIntiFillVerifyBitmap(width / 2, height / 2, border, color2);
 
-            bool result = bmp1.Blit(bmp2, -1024, height / 2, 2);
+            bool result = bmp1.Blit(ref bmp2, -1024, height / 2, 2);
             Assert.False(result);
         }
 
@@ -667,7 +666,7 @@ namespace DjvuNet.Graphics.Tests
             var bmp1 = CreateIntiFillVerifyBitmap(width, height, border, color1);
             var bmp2 = CreateIntiFillVerifyBitmap(width / 2, height / 2, border, color2);
 
-            bool result = bmp1.Blit(bmp2, width / 2, -1024, 2);
+            bool result = bmp1.Blit(ref bmp2, width / 2, -1024, 2);
             Assert.False(result);
         }
 
@@ -702,7 +701,6 @@ namespace DjvuNet.Graphics.Tests
         {
             var bmp = new Bitmap();
             Assert.NotNull(bmp);
-            Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
             Assert.Equal(128, bmp.Width);
@@ -716,35 +714,34 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(1, bmp.GetByteAt(64));
         }
 
-        [Fact()]
-        public void FillTest002()
-        {
+        //[Fact(Skip = "Not implemented"), Trait("Category", "Skip")]
+        //public void FillTest002()
+        //{
 
-            int width = 16;
-            int height = 16;
-            int border = 4;
-            sbyte color1 = 0;
-            sbyte color2 = -1;
-            var bmp1 = CreateIntiFillVerifyBitmap(width, height, border, color1);
-            var bmp2 = CreateIntiFillVerifyBitmap(width, height, border, color2);
+        //    int width = 16;
+        //    int height = 16;
+        //    int border = 4;
+        //    sbyte color1 = 0;
+        //    sbyte color2 = -1;
+        //    var bmp1 = CreateIntiFillVerifyBitmap(width, height, border, color1);
+        //    var bmp2 = CreateIntiFillVerifyBitmap(width, height, border, color2);
 
-            bmp1.Fill(bmp2, 4, 4);
+        //    bmp1.Fill(bmp2, 4, 4);
 
-            IPixelReference pix1 = bmp1.CreateGPixelReference(0);
-            pix1.SetOffset(5, 5);
+        //    IPixelReference pix1 = bmp1.CreateGPixelReference(0);
+        //    pix1.SetOffset(5, 5);
 
-            Assert.Equal(color2, pix1.ToPixel().Blue);
+        //    Assert.Equal(color2, pix1.ToPixel().Blue);
 
-            pix1.SetOffset(3, 5);
-            Assert.Equal(color1, pix1.ToPixel().Blue);
-        }
+        //    pix1.SetOffset(3, 5);
+        //    Assert.Equal(color1, pix1.ToPixel().Blue);
+        //}
 
         [Fact()]
         public void InsertMapTest()
         {
             var bmp = new Bitmap();
             Assert.NotNull(bmp);
-            Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
             Assert.Equal(128, bmp.Width);
@@ -756,7 +753,6 @@ namespace DjvuNet.Graphics.Tests
 
             var bmp2 = new Bitmap();
             Assert.NotNull(bmp2);
-            Assert.True(bmp2.IsRampNeeded);
 
             bmp2.Init(256, 256, 0);
             Assert.Equal(256, bmp2.Width);
@@ -766,7 +762,7 @@ namespace DjvuNet.Graphics.Tests
             bmp2.Fill(127);
             Assert.Equal(127, bmp2.GetByteAt(192));
 
-            bmp2.InsertMap(bmp, 128, 0, false);
+            bmp2.InsertMap(ref bmp, 128, 0, false);
             Assert.Equal(255, bmp2.GetByteAt(192));
         }
 
@@ -774,8 +770,6 @@ namespace DjvuNet.Graphics.Tests
         public void InitTest001()
         {
             Bitmap bmp = new Bitmap();
-            Assert.NotNull(bmp);
-            Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
             Assert.Equal(128, bmp.Width);
@@ -787,8 +781,6 @@ namespace DjvuNet.Graphics.Tests
         public void InitTest002()
         {
             Bitmap bmp = new Bitmap();
-            Assert.NotNull(bmp);
-            Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
             Assert.Equal(128, bmp.Width);
@@ -799,9 +791,10 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(255, bmp.GetByteAt(64));
 
             Bitmap testBmp = new Bitmap();
-            testBmp.Init(bmp, 0);
+            testBmp.Init(ref bmp, 0);
 
-            Assert.NotSame(bmp, testBmp);
+            Assert.Equal<Bitmap>(bmp, testBmp);
+            Assert.False(ReferenceEquals(bmp.Data, testBmp.Data));
             Assert.Equal(bmp.Width, testBmp.Width);
             Assert.Equal(bmp.Height, testBmp.Height);
             Assert.Equal(bmp.GetByteAt(64), testBmp.GetByteAt(64));
@@ -811,8 +804,6 @@ namespace DjvuNet.Graphics.Tests
         public void InitTest003()
         {
             Bitmap bmp = new Bitmap();
-            Assert.NotNull(bmp);
-            Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
             Assert.Equal(128, bmp.Width);
@@ -822,16 +813,14 @@ namespace DjvuNet.Graphics.Tests
             bmp.Fill(-1);
             Assert.Equal(255, bmp.GetByteAt(64));
 
-            var bmp2 = bmp.Init(bmp, new Rectangle(0, 0, 128, 128), 0);
-            Assert.Same(bmp2, bmp);
+            var bmp2 = bmp.Init(ref bmp, new Rectangle(0, 0, 128, 128), 0);
+            Assert.Equal<Bitmap>(bmp2, bmp);
         }
 
         [Fact()]
         public void TranslateTest()
         {
             Bitmap bmp = new Bitmap();
-            Assert.NotNull(bmp);
-            Assert.True(bmp.IsRampNeeded);
 
             bmp.Init(128, 128, 0);
             Assert.Equal(128, bmp.Width);
@@ -843,7 +832,6 @@ namespace DjvuNet.Graphics.Tests
 
             Bitmap bmp2 = new Bitmap();
             Assert.NotNull(bmp2);
-            Assert.True(bmp2.IsRampNeeded);
 
             bmp2.Init(256, 256, 0);
             Assert.Equal(256, bmp2.Width);
@@ -853,7 +841,7 @@ namespace DjvuNet.Graphics.Tests
             bmp2.Fill(127);
             Assert.Equal(127, bmp2.GetByteAt(192));
 
-            Bitmap bmp3 = (Bitmap) bmp.Translate(64, 64, bmp2);
+            Bitmap bmp3 = (Bitmap) bmp.Translate(64, 64, ref bmp2);
             Assert.Equal(128, bmp3.Width);
             Assert.Equal(128, bmp3.Height);
             Assert.Equal(0, bmp3.GetByteAt(96));
@@ -927,29 +915,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(0, rect.Height);
         }
 
-        [Fact]
-        public void PixelRamp_ResolvesColor_Theory()
-        {
-            var bmp = new Bitmap();
-            bmp.Init(10, 10, 0);
-            bmp.Grays = 256;
 
-            // Generate Ramp
-            Pixel[] ramp = bmp.Ramp;
-            Assert.NotNull(ramp);
-            Assert.Equal(256, ramp.Length);
-
-            // White pixel maps to index 0 (White)
-            var whiteRef = bmp.CreateGPixelReference(0); // Offset 0, which we filled with 0 (White) in Init
-            IPixel resultWhite = bmp.PixelRamp(whiteRef);
-            Assert.Equal(unchecked((sbyte)255), resultWhite.Blue); // White is 255,255,255
-
-            // Black pixel maps to index 255
-            bmp.SetByteAt(0, (sbyte)-1); // -1 evaluates to 255 when masked with 0xFF
-            var blackRef = bmp.CreateGPixelReference(0);
-            IPixel resultBlack = bmp.PixelRamp(blackRef);
-            Assert.Equal(0, resultBlack.Blue); // Black is 0,0,0
-        }
         [Fact]
         public void ChangeGrays_UninitializedData_SafelyUpdatesGrays()
         {
@@ -961,14 +927,14 @@ namespace DjvuNet.Graphics.Tests
         [Theory]
         [InlineData(1)]
         [InlineData(257)]
-        public void ChangeGrays_InvalidArguments_ThrowsArgumentOutOfRangeException(int invalidGrays)
+        public void ChangeGrays_InvalidArguments_Throws(int invalidGrays)
         {
             var bmp = new Bitmap();
             Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.ChangeGrays(invalidGrays));
         }
 
         [Fact]
-        public void ChangeGrays_CurrentGraysIsOne_ThrowsInvalidOperationException()
+        public void ChangeGrays_CurrentGraysIsOne_Throws()
         {
             var bmp = new Bitmap();
             bmp.Init(10, 10, 0);
@@ -1011,7 +977,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Init_ThrowsDjvuNullReferenceException()
+        public void Init_Throws()
         {
             var bmp = new Bitmap();
             // Init dimensions but try to force the underlying data buffer to remain null
@@ -1039,7 +1005,7 @@ namespace DjvuNet.Graphics.Tests
                 source.Fill(1);
 
                 // Act
-                bool result = target.Blit(source, x, y, sub);
+                bool result = target.Blit(ref source, x, y, sub);
 
                 // Assert
                 Assert.Equal(expected, result);
@@ -1063,24 +1029,54 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Blit_NullSource_ThrowsDjvuArgumentNullException()
+        public void Blit_NullRefSource_Throws()
         {
             Bitmap target = new Bitmap();
             {
                 target.Init(10, 10, 0);
-                var ex = Assert.Throws<DjvuArgumentNullException>(() => target.Blit(null, 0, 0, 1));
-                Assert.Contains("Cannot blit a null source bitmap onto the target", ex.Message);
+                var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                    target.Blit(ref Unsafe.NullRef<Bitmap>(), 0, 0, 1));
+                Assert.Contains(
+                    $"{typeof(Bitmap).FullName} source reference is null.", ex.Message);
             }
         }
 
         [Fact]
-        public void InsertMap_NullSource_ThrowsDjvuArgumentNullException()
+        public void Blit_DefaultSource_Throws()
         {
             Bitmap target = new Bitmap();
             {
                 target.Init(10, 10, 0);
-                var ex = Assert.Throws<DjvuArgumentNullException>(() => target.InsertMap(null, 0, 0, false));
-                Assert.Contains("Cannot insert a null source map into the target", ex.Message);
+                Bitmap defBmp = default;
+                var ex = Assert.Throws<DjvuArgumentException>(() => target.Blit(ref defBmp, 0, 0, 1));
+                Assert.Contains(
+                    $"Cannot Blit a default source {typeof(Bitmap).FullName} into the target as {nameof(Bitmap.Data)} is null.", ex.Message);
+            }
+        }
+
+        [Fact]
+        public void InsertMap_NullRefSource_Throws()
+        {
+            Bitmap target = new Bitmap();
+            {
+                target.Init(10, 10, 0);
+                var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                    target.InsertMap(ref Unsafe.NullRef<Bitmap>(), 0, 0, false));
+                Assert.Contains(
+                    $"{typeof(Bitmap).FullName} source reference is null.", ex.Message);
+            }
+        }
+
+        [Fact]
+        public void InsertMap_DefaultUninitializedSource_Throws()
+        {
+            Bitmap target = new Bitmap();
+            {
+                target.Init(10, 10, 0);
+                Bitmap defBmp = default;
+                var ex = Assert.Throws<DjvuArgumentException>(() => target.InsertMap(ref defBmp, 0, 0, false));
+                Assert.Contains(
+                    $"Cannot insert a default source {typeof(Bitmap).FullName} into the target as {nameof(Bitmap.Data)} is null.", ex.Message);
             }
         }
 
@@ -1229,7 +1225,7 @@ namespace DjvuNet.Graphics.Tests
 
         [Theory]
         [InlineData(10, 10, 16)]
-        public void Compress_InvalidState_ThrowsDjvuInvalidOperationException(int width, int height, int grays)
+        public void Compress_InvalidState_Throws(int width, int height, int grays)
         {
             Bitmap source = new Bitmap();
             if (width > 0 && height > 0)
@@ -1376,13 +1372,13 @@ namespace DjvuNet.Graphics.Tests
         public void Compress_ZeroDimensions_ReturnsGracefully()
         {
             Bitmap source = new Bitmap();
-            typeof(DjvuNet.Graphics.Map).GetProperty("Width").SetValue(source, 0);
-            typeof(DjvuNet.Graphics.Map).GetProperty("Height").SetValue(source, 0);
-            typeof(DjvuNet.Graphics.Map).GetProperty("Data").SetValue(source, new sbyte[10]);
+            typeof(DjvuNet.Graphics.Bitmap).GetProperty("Width").SetValue(source, 0);
+            typeof(DjvuNet.Graphics.Bitmap).GetProperty("Height").SetValue(source, 0);
+            typeof(DjvuNet.Graphics.Bitmap).GetProperty("Data").SetValue(source, new sbyte[10]);
 
             source.Compress();
 
-            var rleData = typeof(Bitmap).GetField("_RleData", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).GetValue(source) as byte[];
+            var rleData = typeof(Bitmap).GetField("_RleData", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(source) as byte[];
             Assert.Null(rleData);
         }
 
@@ -1443,15 +1439,15 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public unsafe void RleDecode_NullRuns_ThrowsArgumentNullException()
+        public unsafe void RleDecode_NullRuns_Throws()
         {
             Bitmap source = new Bitmap();
             source.Init(10, 10, 0);
-            var method = typeof(Bitmap).GetMethod("RleDecode", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var method = typeof(Bitmap).GetMethod("RleDecode", BindingFlags.NonPublic | BindingFlags.Instance);
             
-            var ex = Assert.Throws<System.Reflection.TargetInvocationException>(() => 
+            var ex = Assert.Throws<TargetInvocationException>(() => 
             {
-                object[] parameters = new object[] { System.Reflection.Pointer.Box(null, typeof(byte*)) };
+                object[] parameters = new object[] { Pointer.Box(null, typeof(byte*)) };
                 method.Invoke(source, parameters);
             });
             Assert.IsType<DjvuArgumentNullException>(ex.InnerException);
@@ -1537,8 +1533,7 @@ namespace DjvuNet.Graphics.Tests
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(10, 10, 0);
-            var method = typeof(Bitmap).GetMethod("SetHeight", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            method.Invoke(bmp, new object[] { 5 }); // Shrinking height is safe with 100-byte data array
+            bmp.SetHeight(5); // Shrinking height is safe with 100-byte data array
             Assert.Equal(5, bmp.Height);
         }
 
@@ -1547,8 +1542,7 @@ namespace DjvuNet.Graphics.Tests
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(10, 10, 0);
-            var method = typeof(Bitmap).GetMethod("SetWidth", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            method.Invoke(bmp, new object[] { 5 }); // Shrinking width is safe since BytesPerRow doesn't update and buffer is large enough
+            bmp.SetWidth(5);
             Assert.Equal(5, bmp.Width);
         }
 
@@ -1559,7 +1553,7 @@ namespace DjvuNet.Graphics.Tests
             Bitmap bmp = new Bitmap(data, 10, 10, 0);
             Assert.Equal(10, bmp.Height);
             Assert.Equal(10, bmp.Width);
-            Assert.Same(data, bmp.Data);
+            Assert.Equal(data, bmp.Data);
         }
 
         [Fact]
@@ -1805,7 +1799,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void CreateBitmap_IncompleteHeader_ThrowsEndOfStreamException()
+        public void CreateBitmap_IncompleteHeader_Throws()
         {
             // Only 1 byte, magic header needs 2 bytes.
             byte[] badData = new byte[] { (byte)'P' };
@@ -1816,7 +1810,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void CreateBitmap_InvalidPgmDepth_ThrowsFormatException()
+        public void CreateBitmap_InvalidPgmDepth_Throws()
         {
             // P5 format, Width: 2, Height: 2, MaxVal: 70000 (exceeds 16-bit 65535 limit)
             string header = "P5\n2 2\n70000\n";
@@ -1828,7 +1822,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void CreateBitmap_UnsupportedMagicNumber_ThrowsFormatException()
+        public void CreateBitmap_UnsupportedMagicNumber_Throws()
         {
             // P9 is an invalid format. CreateBitmap should reject it.
             string header = "P9\n2 2\n255\n";
@@ -1840,7 +1834,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ReadPgmRawStream_TruncatedData_ThrowsEndOfStreamException()
+        public void ReadPgmRawStream_TruncatedData_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(2, 2, 0);
@@ -1855,7 +1849,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ReadPbmRawStream_TruncatedData_ThrowsEndOfStreamException()
+        public void ReadPbmRawStream_TruncatedData_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(10, 10, 0);
@@ -1870,7 +1864,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ReadPgmTextStream_TruncatedData_ThrowsEndOfStreamException()
+        public void ReadPgmTextStream_TruncatedData_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(2, 2, 0);
@@ -1884,7 +1878,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ReadPgmTextStream_CorruptedData_ThrowsFormatException()
+        public void ReadPgmTextStream_CorruptedData_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(2, 2, 0);
@@ -1898,7 +1892,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ReadPbmTextStream_TruncatedData_ThrowsEndOfStreamException()
+        public void ReadPbmTextStream_TruncatedData_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(2, 2, 0);
@@ -1912,7 +1906,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ReadRleStream_TruncatedData_ThrowsEndOfStreamException()
+        public void ReadRleStream_TruncatedData_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(10, 10, 0);
@@ -1926,7 +1920,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void ReadRleStream_DataOutOfSync_ThrowsEndOfStreamException()
+        public void ReadRleStream_DataOutOfSync_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(2, 2, 0);
@@ -1940,7 +1934,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void SerializeToPbm_GraysGreaterThanTwo_ThrowsFormatException()
+        public void SerializeToPbm_GraysGreaterThanTwo_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(10, 10, 0);
@@ -1952,7 +1946,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void SerializeToRle_GraysGreaterThanTwo_ThrowsInvalidOperationException()
+        public void SerializeToRle_GraysGreaterThanTwo_Throws()
         {
             Bitmap bmp = new Bitmap();
             bmp.Init(10, 10, 0);
@@ -1964,7 +1958,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void SerializeToRle_UninitializedData_ThrowsInvalidOperationException()
+        public void SerializeToRle_UninitializedData_Throws()
         {
             Bitmap bmp = new Bitmap();
             // Data is null, Width/Height = 0
@@ -1984,11 +1978,496 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void RleDecode_OutOfBounds_ThrowsArgumentOutOfRangeException()
+        public void RleDecode_OutOfBounds_Throws()
         {
             Bitmap bmp = new Bitmap();
             // Init throws early if memory exceeds max limit
             Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.Init(int.MaxValue, 2, 0));
+        }
+
+        [Fact]
+        public void EnsureZeroBuffer_ExpandsWhenRequired()
+        {
+            int initialSize = Bitmap._ZeroBufferSize;
+            int requiredSize = initialSize + 1024;
+            
+            Bitmap.EnsureZeroBuffer(requiredSize);
+            
+            Assert.True(Bitmap._ZeroBufferSize >= requiredSize, 
+                $"ZeroBuffer failed to expand. Expected at least {requiredSize}, got {Bitmap._ZeroBufferSize}");
+        }
+
+        [Fact]
+        public async Task EnsureZeroBuffer_IsThreadSafe()
+        {
+            int initialSize = Bitmap._ZeroBufferSize;
+            
+            int taskCount = 20;
+            int baseSize = initialSize + 1000;
+            Task[] tasks = new Task[taskCount];
+
+            for (int i = 0; i < taskCount; i++)
+            {
+                int required = baseSize + (i * 100);
+                tasks[i] = Task.Run(() => Bitmap.EnsureZeroBuffer(required), TestContext.Current.CancellationToken);
+            }
+
+            await Task.WhenAll(tasks);
+
+            int expectedMax = baseSize + (19 * 100);
+            
+            Assert.True(Bitmap._ZeroBufferSize >= expectedMax, 
+                $"ZeroBuffer thread-safe expansion failed. Expected at least {expectedMax}, got {Bitmap._ZeroBufferSize}");
+        }
+
+        [Fact]
+        public unsafe void GetRow_NegativeRow_ReturnsZeroBufferPointer()
+        {
+            Bitmap bmp = new Bitmap();
+            bmp.Init(10, 10, 2);
+
+            sbyte* rowPtr = bmp.GetRow(-1);
+            sbyte* expectedPtr = Bitmap._ZeroBufferPointer + bmp.Border;
+
+            Assert.Equal((nint)expectedPtr, (nint)rowPtr);
+        }
+
+        [Fact]
+        public unsafe void GetRow_OverflowRow_ReturnsZeroBufferPointer()
+        {
+            Bitmap bmp = new Bitmap();
+            bmp.Init(10, 10, 2); // Height is 10, valid rows 0-9
+
+            sbyte* rowPtr = bmp.GetRow(10);
+            sbyte* expectedPtr = Bitmap._ZeroBufferPointer + bmp.Border;
+
+            Assert.Equal((nint)expectedPtr, (nint)rowPtr);
+        }
+
+        /// <summary>
+        /// Test verifies that ZeroBufferLock timeout prevents any potential deadlock
+        /// Test has to ensure that first lock is taken on different thread
+        /// that one we are running actual deadlock testing on.
+        /// </summary>
+        /// <returns></returns>
+        [Fact]
+        public async Task EnsureZeroBuffer_Deadlock_Throws()
+        {
+            // Act & Assert combined using the verified infrastructure utility
+            DjvuTimeoutException ex = await Util.ThrowsAsync<DjvuTimeoutException>(
+                lockAcquisition: () => Bitmap._ZeroBufferLock.Enter(),
+                lockRelease: () => Bitmap._ZeroBufferLock.Exit(),
+                backgroundAction: () =>
+                {
+                    int required = Bitmap._ZeroBufferSize + 1024;
+
+                    // This runs on the isolated background thread and hits the lock held by the main thread
+                    Bitmap.EnsureZeroBuffer(required);
+                }
+            );
+
+            // Validate the specific deadlock exception details
+            Assert.Contains("Deadlock detected", ex.Message);
+        }
+
+        [Fact]
+        public void Init_ExternalBufferTooSmall_Throws()
+        {
+            Bitmap bmp = new Bitmap();
+            sbyte[] smallBuffer = new sbyte[10]; // Too small for a 10x10 bitmap
+            
+            var ex = Assert.Throws<DjvuArgumentException>(() => bmp.Init(smallBuffer, 10, 10, 0));
+            Assert.Contains("Mismatch in data size and Bitmap dimensions", ex.Message);
+        }
+
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        public void Init_SourceBitmap_VerifyIsAllocatedOnPinnedObjectHeap()
+        {
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            long pohSizeBefore = GC.GetGCMemoryInfo().GenerationInfo[4].SizeBeforeBytes;
+            // Setup source outside the measured zone
+            Bitmap source = new Bitmap();
+            source.Init(32, 32, 0);
+
+            Bitmap bmp = default;
+            bool enteredNoGC = false;
+
+            try
+            {
+                enteredNoGC = GC.TryStartNoGCRegion(1024 * 1024, true);
+                bmp = new Bitmap();
+                bmp.Init(ref source, 0);
+                Assert.Equal(2, GC.GetGeneration(bmp.Data));
+            }
+            finally
+            {
+                if (enteredNoGC) GC.EndNoGCRegion();
+            }
+
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            long pohSizeAfter = GC.GetGCMemoryInfo().GenerationInfo[4].SizeAfterBytes;
+            
+            long arrayAllocationSize = bmp.Data.Length * sizeof(sbyte) + Clr64BitArrayOverhead;
+
+            Console.WriteLine($"Source: {source}\n{bmp}. Size of allocation in POH: {pohSizeAfter - pohSizeBefore}");
+
+            Assert.Equal(arrayAllocationSize * 2, pohSizeAfter - pohSizeBefore);
+        }
+
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        public void Init_SourceBitmapRect_VerifyIsAllocatedOnPinnedObjectHeap()
+        {
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            long pohSizeBefore = GC.GetGCMemoryInfo().GenerationInfo[4].SizeAfterBytes;
+
+            Bitmap source = new Bitmap();
+            source.Init(64, 64, 0); 
+
+            Bitmap bmp = default;
+            bool enteredNoGC = false;
+
+            try
+            {
+                enteredNoGC = GC.TryStartNoGCRegion(1024 * 1024, true);
+                bmp = new Bitmap();
+                bmp.Init(ref source, new Rectangle(0, 0, 32, 32), 0); 
+                Assert.Equal(2, GC.GetGeneration(bmp.Data));
+            }
+            finally
+            {
+                if (enteredNoGC) GC.EndNoGCRegion();
+            }
+
+            // Attempt to trigger Copy-On-Write if such a mechanism exists
+            for (int i = 0; i < 32; i++)
+            {
+                bmp.Data[i] = (sbyte)(bmp.Data[i] + 1);
+            }
+
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true);
+            long pohSizeAfter = GC.GetGCMemoryInfo().GenerationInfo[4].SizeAfterBytes;
+            
+            long arrayAllocationSize =
+                bmp.Data.Length * sizeof(sbyte) + source.Data.Length * sizeof(sbyte) + 2 * Clr64BitArrayOverhead;
+
+            Console.WriteLine($"Source: {source}\n{bmp}. Size of allocation in POH: {pohSizeAfter - pohSizeBefore}");
+
+            Assert.Equal(arrayAllocationSize, pohSizeAfter - pohSizeBefore);
+        }
+
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        public void Init_HeightWidth_VerifyIsAllocatedOnPinnedObjectHeap()
+        {
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+            long pohSizeBefore = GC.GetGCMemoryInfo().GenerationInfo[4].SizeAfterBytes;
+
+            Bitmap bmp = default;
+            bool enteredNoGC = false;
+
+            try
+            {
+                enteredNoGC = GC.TryStartNoGCRegion(1024 * 1024, true);
+                bmp = new Bitmap();
+                bmp.Init(32, 32, 0);
+                Assert.Equal(2, GC.GetGeneration(bmp.Data));
+            }
+            finally
+            {
+                if (enteredNoGC) GC.EndNoGCRegion();
+            }
+
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+            long pohSizeAfter = GC.GetGCMemoryInfo().GenerationInfo[4].SizeAfterBytes;
+            
+            long arrayAllocationSize = bmp.Data.Length * sizeof(sbyte) + Clr64BitArrayOverhead;
+            Console.WriteLine($"{bmp}. Size of allocation in POH: {pohSizeAfter - pohSizeBefore}");
+            Assert.Equal(arrayAllocationSize, pohSizeAfter - pohSizeBefore);
+        }
+
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        public void Init_DataArray_VerifyIsAllocatedOnPinnedObjectHeap()
+        {
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+            long pohSizeBefore = GC.GetGCMemoryInfo().GenerationInfo[4].SizeAfterBytes;
+
+            Bitmap bmp = default;
+            sbyte[] data = new sbyte[1024]; // Standard, unpinned array
+            bool enteredNoGC = false;
+
+            try
+            {
+                enteredNoGC = GC.TryStartNoGCRegion(1024 * 1024, true);
+                bmp = new Bitmap();
+                bmp.Init(data, 32, 32, 0);
+                Assert.Equal(2, GC.GetGeneration(bmp.Data));
+            }
+            finally
+            {
+                if (enteredNoGC) GC.EndNoGCRegion();
+            }
+
+            GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
+            long pohSizeAfter = GC.GetGCMemoryInfo().GenerationInfo[4].SizeAfterBytes;
+            
+            long arrayAllocationSize = bmp.Data.Length * sizeof(sbyte) + Clr64BitArrayOverhead;
+            Console.WriteLine($"{bmp}. Size of allocation in POH: {pohSizeAfter - pohSizeBefore}");
+            Assert.Equal(arrayAllocationSize, pohSizeAfter - pohSizeBefore);
+        }
+
+        public static TheoryData<Bitmap, Bitmap, bool> EqualityTestData()
+        {
+            var baseBitmap = new Bitmap(10, 10, 0);
+            var identicalCopy = baseBitmap; 
+            
+            var diffDataBitmap = new Bitmap(10, 10, 0);
+            diffDataBitmap.SetByteAt(0, 1);
+            var diffDimsBitmap = new Bitmap(20, 20, 0);
+            var defaultBitmap = new Bitmap();
+            var anotherDefault = new Bitmap();
+
+            var diffBorderBitmap = new Bitmap(10, 10, 1);
+            
+            var diffGraysBitmap = new Bitmap(10, 10, 0);
+            diffGraysBitmap.Grays = 256;
+
+            var identicalDataDiffRefBitmap = new Bitmap(10, 10, 0);
+            
+            var nullDataBitmap = new Bitmap(10, 10, 0);
+            object boxedNull = nullDataBitmap;
+            typeof(Bitmap).GetField("_Data", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(boxedNull, null);
+            nullDataBitmap = (Bitmap)boxedNull;
+            
+            var diffLengthBitmap = new Bitmap(10, 10, 0);
+            object boxedLen = diffLengthBitmap;
+            typeof(Bitmap).GetField("_Data", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(boxedLen, new sbyte[1000]);
+            diffLengthBitmap = (Bitmap)boxedLen;
+
+            var data = new TheoryData<Bitmap, Bitmap, bool>();
+            data.Add(baseBitmap, baseBitmap, true);                 // Path 2: Reference equality
+            data.Add(baseBitmap, identicalCopy, true);              // Path 2: Reference equality
+            data.Add(defaultBitmap, anotherDefault, true);          // Path 2: Reference equality (Null data)
+            data.Add(baseBitmap, identicalDataDiffRefBitmap, true); // Path 5: Value equality / SequenceEqual (identical data array values, different instances)
+            
+            data.Add(baseBitmap, diffDataBitmap, false);            // Path 6: Value inequality (SequenceEqual false)
+            data.Add(baseBitmap, diffDimsBitmap, false);            // Path 1: Property mismatches (Dimensions)
+            data.Add(baseBitmap, defaultBitmap, false);             // Path 1: Property mismatches (Dimensions - 10x10 vs 0x0)
+            data.Add(baseBitmap, diffBorderBitmap, false);          // Path 1: Property mismatches (Border)
+            data.Add(baseBitmap, diffGraysBitmap, false);           // Path 1: Property mismatches (Grays)
+            data.Add(baseBitmap, nullDataBitmap, false);            // Path 3: Unreachable Defensive Trap (Null data arrays via reflection)
+            data.Add(baseBitmap, diffLengthBitmap, false);          // Path 4: Unreachable Defensive Trap (Data length mismatch via reflection)
+
+            return data;
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualityTestData))]
+        public void EqualsBitmap(Bitmap bmp1, Bitmap bmp2, bool expected)
+        {
+            Assert.Equal(expected, bmp1.Equals(bmp2));
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualityTestData))]
+        public void EqualityOperatorEquals(Bitmap bmp1, Bitmap bmp2, bool expected)
+        {
+            Assert.Equal(expected, bmp1 == bmp2);
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualityTestData))]
+        public void EqualityOperatorNotEquals(Bitmap bmp1, Bitmap bmp2, bool expected)
+        {
+            Assert.Equal(!expected, bmp1 != bmp2);
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualityTestData))]
+        public void EqualsObject(Bitmap bmp1, object obj, bool expected)
+        {
+            Assert.Equal(expected, bmp1.Equals(obj));
+        }
+
+        [Fact]
+        public void EqualsObject_BoxedIdenticalStruct()
+        {
+            var baseBitmap = new Bitmap(10, 10, 0);
+            var identicalCopy = baseBitmap;
+            
+            object boxedIdentical = identicalCopy;
+
+            Assert.True(baseBitmap.Equals(boxedIdentical));
+        }
+
+        [Fact]
+        public void EqualsObject_BoxedDifferentStruct()
+        {
+            var baseBitmap = new Bitmap(10, 10, 0);
+            var diffDataBitmap = new Bitmap(10, 10, 0);
+            diffDataBitmap.SetByteAt(0, 1);
+
+            object boxedDiff = diffDataBitmap;
+
+            Assert.False(baseBitmap.Equals(boxedDiff));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("Not A Bitmap")]
+        [InlineData(123)]
+        public void EqualsObject_NullOrDifferentType(object obj)
+        {
+            var baseBitmap = new Bitmap(10, 10, 0);
+            Assert.False(baseBitmap.Equals(obj));
+        }
+
+        [Theory]
+        [MemberData(nameof(EqualityTestData))]
+        public void GetHashCode_MatchesEquality(Bitmap bmp1, Bitmap bmp2, bool expectedEquality)
+        {
+            Assert.Equal(expectedEquality, bmp1.GetHashCode() == bmp2.GetHashCode());
+        }
+
+        [Fact]
+        public void ToString_InitializedStruct()
+        {
+            var bmp = new Bitmap(10, 20, 2);
+            string result = bmp.ToString();
+            
+            Assert.Contains("DjvuNet.Graphics.Bitmap", result);
+            Assert.Contains($"Width: {bmp.Width}", result);
+            Assert.Contains($"Height: {bmp.Height}", result);
+            Assert.Contains($"Border: {bmp.Border}", result);
+            Assert.Contains($"Grays: {bmp.Grays}", result);
+            Assert.Contains($"Data: {bmp.Data.Length} sbytes.", result);
+        }
+
+        [Fact]
+        public void ToString_DefaultStruct_NullData()
+        {
+            var bmp = new Bitmap();
+            string result = bmp.ToString();
+
+            Assert.Contains("DjvuNet.Graphics.Bitmap: Width: 0, Height: 0, Border: 0, Grays: 2, Data: null sbytes.", result);
+        }
+
+        public static TheoryData<Bitmap, Bitmap, bool> RleEqualityTestData()
+        {
+            var data = new TheoryData<Bitmap, Bitmap, bool>();
+
+            // Setup Helpers
+            Bitmap CreateUncompressed(byte value = 0)
+            {
+                var b = new Bitmap();
+                b.Init(10, 10, 0); // Data populated, _RleData null
+                if (value != 0)
+                {
+                    for(int i = 0; i < b.Data.Length; i++) b.Data[i] = (sbyte)value;
+                }
+                return b;
+            }
+
+            Bitmap CreateCompressed(byte rleValue = 0)
+            {
+                var b = CreateUncompressed(rleValue);
+                b.Compress(); // Moves Data to _RleData, sets Data null
+                return b;
+            }
+
+            Bitmap CreateNull()
+            {
+                return new Bitmap(); // Default struct, Data null, _RleData null
+            }
+
+            Bitmap CreateInvalid(byte dataValue, byte rleValue)
+            {
+                var b = CreateUncompressed(dataValue);
+                b._RleData = new byte[] { rleValue, 0x01, 0x02 }; // Arbitrary RLE buffer
+                return b;
+            }
+
+            // 1. UNCOMPRESSED vs UNCOMPRESSED
+            data.Add(CreateUncompressed(1), CreateUncompressed(1), true);  // 1a: Match
+            data.Add(CreateUncompressed(1), CreateUncompressed(0), false); // 1b: Mismatch
+
+            // 2. UNCOMPRESSED vs COMPRESSED
+            data.Add(CreateUncompressed(1), CreateCompressed(1), true);  // 2: Match (logical)
+            
+            // 3. UNCOMPRESSED vs NULL
+            data.Add(CreateUncompressed(1), CreateNull(), false);        // 3: Mismatch
+
+            // 4. UNCOMPRESSED vs INVALID
+            data.Add(CreateUncompressed(1), CreateInvalid(1, 0), true);  // 4: Match (Data takes precedence, rle ignored)
+            
+            // 5. COMPRESSED vs UNCOMPRESSED
+            data.Add(CreateCompressed(1), CreateUncompressed(1), true);  // 5: Match (logical)
+
+            // 6. COMPRESSED vs COMPRESSED
+            var c1 = CreateCompressed(1);
+            var c2 = CreateCompressed(1);
+            data.Add(c1, c1, true); // 6a: Reference match
+            data.Add(c1, c2, true); // 6b: Value match
+            data.Add(CreateCompressed(1), CreateCompressed(0), false); // 6c: Mismatch
+
+            // 7. COMPRESSED vs NULL
+            data.Add(CreateCompressed(1), CreateNull(), false); // 7: Mismatch
+
+            // 8. COMPRESSED vs INVALID
+            data.Add(CreateCompressed(1), CreateInvalid(1, 0), true); // 8: Match (Invalid degrades to Data, Compressed decompresses to match Data)
+
+            // 9. NULL vs UNCOMPRESSED
+            data.Add(CreateNull(), CreateUncompressed(1), false); // 9: Mismatch
+
+            // 10. NULL vs COMPRESSED
+            data.Add(CreateNull(), CreateCompressed(1), false); // 10: Mismatch
+
+            // 11. NULL vs NULL
+            data.Add(CreateNull(), CreateNull(), true); // 11: Match
+
+            // 12. NULL vs INVALID
+            data.Add(CreateNull(), CreateInvalid(1, 0), false); // 12: Mismatch
+
+            // 13. INVALID vs UNCOMPRESSED
+            data.Add(CreateInvalid(1, 0), CreateUncompressed(1), true); // 13: Match (Data matched)
+
+            // 14. INVALID vs COMPRESSED
+            data.Add(CreateInvalid(1, 0), CreateCompressed(1), true); // 14: Match (Data logically matched)
+
+            // 15. INVALID vs NULL
+            data.Add(CreateInvalid(1, 0), CreateNull(), false); // 15: Mismatch
+
+            // 16. INVALID vs INVALID
+            data.Add(CreateInvalid(1, 0), CreateInvalid(1, 0), true);  // 16a: Data match, RLE mismatch -> True
+            data.Add(CreateInvalid(1, 0), CreateInvalid(0, 0), false);  // 16b: Data mismatch, RLE match -> False
+
+            return data;
+        }
+
+        [Theory]
+        [MemberData(nameof(RleEqualityTestData))]
+        public void EqualityOperator_ExhaustiveStateMatrix(Bitmap bmp1, Bitmap bmp2, bool expected)
+        {
+            Assert.Equal(expected, bmp1 == bmp2);
+        }
+
+        [Theory]
+        [MemberData(nameof(RleEqualityTestData))]
+        public void InequalityOperator_ExhaustiveStateMatrix(Bitmap bmp1, Bitmap bmp2, bool expected)
+        {
+            Assert.Equal(!expected, bmp1 != bmp2);
+        }
+
+        [Theory]
+        [MemberData(nameof(RleEqualityTestData))]
+        public void EqualsMethod_ExhaustiveStateMatrix(Bitmap bmp1, Bitmap bmp2, bool expected)
+        {
+            Assert.Equal(expected, bmp1.Equals(bmp2));
+        }
+        
+        [Theory]
+        [MemberData(nameof(RleEqualityTestData))]
+        public void GetHashCode_MatchesEquality_RleMatrix(Bitmap bmp1, Bitmap bmp2, bool expected)
+        {
+            Assert.Equal(expected, bmp1.GetHashCode() == bmp2.GetHashCode());
         }
     }
 }

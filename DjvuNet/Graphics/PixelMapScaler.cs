@@ -1,4 +1,4 @@
-﻿using DjvuNet.Errors;
+using DjvuNet.Errors;
 
 namespace DjvuNet.Graphics
 {
@@ -17,8 +17,8 @@ namespace DjvuNet.Graphics
         private int _XShift;
         private int _YShift;
 
-        internal IPixelMap _PixelMap1;
-        internal IPixelMap _PixelMap2;
+        internal PixelMap _PixelMap1;
+        internal PixelMap _PixelMap2;
         internal int[] _HCoord;
         internal int[] _VCoord;
         internal int _SrcHeight;
@@ -227,7 +227,7 @@ namespace DjvuNet.Graphics
             return inp;
         }
 
-        public void Scale(Rectangle srcRect, IPixelMap srcMap, Rectangle targetRect, IPixelMap targetMap)
+        public void Scale(Rectangle srcRect, PixelMap srcMap, Rectangle targetRect, PixelMap targetMap)
         {
             // Parameter validation
             if ((srcRect.Width != srcMap.Width) || (srcRect.Height != srcMap.Height))
@@ -418,7 +418,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        internal IPixelReference GetLine(int fy, Rectangle redRect, Rectangle srcRect, IPixelMap srcMap)
+        internal IPixelReference GetLine(int fy, Rectangle redRect, Rectangle srcRect, PixelMap srcMap)
         {
             if (fy < redRect.YMin)
             {
@@ -441,7 +441,7 @@ namespace DjvuNet.Graphics
             }
 
             // Shift
-            IPixelMap p = _PixelMap1;
+            PixelMap p = _PixelMap1;
             _PixelMap1 = _PixelMap2;
             _L1 = _L2;
             _PixelMap2 = p;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,7 +37,7 @@ namespace DjvuNet.Skia
                 if (hData.IsAllocated)
                     hData.Free();
 
-                IPixelMap pixMap = new PixelMap();
+                PixelMap pixMap = new PixelMap();
                 return (T) pixMap;
             }
         }

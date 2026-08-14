@@ -56,7 +56,7 @@ namespace DjvuNet.JB2
 
             do
             {
-                rectype = CodeRecordB(rectype, jim, null, null);
+                rectype = CodeRecordB(rectype, jim, ref Unsafe.NullRef<JB2Shape>(), ref Unsafe.NullRef<JB2Blit>());
             } while (rectype != EndOfData);
 
             if (!_GotStartRecordP)
@@ -71,7 +71,7 @@ namespace DjvuNet.JB2
 
             do
             {
-                rectype = CodeRecordA(rectype, jim, null);
+                rectype = CodeRecordA(rectype, jim, ref Unsafe.NullRef<JB2Shape>());
             } while (rectype != EndOfData);
 
             if (!_GotStartRecordP)
@@ -122,7 +122,7 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override void CodeAbsoluteLocation(JB2Blit jblt, int rows, int columns)
+        protected override void CodeAbsoluteLocation(ref JB2Blit jblt, int rows, int columns)
         {
             if (!_GotStartRecordP)
             {
@@ -136,7 +136,7 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override void CodeAbsoluteMarkSize(IBitmap bm, int border)
+        protected override void CodeAbsoluteMarkSize(ref Bitmap bm, int border)
         {
             int xsize = CodeNum(0, BigPositive, _AbsSizeX);
             int ysize = CodeNum(0, BigPositive, _AbsSizeY);
@@ -149,23 +149,20 @@ namespace DjvuNet.JB2
             bm.Init(ysize, xsize, border);
         }
 
-        protected override void CodeBitmapByCrossCoding(IBitmap ibm, IBitmap icbm, int xd2c, int dw, int dy,
+        protected override void CodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm, int xd2c, int dw, int dy,
                                                                      int cy, int up1, int up0, int xup1, int xup0,
                                                                      int xdn1)
         {
 
-            Bitmap bm = (Bitmap)ibm;
-            Bitmap cbm = (Bitmap)icbm;
-
             while (dy >= 0)
             {
-                int context = GetCrossContext(bm, cbm, up1, up0, xup1, xup0, xdn1, 0);
+                int context = GetCrossContext(ref bm, ref cbm, up1, up0, xup1, xup0, xdn1, 0);
 
                 for (int dx = 0; dx < dw; )
                 {
                     int n = CodeBit(false, _CBitDist, context);
                     bm.SetByteAt(up0 + dx++, (sbyte) n);
-                    context = ShiftCrossContext(bm, cbm, context, n, up1, up0, xup1, xup0, xdn1, dx);
+                    context = ShiftCrossContext(ref bm, ref cbm, context, n, up1, up0, xup1, xup0, xdn1, dx);
                 }
 
                 up1 = up0;
@@ -176,24 +173,66 @@ namespace DjvuNet.JB2
             }
         }
 
-        protected override void CodeBitmapDirectly(IBitmap ibm, int dw, int dy, int up2, int up1, int up0)
+        protected override unsafe void CodeBitmapByCrossCoding(ref Bitmap bm, ref Bitmap cbm, int xd2c, int dw, int dy,
+                                                                     int cy, sbyte* pUp1, sbyte* pUp0, sbyte* pXup1, sbyte* pXup0,
+                                                                     sbyte* pXdn1)
         {
-            Bitmap bm = (Bitmap)ibm;
             while (dy >= 0)
             {
-                int context = GetDirectContext(bm, up2, up1, up0, 0);
+                int context = GetCrossContext(pUp1, pUp0, pXup1, pXup0, pXdn1, 0);
+
+                for (int dx = 0; dx < dw; )
+                {
+                    int n = CodeBit(false, _CBitDist, context);
+                    pUp0[dx++] = (sbyte)n;
+                    context = ShiftCrossContext(context, n, pUp1, pUp0, pXup1, pXup0, pXdn1, dx);
+                }
+
+                pUp1 = pUp0;
+                pUp0 = bm.GetRow(--dy);
+                pXup1 = pXup0;
+                pXup0 = pXdn1;
+                pXdn1 = cbm.GetRow((--cy) - 1) + xd2c;
+            }
+        }
+
+        protected override void CodeBitmapDirectly(ref Bitmap bm, int dw, int dy, int up2, int up1, int up0)
+        {
+            while (dy >= 0)
+            {
+                int context = GetDirectContext(ref bm, up2, up1, up0, 0);
 
                 for (int dx = 0; dx < dw; )
                 {
                     int n = CodeBit(false, _BitDist, context);
 
                     bm.SetByteAt(up0 + dx++, (sbyte) n);
-                    context = ShiftDirectContext(bm, context, n, up2, up1, up0, dx);
+                    context = ShiftDirectContext(ref bm, context, n, up2, up1, up0, dx);
                 }
 
                 up2 = up1;
                 up1 = up0;
                 up0 = bm.RowOffset(--dy);
+            }
+        }
+
+        protected override unsafe void CodeBitmapDirectly(ref Bitmap bm, int dw, int dy, sbyte* pUp2, sbyte* pUp1, sbyte* pUp0)
+        {
+            while (dy >= 0)
+            {
+                int context = GetDirectContext(pUp2, pUp1, pUp0, 0);
+
+                for (int dx = 0; dx < dw; )
+                {
+                    int n = CodeBit(false, _BitDist, context);
+
+                    pUp0[dx++] = (sbyte)n;
+                    context = ShiftDirectContext(context, n, pUp2, pUp1, pUp0, dx);
+                }
+
+                pUp2 = pUp1;
+                pUp1 = pUp0;
+                pUp0 = bm.GetRow(--dy);
             }
         }
 
@@ -277,7 +316,7 @@ namespace DjvuNet.JB2
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override void CodeRelativeMarkSize(IBitmap bm, int cw, int ch, int border)
+        protected override void CodeRelativeMarkSize(ref Bitmap bm, int cw, int ch, int border)
         {
             int xdiff = CodeNum(BigNegative, BigPositive, _RelSizeX);
             int ydiff = CodeNum(BigNegative, BigPositive, _RelSizeY);

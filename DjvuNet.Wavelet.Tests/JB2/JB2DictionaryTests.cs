@@ -24,7 +24,12 @@ namespace DjvuNet.JB2.Tests
         [InlineData("testE003_001.djbz")]
         [InlineData("testE004_001.djbz")]
         [InlineData("testE005_001.djbz")]
-        public void DecodeDjbzTest(string djbzFileName)
+        public void DecodeDjbzTheory(string djbzFileName)
+        {
+            DecodeDjbz(djbzFileName);
+        }
+
+        private static void DecodeDjbz(string djbzFileName)
         {
             byte[] djbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, djbzFileName));
 
@@ -42,13 +47,20 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
+        public void DecodeDjbzTest()
+        {
+            string djbzFileName = "extracted/test061C_D1057432.djbz";
+            DecodeDjbz(djbzFileName);
+        }
+
+        [Fact]
         public void AddShape_Success()
         {
             var dict = new JB2Dictionary();
             var shape = new JB2Shape();
             shape.Init(-1); // parent = -1
 
-            int result = dict.AddShape(shape);
+            int result = dict.AddShape(ref shape);
 
             Assert.Equal(0, result);
             Assert.Equal(1, dict.ShapeCount);
@@ -61,7 +73,7 @@ namespace DjvuNet.JB2.Tests
             var invalidShape = new JB2Shape();
             invalidShape.Init(1); // ShapeCount is 0, so 1 >= 0
             
-            var ex = Assert.Throws<DjvuArgumentException>(() => dict.AddShape(invalidShape));
+            var ex = Assert.Throws<DjvuArgumentException>(() => dict.AddShape(ref invalidShape));
             Assert.Contains("JB2 decoding failed: Illegal parent shape number in JB2Shape.", ex.Message);
             Assert.Equal("jb2Shape", ex.ParamName);
         }
@@ -79,10 +91,10 @@ namespace DjvuNet.JB2.Tests
             var dict = new JB2Dictionary();
             var shape = new JB2Shape();
             shape.Init(-1);
-            dict.AddShape(shape);
+            dict.AddShape(ref shape);
 
             var retrievedShape = dict.GetShape(0);
-            Assert.Same(shape, retrievedShape);
+            Assert.Equal<JB2Shape>(shape, retrievedShape);
         }
 
         [Fact]
@@ -91,13 +103,13 @@ namespace DjvuNet.JB2.Tests
             var inheritedDict = new JB2Dictionary();
             var inheritedShape = new JB2Shape();
             inheritedShape.Init(-1);
-            inheritedDict.AddShape(inheritedShape);
+            inheritedDict.AddShape(ref inheritedShape);
 
             var parentDict = new JB2Dictionary();
             parentDict.SetInheritedDict(inheritedDict, true);
 
             var retrievedInherited = parentDict.GetShape(0);
-            Assert.Same(inheritedShape, retrievedInherited);
+            Assert.Equal<JB2Shape>(inheritedShape, retrievedInherited);
         }
 
         [Fact]
@@ -114,7 +126,7 @@ namespace DjvuNet.JB2.Tests
             var dict = new JB2Dictionary();
             var shape = new JB2Shape();
             shape.Init(-1);
-            dict.AddShape(shape);
+            dict.AddShape(ref shape);
             dict.SetInheritedDict(new JB2Dictionary(), true);
 
             Assert.Equal(1, dict.ShapeCount);
@@ -143,10 +155,10 @@ namespace DjvuNet.JB2.Tests
             var dict = new JB2Dictionary();
             var shape = new JB2Shape();
             shape.Init(-1);
-            dict.AddShape(shape);
+            dict.AddShape(ref shape);
             
             var ex = Assert.Throws<DjvuInvalidOperationException>(() => dict.SetInheritedDict(new JB2Dictionary(), false));
-            Assert.Contains("JB2 decoding failed: Cannot set dictionary after adding shapes.", ex.Message);
+            Assert.Contains("JB2 decoding failed: Cannot set inherited dictionary after adding shapes.", ex.Message);
         }
 
         [Fact]
@@ -156,7 +168,7 @@ namespace DjvuNet.JB2.Tests
             dict.SetInheritedDict(new JB2Dictionary(), true);
             
             var ex = Assert.Throws<DjvuInvalidOperationException>(() => dict.SetInheritedDict(new JB2Dictionary(), false));
-            Assert.Contains("JB2 decoding failed: Cannot change dictionary once set.", ex.Message);
+            Assert.Contains("JB2 decoding failed: Cannot change inherited dictionary once set.", ex.Message);
         }
 
         [Fact]
@@ -168,7 +180,7 @@ namespace DjvuNet.JB2.Tests
             var inherited = new JB2Dictionary();
             var shape = new JB2Shape();
             shape.Init(-1);
-            inherited.AddShape(shape);
+            inherited.AddShape(ref shape);
             
             dict.SetInheritedDict(inherited, true); // force=true
             

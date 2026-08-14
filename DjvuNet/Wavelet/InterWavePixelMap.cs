@@ -105,7 +105,7 @@ namespace DjvuNet.Wavelet
             return pixelMap;
         }
 
-        public IPixelMap GetPixelMap(int subsample, Rectangle rect, IPixelMap retval)
+        public PixelMap GetPixelMap(int subsample, Rectangle rect, PixelMap retval)
         {
             if (_YMap == null)
                 return null;

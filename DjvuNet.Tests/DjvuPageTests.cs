@@ -1,4 +1,4 @@
-﻿using DjvuNet;
+using DjvuNet;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -465,7 +465,7 @@ namespace DjvuNet.Tests
 
                         Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
                         Graphics.PixelMap map = new Graphics.PixelMap();
-                        Graphics.IPixelMap result = null;
+                        Graphics.PixelMap result = null;
 
                         result = page.GetPixelMap(rect, 1, 2.2, map);
 
@@ -489,7 +489,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        private void VerifyPixelMap(DjvuNet.Graphics.IPixelMap result)
+        private void VerifyPixelMap(DjvuNet.Graphics.PixelMap result)
         {
             Assert.NotNull(result);
             Assert.IsType<DPixelMap>(result);
@@ -508,7 +508,7 @@ namespace DjvuNet.Tests
                 Util.VerifyDjvuDocument(pageCount, document);
                 IDjvuPage page = document.Pages[0];
                 Graphics.Rectangle rect = new Graphics.Rectangle(100, 0, 100, 100);
-                var bitmap = page.BuildBitmap(rect, 1, 1, null);
+                var bitmap = page.BuildBitmap(rect, 1, 1);
                 Assert.NotNull(bitmap);
             }
         }

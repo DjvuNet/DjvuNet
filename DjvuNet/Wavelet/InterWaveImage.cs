@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using DjvuNet.Errors;
 using DjvuNet.Graphics;
@@ -81,28 +81,7 @@ namespace DjvuNet.Wavelet
             }
         }
 
-        public static InterWaveImage CreateEncoder(ImageType imageType = ImageType.Color)
-        {
-            switch (imageType)
-            {
-                case ImageType.Color:
-                    return new InterWavePixelMapEncoder();
-                case ImageType.Gray:
-                    return new InterWaveBitmapEncoder();
-                default:
-                    throw new DjvuArgumentException($"Unsupported image type {imageType}", nameof(imageType));
-            }
-        }
 
-        public static InterWaveImage CreateEncoder(IBitmap bm, IBitmap mask = null, YCrCbMode mode = YCrCbMode.Normal)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static InterWaveImage CreateEncoder(IPixelMap map, IBitmap mask = null, YCrCbMode mode = YCrCbMode.Normal)
-        {
-            throw new NotImplementedException();
-        }
 
         #endregion Methods
     }

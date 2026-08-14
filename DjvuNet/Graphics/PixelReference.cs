@@ -11,7 +11,7 @@ namespace DjvuNet.Graphics
         private int _blueOffset;
         private int _greenOffset;
         private int _ncolors;
-        private IMap2 _parent;
+        private PixelMap _parent;
         private int _redOffset;
         private int _offset;
 
@@ -51,7 +51,7 @@ namespace DjvuNet.Graphics
             internal set { _blueOffset = value; }
         }
 
-        public IMap2 Parent
+        public PixelMap Parent
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get { return _parent; }
@@ -129,21 +129,21 @@ namespace DjvuNet.Graphics
         /// the initial pixel position to refer to
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PixelReference(IMap2 parent, int offset)
+        public PixelReference(PixelMap parent, int offset)
         {
             Initialize(parent);
             _offset = offset * _ncolors;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PixelReference(IMap2 parent, int row, int column) : base()
+        public PixelReference(PixelMap parent, int row, int column) : base()
         {
             Initialize(parent);
             _offset = (parent.RowOffset(row) + column) * _ncolors;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Initialize(IMap2 parent)
+        private void Initialize(PixelMap parent)
         {
             _parent = parent;
             ColorNumber = parent.BytesPerPixel;
@@ -204,40 +204,6 @@ namespace DjvuNet.Graphics
         public void SetOffset(int row, int column)
         {
             _offset = (_parent.RowOffset(row) + column) * _ncolors;
-        }
-
-        /// <summary>
-        /// Convert the following number of pixels from YCC to RGB. The offset will
-        /// be advanced to the end.
-        /// </summary>
-        /// <param name="count">
-        /// The number of pixels to convert.
-        /// </param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Ycc2Rgb(int count)
-        {
-            if ((_ncolors != 3) || _parent.IsRampNeeded)
-            {
-                throw new DjvuInvalidOperationException(
-                    $"Function {nameof(Ycc2Rgb)} can be used only with three color based images.");
-            }
-
-            while (count-- > 0)
-            {
-                int y = _parent.Data[_offset];
-                int b = _parent.Data[_offset + 1];
-                int r = _parent.Data[_offset + 2];
-                int t2 = r + (r >> 1);
-                int t3 = (y + 128) - (b >> 2);
-                int b0 = t3 + (b << 1);
-                _parent.Data[_offset++] = (sbyte)((b0 < 255) ? ((b0 > 0) ? b0 : 0) : 255);
-
-                int g0 = t3 - (t2 >> 1);
-                _parent.Data[_offset++] = (sbyte)((g0 < 255) ? ((g0 > 0) ? g0 : 0) : 255);
-
-                int r0 = y + 128 + t2;
-                _parent.Data[_offset++] = (sbyte)((r0 < 255) ? ((r0 > 0) ? r0 : 0) : 255);
-            }
         }
 
         /// <summary>
@@ -329,28 +295,13 @@ namespace DjvuNet.Graphics
         {
             int yrev = _parent.Height - y;
 
-            if (!_parent.IsRampNeeded)
+            for (int y0 = yrev; y0-- > (yrev - h); off += scansize)
             {
-                for (int y0 = yrev; y0-- > (yrev - h); off += scansize)
+                for (int i = off, j = (_parent.RowOffset(y0) + x) * _ncolors, k = w; k > 0; k--, j += _ncolors)
                 {
-                    for (int i = off, j = (_parent.RowOffset(y0) + x) * _ncolors, k = w; k > 0; k--, j += _ncolors)
-                    {
-                        pixels[i++] = unchecked((int)0xff000000) | (0xff0000 & (_parent.Data[j + _redOffset] << 16)) |
-                                      (0xff00 & (_parent.Data[j + _greenOffset] << 8)) |
-                                      (0xff & _parent.Data[j + _blueOffset]);
-                    }
-                }
-            }
-            else
-            {
-                var ref_Renamed = _parent.CreateGPixelReference(0);
-                for (int y0 = yrev; y0-- > (yrev - h); off += scansize)
-                {
-                    ref_Renamed.SetOffset(y0, x);
-                    for (int i = off, k = w; k > 0; k--, ref_Renamed.IncOffset())
-                    {
-                        pixels[i++] = _parent.PixelRamp(ref_Renamed).GetHashCode();
-                    }
+                    pixels[i++] = unchecked((int)0xff000000) | (0xff0000 & (_parent.Data[j + _redOffset] << 16)) |
+                                  (0xff00 & (_parent.Data[j + _greenOffset] << 8)) |
+                                  (0xff & _parent.Data[j + _blueOffset]);
                 }
             }
         }
