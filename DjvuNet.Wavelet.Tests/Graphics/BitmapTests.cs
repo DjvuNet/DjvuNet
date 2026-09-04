@@ -3,7 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.Errors;
@@ -35,14 +39,40 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Theory]
-        // Massive overflow: height * stride > int.MaxValue.
-        // 65536 * (65536 + 0) = 4,294,967,296
-        [InlineData(65536, 65536, 0)]
-        public void Init_CalculatedStrideOverflow_Throws(int width, int height, int border)
+        // maxOffsetCalc overflow: 65536 * 65536 = 4,294,967,296 > Array.MaxLength
+        [InlineData(65536, 65536, 0, true, "exceeding Array.MaxLength")]
+        // ZeroBuffer overflow bypassed: height=0 bypasses maxOffset, width=2147483637 > Array.MaxLength is suppressed by Math.Min(height, 1)
+        [InlineData(2147483637, 0, 0, false, null)]
+        public void Init_CalculatedStrideOverflow_Throws(int width, int height, int border, bool shouldThrow, string expectedMessageFragment)
         {
             Bitmap bmp = new Bitmap();
-            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.Init(height, width, border));
-            Assert.Contains("exceed maximum integer size", ex.Message);
+            if (shouldThrow)
+            {
+                var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.Init(height, width, border));
+                Assert.Contains(expectedMessageFragment, ex.Message);
+            }
+            else
+            {
+                bmp.Init(height, width, border);
+            }
+        }
+
+        public static TheoryData<int, int, int, string> BoundsOverflowData => new()
+        {
+            // Data buffer overflow: Empty struct, massive value (passes stride, explodes maxOffset)
+            { 0, 0, Array.MaxLength + 1, "invalid Data buffer size" },
+            // EnsureZeroBuffer top guard is unreachable: Resize intercepts the invalid massiveBorder first
+            { 0, 200000000, Array.MaxLength + 1, "invalid Data buffer size" }
+        };
+
+        [Theory]
+        [MemberData(nameof(BoundsOverflowData))]
+        public void SetMinimumBorder_BoundsOverflow_Throws(int height, int width, int massiveBorder, string expectedMessageFragment)
+        {
+            Bitmap bmp = new Bitmap();
+            bmp.Init(height, width, 0); 
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.SetMinimumBorder(massiveBorder));
+            Assert.Contains(expectedMessageFragment, ex.Message);
         }
 
         [Fact]
@@ -263,16 +293,27 @@ namespace DjvuNet.Graphics.Tests
                 }
             }
 
-            Bitmap target = selfAlias ? source : new Bitmap();
+            Bitmap target = new Bitmap();
 
             if (expectedException != null)
             {
-                Assert.Throws(expectedException, () => target.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder));
+                if (selfAlias)
+                    Assert.Throws(expectedException, () => source.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder));
+                else
+                    Assert.Throws(expectedException, () => target.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder));
                 return;
             }
 
             // No exception expected, safely execute and validate state
-            target.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder);
+            if (selfAlias)
+            {
+                source.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder);
+                target = source; // Assign back to target for unified validation below
+            }
+            else
+            {
+                target.Init(ref source, new Rectangle(rX, rY, rW, rH), tgtBorder);
+            }
 
             // Oracle Geometry Correction: If either requested dimension is 0, the Rectangle is Empty.
             // An Empty Rectangle correctly collapses both Width and Height to 0.
@@ -737,6 +778,247 @@ namespace DjvuNet.Graphics.Tests
         //    Assert.Equal(color1, pix1.ToPixel().Blue);
         //}
 
+        [Theory]
+        // Base cases: no translation (0, 0)
+        [InlineData(15, 0, 0, true)]
+        [InlineData(16, 0, 0, true)]
+        [InlineData(17, 0, 0, true)]
+        [InlineData(25, 0, 0, true)]
+        [InlineData(31, 0, 0, true)]
+        [InlineData(32, 0, 0, true)]
+        [InlineData(33, 0, 0, true)]
+        [InlineData(48, 0, 0, true)]
+        [InlineData(63, 0, 0, true)]
+        [InlineData(64, 0, 0, true)]
+        [InlineData(96, 0, 0, true)]
+        [InlineData(111, 0, 0, true)]
+        [InlineData(112, 0, 0, true)]
+        [InlineData(115, 0, 0, true)]
+
+        // Translation cases: positive shifts
+        [InlineData(25, 3, 2, true)]
+        [InlineData(48, 10, 0, true)]
+
+        // Translation cases: negative shifts (top/left clipping)
+        [InlineData(31, -2, -1, true)]
+        [InlineData(64, -5, 0, true)]
+        [InlineData(96, 0, -2, true)]
+        [InlineData(115, -100, 2, true)] // Heavy left clipping
+
+        // Translation cases: extreme positive shifts (bottom/right clipping)
+        [InlineData(115, 130, 2, true)] // Heavy right clipping
+        [InlineData(111, 4, 3, true)]
+
+        // Translation cases: doBlit = false (overwrite mode)
+        [InlineData(15, 0, 0, false)]
+        [InlineData(16, 0, 0, false)]
+        [InlineData(17, 0, 0, false)]
+        [InlineData(25, 0, 0, false)]
+        [InlineData(31, 0, 0, false)]
+        [InlineData(32, 0, 0, false)]
+        [InlineData(33, 0, 0, false)]
+        [InlineData(48, 0, 0, false)]
+        [InlineData(63, 0, 0, false)]
+        [InlineData(64, 0, 0, false)]
+        [InlineData(96, 0, 0, false)]
+
+        [InlineData(48, 10, 0, false)]
+        [InlineData(64, -5, 2, false)]
+
+        // Extreme Translation cases: out of bounds (no blit expected)
+        [InlineData(15, 150, 0, true)]   // x0 >= targetWidth
+        [InlineData(15, -15, 0, true)]   // x1 >= sourceWidth
+        [InlineData(15, 0, 5, true)]     // y0 >= height
+        [InlineData(15, 0, -5, true)]    // y1 >= height
+
+        // Extreme Translation cases: out of bounds (no blit expected)
+        [InlineData(15, 150, 0, false)]   // x0 >= targetWidth
+        [InlineData(15, -15, 0, false)]   // x1 >= sourceWidth
+        [InlineData(15, 0, 5, false)]     // y0 >= height
+        [InlineData(15, 0, -5, false)]    // y1 >= height
+
+        public unsafe void InsertMap_Bitonal(int sourceWidth, int dx, int dy, bool doBlit)
+        {
+            // Arrange
+            int targetWidth = 150; // Large enough to hold the maximum test boundary
+            int height = 5;
+            var target = new Bitmap();
+            target.Init(height, targetWidth, 0);
+            target.Grays = 2; // Enable bitonal SIMD optimization
+
+            var source = new Bitmap();
+            source.Init(height, sourceWidth, 0);
+            source.Grays = 2;
+
+            // Fill with distinct patterns to mathematically verify Bitwise OR
+            for (int y = 0; y < height; y++)
+            {
+                sbyte* tRow = target.GetRow(y);
+                sbyte* sRow = source.GetRow(y);
+                for (int x = 0; x < targetWidth; x++)
+                    tRow[x] = (sbyte)(x % 2); // 0, 1, 0, 1...
+
+                for (int x = 0; x < sourceWidth; x++)
+                    sRow[x] = (sbyte)((x / 2) % 2); // 0, 0, 1, 1, 0, 0...
+            }
+
+            var targetOrig = target.Duplicate();
+
+            // Predict Return Value
+            int x0 = (dx > 0) ? dx : 0;
+            int y0 = (dy > 0) ? dy : 0;
+            int x1 = (dx < 0) ? (-dx) : 0;
+            int y1 = (dy < 0) ? (-dy) : 0;
+            int expectedW = Math.Min(targetWidth - x0, sourceWidth - x1);
+            int expectedH = Math.Min(height - y0, height - y1);
+            bool expectedResult = (expectedW > 0) && (expectedH > 0);
+
+            // Act
+            bool actualResult = target.InsertMap(ref source, dx, dy, doBlit);
+            Assert.Equal(expectedResult, actualResult);
+
+            // Assert
+            for (int y = 0; y < height; y++)
+            {
+                sbyte* tRow = target.GetRow(y);
+                sbyte* tOrigRow = targetOrig.GetRow(y);
+                
+                int sourceY = y - dy;
+                sbyte* sRow = (sourceY >= 0 && sourceY < height) ? source.GetRow(sourceY) : null;
+
+                for (int x = 0; x < targetWidth; x++)
+                {
+                    int sourceX = x - dx;
+                    if (sRow != null && sourceX >= 0 && sourceX < sourceWidth)
+                    {
+                        sbyte expected = doBlit ? (sbyte)(tOrigRow[x] | sRow[sourceX]) : sRow[sourceX];
+                        Assert.Equal(expected, tRow[x]);
+                    }
+                    else
+                    {
+                        Assert.Equal(tOrigRow[x], tRow[x]); // Untouched buffer check
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        // 1. Base cases: no translation (0, 0) | Fixed Grays: 256
+        [InlineData(15, 0, 0, true, 256)]
+        [InlineData(16, 0, 0, true, 256)]
+        [InlineData(17, 0, 0, true, 256)]
+        [InlineData(25, 0, 0, true, 256)]
+        [InlineData(31, 0, 0, true, 256)]
+        [InlineData(32, 0, 0, true, 256)]
+        [InlineData(33, 0, 0, true, 256)]
+        [InlineData(48, 0, 0, true, 256)]
+        [InlineData(63, 0, 0, true, 256)]
+        [InlineData(64, 0, 0, true, 256)]
+        [InlineData(96, 0, 0, true, 256)]
+        [InlineData(111, 0, 0, true, 256)]
+        [InlineData(112, 0, 0, true, 256)]
+        [InlineData(115, 0, 0, true, 256)]
+
+        // 2. Grays Variation cases | Fixed Spatial: Base (48, 0, 0)
+        [InlineData(48, 0, 0, true, 3)]     // Lowest grayscale boundary
+        [InlineData(48, 0, 0, true, 126)]   // Below sbyte sign wrap
+        [InlineData(48, 0, 0, true, 127)]   // Exact sbyte maximum positive threshold
+        [InlineData(48, 0, 0, true, 128)]   // Exact sbyte negative sign transition
+        [InlineData(48, 0, 0, true, 129)]   // Just above sbyte transition
+        [InlineData(48, 0, 0, true, 254)]   // Below byte limit
+        [InlineData(48, 0, 0, true, 255)]   // Exact unsigned byte limit
+
+        // 3. Translation cases: positive shifts | Fixed Grays: 256
+        [InlineData(25, 3, 2, true, 256)]
+        [InlineData(48, 10, 0, true, 256)]
+
+        // 4. Translation cases: negative shifts (top/left clipping) | Fixed Grays: 256
+        [InlineData(31, -2, -1, true, 256)]
+        [InlineData(64, -5, 0, true, 256)]
+        [InlineData(96, 0, -2, true, 256)]
+        [InlineData(115, -100, 2, true, 256)] // Heavy left clipping
+
+        // 5. Translation cases: extreme positive shifts (bottom/right clipping) | Fixed Grays: 256
+        [InlineData(115, 130, 2, true, 256)] // Heavy right clipping
+        [InlineData(111, 4, 3, true, 256)]
+
+        // 6. Translation cases: doBlit = false (overwrite mode) | Fixed Grays: 256
+        [InlineData(15, 0, 0, false, 256)]
+        [InlineData(31, 0, 0, false, 256)]
+        [InlineData(48, 10, 0, false, 256)]
+        [InlineData(64, -5, 2, false, 256)]
+
+        // 7. Extreme Translation cases: out of bounds (no blit expected) | Fixed Grays: 256
+        [InlineData(15, 150, 0, true, 256)]   // x0 >= targetWidth
+        [InlineData(15, -15, 0, true, 256)]   // x1 >= sourceWidth
+        [InlineData(15, 0, 5, true, 256)]     // y0 >= height
+        [InlineData(15, 0, -5, true, 256)]    // y1 >= height
+        public unsafe void InsertMap_Grayscale(int sourceWidth, int dx, int dy, bool doBlit, int grays)
+        {
+            // Arrange
+            int targetWidth = 150; // Large enough to hold the maximum test boundary
+            int height = 5;
+            var target = new Bitmap();
+            target.Init(height, targetWidth, 0);
+            target.Grays = grays; // Dynamic depth allocation
+
+            var source = new Bitmap();
+            source.Init(height, sourceWidth, 0);
+            source.Grays = grays;
+
+            // Fill with extreme byte patterns precisely constructed to trigger wraps across memory bounds
+            for (int y = 0; y < height; y++)
+            {
+                sbyte* tRow = target.GetRow(y);
+                sbyte* sRow = source.GetRow(y);
+                for (int x = 0; x < targetWidth; x++)
+                    tRow[x] = (sbyte)((125 + x) % 256); // Hits sbyte transition directly
+
+                for (int x = 0; x < sourceWidth; x++)
+                    sRow[x] = (sbyte)((250 + x) % 256); // Hits byte limit transition directly
+            }
+
+            var targetOrig = target.Duplicate();
+
+            // Predict Return Value
+            int x0 = (dx > 0) ? dx : 0;
+            int y0 = (dy > 0) ? dy : 0;
+            int x1 = (dx < 0) ? (-dx) : 0;
+            int y1 = (dy < 0) ? (-dy) : 0;
+            int expectedW = Math.Min(targetWidth - x0, sourceWidth - x1);
+            int expectedH = Math.Min(height - y0, height - y1);
+            bool expectedResult = (expectedW > 0) && (expectedH > 0);
+
+            // Act
+            bool actualResult = target.InsertMap(ref source, dx, dy, doBlit);
+            Assert.Equal(expectedResult, actualResult);
+
+            // Assert
+            for (int y = 0; y < height; y++)
+            {
+                sbyte* tRow = target.GetRow(y);
+                sbyte* tOrigRow = targetOrig.GetRow(y);
+                
+                int sourceY = y - dy;
+                sbyte* sRow = (sourceY >= 0 && sourceY < height) ? source.GetRow(sourceY) : null;
+
+                for (int x = 0; x < targetWidth; x++)
+                {
+                    int sourceX = x - dx;
+                    if (sRow != null && sourceX >= 0 && sourceX < sourceWidth)
+                    {
+                        // Native DjVuLibre logic: unsigned modulo 256 wrapping!
+                        sbyte expected = doBlit ? (sbyte)((byte)tOrigRow[x] + (byte)sRow[sourceX]) : sRow[sourceX];
+                        Assert.Equal(expected, tRow[x]);
+                    }
+                    else
+                    {
+                        Assert.Equal(tOrigRow[x], tRow[x]); // Untouched buffer check
+                    }
+                }
+            }
+        }
+
         [Fact()]
         public void InsertMapTest()
         {
@@ -799,6 +1081,138 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(bmp.Height, testBmp.Height);
             Assert.Equal(bmp.GetByteAt(64), testBmp.GetByteAt(64));
         }
+        public static TheoryData<int, int, int, int, int> GetInitRefBitmapBorderData()
+        {
+            var data = new TheoryData<int, int, int, int, int>();
+            int[] widths = { 10, 15, 16, 17, 21, 31, 32, 33, 37, 48, 49, 63, 64, 65, 95, 96, 111, 112, 115, 144, 176 };
+            int[] borders = { 0, 2, 4 };
+            int[] grays = { 2, 128, 256 };
+            int h = 2; // Fixed height is sufficient since row loops are identical per-row
+            
+            foreach (var w in widths)
+            {
+                foreach (var border in borders)
+                {
+                    foreach (var srcBorder in borders)
+                    {
+                        foreach (var gray in grays)
+                        {
+                            data.Add(w, h, border, srcBorder, gray);
+                        }
+                    }
+                }
+            }
+            
+            return data;
+        }
+
+        [Theory]
+        [MemberData(nameof(GetInitRefBitmapBorderData))]
+        public unsafe void Init_RefBitmap_Border(int w, int h, int border, int srcBorder, int grays)
+        {
+            Bitmap srcBmp = new Bitmap();
+            srcBmp.Init(h, w, srcBorder);
+            srcBmp.Grays = grays;
+            
+            // Fill with a recognizable pattern bounded by Grays
+            sbyte* srcPtr = srcBmp.DataPointer;
+            for (int y = 0; y < h; y++)
+            {
+                int offset = srcBmp.RowOffset(y);
+                for (int x = 0; x < w; x++)
+                {
+                    srcPtr[offset + x] = (sbyte)((x + y * w) % (grays - 1) + 1);
+                }
+            }
+
+            Bitmap testBmp = new Bitmap();
+            testBmp.Init(ref srcBmp, border);
+
+            Assert.Equal(w, testBmp.Width);
+            Assert.Equal(h, testBmp.Height);
+            Assert.Equal(border, testBmp.Border);
+            Assert.Equal(grays, testBmp.Grays);
+
+            // Verify content logic using DataPointer
+            sbyte* dstPtr = testBmp.DataPointer;
+            for (int r = 0; r < h; r++)
+            {
+                int srcOffset = srcBmp.RowOffset(r);
+                int dstOffset = testBmp.RowOffset(r);
+
+                for (int c = 0; c < w; c++)
+                {
+                    Assert.Equal(srcPtr[srcOffset + c], dstPtr[dstOffset + c]);
+                }
+
+                // Verify right border is zeroed
+                for(int b = 0; b < border; b++)
+                {
+                    Assert.Equal(0, dstPtr[dstOffset + w + b]);
+                }
+            }
+
+            // Verify initial top border is zeroed
+            for(int b = 0; b < border; b++)
+            {
+                Assert.Equal(0, dstPtr[b]);
+            }
+        }
+
+        [Theory]
+        [InlineData(10, 2, 4, 256)] // new border is greater
+        [InlineData(10, 4, 2, 128)] // new border is smaller
+        [InlineData(10, 4, 4, 100)] // new border is equal
+        public unsafe void Init_RefBitmap_SameReference(int size, int initialBorder, int newBorder, int grays)
+        {
+            Bitmap bmp = new Bitmap();
+            bmp.Init(size, size, initialBorder);
+            bmp.Grays = grays;
+            
+            // Write unique coordinate-based pattern bounded by Grays
+            sbyte* ptr = bmp.DataPointer;
+            for (int y = 0; y < size; y++)
+            {
+                int rowOffset = bmp.RowOffset(y);
+                for (int x = 0; x < size; x++)
+                {
+                    ptr[rowOffset + x] = (sbyte)((x + y * size) % (grays - 1) + 1);
+                }
+            }
+
+            // Call Init with itself as the source
+            bmp.Init(ref bmp, newBorder);
+
+            // Assert border updated (SetMinimumBorder only increases)
+            int expectedBorder = Math.Max(initialBorder, newBorder);
+            Assert.Equal(expectedBorder, bmp.Border);
+            Assert.Equal(grays, bmp.Grays);
+
+            // Verify unique pattern survived in exact coordinates and padding is zeroed
+            sbyte* newPtr = bmp.DataPointer;
+            for (int y = 0; y < size; y++)
+            {
+                int rowOffset = bmp.RowOffset(y);
+                for (int x = 0; x < size; x++)
+                {
+                    sbyte expectedPixel = (sbyte)((x + y * size) % (grays - 1) + 1);
+                    Assert.Equal(expectedPixel, newPtr[rowOffset + x]);
+                }
+
+                // Verify right border is zeroed
+                for(int b = 0; b < expectedBorder; b++)
+                {
+                    Assert.Equal(0, newPtr[rowOffset + size + b]);
+                }
+            }
+
+            // Verify initial top border is zeroed
+            for(int b = 0; b < expectedBorder; b++)
+            {
+                Assert.Equal(0, newPtr[b]);
+            }
+        }
+
 
         [Fact()]
         public void InitTest003()
@@ -915,6 +1329,59 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(0, rect.Height);
         }
 
+        public static TheoryData<int, int, int[], int, int, int, int, bool> BoundingBoxEdgeCases =>
+            new TheoryData<int, int, int[], int, int, int, int, bool>
+            {
+                // w, h, points [x,y, ...], expXMin, expYMin, expWidth, expHeight, expEmpty
+                // 1. Single pixel at origin (0,0) -> 0 Width, 0 Height, Empty
+                { 10, 10, new[] { 0, 0 }, 0, 0, 0, 0, true },
+                
+                // 2. Single pixel at top-right bounds (9,9)
+                { 10, 10, new[] { 9, 9 }, 9, 9, 0, 0, true },
+
+                // 3. Two pixels forming a 1D horizontal line (Y bounds collapse to 0 area)
+                { 10, 10, new[] { 2, 5, 3, 5 }, 2, 5, 0, 0, true },
+
+                // 4. Two pixels forming a 1D vertical line (X bounds collapse to 0 area)
+                { 10, 10, new[] { 5, 2, 5, 3 }, 5, 2, 0, 0, true },
+
+                // 5. Normal 2D Rectangle (diagonally opposed points)
+                { 10, 10, new[] { 2, 2, 5, 5 }, 2, 2, 3, 3, false },
+                
+                // 6. Cross pattern (furthest extents are at the middle of the edges, not corners)
+                { 10, 10, new[] { 5, 1, 1, 5, 9, 5, 5, 9 }, 1, 1, 8, 8, false },
+                
+                // 7. Full border only (hollow center)
+                { 10, 10, new[] { 0, 0, 9, 0, 0, 9, 9, 9 }, 0, 0, 9, 9, false },
+
+                // 8. Tightly packed non-empty sub-box within large image
+                { 100, 100, new[] { 40, 40, 40, 60, 60, 40, 60, 60 }, 40, 40, 20, 20, false }
+            };
+
+        [Theory]
+        [MemberData(nameof(BoundingBoxEdgeCases))]
+        public unsafe void ComputeBoundingBox_ComprehensiveEdgeCases(
+            int w, int h, int[] points, int expX, int expY, int expW, int expH, bool expEmpty)
+        {
+            var bmp = (Bitmap)CreateIntiFillVerifyBitmap(w, h, 0, 0); // 0 = White
+            
+            for (int i = 0; i < points.Length; i += 2)
+            {
+                int px = points[i];
+                int py = points[i + 1];
+                sbyte* rowPtr = bmp.GetRow(py);
+                rowPtr[px] = 1; // Set to Black
+            }
+
+            Rectangle rect = bmp.ComputeBoundingBox();
+
+            Assert.Equal(expEmpty, rect.Empty);
+            Assert.Equal(expX, rect.XMin);
+            Assert.Equal(expY, rect.YMin);
+            Assert.Equal(expW, rect.Width);
+            Assert.Equal(expH, rect.Height);
+        }
+
 
         [Fact]
         public void ChangeGrays_UninitializedData_SafelyUpdatesGrays()
@@ -977,11 +1444,174 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
+        public void ComputeBoundingBox_CompressedData()
+        {
+            var bmp = (Bitmap)CreateIntiFillVerifyBitmap(10, 10, 0, 1);
+            bmp.Compress();
+            
+            Assert.Null(bmp.Data);
+            Assert.NotNull(bmp.RleData);
+
+            Rectangle rect = bmp.ComputeBoundingBox();
+            
+            Assert.False(rect.Empty);
+            Assert.Equal(0, rect.XMin);
+            Assert.Equal(0, rect.YMin);
+            Assert.Equal(9, rect.Width);
+            Assert.Equal(9, rect.Height);
+        }
+
+        [Fact]
+        public void ComputeBoundingBox_CompressedZeroDimensions()
+        {
+            Bitmap bmp = new Bitmap();
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+            surrogate._Width = 0;
+            surrogate._Height = 0;
+            surrogate._RleData = new byte[10];
+            
+            Rectangle rect = bmp.ComputeBoundingBox();
+            Assert.True(rect.Empty);
+        }
+
+        [Fact]
+        public void ComputeBoundingBox_NullDataWithValidDimensions_Throws()
+        {
+            Bitmap bmp = default;
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+            surrogate._Width = 10;
+            surrogate._Height = 10;
+            surrogate._Data = null;
+            surrogate._RleData = null;
+
+            var ex = Assert.Throws<DjvuNullReferenceException>(() => bmp.ComputeBoundingBox());
+            Assert.Contains("Cannot compute bounding box", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void Compress_InvalidState_Throws(bool hasData)
+        {
+            Bitmap bmp = default;
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+            surrogate._Data = hasData ? new sbyte[10] : null;
+            surrogate._RleData = hasData ? new byte[10] : null;
+
+            var ex = Assert.Throws<DjvuInvalidOperationException>(() => bmp.Compress());
+            if (hasData)
+                Assert.Contains("already contains compressed", ex.Message);
+            else
+                Assert.Contains("Bitmap is not properly initialized", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(255)]
+        public void Compress_InvalidGrays_Throws(byte grays)
+        {
+            Bitmap bmp = default;
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+            surrogate._Data = new sbyte[10];
+            surrogate._Width = 10;
+            surrogate._Height = 10;
+            surrogate._Grays = grays;
+
+            var ex = Assert.Throws<DjvuInvalidOperationException>(() => bmp.Compress());
+            Assert.Contains("Cannot compress data with Grays", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(2147483592L)] // Array.MaxLength + 1L
+        [InlineData(-1L)]
+        public void EnsureZeroBuffer_InvalidSize_Throws(long size)
+        {
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => Bitmap.EnsureZeroBuffer(size));
+            if (size > 0)
+                Assert.Contains("exceeds Array.MaxLength", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(10, 0, 5, 10, true)]
+        [InlineData(2, 2147483621, -15, 0, false)] // Array.MaxLength + 30
+        public void Resize_InvalidDimensions_Throws(int height, int border, int bytesPerRow, int width, bool isArgumentException)
+        {
+            Bitmap bmp = default;
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+            surrogate._Height = height;
+            surrogate._Border = border;
+            surrogate._BytesPerRow = bytesPerRow;
+            
+            if (isArgumentException)
+            {
+                var ex = Assert.Throws<DjvuArgumentException>(() => bmp.SetWidth(width));
+                Assert.Contains("BytesPerRow is insufficient", ex.Message);
+            }
+            else
+            {
+                var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => bmp.SetWidth(width));
+                Assert.Contains("Requirements for _ZeroBuffer result in an invalid size", ex.Message);
+            }
+        }
+
+        [Fact]
         public void Init_Throws()
         {
             var bmp = new Bitmap();
             // Init dimensions but try to force the underlying data buffer to remain null
             Assert.Throws<DjvuArgumentException>(() => bmp.Init(null, 10, 10, 0));
+        }
+
+        [Fact]
+        public void Init_PopulatedBitmap_ThrowsInvalidOperation()
+        {
+            var bmp = new Bitmap();
+            bmp.Init(10, 10, 0); // Populated (Data != null)
+            Assert.Throws<DjvuInvalidOperationException>(() => bmp.Init(5, 5, 0));
+        }
+
+        [Theory]
+        [InlineData("Dimensions")]
+        [InlineData("Data")]
+        [InlineData("RefBitmap")]
+        [InlineData("RefBitmapRect")]
+        public void Init_TargetDisposed_ThrowsObjectDisposed(string overload)
+        {
+            var bmp = new Bitmap();
+            bmp.Dispose();
+            var source = new Bitmap(10, 10);
+            sbyte[] data = new sbyte[100];
+            
+            Action action = overload switch
+            {
+                "Dimensions" => () => bmp.Init(10, 10, 0),
+                "Data" => () => bmp.Init(data, 10, 10, 0),
+                "RefBitmap" => () => bmp.Init(ref source, 0),
+                "RefBitmapRect" => () => bmp.Init(ref source, new Rectangle(0, 0, 10, 10), 0),
+                _ => throw new ArgumentException()
+            };
+            
+            Assert.Throws<DjvuObjectDisposedException>(action);
+        }
+
+        [Theory]
+        [InlineData("RefBitmap")]
+        [InlineData("RefBitmapRect")]
+        public void Init_SourceDisposed_ThrowsArgumentException(string overload)
+        {
+            var bmp = new Bitmap();
+            var source = new Bitmap(10, 10);
+            source.Dispose();
+            
+            Action action = overload switch
+            {
+                "RefBitmap" => () => bmp.Init(ref source, 0),
+                "RefBitmapRect" => () => bmp.Init(ref source, new Rectangle(0, 0, 10, 10), 0),
+                _ => throw new ArgumentException()
+            };
+            
+            var ex = Assert.Throws<DjvuArgumentException>(action);
+            Assert.Contains("has been disposed", ex.Message);
         }
 
         [Theory]
@@ -1001,7 +1631,6 @@ namespace DjvuNet.Graphics.Tests
             {
                 target.Init(tH, tW, 0);
                 source.Init(sH, sW, 0);
-                target.Fill(0);
                 source.Fill(1);
 
                 // Act
@@ -1080,9 +1709,165 @@ namespace DjvuNet.Graphics.Tests
             }
         }
 
+        [Theory]
+        [InlineData("RefBitmap")]
+        [InlineData("RefBitmapRect")]
+        public void Init_SourceNullRef_ThrowsArgumentNullException(string overload)
+        {
+            Bitmap target = new Bitmap();
+            target.Init(10, 10, 0);
+            
+            Action action = overload switch
+            {
+                "RefBitmap" => () => target.Init(ref Unsafe.NullRef<Bitmap>(), 0),
+                "RefBitmapRect" => () => target.Init(ref Unsafe.NullRef<Bitmap>(), new Rectangle(0, 0, 5, 5), 0),
+                _ => throw new ArgumentException()
+            };
+
+            var ex = Assert.Throws<DjvuArgumentNullException>(action);
+            Assert.Contains($"{typeof(Bitmap).FullName} source reference is null.", ex.Message);
+        }
+
+        [Fact]
+        public void Translate_NullRefRetVal_Throws()
+        {
+            Bitmap target = new Bitmap();
+            {
+                target.Init(10, 10, 0);
+                var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                    target.Translate(5, 5, ref Unsafe.NullRef<Bitmap>()));
+                Assert.Contains(
+                    $"{typeof(Bitmap).FullName} retVal reference is null.", ex.Message);
+            }
+        }
+
+        [Fact]
+        public void Constructor_NullRefSource_Throws()
+        {
+            var ex = Assert.Throws<DjvuArgumentNullException>(() => new Bitmap(ref Unsafe.NullRef<Bitmap>()));
+            Assert.Contains(
+                $"{typeof(Bitmap).FullName} bmp reference is null.", ex.Message);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        [InlineData(16)]
+        [InlineData(100)]
+        public void Blit_InvalidSubsample_Throws(int subSample)
+        {
+            Bitmap source = new Bitmap();
+            source.Init(10, 10, 0);
+            Bitmap target = new Bitmap();
+            target.Init(10, 10, 0);
+            
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => target.Blit(ref source, 0, 0, subSample));
+            Assert.Contains($"Subsample factor {subSample} is out of range.", ex.Message);
+        }
+
         // -------------------------------------------------------------------------
         // RLE COMPRESSION / DECOMPRESSION TESTS
         // -------------------------------------------------------------------------
+
+        [Theory]
+        [InlineData(8, 2, false)]    // Scalar fallback
+        [InlineData(8, 2, true)]
+        [InlineData(24, 4, false)]   // Vector128 boundary
+        [InlineData(24, 4, true)]
+        [InlineData(48, 4, false)]   // AVX2 boundary
+        [InlineData(48, 4, true)]
+        [InlineData(136, 4, false)]  // AVX-512 boundary
+        [InlineData(136, 4, true)]
+        public unsafe void DecodeRleCore_WithDirtyUninitializedBuffer(int width, int border, bool isDirty)
+        {
+            // Arrange
+            int height = 8;
+            int bytesPerRow = width + border; 
+            int bufferSize = height * bytesPerRow + border;
+            
+            sbyte[] dirtyBuffer = new sbyte[bufferSize];
+            if (isDirty) Array.Fill(dirtyBuffer, (sbyte)-1); 
+            
+            sbyte[] expectedBuffer = new sbyte[bufferSize];
+            if (isDirty) Array.Fill(expectedBuffer, (sbyte)-1);
+            
+            Bitmap sourceBmp = new Bitmap();
+            sourceBmp.Init(height, width, 0); 
+            // Fill with 1s (black) so the decoded pixels are non-zero. 
+            // If the decoder leaves padding uninitialized (-1) or overwrites it (1), SequenceEqual will fail.
+            Array.Fill(sourceBmp.Data, (sbyte)1);
+            sourceBmp.Compress();
+            byte[] rleData = sourceBmp.RleData;
+            
+            // Act
+            fixed (byte* pRle = rleData)
+            {
+                Bitmap.DecodeRleCore(pRle, rleData.Length, dirtyBuffer, border, height, bytesPerRow, width);
+            }
+
+            var sbDump = new StringBuilder();
+            sbDump.AppendLine($"\n=== BUFFER DUMP (Width: {width}, Dirty: {isDirty}) ===");
+            for (int i = 0; i < border; i++) sbDump.Append($"{dirtyBuffer[i],2} ");
+            sbDump.AppendLine("  <- Top Border");
+            
+            for (int y = 0; y < height; y++)
+            {
+                int rowStart = border + y * bytesPerRow;
+                for (int x = 0; x < bytesPerRow; x++)
+                {
+                    sbDump.Append($"{dirtyBuffer[rowStart + x],2} ");
+                    if (x == width - 1) sbDump.Append("| ");
+                }
+                sbDump.AppendLine();
+            }
+            Console.WriteLine(sbDump.ToString());
+
+            // Generate perfect expected state dynamically
+            for (int i = 0; i < border; i++) expectedBuffer[i] = 0;
+            
+            for (int row = 0; row < height; row++)
+            {
+                int rowStart = border + row * bytesPerRow;
+                
+                for (int p = 0; p < width; p++)
+                {
+                    expectedBuffer[rowStart + p] = dirtyBuffer[rowStart + p];
+                }
+                
+                int rightBorderStart = rowStart + width;
+                for (int p = 0; p < border; p++)
+                {
+                    expectedBuffer[rightBorderStart + p] = 0;
+                }
+            }
+
+            // Assert
+            var dirtySpan = new ReadOnlySpan<sbyte>(dirtyBuffer);
+            var expectedSpan = new ReadOnlySpan<sbyte>(expectedBuffer);
+            
+            if (!dirtySpan.SequenceEqual(expectedSpan))
+            {
+                int diffCount = 0;
+                int maxPreviewLines = 64;
+                var errorLog = new StringBuilder();
+                
+                for (int i = 0; i < bufferSize; i++)
+                {
+                    if (dirtySpan[i] != expectedSpan[i])
+                    {
+                        if (diffCount < maxPreviewLines)
+                        {
+                            errorLog.AppendLine($"Index: {i,4} | Expected: {expectedSpan[i],4} | Actual: {dirtySpan[i],4}");
+                        }
+                        diffCount++;
+                    }
+                }
+                
+                double diffPct = (double)diffCount / bufferSize;
+                errorLog.Insert(0, $"Buffer corruption detected (Width: {width}, Dirty: {isDirty}). {diffCount} bytes ({diffPct:P2}) failed to initialize to 0.\n");
+                Assert.Fail(errorLog.ToString());
+            }
+        }
 
         [Theory]
         [InlineData(4)]    // Scalar fallback
@@ -1166,7 +1951,7 @@ namespace DjvuNet.Graphics.Tests
             target.Compress();
             target._RleData = new byte[] { 0, 1, (byte)(width - 1) };
 
-            target.Uncompress();
+            target.Decompress();
 
             Assert.NotNull(target.Data);
             Assert.Null(target._RleData);
@@ -1182,12 +1967,98 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Theory]
+        [InlineData(15, false)]  [InlineData(15, true)]
+        [InlineData(16, false)]  [InlineData(16, true)]
+        [InlineData(31, false)]  [InlineData(31, true)]
+        [InlineData(32, false)]  [InlineData(32, true)]
+        [InlineData(33, false)]  [InlineData(33, true)]
+        [InlineData(63, false)]  [InlineData(63, true)]
+        [InlineData(64, false)]  [InlineData(64, true)]
+        [InlineData(65, false)]  [InlineData(65, true)]
+        [InlineData(127, false)] [InlineData(127, true)]
+        [InlineData(128, false)] [InlineData(128, true)]
+        [InlineData(129, false)] [InlineData(129, true)]
+        [InlineData(255, false)] [InlineData(255, true)]
+        [InlineData(256, false)] [InlineData(256, true)]
+        [InlineData(257, false)] [InlineData(257, true)]
+        public void Decompress_VectorBoundaries_RoundTrips(int rleByteTarget, bool isMultiRow)
+        {
+            int height;
+            int width;
+            List<int[]> rowDefinitions = new List<int[]>();
+            int rem = rleByteTarget;
+
+            if (isMultiRow)
+            {
+                width = 320; // Fixed width across all rows
+                while (rem > 0)
+                {
+                    if (rem % 3 == 0)      { rowDefinitions.Add(new int[] { 20, 300 });     rem -= 3; } // 1+2 = 3 bytes
+                    else if (rem % 3 == 2) { rowDefinitions.Add(new int[] { 320 });         rem -= 2; } // 2 bytes
+                    else                   { rowDefinitions.Add(new int[] { 10, 10, 300 }); rem -= 4; } // 1+1+2 = 4 bytes
+                }
+                height = rowDefinitions.Count;
+            }
+            else
+            {
+                width = 0;
+                List<int> singleRow = new List<int>();
+                singleRow.Add(320); // 2-byte command to trigger bug (320 -> [193, 64])
+                width += 320;
+                rem -= 2;
+                
+                while (rem > 0)
+                {
+                    singleRow.Add(10); // 1-byte commands to pad to exact target
+                    width += 10;
+                    rem -= 1;
+                }
+                height = 1;
+                rowDefinitions.Add(singleRow.ToArray());
+            }
+
+            Bitmap source = new Bitmap();
+            Bitmap expected = new Bitmap();
+            try
+            {
+                source.Init(height, width, 0);
+                source.Grays = 2;
+
+                int offset = 0;
+                foreach (var rowRuns in rowDefinitions)
+                {
+                    sbyte color = 0; // Always start row with White (0) to prevent injected leading 0 bytes
+                    foreach (int runLength in rowRuns)
+                    {
+                        for (int x = 0; x < runLength; x++)
+                            source.SetByteAt(offset++, color);
+                        color = (sbyte)(1 - color);
+                    }
+                }
+
+                expected = source.Duplicate();
+                
+                // Compress to generate the boundary-crossing _RleData array
+                source.Compress();
+                source.Decompress();
+
+                // Verify struct equivalence
+                Assert.Equal(expected, source);
+            }
+            finally
+            {
+                source.Dispose();
+                expected.Dispose();
+            }
+        }
+
+        [Theory]
         [InlineData("AllWhite", 32, 32)]
         [InlineData("AllBlack", 32, 32)]
         [InlineData("Checkerboard", 64, 64)]
         [InlineData("StartsWithBlack", 64, 64)]
         [InlineData("LongRunOverflow", 200, 200)]
-        public void CompressUncompress_DataPatterns_RoundTripPreservesExactPixels(string pattern, int width, int height)
+        public void Compress_DataPatterns_RoundTrips(string pattern, int width, int height)
         {
             Bitmap source = new Bitmap();
             source.Init(height, width, 0);
@@ -1216,7 +2087,7 @@ namespace DjvuNet.Graphics.Tests
             sbyte[] original = (sbyte[])source.Data.Clone();
 
             source.Compress();
-            source.Uncompress();
+            source.Decompress();
 
             Assert.Equal(original.Length, source.Data.Length);
             for (int i = 0; i < original.Length; i++)
@@ -1237,8 +2108,78 @@ namespace DjvuNet.Graphics.Tests
             Assert.Throws<DjvuInvalidOperationException>(() => source.Compress());
         }
 
+        public static TheoryData<int, string> SimdOobReadTestData()
+        {
+            var data = new TheoryData<int, string>();
+            data.Add(1, "Scalar"); // Unconditionally available
+
+            bool v128 = Vector128.IsHardwareAccelerated;
+            bool avx2 = Avx2.IsSupported;
+            bool avx512 = Avx512F.IsSupported && Avx512BW.IsSupported;
+
+            if (v128)
+            {
+                data.Add(16, "Vector128_16_Exact");
+                data.Add(32, "Vector128_32_Exact");
+                data.Add(48, "Vector128_32+16_Exact");
+            }
+            if (avx2) data.Add(64, "Avx2_Exact");
+            if (avx512) data.Add(128, "Avx512_Exact");
+
+            // Dynamically define fallback boundaries based on highest available ISA
+            if (avx512 && v128)
+            {
+                data.Add(144, "Avx512_Vector128_Fallback (128+16)");
+                data.Add(160, "Avx512_Vector128_Fallback (128+32)");
+                data.Add(176, "Avx512_Vector128_Fallback (128+32+16)");
+            }
+            else if (avx2 && v128)
+            {
+                data.Add(80, "Avx2_Vector128_Fallback (64+16)");
+                data.Add(96, "Avx2_Vector128_Fallback (64+32)");
+                data.Add(112, "Avx2_Vector128_Fallback_Extended (64+32+16)");
+            }
+            else if (v128)
+            {
+                data.Add(80, "Vector128_Extended (2x32+16)");
+            }
+
+            return data;
+        }
+
+        [Theory]
+        [MemberData(nameof(SimdOobReadTestData))]
+        public void DecodeRle_SimdOobRead(int rleStreamLength, string isaName)
+        {
+            const int rleMoreByte = 0xC1;
+            Bitmap source = new Bitmap();
+            source.Init(1, 1024, 0); // height=1, width=1024, border=0
+            source.Fill(0);          // Pre-fill with 0s to detect written pixels
+
+            byte[] rle = new byte[rleStreamLength];
+            rle[rleStreamLength - 1] = rleMoreByte; // 193 forces a massive write of 256+G pixels, proving the OOB read.
+
+            string hexDumpOfBytes = null;
+
+            using (MemoryStream ms = new MemoryStream(rle))
+            {
+                // Verify exception is thrown
+                Assert.Throws<DjvuEndOfStreamException>(() => source.ReadRleStream(ms));
+            }
+
+            bool result = source.Data[0] == 0 && source.Data[255] == 0 && source.Data[512] == 0 && source.Data[source.Data.Length - 1] == 0;
+
+            if (!result)
+            {
+                Span<byte> bytes = MemoryMarshal.Cast<sbyte, byte>(source.Data.AsSpan(0, 512));
+                hexDumpOfBytes = Convert.ToHexString(bytes);
+            }
+
+            Assert.True(result, $"[{isaName}] OOB read caused {nameof(Bitmap.Data)} memory overwrite. Expected all 0s. Data hex dump: {hexDumpOfBytes}");
+        }
+
         [Fact]
-        public void Uncompress_CorruptedRleData_ThrowsDjvuFormatException()
+        public void Decompress_CorruptedRleData_Throws()
         {
             Bitmap source = new Bitmap();
             source.Init(10, 10, 0);
@@ -1248,24 +2189,24 @@ namespace DjvuNet.Graphics.Tests
             // Corrupt the first RLE run to claim 50 pixels (Width is only 10)
             source._RleData[0] = 50;
 
-            Assert.Throws<DjvuFormatException>(() => source.Uncompress());
+            Assert.Throws<DjvuFormatException>(() => source.Decompress());
         }
 
         [Fact]
-        public void Uncompress_ZeroDimensions_ThrowsInvalidOperationException()
+        public void Decompress_ZeroDimensions_Throws()
         {
             Bitmap source = new Bitmap();
             // Setting RleData manually without initializing dimensions
             source._RleData = new byte[] { 0 };
 
-            var ex = Assert.Throws<DjvuInvalidOperationException>(() => source.Uncompress());
+            var ex = Assert.Throws<DjvuInvalidOperationException>(() => source.Decompress());
             Assert.Contains("Bitmap is not properly initialized", ex.Message);
         }
 
 
 
         [Fact(Timeout = 200)] // Safeguard against infinite loops
-        public void SerializeToPbm_RawFormat_RleData_SuccessfullySerializesWithoutInfiniteLoop()
+        public void SerializeToPbm_RawFormat_RleData()
         {
             Bitmap source = new Bitmap();
             source.Init(10, 10, 0);
@@ -1283,7 +2224,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void CompressUncompress_NonZeroBorder_RoundTripPreservesPixels()
+        public void Compress_NonZeroBorder_RoundTrips()
         {
             int width = 32;
             int height = 32;
@@ -1306,7 +2247,7 @@ namespace DjvuNet.Graphics.Tests
 
                 var originalClone = source.Duplicate();
                 source.Compress();
-                source.Uncompress();
+                source.Decompress();
 
                 for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
@@ -1318,7 +2259,7 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact]
-        public void Compress_ExtremeLongRun_CorrectlyEncodesMultiple16383Segments()
+        public void Compress_ExtremeLongRun()
         {
             Bitmap source = new Bitmap();
             // MaxRunSize is 16383. We create a row of 33000 pixels (all white).
@@ -1355,31 +2296,112 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(234, source._RleData[7]);
         }
 
-        [Fact]
-        public void RleEncode_ZeroDimensions_ReturnsZero()
+        [Theory]
+        [InlineData(70000)] // Baseline > 64k
+        [InlineData(65536)] // Exact 64k
+        [InlineData(65600)] // AVX-512 aligned (65536 + 64)
+        [InlineData(65599)] // AVX-512 off-by-one (65536 + 63)
+        [InlineData(65568)] // AVX2 aligned (65536 + 32)
+        [InlineData(65567)] // AVX2 off-by-one (65536 + 31)
+        [InlineData(65552)] // Vector128 aligned (65536 + 16)
+        [InlineData(65551)] // Vector128 off-by-one (65536 + 15)
+        public unsafe void Compress_ExtremeLongRuns(int width)
         {
             Bitmap source = new Bitmap();
-            // Do not init dimensions (Height=0, Width=0)
+            source.Init(3, width, 0);
             source.Grays = 2;
-            source.Compress();
 
-            // Should gracefully do nothing
-            Assert.Null(source._RleData);
-            Assert.Null(source.Data);
+            // Row 0: all white (0). Already initialized to 0.
+            
+            // Row 1: set of short runs, then long run.
+            // Let's make the first 100 pixels alternate 0 and 1.
+            int offsetRow1 = width;
+            for (int i = 0; i < 100; i++)
+            {
+                source.SetByteAt(offsetRow1 + i, (sbyte)(i % 2));
+            }
+            // The rest 69900 pixels are 0.
+
+            // Row 2: long run of 1s (black)
+            int offsetRow2 = 2 * width;
+            for (int i = 0; i < width; i++)
+            {
+                source.SetByteAt(offsetRow2 + i, 1);
+            }
+
+            Bitmap expected = source.Duplicate();
+
+            try
+            {
+                source.Compress();
+                Assert.NotNull(source._RleData);
+
+                source.Decompress();
+
+                fixed (sbyte* pE = expected.Data)
+                fixed (sbyte* pS = source.Data)
+                {
+                    double diff = Util.ImageBinaryDiff((byte*)pE + expected.Border, (byte*)pS + source.Border, source.Width, source.Height, source.BytesPerRow, 8, 8);
+                    if (diff > 0.0)
+                    {
+                        var sb = new StringBuilder();
+                        int mismatchCount = 0;
+                        for (int y = 0; y < source.Height; y++)
+                        {
+                            sbyte* rowE = expected.GetRow(y);
+                            sbyte* rowS = source.GetRow(y);
+                            for (int x = 0; x < source.Width; x++)
+                            {
+                                if (rowE[x] != rowS[x])
+                                {
+                                    sb.AppendLine($"Row {y}, Col {x}: Expected {rowE[x]}, Actual {rowS[x]}");
+                                    mismatchCount++;
+                                    if (mismatchCount >= 50)
+                                    {
+                                        sb.AppendLine("... (truncated)");
+                                        goto Dump;
+                                    }
+                                }
+                            }
+                        }
+                    Dump:
+                        string dumpPath = Path.Combine(Environment.CurrentDirectory, $"Compress_ExtremeLongRuns_Diff_{width}.log");
+                        File.WriteAllText(dumpPath, sb.ToString());
+                        Assert.True(diff == 0.0, $"Diff > 0.0. Mismatches logged to: {dumpPath}\nPreview:\n{sb.ToString()}");
+                    }
+                    Assert.Equal(0.0, diff);
+                }
+            }
+            finally
+            {
+                source.Dispose();
+                expected.Dispose();
+            }
         }
 
-        [Fact]
-        public void Compress_ZeroDimensions_ReturnsGracefully()
+        [Theory]
+        [InlineData(0, true)]
+        [InlineData(10, false)]
+        public void Compress_ZeroDimensions_ThrowsOrReturns(int border, bool shouldThrow)
         {
             Bitmap source = new Bitmap();
-            typeof(DjvuNet.Graphics.Bitmap).GetProperty("Width").SetValue(source, 0);
-            typeof(DjvuNet.Graphics.Bitmap).GetProperty("Height").SetValue(source, 0);
-            typeof(DjvuNet.Graphics.Bitmap).GetProperty("Data").SetValue(source, new sbyte[10]);
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref source);
+            surrogate._Width = 0;
+            surrogate._Height = 0;
+            surrogate._Border = border;
+            surrogate._Data = new sbyte[10];
 
-            source.Compress();
-
-            var rleData = typeof(Bitmap).GetField("_RleData", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(source) as byte[];
-            Assert.Null(rleData);
+            if (shouldThrow)
+            {
+                var ex = Assert.Throws<DjvuInvalidOperationException>(() => source.Compress());
+                Assert.Contains("zero dimensions and zero border", ex.Message);
+            }
+            else
+            {
+                source.Compress();
+                Assert.Null(source.RleData);
+                Assert.NotNull(source.Data);
+            }
         }
 
         [Fact]
@@ -1466,7 +2488,8 @@ namespace DjvuNet.Graphics.Tests
             fixed (byte* pBitmap = bitmap)
             {
                 byte* runsPtr = pRuns;
-                source.Rle2Bitmap(32, ref runsPtr, pBitmap, invert: false);
+                byte* runsEnd = pRuns + runs.Length;
+                source.Rle2Bitmap(32, ref runsPtr, runsEnd, pBitmap, invert: false);
             }
             
             // The method bit-packs 8 pixels per byte.
@@ -1485,7 +2508,8 @@ namespace DjvuNet.Graphics.Tests
             fixed (byte* pBitmap = bitmapInvert)
             {
                 byte* runsPtr = pRuns;
-                source.Rle2Bitmap(32, ref runsPtr, pBitmap, invert: true);
+                byte* runsEnd = pRuns + runs.Length;
+                source.Rle2Bitmap(32, ref runsPtr, runsEnd, pBitmap, invert: true);
             }
             
             // Inverted bits: 0 becomes 1, 1 becomes 0.
@@ -2468,6 +3492,614 @@ namespace DjvuNet.Graphics.Tests
         public void GetHashCode_MatchesEquality_RleMatrix(Bitmap bmp1, Bitmap bmp2, bool expected)
         {
             Assert.Equal(expected, bmp1.GetHashCode() == bmp2.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData(32)]  // Targets Vector128 exactly
+        [InlineData(63)]  // Targets Vector128 with scalar fallback
+        [InlineData(64)]  // Targets AVX2 exactly
+        [InlineData(127)] // Targets AVX2 with scalar fallback
+        [InlineData(128)] // Targets AVX-512 exactly
+        [InlineData(255)] // Targets AVX-512 with scalar fallback
+        public unsafe void DecodeRleCore_RunLength192(int len)
+        {
+            // Bug: The SIMD routines used a threshold of 192 (0xC0) 
+            // but failed to treat exactly 192 as a 2-byte run due to Max(v, 192) equating to 192
+            // instead of Max(v, 191) which correctly flags values >= 192.
+            
+            byte[] runs = new byte[len];
+            runs[0] = 0xC0; // 2-byte run start
+            runs[1] = 0xC0; // 2-byte run end (encoded length = 192)
+            for (int i = 2; i < len; i++)
+            {
+                runs[i] = 0x01; // 1 pixel run
+            }
+
+            int totalPixels = 192 + (len - 2) * 1;
+            sbyte[] decoded = new sbyte[totalPixels];
+
+            fixed (byte* pRuns = runs)
+            {
+                Bitmap.DecodeRleCore(pRuns, len, decoded, 0, 1, totalPixels, totalPixels);
+            }
+
+            for (int i = 0; i < 192; i++)
+            {
+                Assert.Equal(0, decoded[i]);
+            }
+        }
+
+        private static byte[] CreateRleBuffer(int length, byte fill, byte lastByte1, byte? lastByte2 = null)
+        {
+            byte[] buffer = new byte[length];
+            for (int i = 0; i < length; i++) buffer[i] = fill;
+            if (lastByte2.HasValue)
+            {
+                buffer[length - 2] = lastByte1;
+                buffer[length - 1] = lastByte2.Value;
+            }
+            else
+            {
+                buffer[length - 1] = lastByte1;
+            }
+            return buffer;
+        }
+
+        public static TheoryData<byte[], int, int, Type, string> DecodeRleCoreInvalidData => new()
+        {
+            // 1. Scalar Fallback Branch (< 32 bytes)
+            // 0xC1 0xFF = 511 pixels. Width is 200, so it overflows and throws FormatException.
+            { CreateRleBuffer(4, 0x01, 0xC1, 0xFF), 4, 200, typeof(DjvuFormatException), null },
+            // 0xC0 at the very end of stream throws EndOfStreamException
+            { CreateRleBuffer(4, 0x01, 0xC0), 4, 200, typeof(DjvuEndOfStreamException), null },
+            
+            // 1b. Scalar Fallback Branch (Original Explicit Arrays)
+            { new byte[] { 0xFF, 0xFF, 0xFF }, 3, 10, typeof(DjvuFormatException), null },
+            { new byte[] { 0x01, 0x01 }, 2, 10, typeof(DjvuEndOfStreamException), null },
+            
+            // 2. Vector128 / SSE Branch (>= 32 bytes)
+            { CreateRleBuffer(32, 0x01, 0xC1, 0xFF), 32, 200, typeof(DjvuFormatException), null },
+            { CreateRleBuffer(32, 0x01, 0xC0), 32, 200, typeof(DjvuEndOfStreamException), null },
+            
+            // 3. AVX2 Branch (>= 64 bytes)
+            { CreateRleBuffer(64, 0x01, 0xC1, 0xFF), 64, 300, typeof(DjvuFormatException), null },
+            { CreateRleBuffer(64, 0x01, 0xC0), 64, 300, typeof(DjvuEndOfStreamException), null },
+            
+            // 4. AVX-512 Branch (>= 128 bytes)
+            { CreateRleBuffer(128, 0x01, 0xC1, 0xFF), 128, 500, typeof(DjvuFormatException), null },
+            { CreateRleBuffer(128, 0x01, 0xC0), 128, 500, typeof(DjvuEndOfStreamException), null }
+        };
+
+        [Theory]
+        [MemberData(nameof(DecodeRleCoreInvalidData))]
+        public unsafe void DecodeRleCore_InvalidData_Throws(byte[] runs, int runsLength, int requestedPixels, Type expectedException, string dummy)
+        {
+            sbyte[] decoded = new sbyte[requestedPixels];
+            
+            Action decodeAction = () =>
+            {
+                fixed (byte* pRuns = runs)
+                    Bitmap.DecodeRleCore(pRuns, runsLength, decoded, 0, 1, requestedPixels, requestedPixels);
+            };
+
+            Assert.Throws(expectedException, decodeAction);
+        }
+
+        public static TheoryData<string, Type, string> ReadRleStreamInvalidStateData => new()
+        {
+            { "Uninitialized", typeof(DjvuInvalidOperationException), "is uninitialized as both" },
+            { "AlreadyHasRle", typeof(DjvuInvalidOperationException), "already contains compressed" }
+        };
+
+        [Theory]
+        [MemberData(nameof(ReadRleStreamInvalidStateData))]
+        public void ReadRleStream_InvalidState_Throws(string testCase, Type expectedException, string messageFragment)
+        {
+            Bitmap bmp = new Bitmap();
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+
+            switch (testCase)
+            {
+                case "AlreadyHasRle":
+                    surrogate._Data = new sbyte[10];
+                    surrogate._RleData = new byte[10];
+                    break;
+            }
+
+            var ex = Assert.Throws(expectedException, () => bmp.ReadRleStream(Stream.Null));
+            Assert.Contains(messageFragment, ex.Message);
+        }
+
+        public static TheoryData<string, Type, string> RleDecodeInvalidStateData => new()
+        {
+            { "StrideOverflow", typeof(DjvuArgumentOutOfRangeException), "Calculated stride exceeds bounds" },
+            { "BufferOverflow", typeof(DjvuArgumentOutOfRangeException), "Calculated data buffer size exceeds bounds" }
+        };
+
+        [Theory]
+        [MemberData(nameof(RleDecodeInvalidStateData))]
+        public unsafe void RleDecode_InvalidState_Throws(string testCase, Type expectedException, string messageFragment)
+        {
+            Bitmap bmp = new Bitmap();
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+
+            switch (testCase)
+            {
+                case "StrideOverflow":
+                    surrogate._Width = int.MaxValue - 2;
+                    surrogate._Height = 10;
+                    surrogate._Border = 10;
+                    break;
+                case "BufferOverflow":
+                    surrogate._Width = 1000000;
+                    surrogate._Height = 1000000;
+                    surrogate._Border = 0;
+                    break;
+            }
+
+            // Must pass a non-null pointer (e.g. 1) to bypass the ArgumentNullException check
+            var ex = Assert.Throws(expectedException, () => bmp.RleDecode((byte*)1));
+            Assert.Contains(messageFragment, ex.Message);
+        }
+
+        [Fact]
+        public unsafe void RleDecode_NullRuns_ThrowsArgumentNullException()
+        {
+            Bitmap bmp = new Bitmap();
+            bmp.Init(10, 10, 0); // Initialize dimensions to pass prior InvalidOperation guardrail
+            var ex = Assert.Throws<DjvuArgumentNullException>(() => bmp.RleDecode(null));
+            Assert.Equal("runs", ex.ParamName);
+        }
+
+
+        public static TheoryData<int, int, int, int, int, int, int, int> BlitSimdEdgeCases
+        {
+            get
+            {
+                var data = new TheoryData<int, int, int, int, int, int, int, int>();
+
+                // Subsamples to test
+                int[] subsamples = new[] { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                int[] borders = new[] { 0, 1, 2, 4 };
+
+                foreach (int sub in subsamples)
+                {
+                    foreach (int b in borders)
+                    {
+                        // 128-bit Margins
+                        data.Add(200, 200, 15, 15, 0, 0, sub, b);       // -1 byte (128-bit boundary)
+                        data.Add(200, 200, 16, 16, 0, 0, sub, b);       // Exact (128-bit boundary)
+                        data.Add(200, 200, 17, 17, 0, 0, sub, b);       // +1 byte (128-bit boundary)
+
+                        // 256-bit Margins
+                        data.Add(200, 200, 31, 31, 0, 0, sub, b);       // -1 byte (256-bit boundary)
+                        data.Add(200, 200, 32, 32, 0, 0, sub, b);       // Exact (256-bit boundary)
+                        data.Add(200, 200, 33, 33, 0, 0, sub, b);       // +1 byte (256-bit boundary)
+
+                        // Mid-Tier Combinations
+                        data.Add(200, 200, 48, 48, 0, 0, sub, b);       // 1x 256-bit + 1x 128-bit (Exact)
+                        data.Add(200, 200, 51, 51, 0, 0, sub, b);       // 1x 256-bit + 1x 128-bit + 3 byte scalar tail
+
+                        // 512-bit Margins
+                        data.Add(200, 200, 63, 63, 0, 0, sub, b);       // -1 byte (512-bit boundary)
+                        data.Add(200, 200, 64, 64, 0, 0, sub, b);       // Exact (512-bit boundary)
+                        data.Add(200, 200, 65, 65, 0, 0, sub, b);       // +1 byte (512-bit boundary)
+
+                        // Complex Block Combinations (Vector512 Cascade)
+                        data.Add(200, 200, 117, 117, 0, 0, sub, b);     // 1x 512-bit + 1x 256-bit + 1x 128-bit + 5 byte scalar tail
+                        data.Add(200, 200, 200, 200, 0, 0, sub, b);     // Multi-block stress test
+
+                        // Logical Edge Cases
+                        data.Add(200, 200, 64, 64, sub - 1, sub - 1, sub, b);  // SubPixel Phase Shift (max phase)
+                        data.Add(200, 200, 64, 64, -17, -17, sub, b);          // Geometric Clipping (Negative Bounds)
+                        data.Add(50, 50, 200, 200, 10, 10, sub, b);            // Geometric Clipping (Source Out-of-Bounds)
+                        data.Add(50, 50, 200, 200, -19, -23, sub, b);          // Geometric Clipping (Source Out-of-Bounds + Negative Bounds)
+                    }
+                }
+
+                // Explicit edge-case fallback test for an odd unoptimized scalar factor
+                data.Add(200, 200, 100, 100, 0, 0, 3, 0);
+
+                return data;
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(BlitSimdEdgeCases))]
+        public unsafe void Blit_SimdVectorization_ParityWithScalar(
+            int targetWidth, int targetHeight, int sourceWidth, int sourceHeight, int xPosition, int yPosition, int subsample, int border = 4)
+        {
+            // Arrange
+            Bitmap targetSimd = new Bitmap();
+            Util.PrepareTestBitmap(ref targetSimd, Util.SharedTargetBuffer, targetWidth, targetHeight, border);
+
+            Bitmap targetScalar = new Bitmap();
+            Util.PrepareTestBitmap(ref targetScalar, Util.SharedScalarBuffer, targetWidth, targetHeight, border);
+            // Oracle MUST begin with the exact same randomized noise as the SIMD target
+            Buffer.BlockCopy(Util.SharedTargetBuffer, 0, Util.SharedScalarBuffer, 0, targetSimd.RowOffset(targetHeight));
+
+            Bitmap source = new Bitmap();
+            Util.PrepareTestBitmap(ref source, Util.SharedSourceBuffer, sourceWidth, sourceHeight, border);
+
+            // Act - SIMD (The optimized method)
+            targetSimd.Blit(ref source, xPosition, yPosition, subsample);
+
+            // Act - Reference Scalar (The exact legacy DjVuLibre C++ logic, re-written to be readable)
+            int destRow = yPosition / subsample;
+            int subPixelRowOffset = yPosition - (subsample * destRow);
+            if (subPixelRowOffset < 0)
+            { destRow--; subPixelRowOffset += subsample; }
+
+            int startDestColumn = xPosition / subsample;
+            int startSubPixelColOffset = xPosition - (subsample * startDestColumn);
+            if (startSubPixelColOffset < 0)
+            { startDestColumn--; startSubPixelColOffset += subsample; }
+
+            for (int sourceRow = 0; sourceRow < source.Height; sourceRow++)
+            {
+                if (destRow >= 0 && destRow < targetScalar.Height)
+                {
+                    int destCol = startDestColumn;
+                    int subPixelColOffset = startSubPixelColOffset;
+                    int sourceRowStartIndex = source.RowOffset(sourceRow);
+                    int destRowStartIndex = targetScalar.RowOffset(destRow);
+
+                    for (int sourceCol = 0; sourceCol < source.Width; sourceCol++)
+                    {
+                        if (destCol >= 0 && destCol < targetScalar.Width)
+                        {
+                            targetScalar.Data[destRowStartIndex + destCol] = (sbyte)(targetScalar.Data[destRowStartIndex + destCol] + source.Data[sourceRowStartIndex + sourceCol]);
+                        }
+
+                        if (++subPixelColOffset >= subsample)
+                        { subPixelColOffset = 0; destCol++; }
+                    }
+                }
+                if (++subPixelRowOffset >= subsample)
+                { subPixelRowOffset = 0; destRow++; }
+            }
+
+            // Assert
+            var scalarSpan = new ReadOnlySpan<sbyte>(targetScalar.DataPointer, targetScalar.Data.Length);
+            var simdSpan = new ReadOnlySpan<sbyte>(targetSimd.DataPointer, targetSimd.Data.Length);
+            if (!scalarSpan.SequenceEqual(simdSpan))
+            {
+                int diffCount = 0;
+                int maxPreviewLines = 32;
+                var errorLog = new StringBuilder();
+
+                for (int y = 0; y < targetHeight; y++)
+                {
+                    sbyte* simdRow = targetSimd.GetRow(y);
+                    sbyte* scalarRow = targetScalar.GetRow(y);
+                    for (int x = 0; x < targetWidth; x++)
+                    {
+                        if (simdRow[x] != scalarRow[x])
+                        {
+                            if (diffCount < maxPreviewLines)
+                                errorLog.AppendLine($"Y: {y,4} | X: {x,4} | Idx: {y * targetWidth + x,6} | Scalar: {scalarRow[x],4} | SIMD: {simdRow[x],4} | Diff: {scalarRow[x] - simdRow[x]}");
+                            diffCount++;
+                        }
+                    }
+                }
+                double diffPct = (double)diffCount / (targetWidth * targetHeight);
+                errorLog.Insert(0, $"SIMD output does not match Scalar Oracle output. Diff: {diffPct:P4} ({diffCount} pixels)\n");
+                Assert.Fail(errorLog.ToString());
+            }
+        }
+
+        public static TheoryData<int, int, int, int, int, int, int, int> BlitSimdEdgeCases_V2
+        {
+            get
+            {
+                var data = new TheoryData<int, int, int, int, int, int, int, int>();
+
+                // Tier 1 AVX2 LCM Thresholds (subsample * 16)
+                int[] tier1Thresholds = { 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240 };
+                // Tier 1 AVX-512 Fixed Threshold
+                int avx512T1 = 128;
+
+                for (int s = 2; s <= 15; s++)
+                {
+                    int t1 = tier1Thresholds[s - 2];
+                    int[] widths = {
+                        15,                  // Scalar only (< 16)
+                        16, 17, 31,          // Tier 2 Padded Vector only
+                        t1 - 1, t1,          // Straddling AVX2 Tier 1 threshold
+                        t1 + 1,              // One AVX2 Tier 1 + Scalar
+                        t1 + 16,             // One AVX2 Tier 1 + Tier 2
+                        avx512T1 - 1, avx512T1, // Straddling AVX-512 Tier 1 threshold
+                        avx512T1 + 1,        // One AVX-512 Tier 1 + Scalar
+                        avx512T1 * 2,        // Exactly two AVX-512 Tier 1 blocks
+                    };
+
+                    int[] borders = new[] { 0, 1, 2, 4 };
+
+                    foreach (int w in widths)
+                    {
+                        foreach (int b in borders)
+                        {
+                            // 1. Strict zero offset
+                            data.Add(500, 500, w, w, 0, 0, s, b);
+
+                            // 2. Full pixel offset (Shifts exactly 2 target pixels, phase = 0)
+                            int fullPixelOffset = s * 2;
+                            data.Add(500, 500, w, w, fullPixelOffset, fullPixelOffset, s, b);
+
+                            // 3. Exhaustive sub-pixel phase combinations 
+                            // Tests every possible sub-pixel offset against a shifted geometric origin
+                            for (int phase = 1; phase < s; phase++)
+                            {
+                                data.Add(500, 500, w, w, fullPixelOffset + phase, fullPixelOffset + phase, s, b);
+                            }
+                        }
+                    }
+                }
+                return data;
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(BlitSimdEdgeCases_V2))]
+        public unsafe void Blit_SimdVectorization_ParityWithScalarExpanded(
+            int targetWidth, int targetHeight, int sourceWidth, int sourceHeight, int xPosition, int yPosition, int subsample, int border = 4)
+        {
+            // var sw = Stopwatch.StartNew();
+            
+            // 1. Arrange 
+            Bitmap targetSimd = new Bitmap();
+            Util.PrepareTestBitmap(ref targetSimd, Util.SharedTargetBuffer, targetWidth, targetHeight, border);
+            
+            Bitmap targetScalar = new Bitmap();
+            Util.PrepareTestBitmap(ref targetScalar, Util.SharedScalarBuffer, targetWidth, targetHeight, border);
+            // Oracle MUST begin with the exact same randomized noise as the SIMD target
+            Buffer.BlockCopy(Util.SharedTargetBuffer, 0, Util.SharedScalarBuffer, 0, targetSimd.RowOffset(targetHeight));
+
+            Bitmap source = new Bitmap();
+            Util.PrepareTestBitmap(ref source, Util.SharedSourceBuffer, sourceWidth, sourceHeight, border);
+            
+            //long setupTime = sw.ElapsedTicks;
+            //sw.Restart();
+
+            // 2. Act (SIMD Path routed to V2)
+            targetSimd.Blit(ref source, xPosition, yPosition, subsample);
+            
+            //long simdTime = sw.ElapsedTicks;
+            //sw.Restart();
+
+            // 3. Act (Scalar Oracle)
+            int destRow = yPosition / subsample;
+            int subPixelRowOffset = yPosition - (subsample * destRow);
+            if (subPixelRowOffset < 0) { destRow--; subPixelRowOffset += subsample; }
+            
+            int startDestColumn = xPosition / subsample;
+            int startSubPixelColOffset = xPosition - (subsample * startDestColumn);
+            if (startSubPixelColOffset < 0) { startDestColumn--; startSubPixelColOffset += subsample; }
+
+            for (int sourceRow = 0; sourceRow < source.Height; sourceRow++)
+            {
+                if (destRow >= 0 && destRow < targetScalar.Height)
+                {
+                    int destCol = startDestColumn;
+                    int subPixelColOffset = startSubPixelColOffset;
+                    int sourceRowStartIndex = source.RowOffset(sourceRow);
+                    int destRowStartIndex = targetScalar.RowOffset(destRow);
+                    
+                    for (int sourceCol = 0; sourceCol < source.Width; sourceCol++)
+                    {
+                        if (destCol >= 0 && destCol < targetScalar.Width)
+                        {
+                            targetScalar.Data[destRowStartIndex + destCol] = (sbyte)(targetScalar.Data[destRowStartIndex + destCol] + source.Data[sourceRowStartIndex + sourceCol]);
+                        }
+                        if (++subPixelColOffset >= subsample) { subPixelColOffset = 0; destCol++; }
+                    }
+                }
+                if (++subPixelRowOffset >= subsample) { subPixelRowOffset = 0; destRow++; }
+            }
+            
+            // long oracleTime = sw.ElapsedTicks;
+
+            // 4. Assert
+            var scalarSpan = new ReadOnlySpan<sbyte>(targetScalar.DataPointer, targetScalar.Data.Length);
+            var simdSpan = new ReadOnlySpan<sbyte>(targetSimd.DataPointer, targetSimd.Data.Length);
+            if (!scalarSpan.SequenceEqual(simdSpan))
+            {
+                int diffCount = 0;
+                int maxPreviewLines = 32;
+                var errorLog = new System.Text.StringBuilder();
+
+                for (int y = 0; y < targetHeight; y++)
+                {
+                    sbyte* simdRow = targetSimd.GetRow(y);
+                    sbyte* scalarRow = targetScalar.GetRow(y);
+                    for (int x = 0; x < targetWidth; x++)
+                    {
+                        if (simdRow[x] != scalarRow[x])
+                        {
+                            if (diffCount < maxPreviewLines)
+                                errorLog.AppendLine($"Y: {y,4} | X: {x,4} | Idx: {y * targetWidth + x,6} | Scalar: {scalarRow[x],4} | SIMD: {simdRow[x],4} | Diff: {scalarRow[x] - simdRow[x]}");
+                            diffCount++;
+                        }
+                    }
+                }
+                double diffPct = (double)diffCount / (targetWidth * targetHeight);
+                errorLog.Insert(0, $"SIMD output does not match Scalar Oracle output. Diff: {diffPct:P4} ({diffCount} pixels)\n");
+                Assert.Fail(errorLog.ToString());
+            }
+            
+            // Console.WriteLine($"[TIMING] W:{sourceWidth} S:{subsample} | Setup: {setupTime} | SIMD: {simdTime} | Oracle: {oracleTime} (ticks)");
+        }
+
+        public static TheoryData<int, int, int, int, int, int, int, int> Blit_SimdEdgeCases_Large
+        {
+            get
+            {
+                var data = new TheoryData<int, int, int, int, int, int, int, int>();
+
+                for (int s = 2; s <= 15; s++)
+                {
+                    // Calculate actual AVX-512 Tier 1 consumption stride
+                    int chunk = (s <= 4) ? 4 : (s <= 8) ? 8 : 16;
+                    int boxes = 64 / chunk;
+                    int consumed = (s == 2) ? 128 : (boxes * s * 2);
+
+                    // Multipliers: 1 exact loop, and roughly 3.3 loops (to test fractional remainder handling)
+                    double[] iterMultipliers = { 1.0, 3.3 };
+
+                    // Reduced border testing surface
+                    int[] borders = new[] { 0, 4 };
+
+                    foreach (double mult in iterMultipliers)
+                    {
+                        // baseWidth calculates the exact threshold pixel width 
+                        int baseWidth = (int)(consumed * mult) + 128;
+
+                        int[] widths = {
+                            baseWidth - 1,   // Straddling boundary
+                            baseWidth,       // Exact boundary 
+                            baseWidth + 1,   // Clears boundary (passes 1 byte to Scalar Tail)
+                            baseWidth + 31   // Passes exactly 31 bytes to Tier 2
+                        };
+
+                        foreach (int w in widths)
+                        {
+                            foreach (int b in borders)
+                            {
+                                // Strict zero offset
+                                data.Add(2000, 2000, w, w, 0, 0, s, b);
+
+                                // Phase shifted offset (max phase) to aggressively test Tail processor alignment
+                                data.Add(2000, 2000, w, w, (s * 2) + (s - 1), (s * 2) + (s - 1), s, b);
+                            }
+                        }
+                    }
+                }
+                return data;
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Blit_SimdEdgeCases_Large))]
+        //[InlineData(2560, 1600, 1950, 780, 0, 0, 4, 4)]
+        //[InlineData(2560, 1600, 1950, 780, 0, 0, 8, 4)]
+        //[InlineData(2560, 1600, 1950, 780, 0, 0, 9, 4)]
+        public unsafe void Blit_SimdVectorization_Tier1(
+            int targetWidth, int targetHeight, int sourceWidth, int sourceHeight, int xPosition, int yPosition, int subsample, int border)
+        {
+            // 1. Arrange 
+            Bitmap targetSimd = new Bitmap();
+            Util.PrepareTestBitmap(ref targetSimd, Util.SharedTargetBuffer, targetWidth, targetHeight, border);
+            
+            Bitmap targetScalar = new Bitmap();
+            Util.PrepareTestBitmap(ref targetScalar, Util.SharedScalarBuffer, targetWidth, targetHeight, border);
+            // Oracle MUST begin with the exact same randomized noise as the SIMD target
+            Buffer.BlockCopy(Util.SharedTargetBuffer, 0, Util.SharedScalarBuffer, 0, targetSimd.RowOffset(targetHeight));
+
+            Bitmap source = new Bitmap();
+            Util.PrepareTestBitmap(ref source, Util.SharedSourceBuffer, sourceWidth, sourceHeight, border);
+
+            // 2. Act (SIMD Path routed to V2)
+            targetSimd.Blit(ref source, xPosition, yPosition, subsample);
+
+            // 3. Act (Scalar Oracle)
+            int destRow = yPosition / subsample;
+            int subPixelRowOffset = yPosition - (subsample * destRow);
+            if (subPixelRowOffset < 0)
+            { destRow--; subPixelRowOffset += subsample; }
+
+            int startDestColumn = xPosition / subsample;
+            int startSubPixelColOffset = xPosition - (subsample * startDestColumn);
+            if (startSubPixelColOffset < 0)
+            { startDestColumn--; startSubPixelColOffset += subsample; }
+
+            for (int sourceRow = 0; sourceRow < source.Height; sourceRow++)
+            {
+                if (destRow >= 0 && destRow < targetScalar.Height)
+                {
+                    int destCol = startDestColumn;
+                    int subPixelColOffset = startSubPixelColOffset;
+                    int sourceRowStartIndex = source.RowOffset(sourceRow);
+                    int destRowStartIndex = targetScalar.RowOffset(destRow);
+
+                    for (int sourceCol = 0; sourceCol < source.Width; sourceCol++)
+                    {
+                        if (destCol >= 0 && destCol < targetScalar.Width)
+                        {
+                            targetScalar.Data[destRowStartIndex + destCol] = (sbyte)(targetScalar.Data[destRowStartIndex + destCol] + source.Data[sourceRowStartIndex + sourceCol]);
+                        }
+                        if (++subPixelColOffset >= subsample)
+                        { subPixelColOffset = 0; destCol++; }
+                    }
+                }
+                if (++subPixelRowOffset >= subsample)
+                { subPixelRowOffset = 0; destRow++; }
+            }
+
+            // 4. Assert
+            var scalarSpan = new ReadOnlySpan<sbyte>(targetScalar.DataPointer, targetScalar.Data.Length);
+            var simdSpan = new ReadOnlySpan<sbyte>(targetSimd.DataPointer, targetSimd.Data.Length);
+            if (!scalarSpan.SequenceEqual(simdSpan))
+            {
+                int diffCount = 0;
+                int maxPreviewLines = 32;
+                var errorLog = new System.Text.StringBuilder();
+
+                for (int y = 0; y < targetHeight; y++)
+                {
+                    sbyte* simdRow = targetSimd.GetRow(y);
+                    sbyte* scalarRow = targetScalar.GetRow(y);
+                    for (int x = 0; x < targetWidth; x++)
+                    {
+                        if (simdRow[x] != scalarRow[x])
+                        {
+                            if (diffCount < maxPreviewLines)
+                                errorLog.AppendLine($"Y: {y,4} | X: {x,4} | Idx: {y * targetWidth + x,6} | Scalar: {scalarRow[x],4} | SIMD: {simdRow[x],4} | Diff: {scalarRow[x] - simdRow[x]}");
+                            diffCount++;
+                        }
+                    }
+                }
+                double diffPct = (double)diffCount / (targetWidth * targetHeight);
+                errorLog.Insert(0, $"SIMD output does not match Scalar Oracle output on Large AVX-512 boundary. Diff: {diffPct:P4} ({diffCount} pixels)\n");
+                Assert.Fail(errorLog.ToString());
+            }
+        }
+        [Fact]
+        public unsafe void Diagnostics_Reduce2_Vector256()
+        {
+            if (!Avx2.IsSupported) return;
+            sbyte[] src = new sbyte[64];
+            for (int i = 0; i < 64; i++) src[i] = (sbyte)i;
+
+            sbyte[] result = new sbyte[32];
+            fixed (sbyte* ptr = src)
+            fixed (sbyte* res = result)
+            {
+                var v0 = Vector256.Load(ptr);
+                var v1 = Vector256.Load(ptr + 32);
+
+                sbyte[] Shift1_256 = new sbyte[32] { 1, 0, 3, 0, 5, 0, 7, 0, 9, 0, 11, 0, 13, 0, 15, 0, 1, 0, 3, 0, 5, 0, 7, 0, 9, 0, 11, 0, 13, 0, 15, 0 };
+                var sum0 = Vector256.Add(v0, Avx2.Shuffle(v0, Vector256.Create<sbyte>(Shift1_256)));
+                var sum1 = Vector256.Add(v1, Avx2.Shuffle(v1, Vector256.Create<sbyte>(Shift1_256)));
+
+                sbyte[] Pack2_Low_256 = new sbyte[32] { 0, 2, 4, 6, 8, 10, 12, 14, -1, -1, -1, -1, -1, -1, -1, -1, 0, 2, 4, 6, 8, 10, 12, 14, -1, -1, -1, -1, -1, -1, -1, -1 };
+                sbyte[] Pack2_High_256 = new sbyte[32] { -1, -1, -1, -1, -1, -1, -1, -1, 0, 2, 4, 6, 8, 10, 12, 14, -1, -1, -1, -1, -1, -1, -1, -1, 0, 2, 4, 6, 8, 10, 12, 14 };
+
+                var pack = Vector256.BitwiseOr(
+                    Avx2.Shuffle(sum0, Vector256.Create<sbyte>(Pack2_Low_256)),
+                    Avx2.Shuffle(sum1, Vector256.Create<sbyte>(Pack2_High_256)));
+
+                var final = Avx2.PermuteVar8x32(pack.AsInt32(), Vector256.Create(0, 1, 4, 5, 2, 3, 6, 7)).AsSByte();
+                Vector256.Store(final, res);
+
+                for (int i = 0; i < 32; i++)
+                {
+                    sbyte expected = (sbyte)(src[i * 2] + src[i * 2 + 1]);
+                    if (result[i] != expected)
+                    {
+                        Assert.Fail($"Reduce2_Vector256 broken at index {i}: Expected {expected}, Got {result[i]}");
+                    }
+                }
+            }
         }
     }
 }

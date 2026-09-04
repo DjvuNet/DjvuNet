@@ -34,8 +34,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="BitmapSurrogate.cs" />
     <Compile Include="DjvuDocumentUtil.cs" />
     <Compile Include="DjvuJsonDocument.cs" />
+    <Compile Include="HardwareIntrinsics.cs" />
     <Compile Include="Mocks\FileStreamWrapper.cs" />
     <Compile Include="Mocks\IStream.cs" />
     <Compile Include="Mocks\StreamMock.cs" />

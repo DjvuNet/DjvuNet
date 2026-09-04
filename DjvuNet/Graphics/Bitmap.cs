@@ -1,15 +1,18 @@
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading;
-using System.Buffers;
 using DjvuNet.Compression;
 using DjvuNet.Errors;
 
@@ -51,12 +54,22 @@ namespace DjvuNet.Graphics
     /// The maximum supported image size is constrained by a combination of two factors in the current implementation:
     /// <br/>1. The fixed data type is <c>sbyte</c>/<c>byte</c> (1 byte allocated per pixel, regardless of visual color depth).
     /// <br/>2. The underlying data structure is a single standard .NET array (<c>sbyte[] Data</c>), which uses <c>Int32</c> for its index.
-    /// <br/>Therefore, the total number of bytes required (Height * BytesPerRow + Border) cannot exceed <c>int.MaxValue</c> (~2GB).
+    /// <br/>Therefore, the total number of bytes required (Height * BytesPerRow + Border) cannot exceed <see cref="Array.MaxLength"/> (~2GB).
     /// Attempting to decode or allocate images exceeding this size will throw a <see cref="DjvuArgumentOutOfRangeException"/>.
+    /// </para>
+    /// <para>
+    /// <b>INTERMEDIATE ARCHITECTURE NOTE (IDisposable Struct):</b><br/>
+    /// The implementation of <see cref="IDisposable"/> on this mutable struct is an intermediate transition pattern.
+    /// It currently manages the lifecycle of individual pinned array allocations. DjvuNet documents can contain thousands 
+    /// or tens of thousands of <see cref="Bitmap"/> instances with small backing buffers, alongside outliers requiring 
+    /// large buffers. This struct-based allocation pattern will be deferred and replaced by a global memory management 
+    /// mechanism based on a custom pinned array pool or unmanaged arena memory. Additionally, an RLE Compress/Decompress 
+    /// pattern of Data buffers memory (3 - 100 compression ratio) is in advanced implementation stages to ensure pinned 
+    /// buffers remain strictly short-lived.
     /// </para>
     /// </remarks>
     [StructLayout(LayoutKind.Sequential)]
-    public unsafe struct Bitmap : IEquatable<Bitmap>, IDisposable
+    public unsafe partial struct Bitmap : IEquatable<Bitmap>, IDisposable
     {
         private int _Width;
 
@@ -73,7 +86,7 @@ namespace DjvuNet.Graphics
 
         private byte _Grays;
 
-        private sbyte[] _Data;
+        internal sbyte[] _Data;
 
         internal byte[] _RleData;
 
@@ -202,6 +215,27 @@ namespace DjvuNet.Graphics
             }
         }
 
+        /// <summary>
+        /// Gets the raw Run-Length Encoded (RLE) data buffer, if present.
+        /// </summary>
+        public byte[] RleData
+        {
+            get
+            {
+                return _RleData;
+            }
+            private set
+            {
+                _RleData = value;
+            }
+        }
+
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Bitmap"/> has been disposed.
+        /// </summary>
+        public bool IsDisposed => _IsDisposed > 0;
+
         private const int RunOverflow = 0xc0;
         /// <summary>
         /// Hard limitation of the DjVu RLE format.
@@ -235,8 +269,13 @@ namespace DjvuNet.Graphics
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static void EnsureZeroBuffer(int required)
+        internal static void EnsureZeroBuffer(long required)
         {
+            if (required > Array.MaxLength || required < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(required), required, $"Required {nameof(_ZeroBuffer)} size is invalid (less than zero or exceeds Array.MaxLength).");
+            }
+
             if (required <= _ZeroBufferSize) return;
 
             if(_ZeroBufferLock.TryEnter(_LockTimeout))
@@ -252,7 +291,28 @@ namespace DjvuNet.Graphics
                         newSize <<= 1;
                     }
 
-                    var newBuffer = GC.AllocateArray<sbyte>((int)newSize, pinned: true);
+                    if (newSize > Array.MaxLength)
+                    {
+                        // If doubling exceeds the array limit, fallback to the required size 
+                        // aligned up to the nearest 4KB page boundary (4096 bytes).
+                        newSize = (required + 4095L) & ~4095L;
+
+                        // Cap to Array.MaxLength if the 4KB alignment pushed it over
+                        if (newSize > Array.MaxLength)
+                        {
+                            newSize = Array.MaxLength;
+                        }
+                    }
+
+                    sbyte[] newBuffer = null;
+                    try
+                    {
+                        newBuffer = GC.AllocateArray<sbyte>((int)newSize, pinned: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        DjvuExceptionUtil.ThrowInvalidOperation($"Failed to allocate pinned _ZeroBuffer of size {newSize}.", ex);
+                    }
 
                     _ZeroBuffersHistory.Enqueue(_ZeroBuffer);
                     _ZeroBufferPointer = (sbyte*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(newBuffer));
@@ -271,19 +331,67 @@ namespace DjvuNet.Graphics
             }
         }
 
-        private void Resize(int width, int height, int border, int bytesPerRow)
+        /// <summary>
+        /// Resizes the core image memory buffer.
+        /// <b>Note:</b> If the current <see cref="Data"/> buffer is smaller than the new dimensions, this method 
+        /// strictly throws an exception rather than reallocating. To grow an existing buffer in-place, <see cref="Data"/> MUST be nullified first.
+        /// </summary>
+        /// <param name="uninitialized">
+        /// <b>UNSAFE CONTRACT:</b> If true, skips CLR memory zeroing. The caller MUST manually zero-initialize 
+        /// the border regions to maintain structural integrity.
+        /// </param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Resize(int width, int height, int border, int bytesPerRow, bool uninitialized = false)
         {
-            Resize(width, height, border, bytesPerRow, Data);
+            Resize(width, height, border, bytesPerRow, Data, uninitialized, false);
         }
 
-        private void Resize(int width, int height, int border, int bytesPerRow, sbyte[] newDataBuffer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Resize(int width, int height, int border, int bytesPerRow, sbyte[] newData)
         {
-            // Stride validation: DjvuNet Bitmap uses 8bpp (8 bits per pixel) memory layout,
+            Resize(width, height, border, bytesPerRow, newData, false, false);
+        }
+
+        /// <summary>
+        /// Resizes the core image memory buffer and strictly validates dimensions and lengths.
+        /// <b>Note:</b> If <paramref name="newData"/> is provided but is smaller than the required dimensions, this method 
+        /// strictly throws an exception rather than automatically reallocating. To up-size, the caller MUST pass null.
+        /// By default, this method guarantees safe Garbage Collector (GC) pinning by unconditionally allocating 
+        /// a new unmanaged pinned array and copying the contents of <paramref name="newData"/> into it. 
+        /// This ensures that unsafe <see cref="DataPointer"/> memory accesses will not corrupt the heap if the GC compacts memory.
+        /// When <paramref name="useNewData"/> is true, this double-allocation is entirely bypassed. The method 
+        /// safely adopts direct ownership of <paramref name="newData"/> under the strict requirement that the caller 
+        /// has already allocated it utilizing <see cref="GC.AllocateArray{T}(int, bool)"/> with pinned set to true,
+        /// and that the array length is exactly equal to the maximum row offset to maintain structural integrity.
+        /// </summary>
+        /// <param name="width">The target width in pixels.</param>
+        /// <param name="height">The target height in pixels.</param>
+        /// <param name="border">The border size in bytes.</param>
+        /// <param name="bytesPerRow">The number of bytes per row (width + border).</param>
+        /// <param name="newData">The incoming pixel data array.</param>
+        /// <param name="uninitialized">
+        /// If true, allocates the new pinned array without zeroing memory to completely bypass CLR allocation overhead. 
+        /// <b>UNSAFE CONTRACT:</b> This is an internal performance optimization. The caller assumes absolute responsibility 
+        /// for fully overwriting the buffer, which strictly includes manually zero-initializing the <paramref name="border"/> 
+        /// margins to guarantee they represent white pixels.
+        /// </param>
+        /// <param name="useNewData">
+        /// If true, bypasses array duplication and explicitly adopts the <paramref name="newData"/> array. 
+        /// <b>UNSAFE CONTRACT:</b> Because .NET lacks a public API to detect if an array is pinned, this parameter 
+        /// relies on a strict internal API contract. The caller assumes absolute responsibility for guaranteeing 
+        /// that <paramref name="newData"/> was explicitly pinned during allocation to prevent access to dangling pointers via DataPointer.
+        /// </param>
+        private void Resize(int width, int height, int border, int bytesPerRow, sbyte[] newData, bool uninitialized, bool useNewData)
+        {
+            // Validation: DjvuNet Bitmap uses 8bpp (8 bits per pixel) memory layout,
             // allocating 1 byte per pixel regardless of visual color depth (Grays).
-            // Therefore, the row stride (BytesPerRow) must physically accommodate width + border.
+            // Therefore, the bytes per row must physically accommodate width + border.
+            // NOTE: The `bytesPerRow > 0` condition intentionally permits `0` to bypass bounds 
+            // validation. This is an architecturally valid state representing an empty, 
+            // 0-dimensional Bitmap with a 0-length Data buffer.
             if (bytesPerRow > 0 && bytesPerRow < width + border)
             {
-                DjvuExceptionUtil.ThrowArgument("BytesPerRow (stride) is insufficient to hold the image width and border padding.", nameof(bytesPerRow));
+                DjvuExceptionUtil.ThrowArgument("BytesPerRow is insufficient to hold the image width and border.", nameof(bytesPerRow));
             }
 
             // Promote to long to prevent 32-bit integer overflow during malicious/massive allocations.
@@ -293,20 +401,20 @@ namespace DjvuNet.Graphics
             // The limit is imposed by a combination of two factors in the current Bitmap implementation:
             // 1. The fixed data type is sbyte/byte (1 byte per pixel).
             // 2. The underlying data structure is a standard .NET array (sbyte[]), which uses Int32 for its index.
-            // Therefore, the total number of bytes required (maxOffsetCalc) cannot exceed int.MaxValue (2GB).
+            // Therefore, the total number of bytes required (maxOffsetCalc) cannot exceed Array.MaxLength (0x7FFFFFC7).
             // Future work to remove image size limits will require migrating away from a single 1D array
             // or utilizing advanced memory structures like MemoryMappedFiles or pointer arrays.
-            if (maxOffsetCalc > int.MaxValue || maxOffsetCalc < 0)
+            if (maxOffsetCalc > Array.MaxLength || maxOffsetCalc < 0)
             {
-                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Image dimensions cause memory boundary calculation to exceed maximum integer size.");
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, $"Image dimensions result in an invalid {nameof(Data)} buffer size (less than zero or exceeding Array.MaxLength).");
             }
 
             int newMaxRowOffset = (int)maxOffsetCalc;
 
-            if (newDataBuffer != null && newMaxRowOffset > 0 && newDataBuffer.Length < newMaxRowOffset)
+            if (newData != null && newMaxRowOffset > 0 && newData.Length < newMaxRowOffset)
             {
                 DjvuExceptionUtil.ThrowInvalidOperation(
-                    $"Provided data buffer length ({newDataBuffer.Length}) is too small for the specified dimensions. Required: {newMaxRowOffset}");
+                    $"Provided data buffer length ({newData.Length}) is too small for the specified dimensions. Required: {newMaxRowOffset}");
             }
 
             SetHeightPrv(height);
@@ -315,15 +423,35 @@ namespace DjvuNet.Graphics
             _BytesPerRow = bytesPerRow;
             _MaxRowOffset = newMaxRowOffset;
 
-            EnsureZeroBuffer(border + bytesPerRow);
-
-            if (Data != newDataBuffer || Data == null)
+            long requiredZeroBuffer = (long)Math.Min(height, 1) * bytesPerRow + border;
+            if (requiredZeroBuffer > Array.MaxLength || requiredZeroBuffer < 0)
             {
-                Data = GC.AllocateArray<sbyte>(newMaxRowOffset, pinned: true);
-                if (newDataBuffer != null)
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(bytesPerRow), bytesPerRow, $"Requirements for {nameof(_ZeroBuffer)} result in an invalid size (less than zero or exceeding Array.MaxLength).");
+            }
+
+            EnsureZeroBuffer(requiredZeroBuffer);
+
+            if (useNewData && newData != null && newData.Length == newMaxRowOffset)
+            {
+                Data = newData;
+            }
+            else if (Data != newData || Data == null)
+            {
+                try
+                {
+                    Data = uninitialized
+                        ? GC.AllocateUninitializedArray<sbyte>(newMaxRowOffset, pinned: true)
+                        : GC.AllocateArray<sbyte>(newMaxRowOffset, pinned: true);
+                }
+                catch (Exception ex)
+                {
+                    DjvuExceptionUtil.ThrowInvalidOperation($"Failed to allocate pinned Data array of size {newMaxRowOffset}.", ex);
+                }
+                
+                if (newData != null)
                 {
                     // Force allocation of a pinned array to secure DataPointer against GC compaction
-                    Array.Copy(newDataBuffer, Data, Math.Min(newDataBuffer.Length, newMaxRowOffset));
+                    Array.Copy(newData, Data, Math.Min(newData.Length, newMaxRowOffset));
                 }
             }
         }
@@ -376,17 +504,32 @@ namespace DjvuNet.Graphics
             {
                 if (Data != null)
                 {
-                    Bitmap tmp = (Bitmap)new Bitmap().Init(ref this, value);
-                    Resize(Width, Height, value, tmp.GetRowSize(), tmp.Data);
+                    Bitmap tmp = new Bitmap();
+                    tmp.Init(ref this, value);
+                    Resize(Width, Height, value, tmp.BytesPerRow, tmp.Data, false, true);
                     tmp.Data = null;
                 }
                 else
                 {
                     long newStrideCalc = (long)BytesPerRow - _Border + value;
+                    long newMaxRowOffsetCalc = ((long)Height * newStrideCalc) + value;
+
+                    if (newMaxRowOffsetCalc > Array.MaxLength || newMaxRowOffsetCalc < 0)
+                    {
+                        DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(value), value,
+                            $"Image dimensions result in an invalid {nameof(Data)} buffer size (less than zero or exceeding Array.MaxLength).");
+                    }
+
+                    // Architectural Note: This check is a dead code as long as Init()/Resize() 
+                    // allocate an empty array (length 0) for Height=0. Because Data is never null after Init,
+                    // execution always takes the (Data != null) branch above. The only way to reach here is 
+                    // on a completely uninitialized struct, where newStrideCalc = value. Because value <= Array.MaxLength 
+                    // (from the check above), it can never exceed int.MaxValue.
                     if (newStrideCalc > int.MaxValue || newStrideCalc < 0)
                     {
                         DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(value), value, "Calculated stride exceeds bounds.");
                     }
+
                     Resize(Width, Height, value, (int)newStrideCalc);
                 }
             }
@@ -401,13 +544,18 @@ namespace DjvuNet.Graphics
         {
         }
 
-        public Bitmap(int height, int width, int border = Bitmap.BorderSize) : this()
+        public Bitmap(int height, int width, int border = Bitmap.BorderSize, bool uninitialized = false) : this()
         {
-            Init(height, width, border);
+            Init(height, width, border, uninitialized);
         }
 
         public Bitmap(ref Bitmap bmp) : this()
         {
+            if (Unsafe.IsNullRef(ref bmp))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(bmp), $"{typeof(Bitmap).FullName} bmp reference is null.");
+            }
+
             Init(ref bmp, bmp.Border);
         }
 
@@ -417,6 +565,17 @@ namespace DjvuNet.Graphics
             Init(data, height, width, border);
         }
 
+        /// <summary>
+        /// Disposes the underlying pinned array resources.
+        /// </summary>
+        /// <remarks>
+        /// <b>INTERMEDIATE ARCHITECTURE NOTE:</b><br/>
+        /// This disposal pattern is an intermediate implementation. Due to the high allocation volume of <see cref="Bitmap"/> 
+        /// instances (thousands per document, with highly variable buffer sizes), this method will be replaced by a centralized 
+        /// memory management architecture utilizing custom pinned array pooling or unmanaged arena memory. Furthermore, 
+        /// an RLE Compress/Decompress pattern of Data buffers memory (3 - 100 compression ratio) is in advanced implementation 
+        /// stages to keep pinned buffers short-lived.
+        /// </remarks>
         public void Dispose()
         {
             if (!(_IsDisposed > 0))
@@ -454,10 +613,11 @@ namespace DjvuNet.Graphics
             int width = (int)ParserUtil.ReadInteger(ref lookahead, stream);
             int height = (int)ParserUtil.ReadInteger(ref lookahead, stream);
             int maxval = 1;
-            Bitmap bitmap = new Bitmap(height, width, border);
             // go reading file
             if (magic[0] == 'P')
             {
+                // PBM/PGM formats still require the pre-zeroed allocating constructor
+                Bitmap bitmap = new Bitmap(height, width, border);
                 switch (magic[1])
                 {
                     case (byte)'1':
@@ -498,6 +658,7 @@ namespace DjvuNet.Graphics
                 switch (magic[1])
                 {
                     case (byte)'4':
+                        Bitmap bitmap = new Bitmap(height, width, border, uninitialized: true);
                         bitmap.Grays = 2;
                         bitmap.ReadRleStream(stream);
                         return bitmap;
@@ -511,140 +672,104 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ReadPbmTextStream(Stream stream)
         {
-            GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-            IntPtr dataPtr = hData.AddrOfPinnedObject();
-            try
+            byte* row = (byte*)(DataPointer + Border);
+            row += (Height - 1) * BytesPerRow;
+            for (int n = Height - 1; n >= 0; n--)
             {
-                byte* row = (byte*)(dataPtr + Border);
-                row += (Height - 1) * BytesPerRow;
-                for (int n = Height - 1; n >= 0; n--)
+                for (int c = 0; c < Width; c++)
                 {
-                    for (int c = 0; c < Width; c++)
+                    byte bit = (byte)' ';
+                    int bitInt = 0;
+
+                    while (bit == ' ' || bit == '\t' || bit == '\r' || bit == '\n')
                     {
-                        byte bit = (byte)' ';
-                        int bitInt = 0;
-
-                        while (bit == ' ' || bit == '\t' || bit == '\r' || bit == '\n')
+                        bit = 0;
+                        bitInt = stream.ReadByte();
+                        if (bitInt == -1)
                         {
-                            bit = 0;
-                            bitInt = stream.ReadByte();
-                            if (bitInt == -1)
-                            {
-                                DjvuExceptionUtil.ThrowEndOfStream(
-                                    $"End of stream reached. Stream: {nameof(stream)}, Position: {stream.Position}");
-                            }
-
-                            bit = (byte)bitInt;
+                            DjvuExceptionUtil.ThrowEndOfStream(
+                                $"End of stream reached. Stream: {nameof(stream)}, Position: {stream.Position}");
                         }
 
-                        if (bit == '1')
-                        {
-                            row[c] = 1;
-                        }
-                        else if (bit == '0')
-                        {
-                            row[c] = 0;
-                        }
-                        else
-                        {
-                            DjvuExceptionUtil.ThrowFormatException("Corrupted PBM data.");
-                        }
+                        bit = (byte)bitInt;
                     }
-                    row -= BytesPerRow;
+
+                    if (bit == '1')
+                    {
+                        row[c] = 1;
+                    }
+                    else if (bit == '0')
+                    {
+                        row[c] = 0;
+                    }
+                    else
+                    {
+                        DjvuExceptionUtil.ThrowFormatException("Corrupted PBM data.");
+                    }
                 }
-            }
-            finally
-            {
-                if (hData.IsAllocated)
-                {
-                    hData.Free();
-                }
+                row -= BytesPerRow;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ReadPgmTextStream(Stream stream, int maxval)
         {
-            GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-            IntPtr dataPtr = hData.AddrOfPinnedObject();
-            try
+            byte* row = (byte*)(DataPointer + Border);
+            row += (Height - 1) * BytesPerRow;
+            char lookahead = '\n';
+
+            byte[] ramp = new byte[maxval + 1];
+
+            for (int i = 0; i <= maxval; i++)
             {
-                byte* row = (byte*)(dataPtr + Border);
-                row += (Height - 1) * BytesPerRow;
-                char lookahead = '\n';
-
-                byte[] ramp = new byte[maxval + 1];
-
-                for (int i = 0; i <= maxval; i++)
-                {
-                    ramp[i] = (byte)(i < maxval ? ((Grays - 1) * (maxval - i) + maxval / 2) / maxval : 0);
-                }
-
-                for (int n = Height - 1; n >= 0; n--)
-                {
-                    for (int c = 0; c < Width; c++)
-                    {
-                        row[c] = ramp[(int)ParserUtil.ReadInteger(ref lookahead, stream)];
-                    }
-
-                    row -= BytesPerRow;
-                }
+                ramp[i] = (byte)(i < maxval ? ((Grays - 1) * (maxval - i) + maxval / 2) / maxval : 0);
             }
-            finally
+
+            for (int n = Height - 1; n >= 0; n--)
             {
-                if (hData.IsAllocated)
+                for (int c = 0; c < Width; c++)
                 {
-                    hData.Free();
+                    row[c] = ramp[(int)ParserUtil.ReadInteger(ref lookahead, stream)];
                 }
+
+                row -= BytesPerRow;
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void ReadPbmRawStream(Stream stream)
         {
-            GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-            IntPtr dataPtr = hData.AddrOfPinnedObject();
-            try
+            byte* row = (byte*)(DataPointer + Border);
+            row += (Height - 1) * BytesPerRow;
+            for (int n = Height - 1; n >= 0; n--)
             {
-                byte* row = (byte*)(dataPtr + Border);
-                row += (Height - 1) * BytesPerRow;
-                for (int n = Height - 1; n >= 0; n--)
+                byte acc = 0;
+                byte mask = 0;
+                for (int c = 0; c < Width; c++)
                 {
-                    byte acc = 0;
-                    byte mask = 0;
-                    for (int c = 0; c < Width; c++)
+                    if (mask == 0)
                     {
-                        if (mask == 0)
+                        int accInt = stream.ReadByte();
+                        if (accInt == -1)
                         {
-                            int accInt = stream.ReadByte();
-                            if (accInt == -1)
-                            {
-                                DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
-                            }
-
-                            acc = (byte)accInt;
-                            mask = (byte)0x80;
-                        }
-                        if ((acc & mask) != 0)
-                        {
-                            row[c] = 1;
-                        }
-                        else
-                        {
-                            row[c] = 0;
+                            DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
                         }
 
-                        mask >>= 1;
+                        acc = (byte)accInt;
+                        mask = (byte)0x80;
                     }
-                    row -= BytesPerRow;
+                    if ((acc & mask) != 0)
+                    {
+                        row[c] = 1;
+                    }
+                    else
+                    {
+                        row[c] = 0;
+                    }
+
+                    mask >>= 1;
                 }
-            }
-            finally
-            {
-                if (hData.IsAllocated)
-                {
-                    hData.Free();
-                }
+                row -= BytesPerRow;
             }
         }
 
@@ -659,15 +784,9 @@ namespace DjvuNet.Graphics
                 ramp[i] = (byte)(i < maxval ? ((Grays - 1) * (maxval - i) + maxval / 2) / maxval : 0);
             }
 
-            GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-            IntPtr dataPtr = hData.AddrOfPinnedObject();
-
-            GCHandle hRamp = GCHandle.Alloc(ramp, GCHandleType.Pinned);
-            IntPtr rampPtr = hRamp.AddrOfPinnedObject();
-            try
+            fixed (byte* bramp = ramp)
             {
-                byte* bramp = (byte*)rampPtr;
-                byte* row = (byte*)(dataPtr + Border);
+                byte* row = (byte*)(DataPointer + Border);
                 row += (Height - 1) * BytesPerRow;
                 for (int n = Height - 1; n >= 0; n--)
                 {
@@ -698,83 +817,6 @@ namespace DjvuNet.Graphics
                         }
                     }
                     row -= BytesPerRow;
-                }
-            }
-            finally
-            {
-                if (hData.IsAllocated)
-                {
-                    hData.Free();
-                }
-
-                if (hRamp.IsAllocated)
-                {
-                    hRamp.Free();
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void ReadRleStream(Stream stream)
-        {
-            GCHandle hData = GCHandle.Alloc(Data, GCHandleType.Pinned);
-            IntPtr dataPtr = hData.AddrOfPinnedObject();
-            try
-            {
-                // interpret runs data
-                int hInt = 0;
-                byte p = 0;
-                byte* row = (byte*)(dataPtr + Border);
-                int n = Height - 1;
-                row += n * BytesPerRow;
-                int c = 0;
-
-                while (n >= 0)
-                {
-                    hInt = stream.ReadByte();
-                    if (hInt == -1)
-                    {
-                        DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
-                    }
-
-                    int x = hInt;
-                    if (x >= RunOverflow)
-                    {
-                        hInt = stream.ReadByte();
-                        if (hInt == -1)
-                        {
-                            DjvuExceptionUtil.ThrowEndOfStream("Unexpected end of stream.");
-                        }
-
-                        x = hInt + ((x - RunOverflow) << 8);
-                    }
-
-                    if (c + x > Width)
-                    {
-                        DjvuExceptionUtil.ThrowFormatException("Bitmap RLE format data are not in sync");
-                    }
-
-                    while (x-- > 0)
-                    {
-                        row[c++] = p;
-                    }
-
-                    p = (byte)unchecked(1 - p);
-
-                    if (c >= Width)
-                    {
-                        c = 0;
-                        p = 0;
-                        row -= BytesPerRow;
-                        n -= 1;
-                    }
-                }
-            }
-            finally
-            {
-                if (hData.IsAllocated)
-                {
-                    hData.Free();
                 }
             }
         }
@@ -820,7 +862,7 @@ namespace DjvuNet.Graphics
                     {
                         while (runs < runs_end)
                         {
-                            Rle2Bitmap(Width, ref runs, buf, false);
+                            Rle2Bitmap(Width, ref runs, runs_end, buf, false);
                             stream.Write(byteBuff, 0, count);
                         }
                     }
@@ -830,7 +872,7 @@ namespace DjvuNet.Graphics
             {
                 if (Data == null)
                 {
-                    Uncompress();
+                    Decompress();
                 }
 
                 fixed (sbyte* rowStart = Data)
@@ -874,7 +916,7 @@ namespace DjvuNet.Graphics
             //GMonitorLock lock (monitor()) ;
             if (Data == null)
             {
-                Uncompress();
+                Decompress();
             }
 
             // header
@@ -920,350 +962,14 @@ namespace DjvuNet.Graphics
             }
         }
 
-        /// <summary>
-        /// Serializes Bitmap data using Run Length Encoding compression to RLE format.
-        /// </summary>
-        /// <param name="stream"></param>
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void SerializeToRle(Stream stream)
-        {
-            // checks
-            if (Width == 0 || Height == 0)
-            {
-                DjvuExceptionUtil.ThrowInvalidOperation("Bitmap is not properly initialized.");
-            }
-
-            //GMonitorLock lock (monitor()) ;
-            if (Grays > 2)
-            {
-                DjvuExceptionUtil.ThrowInvalidOperation(
-                    $"Only bi-level bitmaps can be saved in PBM format. Grays: {Grays}");
-            }
-
-            // header
-            string head = $"R4\n{Width} {Height}\n";
-            byte[] buffer = new UTF8Encoding(false).GetBytes(head);
-            stream.Write(buffer, 0, buffer.Length);
-
-            // body
-            if (_RleData != null)
-            {
-                stream.Write(_RleData, 0, _RleData.Length);
-            }
-            else
-            {
-                byte[] gruns;
-                long size = RleEncode(out gruns);
-                if (gruns != null && size > 0)
-                {
-                    stream.Write(gruns, 0, gruns.Length);
-                }
-            }
-        }
-
-        internal void Compress()
-        {
-            if (Grays > 2)
-            {
-                DjvuExceptionUtil.ThrowInvalidOperation($"Cannot compress data with Grays: {Grays}");
-            }
-
-            //GMonitorLock lock (monitor()) ;
-            if (Data != null)
-            {
-                byte[] grle;
-                long rleLength = RleEncode(out grle);
-                if (rleLength > 0)
-                {
-                    Data = null;
-                    _RleData = grle;
-                }
-            }
-        }
-
-        internal void Uncompress()
-        {
-            // GMonitorLock lock (monitor()) ;
-            if (Data == null && _RleData != null)
-            {
-                fixed (byte* rle = _RleData)
-                {
-                    RleDecode(rle);
-                }
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        internal long RleEncode(out byte[] gpruns)
-        {
-            gpruns = null;
-
-            // uncompress rle information
-            if (Height == 0 || Width == 0)
-            {
-                return 0;
-            }
-
-            if (Data == null)
-            {
-                gpruns = _RleData;
-                return _RleData != null ? _RleData.Length : 0;
-            }
-
-            // create run array
-            long pos = 0;
-            int maxpos = 1024 + Width + Height;
-            byte[] runsBuff = new byte[maxpos];
-
-            // encode bitmap as rle
-            fixed (sbyte* bytes = Data)
-            {
-                byte* row = (byte*)bytes + Border;
-                int n = Height - 1;
-                row += n * BytesPerRow;
-                while (n >= 0)
-                {
-                    if (maxpos < (pos + 2) + (2 * Width))
-                    {
-                        maxpos += (1024 + 2 * Width);
-                        Array.Resize(ref runsBuff, maxpos);
-                    }
-
-                    fixed (byte* runs = runsBuff)
-                    {
-                        byte* runs_pos = runs + pos;
-                        byte* runs_pos_start = runs_pos;
-
-                        AppendLine(ref runs_pos, row, Width);
-
-                        pos += (int)(runs_pos - runs_pos_start);
-                    }
-                    row -= BytesPerRow;
-                    n -= 1;
-                }
-            }
-            // return result
-            Array.Resize(ref runsBuff, (int)pos);
-            gpruns = runsBuff;
-            return pos;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        internal void RleDecode(byte* runs)
-        {
-            // initialize pixel array
-            if (Width == 0 || Height == 0)
-            {
-                DjvuExceptionUtil.ThrowInvalidOperation("Bitmap is not properly initialized.");
-            }
-
-            long newStrideCalc = (long)Width + Border;
-
-            // This condition should be unreachable under normal circumstances because
-            // the Init() and Resize() methods strictly validate memory boundaries beforehand.
-            // If this throws, it indicates that encapsulation has been bypassed or a required
-            // upstream check is missing.
-            if (newStrideCalc > int.MaxValue || newStrideCalc < 0)
-            {
-                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(Width), Width, "Calculated stride exceeds bounds.");
-            }
-
-            Resize(Width, Height, Border, (int)newStrideCalc);
-
-            if (runs == (byte*)0)
-            {
-                DjvuExceptionUtil.ThrowArgumentNull(nameof(runs));
-            }
-
-            long npixels = Height * BytesPerRow + Border;
-            if (npixels > int.MaxValue || npixels < 0)
-            {
-                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(npixels), npixels, "Calculated data buffer size exceeds bounds.");
-            }
-
-            if (Data == null)
-            {
-                Data = GC.AllocateArray<sbyte>((int)npixels, true);
-            }
-
-            DecodeRleCore(runs, Data, Border, Height, BytesPerRow, Width);
-
-            _RleData = null;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        internal static void DecodeRleCore(byte* runs, sbyte[] data, int border, int height, int bytesPerRow, int width)
-        {
-            int c, n;
-            byte p = 0;
-
-            fixed (sbyte* pData = data)
-            {
-                byte* row = (byte*)pData + border;
-                n = height - 1;
-                row += n * bytesPerRow;
-                c = 0;
-                while (n >= 0)
-                {
-                    int x = ReadRun(ref runs);
-
-                    if (c + x > width)
-                    {
-                        DjvuExceptionUtil.ThrowFormatException("Invalid RLE encoded data.");
-                    }
-
-                    while (x-- > 0)
-                    {
-                        row[c++] = p;
-                    }
-
-                    p = (byte)unchecked(1 - p);
-
-                    if (c >= width)
-                    {
-                        c = 0;
-                        p = 0;
-                        row -= bytesPerRow;
-                        n -= 1;
-                    }
-                }
-            }
-        }
-
-        internal void AppendLine(ref byte* data, byte* row, int rowLength, bool invert = false)
-        {
-            byte* rowEnd = row + rowLength;
-            bool p = !invert;
-
-            while (row < rowEnd)
-            {
-                int count = 0;
-                if ((p = !p))
-                {
-                    if (*row != 0)
-                    {
-                        for (++count, ++row; (row < rowEnd) && *row != 0; ++count, ++row) ;
-                    }
-                }
-                else if (*row == 0)
-                {
-                    for (++count, ++row; (row < rowEnd) && *row == 0; ++count, ++row) ;
-                }
-                AppendRun(ref data, count);
-            }
-        }
-
-        internal void AppendRun(ref byte* data, int count)
-        {
-            if (count < RunOverflow)
-            {
-                data[0] = (byte)count;
-                data += 1;
-            }
-            else if (count <= MaxRunSize)
-            {
-                data[0] = (byte)((count >> 8) + RunOverflow);
-                data[1] = (byte)(count & 0xff);
-                data += 2;
-            }
-            else
-            {
-                AppendLongRun(ref data, count);
-            }
-        }
-
-        /// <summary>
-        /// Encodes runs larger than the 16383 format limit by chaining maximum-size segments
-        /// separated by 0-length runs of the alternating color.
-        /// </summary>
-        internal void AppendLongRun(ref byte* data, int count)
-        {
-            while (count > MaxRunSize)
-            {
-                data[0] = data[1] = 0xff;
-                data[2] = 0;
-                data += 3;
-                count -= MaxRunSize;
-            }
-
-            if (count < RunOverflow)
-            {
-                data[0] = (byte)count;
-                data += 1;
-            }
-            else
-            {
-                data[0] = (byte)((count >> 8) + RunOverflow);
-                data[1] = (byte)(count & 0xff);
-                data += 2;
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int ReadRun(ref byte* data)
-        {
-            int z = *data++;
-            return (z >= RunOverflow) ? ((z & ~RunOverflow) << 8) | (*data++) : z;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        internal void Rle2Bitmap(int width, ref byte* runs, byte* bitmap, bool invert = false)
-        {
-            int obyte_def = invert ? 0xff : 0;
-            int obyte_ndef = invert ? 0 : 0xff;
-            int mask = 0x80, obyte = 0;
-
-            for (int c = width; c > 0;)
-            {
-                int x = ReadRun(ref runs);
-                c -= x;
-
-                while ((x--) > 0)
-                {
-                    if ((mask >>= 1) == 0)
-                    {
-                        *(bitmap++) = (byte)(obyte ^ obyte_def);
-                        obyte = 0;
-                        mask = 0x80;
-
-                        for (; x >= 8; x -= 8)
-                        {
-                            *(bitmap++) = (byte)obyte_def;
-                        }
-                    }
-                }
-
-                if (c > 0)
-                {
-                    x = ReadRun(ref runs);
-                    c -= x;
-                    while ((x--) > 0)
-                    {
-                        obyte |= mask;
-                        if ((mask >>= 1) == 0)
-                        {
-                            *(bitmap++) = (byte)(obyte ^ obyte_def);
-                            obyte = 0;
-                            mask = 0x80;
-
-                            for (; x > 8; x -= 8)
-                            {
-                                *(bitmap++) = (byte)obyte_ndef;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (mask != 0x80)
-            {
-                *(bitmap++) = (byte)(obyte ^ obyte_def);
-            }
-        }
-
         public Bitmap Duplicate()
         {
-            if (this == default)
+            if (IsDisposed)
+            {
+                DjvuExceptionUtil.ThrowObjectDisposed(typeof(Bitmap).FullName);
+            }
+
+            if (Height == 0 && Width == 0 && Border == 0 && Data == null && RleData == null)
                 return default;                                                                                   
 
             Bitmap clone = new Bitmap();
@@ -1275,6 +981,15 @@ namespace DjvuNet.Graphics
             if (Data != null && clone.Data != null)
             {
                 Buffer.BlockCopy(Data, 0, clone.Data, 0, Data.Length);
+            }
+            else if (RleData != null)
+            {
+                if (clone.RleData == null)
+                {
+                    clone.RleData = new byte[RleData.Length];
+                }
+
+                Buffer.BlockCopy(RleData, 0, clone.RleData, 0, RleData.Length);
             }
 
             return clone;
@@ -1330,6 +1045,35 @@ namespace DjvuNet.Graphics
                 return ((offset < Border) || (offset >= _MaxRowOffset)) ? 0 : (0xff & Data[offset]);
         }
 
+        /** Performs an additive blit of the GBitmap #bm# with anti-aliasing.  The
+            GBitmap #bm# is first positioned above the current GBitmap in such a
+            way that position (#u#,#v#) in GBitmap #bm# corresponds to position
+            (#u#+#x#/#subsample#,#v#+#y#/#subsample#) in the current GBitmap.  This
+            mapping results in a contraction of GBitmap #bm# by a factor
+            #subsample#.  Each pixel of the current GBitmap can be covered by a
+            maximum of #subsample^2# pixels of GBitmap #bm#.  The value of
+            each pixel in GBitmap #bm# is then added to the value of the
+            corresponding pixel in the current GBitmap.
+
+            {\bf Example}: Assume for instance that the current GBitmap is initially
+            white (all pixels have value zero).  Each pixel of the current GBitmap
+            then contains the sum of the gray levels of the corresponding pixels in
+            GBitmap #bm#.  There are up to #subsample*subsample# such pixels.  If
+            for instance GBitmap #bm# is a bilevel image (pixels can be #0# or #1#),
+            the pixels of the current GBitmap can take values in range #0# to
+            #subsample*subsample#.  Note that function #blit# does not change the
+            number of gray levels in the current GBitmap.  You must call
+            \Ref{set_grays} to indicate that there are #subsample^2+1# gray
+            levels.  Since there is at most 256 gray levels, this also means that
+            #subsample# should never be greater than #15#.
+
+            {\bf Remark}: Arguments #x# and #y# do not represent a position in the
+            coordinate system of the current GBitmap.  According to the above
+            discussion, the position is (#x/subsample#,#y/subsample#).  In other
+            words, you can position the blit with a sub-pixel resolution.  The
+            resulting anti-aliasing changes are paramount to the image quality. */
+        // void blit(const GBitmap* shape, int x, int y, int subsample);
+
         /// <summary>
         /// Insert another bitmap at the specified location. Note that both bitmaps
         /// need to have the same number of grays.
@@ -1337,20 +1081,20 @@ namespace DjvuNet.Graphics
         /// <param name="source">
         /// Bitmap to insert
         /// </param>
-        /// <param name="xh">
+        /// <param name="xInsertPos">
         /// Horizontal location to insert at
         /// </param>
-        /// <param name="yh">
+        /// <param name="yInsertPos">
         /// Vertical location to insert at
         /// </param>
-        /// <param name="subsample">
+        /// <param name="subSample">
         /// Subsample value at
         /// </param>
         /// <returns>
         /// True if the blit intersected this bitmap
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public bool Blit(ref Bitmap source, int xh, int yh, int subsample)
+        public bool Blit(ref Bitmap source, int xInsertPos, int yInsertPos, int subSample)
         {
             if (Unsafe.IsNullRef(ref source))
             {
@@ -1363,73 +1107,77 @@ namespace DjvuNet.Graphics
                     $"Cannot Blit a default source {typeof(Bitmap).FullName} into the target as {nameof(source.Data)} is null.", nameof(source));
             }
 
-            int pidx = 0;
-            int qidx = 0;
-
-            if (subsample == 1)
+            if (subSample < 1 || subSample > 15)
             {
-                return InsertMap(ref source, xh, yh, true);
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(subSample), subSample, $"Subsample factor {subSample} is out of range. Factors > 15 or < 1 are not supported.");
             }
 
-            if ((xh >= (Width * subsample)) || (yh >= (Height * subsample)) || ((xh + source.Width) < 0) ||
-                ((yh + source.Height) < 0))
+            if (subSample == 1)
+            {
+                return InsertMap(ref source, xInsertPos, yInsertPos, true);
+            }
+
+            if ((xInsertPos >= (Width * subSample)) || (yInsertPos >= (Height * subSample)) ||
+                ((xInsertPos + source.Width) < 0) || ((yInsertPos + source.Height) < 0))
             {
                 return false;
             }
 
             if (source.Data != null)
             {
-                int dr = yh / subsample;
-                int dr1 = yh - (subsample * dr);
+                int startDestRow = yInsertPos / subSample;
+                int subPixelRowOffset = yInsertPos - (subSample * startDestRow);
 
-                if (dr1 < 0)
+                if (subPixelRowOffset < 0)
                 {
-                    dr--;
-                    dr1 += subsample;
+                    startDestRow--;
+                    subPixelRowOffset += subSample;
                 }
 
-                int zdc = xh / subsample;
-                int zdc1 = xh - (subsample * zdc);
+                int startDestColumn = xInsertPos / subSample;
+                int subPixelColumnOffset = xInsertPos - (subSample * startDestColumn);
 
-                if (zdc1 < 0)
+                if (subPixelColumnOffset < 0)
                 {
-                    zdc--;
-                    zdc1 += subsample;
+                    startDestColumn--;
+                    subPixelColumnOffset += subSample;
                 }
 
-                int sr = 0;
-                int idx = 0;
-
-                for (; sr < source.Height; sr++)
+                switch (subSample)
                 {
-                    if ((dr >= 0) && (dr < Height))
-                    {
-                        int dc = zdc;
-                        int dc1 = zdc1;
-                        qidx = source.RowOffset(sr);
-                        pidx = RowOffset(dr);
+                    case 2:
+                        return BlitSubSampleDoubleWord<Factor2>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 3:
+                        return BlitSubSample3<Factor3>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 4:
+                        return BlitSubSampleDoubleWord<Factor4>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 5:
+                        return BlitSubSampleQuadWord<Factor5>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 6:
+                        return BlitSubSampleQuadWord<Factor6>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 7:
+                        return BlitSubSampleQuadWord<Factor7>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 8:
+                        return BlitSubSampleQuadWord<Factor8>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 9:
+                        return BlitSubSample9<Factor9>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 10:
+                        return BlitSubSample128Lane<Factor10>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 11:
+                        return BlitSubSample128Lane<Factor11>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 12:
+                        return BlitSubSample128Lane<Factor12>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 13:
+                        return BlitSubSample128Lane<Factor13>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 14:
+                        return BlitSubSample128Lane<Factor14>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    case 15:
+                        return BlitSubSample128Lane<Factor15>(ref source, startDestRow, subPixelRowOffset, startDestColumn, subPixelColumnOffset);
+                    default:
+                        DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(subSample), subSample, $"Subsample factor {subSample} is out of range. Factors > 15 or < 1 are not supported.");
+                        return false;
 
-                        for (int sc = 0; sc < source.Width; sc++)
-                        {
-                            if ((dc >= 0) && (dc < Width))
-                            {
-                                Data[pidx + dc] = (sbyte)(Data[pidx + dc] + source.Data[qidx + sc]);
-                            }
 
-                            if (++dc1 >= subsample)
-                            {
-                                dc1 = 0;
-                                dc++;
-                            }
-                        }
-                    }
-
-                    if (++dr1 >= subsample)
-                    {
-                        dr1 = 0;
-                        dr++;
-                        idx++;
-                    }
                 }
             }
 
@@ -1528,16 +1276,20 @@ namespace DjvuNet.Graphics
         /// </param>
         public void Fill(short value)
         {
-            int idx = 0;
-
+            uint bufferLength = (uint)(Width < 64 ? Width : 64);
+            sbyte* buffer = stackalloc sbyte[(int)bufferLength];
             sbyte v = (sbyte)value;
-            for (int y = 0; y < Height; y++)
-            {
-                idx = RowOffset(y);
+            Unsafe.InitBlockUnaligned(buffer, (byte)v, bufferLength);
 
-                for (int x = 0; x < Width; x++)
+            for (int r = 0; r < Height; r++)
+            {
+                Span<sbyte> rowSpan = new Span<sbyte>(GetRow(r), Width);
+                int offset = 0;
+                while (offset < Width)
                 {
-                    Data[idx + x] = v;
+                    int toCopy = Math.Min(64, Width - offset);
+                    new ReadOnlySpan<sbyte>(buffer, toCopy).CopyTo(rowSpan.Slice(offset, toCopy));
+                    offset += toCopy;
                 }
             }
         }
@@ -1560,103 +1312,6 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Insert the reference map at the specified location.
-        /// </summary>
-        /// <param name="source">
-        /// map to insert
-        /// </param>
-        /// <param name="dx">
-        /// horizontal position to insert at
-        /// </param>
-        /// <param name="dy">
-        /// vertical position to insert at
-        /// </param>
-        /// <param name="doBlit">
-        /// True if the gray scale values should be added
-        /// </param>
-        /// <returns>
-        /// True if pixels are inserted
-        /// </returns>
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public bool InsertMap(ref Bitmap source, int dx, int dy, bool doBlit)
-        {
-            if (Unsafe.IsNullRef(ref source))
-            {
-                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), $"{typeof(Bitmap).FullName} source reference is null.");
-            }
-
-            if (source == default)
-            {
-                DjvuExceptionUtil.ThrowArgument(
-                    $"Cannot insert a default source {typeof(Bitmap).FullName} into the target as {nameof(source.Data)} is null.", nameof(source));
-            }
-
-            int x0 = (dx > 0) ? dx : 0;
-            int y0 = (dy > 0) ? dy : 0;
-            int x1 = (dx < 0) ? (-dx) : 0;
-            int y1 = (dy < 0) ? (-dy) : 0;
-            int w0 = Width - x0;
-            int w1 = source.Width - x1;
-            int w = (w0 < w1) ? w0 : w1;
-            int h0 = Height - y0;
-            int h1 = source.Height - y1;
-            int h = (h0 < h1) ? h0 : h1;
-
-            if ((w > 0) && (h > 0))
-            {
-                sbyte gmax = (sbyte)(Grays - 1);
-                do
-                {
-                    int offset = RowOffset(y0++) + x0;
-                    int refOffset = source.RowOffset(y1++) + x1;
-                    int i = w;
-
-                    if (doBlit)
-                    {
-                        fixed (sbyte* dataLocation = Data, bitDataLocation = source.Data)
-                        {
-                            // This is not really correct.  We should reduce the original level by the
-                            // amount of the new level.  But since we are normally dealing with non-overlapping
-                            // or bitonal blits it really doesn't matter.
-                            do
-                            {
-                                int g = dataLocation[offset] + bitDataLocation[refOffset++];
-                                dataLocation[offset++] = (g < Grays) ? (sbyte)g : gmax;
-                            } while (--i > 0);
-                        }
-
-                        //// This is not really correct.  We should reduce the original level by the
-                        //// amount of the new level.  But since we are normally dealing with non-overlapping
-                        //// or bitonal blits it really doesn't matter.
-                        //do
-                        //{
-                        //    int g = Data[offset] + bit.Data[refOffset++];
-                        //    Data[offset++] = (g < Grays) ? (sbyte)g : gmax;
-                        //} while (--i > 0);
-                    }
-                    else
-                    {
-                        fixed (sbyte* dataLocation = Data, bitDataLocation = source.Data)
-                        {
-                            do
-                            {
-                                dataLocation[offset++] = bitDataLocation[refOffset++];
-                            } while (--i > 0);
-                        }
-
-                        //do
-                        //{
-                        //    Data[offset++] = bit.Data[refOffset++];
-                        //} while (--i > 0);
-                    }
-                } while (--h > 0);
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Initialize this image with the specified values.
         /// </summary>
         /// <param name="height">
@@ -1673,7 +1328,7 @@ namespace DjvuNet.Graphics
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         [UnscopedRef]
-        public ref Bitmap Init(int height, int width, int border)
+        public ref Bitmap Init(int height, int width, int border, bool uninitialized = false)
         {
             if (width < 0)
             {
@@ -1690,6 +1345,16 @@ namespace DjvuNet.Graphics
                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(border), border, "Border cannot be negative.");
             }
 
+            if (_IsDisposed > 0)
+            {
+                DjvuExceptionUtil.ThrowObjectDisposed(typeof(Bitmap).FullName);
+            }
+
+            if (Data != null || _RleData != null)
+            {
+                DjvuExceptionUtil.ThrowInvalidOperation("Cannot initialize an already populated Bitmap.");
+            }
+
             Data = null;
             Grays = 2;
 
@@ -1697,8 +1362,10 @@ namespace DjvuNet.Graphics
             // BytesPerRow represents single-sided row padding (Width + Border).
             // RowOffset(Height) calculates: (Height * BytesPerRow) + Border
             // which adds one final border cap at the very end of the contiguous memory buffer.
+
+            // Potential integer overflow is guarded by Resize checks
             int bytesPerRow = width + border;
-            Resize(width, height, border, bytesPerRow);
+            Resize(width, height, border, bytesPerRow, uninitialized);
 
             // POH allocation is fully delegated to Resize.
 
@@ -1724,6 +1391,14 @@ namespace DjvuNet.Graphics
                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(border), border, "Border cannot be negative.");
             }
 
+            if (_IsDisposed > 0)
+            {
+                DjvuExceptionUtil.ThrowObjectDisposed(typeof(Bitmap).FullName);
+            }
+
+            // TODO: When .NET provides an API to detect if an array is pinned (dotnet/runtime issue),
+            // we can change this implementation to take direct ownership if `data` is already pinned,
+            // avoiding the forced allocation and copy.
             Data = null;
             Grays = 2;
 
@@ -1762,23 +1437,320 @@ namespace DjvuNet.Graphics
         [UnscopedRef]
         public ref Bitmap Init(ref Bitmap source, int border = 0)
         {
-            /// TODO: Protect against NullRef generic exception
+            if (IsDisposed)
+            {
+                DjvuExceptionUtil.ThrowObjectDisposed(typeof(Bitmap).FullName);
+            }
+
+            if (Unsafe.IsNullRef(ref source))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), $"{typeof(Bitmap).FullName} source reference is null.");
+            }
+
+            // 3. Source State Validation
+            if (source.IsDisposed)
+            {
+                DjvuExceptionUtil.ThrowArgument("The source Bitmap has been disposed.", nameof(source));
+            }
+
             if (!Unsafe.AreSame(ref this, ref source))
             {
-                Init(source.Height, source.Width, border);
-                Grays = source.Grays;
+                int srcHeight = source.Height;
+                int srcWidth = source.Width;
 
-                for (int i = 0; i < Height; i++)
+                if (srcWidth == 0 && srcHeight > 0 && border > 0)
                 {
-                    for (int j = Width, k = RowOffset(i), kr = source.RowOffset(i); j-- > 0;)
+                    return ref Init(srcHeight, srcWidth, border);
+                }
+
+                if (border == source.Border)
+                {
+                    Init(srcHeight, srcWidth, border, uninitialized: true);
+                    Grays = source.Grays;
+                    int bufferLength = _MaxRowOffset;
+                    if (bufferLength > 0)
                     {
-                        Data[k++] = source.Data[kr++];
+                        sbyte* dst = DataPointer;
+                        sbyte* src = source.DataPointer;
+
+                        if (Vector512.IsHardwareAccelerated && bufferLength >= 64)
+                        {
+                            int bufferLengthMinus64 = bufferLength - 64;
+                            for (int offset = 0; offset <= bufferLengthMinus64; offset += 64)
+                            {
+                                Vector512.Store(Vector512.Load(src + offset), dst + offset);
+                            }
+                            Vector512.Store(Vector512.Load(src + bufferLengthMinus64), dst + bufferLengthMinus64);
+                        }
+                        else if (Vector256.IsHardwareAccelerated && bufferLength >= 32)
+                        {
+                            int bufferLengthMinus32 = bufferLength - 32;
+                            for (int offset = 0; offset <= bufferLengthMinus32; offset += 32)
+                            {
+                                Vector256.Store(Vector256.Load(src + offset), dst + offset);
+                            }
+                            Vector256.Store(Vector256.Load(src + bufferLengthMinus32), dst + bufferLengthMinus32);
+                        }
+                        else if (Vector128.IsHardwareAccelerated && bufferLength >= 16)
+                        {
+                            int bufferLengthMinus16 = bufferLength - 16;
+                            for (int offset = 0; offset <= bufferLengthMinus16; offset += 16)
+                            {
+                                Vector128.Store(Vector128.Load(src + offset), dst + offset);
+                            }
+                            Vector128.Store(Vector128.Load(src + bufferLengthMinus16), dst + bufferLengthMinus16);
+                        }
+                        else
+                        {
+                            for (int offset = 0; offset < bufferLength; offset++)
+                            {
+                                dst[offset] = src[offset];
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    Init(srcHeight, srcWidth, border, uninitialized: true);
+                    Grays = source.Grays;
+                    sbyte* dPtr = DataPointer;
+                    int bufferLength = _MaxRowOffset;
+
+                    if (border > 0)
+                    {
+                        if (Vector512.IsHardwareAccelerated && bufferLength >= 64)
+                        {
+                            var zero = Vector512<sbyte>.Zero;
+                            int borderMinus64 = border - 64;
+                            
+                            for (int offset = 0; offset <= borderMinus64; offset += 64)
+                            {
+                                Vector512.Store(zero, dPtr + offset);
+                            }
+                            
+                            int tailOffset = Math.Max(0, border - 64);
+                            Vector512.Store(zero, dPtr + tailOffset);
+                        }
+                        else if (Vector256.IsHardwareAccelerated && bufferLength >= 32)
+                        {
+                            var zero = Vector256<sbyte>.Zero;
+                            int borderMinus32 = border - 32;
+                            
+                            for (int offset = 0; offset <= borderMinus32; offset += 32)
+                            {
+                                Vector256.Store(zero, dPtr + offset);
+                            }
+                            
+                            int tailOffset = Math.Max(0, border - 32);
+                            Vector256.Store(zero, dPtr + tailOffset);
+                        }
+                        else if (Vector128.IsHardwareAccelerated && bufferLength >= 16)
+                        {
+                            var zero = Vector128<sbyte>.Zero;
+                            int borderMinus16 = border - 16;
+                            
+                            for (int offset = 0; offset <= borderMinus16; offset += 16)
+                            {
+                                Vector128.Store(zero, dPtr + offset);
+                            }
+                            
+                            int tailOffset = Math.Max(0, border - 16);
+                            Vector128.Store(zero, dPtr + tailOffset);
+                        }
+                        else
+                        {
+                            for (int offset = 0; offset < border; offset++)
+                            {
+                                dPtr[offset] = 0;
+                            }
+                        }
+                    }
+
+                    if (srcWidth > 0 && srcHeight > 0)
+                    {
+                        sbyte* dstStart = dPtr + border;
+                        sbyte* srcStart = source.DataPointer + source.Border;
+                        int dstStride = srcWidth + border;
+                        int srcStride = srcWidth + source.Border;
+
+                        if (Vector512.IsHardwareAccelerated && srcWidth >= 64)
+                        {
+                            var zero = Vector512<sbyte>.Zero;
+                            int widthMinus64 = srcWidth - 64;
+
+                            if (border > 0)
+                            {
+                                int borderMinus64 = border - 64;
+                                int tailOffset = srcWidth + border - 64;
+
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset <= widthMinus64; offset += 64)
+                                    {
+                                        Vector512.Store(Vector512.Load(srcStart + offset), dstStart + offset);
+                                    }
+
+                                    for (int offset = 0; offset <= borderMinus64; offset += 64)
+                                    {
+                                        Vector512.Store(zero, dstStart + srcWidth + offset);
+                                    }
+
+                                    Vector512.Store(zero, dstStart + tailOffset);
+                                    Vector512.Store(Vector512.Load(srcStart + widthMinus64), dstStart + widthMinus64);
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                            else
+                            {
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset <= widthMinus64; offset += 64)
+                                    {
+                                        Vector512.Store(Vector512.Load(srcStart + offset), dstStart + offset);
+                                    }
+                                    
+                                    Vector512.Store(Vector512.Load(srcStart + widthMinus64), dstStart + widthMinus64);
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                        }
+                        else if (Vector256.IsHardwareAccelerated && srcWidth >= 32)
+                        {
+                            var zero = Vector256<sbyte>.Zero;
+                            int widthMinus32 = srcWidth - 32;
+
+                            if (border > 0)
+                            {
+                                int borderMinus32 = border - 32;
+                                int tailOffset = srcWidth + border - 32;
+
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset <= widthMinus32; offset += 32)
+                                    {
+                                        Vector256.Store(Vector256.Load(srcStart + offset), dstStart + offset);
+                                    }
+
+                                    for (int offset = 0; offset <= borderMinus32; offset += 32)
+                                    {
+                                        Vector256.Store(zero, dstStart + srcWidth + offset);
+                                    }
+
+                                    Vector256.Store(zero, dstStart + tailOffset);
+                                    Vector256.Store(Vector256.Load(srcStart + widthMinus32), dstStart + widthMinus32);
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                            else
+                            {
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset <= widthMinus32; offset += 32)
+                                    {
+                                        Vector256.Store(Vector256.Load(srcStart + offset), dstStart + offset);
+                                    }
+                                    
+                                    Vector256.Store(Vector256.Load(srcStart + widthMinus32), dstStart + widthMinus32);
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                        }
+                        else if (Vector128.IsHardwareAccelerated && srcWidth >= 16)
+                        {
+                            var zero = Vector128<sbyte>.Zero;
+                            int widthMinus16 = srcWidth - 16;
+
+                            if (border > 0)
+                            {
+                                int borderMinus16 = border - 16;
+                                int tailOffset = srcWidth + border - 16;
+
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset <= widthMinus16; offset += 16)
+                                    {
+                                        Vector128.Store(Vector128.Load(srcStart + offset), dstStart + offset);
+                                    }
+
+                                    for (int offset = 0; offset <= borderMinus16; offset += 16)
+                                    {
+                                        Vector128.Store(zero, dstStart + srcWidth + offset);
+                                    }
+
+                                    Vector128.Store(zero, dstStart + tailOffset);
+                                    Vector128.Store(Vector128.Load(srcStart + widthMinus16), dstStart + widthMinus16);
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                            else
+                            {
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset <= widthMinus16; offset += 16)
+                                    {
+                                        Vector128.Store(Vector128.Load(srcStart + offset), dstStart + offset);
+                                    }
+                                    
+                                    Vector128.Store(Vector128.Load(srcStart + widthMinus16), dstStart + widthMinus16);
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (border > 0)
+                            {
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset < srcWidth; offset++)
+                                    {
+                                        dstStart[offset] = srcStart[offset];
+                                    }
+
+                                    for (int offset = 0; offset < border; offset++)
+                                    {
+                                        dstStart[srcWidth + offset] = 0;
+                                    }
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                            else
+                            {
+                                for (int row = 0; row < srcHeight; row++)
+                                {
+                                    for (int offset = 0; offset < srcWidth; offset++)
+                                    {
+                                        dstStart[offset] = srcStart[offset];
+                                    }
+
+                                    dstStart += dstStride;
+                                    srcStart += srcStride;
+                                }
+                            }
+                        }
                     }
                 }
             }
-            else if (border > Border)
+            else
             {
-                SetMinimumBorder(border);
+                if (border > Border)
+                {
+                    SetMinimumBorder(border);
+                }
             }
 
             return ref this;
@@ -1802,37 +1774,251 @@ namespace DjvuNet.Graphics
         [UnscopedRef]
         public ref Bitmap Init(ref Bitmap source, Rectangle rect, int border)
         {
+            if (IsDisposed)
+            {
+                DjvuExceptionUtil.ThrowObjectDisposed(typeof(Bitmap).FullName);
+            }
+
+            if (Unsafe.IsNullRef(ref source))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), $"{typeof(Bitmap).FullName} source reference is null.");
+            }
+
+            // 3. Source State Validation
+            if (source.IsDisposed)
+            {
+                DjvuExceptionUtil.ThrowArgument("The source Bitmap has been disposed.", nameof(source));
+            }
+
+            // Special Case 1: Target is Source (NO-OP check)
             if (Unsafe.AreSame(ref this, ref source))
             {
-                Bitmap tmp = new Bitmap();
-                tmp.Grays = (Grays);
-                tmp.Resize(Width, Height, Border, BytesPerRow, Data);
-                Data = null;
-                Init(ref tmp, rect, border);
-            }
-            else
-            {
-                Init(rect.Height, rect.Width, border);
-                Grays = source.Grays;
-
-                Rectangle rect2 = new Rectangle(0, 0, source.Width, source.Height);
-                rect2.Intersect(rect2, rect);
-                rect2.Translate(-rect.XMin, -rect.YMin);
-
-                if (!rect2.Empty)
+                if (rect.XMin == 0 && rect.YMin == 0 && rect.Width == Width && rect.Height == Height && border == Border)
                 {
-                    int dstIdx = 0;
-                    int srcIdx = 0;
+                    return ref this;
+                }
+            }
+
+            // Special Case 2: Exact Full Copy
+            if (rect.XMin == 0 && rect.YMin == 0 && rect.Width == source.Width && rect.Height == source.Height)
+            {
+                return ref Init(ref source, border);
+            }
+
+            // Execute a shallow struct copy on the stack. 
+            // Because Bitmap is a value type, this creates a strict bitwise copy of its fields (pointers, dimensions) 
+            // with zero heap allocation. This preserves the source state against mutation: if 'ref source' and 'ref this' 
+            // point to the same instance, 'this.Init()' will irrevocably mutate the instance properties, but our stack 
+            // copy safely preserves the original geometry required for read-pointer calculations. Crucially, this allows 
+            // 'this.Init()' to re-use the underlying POH array, eliminating the transient double-allocation bug.
+            Bitmap originalSource = source;
+
+            // Map the target crop rectangle to the source's coordinate space.
+            // Translate offsets the rectangle to a 0,0 origin to establish the valid intersection bounds.
+            Rectangle rect2 = new Rectangle(0, 0, originalSource.Width, originalSource.Height);
+            rect2.Intersect(rect2, rect);
+            rect2.Translate(-rect.XMin, -rect.YMin);
+
+            // Determine if the allocation should bypass CLR zero-initialization (fast path).
+            // uninitialized is set to true strictly when the crop fully covers the target geometry and dimensions > 0.
+            // If coverage is partial or dimensions are empty, we fall back to false to ensure the CLR zeroes the out-of-bounds padding.
+            bool isFullCoverage = (rect2.Width == rect.Width && rect2.Height == rect.Height);
+            bool uninitialized = !rect2.Empty && isFullCoverage;
+
+            bool isSelfAliased = Unsafe.AreSame(ref this, ref source);
+            int bytesPerRow = rect.Width + border;
+            long requiredLength = ((long)rect.Height * bytesPerRow) + border;
+
+            if (isSelfAliased || (Data != null && Data.Length < requiredLength))
+            {
+                // Force Resize to explicitly allocate a fresh pinned buffer. 
+                Data = null;
+            }
+
+            Resize(rect.Width, rect.Height, border, bytesPerRow, uninitialized: uninitialized);
+            Grays = originalSource.Grays;
+
+            if (!rect2.Empty)
+            {
+                sbyte* targetDataPtr = DataPointer;
+                int bufferSize = _MaxRowOffset;
+                int w = rect2.Width;
+                int h = rect2.Height;
+
+                bool isContiguous = (w == originalSource.Width && w == Width && border == 0 && originalSource.Border == 0);
+
+                if (isContiguous)
+                {
+                    // Fast path for fully contiguous memory layouts
+                    sbyte* dstStart = GetRow(0);
+                    sbyte* srcStart = originalSource.GetRow(rect.YMin) + rect.XMin;
+                    Unsafe.CopyBlockUnaligned(dstStart, srcStart, (uint)(w * h));
+                }
+                else if (bufferSize < 16)
+                {
+                    if (uninitialized && border > 0)
+                    {
+                        for (int offset = 0; offset < border; offset++)
+                        {
+                            targetDataPtr[offset] = 0;
+                        }
+                    }
 
                     for (int y = rect2.YMin; y < rect2.YMax; y++)
                     {
-                        dstIdx = RowOffset(y);
-                        /// TODO: Needs protection from NullRef and null Data
-                        srcIdx = source.RowOffset(y + rect.YMin);
+                        sbyte* dstStart = GetRow(y) + rect2.XMin;
+                        sbyte* srcStart = originalSource.GetRow(y + rect.YMin) + rect.XMin + rect2.XMin;
 
-                        for (int x = rect2.XMin; x < rect2.XMax; x++)
+                        for (int offset = 0; offset < w; offset++)
                         {
-                            Data[dstIdx + x] = source.Data[srcIdx + x + rect.XMin];
+                            dstStart[offset] = srcStart[offset];
+                        }
+
+                        if (uninitialized && border > 0)
+                        {
+                            sbyte* borderStart = dstStart + w;
+                            for (int offset = 0; offset < border; offset++)
+                            {
+                                borderStart[offset] = 0;
+                            }
+                        }
+                    }
+                }
+                else if (border == 0)
+                {
+                    // If no border padding is required
+                    for (int y = rect2.YMin; y < rect2.YMax; y++)
+                    {
+                        sbyte* dstStart = GetRow(y) + rect2.XMin;
+                        sbyte* srcStart = originalSource.GetRow(y + rect.YMin) + rect.XMin + rect2.XMin;
+                        Unsafe.CopyBlockUnaligned(dstStart, srcStart, (uint)w);
+                    }
+                }
+                else
+                {
+                    if (uninitialized)
+                    {
+                        if (Vector512.IsHardwareAccelerated && bufferSize >= 64)
+                        {
+                            var zero = Vector512<sbyte>.Zero;
+                            int borderMinus64 = border - 64;
+                            for (int offset = 0; offset <= borderMinus64; offset += 64)
+                                Vector512.Store(zero, targetDataPtr + offset);
+                            Vector512.Store(zero, targetDataPtr + Math.Max(0, border - 64));
+                        }
+                        else if (Vector256.IsHardwareAccelerated && bufferSize >= 32)
+                        {
+                            var zero = Vector256<sbyte>.Zero;
+                            int borderMinus32 = border - 32;
+                            for (int offset = 0; offset <= borderMinus32; offset += 32)
+                                Vector256.Store(zero, targetDataPtr + offset);
+                            Vector256.Store(zero, targetDataPtr + Math.Max(0, border - 32));
+                        }
+                        // Condition guaranteed by previous bufferSize >= 16 check
+                        else if (Vector128.IsHardwareAccelerated && bufferSize >= 16)
+                        {
+                            var zero = Vector128<sbyte>.Zero;
+                            int borderMinus16 = border - 16;
+                            for (int offset = 0; offset <= borderMinus16; offset += 16)
+                                Vector128.Store(zero, targetDataPtr + offset);
+                            Vector128.Store(zero, targetDataPtr + Math.Max(0, border - 16));
+                        }
+                    }
+
+                    // Vector-accelerated block copy loops.
+                    if (Vector512.IsHardwareAccelerated && w >= 64)
+                    {
+                        var zero = Vector512<sbyte>.Zero;
+                        int widthMinus64 = w - 64;
+                        int borderMinus64 = border - 64;
+                        int tailOffset = w + border - 64;
+
+                        for (int y = rect2.YMin; y < rect2.YMax; y++)
+                        {
+                            sbyte* dstStart = GetRow(y) + rect2.XMin;
+                            sbyte* srcStart = originalSource.GetRow(y + rect.YMin) + rect.XMin + rect2.XMin;
+
+                            for (int offset = 0; offset <= widthMinus64; offset += 64)
+                                Vector512.Store(Vector512.Load(srcStart + offset), dstStart + offset);
+
+                            for (int offset = 0; offset <= borderMinus64; offset += 64)
+                                Vector512.Store(zero, dstStart + w + offset);
+
+                            Vector512.Store(zero, dstStart + tailOffset);
+                            Vector512.Store(Vector512.Load(srcStart + widthMinus64), dstStart + widthMinus64);
+                        }
+                    }
+                    else if (Vector256.IsHardwareAccelerated && w >= 32)
+                    {
+                        var zero = Vector256<sbyte>.Zero;
+                        int widthMinus32 = w - 32;
+                        int borderMinus32 = border - 32;
+                        int tailOffset = w + border - 32;
+
+                        for (int y = rect2.YMin; y < rect2.YMax; y++)
+                        {
+                            sbyte* dstStart = GetRow(y) + rect2.XMin;
+                            sbyte* srcStart = originalSource.GetRow(y + rect.YMin) + rect.XMin + rect2.XMin;
+
+                            for (int offset = 0; offset <= widthMinus32; offset += 32)
+                                Vector256.Store(Vector256.Load(srcStart + offset), dstStart + offset);
+
+                            for (int offset = 0; offset <= borderMinus32; offset += 32)
+                                Vector256.Store(zero, dstStart + w + offset);
+
+                            Vector256.Store(zero, dstStart + tailOffset);
+                            Vector256.Store(Vector256.Load(srcStart + widthMinus32), dstStart + widthMinus32);
+                        }
+                    }
+                    else if (Vector128.IsHardwareAccelerated && w >= 16)
+                    {
+                        var zero = Vector128<sbyte>.Zero;
+                        int widthMinus16 = w - 16;
+                        int borderMinus16 = border - 16;
+                        int tailOffset = w + border - 16;
+
+                        for (int y = rect2.YMin; y < rect2.YMax; y++)
+                        {
+                            sbyte* dstStart = GetRow(y) + rect2.XMin;
+                            sbyte* srcStart = originalSource.GetRow(y + rect.YMin) + rect.XMin + rect2.XMin;
+
+                            for (int offset = 0; offset <= widthMinus16; offset += 16)
+                                Vector128.Store(Vector128.Load(srcStart + offset), dstStart + offset);
+
+                            for (int offset = 0; offset <= borderMinus16; offset += 16)
+                                Vector128.Store(zero, dstStart + w + offset);
+
+                            Vector128.Store(zero, dstStart + tailOffset);
+                            Vector128.Store(Vector128.Load(srcStart + widthMinus16), dstStart + widthMinus16);
+                        }
+                    }
+                    else
+                    {
+                        for (int y = rect2.YMin; y < rect2.YMax; y++)
+                        {
+                            sbyte* dstStart = GetRow(y) + rect2.XMin;
+                            sbyte* srcStart = originalSource.GetRow(y + rect.YMin) + rect.XMin + rect2.XMin;
+
+                            if (w < 16)
+                            {
+                                for (int offset = 0; offset < w; offset++)
+                                {
+                                    dstStart[offset] = srcStart[offset];
+                                }
+                            }
+                            else
+                            {
+                                Unsafe.CopyBlockUnaligned(dstStart, srcStart, (uint)w);
+                            }
+
+                            if (uninitialized)
+                            {
+                                sbyte* borderStart = dstStart + w;
+                                for (int offset = 0; offset < border; offset++)
+                                {
+                                    borderStart[offset] = 0;
+                                }
+                            }
                         }
                     }
                 }
@@ -1857,7 +2043,11 @@ namespace DjvuNet.Graphics
         /// </returns>
         public ref Bitmap Translate(int dx, int dy, ref Bitmap retVal)
         {
-            /// TODO: NullRef retVal will throw generic exception
+            if (Unsafe.IsNullRef(ref retVal))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(retVal), $"{typeof(Bitmap).FullName} retVal reference is null.");
+            }
+
             ref Bitmap bmp = ref retVal;
             if (bmp.Width != Width || bmp.Height != Height)
             {
@@ -1874,93 +2064,92 @@ namespace DjvuNet.Graphics
         }
 
         /// <summary>
-        /// Find the bounding box for non-white pixels.
+        /// Find the bounding box for non-white (non-zero) pixels.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// <b>Architectural Divergence (C++ Quirk Preservation):</b>
+        /// This method deliberately replicates a geometric quirk from the reference C++ DjVuLibre implementation.
+        /// The bounds (<c>xmin, ymin, xmax, ymax</c>) are calculated as <i>inclusive</i> coordinates of the furthest non-zero pixels. 
+        /// Because the <see cref="Rectangle"/> struct calculates width and height <i>exclusively</i> (e.g., <c>Width = xmax - xmin</c>), 
+        /// a bounding box for a fully populated 10x10 image will yield a Width and Height of 9.
+        /// </para>
+        /// <para>
+        /// Furthermore, if the image contains exactly one non-zero pixel (e.g., at <c>x=3, y=5</c>), the inclusive coordinates 
+        /// will be <c>xmin=3, xmax=3, ymin=5, ymax=5</c>. This mathematically collapses the rectangle's area to 0, 
+        /// marking it explicitly as <c>Empty</c>. This single-pixel annihilation is expected behavior to maintain parser parity.
+        /// </para>
+        /// </remarks>
         /// <returns>
         /// Bounding rectangle
         /// </returns>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public Rectangle ComputeBoundingBox()
         {
-            if (Data == null && Width > 0 && Height > 0)
+            if (Data == null && RleData == null && Width > 0 && Height > 0)
             {
                 // This state should be statically unreachable due to encapsulation safeguards.
                 // If it throws, it means an initialization check was bypassed or memory was externally corrupted.
-                DjvuExceptionUtil.ThrowNullReference($"Cannot compute bounding box: the underlying data buffer is null. Width: {Width}, Height: {Height}");
+                DjvuExceptionUtil.ThrowNullReference($"Cannot compute bounding box: the underlying {nameof(Data)} and {nameof(RleData)} buffers are null. Width: {Width}, Height: {Height}");
+            }
+
+            // Short circuit no op optimization
+            if (Data == null && RleData != null)
+            {
+                if (Width > 0 && Height > 0)
+                {
+                    Decompress();
+                }
+                else
+                {
+                    return new Rectangle();
+                }
             }
 
             int w = Width;
             int h = Height;
-            int s = GetRowSize();
+            
+            int ymin = 0, ymax = h - 1;
+            int xmin = w, xmax = 0;
 
-            int xmin, xmax, ymin, ymax;
-            for (xmax = w - 1; xmax >= 0; xmax--)
+            // Find ymin (Top-down)
+            for (; ymin < h; ymin++)
             {
-                int p = RowOffset(0) + xmax;
-                int pe = p + (s * h);
-
-                while ((p < pe) && GetBooleanAt(p))
-                {
-                    p += s;
-                }
-
-                if (p < pe)
+                if (new ReadOnlySpan<byte>(GetRow(ymin), w).IndexOfAnyExcept((byte)0) != -1)
                 {
                     break;
                 }
             }
 
-            for (ymax = h - 1; ymax >= 0; ymax--)
-            {
-                int p = RowOffset(ymax);
-                int pe = p + w;
-
-                while ((p < pe) && GetBooleanAt(p))
-                {
-                    ++p;
-                }
-
-                if (p < pe)
-                {
-                    break;
-                }
-            }
-
-            for (xmin = 0; xmin <= xmax; xmin++)
-            {
-                int p = RowOffset(0) + xmin;
-                int pe = p + (s * h);
-
-                while ((p < pe) && GetBooleanAt(p))
-                {
-                    p += s;
-                }
-
-                if (p < pe)
-                {
-                    break;
-                }
-            }
-
-            for (ymin = 0; ymin <= ymax; ymin++)
-            {
-                int p = RowOffset(ymin);
-                int pe = p + w;
-
-                while ((p < pe) && GetBooleanAt(p))
-                {
-                    ++p;
-                }
-
-                if (p < pe)
-                {
-                    break;
-                }
-            }
-
-            if (xmin > xmax || ymin > ymax)
+            // If the image is completely empty, mathematically enforce empty rectangle 
+            // by setting bounds that trigger the Rectangle's empty flag logic
+            if (ymin == h)
             {
                 return new Rectangle();
+            }
+
+            // Find ymax (Bottom-up)
+            for (; ymax >= ymin; ymax--)
+            {
+                if (new ReadOnlySpan<byte>(GetRow(ymax), w).IndexOfAnyExcept((byte)0) != -1)
+                {
+                    break;
+                }
+            }
+
+            // Find xmin and xmax horizontally (Cache-friendly & Vectorized)
+            for (int y = ymin; y <= ymax; y++)
+            {
+                ReadOnlySpan<byte> rowSpan = new ReadOnlySpan<byte>(GetRow(y), w);
+                
+                int first = rowSpan.IndexOfAnyExcept((byte)0);
+                if (first != -1)
+                {
+                    if (first < xmin) xmin = first;
+                    
+                    int last = rowSpan.LastIndexOfAnyExcept((byte)0);
+                    if (last > xmax) xmax = last;
+                }
             }
 
             // Use 64-bit arithmetic to safely detect underflow/overflow
@@ -2012,7 +2201,7 @@ namespace DjvuNet.Graphics
                     Array.Clear(buffer, 0, (int)npixels);
                     fixed (byte* rle = _RleData)
                     {
-                        DecodeRleCore(rle, buffer, Border, Height, BytesPerRow, Width);
+                        DecodeRleCore(rle, _RleData.Length, buffer, Border, Height, BytesPerRow, Width);
                     }
                     ReadOnlySpan<byte> byteSpan = new ReadOnlySpan<byte>(Unsafe.As<byte[]>(buffer), 0, (int)npixels);
                     hash.AddBytes(byteSpan);
@@ -2043,16 +2232,16 @@ namespace DjvuNet.Graphics
                 return true;
             }
 
-            // Using compressed Bitmap._RleData for equality comparison seems to be much more efficient than specially decompressing and allocating Data buffer which most probably will be from 10 to 20 times larger than compressed bitonal RLE image
+            // Using compressed Bitmap.RleData for equality comparison seems to be much more efficient than specially decompressing and allocating Data buffer which most probably will be from 10 to 20 times larger than compressed bitonal RLE image
             if (bmp1.Data == null && bmp2.Data == null)
             {
-                if (ReferenceEquals(bmp1._RleData, bmp2._RleData))
+                if (ReferenceEquals(bmp1.RleData, bmp2.RleData))
                     return true;
 
-                if (bmp1._RleData == null || bmp2._RleData == null || bmp1._RleData.Length != bmp2._RleData.Length)
+                if (bmp1.RleData == null || bmp2.RleData == null || bmp1.RleData.Length != bmp2.RleData.Length)
                     return false;
 
-                return new ReadOnlySpan<byte>(bmp1._RleData).SequenceEqual(new ReadOnlySpan<byte>(bmp2._RleData));
+                return new ReadOnlySpan<byte>(bmp1.RleData).SequenceEqual(new ReadOnlySpan<byte>(bmp2.RleData));
             }
 
             sbyte[] rented1 = null;
@@ -2062,26 +2251,26 @@ namespace DjvuNet.Graphics
             {
                 sbyte[] data1 = bmp1.Data;
                 int npixels1 = bmp1.Data != null ? bmp1.Data.Length : bmp1.Height * bmp1.BytesPerRow + bmp1.Border;
-                if (data1 == null && bmp1._RleData != null)
+                if (data1 == null && bmp1.RleData != null)
                 {
                     rented1 = ArrayPool<sbyte>.Shared.Rent((int)npixels1);
                     Array.Clear(rented1, 0, npixels1);
-                    fixed (byte* rle = bmp1._RleData)
+                    fixed (byte* rle = bmp1.RleData)
                     {
-                        DecodeRleCore(rle, rented1, bmp1.Border, bmp1.Height, bmp1.BytesPerRow, bmp1.Width);
+                        DecodeRleCore(rle, bmp1.RleData.Length, rented1, bmp1.Border, bmp1.Height, bmp1.BytesPerRow, bmp1.Width);
                     }
                     data1 = rented1;
                 }
 
                 sbyte[] data2 = bmp2.Data;
                 int npixels2 = bmp2.Data != null ? bmp2.Data.Length : bmp2.Height * bmp2.BytesPerRow + bmp2.Border;
-                if (data2 == null && bmp2._RleData != null)
+                if (data2 == null && bmp2.RleData != null)
                 {
                     rented2 = ArrayPool<sbyte>.Shared.Rent((int)npixels2);
                     Array.Clear(rented2, 0, npixels2);
-                    fixed (byte* rle = bmp2._RleData)
+                    fixed (byte* rle = bmp2.RleData)
                     {
-                        DecodeRleCore(rle, rented2, bmp2.Border, bmp2.Height, bmp2.BytesPerRow, bmp2.Width);
+                        DecodeRleCore(rle, bmp2.RleData.Length, rented2, bmp2.Border, bmp2.Height, bmp2.BytesPerRow, bmp2.Width);
                     }
                     data2 = rented2;
                 }

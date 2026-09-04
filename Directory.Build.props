@@ -103,7 +103,7 @@
     <Compile Include="Properties\AssemblyInfoCommon.cs" />
   </ItemGroup> -->
 
-  <ItemGroup>
+  <ItemGroup Condition="!$(MSBuildProjectName.StartsWith('BenchmarkDotNet'))">
     <Compile Include="Properties\AssemblyInfo.$(TargetFramework).cs" />
     <Compile Include="Properties\AssemblyInfoCommon.$(TargetFramework).cs" />
   </ItemGroup>

@@ -99,6 +99,7 @@
     <Compile Include="Util\ReportingEngineTests.cs" />
     <Compile Include="Util\VerifyTests.cs" />
     <Compile Include="Util\ImageBinaryDiffTests.cs" />
+    <Compile Include="Util\HardwareIntrinsicsTests.cs" />
     <Compile Include="Text\PageTextItemTests.cs" />
     <Compile Include="Text\PageTextSearchTests.cs" />
     <Compile Include="Text\PageTextTests.cs" />

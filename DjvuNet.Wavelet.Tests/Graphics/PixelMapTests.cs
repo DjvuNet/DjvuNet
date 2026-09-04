@@ -278,7 +278,6 @@ namespace DjvuNet.Graphics.Tests
 
             Bitmap bmp = new Bitmap();
             bmp.Init(height, width, 0);
-            bmp.Fill(0);
 
             var map = CreateInitVerifyPixelMap(width, height, color);
 
@@ -306,7 +305,6 @@ namespace DjvuNet.Graphics.Tests
 
             Bitmap bmp = new Bitmap();
             bmp.Init(height, width, 0);
-            bmp.Fill(0);
 
             var map = CreateInitVerifyPixelMap(width, height, Pixel.BlackPixel);
 
@@ -322,7 +320,6 @@ namespace DjvuNet.Graphics.Tests
 
             Bitmap bmp = new Bitmap();
             bmp.Init(height, width, 0);
-            bmp.Fill(0);
 
             var map = CreateInitVerifyPixelMap(2 * width, 2 * height, color);
 
@@ -338,7 +335,6 @@ namespace DjvuNet.Graphics.Tests
 
             Bitmap bmp = new Bitmap();
             bmp.Init(height, width, 0);
-            bmp.Fill(0);
 
             var map = CreateInitVerifyPixelMap(2 * width, 2 * height, color);
 
@@ -354,7 +350,6 @@ namespace DjvuNet.Graphics.Tests
 
             Bitmap bmp = new Bitmap();
             bmp.Init(height, width, 0);
-            bmp.Fill(0);
 
             var map = CreateInitVerifyPixelMap(2 * width, 2 * height, color);
 
@@ -1363,5 +1358,61 @@ namespace DjvuNet.Graphics.Tests
         //        Assert.Equal(height, bmp.Height);
         //    }
         //}
+
+        [Fact]
+        public void Attenuate_NullRefTarget_Throws()
+        {
+            PixelMap map = new PixelMap();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                map.Attenuate(ref Unsafe.NullRef<Bitmap>(), 0, 0));
+            Assert.Contains($"{typeof(Bitmap).FullName} target reference is null.", ex.Message);
+        }
+
+        [Fact]
+        public void Blit_NullRefBm_Throws()
+        {
+            PixelMap map = new PixelMap();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                map.Blit(ref Unsafe.NullRef<Bitmap>(), 0, 0, Pixel.BlackPixel));
+            Assert.Contains($"{typeof(Bitmap).FullName} bm reference is null.", ex.Message);
+        }
+
+        [Fact]
+        public void Fill_NullRefSource_Throws()
+        {
+            PixelMap map = new PixelMap();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                map.Fill(ref Unsafe.NullRef<Bitmap>(), 0, 0));
+            Assert.Contains($"{typeof(Bitmap).FullName} source reference is null.", ex.Message);
+        }
+
+        [Fact]
+        public void Init_NullRefSource_Throws()
+        {
+            PixelMap map = new PixelMap();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                map.Init(ref Unsafe.NullRef<Bitmap>()));
+            Assert.Contains($"{typeof(Bitmap).FullName} source reference is null.", ex.Message);
+        }
+
+        [Fact]
+        public void Stencil_NullRefMask_Throws()
+        {
+            PixelMap map = new PixelMap();
+            PixelMap foreground = new PixelMap();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                map.Stencil(ref Unsafe.NullRef<Bitmap>(), foreground, 1, 1, new Rectangle(0,0,10,10), 1.0));
+            Assert.Contains($"{typeof(Bitmap).FullName} mask reference is null.", ex.Message);
+        }
+
+        [Fact]
+        public void Stencil_NullForegroundMap_Throws()
+        {
+            PixelMap map = new PixelMap();
+            Bitmap mask = new Bitmap();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() =>
+                map.Stencil(ref mask, null, 1, 1, new Rectangle(0,0,10,10), 1.0));
+            Assert.Contains($"{typeof(PixelMap).FullName} foregroundMap reference is null.", ex.Message);
+        }
     }
 }

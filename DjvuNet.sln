@@ -757,6 +757,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libdjvulibre", "djvulibre\w
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LibGit2Sharp", "eng\tools\libgit2sharp\LibGit2Sharp\LibGit2Sharp.csproj", "{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5B12A076-917E-4530-9F34-10F00D1D5271}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DjvuNet.Benchmarks", "DjvuNet.Benchmarks\DjvuNet.Benchmarks.csproj", "{C45FED84-3F09-51F7-3947-F30CE3C1C415}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|AnyCPU = Debug|AnyCPU
@@ -1421,6 +1425,46 @@ Global
 		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|x64.Build.0 = Release|x64
 		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|x86.ActiveCfg = Release|x86
 		{B002B86C-2F24-8436-5C8C-ECD36CE2EA53}.ReleaseStatic|x86.Build.0 = Release|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|AnyCPU.ActiveCfg = Debug|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|AnyCPU.Build.0 = Debug|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|Arm.ActiveCfg = Debug|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|Arm.Build.0 = Debug|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|Arm64.ActiveCfg = Debug|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|Arm64.Build.0 = Debug|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|x64.ActiveCfg = Debug|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|x64.Build.0 = Debug|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|x86.ActiveCfg = Debug|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Debug|x86.Build.0 = Debug|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|AnyCPU.ActiveCfg = Debug|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|AnyCPU.Build.0 = Debug|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|Arm.ActiveCfg = Debug|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|Arm.Build.0 = Debug|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|Arm64.ActiveCfg = Debug|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|Arm64.Build.0 = Debug|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|x64.ActiveCfg = Debug|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|x64.Build.0 = Debug|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|x86.ActiveCfg = Debug|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.DebugStatic|x86.Build.0 = Debug|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|AnyCPU.ActiveCfg = Release|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|AnyCPU.Build.0 = Release|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|Arm.ActiveCfg = Release|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|Arm.Build.0 = Release|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|Arm64.ActiveCfg = Release|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|Arm64.Build.0 = Release|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|x64.ActiveCfg = Release|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|x64.Build.0 = Release|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|x86.ActiveCfg = Release|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.Release|x86.Build.0 = Release|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|AnyCPU.ActiveCfg = Release|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|AnyCPU.Build.0 = Release|Any CPU
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|Arm.ActiveCfg = Release|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|Arm.Build.0 = Release|arm
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|Arm64.ActiveCfg = Release|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|Arm64.Build.0 = Release|arm64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|x64.ActiveCfg = Release|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|x64.Build.0 = Release|x64
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|x86.ActiveCfg = Release|x86
+		{C45FED84-3F09-51F7-3947-F30CE3C1C415}.ReleaseStatic|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

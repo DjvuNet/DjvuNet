@@ -7,6 +7,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using DjvuNet.Graphics;
 using DjvuNet.Tests;
+using BenchmarkDotNet.Running;
 
 namespace DjvuNet.Benchmarks
 {
@@ -20,6 +21,14 @@ namespace DjvuNet.Benchmarks
         public override IEnumerable<int> ThreadCountValues => new[] { 2 , 4, 6, Environment.ProcessorCount };
 
         protected override DjvuNetBenchmarkType BenchmarkType => DjvuNetBenchmarkType.ImageBinaryDiff;
+
+        public override long GetBytesPerOperation(BenchmarkCase benchmarkCase)
+        {
+            // Diff reads from both Buffer 1 and Buffer 2 simultaneously (2x memory bandwidth)
+            int pixelSizeBits = 24; 
+            long bytesPerImage = MaxPixels * (pixelSizeBits / 8);
+            return bytesPerImage * 2; 
+        }
 
         // Use a local constant to increase workload specifically for this fast benchmark
         private const int DiffInvocationCount = 5;

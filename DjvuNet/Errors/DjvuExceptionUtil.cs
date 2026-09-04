@@ -90,6 +90,23 @@ namespace DjvuNet.Errors
             throw new DjvuEndOfStreamException(message, innerException);
         }
 
+        /// <summary>
+        /// Overload which allows for using exception throwing helper in ternary expressions.
+        /// Useful for throwing exceptions during parsing with very limited impact on performance
+        /// for non error paths due to Jit creating conditional move operations.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="message"></param>
+        /// <param name="innerException"></param>
+        /// <returns></returns>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static T ThrowEndOfStream<T>(string message, Exception innerException = null) where T : struct
+        {
+            ThrowEndOfStream(message, innerException);
+            return default(T);
+
+        }
+
         [DoesNotReturn]
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowAggregate(string message, IEnumerable<Exception> innerExceptions)

@@ -438,5 +438,6 @@ namespace DjvuNet.Tests.Errors
             Assert.Contains("Custom message", ex.Message);
             Assert.Null(ex.InnerException);
         }
+
     }
 }

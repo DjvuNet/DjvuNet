@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Running;
 using DjvuNet.Errors;
 using DjvuNet.Graphics;
 using DjvuNet.Tests;
@@ -25,12 +26,18 @@ namespace DjvuNet.Benchmarks
         ImageBinaryDiff
     }
 
-    public abstract class DjvuNetBenchmarkBase
+    public abstract class DjvuNetBenchmarkBase : IThroughputBenchmark
     {
         protected const int InvocationCount = 10;
         protected const int MaxWidth = 5448;
         protected const int MaxHeight = 3686;
         protected const int MaxPixels = MaxWidth * MaxHeight;
+
+        public unsafe virtual long GetBytesPerOperation(BenchmarkCase benchmarkCase)
+        {
+            // Default payload: 1x MaxPixels array at the exact unmanaged struct size.
+            return MaxPixels * sizeof(Pixel); 
+        }
 
         protected IntPtr[] _nativePixelBuffers;
         protected IntPtr[] _nativePlanarBuffers;

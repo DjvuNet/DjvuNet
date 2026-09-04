@@ -16,7 +16,9 @@ namespace DjvuNet.Benchmarks
 {
     public class StandardConfig : ManualConfig
     {
-        public StandardConfig()
+        public StandardConfig() : this(true) { }
+
+        protected StandardConfig(bool addDefaultJob)
         {
             AddDiagnoser(MemoryDiagnoser.Default);
             AddDiagnoser(new DisassemblyDiagnoser(new DisassemblyDiagnoserConfig(maxDepth: 3, printSource: true, printInstructionAddresses: true, exportGithubMarkdown: true, exportHtml: true)));
@@ -45,14 +47,21 @@ namespace DjvuNet.Benchmarks
             AddExporter(MarkdownExporter.Console);
             AddExporter(JsonExporter.Full);
 
+            AddColumn(new ThroughputColumn());
+            AddColumn(new CompressionRatioColumn());
+            this.HideColumns("Error", "EnvironmentVariables", "RatioSD");
+
             var toolchain = new InProcessEmitToolchain(
                 timeout: TimeSpan.FromMinutes(30),
                 logOutput: false);
 
-            // ORIGINAL ACCURACY CONFIGURATION (Longer execution time)
-            AddJob(Job.Default
-                .WithToolchain(toolchain)
-                .WithGcServer(true));
+            if (addDefaultJob)
+            {
+                // ORIGINAL ACCURACY CONFIGURATION (Longer execution time)
+                AddJob(Job.Default
+                    .WithToolchain(toolchain)
+                    .WithGcServer(true));
+            }
 
             // FAST / ACCURATE BALANCED CONFIGURATION
             // AddJob(Job.ShortRun

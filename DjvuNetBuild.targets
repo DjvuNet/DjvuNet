@@ -89,6 +89,7 @@
   </Target>
 
   <Target Name="InjectVersion" BeforeTargets="CoreCompile" DependsOnTargets="UpdateVersionCache"
+          Condition="!$(MSBuildProjectName.StartsWith('BenchmarkDotNet'))"
           Inputs="$(MSBuildThisFileDirectory).build.version;$(ProjectDir)Properties\AssemblyInfo.Template.cs;$(MSBuildThisFileDirectory)Templates\AssemblyInfoCommon.Template.cs"
           Outputs="$(ProjectDir)Properties\AssemblyInfo.$(TargetFramework).cs;$(ProjectDir)Properties\AssemblyInfoCommon.$(TargetFramework).cs;$(UtilTestFile)">
 

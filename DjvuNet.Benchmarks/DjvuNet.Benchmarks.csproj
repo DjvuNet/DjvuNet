@@ -2,22 +2,26 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), DjvuNetBuild.props))\DjvuNetBuild.props" />
 
     <ItemGroup>
-      <Compile Include="Program.cs"/>
-      <Compile Include="DjvuNetBenchmarkBase.cs"/>
-      <Compile Include="ImageBinaryDiffBenchmark.cs"/>
-      <Compile Include="ImageCacheBenchmark.cs"/>
-      <Compile Include="YCbCr2RgbBenchmark.cs"/>
-      <Compile Include="Rgb2YCbCrBenchmark.cs"/>
-      <Compile Include="Rgb2YCbCrMatrixBenchmark.cs"/>
-      <Compile Include="YCbCrSimdBenchmark.cs"/>
-      <Compile Include="YCbCr2RgbMatrixBenchmark.cs"/>
+      <Compile Include="BitmapBlitSubSampleBenchmark.cs" />
+      <Compile Include="Program.cs" />
+      <Compile Include="DjvuNetBenchmarkBase.cs" />
+      <Compile Include="ImageBinaryDiffBenchmark.cs" />
+      <Compile Include="ImageCacheBenchmark.cs" />
+      <Compile Include="YCbCr2RgbBenchmark.cs" />
+      <Compile Include="Rgb2YCbCrBenchmark.cs" />
+      <Compile Include="Rgb2YCbCrMatrixBenchmark.cs" />
+      <Compile Include="YCbCrSimdBenchmark.cs" />
+      <Compile Include="YCbCr2RgbMatrixBenchmark.cs" />
       <Compile Include="YCbCrParallelSimdBenchmark.cs" />
       <Compile Include="YCbCrCombinedMatrixBenchmark.cs" />
       <Compile Include="Rgb2YCbCrHybridVsUnifiedBenchmark.cs" />
       <Compile Include="Rgb2YCbCrUnifiedBenchmark.cs" />
-      <Compile Include="PigeonTransformBenchmark.cs"/>
-      <Compile Include="LongRunningConfig.cs"/>
-      <Compile Include="StandardConfig.cs"/>
+      <Compile Include="PigeonTransformBenchmark.cs" />
+      <Compile Include="LongRunningConfig.cs" />
+      <Compile Include="StandardConfig.cs" />
+      <Compile Include="BitmapRleBenchmark.cs" />
+      <Compile Include="ThroughputColumn.cs" />
+      <Compile Include="CompressionRatioColumn.cs" />
     </ItemGroup>
 
   <ItemGroup>

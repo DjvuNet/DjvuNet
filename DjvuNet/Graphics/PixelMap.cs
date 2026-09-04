@@ -242,7 +242,11 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Attenuate(ref Bitmap target, int xPos, int yPos)
         {
-            /// TODO: Needs protection from NullRef generic exception
+            if (Unsafe.IsNullRef(ref target))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(target), $"{typeof(Bitmap).FullName} target reference is null.");
+            }
+
             // Compute number of rows and columns
             int rows = yPos + target.Height;
 
@@ -333,7 +337,11 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Blit(ref Bitmap bm, int xPos, int yPos, IPixel color)
         {
-            /// TODO: Needs protection from NullRef generic exception 
+            if (Unsafe.IsNullRef(ref bm))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(bm), $"{typeof(Bitmap).FullName} bm reference is null.");
+            }
+
             // Check
             if (color == null)
             {
@@ -1139,7 +1147,11 @@ namespace DjvuNet.Graphics
         /// </param>
         public unsafe void Fill(ref Bitmap source, int dx, int dy)
         {
-            /// TODO: Needs protection from NullRef generic exception
+            if (Unsafe.IsNullRef(ref source))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), $"{typeof(Bitmap).FullName} source reference is null.");
+            }
+
             if (source == default)
                 DjvuExceptionUtil.ThrowArgument( 
                     "The source Bitmap cannot be default. Please provide a valid and initialized Bitmap instance.", nameof(source));
@@ -1391,7 +1403,11 @@ namespace DjvuNet.Graphics
         /// </returns>
         public unsafe PixelMap Init(ref Bitmap source)
         {
-            /// TODO: Needs protection from NullRef generic exception
+            if (Unsafe.IsNullRef(ref source))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(source), $"{typeof(Bitmap).FullName} source reference is null.");
+            }
+
             if (source == default)
                 DjvuExceptionUtil.ThrowArgument( 
                     "The source Bitmap cannot be default instance. Please provide a valid, initialized Bitmap instance.",
@@ -1839,7 +1855,16 @@ namespace DjvuNet.Graphics
         public unsafe void Stencil(ref Bitmap mask, PixelMap foregroundMap, int superSample,
         int subSample, Rectangle bounds, double gamma)
         {
-            /// TODO: Needs protection from NullRef generic exception
+            if (Unsafe.IsNullRef(ref mask))
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(mask), $"{typeof(Bitmap).FullName} mask reference is null.");
+            }
+
+            if (foregroundMap == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(foregroundMap), $"{typeof(PixelMap).FullName} foregroundMap reference is null.");
+            }
+
             // Check arguments
             int width = (((foregroundMap.Width * superSample) + subSample - 1) / subSample);
             int height = (((foregroundMap.Height * superSample) + subSample - 1) / subSample);
