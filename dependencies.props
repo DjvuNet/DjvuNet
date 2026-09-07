@@ -26,6 +26,7 @@
     <SystemDrawingCommonPackageVersion Condition="'$(TargetOS)' != 'Windows'">6.0.0</SystemDrawingCommonPackageVersion>
     <SkiaSharpPackageVersion>3.119.2</SkiaSharpPackageVersion>
     <SystemCommandLinePackageVersion>2.0.8</SystemCommandLinePackageVersion>
+    <SqliteNetPclPackageVersion>1.11.285</SqliteNetPclPackageVersion>
   </PropertyGroup>
 
   <!-- ILLink.Tasks package version -->

@@ -93,13 +93,43 @@ namespace DjvuNet.JB2
             return retval;
         }
 
+        /// <summary>
+        /// Decodes the shared shape dictionary payload from the provided stream.
+        /// </summary>
+        /// <param name="gbs">The binary reader positioned at the start of the JB2 stream.</param>
+        /// <param name="zdict">The optional inherited shape dictionary.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public virtual void Decode(IBinaryReader gbs, JB2Dictionary zdict)
         {
+            if (gbs?.BaseStream == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(gbs), "JB2 decoding failed: IBinaryReader or its BaseStream cannot be null.");
+
             Init();
-            JB2Decoder codec = new JB2Decoder();
-            codec.Init(gbs, zdict);
-            codec.Code(this);
+            using (JB2Decoder codec = new JB2Decoder())
+            {
+                codec.Init(gbs, zdict);
+                codec.Code(this);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void Encode(IBinaryWriter pool)
+        {
+            Encode(pool, null);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public virtual void Encode(IBinaryWriter gbs, JB2Dictionary zdict)
+        {
+            if (gbs?.BaseStream == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(gbs), "JB2 encoding failed: IBinaryWriter or its BaseStream cannot be null.");
+
+            using (JB2Encoder codec = new JB2Encoder())
+            {
+                codec.Init(gbs.BaseStream, zdict);
+                codec.Encode(this);
+                codec.Flush();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

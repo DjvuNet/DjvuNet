@@ -9,7 +9,9 @@ using DjvuNet.Graphics;
 using DjvuNet.Tests;
 using BenchmarkDotNet.Running;
 
-namespace DjvuNet.Benchmarks
+using DjvuNet.Benchmarks.Core;
+
+namespace DjvuNet.Tools.Benchmarks
 {
     [Config(typeof(CustomParallelConfig))]
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByParams)]
@@ -18,15 +20,25 @@ namespace DjvuNet.Benchmarks
         [Params(1024, 4096, 9216, 16384, 36864, 65536, 262144, 1048576, 2096704,  4194304, MaxPixels)]
         public override int PixelCount { get; set; }
 
-        public override IEnumerable<int> ThreadCountValues => new[] { 2 , 4, 6, Environment.ProcessorCount };
+        public override IEnumerable<int> ThreadCountValues => new[] { 2, 4, 6, 8 };
 
         protected override DjvuNetBenchmarkType BenchmarkType => DjvuNetBenchmarkType.ImageBinaryDiff;
 
         public override long GetBytesPerOperation(BenchmarkCase benchmarkCase)
         {
+            int pixelCount = MaxPixels;
+            if (System.Linq.Enumerable.FirstOrDefault(benchmarkCase.Parameters.Items, p => p.Name == "PixelCount")?.Value is int pCount)
+            {
+                pixelCount = pCount;
+            }
+
+            // The benchmark inner loop executes 'ImageRatio' times (MaxPixels / pixelCount).
+            // We must calculate the exact number of pixels processed taking integer division truncation into account.
+            long actualPixelsProcessed = (long)(MaxPixels / pixelCount) * pixelCount;
+
             // Diff reads from both Buffer 1 and Buffer 2 simultaneously (2x memory bandwidth)
             int pixelSizeBits = 24; 
-            long bytesPerImage = MaxPixels * (pixelSizeBits / 8);
+            long bytesPerImage = actualPixelsProcessed * (pixelSizeBits / 8);
             return bytesPerImage * 2; 
         }
 

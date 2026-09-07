@@ -126,7 +126,7 @@
     <Compile Include="DataChunks\TxtaChunk.cs" />
     <Compile Include="DataChunks\TxtzChunk.cs" />
     <Compile Include="DataChunks\WmrmChunk.cs" />
-    <Compile Include="Diagnostics\DjvuEventSource.cs" />
+    <Compile Include="Diagnostics\DocumentEventSource.cs" />
     <Compile Include="DjvuDocument.cs" />
     <Compile Include="DjvuImage.cs" />
     <Compile Include="IDjvuImage.cs" />
@@ -147,8 +147,10 @@
     <Compile Include="Errors\DjvuObjectDisposedException.cs" />
     <Compile Include="Extensions\ExtensionMethods.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="Graphics\GraphicsEventSource.cs" />
     <Compile Include="Graphics\Bitmap.cs" />
     <Compile Include="Graphics\Bitmap.Simd.cs" />
+    <Compile Include="Graphics\MemoryManager.cs" />
     <Compile Include="Graphics\IImageCodecProperty.cs" />
     <Compile Include="Graphics\IImageDecoder.cs" />
     <Compile Include="Graphics\IImageEncoder.cs" />
@@ -180,6 +182,7 @@
     <Compile Include="JB2\JB2Decoder.cs" />
     <Compile Include="JB2\JB2Dictionary.cs" />
     <Compile Include="JB2\JB2Encoder.cs" />
+    <Compile Include="JB2\JB2EventSource.cs" />
     <Compile Include="JB2\JB2Image.cs" />
     <Compile Include="JB2\JB2Shape.cs" />
     <Compile Include="Parser\AbstractDocumentTree.cs" />

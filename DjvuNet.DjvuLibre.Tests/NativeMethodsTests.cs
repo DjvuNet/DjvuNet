@@ -307,7 +307,7 @@ namespace DjvuNet.DjvuLibre.Tests
                     }
                 }
 
-                bool getBmpInfo = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 4, out int origWidth, out int origHeight, out int origRowSize, out int origBorder, IntPtr.Zero, 0);
+                bool getBmpInfo = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 1, 4, out int origWidth, out int origHeight, out int origRowSize, out int origBorder, IntPtr.Zero, 0);
                 Assert.True(getBmpInfo);
 
                 byte[] payloadAll;
@@ -363,8 +363,8 @@ namespace DjvuNet.DjvuLibre.Tests
                     }
                 }
 
-                Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeOriginal, 4, out int origW, out int origH, out int origRow, out int origBorder, IntPtr.Zero, 0));
-                Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeVariant, 4, out int varW, out int varH, out int varRow, out int varBorder, IntPtr.Zero, 0));
+                Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeOriginal, 1, 4, out int origW, out int origH, out int origRow, out int origBorder, IntPtr.Zero, 0));
+                Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeVariant, 1, 4, out int varW, out int varH, out int varRow, out int varBorder, IntPtr.Zero, 0));
 
                 Assert.Equal(origW, varW);
                 Assert.Equal(origH, varH);
@@ -382,8 +382,8 @@ namespace DjvuNet.DjvuLibre.Tests
                 {
                     fixed(byte* pOrigPix = origPixels, pVarPix = varPixels)
                     {
-                        Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeOriginal, 4, out _, out _, out _, out _, (IntPtr)pOrigPix, origPixels.Length));
-                        Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeVariant, 4, out _, out _, out _, out _, (IntPtr)pVarPix, varPixels.Length));
+                        Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeOriginal, 1, 4, out _, out _, out _, out _, (IntPtr)pOrigPix, origPixels.Length));
+                        Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeVariant, 1, 4, out _, out _, out _, out _, (IntPtr)pVarPix, varPixels.Length));
 
                         diff = Util.ImageBinaryDiff(pOrigPix, pVarPix, origW, origH, origRow, 8, 8);
                     }
@@ -425,7 +425,7 @@ namespace DjvuNet.DjvuLibre.Tests
                 if (!success || nativeImage == IntPtr.Zero)
                     return false;
 
-                bool getBmpInfo = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 4, out int w, out int h, out int rowSize, out int border, IntPtr.Zero, 0);
+                bool getBmpInfo = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 1, 4, out int w, out int h, out int rowSize, out int border, IntPtr.Zero, 0);
                 return getBmpInfo && w == expectedWidth && h == expectedHeight && rowSize == expectedRowSize;
             }
             catch

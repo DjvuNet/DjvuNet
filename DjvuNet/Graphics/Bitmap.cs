@@ -15,6 +15,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using DjvuNet.Compression;
 using DjvuNet.Errors;
+using DjvuNet.Diagnostics;
 
 namespace DjvuNet.Graphics
 {
@@ -265,6 +266,7 @@ namespace DjvuNet.Graphics
             _ZeroBuffersHistory = new ConcurrentQueue<sbyte[]>();
             _ZeroBufferLock = new Lock();
             _ZeroBuffer = GC.AllocateArray<sbyte>(_ZeroBufferSize, pinned: true);
+            GraphicsEventSource.Log.OnBitmapDataAllocated(0, 0, _ZeroBufferSize, 0, false, "ZeroBuffer_Init");
             unsafe { _ZeroBufferPointer = (sbyte*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(_ZeroBuffer)); }
         }
 
@@ -308,6 +310,7 @@ namespace DjvuNet.Graphics
                     try
                     {
                         newBuffer = GC.AllocateArray<sbyte>((int)newSize, pinned: true);
+                        GraphicsEventSource.Log.OnBitmapDataAllocated(0, 0, (long)newSize, 0, false, "ZeroBuffer_Resize");
                     }
                     catch (Exception ex)
                     {
@@ -442,6 +445,8 @@ namespace DjvuNet.Graphics
                     Data = uninitialized
                         ? GC.AllocateUninitializedArray<sbyte>(newMaxRowOffset, pinned: true)
                         : GC.AllocateArray<sbyte>(newMaxRowOffset, pinned: true);
+                        
+                    GraphicsEventSource.Log.OnBitmapDataAllocated(Width, Height, newMaxRowOffset, border, uninitialized, "Resize");
                 }
                 catch (Exception ex)
                 {
@@ -987,6 +992,7 @@ namespace DjvuNet.Graphics
                 if (clone.RleData == null)
                 {
                     clone.RleData = new byte[RleData.Length];
+                    GraphicsEventSource.Log.OnRleDataAllocated(RleData.Length, "Duplicate");
                 }
 
                 Buffer.BlockCopy(RleData, 0, clone.RleData, 0, RleData.Length);

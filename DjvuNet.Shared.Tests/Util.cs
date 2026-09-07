@@ -1603,6 +1603,30 @@ namespace DjvuNet.Tests
             return result;
         }
 
+        private static readonly Lazy<Dictionary<string, string>> _sjbzToDjbzMap = new Lazy<Dictionary<string, string>>(() =>
+        {
+            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (object[] row in GetJB2ImageTestData(null, null, TestCoverage.All, 1))
+            {
+                string djbz = (string)row[0];
+                string sjbz = (string)row[1];
+                if (sjbz != null)
+                {
+                    string key = Path.GetFileName(sjbz);
+                    if (!map.ContainsKey(key))
+                        map.Add(key, djbz);
+                }
+            }
+            return map;
+        });
+
+        public static string GetDjbzForSjbz(string sjbzFileName)
+        {
+            if (string.IsNullOrWhiteSpace(sjbzFileName)) return null;
+            string key = Path.GetFileName(sjbzFileName);
+            return _sjbzToDjbzMap.Value.TryGetValue(key, out string djbz) ? djbz : null;
+        }
+
         public static IEnumerable<object[]> GetJB2ImageTestData(int[] skipDocs = null, string[] skipChunks = null, TestCoverage coverage = TestCoverage.All, int step = 1)
         {
             string mapPath = Path.Combine(ArtifactsDataPath, "extracted", "jb2_chunk_map.json");

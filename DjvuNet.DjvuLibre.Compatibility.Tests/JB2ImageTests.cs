@@ -245,7 +245,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
 
                 // 2. Extract Native Bitmap matching C#'s
 
-                bool getBmpInfo = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 4, out int nWidth, out int nHeight, out int nRowSize, out int nBorder, IntPtr.Zero, 0);
+                bool getBmpInfo = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 1, 4, out int nWidth, out int nHeight, out int nRowSize, out int nBorder, IntPtr.Zero, 0);
                 Assert.True(getBmpInfo, "Native GetDjvuJb2ImageBitmap dimension query failed.");
 
                 Assert.True(nWidth > 0, "Native decoded image has 0 width.");
@@ -257,7 +257,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                 bool getBmpData = false;
                 fixed (byte* pNative = nativeBuffer)
                 {
-                    getBmpData = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 4, out nWidth, out nHeight, out nRowSize, out nBorder, (IntPtr)pNative, nativeBuffer.Length);
+                    getBmpData = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 1, 4, out nWidth, out nHeight, out nRowSize, out nBorder, (IntPtr)pNative, nativeBuffer.Length);
                 }
                 Assert.True(getBmpData, "Native GetDjvuJb2ImageBitmap extraction failed.");
 

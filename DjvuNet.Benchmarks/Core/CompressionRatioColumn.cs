@@ -3,7 +3,7 @@ using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Reports;
 using BenchmarkDotNet.Running;
 
-namespace DjvuNet.Benchmarks
+namespace DjvuNet.Benchmarks.Core
 {
     public interface ICompressionRatioBenchmark
     {

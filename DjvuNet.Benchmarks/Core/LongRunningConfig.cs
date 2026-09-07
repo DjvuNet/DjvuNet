@@ -8,7 +8,7 @@ using BenchmarkDotNet.Exporters;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Toolchains.InProcess.Emit;
 
-namespace DjvuNet.Benchmarks
+namespace DjvuNet.Benchmarks.Core
 {
     public class LongRunningConfig : ManualConfig
     {

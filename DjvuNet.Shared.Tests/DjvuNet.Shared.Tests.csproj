@@ -37,6 +37,9 @@
     <Compile Include="BitmapSurrogate.cs" />
     <Compile Include="DjvuDocumentUtil.cs" />
     <Compile Include="DjvuJsonDocument.cs" />
+    <Compile Include="Diagnostics\BitmapEventListener.cs" />
+    <Compile Include="Diagnostics\MemoryEventListener.cs" />
+    <Compile Include="Diagnostics\TestEventListener.cs" />
     <Compile Include="HardwareIntrinsics.cs" />
     <Compile Include="Mocks\FileStreamWrapper.cs" />
     <Compile Include="Mocks\IStream.cs" />

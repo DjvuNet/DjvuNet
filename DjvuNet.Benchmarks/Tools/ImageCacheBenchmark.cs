@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using BenchmarkDotNet.Attributes;
 using DjvuNet;
 using DjvuNet.Tests;
+using DjvuNet.Graphics;
+using DjvuNet.Benchmarks.Core;
 
-namespace DjvuNet.Benchmarks
+namespace DjvuNet.Tools.Benchmarks
 {
     [Config(typeof(LongRunningConfig))]
     public class ImageCacheBenchmark : IDisposable

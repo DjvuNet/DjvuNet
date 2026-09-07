@@ -1,20 +1,141 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DjvuNet.JB2;
-using DjvuNet.Tests;
-using DjvuNet.Graphics;
-using DjvuNet.DataChunks;
-using DjvuNet.Errors;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using DjvuNet.DataChunks;
+using DjvuNet.Diagnostics.Tests;
+using DjvuNet.Errors;
+using DjvuNet.Graphics;
+using DjvuNet.Tests;
 using Xunit;
 
 namespace DjvuNet.JB2.Tests
 {
-    public class JB2ImageTests
+    public sealed class JB2ImageEtwFixture : IDisposable
+    {
+        private readonly BitmapEventListener _listener;
+
+        public JB2ImageEtwFixture()
+        {
+            _listener = new BitmapEventListener();
+        }
+
+        public void Dispose()
+        {
+            string framework = "net" + Environment.Version.Major + ".0";
+            string dir = Path.Combine(Util.RepoRoot, "TestResults", framework);
+            Directory.CreateDirectory(dir);
+            BitmapEventListener.ExportToJsonl(Path.Combine(dir, "BitmapAnalytics.jsonl"));
+            BitmapEventListener.Records.Clear();
+            _listener.Dispose();
+        }
+    }
+
+    public class JB2ImageMemoryTracedTests : IClassFixture<JB2ImageEtwFixture>
+    {
+
+        public static TheoryData<string, string> JB2ImageFullTestData
+        {
+            get
+            {
+                var data = new TheoryData<string, string>();
+                foreach (var row in Util.GetJB2ImageTestData(new int[0], new string[0], TestCoverage.All))
+                {
+                    data.Add((string)row[0], (string)row[1]);
+                }
+                return data;
+            }
+        }
+
+        [Theory(Skip = ""), Trait("Category", "Skip")]
+        [MemberData(nameof(JB2ImageFullTestData))]
+        public void DecodeRleRoundtripTest(string djbzFileName, string sjbzFileName)
+        {
+            DecodeRleRoundtripInternal(djbzFileName, sjbzFileName);
+        }
+
+        [Theory(Skip =""), Trait("Category", "Skip")]
+        [MemberData(nameof(JB2ImageFullTestData))]
+        public void MaskBitmap_Compression_All(string djbzFileName, string sjbzFileName)
+        {
+            string djbzFile = Util.GetDjbzForSjbz(sjbzFileName);
+            JB2Dictionary jb2Dict = null;
+            
+            if (djbzFile != null)
+            {
+                jb2Dict = new JB2Dictionary();
+                byte[] djbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, djbzFile));
+                using (var ms = new MemoryStream(djbzPayload))
+                using (var reader = new DjvuReader(ms))
+                {
+                    jb2Dict.Decode(reader);
+                }
+            }
+
+            byte[] payload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, sjbzFileName));
+            JB2Image image = new JB2Image();
+            using (var ms = new MemoryStream(payload))
+            using (var reader = new DjvuReader(ms))
+            {
+                image.Decode(reader, jb2Dict);
+            }
+            
+            Bitmap bm = image.GetBitmap();
+            int uncompressedSize = bm.Data.Length;
+            bm.Compress();
+            int compressedSize = bm.RleData.Length;
+            double ratio = (double)uncompressedSize / compressedSize;
+            
+            Console.WriteLine($"[COMPRESSION_DATA] File: {Path.GetFileName(sjbzFileName)} | Uncompressed: {uncompressedSize} | Compressed: {compressedSize} | Ratio: {ratio:F2}");
+        }
+
+        private void DecodeRleRoundtripInternal(string djbzFileName, string sjbzFileName)
+        {
+            JB2Dictionary jb2Dict = null;
+
+            BitmapEventListener.CurrentDjbz.Value = djbzFileName;
+            BitmapEventListener.CurrentSjbz.Value = sjbzFileName;
+
+            if (djbzFileName != null)
+            {
+                jb2Dict = new JB2Dictionary();
+                byte[] djbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, djbzFileName));
+
+                using (var ms = new MemoryStream(djbzPayload))
+                using (var reader = new DjvuReader(ms))
+                {
+                    BitmapEventListener.CurrentPhase.Value = "JB2Dictionary_Decode";
+                    jb2Dict.Decode(reader);
+                }
+                Assert.True(jb2Dict.ShapeCount > 0, "Managed dictionary decoded 0 shapes.");
+            }
+
+            byte[] sjbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, sjbzFileName));
+            JB2Image image = new JB2Image();
+
+            using (var ms = new MemoryStream(sjbzPayload))
+            using (var reader = new DjvuReader(ms))
+            {
+                BitmapEventListener.CurrentPhase.Value = "JB2Image_Decode";
+                image.Decode(reader, jb2Dict);
+            }
+
+            BitmapEventListener.CurrentPhase.Value = "Bitmap_RleCompression";
+            for (int i = 0; i < image.ShapeCount; i++)
+            {
+                ref JB2Shape shape = ref image.GetShape(i);
+                shape.Bitmap.Compress();
+                shape.Bitmap.Decompress();
+            }
+
+            Assert.True(image.ShapeCount > 0, "JB2Image decoded 0 shapes.");
+        }
+    }
+
+    public class JB2ImageTests 
     {
 
         public static IEnumerable<object[]> JB2ImageTestData => Util.GetJB2ImageTestData(
@@ -38,6 +159,75 @@ namespace DjvuNet.JB2.Tests
         public void DecodeTest(string djbzFileName, string sjbzFileName)
         {
             DecodeInternal(djbzFileName, sjbzFileName);
+        }
+
+        [Theory]
+        [InlineData(@"extracted/test002C_P01.sjbz")]
+        [InlineData(@"extracted/test007C_P02.sjbz")]
+        [InlineData(@"extracted/test011C_P03.sjbz")]
+        [InlineData(@"extracted/test023C_P01.sjbz")]
+        [InlineData(@"extracted/test032C_P01.sjbz")]
+        [InlineData(@"extracted/test033C_P01.sjbz")]
+        public void DecodeGeometry(string sjbzFileName)
+        {
+            byte[] sjbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, sjbzFileName));
+
+            JB2Image imageGeom = new JB2Image();
+            using (var ms = new MemoryStream(sjbzPayload))
+            using (var reader = new DjvuReader(ms))
+            {
+                imageGeom.DecodeGeometry(reader);
+            }
+
+            // Compute JSON properties from SJBZ path (e.g., "extracted/test007C_P02.sjbz")
+            string fileName = Path.GetFileNameWithoutExtension(sjbzFileName);
+            string[] parts = fileName.Split('_');
+            string baseName = parts[0];
+            int pageNumber = int.Parse(parts[1].Substring(1)); // "P02" -> 2
+
+            // Read JSON to verify against the ground-truth INFO chunk
+            string jsonPath = Path.Combine(Util.ArtifactsPath, baseName + ".json");
+            string jsonContent = File.ReadAllText(jsonPath);
+            using (JsonDocument doc = JsonDocument.Parse(jsonContent))
+            {
+                var rootChildren = doc.RootElement.GetProperty("DjvuData").GetProperty("Children");
+                
+                // Find the Nth FORM:DJVU page object using a zero-allocation loop
+                JsonElement targetPageDjvu = default;
+                int pageCount = 0;
+                foreach (var child in rootChildren.EnumerateArray())
+                {
+                    if (child.GetProperty("ID").GetString() == "FORM:DJVU")
+                    {
+                        pageCount++;
+                        if (pageCount == pageNumber)
+                        {
+                            targetPageDjvu = child;
+                            break;
+                        }
+                    }
+                }
+
+                // The INFO chunk contains the page dimensions
+                JsonElement infoChunk = default;
+                foreach (var child in targetPageDjvu.GetProperty("Children").EnumerateArray())
+                {
+                    if (child.GetProperty("ID").GetString() == "INFO")
+                    {
+                        infoChunk = child;
+                        break;
+                    }
+                }
+
+                int expectedWidth = infoChunk.GetProperty("Width").GetInt32();
+                int expectedHeight = infoChunk.GetProperty("Height").GetInt32();
+
+                Assert.Equal(expectedWidth, imageGeom.Width);
+                Assert.Equal(expectedHeight, imageGeom.Height);
+            }
+
+            Assert.Equal(0, imageGeom.ShapeCount);
+            Assert.True(imageGeom.Blits.Length == 0);
         }
 
         [Theory]
@@ -93,11 +283,51 @@ namespace DjvuNet.JB2.Tests
             Assert.True(diff == 0.0, $"Managed pixel parity mismatch! Diff: {diff}. Variant: {Path.GetFileName(variantFile)} vs {Path.GetFileName(originalSjbzPath)}");
         }
 
+        [Theory]
+        [InlineData(@"extracted/test053C_P02.sjbz")] // Micro 
+        [InlineData(@"extracted/test032C_P01.sjbz")] // Standard 
+        [InlineData(@"extracted/test074C_P01.sjbz")] // Massive 
+        public void MaskBitmap_Compression(string file)
+        {
+            string djbzFile = Util.GetDjbzForSjbz(file);
+            JB2Dictionary jb2Dict = null;
+            
+            if (djbzFile != null)
+            {
+                jb2Dict = new JB2Dictionary();
+                byte[] djbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, djbzFile));
+                using (var ms = new MemoryStream(djbzPayload))
+                using (var reader = new DjvuReader(ms))
+                {
+                    jb2Dict.Decode(reader);
+                }
+            }
+
+            byte[] payload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, file));
+            JB2Image image = new JB2Image();
+            using (var ms = new MemoryStream(payload))
+            using (var reader = new DjvuReader(ms))
+            {
+                image.Decode(reader, jb2Dict);
+            }
+            
+            Bitmap bm = image.GetBitmap();
+            int uncompressedSize = bm.Data.Length;
+            bm.Compress();
+            int compressedSize = bm.RleData.Length;
+            double ratio = (double)uncompressedSize / compressedSize;
+            
+            Console.WriteLine($"RLE Compress Mask Bitmap => File: {Path.GetFileName(file)} | Data: {uncompressedSize / 1024.0:F2} KB | RleData: {compressedSize / 1024.0:F2} KB | Ratio: {ratio:F2}x");
+        }
+
         private void DecodeInternal(string djbzFileName, string sjbzFileName)
         {
 
             string prefixStr = "JB2ImageTests.DecodeTest => ";
             JB2Dictionary jb2Dict = null;
+
+            BitmapEventListener.CurrentDjbz.Value = djbzFileName;
+            BitmapEventListener.CurrentSjbz.Value = sjbzFileName;
 
             if (djbzFileName != null)
             {
@@ -107,6 +337,7 @@ namespace DjvuNet.JB2.Tests
                 using (var ms = new MemoryStream(djbzPayload))
                 using (var reader = new DjvuReader(ms))
                 {
+                    BitmapEventListener.CurrentPhase.Value = "SharedDictionary_Decode";
                     // This should not throw DjvuEndOfStreamException
                     jb2Dict.Decode(reader);
                 }
@@ -123,6 +354,7 @@ namespace DjvuNet.JB2.Tests
             using (var ms = new MemoryStream(sjbzPayload))
             using (var reader = new DjvuReader(ms))
             {
+                BitmapEventListener.CurrentPhase.Value = "PageImage_Decode";
                 // This should not throw DjvuNet.DjvuFormatException : Image dictionary not provided.
                 image.Decode(reader, jb2Dict);
             }
@@ -148,6 +380,26 @@ namespace DjvuNet.JB2.Tests
             image.AddBlit(ref blit);
 
             return image;
+        }
+
+        [Fact]
+        public void Encode_Throws()
+        {
+            var image = new JB2Image();
+            Assert.Throws<DjvuArgumentNullException>(() => image.Encode(null, null));
+        }
+
+        [Fact]
+        public void Encode()
+        {
+            var image = CreateTestImage(10, 10);
+            
+            using (var msEncode = new MemoryStream())
+            using (var writer = new DjvuWriter(msEncode))
+            {
+                image.Encode(writer, null);
+                Assert.True(msEncode.Length > 0);
+            }
         }
 
         [Theory]
@@ -468,5 +720,23 @@ namespace DjvuNet.JB2.Tests
             Assert.Equal(0, image.Height);
             Assert.Equal(image.Blits.Length, 0);
         }
+        [Fact]
+        public void Decode_Throws()
+        {
+            JB2Image image = new JB2Image();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() => image.Decode(null, null));
+            Assert.Contains("cannot be null", ex.Message);
+        }
+
+        [Fact]
+        public void DecodeGeometry_Throws()
+        {
+            JB2Image image = new JB2Image();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() => image.DecodeGeometry(null));
+            Assert.Contains("cannot be null", ex.Message);
+        }
+
+
+
     }
 }

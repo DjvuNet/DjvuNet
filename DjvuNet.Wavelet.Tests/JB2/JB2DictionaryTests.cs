@@ -54,6 +54,31 @@ namespace DjvuNet.JB2.Tests
         }
 
         [Fact]
+        public void Encode_Throws()
+        {
+            var dict = new JB2Dictionary();
+            Assert.Throws<DjvuArgumentNullException>(() => dict.Encode(null));
+        }
+
+        [Fact]
+        public void Encode()
+        {
+            string djbzFileName = "extracted/test061C_D1057432.djbz";
+            byte[] djbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, djbzFileName));
+            JB2Dictionary managedDict = new JB2Dictionary();
+            using (var ms = new MemoryStream(djbzPayload))
+            using (var reader = new DjvuReader(ms))
+                managedDict.Decode(reader);
+
+            using (var msEncode = new MemoryStream())
+            using (var writer = new DjvuWriter(msEncode))
+            {
+                managedDict.Encode(writer);
+                Assert.True(msEncode.Length > 0);
+            }
+        }
+
+        [Fact]
         public void AddShape_Success()
         {
             var dict = new JB2Dictionary();
@@ -197,5 +222,15 @@ namespace DjvuNet.JB2.Tests
             dict.InheritedDictionary = inherited;
             Assert.Same(inherited, dict.InheritedDictionary);
         }
+        [Fact]
+        public void Decode_Throws()
+        {
+            JB2Dictionary dict = new JB2Dictionary();
+            var ex = Assert.Throws<DjvuArgumentNullException>(() => dict.Decode(null, null));
+            Assert.Contains("cannot be null", ex.Message);
+        }
+
+
+
     }
 }

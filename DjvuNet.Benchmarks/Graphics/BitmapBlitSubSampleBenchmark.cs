@@ -1,14 +1,18 @@
-﻿using System;
+using System;
 using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Running;
 using DjvuNet.Graphics;
 using DjvuNet.Tests;
+using DjvuNet.Benchmarks;
+using System.Threading.Tasks;
 
-namespace DjvuNet.Benchmarks
+using DjvuNet.Benchmarks.Core;
+
+namespace DjvuNet.Graphics.Benchmarks
 {
-    [Config(typeof(BitmapRleConfig))] // Inherit the Scalar / Vector128 / AVX2 / AVX512 Jobs
+    [Config(typeof(SimdMatrixConfig))] // Inherit the Scalar / Vector128 / AVX2 / AVX512 Jobs
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByMethod)]
     public class BitmapBlitSubSampleBenchmark : IThroughputBenchmark
     {

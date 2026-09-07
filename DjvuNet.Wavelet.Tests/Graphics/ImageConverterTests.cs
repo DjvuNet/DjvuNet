@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,7 +7,7 @@ using DjvuNet.Graphics;
 using DjvuNet.Tests.Xunit;
 using Xunit;
 
-namespace DjvuNet.Wavelet.Tests.Graphics
+namespace DjvuNet.Graphics.Tests
 {
     public class ImageConverterTests
     {

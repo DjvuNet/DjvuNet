@@ -1,12 +1,15 @@
 using System;
+using System.Buffers;
 using System.IO;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
 using System.Text;
 using DjvuNet.Errors;
+using DjvuNet.Diagnostics;
 
 namespace DjvuNet.Graphics
 {
@@ -391,7 +394,7 @@ namespace DjvuNet.Graphics
                             dstCol += 32;
                         }
 
-                        // Tier 2: 32 bytes -> 10 pixels cascade (Strictly ONE Vector256.Load)
+                        // Tier 2: 30 bytes -> 10 pixels cascade (Strictly ONE Vector256.Load)
                         int safeSimdWidth32T2 = srcWidth + source.Border - 32;
                         if (srcCol <= safeSimdWidth32T2)
                         {
@@ -3461,6 +3464,7 @@ namespace DjvuNet.Graphics
                 long emptyPixels = Height * emptyStride + Border;
 
                 Data = GC.AllocateArray<sbyte>((int)emptyPixels, pinned: true);
+                GraphicsEventSource.Log.OnBitmapDataAllocated(Width, Height, emptyPixels, Border, false, "Decompress_Empty");
                 _RleData = null;
 
                 return;
@@ -3497,6 +3501,7 @@ namespace DjvuNet.Graphics
             if (Data == null)
             {
                 Data = GC.AllocateUninitializedArray<sbyte>((int)npixels, pinned: true);
+                GraphicsEventSource.Log.OnBitmapDataAllocated(Width, Height, npixels, Border, true, "Decompress_PixelData");
             }
 
             Resize(Width, Height, Border, (int)newStrideCalc);
@@ -4428,41 +4433,52 @@ namespace DjvuNet.Graphics
             // create run array
             long pos = 0;
             int maxpos = 1024 + Width + Height;
-            byte[] runsBuff = GC.AllocateUninitializedArray<byte>(maxpos);
+            byte[] runsBuff = MemoryManager.RlePool.Rent(maxpos, "EncodeRle_Intermediate");
 
-            // encode bitmap as rle
+            try
             {
-                int n = Height - 1;
-                byte* row = (byte*)GetRow(n);
-                while (n >= 0)
+                // encode bitmap as rle
                 {
-                    long required = pos + 2 + (2 * Width);
-                    if (maxpos < required)
+                    int n = Height - 1;
+                    byte* row = (byte*)GetRow(n);
+                    while (n >= 0)
                     {
-                        maxpos = (int)Math.Max((long)maxpos * 2, required + 1024);
-                        var newRuns = GC.AllocateUninitializedArray<byte>(maxpos);
-                        Buffer.BlockCopy(runsBuff, 0, newRuns, 0, (int)pos);
-                        runsBuff = newRuns;
+                        long required = pos + 2 + (2 * Width);
+                        if (maxpos < required)
+                        {
+                            maxpos = (int)Math.Max((long)maxpos * 2, required + 1024);
+                            var newRuns = MemoryManager.RlePool.Rent(maxpos, "EncodeRle_Growth");
+                            Buffer.BlockCopy(runsBuff, 0, newRuns, 0, (int)pos);
+                            
+                            var oldRuns = runsBuff;
+                            runsBuff = newRuns;
+                            MemoryManager.RlePool.Return(oldRuns, "EncodeRle_Growth_Cleanup");
+                        }
+
+                        fixed (byte* runs = runsBuff)
+                        {
+                            byte* runs_pos = runs + pos;
+                            byte* runs_pos_start = runs_pos;
+
+                            AppendLine(ref runs_pos, row, Width);
+
+                            pos += (int)(runs_pos - runs_pos_start);
+                        }
+                        row -= BytesPerRow;
+                        n -= 1;
                     }
-
-                    fixed (byte* runs = runsBuff)
-                    {
-                        byte* runs_pos = runs + pos;
-                        byte* runs_pos_start = runs_pos;
-
-                        AppendLine(ref runs_pos, row, Width);
-
-                        pos += (int)(runs_pos - runs_pos_start);
-                    }
-                    row -= BytesPerRow;
-                    n -= 1;
                 }
+                // return result
+                var finalRuns = GC.AllocateUninitializedArray<byte>((int)pos);
+                GraphicsEventSource.Log.OnRleDataAllocated((int)pos, "EncodeRle_Final");
+                Buffer.BlockCopy(runsBuff, 0, finalRuns, 0, (int)pos);
+                gpruns = finalRuns;
+                return pos;
             }
-            // return result
-            var finalRuns = GC.AllocateUninitializedArray<byte>((int)pos);
-            Buffer.BlockCopy(runsBuff, 0, finalRuns, 0, (int)pos);
-            gpruns = finalRuns;
-            return pos;
+            finally
+            {
+                MemoryManager.RlePool.Return(runsBuff, "EncodeRle_Method_Cleanup");
+            }
         }
 
         /// <summary>

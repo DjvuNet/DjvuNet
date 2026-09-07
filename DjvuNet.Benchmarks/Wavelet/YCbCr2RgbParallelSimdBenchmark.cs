@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.Intrinsics.X86;
+using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using DjvuNet.Graphics;
 using DjvuNet.Wavelet;
+using BenchmarkDotNet.Configs;
 
-namespace DjvuNet.Benchmarks
+using DjvuNet.Benchmarks.Core;
+
+namespace DjvuNet.Wavelet.Benchmarks
 {
     [Config(typeof(CustomParallelConfig))]
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByParams)]
@@ -18,10 +22,8 @@ namespace DjvuNet.Benchmarks
         protected override DjvuNetBenchmarkType BenchmarkType => DjvuNetBenchmarkType.ReverseYCbCrToRgb;
 
         [ParamsSource(nameof(ThreadCountValues))]
-        public int ThreadCount { get; set; }
-        public IEnumerable<int> ThreadCountValues => new[] { 1, 2, 4, 6, Environment.ProcessorCount };
-
-        private ParallelOptions _options;
+        public override int ThreadCount { get; set; }
+        public override IEnumerable<int> ThreadCountValues => new[] { 1, 2, 4, 6, Environment.ProcessorCount };
 
         [IterationSetup]
         public override unsafe void IterationSetup()

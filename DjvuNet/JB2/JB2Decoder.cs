@@ -16,6 +16,8 @@ namespace DjvuNet.JB2
         internal ZPCodec _Coder;
         internal byte _ZpBitHolder;
 
+        internal bool _GeometryOnly;
+
         #endregion Internal Fields
 
         #region Constructors
@@ -50,6 +52,29 @@ namespace DjvuNet.JB2
 
         #region Public Methods
 
+        public void CodeGeometry(JB2Image jim)
+        {
+            _GeometryOnly = true;
+            try
+            {
+                int rectype = StartOfData;
+                
+                do
+                {
+                    rectype = CodeRecordB(rectype, jim, ref Unsafe.NullRef<JB2Shape>(), ref Unsafe.NullRef<JB2Blit>());
+                } while (!_GotStartRecordP && rectype != EndOfData);
+
+                if (!_GotStartRecordP)
+                {
+                    DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: StartOfData record is missing.");
+                }
+            }
+            finally
+            {
+                _GeometryOnly = false;
+            }
+        }
+
         public void Code(JB2Image jim)
         {
             int rectype = StartOfData;
@@ -61,7 +86,7 @@ namespace DjvuNet.JB2
 
             if (!_GotStartRecordP)
             {
-                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Missing required start record.");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: StartOfData record is missing.");
             }
         }
 
@@ -76,7 +101,7 @@ namespace DjvuNet.JB2
 
             if (!_GotStartRecordP)
             {
-                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Missing required start record.");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: StartOfData record is missing.");
             }
         }
 
@@ -126,7 +151,7 @@ namespace DjvuNet.JB2
         {
             if (!_GotStartRecordP)
             {
-                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Missing required start record.");
+                DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: StartOfData record is missing.");
             }
 
             int left = CodeNum(1, _ImageColumns, _AbsLocX);
@@ -289,13 +314,13 @@ namespace DjvuNet.JB2
                     dict = _ZDict;
                     jim.InheritedDictionary = dict;
                 }
-                else
+                else if (!_GeometryOnly)
                 {
                     DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: A shape dictionary is required but was not provided.");
                 }
             }
 
-            if ((dict != null) && (size != dict.ShapeCount))
+            if (!_GeometryOnly && (dict != null) && (size != dict.ShapeCount))
             {
                 DjvuExceptionUtil.ThrowFormatException("JB2 decoding failed: Shape dictionary size mismatch.");
             }

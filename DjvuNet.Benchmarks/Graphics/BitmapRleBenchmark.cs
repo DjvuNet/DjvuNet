@@ -14,42 +14,14 @@ using SysRectangle = System.Drawing.Rectangle;
 using SysBitmapData = System.Drawing.Imaging.BitmapData;
 using SysImageLockMode = System.Drawing.Imaging.ImageLockMode;
 using SysPixelFormat = System.Drawing.Imaging.PixelFormat;
+using DjvuNet.Errors;
 
-namespace DjvuNet.Benchmarks
+using DjvuNet.Benchmarks.Core;
+using DjvuNet.Benchmarks;
+
+namespace DjvuNet.Graphics.Benchmarks
 {
-    // Custom Config using Out-Of-Process Jobs to force the JIT to respect CPU flag environment variables
-    public class BitmapRleConfig : StandardConfig
-    {
-        public BitmapRleConfig() : base(false)
-        {
-
-            // 1.Baseline: Scalar(Disable all hardware intrinsics)
-            AddJob(Job.Default
-                .WithGcServer(true)
-                .WithId("1. Scalar")
-                .WithEnvironmentVariable("DOTNET_EnableHWIntrinsic", "0")
-                .AsBaseline());
-
-            // 2. Vector128: (SSE / SSE4.1) by disabling AVX and higher
-            AddJob(Job.Default
-                .WithGcServer(true)
-                .WithId("2. Vector128")
-                .WithEnvironmentVariable("DOTNET_EnableAVX", "0"));
-
-            // 3. AVX2: Disable AVX-512 to restrict pipeline to 256-bit
-            AddJob(Job.Default
-                .WithGcServer(true)
-                .WithId("3. AVX2")
-                .WithEnvironmentVariable("DOTNET_EnableAVX512", "0"));
-
-            // 4. AVX512: Unrestricted (Maximum Hardware Capabilities)
-            AddJob(Job.Default
-                .WithGcServer(true)
-                .WithId("4. AVX512"));
-        }
-    }
-
-    [Config(typeof(BitmapRleConfig))]
+    [Config(typeof(SimdMatrixConfig))]
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByMethod)]
     public class BitmapRleBenchmark : IThroughputBenchmark, ICompressionRatioBenchmark
     {

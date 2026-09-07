@@ -1,28 +1,18 @@
-﻿using System;
+using System;
 using System.Diagnostics.Tracing;
 
 namespace DjvuNet.Diagnostics
 {
     [EventSource(Name = _Name, Guid = _Guid)]
-    public partial class DjvuEventSource : EventSource
+    public partial class DocumentEventSource : EventSource
     {
-        const string _Name = "DjvuNet-Library";
+        const string _Name = "DjvuNet.Diagnostics.DocumentEventSource";
         const String _Guid = "{B1C56657-E6FE-4348-BDCC-0B271A77A06E}";
         const byte _Version = 0x01;
 
-        protected static DjvuEventSource _Instance;
+        public static readonly DocumentEventSource Log = new DocumentEventSource();
 
-        public static DjvuEventSource Log
-        {
-            get
-            {
-                if (_Instance == null)
-                    _Instance = new DjvuEventSource();
-                return _Instance;
-            }
-        }
-
-        protected DjvuEventSource() : base(_Name) { }
+        protected DocumentEventSource() : base(_Name) { }
 
         [Event(1, Level = EventLevel.LogAlways, Opcode = EventOpcode.Start, Task = EventTask.None, Version = _Version)]
         public void OnDocumentOpen()

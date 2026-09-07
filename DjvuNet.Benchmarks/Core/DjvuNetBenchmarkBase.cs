@@ -17,7 +17,7 @@ using DjvuNet.DjvuLibre;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
 
-namespace DjvuNet.Benchmarks
+namespace DjvuNet.Benchmarks.Core
 {
     public enum DjvuNetBenchmarkType
     {

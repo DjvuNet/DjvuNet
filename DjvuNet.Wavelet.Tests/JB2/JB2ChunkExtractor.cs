@@ -8,7 +8,7 @@ using DjvuNet.DataChunks;
 using DjvuNet.Tests;
 using Xunit;
 
-namespace DjvuNet.Wavelet.Tests
+namespace DjvuNet.JB2.Tests
 {
     public class JB2ChunkExtractor
     {

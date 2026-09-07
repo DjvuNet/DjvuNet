@@ -14,9 +14,12 @@ using DjvuNet.Errors;
 using DjvuNet.Graphics;
 using DjvuNet.Tests;
 using Xunit;
+using System.Diagnostics.Tracing;
+using System.Collections.Concurrent;
 
 namespace DjvuNet.Graphics.Tests
 {
+
     public class BitmapTests
     {
         /// <summary>
@@ -1820,7 +1823,6 @@ namespace DjvuNet.Graphics.Tests
                 }
                 sbDump.AppendLine();
             }
-            Console.WriteLine(sbDump.ToString());
 
             // Generate perfect expected state dynamically
             for (int i = 0; i < border; i++) expectedBuffer[i] = 0;
@@ -1850,6 +1852,7 @@ namespace DjvuNet.Graphics.Tests
                 int diffCount = 0;
                 int maxPreviewLines = 64;
                 var errorLog = new StringBuilder();
+                errorLog.Append(sbDump.ToString());
                 
                 for (int i = 0; i < bufferSize; i++)
                 {

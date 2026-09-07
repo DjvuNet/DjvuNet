@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using DjvuNet.DataChunks;
 using DjvuNet.Errors;
 using DjvuNet.Graphics;
@@ -72,6 +73,8 @@ namespace DjvuNet.JB2
 
         public Bitmap GetBitmap(int subsample, int align)
         {
+            JB2EventSource.Log.OnJB2ImageRenderStart("GetBitmap_SubSample");
+
             Verify.SubsampleRange(subsample);
 
             if ((Width == 0) || (Height == 0))
@@ -88,22 +91,32 @@ namespace DjvuNet.JB2
             bm.Init(sheight, swidth, border);
             bm.Grays = (1 + (subsample * subsample));
 
-            for (int blitno = 0; blitno < Blits.Length; blitno++)
-            //Parallel.For(
-            //    0,
-            //    Blits.Count,
-            //    blitno =>
-            //    {
-            {
-                JB2Blit pblit = GetBlit(blitno);
-                ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
+            // WARNING: Parallelizing this loop via Parallel.For is currently unsafe.
+            // bm.Blit performs non-atomic read-modify-write operations on a shared 1D array (bm.Data).
+            // Overlapping shapes (e.g., a dot over an 'i') will cause write-tearing and visual corruption.
+            // A thread-safe compositing phase (e.g., scanline locks or partitioned Z-buffers) is required first.
+            //ParallelOptions options = new ParallelOptions();
+            //options.MaxDegreeOfParallelism = 4;
 
-                if (pshape.Bitmap != default)
-                {
-                    bm.Blit(ref pshape.Bitmap, pblit.Left, pblit.Bottom, subsample);
-                }
-                //});
+            for (int blitno = 0; blitno < Blits.Length; blitno++)
+            { 
+                //Parallel.For(
+                //    0,
+                //    Blits.Length,
+                //    options,
+                //    blitno =>
+                //    {
+                        JB2Blit pblit = GetBlit(blitno);
+                        ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
+
+                        if (pshape.Bitmap.Data != null)
+                        {
+                            bm.Blit(ref pshape.Bitmap, pblit.Left, pblit.Bottom, subsample);
+                        }
+                    //});
             }
+
+            JB2EventSource.Log.OnJB2ImageRenderStop(Blits.Length, bm.Data.Length, "GetBitmap_SubSample");
 
             return bm;
         }
@@ -125,36 +138,45 @@ namespace DjvuNet.JB2
 
         public Bitmap GetBitmap(Rectangle rect, int subsample, int align, int dispy)
         {
-            if ((Width == 0) || (Height == 0))
-            {
-                DjvuExceptionUtil.ThrowFormatException(
-                    $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
-            }
-
-            Verify.SubsampleRange(subsample);
-
-            int rxmin = rect.XMin * subsample;
-            int rymin = rect.YMin * subsample;
-            int swidth = rect.Width;
-            int sheight = rect.Height;
-            int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
-
+            JB2EventSource.Log.OnJB2ImageRenderStart("GetBitmap_Rect");
             Bitmap bm = new Bitmap();
-            bm.Init(sheight, swidth, border);
-            bm.Grays = (1 + (subsample * subsample));
-
-            for (int blitno = 0; blitno < Blits.Length; )
+            try
             {
-                JB2Blit pblit = GetBlit(blitno++);
-                ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
-
-                if (pshape.Bitmap != default)
+                if ((Width == 0) || (Height == 0))
                 {
-                    bm.Blit(ref pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample);
+                    DjvuExceptionUtil.ThrowFormatException(
+                        $"Image is empty and can not be used to create bitmap. Width: {Width}, Height {Height}");
                 }
-            }
 
-            return bm;
+                Verify.SubsampleRange(subsample);
+
+                int rxmin = rect.XMin * subsample;
+                int rymin = rect.YMin * subsample;
+                int swidth = rect.Width;
+                int sheight = rect.Height;
+                int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
+
+                bm.Init(sheight, swidth, border);
+                bm.Grays = (1 + (subsample * subsample));
+
+                for (int blitno = 0; blitno < Blits.Length; )
+                {
+                    JB2Blit pblit = GetBlit(blitno++);
+                    ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
+
+                    if (pshape.Bitmap.Data != null)
+                    {
+                        bm.Blit(ref pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample);
+                    }
+                }
+
+                return bm;
+            }
+            finally
+            {
+                int dataLength = bm.Data != null ? bm.Data.Length : 0;
+                JB2EventSource.Log.OnJB2ImageRenderStop(Blits.Length, dataLength, "GetBitmap_Rect");
+            }
         }
 
         public Bitmap GetBitmap(Rectangle rect, int subsample, int align, int dispy, List<int> components)
@@ -164,36 +186,47 @@ namespace DjvuNet.JB2
                 return GetBitmap(rect, subsample, align, dispy);
             }
 
-            if ((Width == 0) || (Height == 0))
-            {
-                DjvuExceptionUtil.ThrowFormatException(
-                    $"Image is empty can not be used to create bitmap. Width: {Width}, Height {Height}");
-            }
-
-            Verify.SubsampleRange(subsample);
-
-            int rxmin = rect.XMin * subsample;
-            int rymin = rect.YMin * subsample;
-            int swidth = rect.Width;
-            int sheight = rect.Height;
-            int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
-            
+            JB2EventSource.Log.OnJB2ImageRenderStart("GetBitmap_Components");
             Bitmap bm = new Bitmap();
-            bm.Init(sheight, swidth, border);
-            bm.Grays = (1 + (subsample * subsample));
-
-            for (int blitno = 0; blitno < Blits.Length; blitno++)
+            try
             {
-                JB2Blit pblit = GetBlit(blitno);
-                ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
-
-                if (pshape.Bitmap != default && bm.Blit(ref pshape.Bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample))
+                if ((Width == 0) || (Height == 0))
                 {
-                    components.Add((blitno));
+                    DjvuExceptionUtil.ThrowFormatException(
+                        $"Image is empty can not be used to create bitmap. Width: {Width}, Height {Height}");
                 }
-            }
 
-            return bm;
+                Verify.SubsampleRange(subsample);
+
+                int rxmin = rect.XMin * subsample;
+                int rymin = rect.YMin * subsample;
+                int swidth = rect.Width;
+                int sheight = rect.Height;
+                int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
+                
+                bm.Init(sheight, swidth, border);
+                bm.Grays = (1 + (subsample * subsample));
+
+                for (int blitno = 0; blitno < Blits.Length; blitno++)
+                {
+                    JB2Blit pblit = GetBlit(blitno);
+                    ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
+                    ref Bitmap bitmap = ref pshape.Bitmap;
+
+                    // RleData handling decision - implement direct RLE algorithm or rely on Decompress and SIMD optimized Blit
+                    if (bitmap.Data != null && bm.Blit(ref bitmap, pblit.Left - rxmin, (dispy + pblit.Bottom) - rymin, subsample))
+                    {
+                        components.Add((blitno));
+                    }
+                }
+
+                return bm;
+            }
+            finally
+            {
+                int dataLength = bm.Data != null ? bm.Data.Length : 0;
+                JB2EventSource.Log.OnJB2ImageRenderStop(Blits.Length, dataLength, "GetBitmap_Components");
+            }
         }
 
         public PixelMap GetPixelMap(ColorPalette palette, int subsample, int align)
@@ -217,6 +250,8 @@ namespace DjvuNet.JB2
             // by grouping all blits that share the exact same palette color index into a single batch,
             // and performing one bulk pm->blit for that entire layer before moving to the next color.
             // This C# implementation skips that batching and sequentially resolves/draws each blit.
+            // WARNING: Do not uncomment Parallel.For without addressing overlapping writes.
+            // pixelMap.Blit mutates a shared array; parallel execution will cause write-tearing.
             for (int blitno = 0; blitno < Blits.Length; blitno++)
             //Parallel.For(
             //    0,
@@ -228,7 +263,7 @@ namespace DjvuNet.JB2
                 ref JB2Shape pshape = ref GetShape(pblit.ShapeNumber);
                 Pixel color = palette.PaletteColors[palette.BlitColors[blitno]];
 
-                if (pshape.Bitmap != default)
+                if (pshape.Bitmap.Data != null)
                 {
                     pixelMap.Blit(ref pshape.Bitmap, pblit.Left, pblit.Bottom, color);
                 }
@@ -266,13 +301,73 @@ namespace DjvuNet.JB2
             return retval;
         }
 
+        /// <summary>
+        /// Decodes the full JB2 shape and blit payload from the provided stream.
+        /// </summary>
+        /// <param name="gbs">The binary reader positioned at the start of the JB2 stream.</param>
+        /// <param name="zdict">The optional inherited shape dictionary required by this image.</param>
         public override void Decode(IBinaryReader gbs, JB2Dictionary zdict)
         {
+            if (gbs?.BaseStream == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(gbs), "JB2 decoding failed: IBinaryReader or its BaseStream cannot be null.");
+
             Init();
 
-            JB2Decoder codec = new JB2Decoder();
-            codec.Init(gbs, zdict);
-            codec.Code(this);
+            using (JB2Decoder codec = new JB2Decoder())
+            {
+                codec.Init(gbs, zdict);
+                codec.Code(this);
+            }
+        }
+
+        /// <summary>
+        /// Partially decodes the JB2 stream strictly to extract the image dimensions without allocating shapes. 
+        /// The original position of the underlying stream is fully restored upon completion.
+        /// </summary>
+        /// <param name="gbs">The binary reader positioned at the start of the JB2 stream.</param>
+        public void DecodeGeometry(IBinaryReader gbs)
+        {
+            if (gbs?.BaseStream == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(gbs), "JB2 decoding failed: IBinaryReader or its BaseStream cannot be null.");
+
+            Init();
+
+            if (!gbs.BaseStream.CanSeek)
+            {
+                DjvuExceptionUtil.ThrowNotSupported("JB2 decoding failed: DecodeGeometry requires a seekable stream to guarantee position restoration.");
+            }
+            
+            long startPosition = gbs.BaseStream.Position;
+
+            try
+            {
+                using (JB2Decoder codec = new JB2Decoder())
+                {
+                    codec.Init(gbs, null);
+                    codec.CodeGeometry(this);
+                }
+            }
+            finally
+            {
+                if (startPosition != -1)
+                {
+                    gbs.BaseStream.Position = startPosition;
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public override void Encode(IBinaryWriter gbs, JB2Dictionary zdict)
+        {
+            if (gbs?.BaseStream == null)
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(gbs), "JB2 encoding failed: IBinaryWriter or its BaseStream cannot be null.");
+
+            using (JB2Encoder codec = new JB2Encoder())
+            {
+                codec.Init(gbs.BaseStream, zdict);
+                codec.Encode(this);
+                codec.Flush();
+            }
         }
 
         public override void Init()

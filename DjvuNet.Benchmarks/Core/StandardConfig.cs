@@ -12,7 +12,7 @@ using BenchmarkDotNet.Toolchains.InProcess.Emit;
 using DjvuNet.Tests;
 using DjvuNet;
 
-namespace DjvuNet.Benchmarks
+namespace DjvuNet.Benchmarks.Core
 {
     public class StandardConfig : ManualConfig
     {

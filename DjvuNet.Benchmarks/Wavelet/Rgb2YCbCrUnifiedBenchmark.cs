@@ -4,7 +4,9 @@ using BenchmarkDotNet.Configs;
 using DjvuNet.Graphics;
 using DjvuNet.Wavelet;
 
-namespace DjvuNet.Benchmarks
+using DjvuNet.Benchmarks.Core;
+
+namespace DjvuNet.Wavelet.Benchmarks
 {
     [Config(typeof(CustomParallelConfig))]
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByParams)]

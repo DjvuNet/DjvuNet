@@ -92,6 +92,28 @@ namespace DjvuNet.JB2.Tests
             }
         }
 
+        [Theory]
+        [InlineData(@"extracted/test002C_D1868.djbz", @"extracted/test002C_P01.sjbz")]
+        public void JB2Decoder_CodeGeometry(string djbzFileName, string sjbzFileName)
+        {
+            using (JB2Decoder decoder = new JB2Decoder())
+            {
+                byte[] sjbzPayload = File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, sjbzFileName));
+                using (var ms = new MemoryStream(sjbzPayload))
+                using (var reader = new DjvuReader(ms))
+                {
+                    decoder.Init(reader, null);
+                    JB2Image image = new JB2Image();
+                    decoder.CodeGeometry(image);
+
+                    Assert.True(image.Width > 0, "Width not decoded");
+                    Assert.True(image.Height > 0, "Height not decoded");
+                    Assert.Equal(0, image.ShapeCount); // Ensure shapes were skipped
+                    Assert.True(image.Blits.Length == 0); // Ensure blits were skipped
+                }
+            }
+        }
+
         [Fact]
         public void JB2Decoder_Code_RequiredDictOrReset()
         {
@@ -179,7 +201,7 @@ namespace DjvuNet.JB2.Tests
                 {
                     decoder.Init(reader, null);
                     var ex = Assert.Throws<DjvuFormatException>(() => decoder.Code(new JB2Image()));
-                    Assert.Contains("JB2 decoding failed: Missing required start record", ex.Message);
+                    Assert.Contains("JB2 decoding failed: StartOfData record is missing", ex.Message);
                 }
             }
         }
@@ -219,7 +241,7 @@ namespace DjvuNet.JB2.Tests
             using (var decoder = new MockForExceptions { CodeRecordTypeOverrideValue = 11 })
             {
                 var ex = Assert.Throws<DjvuFormatException>(() => decoder.Code(new JB2Image()));
-                Assert.Contains("JB2 decoding failed: Missing required start record", ex.Message);
+                Assert.Contains("JB2 decoding failed: StartOfData record is missing", ex.Message);
             }
         }
 

@@ -1548,7 +1548,7 @@ namespace DjvuNet.DjvuLibre
         /// </summary>
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_get_bitmap", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern bool GetDjvuJb2ImageBitmap(
-            IntPtr handle, int align,
+            IntPtr handle, int subsample, int align,
             out int width, out int height, out int rowsize, out int border,
             IntPtr buffer, int bufferSize);
 

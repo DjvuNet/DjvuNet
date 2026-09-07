@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Configs;
 using DjvuNet.Graphics;
+using DjvuNet.DjvuLibre;
 using DjvuNet.Wavelet;
+using DjvuNet.Benchmarks.Core;
 
-namespace DjvuNet.Benchmarks
+namespace DjvuNet.Wavelet.Benchmarks
 {
     [Config(typeof(CustomParallelConfig))]
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByParams)]
