@@ -156,17 +156,17 @@ namespace DjvuNet.Wavelet
         /// <param name="p"></param>
         /// <param name="w"></param>
         /// <param name="h"></param>
-        /// <param name="rowsize"></param>
+        /// <param name="rowSize"></param>
         /// <param name="begin"></param>
         /// <param name="end"></param>
-        public static unsafe void Backward(short* p, int w, int h, int rowsize, int begin, int end)
+        public static unsafe void Backward(short* p, int w, int h, int rowSize, int begin, int end)
         {
             FilterBegin(w, h);
 
             for (int scale = begin >> 1; scale >= end; scale >>= 1)
             {
-                FilterBv(p, w, h, rowsize, scale);
-                FilterBh(p, w, h, rowsize, scale);
+                FilterBv(p, w, h, rowSize, scale);
+                FilterBh(p, w, h, rowSize, scale);
             }
 
             FilterEnd();

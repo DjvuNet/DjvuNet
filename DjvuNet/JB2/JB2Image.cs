@@ -243,7 +243,8 @@ namespace DjvuNet.JB2
             int sheight = ((Height + subsample) - 1) / subsample;
             int border = (((swidth + align) - 1) & ~(align - 1)) - swidth;
 
-            PixelMap pixelMap = new PixelMap(new sbyte[swidth*sheight*3], swidth, sheight);
+            PixelMap pixelMap = new PixelMap();
+            pixelMap.Init(sheight, swidth, Graphics.Pixel.WhitePixel);
 
             // NOTE (Optimization Opportunity): 
             // The C++ reference implementation (DjVuImage::get_pixmap) optimizes this rendering 

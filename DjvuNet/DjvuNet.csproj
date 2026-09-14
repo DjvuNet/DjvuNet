@@ -60,6 +60,7 @@
     <Compile Include="Compression\IDataCoderFactory.cs" />
     <Compile Include="Compression\ZPCoderFactory.cs" />
     <Compile Include="Compression\ZPTable.cs" />
+    <Compile Include="Configuration\DjvuOptions.cs" />
     <Compile Include="Configuration\DjvuSettings.cs" />
     <Compile Include="DataChunks\Annotations\Annotation.cs" />
     <Compile Include="DataChunks\Annotations\AnnotationChunk.cs" />

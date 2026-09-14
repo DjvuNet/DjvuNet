@@ -64,8 +64,10 @@ if ($gitTopLevel) {
 }
 
 if ($isGitRoot) {
-    Write-Host "`n--- Git Status ---"
-    git status
+    Write-Host "`n--- Git Branch ---"
+    $branch = git branch --show-current
+    if ([string]::IsNullOrEmpty($branch)) { $branch = git rev-parse --short HEAD }
+    Write-Host "Branch: $branch"
 
     Write-Host "`n--- Git Diff HEAD (Summary) ---"
     git diff --stat HEAD
@@ -75,7 +77,21 @@ if ($isGitRoot) {
     Write-Host "  -> Full diff dumped to: repo_status_diff.patch"
 
     Write-Host "`n--- Recent Commits (Local) ---"
-    git log -n 3
+    $hashes = git log -n 3 --format="%H"
+    foreach ($h in $hashes) {
+        git log -1 --format="commit %h%nAuthor: %an <%ae>%nDate:   %ad" $h
+        Write-Host ""
+        $commitMsg = (git log -1 --format="%B" $h) -join "`n"
+        $paragraphs = $commitMsg -split '\n\s*\n' | Where-Object { $_.Trim() -ne '' }
+        $takeCount = [math]::Min(3, $paragraphs.Count)
+        for ($i = 0; $i -lt $takeCount; $i++) {
+            $paragraphs[$i] -split '\n' | ForEach-Object { Write-Host "    $_" }
+            Write-Host ""
+        }
+        if ($paragraphs.Count -gt 3) {
+            Write-Host "    ... (remaining paragraphs omitted for brevity)`n"
+        }
+    }
 
     Write-Host "`n--- Recent Tags (Since $sinceDate) ---"
     $tags = git for-each-ref --sort=-creatordate --format="%(creatordate:iso8601)|%(refname:short)" refs/tags

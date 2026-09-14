@@ -922,37 +922,41 @@ namespace DjvuNet
             }
         }
 
-        //internal DjvuNet.Graphics.IMap GetForegroundMap()
-        //{
-        //    lock (LoadingLock)
-        //    {
-        //        DjvuNet.Graphics.IMap result = null;
-        //        JB2Image jb2image = null;
-        //        IInterWavePixelMap iwPixelMap = _Page.ForegroundIWPixelMap;
+        internal PixelMap GetForegroundMap()
+        {
+            lock (LoadingLock)
+            {
+                PixelMap result = null;
+                JB2Image jb2image = null;
+                IInterWavePixelMap iwPixelMap = _Page.ForegroundIWPixelMap;
 
-        //        if (iwPixelMap != null)
-        //        {
-        //            result = _Page.ForegroundIWPixelMap.GetPixelMap();
-        //        }
-        //        else if ((jb2image = _Page.ForegroundJB2Image) != null)
-        //        {
-        //            if (_Page.ForegroundPalette == null)
-        //            {
-        //                result = jb2image.GetBitmap(1, GBitmap.BorderSize);
-        //            }
-        //            else
-        //            {
-        //                result = jb2image.GetPixelMap(_Page.ForegroundPalette, 1, 16);
-        //            }
-        //        }
-        //        else if (iwPixelMap == null && jb2image == null)
-        //        {
-        //            result = new GBitmap(_Page.Height, _Page.Width, GBitmap.BorderSize);
-        //        }
+                if (iwPixelMap != null)
+                {
+                    result = _Page.ForegroundIWPixelMap.GetPixelMap();
+                }
+                else if ((jb2image = _Page.ForegroundJB2Image) != null)
+                {
+                    if (_Page.ForegroundPalette == null)
+                    {
+                        GBitmap gbitmap = jb2image.GetBitmap(1, GBitmap.BorderSize);
+                        result = new PixelMap();
+                        result.Init(gbitmap.Height, gbitmap.Width, Graphics.Pixel.WhitePixel);
+                        result.Blit(ref gbitmap, 0, 0, Graphics.Pixel.BlackPixel);
+                    }
+                    else
+                    {
+                        result = jb2image.GetPixelMap(_Page.ForegroundPalette, 1, 16);
+                    }
+                }
+                else if (iwPixelMap == null && jb2image == null)
+                {
+                    result = new PixelMap();
+                    result.Init(_Page.Height, _Page.Width, Graphics.Pixel.WhitePixel);
+                }
 
-        //        return result;
-        //    }
-        //}
+                return result;
+            }
+        }
 
         internal Bitmap GetMaskImage(int subsample, bool resizeImage = false)
         {

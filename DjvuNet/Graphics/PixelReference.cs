@@ -8,11 +8,8 @@ namespace DjvuNet.Graphics
     {
         #region Private Members
 
-        private int _blueOffset;
-        private int _greenOffset;
         private int _ncolors;
         private PixelMap _parent;
-        private int _redOffset;
         private int _offset;
 
         #endregion Private Members
@@ -27,29 +24,11 @@ namespace DjvuNet.Graphics
             internal set { _ncolors = value; }
         }
 
-        public int RedOffset
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _redOffset; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal set { _redOffset = value; }
-        }
+        public const int BlueOffset = 0;
 
-        public int GreenOffset
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _greenOffset; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal set { _greenOffset = value; }
-        }
+        public const int GreenOffset = 1;
 
-        public int BlueOffset
-        {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _blueOffset; }
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            internal set { _blueOffset = value; }
-        }
+        public const int RedOffset = 2;
 
         public PixelMap Parent
         {
@@ -75,10 +54,10 @@ namespace DjvuNet.Graphics
         public sbyte Blue
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _parent.Data[_offset + _blueOffset]; }
+            get { return _parent.Data[_offset + BlueOffset]; }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { _parent.Data[_offset + _blueOffset] = value; }
+            set { _parent.Data[_offset + BlueOffset] = value; }
         }
 
         #endregion Blue
@@ -91,10 +70,10 @@ namespace DjvuNet.Graphics
         public sbyte Green
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _parent.Data[_offset + _greenOffset]; }
+            get { return _parent.Data[_offset + GreenOffset]; }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { _parent.Data[_offset + _greenOffset] = value; }
+            set { _parent.Data[_offset + GreenOffset] = value; }
         }
 
         #endregion Green
@@ -107,10 +86,10 @@ namespace DjvuNet.Graphics
         public sbyte Red
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _parent.Data[_offset + _redOffset]; }
+            get { return _parent.Data[_offset + RedOffset]; }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            set { _parent.Data[_offset + _redOffset] = value; }
+            set { _parent.Data[_offset + RedOffset] = value; }
         }
 
         #endregion Red
@@ -146,10 +125,7 @@ namespace DjvuNet.Graphics
         private void Initialize(PixelMap parent)
         {
             _parent = parent;
-            ColorNumber = parent.BytesPerPixel;
-            _blueOffset = parent.BlueOffset;
-            _greenOffset = parent.GreenOffset;
-            _redOffset = parent.RedOffset;
+            ColorNumber = PixelMap.BytesPerPixel;
         }
 
         #endregion Constructors
@@ -164,8 +140,7 @@ namespace DjvuNet.Graphics
         /// </param>
         public void SetPixels(IPixelReference source, int length)
         {
-            if (source.ColorNumber != _ncolors || source.BlueOffset != _blueOffset ||
-                source.GreenOffset != _greenOffset || source.RedOffset != _redOffset)
+            if (source.ColorNumber != _ncolors)
             {
                 while (length-- > 0)
                 {
@@ -299,9 +274,9 @@ namespace DjvuNet.Graphics
             {
                 for (int i = off, j = (_parent.RowOffset(y0) + x) * _ncolors, k = w; k > 0; k--, j += _ncolors)
                 {
-                    pixels[i++] = unchecked((int)0xff000000) | (0xff0000 & (_parent.Data[j + _redOffset] << 16)) |
-                                  (0xff00 & (_parent.Data[j + _greenOffset] << 8)) |
-                                  (0xff & _parent.Data[j + _blueOffset]);
+                    pixels[i++] = unchecked((int)0xff000000) | (0xff0000 & (_parent.Data[j + RedOffset] << 16)) |
+                                  (0xff00 & (_parent.Data[j + GreenOffset] << 8)) |
+                                  (0xff & _parent.Data[j + BlueOffset]);
                 }
             }
         }

@@ -236,8 +236,8 @@ namespace DjvuNet.Graphics
             }
 
             // Compute rectangles
-            Rectangle required_red = new Rectangle();
-            Rectangle sourceRect = CreateRectangles(ref targetRect, ref required_red);
+            Rectangle requiredRed = new Rectangle();
+            Rectangle sourceRect = CreateRectangles(ref targetRect, ref requiredRed);
 
             if ( (srcRect.XMin > sourceRect.XMin) || (srcRect.YMin > sourceRect.YMin)
               || (srcRect.XMax < sourceRect.XMax) || (srcRect.YMax < sourceRect.YMax))
@@ -248,25 +248,25 @@ namespace DjvuNet.Graphics
             // Adjust output pixmap
             if ((targetRect.Width != (int)targetMap.Width) || (targetRect.Height != (int)targetMap.Height))
             {
-                targetMap.Init(targetRect.Height, targetRect.Width, null);
+                targetMap.Init(targetRect.Height, targetRect.Width);
             }
 
             // Prepare temp stuff
-            int bufw = required_red.Width;
+            int bufw = requiredRed.Width;
             Pixel[] lbuffer = new Pixel[bufw + 2];
 
             try
             {
                 if ((_XShift > 0) || (_YShift > 0))
                 {
-                    _PixelMap1 = new PixelMap().Init(1, bufw, null);
-                    _PixelMap2 = new PixelMap().Init(2, bufw, null);
+                    _PixelMap1 = new PixelMap().Init(1, bufw);
+                    _PixelMap2 = new PixelMap().Init(2, bufw);
                     _L1 = _L2 = -1;
                 }
 
-                IPixelReference upper = srcMap.CreateGPixelReference(0, 0);
-                IPixelReference lower = srcMap.CreateGPixelReference(0, 0);
-                IPixelReference dest = targetMap.CreateGPixelReference(0, 0);
+                sbyte[] lowerData = null, upperData = null;
+                int lowerOffset = 0, upperOffset = 0;
+                sbyte[] destData = targetMap.Data;
 
                 // Loop on output lines
                 for (int y = targetRect.YMin; y < targetRect.YMax; y++)
@@ -280,60 +280,54 @@ namespace DjvuNet.Graphics
                         // Obtain upper and lower line in reduced image
                         if ((_XShift > 0) || (_YShift > 0))
                         {
-                            lower = GetLine(fy1, required_red, srcRect, srcMap);
-                            upper = GetLine(fy2, required_red, srcRect, srcMap);
+                            PixelMap lowerMap = GetLine(fy1, requiredRed, srcRect, srcMap);
+                            lowerData = lowerMap.Data;
+                            lowerOffset = 0;
+                            
+                            PixelMap upperMap = GetLine(fy2, requiredRed, srcRect, srcMap);
+                            upperData = upperMap.Data;
+                            upperOffset = 0;
                         }
                         else
                         {
-                            int dx = required_red.XMin - srcRect.XMin;
+                            int dx = requiredRed.XMin - srcRect.XMin;
 
-                            if (required_red.YMin > fy1)
+                            if (requiredRed.YMin > fy1)
                             {
-                                fy1 = required_red.YMin;
+                                fy1 = requiredRed.YMin;
                             }
 
-                            if (required_red.YMax <= fy2)
+                            if (requiredRed.YMax <= fy2)
                             {
-                                fy2 = required_red.YMax - 1;
+                                fy2 = requiredRed.YMax - 1;
                             }
 
-                            lower.SetOffset(fy1 - srcRect.YMin, dx);
-                            // srcMap.CreateGPixelReference(fy1 - srcRect.YMin, dx);
-                            upper.SetOffset(fy2 - srcRect.YMin, dx);
-                             // srcMap.CreateGPixelReference(fy2 - srcRect.YMin, dx);
+                            lowerData = srcMap.Data;
+                            lowerOffset = (srcMap.RowOffset(fy1 - srcRect.YMin) + dx) * PixelMap.BytesPerPixel;
+                            
+                            upperData = srcMap.Data;
+                            upperOffset = (srcMap.RowOffset(fy2 - srcRect.YMin) + dx) * PixelMap.BytesPerPixel;
                         }
 
                         // Compute line
                         int idest = 1;
                         short[] deltas = interp[fy & FRACMASK];
 
-                        unsafe
+                        for (int edest = idest + bufw; idest < edest; upperOffset += PixelMap.BytesPerPixel, lowerOffset += PixelMap.BytesPerPixel)
                         {
-                            for (int edest = idest + bufw; idest < edest; upper.IncOffset(), lower.IncOffset())
-                            {
-                                Pixel destPix = lbuffer[idest++];
+                            byte uB = (byte)upperData[upperOffset + PixelMap.BlueOffset];
+                            byte lB = (byte)lowerData[lowerOffset + PixelMap.BlueOffset];
+                            byte b = (byte)(lB + deltas[(256 + uB) - lB]);
 
-                                int color = 0;
-                                sbyte* colorPtr = (sbyte*)&color;
-                                // Skip alpha and set pointer to Blue
-                                colorPtr++;
-                                *colorPtr = lower.Blue;
-                                *colorPtr += (sbyte)deltas[(256 + upper.Blue) - *colorPtr];
+                            byte uG = (byte)upperData[upperOffset + PixelMap.GreenOffset];
+                            byte lG = (byte)lowerData[lowerOffset + PixelMap.GreenOffset];
+                            byte g = (byte)(lG + deltas[(256 + uG) - lG]);
 
-                                // Set pointer to Green
-                                colorPtr++;
-                                *colorPtr = lower.Green;
-                                *colorPtr += (sbyte)deltas[(256 + upper.Green) - *colorPtr];
+                            byte uR = (byte)upperData[upperOffset + PixelMap.RedOffset];
+                            byte lR = (byte)lowerData[lowerOffset + PixelMap.RedOffset];
+                            byte r = (byte)(lR + deltas[(256 + uR) - lR]);
 
-                                // Set pointer to Red
-                                colorPtr++;
-                                *colorPtr = lower.Red;
-                                *colorPtr += (sbyte)deltas[(256 + upper.Red) - *colorPtr];
-
-                                //Pixel d = (Pixel) lower.ToPixel();
-                                //destPix.SetBGR(d);
-                                destPix.SetBGR(*colorPtr);
-                            }
+                            lbuffer[idest++] = new Pixel((sbyte)b, (sbyte)g, (sbyte)r);
                         }
                     }
 
@@ -342,42 +336,31 @@ namespace DjvuNet.Graphics
                         // Prepare for side effects
                         lbuffer[0] = lbuffer[1];
 
-                        // lbuffer[bufw] = lbuffer[bufw];
-                        int line = 1 - required_red.XMin;
-                        dest.SetOffset(y - targetRect.YMin, 0);
-                            //= targetMap.CreateGPixelReference(y - targetRect.YMin, 0);
+                        int line = 1 - requiredRed.XMin;
+                        int destOffset = targetMap.RowOffset(y - targetRect.YMin) * PixelMap.BytesPerPixel;
 
                         // Loop horizontally
-                        unsafe
+                        for (int x = targetRect.XMin; x < targetRect.XMax; x++)
                         {
-                            for (int x = targetRect.XMin; x < targetRect.XMax; x++)
-                            {
-                                int n = _HCoord[x];
-                                int lowerl = line + (n >> FRACBITS);
-                                Pixel lower0 = lbuffer[lowerl];
-                                Pixel lower1 = lbuffer[lowerl + 1];
-                                short[] deltas = interp[n & FRACMASK];
+                            int n = _HCoord[x];
+                            int lowerl = line + (n >> FRACBITS);
+                            Pixel lower0 = lbuffer[lowerl];
+                            Pixel lower1 = lbuffer[lowerl + 1];
+                            short[] hDeltas = interp[n & FRACMASK];
 
-                                int color = 0;
-                                sbyte* colorPtr = (sbyte*) &color;
-                                // Skip alpha and set pointer to Blue
-                                colorPtr++;
-                                *colorPtr = lower0.Blue;
-                                *colorPtr += (sbyte) deltas[(256 + lower1.Blue) - *colorPtr];
+                            byte l0B = (byte)lower0.Blue;
+                            byte b = (byte)(l0B + hDeltas[(256 + (byte)lower1.Blue) - l0B]);
+                            
+                            byte l0G = (byte)lower0.Green;
+                            byte g = (byte)(l0G + hDeltas[(256 + (byte)lower1.Green) - l0G]);
+                            
+                            byte l0R = (byte)lower0.Red;
+                            byte r = (byte)(l0R + hDeltas[(256 + (byte)lower1.Red) - l0R]);
 
-                                // Set pointer to Green
-                                colorPtr++;
-                                *colorPtr = lower0.Green;
-                                *colorPtr += (sbyte) deltas[(256 + lower1.Green) - *colorPtr];
-
-                                // Set pointer to Red
-                                colorPtr++;
-                                *colorPtr = lower0.Red;
-                                *colorPtr += (sbyte) deltas[(256 + lower1.Red) - *colorPtr];
-
-                                dest.SetBGR(*colorPtr);
-                                dest.IncOffset();
-                            }
+                            destData[destOffset + PixelMap.BlueOffset] = (sbyte)b;
+                            destData[destOffset + PixelMap.GreenOffset] = (sbyte)g;
+                            destData[destOffset + PixelMap.RedOffset] = (sbyte)r;
+                            destOffset += PixelMap.BytesPerPixel;
                         }
                     }
                 }
@@ -418,7 +401,7 @@ namespace DjvuNet.Graphics
             }
         }
 
-        internal IPixelReference GetLine(int fy, Rectangle redRect, Rectangle srcRect, PixelMap srcMap)
+        internal PixelMap GetLine(int fy, Rectangle redRect, Rectangle srcRect, PixelMap srcMap)
         {
             if (fy < redRect.YMin)
             {
@@ -432,12 +415,12 @@ namespace DjvuNet.Graphics
             // Cached line
             if (fy == _L2)
             {
-                return _PixelMap2.CreateGPixelReference(0);
+                return _PixelMap2;
             }
 
             if (fy == _L1)
             {
-                return _PixelMap1.CreateGPixelReference(0);
+                return _PixelMap1;
             }
 
             // Shift
@@ -464,11 +447,12 @@ namespace DjvuNet.Graphics
             int rnd = 1 << (div - 1);
             int rnd2 = rnd + rnd;
 
-            var inp1 = srcMap.CreateGPixelReference(0);
-            var ip = p.CreateGPixelReference(0);
+            sbyte[] srcData = srcMap.Data;
+            sbyte[] pData = p.Data;
+            int pOffset = 0;
 
             // Compute averages
-            for (int x = line.XMin; x < line.XMax; x += sw, ip.IncOffset())
+            for (int x = line.XMin; x < line.XMax; x += sw, pOffset += PixelMap.BytesPerPixel)
             {
                 int r = 0;
                 int g = 0;
@@ -486,31 +470,35 @@ namespace DjvuNet.Graphics
                 for (int sy = 0; sy < sy1; sy++, inp0 += rowsize)
                 {
                     int sx1 = x + sw;
-                    inp1.SetOffset(inp0);
+                    int inp1Offset = inp0 * PixelMap.BytesPerPixel;
 
                     if (sx1 > line.XMax)
                     {
                         sx1 = line.XMax;
                     }
 
-                    for (int sx = sx1 - x; sx-- > 0; s++, inp1.IncOffset())
+                    for (int sx = sx1 - x; sx-- > 0; s++, inp1Offset += PixelMap.BytesPerPixel)
                     {
-                        r += inp1.Red;
-                        g += inp1.Green;
-                        b += inp1.Blue;
+                        r += (byte)srcData[inp1Offset + PixelMap.RedOffset];
+                        g += (byte)srcData[inp1Offset + PixelMap.GreenOffset];
+                        b += (byte)srcData[inp1Offset + PixelMap.BlueOffset];
                     }
                 }
 
                 if (s == rnd2)
                 {
-                    ip.SetBGR((b + rnd) >> div, (g + r) >> div, (r + rnd) >> div);
+                    pData[pOffset + PixelMap.BlueOffset] = (sbyte)((b + rnd) >> div);
+                    pData[pOffset + PixelMap.GreenOffset] = (sbyte)((g + rnd) >> div);
+                    pData[pOffset + PixelMap.RedOffset] = (sbyte)((r + rnd) >> div);
                 }
                 else
                 {
-                    ip.SetBGR((b + (s / 2)) / 2, (g + (s / 2)) / s, (r + (s / 2)) / s);
+                    pData[pOffset + PixelMap.BlueOffset] = (sbyte)((b + (s / 2)) / s);
+                    pData[pOffset + PixelMap.GreenOffset] = (sbyte)((g + (s / 2)) / s);
+                    pData[pOffset + PixelMap.RedOffset] = (sbyte)((r + (s / 2)) / s);
                 }
             }
-            return _PixelMap2.CreateGPixelReference(0);
+            return _PixelMap2;
         }
 
         #endregion

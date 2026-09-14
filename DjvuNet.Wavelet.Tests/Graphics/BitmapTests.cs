@@ -3107,7 +3107,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Contains("Mismatch in data size and Bitmap dimensions", ex.Message);
         }
 
-        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly."), Trait("Category", "Skip")]
         public void Init_SourceBitmap_VerifyIsAllocatedOnPinnedObjectHeap()
         {
             GC.Collect(2, GCCollectionMode.Forced, blocking: true);
@@ -3141,7 +3141,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(arrayAllocationSize * 2, pohSizeAfter - pohSizeBefore);
         }
 
-        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly."), Trait("Category", "Skip")]
         public void Init_SourceBitmapRect_VerifyIsAllocatedOnPinnedObjectHeap()
         {
             GC.Collect(2, GCCollectionMode.Forced, blocking: true);
@@ -3182,7 +3182,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(arrayAllocationSize, pohSizeAfter - pohSizeBefore);
         }
 
-        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly."), Trait("Category", "Skip")]
         public void Init_HeightWidth_VerifyIsAllocatedOnPinnedObjectHeap()
         {
             GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);
@@ -3211,7 +3211,7 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(arrayAllocationSize, pohSizeAfter - pohSizeBefore);
         }
 
-        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly.")]
+        [Fact(Skip = "Flaky Init test - only run in group with other Init tests excluding all other tests in assembly."), Trait("Category", "Skip")]
         public void Init_DataArray_VerifyIsAllocatedOnPinnedObjectHeap()
         {
             GC.Collect(2, GCCollectionMode.Forced, blocking: true, compacting: true);

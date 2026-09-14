@@ -650,7 +650,7 @@ namespace DjvuNet.Graphics.Tests
         // 3. Both Axes Overflow simultaneously
         [InlineData(-2000000000, -2000000000, 2000000000, 2000000000)]
         // 4. Exact Int32.MaxValue boundary + 1 on X-Axis (Span = 2,147,483,648)
-        [InlineData(0, 0, int.MaxValue, 10, Skip = "Cannot initialize array directly with int.MaxValue + 1 if cast is unchecked, simulating memory instead")]
+        [InlineData(0, 0, int.MaxValue, 10, Skip = "Cannot initialize array directly with int.MaxValue + 1 if cast is unchecked, simulating memory instead"), Trait("Category", "Skip")]
         public void Empty_GeometricDistanceOverflow_EvaluatesToTrue(int xMin, int yMin, int xMax, int yMax)
         {
             // We simulate a corrupted struct loaded from a binary stream (e.g. invalid DjVu chunk).

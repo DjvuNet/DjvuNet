@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using DjvuNet.DjvuLibre;
 using DjvuNet.Errors;
 using DjvuNet.Tests;
+using DjvuNet.DataChunks;
 using Xunit;
 
 namespace DjvuNet.DjvuLibre.Tests
@@ -619,6 +620,448 @@ namespace DjvuNet.DjvuLibre.Tests
                     DjvuMarshal.FreeHGlobal(outDataNonMark);
                 if (ptrJB2Img != IntPtr.Zero)
                     NativeMethods.FreeDjvuJb2Image(ptrJB2Img);
+            }
+        }
+
+        [Theory]
+        [InlineData("test023C_P01.sjbz")]
+        [InlineData("test033C_P01.sjbz")]
+        [InlineData("test075C_P01.sjbz")]
+        public void GetJb2ImageRleMask(string sjbzFileName)
+        {
+            string djbzFileName = Util.GetDjbzForSjbz(sjbzFileName);
+
+            string sjbzFilePath = Path.Combine(Util.ArtifactsDataPath, "extracted", sjbzFileName);
+            byte[] sjbzPayload = File.ReadAllBytes(sjbzFilePath);
+
+            byte[] djbzPayload = null;
+            if (!string.IsNullOrEmpty(djbzFileName))
+            {
+                string djbzFilePath = Path.Combine(Util.ArtifactsDataPath, djbzFileName);
+                djbzPayload = File.ReadAllBytes(djbzFilePath);
+            }
+
+            IntPtr nativeImage = IntPtr.Zero;
+
+            try
+            {
+                unsafe
+                {
+                    if (djbzPayload == null)
+                    {
+                        fixed (byte* pSjbz = sjbzPayload)
+                        {
+                            bool imgResult = NativeMethods.CreateDjvuJb2ImageFromChunk((IntPtr)pSjbz, sjbzPayload.Length, IntPtr.Zero, 0, out nativeImage);
+                            Assert.True(imgResult);
+                        }
+                    }
+                    else
+                    {
+                        fixed (byte* pSjbz = sjbzPayload)
+                        fixed (byte* pDjbz = djbzPayload)
+                        {
+                            bool imgResult = NativeMethods.CreateDjvuJb2ImageFromChunk((IntPtr)pSjbz, sjbzPayload.Length, (IntPtr)pDjbz, djbzPayload.Length, out nativeImage);
+                            Assert.True(imgResult);
+                        }
+                    }
+                }
+
+                bool result1 = NativeMethods.GetJb2ImageRleMask(nativeImage, 1, 1, IntPtr.Zero, 0, out int maskSize);
+                Assert.True(result1);
+                Assert.True(maskSize > 0);
+
+                IntPtr buffer = DjvuMarshal.AllocHGlobal((uint)maskSize);
+                try
+                {
+                    bool result2 = NativeMethods.GetJb2ImageRleMask(nativeImage, 1, 1, buffer, maskSize, out _);
+                    Assert.True(result2);
+                }
+                finally
+                {
+                    DjvuMarshal.FreeHGlobal(buffer);
+                }
+            }
+            finally
+            {
+                if (nativeImage != IntPtr.Zero)
+                    NativeMethods.FreeDjvuJb2Image(nativeImage);
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(75)]
+        public void GetPageBackgroundPpm(int fileIndex)
+        {
+            using (DjvuDocumentInfo document = DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(fileIndex)))
+            using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+            {
+                Assert.NotEqual(IntPtr.Zero, page.Page);
+                DjvuRectangle pageRect = new DjvuNet.Graphics.Rectangle(0, 0, page.Width, page.Height);
+                DjvuRectangle renderRect = pageRect;
+
+                bool result1 = NativeMethods.GetPageBackgroundPpm(page.Page, ref renderRect, ref pageRect, IntPtr.Zero, 0, out int ppmSize);
+                Assert.True(result1);
+                
+                if (ppmSize > 0)
+                {
+                    IntPtr buffer = DjvuMarshal.AllocHGlobal((uint)ppmSize);
+                    try
+                    {
+                        bool result2 = NativeMethods.GetPageBackgroundPpm(page.Page, ref renderRect, ref pageRect, buffer, ppmSize, out ppmSize);
+                        Console.WriteLine($"Background Image ppm: test0{fileIndex}C.djvu page 1 passed {result2}: PPM buffer size {ppmSize:###\' \'###\' \'###\' \'###}");
+                        Assert.True(result2);
+                    }
+                    finally
+                    {
+                        DjvuMarshal.FreeHGlobal(buffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(75)]
+        public void GetPageForegroundPpm(int fileIndex)
+        {
+            using (DjvuDocumentInfo document = DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(fileIndex)))
+            using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+            {
+                Assert.NotEqual(IntPtr.Zero, page.Page);
+                DjvuRectangle pageRect = new DjvuNet.Graphics.Rectangle(0, 0, page.Width, page.Height);
+                DjvuRectangle renderRect = pageRect;
+
+                bool result1 = NativeMethods.GetPageForegroundPpm(page.Page, ref renderRect, ref pageRect, IntPtr.Zero, 0, out int ppmSize);
+                Assert.True(result1);
+                
+                if (ppmSize > 0)
+                {
+                    IntPtr buffer = DjvuMarshal.AllocHGlobal((uint)ppmSize);
+                    try
+                    {
+                        bool result2 = NativeMethods.GetPageForegroundPpm(page.Page, ref renderRect, ref pageRect, buffer, ppmSize, out ppmSize);
+                        Console.WriteLine($"Foreground Image ppm: test0{fileIndex}C.djvu page 1 passed {result2}: PPM buffer size {ppmSize:###\' \'###\' \'###\' \'###}");
+                        Assert.True(result2);
+                    }
+                    finally
+                    {
+                        DjvuMarshal.FreeHGlobal(buffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(75)]
+        public void GetPageImagePpm(int fileIndex)
+        {
+            using (DjvuDocumentInfo document = DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(fileIndex)))
+            using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+            {
+                Assert.NotEqual(IntPtr.Zero, page.Page);
+                DjvuRectangle pageRect = new DjvuNet.Graphics.Rectangle(0, 0, page.Width, page.Height);
+                DjvuRectangle renderRect = pageRect;
+
+                bool result1 = NativeMethods.GetPageImagePpm(page.Page, ref renderRect, ref pageRect, IntPtr.Zero, 0, out int ppmSize);
+                Assert.True(result1);
+                
+                if (ppmSize > 0)
+                {
+                    IntPtr buffer = DjvuMarshal.AllocHGlobal((uint)ppmSize);
+                    try
+                    {
+                        bool result2 = NativeMethods.GetPageImagePpm(page.Page, ref renderRect, ref pageRect, buffer, ppmSize, out ppmSize);
+                        Console.WriteLine($"DjvuPage Image ppm: test0{fileIndex}C.djvu page 1 passed {result2}: PPM buffer size {ppmSize:###\' \'###\' \'###\' \'###}");
+                        Assert.True(result2);
+                    }
+                    finally
+                    {
+                        DjvuMarshal.FreeHGlobal(buffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(75)]
+        public void GetPageBackgroundData(int fileIndex)
+        {
+            using (DjvuDocumentInfo document = DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(fileIndex)))
+            using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+            {
+                Assert.NotEqual(IntPtr.Zero, page.Page);
+                DjvuRectangle pageRect = new DjvuNet.Graphics.Rectangle(0, 0, page.Width, page.Height);
+                DjvuRectangle renderRect = pageRect;
+
+                bool result1 = NativeMethods.GetPageBackgroundData(page.Page, ref renderRect, ref pageRect, out int width, out int height, out int rawSize, IntPtr.Zero, 0);
+                Assert.True(result1);
+
+                if (rawSize > 0)
+                {
+                    Assert.Equal(page.Width, width);
+                    Assert.Equal(page.Height, height);
+                    
+                    IntPtr rawBuffer = DjvuMarshal.AllocHGlobal((uint)rawSize);
+                    try
+                    {
+                        bool result2 = NativeMethods.GetPageBackgroundData(page.Page, ref renderRect, ref pageRect, out width, out height, out rawSize, rawBuffer, rawSize);
+                        Console.WriteLine($"Background Image Data: test0{fileIndex}C.djvu page 1 passed {result2}: width: {width}, height: {height}, buffer size {rawSize:###\' \'###\' \'###\' \'###}");
+                        Assert.True(result2);
+                    }
+                    finally
+                    {
+                        DjvuMarshal.FreeHGlobal(rawBuffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(75)]
+        public void GetPageForegroundData(int fileIndex)
+        {
+            using (DjvuDocumentInfo document = DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(fileIndex)))
+            using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+            {
+                Assert.NotEqual(IntPtr.Zero, page.Page);
+                DjvuRectangle pageRect = new DjvuNet.Graphics.Rectangle(0, 0, page.Width, page.Height);
+                DjvuRectangle renderRect = pageRect;
+
+                bool result1 = NativeMethods.GetPageForegroundData(page.Page, ref renderRect, ref pageRect, out int width, out int height, out int outputSize, IntPtr.Zero, 0);
+                Assert.True(result1);
+
+                if (outputSize > 0)
+                {
+                    Assert.Equal(page.Width, width);
+                    Assert.Equal(page.Height, height);
+                    
+                    IntPtr rawBuffer = DjvuMarshal.AllocHGlobal((uint)outputSize);
+                    try
+                    {
+                        bool result2 = NativeMethods.GetPageForegroundData(page.Page, ref renderRect, ref pageRect, out _, out _, out _, rawBuffer, outputSize);
+                        Console.WriteLine($"Foreground Image Data: test0{fileIndex}C.djvu page 1 passed {result2}: width: {width}, height: {height}, buffer size {outputSize:###\' \'###\' \'###\' \'###}");
+
+                        Assert.True(result2);
+                    }
+                    finally
+                    {
+                        DjvuMarshal.FreeHGlobal(rawBuffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(75)]
+        public void GetPageImageData(int fileIndex)
+        {
+            using (DjvuDocumentInfo document = DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(fileIndex)))
+            using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+            {
+                Assert.NotEqual(IntPtr.Zero, page.Page);
+                DjvuRectangle pageRect = new DjvuNet.Graphics.Rectangle(0, 0, page.Width, page.Height);
+                DjvuRectangle renderRect = pageRect;
+
+                bool result1 = NativeMethods.GetPageImageData(page.Page, ref renderRect, ref pageRect, out int width, out int height, out int outputSize, IntPtr.Zero, 0);
+                Assert.True(result1);
+
+                if (outputSize > 0)
+                {
+                    Assert.Equal(page.Width, width);
+                    Assert.Equal(page.Height, height);
+                    
+                    IntPtr rawBuffer = DjvuMarshal.AllocHGlobal((uint)outputSize);
+                    try
+                    {
+                        bool result2 = NativeMethods.GetPageImageData(page.Page, ref renderRect, ref pageRect, out _, out _, out _, rawBuffer, outputSize);
+                        Console.WriteLine($"DjvuPage Image Data: test0{fileIndex}C.djvu page 1 passed {result2}: width: {width}, height: {height}, buffer size {outputSize:###\' \'###\' \'###\' \'###}");
+                        Assert.True(result2);
+                    }
+                    finally
+                    {
+                        DjvuMarshal.FreeHGlobal(rawBuffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(75)]
+        public void GetIW44RawPixmap_ExtractsRawBackground(int fileIndex)
+        {
+            using (DjvuDocument doc = Util.GetTestDocument(fileIndex, out int _))
+            {
+                DjvuPage page = (DjvuPage)doc.Pages[0];
+                List<BG44Chunk> bg44Chunks = new List<BG44Chunk>();
+
+                foreach (var chunk in page.PageForm.Children)
+                {
+                    if (chunk.ChunkType == ChunkType.BG44)
+                    {
+                        bg44Chunks.Add((BG44Chunk)chunk);
+                    }
+                    else if (chunk is DjvuFormElement form)
+                    {
+                        foreach (var subChunk in form.Children)
+                        {
+                            if (subChunk.ChunkType == ChunkType.BG44)
+                            {
+                                bg44Chunks.Add((BG44Chunk)subChunk);
+                            }
+                        }
+                    }
+                }
+
+                if (bg44Chunks.Count == 0) return;
+
+                IntPtr nativeHandle = IntPtr.Zero;
+                IntPtr rawBuffer = IntPtr.Zero;
+
+                try
+                {
+                    for (int chunkIdx = 0; chunkIdx < bg44Chunks.Count; chunkIdx++)
+                    {
+                        BG44Chunk bg44 = bg44Chunks[chunkIdx];
+                        byte[] rawChunkBytes;
+                        using (var memoryReader = bg44.Reader.CloneReaderToMemory(bg44.DataOffset, bg44.Length))
+                        {
+                            rawChunkBytes = memoryReader.ReadBytes((int)bg44.Length);
+                        }
+
+                        unsafe
+                        {
+                            fixed (byte* pChunk = rawChunkBytes)
+                            {
+                                if (nativeHandle == IntPtr.Zero)
+                                {
+                                    nativeHandle = NativeMethods.CreateIW44ImageFromChunk((IntPtr)pChunk, rawChunkBytes.Length, 1);
+                                    Assert.NotEqual(IntPtr.Zero, nativeHandle);
+                                }
+                                else
+                                {
+                                    bool decodeResult = NativeMethods.DecodeIW44Chunk(nativeHandle, (IntPtr)pChunk, rawChunkBytes.Length);
+                                    Assert.True(decodeResult);
+                                }
+                            }
+                        }
+                    }
+
+                    // 1. Pass 1: Get dimensions
+                    bool sizeResult = NativeMethods.GetIW44RawPixelMap(nativeHandle, 1, IntPtr.Zero, IntPtr.Zero, 0, out int width, out int height);
+                    Assert.True(sizeResult, "Failed to get raw pixmap dimensions");
+                    Assert.True(width > 0 && height > 0);
+
+                    // 2. Pass 2: Extract data
+                    int bufferSize = width * height * 3;
+                    rawBuffer = DjvuMarshal.AllocHGlobal((uint)bufferSize);
+
+                    bool extractResult = NativeMethods.GetIW44RawPixelMap(nativeHandle, 1, IntPtr.Zero, rawBuffer, bufferSize, out int exWidth, out int exHeight);
+                    Assert.True(extractResult, "Failed to extract raw pixmap data");
+                    Assert.Equal(width, exWidth);
+                    Assert.Equal(height, exHeight);
+                }
+                finally
+                {
+                    if (rawBuffer != IntPtr.Zero)
+                    {
+                        DjvuMarshal.FreeHGlobal(rawBuffer);
+                    }
+                    if (nativeHandle != IntPtr.Zero)
+                    {
+                        NativeMethods.FreeIW44Image(nativeHandle);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public unsafe void GetIW44RawPixmap_Linear()
+        {
+            using (DjvuDocument doc = Util.GetTestDocument(56, out int _))
+            {
+                DjvuPage page = (DjvuPage)doc.Pages[0];
+                FG44Chunk chunk = null;
+                foreach (var c in page.PageForm.Children)
+                {
+                    if (c.ChunkType == ChunkType.FG44)
+                    {
+                        chunk = (FG44Chunk)c;
+                        break;
+                    }
+                }
+                Assert.NotNull(chunk);
+
+                byte[] rawChunkBytes;
+                using (var memoryReader = chunk.Reader.CloneReaderToMemory(chunk.DataOffset, chunk.Length))
+                {
+                    rawChunkBytes = memoryReader.ReadBytes((int)chunk.Length);
+                }
+
+                IntPtr nativeHandle = IntPtr.Zero;
+                IntPtr rawBuffer = IntPtr.Zero;
+
+                try
+                {
+                    fixed (byte* pChunk = rawChunkBytes)
+                    {
+                        nativeHandle = NativeMethods.CreateIW44ImageFromChunk((IntPtr)pChunk, rawChunkBytes.Length, 1);
+                        Assert.NotEqual(IntPtr.Zero, nativeHandle);
+                    }
+
+                    // Test Dimension Query
+                    bool dimResult = NativeMethods.GetIW44RawPixelMapLinear(
+                        nativeHandle, IntPtr.Zero, 0, out int width, out int height);
+                    Assert.True(dimResult);
+                    Assert.True(width > 0 && height > 0);
+
+                    // Test Extraction
+                    int bufferSize = width * height * 3;
+                    rawBuffer = Marshal.AllocHGlobal(bufferSize);
+
+                    bool extResult = NativeMethods.GetIW44RawPixelMapLinear(
+                        nativeHandle, rawBuffer, bufferSize, out int outWidth, out int outHeight);
+                    Assert.True(extResult);
+                    Assert.Equal(width, outWidth);
+                    Assert.Equal(height, outHeight);
+                    
+                    // Also verify the standard region decode extraction doesn't crash on the same handle
+                    IntPtr rawBufferRegion = Marshal.AllocHGlobal(bufferSize);
+                    try
+                    {
+                        bool extRegionResult = NativeMethods.GetIW44RawPixelMap(
+                            nativeHandle, 1, IntPtr.Zero, rawBufferRegion, bufferSize, out int _, out int _);
+                        Assert.True(extRegionResult);
+                    }
+                    finally
+                    {
+                        Marshal.FreeHGlobal(rawBufferRegion);
+                    }
+                }
+                finally
+                {
+                    if (rawBuffer != IntPtr.Zero) 
+                    {
+                        Marshal.FreeHGlobal(rawBuffer);
+                    }
+                    
+                    if (nativeHandle != IntPtr.Zero) 
+                    {
+                        NativeMethods.FreeIW44Image(nativeHandle);
+                    }
+                }
             }
         }
     }

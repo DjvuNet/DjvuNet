@@ -888,6 +888,123 @@ namespace DjvuNet.Tests
             return result / ((double)width * height * ((double)pixelSize / channelSize) * maxChannelValue);
         }
 
+        public static unsafe void DumpImageMismatchDetails(Bitmap native, Bitmap managed, int fileIndex, string mapType)
+        {
+            Rectangle rect = new Rectangle(0, 0, native.Width, native.Height);
+            BitmapData data1 = null;
+            BitmapData data2 = null;
+
+            try
+            {
+                data1 = native.LockBits(rect, ImageLockMode.ReadOnly, native.PixelFormat);
+                data2 = managed.LockBits(rect, ImageLockMode.ReadOnly, managed.PixelFormat);
+                
+                int stride = Math.Abs(data1.Stride);
+                byte* p1 = (byte*)data1.Scan0;
+                byte* p2 = (byte*)data2.Scan0;
+
+                Console.WriteLine($"\nDiff Mismatches for test0{fileIndex:00#}C.djvu:");
+                
+                for (int y = 0; y < native.Height; y++)
+                {
+                    for (int x = 0; x < native.Width; x++)
+                    {
+                        int offset = (y * stride) + (x * 3);
+                        
+                        if (p1[offset] != p2[offset] || 
+                            p1[offset + 1] != p2[offset + 1] || 
+                            p1[offset + 2] != p2[offset + 2])
+                        {
+                            int startX = Math.Max(0, x - 3);
+                            int endX = Math.Min(native.Width, startX + 32);
+                            
+                            Console.WriteLine($"Mismatch block starting at Row: {y}, Col: {startX}");
+                            
+                            Console.Write("ImgN:");
+                            for (int i = startX; i < endX; i++)
+                            {
+                                int pxOffset = (y * stride) + (i * 3);
+                                Console.Write($" {p1[pxOffset]:X2} {p1[pxOffset + 1]:X2} {p1[pxOffset + 2]:X2}");
+                            }
+                                
+                            Console.Write("\nImgM:");
+                            for (int i = startX; i < endX; i++)
+                            {
+                                int pxOffset = (y * stride) + (i * 3);
+                                Console.Write($" {p2[pxOffset]:X2} {p2[pxOffset + 1]:X2} {p2[pxOffset + 2]:X2}");
+                            }
+                                
+                            Console.Write("\nDiff:");
+                            for (int i = startX; i < endX; i++)
+                            {
+                                int pxOffset = (y * stride) + (i * 3);
+                                Console.Write($" {Math.Abs(p1[pxOffset] - p2[pxOffset]):X2} {Math.Abs(p1[pxOffset + 1] - p2[pxOffset + 1]):X2} {Math.Abs(p1[pxOffset + 2] - p2[pxOffset + 2]):X2}");
+                            }
+                            
+                            Console.WriteLine($"\n{mapType} PixelMap Binary Mismatch for test0{fileIndex:00#}C.djvu.");
+                            return;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                if (data1 != null)
+                {
+                    native.UnlockBits(data1);
+                }
+
+                if (data2 != null)
+                {
+                    managed.UnlockBits(data2);
+                }
+            }
+        }
+
+        public static unsafe void DumpImageMismatchDetails(byte* pNative, byte* pManaged, int length, int width, int fileIndex, string mapType)
+        {
+            Console.WriteLine($"\nDiff Mismatches for test0{fileIndex}C.djvu:");
+            int firstMismatch = -1;
+            for (int i = 0; i < length; i++)
+            {
+                if (pNative[i] != pManaged[i])
+                {
+                    firstMismatch = i;
+                    break;
+                }
+            }
+
+            if (firstMismatch != -1)
+            {
+                int firstPixel = firstMismatch / 3;
+                int startPixel = System.Math.Max(0, firstPixel - 3);
+                int startIndex = startPixel * 3;
+                int limitBytes = System.Math.Min(length - startIndex, 96);
+                
+                int row = startPixel / width;
+                int col = startPixel % width;
+                
+                Console.WriteLine($"Mismatch block starting at Row: {row}, Col: {col} (Index: {startIndex})");
+
+                Console.Write("ImgN:");
+                for (int i = 0; i < limitBytes; i++)
+                    Console.Write($" {pNative[startIndex + i]:X2}");
+                Console.WriteLine();
+                
+                Console.Write("ImgM:");
+                for (int i = 0; i < limitBytes; i++)
+                    Console.Write($" {pManaged[startIndex + i]:X2}");
+                Console.WriteLine();
+                
+                Console.Write("Diff:");
+                for (int i = 0; i < limitBytes; i++)
+                    Console.Write($" {System.Math.Abs(pNative[startIndex + i] - pManaged[startIndex + i]):X2}");
+                Console.WriteLine();
+            }
+            
+            Console.WriteLine($"{mapType} PixelMap Binary Mismatch for test0{fileIndex}C.djvu.");
+        }
+
         /// <summary>
         /// Calculates the intermediate Sum of Absolute Differences (SAD) between two image buffers using highly optimized Vector256 (AVX2) instructions.
         /// This raw sum is passed to the parent method to compute the final normalized image difference ratio.

@@ -232,14 +232,10 @@ namespace DjvuNet.Tests
 
                 Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, 1000, 1500);
                 Graphics.PixelMap map = new Graphics.PixelMap();
-                var result = page.GetBgPixmap(rect, 1, 2.2, map);
+                var result = page.GetBackgroundPixelMap(rect, 1, 2.2, map);
                 Assert.NotNull(result);
 
                 Assert.IsType<Graphics.PixelMap>(result);
-                Assert.Equal<int>(3, result.BytesPerPixel);
-                Assert.Equal<int>(0, result.BlueOffset);
-                Assert.Equal<int>(1, result.GreenOffset);
-                Assert.Equal<int>(2, result.RedOffset);
             }
         }
 
@@ -272,14 +268,10 @@ namespace DjvuNet.Tests
 
                 Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, (page.Width / subsample), (page.Height / subsample));
                 Graphics.PixelMap map = new Graphics.PixelMap();
-                var result = page.GetBgPixmap(rect, subsample, 2.2, map);
+                var result = page.GetBackgroundPixelMap(rect, subsample, 2.2, map);
                 Assert.NotNull(result);
 
                 Assert.IsType<Graphics.PixelMap>(result);
-                Assert.Equal<int>(3, result.BytesPerPixel);
-                Assert.Equal<int>(0, result.BlueOffset);
-                Assert.Equal<int>(1, result.GreenOffset);
-                Assert.Equal<int>(2, result.RedOffset);
             }
         }
 
@@ -493,10 +485,6 @@ namespace DjvuNet.Tests
         {
             Assert.NotNull(result);
             Assert.IsType<DPixelMap>(result);
-            Assert.Equal<int>(3, result.BytesPerPixel);
-            Assert.Equal<int>(0, result.BlueOffset);
-            Assert.Equal<int>(1, result.GreenOffset);
-            Assert.Equal<int>(2, result.RedOffset);
         }
 
         [Fact()]
@@ -544,7 +532,7 @@ namespace DjvuNet.Tests
         public void GetBgPixMap000()
         {
             var page = new DjvuPage();
-            Assert.Null(page.GetBgPixmap(new Graphics.Rectangle(), 1, 2.2, null));
+            Assert.Null(page.GetBackgroundPixelMap(new Graphics.Rectangle(), 1, 2.2, null));
         }
 
         [Fact()]
@@ -553,7 +541,10 @@ namespace DjvuNet.Tests
             var page = new DjvuPage();
             page.Height = 128;
             page.Width = 128;
-            Assert.Null(page.GetBgPixmap(new Graphics.Rectangle(), 1, 2.2, null));
+            var map = page.GetBackgroundPixelMap(new Graphics.Rectangle(), 1, 2.2, null);
+            Assert.NotNull(map);
+            Assert.Equal(0, map.Width);
+            Assert.Equal(0, map.Height);
         }
 
         [Fact()]

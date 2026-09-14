@@ -216,7 +216,6 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             }
         }
 
-
         [Fact(Skip = "C++ backend preemptively runs spatial filters on load, destroying entropy state parity. Use isolated chunk tests instead.")]
         public void VerifyEntropyDecodedBlocks_test042C_02()
         {
@@ -582,6 +581,246 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             {
                 if (cppBuffer != IntPtr.Zero) DjvuMarshal.FreeHGlobal(cppBuffer);
                 if (csBuffer != IntPtr.Zero) DjvuMarshal.FreeHGlobal(csBuffer);
+            }
+        }
+        [Theory]
+        [InlineData(56)]
+        [InlineData(62)]
+        public void VerifyEntropyDecodedBlocks_FG44(int fileIndex)
+        {
+            using (DjvuDocument doc = Util.GetTestDocument(fileIndex, out int pageCount))
+            {
+                DjvuPage page = (DjvuPage)doc.Pages[0];
+                
+                FG44Chunk fg44Chunk = null;
+                foreach (var child in page.PageForm.Children)
+                {
+                    if (child.ChunkType == ChunkType.FG44)
+                    {
+                        fg44Chunk = (FG44Chunk)child;
+                        break;
+                    }
+                }
+                
+                Assert.NotNull(fg44Chunk);
+
+                int totalDiffCount = 0;
+                int totalBlocksWithErrors = 0;
+
+                byte[] rawChunkBytes;
+                using (var memoryReader = fg44Chunk.Reader.CloneReaderToMemory(fg44Chunk.DataOffset, fg44Chunk.Length))
+                {
+                    rawChunkBytes = memoryReader.ReadBytes((int)fg44Chunk.Length);
+                }
+
+                InterWavePixelMapDecoder mapDecoder = new InterWavePixelMapDecoder();
+                using (var memoryReader = fg44Chunk.Reader.CloneReaderToMemory(fg44Chunk.DataOffset, fg44Chunk.Length))
+                {
+                    mapDecoder.Decode(memoryReader);
+                }
+
+                IntPtr nativeHandle = IntPtr.Zero;
+                IntPtr nativeBlockBuffer = IntPtr.Zero;
+
+                try
+                {
+                    unsafe
+                    {
+                        fixed (byte* pChunk = rawChunkBytes)
+                        {
+                            nativeHandle = NativeMethods.CreateIW44ImageFromChunk((IntPtr)pChunk, rawChunkBytes.Length, 1);
+                            Assert.NotEqual(IntPtr.Zero, nativeHandle);
+                        }
+                    }
+
+                    var csharpMap = (InterWaveMap)mapDecoder._YMap;
+                    bool result = NativeMethods.GetIW44MapInfo(nativeHandle, 0, out int bw, out int bh, out int nb);
+                    Assert.True(result);
+                    Assert.Equal(csharpMap.BlockWidth, bw);
+                    Assert.Equal(csharpMap.BlockHeight, bh);
+                    Assert.Equal(csharpMap.BlockNumber, nb);
+
+                    nativeBlockBuffer = DjvuMarshal.AllocHGlobal((uint)(1024 * sizeof(short)));
+
+                    for (int i = 0; i < nb; i++)
+                    {
+                        var csharpBlock = csharpMap.Blocks[i];
+                        short[] csCoeff = new short[1024];
+                        csharpBlock.WriteLiftBlock(csCoeff, 0, 64);
+
+                        bool blockResult = NativeMethods.GetIW44BlockData(nativeHandle, 0, i, nativeBlockBuffer, 1024);
+                        Assert.True(blockResult);
+
+                        unsafe
+                        {
+                            fixed (short* pCs = csCoeff)
+                            {
+                                double diff = Util.ImageBinaryDiff((byte*)pCs, (byte*)nativeBlockBuffer, 1024, 1, 2048, 16, 8);
+                                if (diff > 0.0)
+                                {
+                                    totalBlocksWithErrors++;
+                                    totalDiffCount++;
+                                }
+                            }
+                        }
+                    }
+
+                    Assert.True(totalDiffCount == 0, $"ZPCodec entropy parity failed for FG44 Doc {fileIndex}! Mismatches in {totalBlocksWithErrors} blocks.");
+                }
+                finally
+                {
+                    if (nativeHandle != IntPtr.Zero)
+                    {
+                        NativeMethods.FreeIW44Image(nativeHandle);
+                    }
+                    if (nativeBlockBuffer != IntPtr.Zero)
+                    {
+                        DjvuMarshal.FreeHGlobal(nativeBlockBuffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(56)]
+        [InlineData(62)]
+        public void VerifySpatialLifting_FG44(int fileIndex)
+        {
+            using (DjvuDocument doc = Util.GetTestDocument(fileIndex, out int pageCount))
+            {
+                DjvuPage page = (DjvuPage)doc.Pages[0];
+                
+                FG44Chunk fg44Chunk = null;
+                foreach (var child in page.PageForm.Children)
+                {
+                    if (child.ChunkType == ChunkType.FG44)
+                    {
+                        fg44Chunk = (FG44Chunk)child;
+                        break;
+                    }
+                }
+                Assert.NotNull(fg44Chunk);
+
+                byte[] rawChunkBytes;
+                using (var memoryReader = fg44Chunk.Reader.CloneReaderToMemory(fg44Chunk.DataOffset, fg44Chunk.Length))
+                {
+                    rawChunkBytes = memoryReader.ReadBytes((int)fg44Chunk.Length);
+                }
+
+                // 1. C# Entropy Decode
+                InterWavePixelMapDecoder mapDecoder = new InterWavePixelMapDecoder();
+                using (var memoryReader = fg44Chunk.Reader.CloneReaderToMemory(fg44Chunk.DataOffset, fg44Chunk.Length))
+                {
+                    mapDecoder.Decode(memoryReader);
+                }
+                var csharpMap = (InterWaveMap)mapDecoder._YMap;
+
+                IntPtr nativeHandle = IntPtr.Zero;
+                IntPtr cppBuffer = IntPtr.Zero;
+                IntPtr csBuffer = IntPtr.Zero;
+
+                try
+                {
+                    // 2. C++ Entropy Decode (Isolated chunk parsing)
+                    unsafe
+                    {
+                        fixed (byte* pChunk = rawChunkBytes)
+                        {
+                            nativeHandle = NativeMethods.CreateIW44ImageFromChunk((IntPtr)pChunk, rawChunkBytes.Length, 1);
+                            Assert.NotEqual(IntPtr.Zero, nativeHandle);
+                        }
+                    }
+
+                    bool result = NativeMethods.GetIW44MapInfo(nativeHandle, 0, out int bw, out int bh, out int nb);
+                    Assert.True(result);
+
+                    // 3. Flatten blocks into Unified Data Arrays (matching InterWaveMap.BuildUnifiedData logic)
+                    int width = csharpMap.Width;
+                    int height = csharpMap.Height;
+                    int blockWidth = csharpMap.BlockWidth;
+                    int blockHeight = csharpMap.BlockHeight;
+                    
+                    int totalElements = blockWidth * blockHeight;
+                    short[] csData16 = new short[totalElements];
+                    short[] cppData16 = new short[totalElements];
+                    
+                    IntPtr nativeBlockBuffer = DjvuMarshal.AllocHGlobal((uint)(1024 * sizeof(short)));
+                    try
+                    {
+                        short[] liftblock = new short[1024];
+                        for (int i = 0, pidx = 0; i < blockHeight; i += 32)
+                        {
+                            for (int j = 0; j < blockWidth; j += 32, pidx++)
+                            {
+                                // C# Block flatten
+                                csharpMap.Blocks[pidx].WriteLiftBlock(liftblock, 0, 64);
+                                int destIdx = (i * blockWidth) + j;
+                                for (int ii = 0, srcIdx = 0; ii < 32; ii++, srcIdx += 32, destIdx += blockWidth)
+                                {
+                                    Array.Copy(liftblock, srcIdx, csData16, destIdx, 32);
+                                }
+
+                                // C++ Block flatten
+                                bool blockResult = NativeMethods.GetIW44BlockData(nativeHandle, 0, pidx, nativeBlockBuffer, 1024);
+                                Assert.True(blockResult);
+                                Marshal.Copy(nativeBlockBuffer, liftblock, 0, 1024);
+                                
+                                int cppDestIdx = (i * blockWidth) + j;
+                                for (int ii = 0, srcIdx = 0; ii < 32; ii++, srcIdx += 32, cppDestIdx += blockWidth)
+                                {
+                                    Array.Copy(liftblock, srcIdx, cppData16, cppDestIdx, 32);
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        if (nativeBlockBuffer != IntPtr.Zero)
+                        {
+                            DjvuMarshal.FreeHGlobal(nativeBlockBuffer);
+                        }
+                    }
+
+                    // 4. Allocate native memory for both flat arrays
+                    cppBuffer = DjvuMarshal.AllocHGlobal((uint)(totalElements * sizeof(short)));
+                    csBuffer = DjvuMarshal.AllocHGlobal((uint)(totalElements * sizeof(short)));
+                    Marshal.Copy(cppData16, 0, cppBuffer, totalElements);
+                    Marshal.Copy(csData16, 0, csBuffer, totalElements);
+
+                    // 5. Execute Spatial Transforms in Parallel!
+                    // Scale 1, fast 0
+                    bool nativeRes = NativeMethods.IW44TransformBackward(cppBuffer, width, height, blockWidth, 32, 1);
+                    Assert.True(nativeRes, "Native IW44TransformBackward failed.");
+
+                    unsafe
+                    {
+                        InterWaveTransform.Backward((short*)csBuffer, width, height, blockWidth, 32, 1);
+                    }
+
+                    // 6. Diff the spatially filtered arrays
+                    double diff = 0.0;
+                    unsafe
+                    {
+                        diff = Util.ImageBinaryDiff((byte*)csBuffer, (byte*)cppBuffer, width, height, blockWidth * 2, 16, 8);
+                    }
+
+                    Assert.True(diff == 0.0, $"Spatial lifting parity failed for FG44 Doc {fileIndex}! Diff ratio: {diff}");
+                }
+                finally
+                {
+                    if (nativeHandle != IntPtr.Zero)
+                    {
+                        NativeMethods.FreeIW44Image(nativeHandle);
+                    }
+                    if (cppBuffer != IntPtr.Zero)
+                    {
+                        DjvuMarshal.FreeHGlobal(cppBuffer);
+                    }
+                    if (csBuffer != IntPtr.Zero)
+                    {
+                        DjvuMarshal.FreeHGlobal(csBuffer);
+                    }
+                }
             }
         }
     }

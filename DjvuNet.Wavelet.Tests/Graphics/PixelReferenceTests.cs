@@ -236,51 +236,6 @@ namespace DjvuNet.Graphics.Tests
         }
 
         [Fact()]
-        public void BlueOffsetTest()
-        {
-            int width = 256;
-            int height = 256;
-            Pixel color = Pixel.BluePixel;
-
-            PixelMap map1 = PixelMapTests.CreateInitVerifyPixelMap(width, height, color);
-            PixelReference pix = (PixelReference) map1.CreateGPixelReference(0);
-
-            Assert.Equal(0, pix.BlueOffset);
-            pix.BlueOffset = 1;
-            Assert.Equal(1, pix.BlueOffset);
-        }
-
-        [Fact()]
-        public void GreenOffsetTest()
-        {
-            int width = 256;
-            int height = 256;
-            Pixel color = Pixel.BluePixel;
-
-            PixelMap map1 = PixelMapTests.CreateInitVerifyPixelMap(width, height, color);
-            PixelReference pix = (PixelReference)map1.CreateGPixelReference(0);
-
-            Assert.Equal(1, pix.GreenOffset);
-            pix.GreenOffset = 0;
-            Assert.Equal(0, pix.GreenOffset);
-        }
-
-        [Fact()]
-        public void RedOffsetTest()
-        {
-            int width = 256;
-            int height = 256;
-            Pixel color = Pixel.BluePixel;
-
-            PixelMap map1 = PixelMapTests.CreateInitVerifyPixelMap(width, height, color);
-            PixelReference pix = (PixelReference)map1.CreateGPixelReference(0);
-
-            Assert.Equal(2, pix.RedOffset);
-            pix.RedOffset = 0;
-            Assert.Equal(0, pix.RedOffset);
-        }
-
-        [Fact()]
         public void ParentTest()
         {
             int width = 256;

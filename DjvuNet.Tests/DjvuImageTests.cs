@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 using DjvuNet.Errors;
 using DjvuNet.Tests.Xunit;
+using DjvuNet.Extensions;
 using Moq;
 using Xunit;
 
@@ -545,21 +546,26 @@ namespace DjvuNet.Tests
 #endif
             {
                 Util.VerifyDjvuDocument(pageCount, document);
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", $"test{docNumber:00#}C.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.BuildImage())
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
+
+                using (Bitmap image = map?.ToImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
                     Assert.NotNull(image);
                     Assert.IsType<Bitmap>(image);
 
-                    double threshold = 0.0585;
-                    if (docNumber == 75) threshold = 0.15;
+                    double threshold = 0.0;
 
                     bool result = Util.CompareImagesForBinarySimilarity(testImage, image, threshold, true, $"Testing Djvu BuildImage(): \t\ttest{docNumber:00#}C.png, ");
 
+                    if (!result)
+                    {
+                        Util.DumpImageMismatchDetails(testImage, image, docNumber, "BuildImage");
+                    }
 #if DUMP_IMAGES
                     DumpImage(docNumber, image, "Img");
 #endif
@@ -605,8 +611,10 @@ namespace DjvuNet.Tests
                 IDjvuPage page = document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", $"test{docNumber:00#}CBgnd.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.GetBackgroundImage(1, true))
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap bgMap = page.GetBackgroundPixelMap(rect, 1, 2.2, null);
+
+                using (Bitmap image = bgMap.ToImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
                     Assert.NotNull(image);
@@ -618,7 +626,7 @@ namespace DjvuNet.Tests
                         Assert.Fail($"Unexpected image size differences.\nWidth image: {image.Width} | testImage: {testImage.Width}, Height: image: {image.Height} | testImage {testImage.Height}");
                     }
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.0585, true, $"Testing Djvu GetBackgroundImage(): \ttest{docNumber:00#}C.png, ");
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.0, true, $"Testing Djvu GetBackgroundImage(): \ttest{docNumber:00#}C.png, ");
 
 #if DUMP_IMAGES
                     DumpImage(docNumber, image, "Bgnd");
@@ -630,19 +638,26 @@ namespace DjvuNet.Tests
             }
         }
 
-        [DjvuTheory(Skip = "Not implemented"), Trait("Category", "Skip")]
+        [DjvuTheory]
         [MemberData(nameof(Util.ForegroundImageSourceDocs), MemberType = typeof(Util))]
         public void BuildForegroundImage_Theory(int docNumber)
         {
             int pageCount = 0;
+#if DJVUNET_ALL_TESTS
+            DjvuDocument document = _fixture.GetDocument(docNumber);
+            pageCount = document.Pages.Count;
+#else
             using (DjvuDocument document = Util.GetTestDocument(docNumber, out pageCount))
+#endif
             {
                 Util.VerifyDjvuDocument(pageCount, document);
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", $"test{docNumber:00#}CFgnd.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.GetForegroundImage(1, true))
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap fgMap = page.GetForegroundPixelMap(rect, 1, 2.2);
+
+                using (Bitmap image = fgMap?.ToImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
                     Assert.NotNull(image);
@@ -653,7 +668,21 @@ namespace DjvuNet.Tests
                         Assert.Fail($"Unexpected image size differences. Width image: {image.Width} | testImage: {testImage.Width}, Height: image: {image.Height} | testImage {testImage.Height}");
                     }
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.025, true, $"Testing Djvu GetForegroundImage(): \ttest{docNumber:00#}C.png, ");
+                    double threshold = 0.0;
+
+                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, threshold, true, $"Testing Djvu GetForegroundImage(): \ttest{docNumber:00#}C.png, ");
+
+                    if (!result)
+                    {
+                        Util.DumpImageMismatchDetails(testImage, image, docNumber, "Foreground");
+                        
+                        Console.WriteLine($"Page Width: {page.Width}, Height: {page.Height}");
+                        Console.WriteLine($"ForegroundJB2Image present?   {page.ForegroundJB2Image != null}");
+                        Console.WriteLine($"ForegroundPalette present?    {page.ForegroundPalette != null}");
+                        if (page.ForegroundPalette != null)
+                            Console.WriteLine($"  -> Palette Colors: {page.ForegroundPalette.PaletteColors?.Length ?? 0}");
+                        Console.WriteLine($"ForegroundIWPixelMap present? {page.ForegroundIWPixelMap != null}");
+                    }
 
 #if DUMP_IMAGES
                     DumpImage(docNumber, image, "Fgnd");
@@ -662,6 +691,18 @@ namespace DjvuNet.Tests
                     Assert.True(result);
                 }
             }
+        }
+
+        [Fact]
+        public void BuildForegroundImage_56C_Fact()
+        {
+            BuildForegroundImage_Theory(56);
+        }
+
+        [Fact]
+        public void BuildForegroundImage_62C_Fact()
+        {
+            BuildForegroundImage_Theory(62);
         }
 
         public static IEnumerable<object[]> MaskImageSourceDocs

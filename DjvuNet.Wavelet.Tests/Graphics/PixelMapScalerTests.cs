@@ -1012,5 +1012,43 @@ namespace DjvuNet.Graphics.Tests
         }
 
 
+        [Theory]
+        [InlineData(10, 10, 10, 10)]
+        [InlineData(48, 27, 32, 18)]
+        [InlineData(16, 9, 32, 18)]
+        [InlineData(33, 33, 100, 100)]
+        [InlineData(100, 100, 33, 33)]
+        [InlineData(10, 50, 50, 10)]
+        [InlineData(1, 1, 10, 10)]
+        public void Scale_ColorRetention_Theory(int srcWidth, int srcHeight, int targetWidth, int targetHeight)
+        {
+            var sclr = new PixelMapScaler(srcWidth, srcHeight, targetWidth, targetHeight);
+            
+            Rectangle srcRect = new Rectangle(0, 0, srcWidth, srcHeight);
+            Rectangle targetRect = new Rectangle(0, 0, targetWidth, targetHeight);
+            
+            PixelMap srcMap = PixelMapTests.CreateInitVerifyPixelMap(srcWidth, srcHeight, Pixel.RedPixel);
+            PixelMap destMap = PixelMapTests.CreateInitVerifyPixelMap(targetWidth, targetHeight, Pixel.WhitePixel);
+            
+            sclr.SetHorzRatio(targetWidth, srcWidth);
+            sclr.SetVertRatio(targetHeight, srcHeight);
+            
+            sclr.Scale(srcRect, srcMap, targetRect, destMap);
+            
+            int zeroCount = 0;
+            int redCount = 0;
+            for (int i = 0; i < destMap.Data.Length; i += 3)
+            {
+                sbyte b = destMap.Data[i];
+                sbyte g = destMap.Data[i + 1];
+                sbyte r = destMap.Data[i + 2];
+                if (b == 0 && g == 0 && r == 0) zeroCount++;
+                if (b == 0 && g == 0 && r == -1) redCount++; // -1 is 0xFF in sbyte
+            }
+            
+            int totalPixels = destMap.Data.Length / 3;
+            Assert.True(zeroCount == 0, $"TDD Failure: Scaler corrupted {zeroCount} out of {totalPixels} pixels to pure zeros (black).");
+            Assert.True(redCount == totalPixels, $"TDD Failure: Expected {totalPixels} red pixels, but got {redCount}.");
+        }
     }
 }

@@ -5,8 +5,6 @@ namespace DjvuNet.Graphics
 {
     public interface IMap
     {
-        int BytesPerPixel { get; }
-
         sbyte[] Data { get; }
 
         int Height { get; }

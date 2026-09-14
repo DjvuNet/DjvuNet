@@ -20,23 +20,18 @@ by [Telavian](https://github.com/Telavian) and after remaining inactive for some
 
 ## Current Status
 
-*DjvuNet library is not ready for production use and is still in early development.* There are several known bugs which need to be fixed and missing features which need to be implemented first
-before library could be treated as production ready or fully functional. Furthermore, there are some bugs in image decoder that leave some of images distorted.
+*DjvuNet library is not ready for production use and is still in development.* There are several known bugs which need to be fixed and missing features which need to be implemented first
+before library could be treated as production ready or fully functional. However, the core graphics decoding pipelines now produce mathematically identical output to the C++ reference implementation.
 
-Library supports full .NET Framework 4.7.2 or newer on Windows and .NET Core 10.0.0 or newer on Windows, Linux, macOS.
+Library supports .NET 10.0.0 or newer on Windows, Linux, macOS on x64 and arm64 architectures.
 
-Project undergoes several architectural and implementations changes, which are done in "dev" branch.
+Project undergoes several architectural and implementations changes.
 
 - DjVu file format parser was optimized and refactored what so far resulted in more than 10x speedup.
 
-- Image data decoding and encoding with Interpolated Dubuc-Deslauriers-Lemire (DDL) (4, 4) Discrete Wavelet Transform is close
-to be finished but still has couple bugs which need to be fixed.
+- All graphics and data pipelines—including JB2 decoding and encoding, IW44 wavelet decoding, and ZP/BZZ compression and decompression—are fully implemented and achieve 100% binary compatibility (0.0 divergence) with the DjvuLibre C++ reference implementation.
 
-- There was very limited optimization work done in this area with some 30 - 40% improvements in performance and identification of several next optimization targets.
-
-- ZP arithmetic coder and BZZ encoding/decoding is fully implemented and reached binary compatibility with DjvuLibre. It still awaits final optimizations.
-
-- JB2 decoding and encoding is fully implemented and reached binary parity as well.
+- The wavelet processing pipelines and image rendering loops have been comprehensively overhauled with hardware-accelerated SIMD kernels (AVX2, SSSE3, SSE4.1) and zero-allocation unsafe pointer arithmetic to maximize throughput. Optimization work in this area is ongoing.
 
 - Image segmentation for Mixed Raster Content done in DjvuLibre with ColorPalette histogram calculation will be entirely rewritten as there was significant progress in image segmentation algorithms in the last two decades.
 

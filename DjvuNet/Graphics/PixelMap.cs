@@ -8,6 +8,7 @@ using System.Runtime.Intrinsics.X86;
 using System.Threading;
 using System.Threading.Tasks;
 using DjvuNet.Errors;
+using DjvuNet.Configuration;
 
 namespace DjvuNet.Graphics
 {
@@ -28,16 +29,16 @@ namespace DjvuNet.Graphics
     /// (Width * Height * 3) &lt;= Array.MaxLength, yielding a maximum area of roughly 715,827,863 pixels.
     /// </para>
     /// </remarks>
-    public sealed class PixelMap : IMap2
+    public sealed class PixelMap
     {
         public sbyte[] Data { get; internal set; }
         public int Width { get; private set; }
         public int Height { get; private set; }
-        public int BytesPerPixel => 3;
-        public int BlueOffset => 0;
-        public int GreenOffset => 1;
-        public int RedOffset => 2;
-        public bool IsRampNeeded => false;
+        public const int BytesPerPixel = 3;
+        public const int BlueOffset = 0;
+        public const int GreenOffset = 1;
+        public const int RedOffset = 2;
+        public const bool IsRampNeeded = false;
 
         internal void SetWidth(int width)
         {
@@ -56,6 +57,7 @@ namespace DjvuNet.Graphics
             }
             Height = height;
         }
+
         #region Private Members
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -104,11 +106,6 @@ namespace DjvuNet.Graphics
         internal static double CachedGamma = -1D;
 
         /// <summary>
-        /// Used to quickly clip out of bounds values.
-        /// </summary>
-        private static readonly sbyte[] _clip = new sbyte[512];
-
-        /// <summary>
         /// Used for attenuation
         /// </summary>
         private static readonly Object[] _multiplierRefArray = new Object[256];
@@ -125,10 +122,7 @@ namespace DjvuNet.Graphics
 
         static PixelMap()
         {
-            for (int i = 0; i < _clip.Length; i++)
-            {
-                _clip[i] = (sbyte)((i < 256) ? i : 255);
-            }
+
 
             for (int i = 1; i < _invmap.Length; i++)
             {
@@ -207,15 +201,15 @@ namespace DjvuNet.Graphics
                         {
                             double x = i / 255D;
 
-                            //if (DjVuOptions.BEZIERGAMMA)
+                            if (DjvuOptions.BEZIERGAMMA)
                             {
                                 double t = (Math.Sqrt(1.0D + (((gamma * gamma) - 1.0D) * x)) - 1.0D) / (gamma - 1.0D);
                                 x = ((((1.0D - gamma) * t) + (2D * gamma)) * t) / (gamma + 1.0D);
                             }
-                            //else
-                            //{
-                            //    x = System.Math.Pow(x, 1.0D / gamma);
-                            //}
+                            else
+                            {
+                                x = Math.Pow(x, 1.0D / gamma);
+                            }
 
                             CachedGammaTable[i] = (int)Math.Floor((255D * x) + 0.5D);
                         }
@@ -322,7 +316,7 @@ namespace DjvuNet.Graphics
         /// <summary>
         /// Insert the specified bitmap with the specified color.
         /// </summary>
-        /// <param name="bm">
+        /// <param name="bitmap">
         /// bitmap to insert
         /// </param>
         /// <param name="xPos">
@@ -335,100 +329,312 @@ namespace DjvuNet.Graphics
         /// color to insert bitmap with
         /// </param>
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void Blit(ref Bitmap bm, int xPos, int yPos, IPixel color)
+        public unsafe void Blit(ref Bitmap bitmap, int xPos, int yPos, Pixel color)
         {
-            if (Unsafe.IsNullRef(ref bm))
+            if (Unsafe.IsNullRef(ref bitmap))
             {
-                DjvuExceptionUtil.ThrowArgumentNull(nameof(bm), $"{typeof(Bitmap).FullName} bm reference is null.");
-            }
-
-            // Check
-            if (color == null)
-            {
-                return;
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(bitmap), $"{typeof(Bitmap).FullName} bm reference is null.");
             }
 
             // Compute number of rows and columns
-            int xrows = yPos + bm.Height;
+            int rowCount = yPos + bitmap.Height;
 
-            if (xrows > Height)
+            if (rowCount > Height)
             {
-                xrows = Height;
+                rowCount = Height;
             }
 
             if (yPos > 0)
             {
-                xrows -= yPos;
+                rowCount -= yPos;
             }
 
-            int xcolumns = xPos + bm.Width;
+            int columnCount = xPos + bitmap.Width;
 
-            if (xcolumns > Width)
+            if (columnCount > Width)
             {
-                xcolumns = Width;
+                columnCount = Width;
             }
 
             if (xPos > 0)
             {
-                xcolumns -= xPos;
+                columnCount -= xPos;
             }
 
-            if ((xrows <= 0) || (xcolumns <= 0))
+            if ((rowCount <= 0) || (columnCount <= 0))
             {
                 return;
             }
 
             // Precompute multiplier map
-            int maxgray = bm.Grays - 1;
-            int[] multiplier = new int[maxgray];
+            int maxGray = bitmap.Grays - 1;
+            int[] multiplier = new int[maxGray];
 
-            for (int i = 0; i < maxgray; i++)
+            for (int i = 0; i < maxGray; i++)
             {
-                multiplier[i] = 0x10000 - ((i << 16) / maxgray);
+                multiplier[i] = 0x10000 - ((i << 16) / maxGray);
             }
 
             // Cache target color
-            int gr = color.Red;
-            int gg = color.Green;
-            int gb = color.Blue;
+            int targetRed = (byte)color.Red;
+            int targetGreen = (byte)color.Green;
+            int targetBlue = (byte)color.Blue;
 
             // Compute starting point
-            int src = bm.RowOffset((yPos < 0) ? (-yPos) : 0) - ((xPos < 0) ? xPos : 0);
-            int dst = ((yPos > 0) ? RowOffset(yPos) : 0) + ((xPos > 0) ? xPos : 0);
+            int bitmapStartY = (yPos < 0) ? (-yPos) : 0;
+            int bitmapStartX = (xPos < 0) ? (-xPos) : 0;
+            int dstOffset = ((yPos > 0) ? RowOffset(yPos) : 0) + ((xPos > 0) ? xPos : 0);
+            int dstRowIncrement = GetRowSize();
 
-            IPixelReference dstPixel = CreateGPixelReference(dst);
+            // Precompute target color vectors and shuffle masks for AVX2 (32 pixels) and SSE4.1 (16 pixels)
+            Vector256<byte> target0Vec256 = Vector256<byte>.Zero;
+            Vector256<byte> target1Vec256 = Vector256<byte>.Zero;
+            Vector256<byte> target2Vec256 = Vector256<byte>.Zero;
+            Vector256<byte> maxGrayVec256 = Vector256.Create((byte)maxGray);
+            Vector256<byte> shuffleMask0Vec256 = Vector256<byte>.Zero;
+            Vector256<byte> shuffleMask1Vec256 = Vector256<byte>.Zero;
+            Vector256<byte> shuffleMask2Vec256 = Vector256<byte>.Zero;
 
-            // Loop over rows
-            for (int y = 0; y < xrows; y++)
+            Vector128<byte> target0Vec = Vector128<byte>.Zero;
+            Vector128<byte> target1Vec = Vector128<byte>.Zero;
+            Vector128<byte> target2Vec = Vector128<byte>.Zero;
+            Vector128<byte> maxGrayVec = Vector128.Create((byte)maxGray);
+            Vector128<byte> shuffleMask0Vec = Vector128<byte>.Zero;
+            Vector128<byte> shuffleMask1Vec = Vector128<byte>.Zero;
+            Vector128<byte> shuffleMask2Vec = Vector128<byte>.Zero;
+
+            if (Avx2.IsSupported)
             {
-                // Loop over columns
-                dstPixel.SetOffset(dst);
-
-                for (int x = 0; x < xcolumns; dstPixel.IncOffset())
+                byte* tmpTargets = stackalloc byte[96];
+                for (int i = 0; i < 96; i += 3)
                 {
-                    int srcpix = bm.GetByteAt(src + (x++));
+                    tmpTargets[i] = (byte)targetBlue;
+                    tmpTargets[i + 1] = (byte)targetGreen;
+                    tmpTargets[i + 2] = (byte)targetRed;
+                }
+                target0Vec256 = Avx.LoadVector256(tmpTargets);
+                target1Vec256 = Avx.LoadVector256(tmpTargets + 32);
+                target2Vec256 = Avx.LoadVector256(tmpTargets + 64);
 
-                    // Perform pixel operation
-                    if (srcpix != 0)
+                Vector128<byte> smA = Vector128.Create((byte)0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5);
+                Vector128<byte> smB = Vector128.Create((byte)5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10);
+                Vector128<byte> smC = Vector128.Create((byte)10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15);
+                
+                shuffleMask0Vec256 = Vector256.Create(smA, smB);
+                shuffleMask1Vec256 = Vector256.Create(smC, smA);
+                shuffleMask2Vec256 = Vector256.Create(smB, smC);
+
+                target0Vec = target0Vec256.GetLower();
+                target1Vec = target0Vec256.GetUpper();
+                target2Vec = target1Vec256.GetLower();
+                shuffleMask0Vec = smA;
+                shuffleMask1Vec = smB;
+                shuffleMask2Vec = smC;
+            }
+            else if (Sse41.IsSupported)
+            {
+                byte* tmpTargets = stackalloc byte[48];
+                for (int i = 0; i < 48; i += 3)
+                {
+                    tmpTargets[i] = (byte)targetBlue;
+                    tmpTargets[i + 1] = (byte)targetGreen;
+                    tmpTargets[i + 2] = (byte)targetRed;
+                }
+                target0Vec = Sse2.LoadVector128(tmpTargets);
+                target1Vec = Sse2.LoadVector128(tmpTargets + 16);
+                target2Vec = Sse2.LoadVector128(tmpTargets + 32);
+
+                shuffleMask0Vec = Vector128.Create((byte)0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5);
+                shuffleMask1Vec = Vector128.Create((byte)5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10);
+                shuffleMask2Vec = Vector128.Create((byte)10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15);
+            }
+
+            fixed (sbyte* pData = Data)
+            {
+                // Loop over rows
+                for (int y = 0; y < rowCount; y++)
+                {
+                    sbyte* sourcePtr = bitmap.GetRow(bitmapStartY + y) + bitmapStartX;
+                    int currentDst = dstOffset;
+                    int x = 0;
+
+                    if (Avx2.IsSupported)
                     {
-                        if (srcpix >= maxgray)
+                        for (; x <= columnCount - 32; x += 32)
                         {
-                            dstPixel.SetBGR(gb, gg, gr);
-                        }
-                        else
-                        {
-                            int level0 = multiplier[srcpix];
-                            int level1 = 0x10000 - level0;
-                            dstPixel.SetBGR(_clip[unchecked((byte)((dstPixel.Blue * level0) + (gb * level1)) >> 16)],
-                                            _clip[unchecked((byte)((dstPixel.Green * level0) + (gg * level1)) >> 16)],
-                                            _clip[unchecked((byte)((dstPixel.Red * level0) + (gr * level1)) >> 16)]);
+                            Vector256<byte> srcAlpha = Avx.LoadVector256((byte*)sourcePtr + x);
+                            
+                            // 1. ALL-ZERO BLOCK
+                            if (Avx2.MoveMask(Avx2.CompareEqual(srcAlpha, Vector256<byte>.Zero)) == -1)
+                            {
+                                currentDst += 32;
+                                continue;
+                            }
+
+                            sbyte* pixelPtr = pData + (currentDst * BytesPerPixel);
+                            Vector256<byte> isMax = Avx2.CompareEqual(srcAlpha, maxGrayVec256);
+
+                            // 2. ALL-OPAQUE BLOCK
+                            if (Avx2.MoveMask(isMax) == -1)
+                            {
+                                Avx.Store((byte*)pixelPtr, target0Vec256);
+                                Avx.Store((byte*)pixelPtr + 32, target1Vec256);
+                                Avx.Store((byte*)pixelPtr + 64, target2Vec256);
+                                currentDst += 32;
+                                continue;
+                            }
+
+                            // 3. MIXED BITONAL EDGE
+                            Vector256<byte> isZero = Avx2.CompareEqual(srcAlpha, Vector256<byte>.Zero);
+                            if (Avx2.MoveMask(Avx2.Or(isZero, isMax)) == -1)
+                            {
+                                Vector256<byte> srcDupLower = Avx2.Permute4x64(isMax.AsInt64(), 0b_01_00_01_00).AsByte();
+                                Vector256<byte> srcDupUpper = Avx2.Permute4x64(isMax.AsInt64(), 0b_11_10_11_10).AsByte();
+
+                                Vector256<byte> alpha0 = Avx2.Shuffle(srcDupLower, shuffleMask0Vec256);
+                                Vector256<byte> alpha1 = Avx2.Shuffle(isMax, shuffleMask1Vec256);
+                                Vector256<byte> alpha2 = Avx2.Shuffle(srcDupUpper, shuffleMask2Vec256);
+
+                                Vector256<byte> dst0 = Avx.LoadVector256((byte*)pixelPtr);
+                                Vector256<byte> dst1 = Avx.LoadVector256((byte*)pixelPtr + 32);
+                                Vector256<byte> dst2 = Avx.LoadVector256((byte*)pixelPtr + 64);
+
+                                Avx.Store((byte*)pixelPtr, Avx2.BlendVariable(dst0, target0Vec256, alpha0));
+                                Avx.Store((byte*)pixelPtr + 32, Avx2.BlendVariable(dst1, target1Vec256, alpha1));
+                                Avx.Store((byte*)pixelPtr + 64, Avx2.BlendVariable(dst2, target2Vec256, alpha2));
+                                
+                                currentDst += 32;
+                                continue;
+                            }
+
+                            // 4. FRACTIONAL ANTI-ALIASED FALLBACK
+                            for (int i = 0; i < 32; i++)
+                            {
+                                int sourcePixel = (byte)sourcePtr[x + i];
+                                if (sourcePixel != 0)
+                                {
+                                    sbyte* p = pixelPtr + (i * BytesPerPixel);
+                                    if (sourcePixel >= maxGray)
+                                    {
+                                        p[BlueOffset] = unchecked((sbyte)targetBlue);
+                                        p[GreenOffset] = unchecked((sbyte)targetGreen);
+                                        p[RedOffset] = unchecked((sbyte)targetRed);
+                                    }
+                                    else
+                                    {
+                                        int level0 = multiplier[sourcePixel];
+                                        int level1 = 0x10000 - level0;
+                                        p[BlueOffset] = unchecked((sbyte)((((byte)p[BlueOffset] * level0) + (targetBlue * level1)) >> 16));
+                                        p[GreenOffset] = unchecked((sbyte)((((byte)p[GreenOffset] * level0) + (targetGreen * level1)) >> 16));
+                                        p[RedOffset] = unchecked((sbyte)((((byte)p[RedOffset] * level0) + (targetRed * level1)) >> 16));
+                                    }
+                                }
+                            }
+                            currentDst += 32;
                         }
                     }
-                }
 
-                // Next line
-                dst += GetRowSize();
-                src += bm.GetRowSize();
+                    if (Sse41.IsSupported)
+                    {
+                        for (; x <= columnCount - 16; x += 16)
+                        {
+                            Vector128<byte> srcAlpha = Sse2.LoadVector128((byte*)sourcePtr + x);
+                            
+                            // 1. ALL-ZERO BLOCK: Instant Skip
+                            if (Sse2.MoveMask(Sse2.CompareEqual(srcAlpha, Vector128<byte>.Zero)) == 0xFFFF)
+                            {
+                                currentDst += 16;
+                                continue;
+                            }
+
+                            sbyte* pixelPtr = pData + (currentDst * BytesPerPixel);
+                            Vector128<byte> isMax = Sse2.CompareEqual(srcAlpha, maxGrayVec);
+
+                            // 2. ALL-OPAQUE BLOCK: Instant Overwrite
+                            if (Sse2.MoveMask(isMax) == 0xFFFF)
+                            {
+                                Sse2.Store((byte*)pixelPtr, target0Vec);
+                                Sse2.Store((byte*)pixelPtr + 16, target1Vec);
+                                Sse2.Store((byte*)pixelPtr + 32, target2Vec);
+                                currentDst += 16;
+                                continue;
+                            }
+
+                            // 3. MIXED BITONAL EDGE: SSE4.1 Blend Variable
+                            Vector128<byte> isZero = Sse2.CompareEqual(srcAlpha, Vector128<byte>.Zero);
+                            if (Sse2.MoveMask(Sse2.Or(isZero, isMax)) == 0xFFFF)
+                            {
+                                Vector128<byte> alpha0 = Ssse3.Shuffle(isMax, shuffleMask0Vec);
+                                Vector128<byte> alpha1 = Ssse3.Shuffle(isMax, shuffleMask1Vec);
+                                Vector128<byte> alpha2 = Ssse3.Shuffle(isMax, shuffleMask2Vec);
+
+                                Vector128<byte> dst0 = Sse2.LoadVector128((byte*)pixelPtr);
+                                Vector128<byte> dst1 = Sse2.LoadVector128((byte*)pixelPtr + 16);
+                                Vector128<byte> dst2 = Sse2.LoadVector128((byte*)pixelPtr + 32);
+
+                                Sse2.Store((byte*)pixelPtr, Sse41.BlendVariable(dst0, target0Vec, alpha0));
+                                Sse2.Store((byte*)pixelPtr + 16, Sse41.BlendVariable(dst1, target1Vec, alpha1));
+                                Sse2.Store((byte*)pixelPtr + 32, Sse41.BlendVariable(dst2, target2Vec, alpha2));
+                                
+                                currentDst += 16;
+                                continue;
+                            }
+
+                            // 4. FRACTIONAL ANTI-ALIASED FALLBACK
+                            for (int i = 0; i < 16; i++)
+                            {
+                                int sourcePixel = (byte)sourcePtr[x + i];
+                                if (sourcePixel != 0)
+                                {
+                                    sbyte* p = pixelPtr + (i * BytesPerPixel);
+                                    if (sourcePixel >= maxGray)
+                                    {
+                                        p[BlueOffset] = unchecked((sbyte)targetBlue);
+                                        p[GreenOffset] = unchecked((sbyte)targetGreen);
+                                        p[RedOffset] = unchecked((sbyte)targetRed);
+                                    }
+                                    else
+                                    {
+                                        int level0 = multiplier[sourcePixel];
+                                        int level1 = 0x10000 - level0;
+                                        p[BlueOffset] = unchecked((sbyte)((((byte)p[BlueOffset] * level0) + (targetBlue * level1)) >> 16));
+                                        p[GreenOffset] = unchecked((sbyte)((((byte)p[GreenOffset] * level0) + (targetGreen * level1)) >> 16));
+                                        p[RedOffset] = unchecked((sbyte)((((byte)p[RedOffset] * level0) + (targetRed * level1)) >> 16));
+                                    }
+                                }
+                            }
+                            currentDst += 16;
+                        }
+                    }
+
+                    // 5. REMAINDER LOOP
+                    for (; x < columnCount; x++)
+                    {
+                        int sourcePixel = (byte)sourcePtr[x];
+                        if (sourcePixel != 0)
+                        {
+                            sbyte* pixelPtr = pData + (currentDst * BytesPerPixel);
+                            if (sourcePixel >= maxGray)
+                            {
+                                pixelPtr[BlueOffset] = unchecked((sbyte)targetBlue);
+                                pixelPtr[GreenOffset] = unchecked((sbyte)targetGreen);
+                                pixelPtr[RedOffset] = unchecked((sbyte)targetRed);
+                            }
+                            else
+                            {
+                                int level0 = multiplier[sourcePixel];
+                                int level1 = 0x10000 - level0;
+                                pixelPtr[BlueOffset] = unchecked((sbyte)((((byte)pixelPtr[BlueOffset] * level0) + (targetBlue * level1)) >> 16));
+                                pixelPtr[GreenOffset] = unchecked((sbyte)((((byte)pixelPtr[GreenOffset] * level0) + (targetGreen * level1)) >> 16));
+                                pixelPtr[RedOffset] = unchecked((sbyte)((((byte)pixelPtr[RedOffset] * level0) + (targetRed * level1)) >> 16));
+                            }
+                        }
+                        currentDst++;
+                    }
+
+                    // Next line
+                    dstOffset += dstRowIncrement;
+                }
             }
         }
 
@@ -508,61 +714,61 @@ namespace DjvuNet.Graphics
                         partEnd += prllReminder;
                     }
 
-                    for (; i < partEnd; i++)
+                    for (; i < partEnd;)
                     {
-                        pData[i] = (byte)gammaLUT[pData[i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
 
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
 
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
 
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
 
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
 
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
-                        pData[i] = (byte)gammaLUT[pData[++i]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
+                        pData[i] = (byte)gammaLUT[pData[i++]];
                     }
                 });
             }
@@ -601,61 +807,61 @@ namespace DjvuNet.Graphics
             int reminderLength = data.Length % 48;
             dataLength -= reminderLength;
 
-            for (int i = 0; i < dataLength; i++)
+            for (int i = 0; i < dataLength;)
             {
-                pData[i] = (byte)gammaLUT[pData[i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
             }
 
             for (int i = dataLength; i < dataLength + reminderLength; i++)
@@ -676,61 +882,61 @@ namespace DjvuNet.Graphics
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public static unsafe void ApplyGamma(byte* pData, int dataLengthRem, int dataLength, int* gammaLUT)
         {
-            for (int i = 0; i < dataLength; i++)
+            for (int i = 0; i < dataLength;)
             {
-                pData[i] = (byte)gammaLUT[pData[i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
 
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
-                pData[i] = (byte)gammaLUT[pData[++i]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
+                pData[i] = (byte)gammaLUT[pData[i++]];
             }
 
             for (int i = dataLength; i < dataLengthRem; i++)
@@ -796,7 +1002,7 @@ namespace DjvuNet.Graphics
                 rect = new Rectangle(0, 0, width, height);
             }
 
-            Init(rect.Height, rect.Width, null);
+            Init(rect.Height, rect.Width);
 
             int sy = rect.YMin * subsample;
             int sxz = rect.XMin * subsample;
@@ -900,7 +1106,7 @@ namespace DjvuNet.Graphics
                 destHeight = rect.Height;
             }
 
-            Init(destHeight, destWidth, null);
+            Init(destHeight, destWidth);
 
             int sy = rect.YMin / 3;
             int dy = rect.YMin - (3 * sy);
@@ -1289,47 +1495,221 @@ namespace DjvuNet.Graphics
                 SetWidth(width);
             }
 
-            int npix = RowOffset(Height);
+            long npix = (long)Height * Width;
 
             if (npix > 0)
             {
-                if (Data == null || Data.Length < npix * 3)
+                long totalBytes = npix * BytesPerPixel;
+
+                // Guard against > Array.MaxLength and < 0
+                if (totalBytes > Array.MaxLength || totalBytes < 0)
                 {
-                    Data = GC.AllocateUninitializedArray<sbyte>(npix * 3, pinned: false);
+                    DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height,
+                        $"Image dimensions result in an invalid {nameof(Data)} buffer size (less than zero or exceeding Array.MaxLength).");
+                }
+
+                if (Data == null || Data.Length < totalBytes)
+                {
+                    Data = GC.AllocateUninitializedArray<sbyte>((int)totalBytes, pinned: false);
                 }
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public PixelMap Init(int height, int width, IPixel color)
+        public PixelMap Init(int height, int width)
         {
-            InitUninitialized(height, width);
+            if (height != Height || width != Width)
+            {
+                SetHeight(height);
+                SetWidth(width);
+            }
 
-            int npix = RowOffset(Height);
+            long npix = (long)Height * Width;
 
             if (npix > 0)
             {
-                if (color != null && (color.Blue != 0 || color.Green != 0 || color.Red != 0 ))
+                long totalBytes = npix * 3;
+                
+                if (totalBytes > Array.MaxLength || totalBytes < 0)
                 {
-                    sbyte b = color.Blue;
-                    sbyte g = color.Green;
-                    sbyte r = color.Red;
-                    unsafe
-                    {
-                        fixed (sbyte* pdata = Data)
-                        {
-                            for (int i = 0; i < npix * 3;)
-                            {
-                                pdata[i++] = b;
-                                pdata[i++] = g;
-                                pdata[i++] = r;
-                            }
-                        }
-                    }
+                    DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height,
+                        $"Image dimensions result in an invalid {nameof(Data)} buffer size (less than zero or exceeding Array.MaxLength).");
+                }
+
+                // TODO (Optimization Opportunity): Consider replacing this array allocation with ArrayPool<sbyte>.Shared
+                if (Data == null || Data.Length < totalBytes)
+                {
+                    Data = GC.AllocateArray<sbyte>((int)totalBytes, pinned: false);
                 }
                 else
                 {
-                    Array.Clear(Data, 0, npix * 3);
+                    Unsafe.InitBlockUnaligned(
+                        ref Unsafe.As<sbyte, byte>(ref MemoryMarshal.GetArrayDataReference(Data)),
+                        0,
+                        (uint)totalBytes);
+                }
+            }
+
+            return this;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public unsafe PixelMap Init(int height, int width, Pixel color)
+        {
+            if (color.Blue == 0 && color.Green == 0 && color.Red == 0)
+            {
+                return Init(height, width);
+            }
+
+            // Note: InitUninitialized serves as the primary bounds-check guard for image dimensions. 
+            // If the Array.MaxLength and 64-bit overflow checks are ever removed from it, they MUST
+            // be restored in this method
+            InitUninitialized(height, width);
+
+            long npix = (long)Height * Width;
+
+            if (npix > 0)
+            {
+                long totalBytes = npix * 3;
+
+                ref byte dataRef = ref Unsafe.As<sbyte, byte>(ref MemoryMarshal.GetArrayDataReference(Data));
+
+                sbyte b = color.Blue;
+                sbyte g = color.Green;
+                sbyte r = color.Red;
+
+                if (b == g && g == r)
+                {
+                    Unsafe.InitBlockUnaligned(ref dataRef, (byte)b, (uint)totalBytes);
+                }
+                else
+                {
+                    nuint offset = 0;
+
+                    if (Vector512.IsHardwareAccelerated && totalBytes >= 192)
+                    {
+                        byte* pPattern = stackalloc byte[192];
+                        for (int i = 0; i < 192;) { pPattern[i++] = (byte)b; pPattern[i++] = (byte)g; pPattern[i++] = (byte)r; }
+                        
+                        Vector512<byte> v0 = Vector512.Load(pPattern);
+                        Vector512<byte> v1 = Vector512.Load(pPattern + 64);
+                        Vector512<byte> v2 = Vector512.Load(pPattern + 128);
+
+                        nuint limit = (nuint)totalBytes - 191;
+                        while (offset < limit)
+                        {
+                            Vector512.StoreUnsafe(v0, ref dataRef, offset);
+                            Vector512.StoreUnsafe(v1, ref dataRef, offset + 64);
+                            Vector512.StoreUnsafe(v2, ref dataRef, offset + 128);
+                            offset += 192;
+                        }
+                        
+                        nuint rem = (nuint)totalBytes - offset;
+                        if (rem > 0)
+                        {
+                            if (rem <= 64)
+                            {
+                                Vector512.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 64);
+                            }
+                            else if (rem <= 128)
+                            {
+                                Vector512.StoreUnsafe(v1, ref dataRef, (nuint)totalBytes - 128);
+                                Vector512.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 64);
+                            }
+                            else
+                            {
+                                Vector512.StoreUnsafe(v0, ref dataRef, (nuint)totalBytes - 192);
+                                Vector512.StoreUnsafe(v1, ref dataRef, (nuint)totalBytes - 128);
+                                Vector512.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 64);
+                            }
+                            offset = (nuint)totalBytes;
+                        }
+                    }
+                    else if (Vector256.IsHardwareAccelerated && totalBytes >= 96)
+                    {
+                        byte* pPattern = stackalloc byte[96];
+                        for (int i = 0; i < 96;) { pPattern[i++] = (byte)b; pPattern[i++] = (byte)g; pPattern[i++] = (byte)r; }
+                        
+                        Vector256<byte> v0 = Vector256.Load(pPattern);
+                        Vector256<byte> v1 = Vector256.Load(pPattern + 32);
+                        Vector256<byte> v2 = Vector256.Load(pPattern + 64);
+
+                        nuint limit = (nuint)totalBytes - 95;
+                        while (offset < limit)
+                        {
+                            Vector256.StoreUnsafe(v0, ref dataRef, offset);
+                            Vector256.StoreUnsafe(v1, ref dataRef, offset + (nuint)32);
+                            Vector256.StoreUnsafe(v2, ref dataRef, offset + (nuint)64);
+                            offset += 96;
+                        }
+                        
+                        nuint rem = (nuint)totalBytes - offset;
+                        if (rem > 0)
+                        {
+                            if (rem <= 32)
+                            {
+                                Vector256.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 32);
+                            }
+                            else if (rem <= 64)
+                            {
+                                Vector256.StoreUnsafe(v1, ref dataRef, (nuint)totalBytes - 64);
+                                Vector256.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 32);
+                            }
+                            else
+                            {
+                                Vector256.StoreUnsafe(v0, ref dataRef, (nuint)totalBytes - 96);
+                                Vector256.StoreUnsafe(v1, ref dataRef, (nuint)totalBytes - 64);
+                                Vector256.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 32);
+                            }
+                            offset = (nuint)totalBytes;
+                        }
+                    }
+                    else if (Vector128.IsHardwareAccelerated && totalBytes >= 48)
+                    {
+                        byte* pPattern = stackalloc byte[48];
+                        for (int i = 0; i < 48;) { pPattern[i++] = (byte)b; pPattern[i++] = (byte)g; pPattern[i++] = (byte)r; }
+                        
+                        Vector128<byte> v0 = Vector128.Load(pPattern);
+                        Vector128<byte> v1 = Vector128.Load(pPattern + 16);
+                        Vector128<byte> v2 = Vector128.Load(pPattern + 32);
+
+                        nuint limit = (nuint)totalBytes - 47;
+                        while (offset < limit)
+                        {
+                            Vector128.StoreUnsafe(v0, ref dataRef, offset);
+                            Vector128.StoreUnsafe(v1, ref dataRef, offset + (nuint)16);
+                            Vector128.StoreUnsafe(v2, ref dataRef, offset + (nuint)32);
+                            offset += 48;
+                        }
+                        
+                        nuint rem = (nuint)totalBytes - offset;
+                        if (rem > 0)
+                        {
+                            if (rem <= 16)
+                            {
+                                Vector128.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 16);
+                            }
+                            else if (rem <= 32)
+                            {
+                                Vector128.StoreUnsafe(v1, ref dataRef, (nuint)totalBytes - 32);
+                                Vector128.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 16);
+                            }
+                            else
+                            {
+                                Vector128.StoreUnsafe(v0, ref dataRef, (nuint)totalBytes - 48);
+                                Vector128.StoreUnsafe(v1, ref dataRef, (nuint)totalBytes - 32);
+                                Vector128.StoreUnsafe(v2, ref dataRef, (nuint)totalBytes - 16);
+                            }
+                            offset = (nuint)totalBytes;
+                        }
+                    }
+
+                    while (offset < (nuint)totalBytes)
+                    {
+                        Unsafe.Add(ref dataRef, offset++) = (byte)b;
+                        Unsafe.Add(ref dataRef, offset++) = (byte)g;
+                        Unsafe.Add(ref dataRef, offset++) = (byte)r;
+                    }
                 }
             }
 
@@ -1360,7 +1740,7 @@ namespace DjvuNet.Graphics
             
             // Circuit breaker for empty sources
             if (source.Width == 0 || source.Height == 0)
-                return Init(rect.Height, rect.Width, null);
+                return Init(rect.Height, rect.Width);
 
             if (source.Data == null)
                 DjvuExceptionUtil.ThrowInvalidOperation(
@@ -1408,7 +1788,8 @@ namespace DjvuNet.Graphics
                 DjvuExceptionUtil.ThrowArgumentNull(nameof(source), $"{typeof(Bitmap).FullName} source reference is null.");
             }
 
-            if (source == default)
+            // TODO: When RLE memory compression is enabled we should check for: source.RleData == null
+            if (source.Data == null && source.Height == 0 && source.Width == 0 && source.Border == 0)
                 DjvuExceptionUtil.ThrowArgument( 
                     "The source Bitmap cannot be default instance. Please provide a valid, initialized Bitmap instance.",
                     nameof(source));
@@ -1419,8 +1800,9 @@ namespace DjvuNet.Graphics
 
             // Circuit breaker for empty sources
             if (source.Width == 0 || source.Height == 0)
-                return Init(0, 0, null);
+                return Init(0, 0);
 
+            // TODO: When RLE memory compression is enabled we should check for: source.RleData == null
             if (source.Data == null)
                 DjvuExceptionUtil.ThrowInvalidOperation(
                     $"The source Bitmap.Data array is null - probably uninitialized. Current state - Width: {source.Width}, Height: {source.Height}, Data: {source.Data}.");
@@ -1656,7 +2038,7 @@ namespace DjvuNet.Graphics
 
             // Circuit breaker for empty sources
             if (source.Width == 0 || source.Height == 0)
-                return Init(0, 0, null);
+                return Init(0, 0);
 
             if (source.Data == null)
                 DjvuExceptionUtil.ThrowInvalidOperation(
@@ -1829,6 +2211,17 @@ namespace DjvuNet.Graphics
 
         /// <summary>
         /// Draw the foreground layer onto this background image.
+        /// 
+        /// Architectural Note: 
+        /// This implementation significantly diverges from and optimizes the DjVuLibre C++ reference (GPixmap::stencil).
+        /// The C++ stencil hot loop strictly supports integer upsampling (via the supersample parameter). To achieve 
+        /// fractional downsampling, the C++ architecture bypasses its stencil loop entirely, allocates a new image buffer, 
+        /// performs a full pre-warping geometric scaling pass, and then executes an integer upsample blit.
+        /// 
+        /// In DjvuNet, we introduced the subSample parameter and integrated a Bresenham-style step-and-fraction 
+        /// precalculated advancement algorithm directly into the hot loop. This perfectly guarantees mathematical 
+        /// algorithmic identity with C++ upsampling when subSample=1, while safely achieving dynamic fractional 
+        /// downsampling on-the-fly without requiring any intermediate buffer allocations or pre-warping scaling passes.
         /// </summary>
         /// <param name="mask">
         /// the mask layer
@@ -1911,89 +2304,112 @@ namespace DjvuNet.Graphics
             }
 
             // Precompute multiplier map
-            int maxgray = mask.Grays - 1;
-            int[] multiplier = new int[maxgray];
+            int maxGray = mask.Grays - 1;
+            int* multiplier = stackalloc int[maxGray];
 
-            for (int i = 1; i < maxgray; i++)
+            for (int i = 1; i < maxGray; i++)
             {
-                multiplier[i] = (0x10000 * i) / maxgray;
+                multiplier[i] = (0x10000 * i) / maxGray;
             }
 
             // Prepare color correction table
             int[] gtable = GetGammaCorrection(gamma);
 
-            double ratioFg = superSample / (double)subSample;
-            // Compute starting point in blown up foreground PixelMap
             int fgy = (rect.YMin * subSample) / superSample;
-            double fgy1 = rect.YMin - ratioFg * fgy;
+            int fgy1Scaled = rect.YMin * subSample - superSample * fgy;
 
-            if (fgy1 < 0)
+            if (fgy1Scaled < 0)
             {
                 fgy--;
-                fgy1 += ratioFg;
+                fgy1Scaled += superSample;
             }
 
             int fgxz = (rect.XMin * subSample) / superSample;
-            double fgx1z = rect.XMin - ratioFg * fgxz;
+            int fgx1zScaled = rect.XMin * subSample - superSample * fgxz;
 
-            if (fgx1z < 0)
+            if (fgx1zScaled < 0)
             {
                 fgxz--;
-                fgx1z += ratioFg;
+                fgx1zScaled += superSample;
             }
 
-            int fg = foregroundMap.RowOffset(fgy);
-            var fgx = foregroundMap.CreateGPixelReference(0);
-            var dst = CreateGPixelReference(0);
+            // Bresenham-style optimization to extract division from the hot loop while 
+            // safely handling extreme downsampling ratios (subSample > superSample).
+            // This maintains exactly one IF branch per pixel iteration, identical to the 
+            // C++ DjVuLibre implementation when upsampling, but correctly handles fractional stepping.
+            int stepAdvanceX = (subSample / superSample) * BytesPerPixel;
+            int fracAdvanceX = subSample % superSample;
+            int stepAdvanceY = subSample / superSample;
+            int fracAdvanceY = subSample % superSample;
 
-            // Loop over rows
-            for (int y = 0; y < xrows; y++)
+            fixed (sbyte* pData = Data)
+            fixed (sbyte* pFgData = foregroundMap.Data)
+            fixed (int* gTableLocation = gtable)
             {
-                // Loop over columns
-                fgx.SetOffset(fg + fgxz);
-
-                double fgx1 = fgx1z;
-                dst.SetOffset(y, 0);
-
-                int src = mask.RowOffset(y);
-
-                for (int x = 0; x < xcolumns; x++, dst.IncOffset())
+                // Loop over rows
+                for (int y = 0; y < xrows; y++)
                 {
-                    int srcpix = mask.GetByteAt(src + x);
+                    int fgx1Scaled = fgx1zScaled;
+                    
+                    int dstRowOffset = RowOffset(y);
+                    int fgRowOffset = foregroundMap.RowOffset(fgy);
+                    sbyte* maskRow = mask.GetRow(y);
 
-                    // Perform pixel operation
-                    if (srcpix > 0)
+                    sbyte* dstPixel = pData + (dstRowOffset * BytesPerPixel);
+                    sbyte* fgPixel = pFgData + ((fgRowOffset + fgxz) * BytesPerPixel);
+
+                    for (int x = 0; x < xcolumns; x++)
                     {
-                        fixed (int* gTableLocation = gtable)
+                        int srcPixel = (byte)maskRow[x];
+
+                        // Perform pixel operation
+                        if (srcPixel > 0)
                         {
-                            if (srcpix >= maxgray)
+                            byte fgB = (byte)fgPixel[BlueOffset];
+                            byte fgG = (byte)fgPixel[GreenOffset];
+                            byte fgR = (byte)fgPixel[RedOffset];
+
+                            if (srcPixel >= maxGray)
                             {
-                                dst.SetBGR(gTableLocation[(byte)fgx.Blue], gTableLocation[(byte)fgx.Green],
-                                           gTableLocation[(byte)fgx.Red]);
+                                dstPixel[BlueOffset] = unchecked((sbyte)gTableLocation[fgB]);
+                                dstPixel[GreenOffset] = unchecked((sbyte)gTableLocation[fgG]);
+                                dstPixel[RedOffset] = unchecked((sbyte)gTableLocation[fgR]);
                             }
                             else
                             {
-                                int level = multiplier[srcpix];
-                                dst.SetBGR((((byte)dst.Blue * (0x10000 - level)) + (level * gTableLocation[(byte)fgx.Blue])) >> 16,
-                                           (((byte)dst.Green * (0x10000 - level)) + (level * gTableLocation[(byte)fgx.Green])) >> 16,
-                                           (((byte)dst.Red * (0x10000 - level)) + (level * gTableLocation[(byte)fgx.Red])) >> 16);
+                                int level = multiplier[srcPixel];
+                                
+                                byte dstB = (byte)dstPixel[BlueOffset];
+                                byte dstG = (byte)dstPixel[GreenOffset];
+                                byte dstR = (byte)dstPixel[RedOffset];
+
+                                // Use exact C++ algebraic truncation to prevent off-by-1 byte rounding errors
+                                dstPixel[BlueOffset] = unchecked((sbyte)((int)dstB - ((((int)dstB - gTableLocation[fgB]) * level) >> 16)));
+                                dstPixel[GreenOffset] = unchecked((sbyte)((int)dstG - ((((int)dstG - gTableLocation[fgG]) * level) >> 16)));
+                                dstPixel[RedOffset] = unchecked((sbyte)((int)dstR - ((((int)dstR - gTableLocation[fgR]) * level) >> 16)));
                             }
+                        }
+
+                        dstPixel += BytesPerPixel;
+
+                        // Next column
+                        fgPixel += stepAdvanceX;
+                        fgx1Scaled += fracAdvanceX;
+                        if (fgx1Scaled >= superSample)
+                        {
+                            fgx1Scaled -= superSample;
+                            fgPixel += BytesPerPixel;
                         }
                     }
 
-                    // Next column
-                    if (++fgx1 >= ratioFg)
+                    // Next line
+                    fgy += stepAdvanceY;
+                    fgy1Scaled += fracAdvanceY;
+                    if (fgy1Scaled >= superSample)
                     {
-                        fgx1 -= ratioFg;
-                        fgx.IncOffset();
+                        fgy1Scaled -= superSample;
+                        fgy++;
                     }
-                }
-
-                // Next line
-                if (++fgy1 >= ratioFg)
-                {
-                    fgy1 -= ratioFg;
-                    fg += foregroundMap.GetRowSize();
                 }
             }
         }
@@ -2016,7 +2432,7 @@ namespace DjvuNet.Graphics
         {
             if (retVal == null || retVal.Width != Width || retVal.Height != Height)
             {
-                retVal = new PixelMap().Init(Height, Width, null);
+                retVal = new PixelMap().Init(Height, Width);
             }
 
             retVal.Fill(this, -dx, -dy);

@@ -70,7 +70,7 @@ namespace DjvuNet
 
         //System.Drawing.Bitmap ExtractThumbnailImage();
 
-        PixelMap GetBgPixmap(Graphics.Rectangle rect, int subsample, double gamma, PixelMap retval);
+        PixelMap GetBackgroundPixelMap(Graphics.Rectangle rect, int subsample, double gamma, PixelMap retval);
 
         Graphics.Bitmap GetBitmap(Graphics.Rectangle rect, int subsample, int align);
 

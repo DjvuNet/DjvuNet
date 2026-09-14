@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using DjvuNet.Errors;
+using DjvuNet.Tests;
 using Xunit;
 
 namespace DjvuNet.Graphics.Tests
@@ -10,6 +11,24 @@ namespace DjvuNet.Graphics.Tests
 
     public class PixelMapTests
     {
+        [Fact]
+        public void PixelMap_InitRefBitmap_Throws()
+        {
+            var bmp = new Bitmap(); 
+            
+            ref BitmapSurrogate surrogate = ref Unsafe.As<Bitmap, BitmapSurrogate>(ref bmp);
+            surrogate._Width = 46000;
+            surrogate._Height = 46000;
+            surrogate._Grays = 2; 
+            surrogate._BytesPerRow = 46000;
+            surrogate._Data = new sbyte[10]; 
+
+            var map = new PixelMap();
+
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => map.Init(ref bmp));
+
+            Assert.Contains("exceeding Array.MaxLength", ex.Message);
+        }
 
         int shdWidth = 1920 * 2;
         int shdHeight = 1080 * 2;
@@ -119,22 +138,27 @@ namespace DjvuNet.Graphics.Tests
         public static PixelMap CreateVerifyPixelMap()
         {
             var map = new PixelMap();
-            Assert.Equal(3, map.BytesPerPixel);
             Assert.Equal(0, map.Width);
             Assert.Equal(0, map.Height);
             return map;
         }
 
-        public static PixelMap CreateInitVerifyPixelMap(int width, int height, IPixel color)
+        public static PixelMap CreateInitVerifyPixelMap(int width, int height, Pixel color)
         {
             PixelMap map = CreateVerifyPixelMap();
             map.Init(height, width, color);
             Assert.Equal(width, map.Width);
             Assert.Equal(height, map.Height);
-            Assert.Equal<IPixel>(color, map.CreateGPixelReference(width / 2).ToPixel());
 
-            var pix = map.CreateGPixelReference(width / 2);
-            Assert.True(color.Equals(pix.ToPixel()));
+            int byteOffset = (map.RowOffset(0) + (width / 2)) * PixelMap.BytesPerPixel;
+            sbyte actualBlue = map.Data[byteOffset + PixelMap.BlueOffset];
+            sbyte actualGreen = map.Data[byteOffset + PixelMap.GreenOffset];
+            sbyte actualRed = map.Data[byteOffset + PixelMap.RedOffset];
+
+            Assert.Equal<sbyte>(color.Blue, actualBlue);
+            Assert.Equal<sbyte>(color.Green, actualGreen);
+            Assert.Equal<sbyte>(color.Red, actualRed);
+
             return map;
         }
 
@@ -177,13 +201,81 @@ namespace DjvuNet.Graphics.Tests
             Assert.Same(PixelMap.CachedGammaTable, correction);
         }
 
+        [Fact]
+        public void Init_Dimensions_Throws()
+        {
+            PixelMap map = new PixelMap();
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => map.Init(65535, 65535));
+            Assert.Contains("Image dimensions result in an invalid Data buffer size (less than zero or exceeding Array.MaxLength).", ex.Message);
+        }
+
+        [Fact]
+        public void Init_DimensionsPixel_Throws()
+        {
+            PixelMap map = new PixelMap();
+            var ex = Assert.Throws<DjvuArgumentOutOfRangeException>(() => map.Init(65535, 65535, Pixel.WhitePixel));
+            Assert.Contains("Image dimensions result in an invalid Data buffer size (less than zero or exceeding Array.MaxLength).", ex.Message);
+        }
+
         [Fact()]
         public void PixelMapTest()
         {
             PixelMap map = new PixelMap();
-            Assert.Equal(3, map.BytesPerPixel);
             Assert.Equal(0, map.Width);
             Assert.Equal(0, map.Height);
+        }
+
+        [Theory]
+        // Vector512 Tail Processing Paths (Requires totalBytes >= 192)
+        [InlineData(1, 65)] // V512, 1 vector tail (rem=3,  width * 3 = 195)
+        [InlineData(1, 85)] // V512, 1 vector tail (rem=63, width * 3 = 255)
+        [InlineData(1, 86)] // V512, 2 vector tail (rem=66, width * 3 = 258)
+        [InlineData(1, 106)]// V512, 2 vector tail (rem=126, width * 3 = 318)
+        [InlineData(1, 107)]// V512, 3 vector tail (rem=129, width * 3 = 321)
+        [InlineData(1, 127)]// V512, 3 vector tail (rem=189, width * 3 = 381)
+        [InlineData(1, 128)]// V512, 0 vector tail (rem=0,   width * 3 = 384)
+        // Vector256 Tail Processing Paths
+        [InlineData(1, 33)] // V256, 1 vector tail (rem=3,  width * 3 = 99)
+        [InlineData(1, 42)] // V256, 1 vector tail (rem=30, width * 3 = 126)
+        [InlineData(1, 43)] // V256, 2 vector tail (rem=33, width * 3 = 129)
+        [InlineData(1, 53)] // V256, 2 vector tail (rem=63, width * 3 = 159)
+        [InlineData(1, 54)] // V256, 3 vector tail (rem=66, width * 3 = 162)
+        [InlineData(1, 63)] // V256, 3 vector tail (rem=93, width * 3 = 189)
+        [InlineData(1, 64)] // V256, 0 vector tail (rem=0,  width * 3 = 192)
+        // Vector128 Tail Processing Paths (Requires 48 <= totalBytes < 96)
+        [InlineData(1, 17)] // V128, 1 vector tail (rem=3,  width * 3 = 51)
+        [InlineData(1, 21)] // V128, 1 vector tail (rem=15, width * 3 = 63)
+        [InlineData(1, 22)] // V128, 2 vector tail (rem=18, width * 3 = 66)
+        [InlineData(1, 26)] // V128, 2 vector tail (rem=30, width * 3 = 78)
+        [InlineData(1, 27)] // V128, 3 vector tail (rem=33, width * 3 = 81)
+        [InlineData(1, 31)] // V128, 3 vector tail (rem=45, width * 3 = 93)
+        [InlineData(1, 16)] // V128, 0 vector tail (rem=0,  width * 3 = 48)
+        // Scalar Fallback Paths (totalBytes < 48)
+        [InlineData(1, 1)]  // Scalar, (width * 3 = 3)
+        [InlineData(1, 15)] // Scalar, (width * 3 = 45)
+        public unsafe void Init_DimensionsPixel_TailProcessing(int height, int width)
+        {
+            Pixel color = new Pixel(unchecked((sbyte)10), unchecked((sbyte)20), unchecked((sbyte)30));
+            PixelMap map = new PixelMap();
+            map.Init(height, width, color);
+            
+            int totalBytes = height * width * PixelMap.BytesPerPixel;
+            Assert.Equal(totalBytes, map.Data.Length);
+
+            sbyte[] referenceData = new sbyte[totalBytes];
+            for (int i = 0; i < totalBytes;)
+            {
+                referenceData[i++] = color.Blue;
+                referenceData[i++] = color.Green;
+                referenceData[i++] = color.Red;
+            }
+
+            fixed (sbyte* ptrMap = map.Data)
+            fixed (sbyte* ptrRef = referenceData)
+            {
+                double diff = Util.ImageBinaryDiff((byte*)ptrMap, (byte*)ptrRef, width, height, width * PixelMap.BytesPerPixel);
+                Assert.Equal(0.0, diff);
+            }
         }
 
         [Fact()]
@@ -269,91 +361,127 @@ namespace DjvuNet.Graphics.Tests
             Assert.Equal(bColor, bmp.GetByteAt(256));
         }
 
-        [Fact()]
-        public void BlitTest01()
+        [Fact]
+        public void Blit_NullColor_ReturnsEarly()
         {
-            int width = 512;
-            int height = 512;
-            Pixel color = Pixel.RedPixel;
-
+            var map = CreateInitVerifyPixelMap(10, 10, Pixel.RedPixel);
             Bitmap bmp = new Bitmap();
-            bmp.Init(height, width, 0);
-
-            var map = CreateInitVerifyPixelMap(width, height, color);
-
-            map.Blit(ref bmp, 256, 1, Pixel.BlackPixel);
-
-            Assert.Equal(width, map.Width);
-            Assert.Equal(height, map.Height);
-
-            var pix = map.CreateGPixelReference(128);
-            Assert.True(color.Equals(pix.ToPixel()));
-
-            var pix2 = map.CreateGPixelReference(384);
-            Assert.True(color.Equals(pix2.ToPixel()));
-
-            var pix3 = map.CreateGPixelReference(512 * 3 + 384);
-            Assert.True(color.Equals(pix3.ToPixel()));
+            bmp.Init(10, 10, 0);
+            map.Blit(ref bmp, 0, 0, Pixel.BlackPixel);
+            // No exception means pass
         }
 
-        [Fact()]
-        public void BlitTest02()
+        [Fact]
+        public void Blit_NullBitmap_ThrowsArgumentNullException()
         {
-            int width = 512;
-            int height = 512;
-            Pixel color = Pixel.RedPixel;
-
-            Bitmap bmp = new Bitmap();
-            bmp.Init(height, width, 0);
-
-            var map = CreateInitVerifyPixelMap(width, height, Pixel.BlackPixel);
-
-            map.Blit(ref bmp, 256, 1, null);
+            var map = CreateInitVerifyPixelMap(10, 10, Pixel.RedPixel);
+            Assert.Throws<DjvuArgumentNullException>("bitmap", () => map.Blit(ref Unsafe.NullRef<Bitmap>(), 0, 0, Pixel.WhitePixel));
         }
 
-        [Fact()]
-        public void BlitTest03()
+        [Theory]
+        [InlineData(-10, 0)]  // Left edge completely out
+        [InlineData(0, -10)]  // Bottom edge completely out
+        [InlineData(10, 0)]   // Right edge completely out
+        [InlineData(0, 10)]   // Top edge completely out
+        public void Blit_CompletelyOutOfBounds_DoesNotModifyMap(int xPos, int yPos)
         {
-            int width = 512;
-            int height = 512;
-            Pixel color = Pixel.RedPixel;
+            Pixel bgColor = Pixel.RedPixel;
 
-            Bitmap bmp = new Bitmap();
-            bmp.Init(height, width, 0);
-
-            var map = CreateInitVerifyPixelMap(2 * width, 2 * height, color);
-
-            map.Blit(ref bmp, 256, 1, Pixel.WhitePixel);
+            var map = CreateInitVerifyPixelMap(10, 10, bgColor);
+            Bitmap bmp = new Bitmap().Init(10, 10, 0);
+            bmp.Grays = 256;
+            bmp.Fill(unchecked((sbyte)255)); // Visible pixels
+            
+            map.Blit(ref bmp, xPos, yPos, Pixel.WhitePixel);
+            
+            // Map should remain pure red (unmodified)
+            for (int i = 0; i < map.Data.Length; i += PixelMap.BytesPerPixel)
+            {
+                Assert.Equal<sbyte>(bgColor.Blue, map.Data[i + PixelMap.BlueOffset]);
+                Assert.Equal<sbyte>(bgColor.Green, map.Data[i + PixelMap.GreenOffset]);
+                Assert.Equal<sbyte>(bgColor.Red, map.Data[i + PixelMap.RedOffset]);
+            }
         }
 
-        [Fact()]
-        public void BlitTest04()
+        [Fact]
+        public void Blit_TransparentPixels_DoesNotModifyMap()
         {
-            int width = 512;
-            int height = 512;
-            Pixel color = Pixel.RedPixel;
-
-            Bitmap bmp = new Bitmap();
-            bmp.Init(height, width, 0);
-
-            var map = CreateInitVerifyPixelMap(2 * width, 2 * height, color);
-
-            map.Blit(ref bmp, -512, 1, Pixel.WhitePixel);
+            var map = CreateInitVerifyPixelMap(10, 10, Pixel.RedPixel);
+            Bitmap bmp = new Bitmap().Init(10, 10, 0);
+            bmp.Grays = 256;
+            bmp.Fill(0); // 0 = completely transparent
+            
+            map.Blit(ref bmp, 0, 0, Pixel.WhitePixel);
+            
+            // Map should remain pure red
+            for (int i = 0; i < map.Data.Length; i += PixelMap.BytesPerPixel)
+            {
+                Assert.Equal<sbyte>(Pixel.RedPixel.Blue, map.Data[i + PixelMap.BlueOffset]);
+            }
         }
 
-        [Fact()]
-        public void BlitTest05()
+        [Fact]
+        public void Blit_OpaquePixels_OverridesMapCompletely()
         {
-            int width = 512;
-            int height = 512;
-            Pixel color = Pixel.RedPixel;
+            var map = CreateInitVerifyPixelMap(10, 10, Pixel.RedPixel);
+            Bitmap bmp = new Bitmap().Init(10, 10, 0);
+            bmp.Grays = 256;
+            bmp.Fill(unchecked((sbyte)255)); // maxgray = 255
+            
+            map.Blit(ref bmp, 0, 0, Pixel.WhitePixel);
+            
+            // Map should become pure white in the 10x10 area
+            for (int i = 0; i < map.Data.Length; i += PixelMap.BytesPerPixel)
+            {
+                Assert.Equal<sbyte>(Pixel.WhitePixel.Blue, map.Data[i + PixelMap.BlueOffset]);
+            }
+        }
+
+        [Theory]
+        [InlineData(128)]
+        [InlineData(64)]
+        [InlineData(192)]
+        public void Blit_AntiAliasedInterpolation_Theory(int srcPixelValue)
+        {
+            int width = 10;
+            int height = 10;
+            Pixel bgColor = Pixel.RedPixel; 
+            Pixel fgColor = Pixel.BluePixel;
+
+            var map = CreateInitVerifyPixelMap(width, height, bgColor);
 
             Bitmap bmp = new Bitmap();
             bmp.Init(height, width, 0);
+            bmp.Grays = 256; 
 
-            var map = CreateInitVerifyPixelMap(2 * width, 2 * height, color);
+            // Fill bitmap with partial transparency to trigger interpolation (the `else` branch in Blit)
+            for (int r = 0; r < height; r++)
+            {
+                int rowOffset = bmp.RowOffset(r);
+                for (int c = 0; c < width; c++)
+                {
+                    bmp.SetByteAt(rowOffset + c, unchecked((sbyte)srcPixelValue));
+                }
+            }
 
-            map.Blit(ref bmp, 256, -512, Pixel.WhitePixel);
+            map.Blit(ref bmp, 0, 0, fgColor);
+            
+            int maxgray = bmp.Grays - 1;
+            int level0 = 0x10000 - ((srcPixelValue << 16) / maxgray);
+            int level1 = 0x10000 - level0;
+
+            sbyte expectedRed = unchecked((sbyte)(( (byte)bgColor.Red * level0 + (byte)fgColor.Red * level1) >> 16));
+            sbyte expectedGreen = unchecked((sbyte)(( (byte)bgColor.Green * level0 + (byte)fgColor.Green * level1) >> 16));
+            sbyte expectedBlue = unchecked((sbyte)(( (byte)bgColor.Blue * level0 + (byte)fgColor.Blue * level1) >> 16));
+
+            // Fetch pixel data directly from the Data array without PixelReference
+            sbyte actualBlue = map.Data[PixelMap.BlueOffset];
+            sbyte actualGreen = map.Data[PixelMap.GreenOffset];
+            sbyte actualRed = map.Data[PixelMap.RedOffset];
+            
+            Assert.Equal<sbyte>(expectedRed, actualRed);
+            Assert.Equal<sbyte>(expectedGreen, actualGreen);
+            Assert.Equal<sbyte>(expectedBlue, actualBlue);
         }
 
         [Fact()]
@@ -361,26 +489,33 @@ namespace DjvuNet.Graphics.Tests
         {
             double g = 2.90000000;
             var map = CreateInitVerifyPixelMap(256, 256, Pixel.GreenPixel);
-            var pixRef = map.CreateGPixelReference(0, 128);
-            var pix = pixRef.ToPixel();
+            int byteOffset = map.RowOffset(128) * PixelMap.BytesPerPixel;
+            sbyte initialBlue = map.Data[byteOffset + PixelMap.BlueOffset];
+            sbyte initialGreen = map.Data[byteOffset + PixelMap.GreenOffset];
+            sbyte initialRed = map.Data[byteOffset + PixelMap.RedOffset];
+
             map.ApplyGammaCorrection(g);
-            var pixAfterGamma = pixRef.ToPixel();
             int[] gammaTable = PixelMap.GetGammaCorrection(g);
 
-            Assert.Equal<byte>(unchecked((byte)pixAfterGamma.Blue), (byte) gammaTable[unchecked((byte)pix.Blue)]);
-            Assert.Equal<byte>(unchecked((byte)pixAfterGamma.Green), (byte)gammaTable[unchecked((byte)pix.Green)]);
-            Assert.Equal<byte>(unchecked((byte)pixAfterGamma.Red), (byte)gammaTable[unchecked((byte)pix.Red)]);
+            Assert.Equal<byte>(unchecked((byte)map.Data[byteOffset + PixelMap.BlueOffset]), (byte) gammaTable[unchecked((byte)initialBlue)]);
+            Assert.Equal<byte>(unchecked((byte)map.Data[byteOffset + PixelMap.GreenOffset]), (byte)gammaTable[unchecked((byte)initialGreen)]);
+            Assert.Equal<byte>(unchecked((byte)map.Data[byteOffset + PixelMap.RedOffset]), (byte)gammaTable[unchecked((byte)initialRed)]);
         }
 
         [Fact()]
         public void ApplyGammaCorrectionTest002()
         {
             var map = CreateInitVerifyPixelMap(256, 256, Pixel.GreenPixel);
-            var pixRef = map.CreateGPixelReference(0, 128);
-            var pix = pixRef.ToPixel();
+            int byteOffset = map.RowOffset(128) * PixelMap.BytesPerPixel;
+            sbyte initialBlue = map.Data[byteOffset + PixelMap.BlueOffset];
+            sbyte initialGreen = map.Data[byteOffset + PixelMap.GreenOffset];
+            sbyte initialRed = map.Data[byteOffset + PixelMap.RedOffset];
+
             map.ApplyGammaCorrection(1.00000000);
-            var pixAfterGamma = pixRef.ToPixel();
-            Assert.Equal<IPixel>(pix, pixAfterGamma);
+
+            Assert.Equal<sbyte>(initialBlue, map.Data[byteOffset + PixelMap.BlueOffset]);
+            Assert.Equal<sbyte>(initialGreen, map.Data[byteOffset + PixelMap.GreenOffset]);
+            Assert.Equal<sbyte>(initialRed, map.Data[byteOffset + PixelMap.RedOffset]);
         }
 
         [Fact()]
@@ -1326,13 +1461,13 @@ namespace DjvuNet.Graphics.Tests
             // Test 1D linear offset iterator
             var referenceByOffset = map.CreateGPixelReference(42);
             Assert.NotNull(referenceByOffset);
-            Assert.Equal(42 * map.BytesPerPixel, referenceByOffset.Offset);
+            Assert.Equal(42 * PixelMap.BytesPerPixel, referenceByOffset.Offset);
             Assert.Same(map, referenceByOffset.Parent);
 
             // Test 2D spatial coordinate iterator
             var referenceByCoord = map.CreateGPixelReference(2, 5);
             Assert.NotNull(referenceByCoord);
-            int expectedOffset = (map.RowOffset(2) + 5) * map.BytesPerPixel;
+            int expectedOffset = (map.RowOffset(2) + 5) * PixelMap.BytesPerPixel;
             Assert.Equal(expectedOffset, referenceByCoord.Offset);
             Assert.Same(map, referenceByCoord.Parent);
         }
@@ -1413,6 +1548,154 @@ namespace DjvuNet.Graphics.Tests
             var ex = Assert.Throws<DjvuArgumentNullException>(() =>
                 map.Stencil(ref mask, null, 1, 1, new Rectangle(0,0,10,10), 1.0));
             Assert.Contains($"{typeof(PixelMap).FullName} foregroundMap reference is null.", ex.Message);
+        }
+
+        /// <summary>
+        /// Tests the mathematical parity of the Djvu 3-Layer Model blending equation across
+        /// all execution paths: transparent, opaque, and fractional blending.
+        /// </summary>
+        [Theory]
+        [InlineData(0, 255, 0, 1.0)]        // 0% Coverage (srcpix == 0 execution path)
+        [InlineData(255, 255, 0, 1.0)]      // 100% Coverage (srcpix >= maxgray path)
+        [InlineData(128, 255, 0, 1.0)]      // 50% Coverage (Blending path)
+        [InlineData(1, 0, 255, 1.0)]        // 0.3% Coverage Blending Edge Case
+        [InlineData(254, 255, 0, 1.0)]      // 99.6% Coverage Blending Edge Case
+        [InlineData(127, 40, 132, 2.2)]     // test056C approximate rounding edge case
+        [InlineData(85, 45, 51, 2.2)]       // test062C approximate rounding edge case
+        public void Stencil_MaskBlending(byte maskWeight, byte dstVal, byte fgVal, double gamma)
+        {
+            // Arrange
+            int width = 1;
+            int height = 1;
+            
+            Bitmap mask = new Bitmap();
+            mask.Init(height, width, 0); 
+            mask.Grays = 256;
+            mask.Data[0] = (sbyte)maskWeight;
+            
+            PixelMap fgMap = new PixelMap();
+            fgMap.Init(height, width, new Pixel((sbyte)fgVal, (sbyte)fgVal, (sbyte)fgVal));
+            
+            PixelMap dstMap = new PixelMap();
+            dstMap.Init(height, width, new Pixel((sbyte)dstVal, (sbyte)dstVal, (sbyte)dstVal));
+            
+            // Expected (DjvuLibre C++ formula from GPixmap::stencil)
+            int expected = dstVal;
+            if (maskWeight >= 255)
+            {
+                int[] gtable = PixelMap.GetGammaCorrection(gamma);
+                expected = gtable[fgVal];
+            }
+            else if (maskWeight > 0)
+            {
+                int maxgray = mask.Grays - 1;
+                int level = (0x10000 * maskWeight) / maxgray;
+                int[] gtable = PixelMap.GetGammaCorrection(gamma);
+                expected = dstVal - ((((int)dstVal - gtable[fgVal]) * level) >> 16);
+            }
+            
+            // Act
+            dstMap.Stencil(ref mask, fgMap, 1, 1, new DjvuNet.Graphics.Rectangle(0, 0, width, height), gamma);
+            
+            // Assert
+            Assert.Equal((sbyte)expected, dstMap.Data[PixelMap.BlueOffset]);
+            Assert.Equal((sbyte)expected, dstMap.Data[PixelMap.GreenOffset]);
+            Assert.Equal((sbyte)expected, dstMap.Data[PixelMap.RedOffset]);
+        }
+
+        /// <summary>
+        /// Verifies that Stencil correctly advances the pointer during both upsampling and 
+        /// downsampling, including complex prime number ratios.
+        /// </summary>
+        [Theory]
+        [InlineData(1, 2)] // 2x downsample
+        [InlineData(1, 4)] // 4x downsample
+        [InlineData(2, 5)] // 2.5x downsample
+        [InlineData(3, 7)] // Prime downsample
+        [InlineData(7, 11)] // Prime downsample
+        [InlineData(2, 1)] // 2x upsample
+        [InlineData(3, 1)] // 3x upsample
+        [InlineData(5, 2)] // 2.5x upsample
+        [InlineData(7, 3)] // Prime upsample
+        [InlineData(11, 7)] // Prime upsample
+        public void Stencil_Scaling_PointerAdvance(int superSample, int subSample)
+        {
+            // Arrange
+            // Use a slightly larger destination to ensure fractional accumulation triggers wraps
+            int dstWidth = 20;
+            int dstHeight = 20;
+            
+            // Foreground needs to be large enough to handle the downsampling
+            // Max coord accessed in fgMap will be around (dstWidth * subSample) / superSample
+            int fgWidth = (dstWidth * subSample / superSample) + 2;
+            int fgHeight = (dstHeight * subSample / superSample) + 2;
+
+            Bitmap mask = new Bitmap();
+            mask.Init(dstHeight, dstWidth, 0); 
+            mask.Grays = 256;
+            // Mask: Checkerboard pattern (255 for opaque, 128 for fractional blend)
+            for (int y = 0; y < dstHeight; y++)
+            {
+                int maskRowOffset = mask.RowOffset(y);
+                for (int x = 0; x < dstWidth; x++)
+                {
+                    mask.Data[maskRowOffset + x] = (x + y) % 2 == 0 ? unchecked((sbyte)255) : unchecked((sbyte)128);
+                }
+            }
+
+            PixelMap fgMap = new PixelMap();
+            fgMap.Init(fgHeight, fgWidth, new Pixel(0, 0, 0));
+            // Fill fgMap with distinct colors based on coordinates
+            for (int y = 0; y < fgHeight; y++)
+            {
+                int rowOffset = fgMap.RowOffset(y);
+                for (int x = 0; x < fgWidth; x++)
+                {
+                    int pixelIndex = (rowOffset + x) * PixelMap.BytesPerPixel;
+                    fgMap.Data[pixelIndex + PixelMap.BlueOffset] = (sbyte)100;
+                    fgMap.Data[pixelIndex + PixelMap.GreenOffset] = (sbyte)((y % 100) + 50); // Green = Y coordinate
+                    fgMap.Data[pixelIndex + PixelMap.RedOffset] = (sbyte)((x % 100) + 50);   // Red = X coordinate
+                }
+            }
+
+            PixelMap dstMap = new PixelMap();
+            // Static background: Blue=30, Green=20, Red=10
+            dstMap.Init(dstHeight, dstWidth, new Pixel((sbyte)30, (sbyte)20, (sbyte)10));
+
+            // Act
+            // Gamma is 1.0 to avoid complex non-linear gamma lookup tables altering the expected coordinate values directly
+            dstMap.Stencil(ref mask, fgMap, superSample, subSample, new DjvuNet.Graphics.Rectangle(0, 0, dstWidth, dstHeight), 1.0);
+
+            // Assert
+            for (int y = 0; y < dstHeight; y++)
+            {
+                int dstRowOffset = dstMap.RowOffset(y);
+                int maskRowOffset = mask.RowOffset(y);
+                // Correct calculation for expected foreground coordinate
+                int expectedFgY = (y * subSample) / superSample;
+
+                for (int x = 0; x < dstWidth; x++)
+                {
+                    int expectedFgX = (x * subSample) / superSample;
+                    int dstPixelIndex = (dstRowOffset + x) * PixelMap.BytesPerPixel;
+                    
+                    int maskVal = (byte)mask.Data[maskRowOffset + x];
+                    int level = (0x10000 * maskVal) / 255;
+                    
+                    // DjVuLibre Blending Formula (gamma = 1.0)
+                    sbyte expectedR = maskVal >= 255 ? (sbyte)((expectedFgX % 100) + 50) : (sbyte)(10 - (((10 - ((expectedFgX % 100) + 50)) * level) >> 16));
+                    sbyte expectedG = maskVal >= 255 ? (sbyte)((expectedFgY % 100) + 50) : (sbyte)(20 - (((20 - ((expectedFgY % 100) + 50)) * level) >> 16));
+                    sbyte expectedB = maskVal >= 255 ? (sbyte)100 : (sbyte)(30 - (((30 - 100) * level) >> 16));
+                    
+                    sbyte actualB = dstMap.Data[dstPixelIndex + PixelMap.BlueOffset];
+                    sbyte actualG = dstMap.Data[dstPixelIndex + PixelMap.GreenOffset];
+                    sbyte actualR = dstMap.Data[dstPixelIndex + PixelMap.RedOffset];
+
+                    Assert.Equal(expectedR, actualR);
+                    Assert.Equal(expectedG, actualG);
+                    Assert.Equal(expectedB, actualB);
+                }
+            }
         }
     }
 }

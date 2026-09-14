@@ -149,13 +149,11 @@ namespace DjvuNet.Extensions
             }
 
             PixelFormat format = default(PixelFormat);
-            if (pixmp.BytesPerPixel == 3)
+            if (PixelMap.BytesPerPixel == 3)
                 format = PixelFormat.Format24bppRgb;
-            else 
-                DjvuExceptionUtil.ThrowFormatException($"Unsupported pixel format for byte count: {pixmp.BytesPerPixel}");
 
             // Cast to long to prevent 32-bit integer overflow during stride calculation
-            long calculatedBytesPerRow = (long)pixmp.BytesPerPixel * pixmp.Width;
+            long calculatedBytesPerRow = (long)PixelMap.BytesPerPixel * pixmp.Width;
             if (calculatedBytesPerRow > int.MaxValue)
             {
                 DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(pixmp.Width), pixmp.Width, "Calculated stride exceeds Int32 limits.");

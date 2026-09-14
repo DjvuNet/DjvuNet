@@ -6,16 +6,9 @@ namespace DjvuNet.Graphics
     {
         int ColorNumber { get; }
 
-        int RedOffset { get; }
-
-        int GreenOffset { get; }
-
-        int BlueOffset { get; }
-
         PixelMap Parent { get; }
 
         int Offset { get; }
-
 
         void IncOffset();
 

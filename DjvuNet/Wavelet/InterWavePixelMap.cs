@@ -1,5 +1,8 @@
+using System;
 using System.Runtime.CompilerServices;
+using DjvuNet.Errors;
 using DjvuNet.Graphics;
+using DjvuNet.Utilities;
 
 namespace DjvuNet.Wavelet
 {
@@ -69,16 +72,23 @@ namespace DjvuNet.Wavelet
 
             int width = _YMap.Width;
             int height = _YMap.Height;
-            int pixsep = 3;
-            int rowsep = width * pixsep;
-            sbyte[] bytes = new sbyte[height * rowsep];
+            int pixSep = 3;
+            long rowSep = (long)width * pixSep;
+            long totalBytes = height * rowSep;
 
-            _YMap.Image(0, bytes, rowsep, pixsep, false);
+            if (totalBytes > Array.MaxLength)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Image dimensions result in an invalid Data buffer size (exceeding Array.MaxLength).");
+            }
+
+            sbyte[] bytes = new sbyte[(int)totalBytes];
+
+            _YMap.Image(0, bytes, (int)rowSep, pixSep, false);
 
             if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
-                _CbMap.Image(1, bytes, rowsep, pixsep, _CrCbHalf);
-                _CrMap.Image(2, bytes, rowsep, pixsep, _CrCbHalf);
+                _CbMap.Image(1, bytes, (int)rowSep, pixSep, _CrCbHalf);
+                _CrMap.Image(2, bytes, (int)rowSep, pixSep, _CrCbHalf);
             }
 
             // Convert image to RGB
@@ -105,26 +115,37 @@ namespace DjvuNet.Wavelet
             return pixelMap;
         }
 
-        public PixelMap GetPixelMap(int subsample, Rectangle rect, PixelMap retval)
+        public PixelMap GetPixelMap(int subSample, Rectangle rect, PixelMap retVal)
         {
+            Verify.SubsampleRange(subSample);
+
             if (_YMap == null)
                 return null;
 
-            if (retval == null)
-                retval = new PixelMap();
+            if (retVal == null)
+            {
+                retVal = new PixelMap();
+            }
 
             int width = rect.Width;
             int height = rect.Height;
-            int pixsep = 3;
-            int rowsep = width * pixsep;
-            sbyte[] bytes = retval.Init(height, width, null).Data;
+            int pixSep = 3;
+            long rowSep = (long)width * pixSep;
+            long totalBytes = height * rowSep;
 
-            _YMap.Image(subsample, rect, 0, bytes, rowsep, pixsep, false);
+            if (totalBytes > Array.MaxLength)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Image dimensions result in an invalid Data buffer size (exceeding Array.MaxLength).");
+            }
+
+            sbyte[] bytes = retVal.Init(height, width).Data;
+
+            _YMap.Image(subSample, rect, 0, bytes, (int)rowSep, pixSep, false);
 
             if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
             {
-                _CbMap.Image(subsample, rect, 1, bytes, rowsep, pixsep, _CrCbHalf);
-                _CrMap.Image(subsample, rect, 2, bytes, rowsep, pixsep, _CrCbHalf);
+                _CbMap.Image(subSample, rect, 1, bytes, (int)rowSep, pixSep, _CrCbHalf);
+                _CrMap.Image(subSample, rect, 2, bytes, (int)rowSep, pixSep, _CrCbHalf);
             }
 
             if ((_CrMap != null) && (_CbMap != null) && (_CrCbDelay >= 0))
@@ -140,12 +161,12 @@ namespace DjvuNet.Wavelet
             }
             else
             {
-                IPixelReference pixel = retval.CreateGPixelReference(0);
+                IPixelReference pixel = retVal.CreateGPixelReference(0);
                 for (int x = width * height; x-- > 0; pixel.IncOffset())
                     pixel.SetGray((sbyte)(127 - pixel.Blue));
             }
 
-            return retval;
+            return retVal;
         }
 
         #endregion Public Methods

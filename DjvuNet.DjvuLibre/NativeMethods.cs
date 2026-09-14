@@ -1711,6 +1711,45 @@ namespace DjvuNet.DjvuLibre
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_decode_chunk", CallingConvention = CallingConvention.Cdecl)]
         internal static extern bool DecodeIW44Chunk(IntPtr iw44Handle, IntPtr chunkData, int chunkSize);
 
+        /// <summary>
+        /// Extracts the RAW, unmasked, unscaled BGR background image directly from the native IW44 structure.
+        /// Passing <see cref="IntPtr.Zero"/> to <paramref name="outBgrBuffer"/> allows querying the dimensions 
+        /// before allocating the extraction buffer.
+        /// </summary>
+        /// <param name="iw44Handle">The native handle to the decoded IW44Image (must be a color IWPixmap).</param>
+        /// <param name="subsample">The subsampling ratio (must be a power of two between 1 and 32).</param>
+        /// <param name="rect">Pointer to a ddjvu_rect_t structure. Pass <see cref="IntPtr.Zero"/> to render the full image.</param>
+        /// <param name="outBgrBuffer">Pointer to a pre-allocated buffer to receive the interleaved BGR data, or <see cref="IntPtr.Zero"/> to query size.</param>
+        /// <param name="bufferSize">The size of the outBgrBuffer in bytes.</param>
+        /// <param name="outWidth">Returns the resolved width of the extracted image in pixels.</param>
+        /// <param name="outHeight">Returns the resolved height of the extracted image in pixels.</param>
+        /// <returns>True if extraction (or dimension query) was successful, otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_get_raw_pixmap", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool GetIW44RawPixelMap(
+            IntPtr iw44Handle, 
+            int subsample, 
+            IntPtr rect, 
+            IntPtr outBgrBuffer, 
+            int bufferSize, 
+            out int outWidth, 
+            out int outHeight);
+
+        /// <summary>
+        /// Extracts the RAW, unmasked, unscaled BGR image directly from the IW44 structure
+        /// using a full, linear decoding path that bypasses multiresolution boundary padding.
+        /// Unlike GetIW44RawPixmap which routes through the region-based multiresolution decoder, 
+        /// this function invokes the parameterless native get_pixmap(void) to match full-decode logic.
+        /// This works identically for both Background (BG44) and Foreground (FG44) decoded chunks.
+        /// </summary>
+        /// <returns>True if extraction (or dimension query) was successful, otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_get_raw_pixmap_linear", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern bool GetIW44RawPixelMapLinear(
+            IntPtr iw44Handle, 
+            IntPtr outBgrBuffer, 
+            int bufferSize, 
+            out int outWidth, 
+            out int outHeight);
+
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_iw44_free", CallingConvention = CallingConvention.Cdecl)]
         internal static extern void FreeIW44Image(IntPtr iw44Handle);
 
@@ -2003,6 +2042,183 @@ namespace DjvuNet.DjvuLibre
         /// <returns>True if successful, false if any pointer is NULL.</returns>
         [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_get_jb2_encoding_options", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
         internal static extern bool GetJb2EncodingOptions(out int contains_all, out int contains_shared, out int contains_marks);
+
+        /* -------------------------------------------------- */
+        /* TEST ARTIFACT EXTRACTION                           */
+        /* -------------------------------------------------- */
+
+        /// <summary>
+        /// Gets the JB2 mask serialized in GBitmap RLE compressed format.
+        /// 
+        /// This extraction mechanism requires two passes. In the first pass, provide IntPtr.Zero for the buffer 
+        /// to compute the required extraction size, which will be populated in the outputSize parameter. 
+        /// Allocate memory matching outputSize, then invoke the function a second time to execute the data transfer.
+        /// </summary>
+        /// <param name="handle">Pointer to the unmanaged JB2Image instance.</param>
+        /// <param name="subsample">The subsampling factor. Typically 1 for full resolution.</param>
+        /// <param name="align">The row alignment in bytes. Typically 1 for exact packing.</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes.</param>
+        /// <param name="outputSize">Outputs the exact size in bytes required to store the serialized RLE mask.</param>
+        /// <returns>True if the parameters are valid and the extraction succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_jb2image_get_rle_mask", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetJb2ImageRleMask(
+            IntPtr handle, 
+            int subsample, 
+            int align,
+            IntPtr buffer, 
+            int bufferSize, 
+            out int outputSize);
+
+        /// <summary>
+        /// Gets the background component image rendered to full resolution in PPM format.
+        /// 
+        /// This extraction mechanism requires two passes. In the first pass, provide IntPtr.Zero for the buffer 
+        /// to compute the required extraction size, which will be populated in the outputSize parameter. 
+        /// Allocate memory matching outputSize, then invoke the function a second time to execute the data transfer.
+        /// </summary>
+        /// <param name="page">Pointer to the unmanaged ddjvu_page_t instance.</param>
+        /// <param name="renderRect">The specific segment of the image to extract. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="pageRect">The physical dimensions of the full page. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes.</param>
+        /// <param name="outputSize">Outputs the exact size in bytes required to store the generated PPM file data.</param>
+        /// <returns>True if the parameters are valid, memory capacity is sufficient, and the extraction succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_bg_ppm", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetPageBackgroundPpm(
+            IntPtr page,
+            ref DjvuRectangle renderRect, 
+            ref DjvuRectangle pageRect,
+            IntPtr buffer, 
+            int bufferSize, 
+            out int outputSize);
+
+        /// <summary>
+        /// Gets the foreground component image rendered to full resolution in PPM format.
+        /// 
+        /// This extraction mechanism requires two passes. In the first pass, provide IntPtr.Zero for the buffer 
+        /// to compute the required extraction size, which will be populated in the outputSize parameter. 
+        /// Allocate memory matching outputSize, then invoke the function a second time to execute the data transfer.
+        /// </summary>
+        /// <param name="page">Pointer to the unmanaged ddjvu_page_t instance.</param>
+        /// <param name="renderRect">The specific segment of the image to extract. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="pageRect">The physical dimensions of the full page. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes.</param>
+        /// <param name="outputSize">Outputs the exact size in bytes required to store the generated PPM file data.</param>
+        /// <returns>True if the parameters are valid, memory capacity is sufficient, and the extraction succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_fg_ppm", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetPageForegroundPpm(
+            IntPtr page,
+            ref DjvuRectangle renderRect, 
+            ref DjvuRectangle pageRect,
+            IntPtr buffer, 
+            int bufferSize, 
+            out int outputSize);
+
+        /// <summary>
+        /// Gets the complete, composited page image rendered to full resolution in PPM format.
+        /// 
+        /// This extraction mechanism requires two passes. In the first pass, provide IntPtr.Zero for the buffer 
+        /// to compute the required extraction size, which will be populated in the outputSize parameter. 
+        /// Allocate memory matching outputSize, then invoke the function a second time to execute the data transfer.
+        /// </summary>
+        /// <param name="page">Pointer to the unmanaged ddjvu_page_t instance.</param>
+        /// <param name="renderRect">The specific segment of the image to extract. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="pageRect">The physical dimensions of the full page. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes.</param>
+        /// <param name="outputSize">Outputs the exact size in bytes required to store the generated PPM file data.</param>
+        /// <returns>True if the parameters are valid, memory capacity is sufficient, and the extraction succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_composite_ppm", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetPageImagePpm(
+            IntPtr page,
+            ref DjvuRectangle renderRect, 
+            ref DjvuRectangle pageRect,
+            IntPtr buffer, 
+            int bufferSize, 
+            out int outputSize);
+
+        /// <summary>
+        /// Gets the uncompressed, raw background component pixel data scaled to full resolution in BGR format (3 bytes per pixel).
+        /// 
+        /// This extraction mechanism requires two passes and provides direct access to the GPixmap internal memory structure. 
+        /// In the first pass, provide IntPtr.Zero for the buffer. The function will compute and return the width, height, and total outputSize. 
+        /// The caller must allocate a contiguous unmanaged buffer matching outputSize, and invoke the function again.
+        /// </summary>
+        /// <param name="page">Pointer to the unmanaged ddjvu_page_t instance.</param>
+        /// <param name="renderRect">The specific segment of the image to extract. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="pageRect">The physical dimensions of the full page. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="width">Outputs the exact width of the extracted image data in pixels.</param>
+        /// <param name="height">Outputs the exact height of the extracted image data in pixels.</param>
+        /// <param name="outputSize">Outputs the exact size in bytes required to store the uncompressed BGR pixel array (width * height * 3).</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes. Must be greater than or equal to outputSize.</param>
+        /// <returns>True if the parameters are valid, buffer capacity is mathematically verified against outputSize, and the block copy succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_bg_raw", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetPageBackgroundData(
+            IntPtr page,
+            ref DjvuRectangle renderRect, 
+            ref DjvuRectangle pageRect,
+            out int width, 
+            out int height, 
+            out int outputSize,
+            IntPtr buffer, 
+            int bufferSize);
+
+        /// <summary>
+        /// Gets the uncompressed, raw foreground component pixel data scaled to full resolution in BGR format (3 bytes per pixel).
+        /// 
+        /// This extraction mechanism requires two passes and provides direct access to the GPixmap internal memory structure. 
+        /// In the first pass, provide IntPtr.Zero for the buffer. The function will compute and return the width, height, and total outputSize. 
+        /// The caller must allocate a contiguous unmanaged buffer matching outputSize, and invoke the function again.
+        /// </summary>
+        /// <param name="page">Pointer to the unmanaged ddjvu_page_t instance.</param>
+        /// <param name="renderRect">The specific segment of the image to extract. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="pageRect">The physical dimensions of the full page. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="width">Outputs the exact width of the extracted image data in pixels.</param>
+        /// <param name="height">Outputs the exact height of the extracted image data in pixels.</param>
+        /// <param name="outputSize">Outputs the exact size in bytes required to store the uncompressed BGR pixel array (width * height * 3).</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes. Must be greater than or equal to outputSize.</param>
+        /// <returns>True if the parameters are valid, buffer capacity is mathematically verified against outputSize, and the block copy succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_fg_raw", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetPageForegroundData(
+            IntPtr page,
+            ref DjvuRectangle renderRect, 
+            ref DjvuRectangle pageRect,
+            out int width, 
+            out int height, 
+            out int outputSize,
+            IntPtr buffer, 
+            int bufferSize);
+
+        /// <summary>
+        /// Gets the complete, composited uncompressed raw page pixel data in BGR format (3 bytes per pixel).
+        /// 
+        /// This extraction mechanism requires two passes and provides direct access to the GPixmap internal memory structure. 
+        /// In the first pass, provide IntPtr.Zero for the buffer. The function will compute and return the width, height, and total outputSize. 
+        /// The caller must allocate a contiguous unmanaged buffer matching outputSize, and invoke the function again.
+        /// </summary>
+        /// <param name="page">Pointer to the unmanaged ddjvu_page_t instance.</param>
+        /// <param name="renderRect">The specific segment of the image to extract. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="pageRect">The physical dimensions of the full page. Must be a valid DjvuRectangle struct.</param>
+        /// <param name="width">Outputs the exact width of the extracted image data in pixels.</param>
+        /// <param name="height">Outputs the exact height of the extracted image data in pixels.</param>
+        /// <param name="outputSize">Outputs the exact size in bytes required to store the uncompressed BGR pixel array (width * height * 3).</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes. Must be greater than or equal to outputSize.</param>
+        /// <returns>True if the parameters are valid, buffer capacity is mathematically verified against outputSize, and the block copy succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_composite_raw", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetPageImageData(
+            IntPtr page,
+            ref DjvuRectangle renderRect, 
+            ref DjvuRectangle pageRect,
+            out int width, 
+            out int height, 
+            out int outputSize,
+            IntPtr buffer, 
+            int bufferSize);
     }
 }
 
