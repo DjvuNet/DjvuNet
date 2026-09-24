@@ -30,6 +30,72 @@ namespace DjvuNet.Wavelet
         }
 
         /// <summary>
+        /// EXPLICIT ARCHITECTURE NOTE (SIMD Waterfall Pattern):
+        /// Do not add 'else' blocks to these hardware checks. This is a deliberate "SIMD Waterfall".
+        /// The waterfall only falls through if the initial width is smaller than the vector size.
+        /// Otherwise, each tier processes the bulk of the data and handles its own unaligned tail 
+        /// internally using an overlapping tail-shift strategy, returning the full width processed.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void YCbCr2Rgb(short* pY, short* pCb, short* pCr, sbyte* pImg8, int width, int height, int rowSize, int blockWidth)
+        {
+            int processedWidth = 0;
+            if (Avx512F.IsSupported && Avx512BW.IsSupported)
+            {
+                processedWidth = InterWaveSimd.YCbCr2RgbVector512(pY, pCb, pCr, pImg8, height, width, blockWidth, rowSize, 0);
+            }
+            
+            if (Avx2.IsSupported && width - processedWidth >= 32)
+            {
+                processedWidth = InterWaveSimd.YCbCr2RgbVector256(pY, pCb, pCr, pImg8, height, width, blockWidth, rowSize, processedWidth);
+            }
+            
+            if ((Ssse3.IsSupported || AdvSimd.Arm64.IsSupported) && width - processedWidth >= 16)
+            {
+                processedWidth = InterWaveSimd.YCbCr2RgbVector128(pY, pCb, pCr, pImg8, height, width, blockWidth, rowSize, processedWidth);
+            }
+
+            if (processedWidth < width)
+            {
+                InterWaveTransform.YCbCr2RgbScalar(pY, pCb, pCr, pImg8, width, height, rowSize, blockWidth, processedWidth);
+            }
+        }
+
+        /// <summary>
+        /// See YCbCr2Rgb for documentation on the deliberate SIMD Waterfall routing pattern.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void YGray2Rgb(short* pY, sbyte* pImg8, int width, int height, int rowSize, int blockWidth)
+        {
+            int processedWidth = 0;
+            if (Avx512F.IsSupported && Avx512BW.IsSupported)
+            {
+                processedWidth = InterWaveSimd.YGray2PixelMapVector512(pY, pImg8, height, width, blockWidth, rowSize, 0);
+            }
+            
+            if (Avx2.IsSupported && width - processedWidth >= 32)
+            {
+                processedWidth = InterWaveSimd.YGray2PixelMapVector256(pY, pImg8, height, width, blockWidth, rowSize, processedWidth);
+            }
+
+            if ((Ssse3.IsSupported || AdvSimd.Arm64.IsSupported) && width - processedWidth >= 16)
+            {
+                processedWidth = InterWaveSimd.YGray2PixelMapVector128(pY, pImg8, height, width, blockWidth, rowSize, processedWidth);
+            }
+            
+            for (int y = 0, pidx = 0, ridx = 0; y < height; y++, pidx += blockWidth, ridx += rowSize)
+            {
+                int pixidx = ridx + (processedWidth * 3);
+                for (int x = processedWidth; x < width; x++, pixidx += 3)
+                {
+                    int yVal = (pY[pidx + x] + 32) >> 6;
+                    yVal = yVal < -128 ? -128 : (yVal > 127 ? 127 : yVal);
+                    pImg8[pixidx] = pImg8[pixidx + 1] = pImg8[pixidx + 2] = (sbyte)(127 - yVal);
+                }
+            }
+        }
+
+        /// <summary>
         /// Calculates the optimal number of threads for parallel SIMD execution based on empirical throughput curves.
         /// Returns 1 to indicate the caller should bypass the TPL and fall back to a single-threaded scalar loop.
         /// </summary>

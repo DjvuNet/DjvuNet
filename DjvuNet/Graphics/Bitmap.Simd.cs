@@ -3223,7 +3223,7 @@ namespace DjvuNet.Graphics
                         if (doBlit)
                         {
                             int c = 0;
-                            if (Vector256.IsHardwareAccelerated)
+                            if (Vector512.IsHardwareAccelerated)
                             {
                                 int limit128 = w - 128;
                                 while (c <= limit128)

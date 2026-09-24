@@ -224,6 +224,7 @@
     <Compile Include="Wavelet\InterWaveTransform.Unified.cs" />
     <Compile Include="Wavelet\InterWaveTransform.Vector128.cs" />
     <Compile Include="Wavelet\InterWaveTransform.Vector256.cs" />
+    <Compile Include="Wavelet\InterWaveTransform.Vector512.cs" />
     <Compile Include="Wavelet\MemoryUtilities.cs" />
     <Compile Include="Wavelet\YCrCbMode.cs" />
     <Compile Include="Text\PageText.cs" />

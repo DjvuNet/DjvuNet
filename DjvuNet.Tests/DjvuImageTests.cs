@@ -4,13 +4,12 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Runtime.Intrinsics;
 using DjvuNet.Errors;
-using DjvuNet.Tests.Xunit;
 using DjvuNet.Extensions;
+using DjvuNet.Tests.Xunit;
 using Moq;
 using Xunit;
+using SysBitmap = System.Drawing.Bitmap;
 
 namespace DjvuNet.Tests
 {
@@ -351,17 +350,35 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test001C.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.BuildImage())
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
+
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(map);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
+                    bool result = Util.ImageBinarySimilarity(testImage, map, 0.0, true, $"Testing Djvu BuildPageImage001: \t\ttest001C.png, ");
+
+                    Bitmap image = null;
+                    try
+                    {
+                        if (!result)
+                        {
+                            image = map.ToImage();
+                            Util.DumpImageMismatch(testImage, image, 1, "BuildPageImage");
+                        }
+#if DUMP_IMAGES
+                        image ??= map.ToImage();
+                        DumpImage(1, image, "Img");
+#endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -376,17 +393,35 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test002C.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.BuildImage())
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
+
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(map);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
+                    bool result = Util.ImageBinarySimilarity(testImage, map, 0.0, true, $"Testing Djvu BuildPageImage002: \t\ttest002C.png, ");
+
+                    Bitmap image = null;
+                    try
+                    {
+                        if (!result)
+                        {
+                            image = map.ToImage();
+                            Util.DumpImageMismatch(testImage, image, 2, "BuildPageImage");
+                        }
+#if DUMP_IMAGES
+                        image ??= map.ToImage();
+                        DumpImage(2, image, "Img");
+#endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -401,17 +436,35 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test003C.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.BuildImage())
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
+
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(map);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image);
+                    bool result = Util.ImageBinarySimilarity(testImage, map, 0.0, true, $"Testing Djvu BuildPageImage003: \t\ttest003C.png, ");
+
+                    Bitmap image = null;
+                    try
+                    {
+                        if (!result)
+                        {
+                            image = map.ToImage();
+                            Util.DumpImageMismatch(testImage, image, 3, "BuildPageImage");
+                        }
+#if DUMP_IMAGES
+                        image ??= map.ToImage();
+                        DumpImage(3, image, "Img");
+#endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -426,17 +479,35 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test004C.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.BuildImage())
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
+
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(map);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.0585);
+                    bool result = Util.ImageBinarySimilarity(testImage, map, 0.0, true, $"Testing Djvu BuildPageImage004: \t\ttest004C.png, ");
+
+                    Bitmap image = null;
+                    try
+                    {
+                        if (!result)
+                        {
+                            image = map.ToImage();
+                            Util.DumpImageMismatch(testImage, image, 4, "BuildPageImage");
+                        }
+#if DUMP_IMAGES
+                        image ??= map.ToImage();
+                        DumpImage(4, image, "Img");
+#endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -451,17 +522,35 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test061C.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.BuildImage())
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
+
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(map);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.05);
+                    bool result = Util.ImageBinarySimilarity(testImage, map, 0.0, true, $"Testing Djvu BuildPageImage061: \t\ttest061C.png, ");
+
+                    Bitmap image = null;
+                    try
+                    {
+                        if (!result)
+                        {
+                            image = map.ToImage();
+                            Util.DumpImageMismatch(testImage, image, 61, "BuildPageImage");
+                        }
+#if DUMP_IMAGES
+                        image ??= map.ToImage();
+                        DumpImage(61, image, "Img");
+#endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -476,17 +565,35 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
 
-                IDjvuPage page = document.FirstPage;
+                DjvuPage page = (DjvuPage)document.FirstPage;
                 var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test075C.png");
 
-                DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.BuildImage())
+                Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
+                Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
+
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(map);
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.15);
+                    bool result = Util.ImageBinarySimilarity(testImage, map, 0.0, true, $"Testing Djvu BuildPageImage075: \t\ttest075C.png, ");
+
+                    Bitmap image = null;
+                    try
+                    {
+                        if (!result)
+                        {
+                            image = map.ToImage();
+                            Util.DumpImageMismatch(testImage, image, 75, "BuildPageImage");
+                        }
+#if DUMP_IMAGES
+                        image ??= map.ToImage();
+                        DumpImage(75, image, "Img");
+#endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -552,23 +659,32 @@ namespace DjvuNet.Tests
                 Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
                 Graphics.PixelMap map = page.GetPixelMap(rect, 1, 2.2, null);
 
-                using (Bitmap image = map?.ToImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(map);
 
                     double threshold = 0.0;
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, threshold, true, $"Testing Djvu BuildImage(): \t\ttest{docNumber:00#}C.png, ");
+                    bool result = Util.ImageBinarySimilarity(testImage, map, threshold, true, $"Testing Djvu BuildImage(): \t\ttest{docNumber:00#}C.png, ");
 
-                    if (!result)
+                    Bitmap image = null;
+                    try
                     {
-                        Util.DumpImageMismatchDetails(testImage, image, docNumber, "BuildImage");
-                    }
+                        if (!result)
+                        {
+                            image = map.ToImage();
+                            Util.DumpImageMismatch(testImage, image, docNumber, "BuildImage");
+                        }
 #if DUMP_IMAGES
-                    DumpImage(docNumber, image, "Img");
+                        image ??= map.ToImage();
+                        DumpImage(docNumber, image, "Img");
 #endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
+
                     Assert.True(result, $"Test failed: ");
                 }
             }
@@ -614,24 +730,34 @@ namespace DjvuNet.Tests
                 Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
                 Graphics.PixelMap bgMap = page.GetBackgroundPixelMap(rect, 1, 2.2, null);
 
-                using (Bitmap image = bgMap.ToImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(bgMap);
 
-                    Bitmap resizedImage = null;
-                    if (image.Width != testImage.Width || image.Height != testImage.Height)
+                    if (bgMap.Width != testImage.Width || bgMap.Height != testImage.Height)
                     {
-                        Assert.Fail($"Unexpected image size differences.\nWidth image: {image.Width} | testImage: {testImage.Width}, Height: image: {image.Height} | testImage {testImage.Height}");
+                        Assert.Fail($"Unexpected image size differences.\nWidth image: {bgMap.Width} | testImage: {testImage.Width}, Height: image: {bgMap.Height} | testImage {testImage.Height}");
                     }
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.0, true, $"Testing Djvu GetBackgroundImage(): \ttest{docNumber:00#}C.png, ");
+                    bool result = Util.ImageBinarySimilarity(testImage, bgMap, 0.0, true, $"Testing Djvu GetBackgroundImage(): \ttest{docNumber:00#}C.png, ");
 
+                    Bitmap image = null;
+                    try
+                    {
+                        if (!result)
+                        {
+                            image = bgMap.ToImage();
+                            Util.DumpImageMismatch(testImage, image, docNumber, "Bgnd");
+                        }
 #if DUMP_IMAGES
-                    DumpImage(docNumber, image, "Bgnd");
+                        image ??= bgMap.ToImage();
+                        DumpImage(docNumber, image, "Bgnd");
 #endif
-                    resizedImage?.Dispose();
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -657,36 +783,44 @@ namespace DjvuNet.Tests
                 Graphics.Rectangle rect = new Graphics.Rectangle(0, 0, page.Width, page.Height);
                 Graphics.PixelMap fgMap = page.GetForegroundPixelMap(rect, 1, 2.2);
 
-                using (Bitmap image = fgMap?.ToImage())
                 using (Bitmap testImage = new Bitmap(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                    Assert.NotNull(fgMap);
 
-                    if (image.Width != testImage.Width || image.Height != testImage.Height)
+                    if (fgMap.Width != testImage.Width || fgMap.Height != testImage.Height)
                     {
-                        Assert.Fail($"Unexpected image size differences. Width image: {image.Width} | testImage: {testImage.Width}, Height: image: {image.Height} | testImage {testImage.Height}");
+                        Assert.Fail($"Unexpected image size differences. Width image: {fgMap.Width} | testImage: {testImage.Width}, Height: image: {fgMap.Height} | testImage {testImage.Height}");
                     }
 
                     double threshold = 0.0;
 
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, threshold, true, $"Testing Djvu GetForegroundImage(): \ttest{docNumber:00#}C.png, ");
+                    bool result = Util.ImageBinarySimilarity(testImage, fgMap, threshold, true, $"Testing Djvu GetForegroundImage(): \ttest{docNumber:00#}C.png, ");
 
-                    if (!result)
+                    Bitmap image = null;
+                    try
                     {
-                        Util.DumpImageMismatchDetails(testImage, image, docNumber, "Foreground");
-                        
-                        Console.WriteLine($"Page Width: {page.Width}, Height: {page.Height}");
-                        Console.WriteLine($"ForegroundJB2Image present?   {page.ForegroundJB2Image != null}");
-                        Console.WriteLine($"ForegroundPalette present?    {page.ForegroundPalette != null}");
-                        if (page.ForegroundPalette != null)
-                            Console.WriteLine($"  -> Palette Colors: {page.ForegroundPalette.PaletteColors?.Length ?? 0}");
-                        Console.WriteLine($"ForegroundIWPixelMap present? {page.ForegroundIWPixelMap != null}");
-                    }
+                        if (!result)
+                        {
+                            image = fgMap.ToImage();
+                            Util.DumpImageMismatch(testImage, image, docNumber, "Foreground");
+
+                            Console.WriteLine($"Page Width: {page.Width}, Height: {page.Height}");
+                            Console.WriteLine($"ForegroundJB2Image present?   {page.ForegroundJB2Image != null}");
+                            Console.WriteLine($"ForegroundPalette present?    {page.ForegroundPalette != null}");
+                            if (page.ForegroundPalette != null)
+                                Console.WriteLine($"  -> Palette Colors: {page.ForegroundPalette.PaletteColors?.Length ?? 0}");
+                            Console.WriteLine($"ForegroundIWPixelMap present? {page.ForegroundIWPixelMap != null}");
+                        }
 
 #if DUMP_IMAGES
-                    DumpImage(docNumber, image, "Fgnd");
+                        image ??= fgMap.ToImage();
+                        DumpImage(docNumber, image, "Fgnd");
 #endif
+                    }
+                    finally
+                    {
+                        image?.Dispose();
+                    }
 
                     Assert.True(result);
                 }
@@ -711,22 +845,24 @@ namespace DjvuNet.Tests
             {
                 List<object[]> retVal = new List<object[]>();
 
-                foreach(object[] i in Util.ForegroundImageSourceDocs)
+                foreach (object[] i in Util.ForegroundImageSourceDocs)
                 {
-                    // Special casing for huge errors which should be investigated
-                    switch ((int)i[0])
-                    {
-                        case 75:
-                            retVal.Add(new object[] { i[0], 0.000001 });
-                            break;
-                        default:
-                            retVal.Add(new object[] { i[0], 0.000001 });
-                            break;
-                    }
+                    retVal.Add(new object[] { i[0], 0.0 });
+                    //// Special casing for huge errors which should be investigated
+                    //switch ((int)i[0])
+                    //{
+                    //    case 75:
+                    //        retVal.Add(new object[] { i[0], 0.000001 });
+                    //        break;
+                    //    default:
+                    //        retVal.Add(new object[] { i[0], 0.000001 });
+                    //        break;
+                    //}
                 }
                 return retVal;
             }
         }
+
 
         [Theory]
         [MemberData(nameof(MaskImageSourceDocs))]
@@ -742,24 +878,48 @@ namespace DjvuNet.Tests
             {
                 Util.VerifyDjvuDocument(pageCount, document);
                 IDjvuPage page = document.FirstPage;
-                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", $"test{docNumber:00#}Cmask.png");
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "extracted", $"test{docNumber:00#}C_P01.rle");
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.GetMaskImage(1, true))
-                using (Bitmap testImage = new Bitmap(testImagePath))
+
+                Graphics.Bitmap maskMap = djvuImage.GetMaskBitmap();
+                Assert.NotNull(maskMap);
+
+                Graphics.Bitmap maskOracle;
+                using (FileStream fs = File.OpenRead(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
-
-                    using Bitmap invertedImage = DjvuImage.InvertImage(image);
-
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, invertedImage, tolerance, true, $"Testing Djvu GetMaskImage(): \t\ttest{docNumber:00#}C.png, ");
-
-#if DUMP_IMAGES
-                    DumpIage(docNumber, image, "Mask");
-#endif
-                    Assert.True(result);
+                    maskOracle = Graphics.Bitmap.CreateBitmap(fs, maskMap.Border);
                 }
+
+                if (maskMap.Width != maskOracle.Width || maskMap.Height != maskOracle.Height)
+                {
+                    Assert.Fail($"Unexpected image size differences. Width maskMap: {maskMap.Width} | maskOracle: {maskOracle.Width}, Height: maskMap: {maskMap.Height} | maskOracle {maskOracle.Height}");
+                }
+
+                var (result, diff) = Util.ImageBinarySimilarity(ref maskOracle, ref maskMap, tolerance, true, $"Testing Djvu GetMaskImage(): \t\ttest{docNumber:00#}C_P01.rle, ");
+
+                SysBitmap dumpImg = null;
+                SysBitmap oracleDumpImg = null;
+                try
+                {
+                    if (!result)
+                    {
+                        dumpImg = maskMap.ToImage();
+                        oracleDumpImg = maskOracle.ToImage();
+                        Util.DumpImageMismatch(oracleDumpImg, dumpImg, docNumber, "MaskImage");
+                    }
+#if DUMP_IMAGES
+                    dumpImg ??= maskMap.ToImage();
+                    DumpImage(docNumber, dumpImg, "Mask");
+#endif
+                }
+                finally
+                {
+                    dumpImg?.Dispose();
+                    oracleDumpImg?.Dispose();
+                }
+
+                Assert.True(result);
             }
         }
 
@@ -855,16 +1015,14 @@ namespace DjvuNet.Tests
                 Assert.NotNull(page);
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.GetMaskImage(1))
-                {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
+                Graphics.Bitmap maskBitmap = djvuImage.GetMaskBitmap();
+                Assert.NotNull(maskBitmap);
+                Assert.NotNull(maskBitmap.Data);
 #if DUMP_IMAGES
-                    string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CMn.png");
-                    using (FileStream stream = new FileStream(file, FileMode.Create))
-                        image.Save(stream, ImageFormat.Png);
+                string file = Path.Combine(Util.ArtifactsDataPath, "dumps", "test003CMn.rle");
+                using (FileStream stream = new FileStream(file, FileMode.Create))
+                    maskBitmap.SerializeToRle(stream);
 #endif
-                }
             }
         }
 
@@ -878,21 +1036,43 @@ namespace DjvuNet.Tests
 
                 DjvuPage page = document.FirstPage as DjvuPage;
                 Assert.NotNull(page);
-                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "test075C.mask.png");
+                var testImagePath = Path.Combine(Util.RepoRoot, "artifacts", "data", "extracted", "test075C_P01.rle");
 
                 DjvuImage djvuImage = page.Image as DjvuImage;
-                using (Bitmap image = djvuImage.GetMaskImage(1))
-                using (Bitmap testImage = new Bitmap(testImagePath))
+                Graphics.Bitmap image = djvuImage.GetMaskBitmap();
+                Assert.NotNull(image.Data);
+
+                Graphics.Bitmap maskOracle;
+                using (FileStream fs = File.OpenRead(testImagePath))
                 {
-                    Assert.NotNull(image);
-                    Assert.IsType<Bitmap>(image);
-
-                    Assert.NotNull(testImage);
-
-                    bool result = Util.CompareImagesForBinarySimilarity(testImage, image, 0.3, true, "Testing Djvu  mask: \t\ttest075C.png, ");
-
-                    Assert.True(result);
+                    maskOracle = Graphics.Bitmap.CreateBitmap(fs, 0);
                 }
+
+                var (result, diff) = Util.ImageBinarySimilarity(ref maskOracle, ref image, 0.0, true, "Testing Djvu  mask: \t\ttest075C.rle, ");
+
+                if (image.Width != maskOracle.Width || image.Height != maskOracle.Height)
+                {
+                    Assert.Fail($"Unexpected image size differences. Width image: {image.Width} | maskOracle: {maskOracle.Width}, Height: image: {image.Height} | maskOracle {maskOracle.Height}");
+                }
+
+                SysBitmap dumpImg = null;
+                SysBitmap oracleDumpImg = null;
+                try
+                {
+                    if (!result)
+                    {
+                        dumpImg = image.ToImage();
+                        oracleDumpImg = maskOracle.ToImage();
+                        Util.DumpImageMismatch(oracleDumpImg, dumpImg, 75, "MaskImage");
+                    }
+                }
+                finally
+                {
+                    dumpImg?.Dispose();
+                    oracleDumpImg?.Dispose();
+                }
+
+                Assert.True(result);
             }
         }
 

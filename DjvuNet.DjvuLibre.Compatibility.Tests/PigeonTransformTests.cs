@@ -8,6 +8,7 @@ using Xunit;
 using DjvuNet.Tests;
 using System.Threading.Tasks;
 using System.Runtime.Intrinsics.X86;
+using System.Runtime.Intrinsics.Arm;
 
 namespace DjvuNet.DjvuLibre.Compatibility.Tests
 {
@@ -255,9 +256,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (byte* pNtCb = nativeOutCb)
             fixed (byte* pNtCr = nativeOutCr)
             {
-                double diffY = Util.ImageBinaryDiff((byte*)pY, pNtY, width, height, width, 8, 8);
-                double diffCb = Util.ImageBinaryDiff((byte*)pCb, pNtCb, width, height, width, 8, 8);
-                double diffCr = Util.ImageBinaryDiff((byte*)pCr, pNtCr, width, height, width, 8, 8);
+                double diffY = Util.ImageBinaryDiff((byte*)pY, pNtY, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit);
+                double diffCb = Util.ImageBinaryDiff((byte*)pCb, pNtCb, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit);
+                double diffCr = Util.ImageBinaryDiff((byte*)pCr, pNtCr, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit);
 
                 Assert.Equal(0.0, diffY);
                 Assert.Equal(0.0, diffCb);
@@ -353,9 +354,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (byte* pNtCb = nativeOutCb)
             fixed (byte* pNtCr = nativeOutCr)
             {
-                double diffY = Util.ImageBinaryDiff((byte*)pY, pNtY, width, height, outRowSize, 8, 8);
-                double diffCb = Util.ImageBinaryDiff((byte*)pCb, pNtCb, width, height, outRowSize, 8, 8);
-                double diffCr = Util.ImageBinaryDiff((byte*)pCr, pNtCr, width, height, outRowSize, 8, 8);
+                double diffY = Util.ImageBinaryDiff((byte*)pY, pNtY, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit);
+                double diffCb = Util.ImageBinaryDiff((byte*)pCb, pNtCb, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit);
+                double diffCr = Util.ImageBinaryDiff((byte*)pCr, pNtCr, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit);
 
                 if (diffY != 0.0 || diffCb != 0.0 || diffCr != 0.0)
                 {
@@ -466,14 +467,14 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (byte* pNtCr = nativeOutCr)
             {
                 // Native vs Unified
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, width, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
 
                 // Scalar vs Unified
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pScY, (byte*)pUnY, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pScCb, (byte*)pUnCb, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pScCr, (byte*)pUnCr, width, height, width, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pScY, (byte*)pUnY, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pScCb, (byte*)pUnCb, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pScCr, (byte*)pUnCr, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
             }
         }
 
@@ -680,14 +681,14 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (byte* pNtCr = nativeOutCr)
             {
                 // Native vs Unified (Must match exactly)
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, outRowSize, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, outRowSize, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, outRowSize, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
 
                 // Scalar vs Unified (Must fail because Scalar ignores stride)
-                double diffScY = Util.ImageBinaryDiff((byte*)pScY, (byte*)pUnY, width, height, outRowSize, 8, 8);
-                double diffScCb = Util.ImageBinaryDiff((byte*)pScCb, (byte*)pUnCb, width, height, outRowSize, 8, 8);
-                double diffScCr = Util.ImageBinaryDiff((byte*)pScCr, (byte*)pUnCr, width, height, outRowSize, 8, 8);
+                double diffScY = Util.ImageBinaryDiff((byte*)pScY, (byte*)pUnY, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit);
+                double diffScCb = Util.ImageBinaryDiff((byte*)pScCb, (byte*)pUnCb, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit);
+                double diffScCr = Util.ImageBinaryDiff((byte*)pScCr, (byte*)pUnCr, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit);
 
                 bool scalarFailed = diffScY > 0.0 || diffScCb > 0.0 || diffScCr > 0.0;
                 Assert.False(scalarFailed, "Expected the new scalar method to pass parity on padded buffers.");
@@ -1129,6 +1130,144 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                 Console.WriteLine($"Total Diffs: {diffCount}");
                 Assert.True(diffCount == 0, $"Found diffs in YCbCr2Rgb conversion.\n{sb.ToString()}");
             }
+        }
+        [Fact]
+        public unsafe void YCbCr2RgbScalar_Fused_BruteForceParity()
+        {
+            int width = 4096;
+            int height = 4096;
+            int rowSizeInBytes = width * 3;
+            int totalBytes = height * rowSizeInBytes;
+
+            short[] arrY = GC.AllocateUninitializedArray<short>(width * height);
+            short[] arrCb = GC.AllocateUninitializedArray<short>(width * height);
+            short[] arrCr = GC.AllocateUninitializedArray<short>(width * height);
+            
+            byte[] managedBuffer = GC.AllocateUninitializedArray<byte>(totalBytes);
+            byte[] backupBuffer = GC.AllocateUninitializedArray<byte>(totalBytes);
+            byte[] nativeBuffer = GC.AllocateUninitializedArray<byte>(totalBytes);
+
+            fixed (byte* pBackup = backupBuffer)
+            fixed (short* pY = arrY, pCb = arrCb, pCr = arrCr)
+            {
+                Pixel* pGenerator = (Pixel*)pBackup;
+                short* pGenY = pY, pGenCb = pCb, pGenCr = pCr;
+                for (int y = sbyte.MinValue; y <= sbyte.MaxValue; y++)
+                {
+                    for (int cb = sbyte.MinValue; cb <= sbyte.MaxValue; cb++)
+                    {
+                        for (int cr = sbyte.MinValue; cr <= sbyte.MaxValue; cr++)
+                        {
+                            pGenerator->Blue = (sbyte)y; pGenerator->Green = (sbyte)cb; pGenerator->Red = (sbyte)cr; pGenerator++;
+                            *pGenY++ = (short)(y << 6); *pGenCb++ = (short)(cb << 6); *pGenCr++ = (short)(cr << 6);
+                        }
+                    }
+                }
+            }
+
+            Buffer.BlockCopy(backupBuffer, 0, managedBuffer, 0, totalBytes);
+            Buffer.BlockCopy(backupBuffer, 0, nativeBuffer, 0, totalBytes);
+
+            fixed (byte* pOutM = managedBuffer)
+            fixed (byte* pNative = nativeBuffer)
+            fixed (short* pY = arrY, pCb = arrCb, pCr = arrCr)
+            {
+                InterWaveTransform.YCbCr2RgbScalar(pY, pCb, pCr, (sbyte*)pOutM, width, height, rowSizeInBytes, width);
+
+                bool success = NativeMethods.YCbCrToRgb((IntPtr)pNative, width, height, width);
+                Assert.True(success);
+
+                double diff = Util.ImageBinaryDiff(pNative, pOutM, width, height, rowSizeInBytes);
+                if (diff > 0.0)
+                {
+                    Util.DumpImageMismatch(pNative, pOutM, totalBytes, width, 0, "FusedScalarBruteForce");
+                    Assert.Fail($"Found diffs in Fused YCbCr2Rgb conversion. Mismatches dumped to log. Diff Score: {diff}");
+                }
+            }
+        }
+
+        private unsafe delegate int FusedSimdKernel(short* pY, short* pCb, short* pCr, sbyte* pImg8, int height, int width, int srcStride, int rowSizeInBytes, int startX);
+
+        private unsafe void RunFusedBruteForceParity(FusedSimdKernel simdKernel)
+        {
+            string testName = Xunit.TestContext.Current.Test.TestDisplayName;
+            int width = 4096;
+            int height = 4096;
+            int rowSizeInBytes = width * 3;
+            int totalBytes = height * rowSizeInBytes;
+
+            short[] arrY = GC.AllocateUninitializedArray<short>(width * height);
+            short[] arrCb = GC.AllocateUninitializedArray<short>(width * height);
+            short[] arrCr = GC.AllocateUninitializedArray<short>(width * height);
+            
+            sbyte[] managedBuffer = GC.AllocateUninitializedArray<sbyte>(totalBytes);
+            sbyte[] backupBuffer = GC.AllocateUninitializedArray<sbyte>(totalBytes);
+            sbyte[] nativeBuffer = GC.AllocateUninitializedArray<sbyte>(totalBytes);
+
+            fixed (sbyte* pBackup = backupBuffer)
+            fixed (short* pY = arrY, pCb = arrCb, pCr = arrCr)
+            {
+                Pixel* pGenerator = (Pixel*)pBackup;
+                short* pGenY = pY, pGenCb = pCb, pGenCr = pCr;
+                for (int y = sbyte.MinValue; y <= sbyte.MaxValue; y++)
+                {
+                    for (int cb = sbyte.MinValue; cb <= sbyte.MaxValue; cb++)
+                    {
+                        for (int cr = sbyte.MinValue; cr <= sbyte.MaxValue; cr++)
+                        {
+                            pGenerator->Blue = (sbyte)y; pGenerator->Green = (sbyte)cb; pGenerator->Red = (sbyte)cr; pGenerator++;
+                            *pGenY++ = (short)(y << 6); *pGenCb++ = (short)(cb << 6); *pGenCr++ = (short)(cr << 6);
+                        }
+                    }
+                }
+            }
+
+            Buffer.BlockCopy(backupBuffer, 0, managedBuffer, 0, totalBytes);
+            Buffer.BlockCopy(backupBuffer, 0, nativeBuffer, 0, totalBytes);
+
+            fixed (sbyte* pOutM = managedBuffer)
+            fixed (sbyte* pNative = nativeBuffer)
+            fixed (short* pY = arrY, pCb = arrCb, pCr = arrCr)
+            {
+                simdKernel(pY, pCb, pCr, pOutM, height, width, width, rowSizeInBytes, 0);
+
+                bool success = NativeMethods.YCbCrToRgb((IntPtr)pNative, width, height, width);
+                Assert.True(success);
+
+                double diff = Util.ImageBinaryDiff((byte*)pNative, (byte*)pOutM, width, height, rowSizeInBytes);
+                if (diff > 0.0)
+                {
+                    Util.DumpImageMismatch((byte*)pNative, (byte*)pOutM, totalBytes, width, 0, testName);
+                    Assert.Fail($"Found diffs in {testName} fused YCbCr2Rgb conversion. Diff Score: {diff}");
+                }
+            }
+        }
+
+        [Fact]
+        public unsafe void YCbCr2RgbVector128_Fused_BruteForceParity()
+        {
+            if (!Ssse3.IsSupported && !AdvSimd.Arm64.IsSupported)
+                Assert.Skip("Vector128 (SSSE3 or ARM64 AdvSimd) hardware acceleration is not supported on this architecture.");
+            
+            RunFusedBruteForceParity(InterWaveSimd.YCbCr2RgbVector128);
+        }
+
+        [Fact]
+        public unsafe void YCbCr2RgbVector256_Fused_BruteForceParity()
+        {
+            if (!Avx2.IsSupported)
+                Assert.Skip("Vector256 (AVX2) hardware acceleration is not supported on this architecture.");
+            
+            RunFusedBruteForceParity(InterWaveSimd.YCbCr2RgbVector256);
+        }
+
+        [Fact]
+        public unsafe void YCbCr2RgbVector512_Fused_BruteForceParity()
+        {
+            if (!Avx512F.IsSupported || !Avx512BW.IsSupported)
+                Assert.Skip("Vector512 (AVX-512 F/BW) hardware acceleration is not supported on this architecture.");
+            
+            RunFusedBruteForceParity(InterWaveSimd.YCbCr2RgbVector512);
         }
     }
 }

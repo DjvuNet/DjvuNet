@@ -11,12 +11,11 @@ using System.IO;
 
 namespace DjvuNet.JB2.Benchmarks
 {
-    [Config(typeof(ShortSimdMatrixConfig))]
     [GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
     [CategoriesColumn]
     public class JB2ImageCodecBenchmark : JB2ImageBenchmarkBase
     {
-        [Params("test032C_P01", "test033C_P01", "test033C_P25", "test049C_P01")]
+        [Params("test032C_P01", "test033C_P01", "test033C_P25", "test049C_P01", "test023C_P01", "test075C_P01")]
         public override string TestFile { get; set; }
 
         [BenchmarkCategory("Decode"), Benchmark]

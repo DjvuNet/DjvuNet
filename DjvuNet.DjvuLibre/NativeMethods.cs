@@ -2194,6 +2194,33 @@ namespace DjvuNet.DjvuLibre
             int bufferSize);
 
         /// <summary>
+        /// Gets the GBitmap data from the page JB2Image.
+        /// 
+        /// This extraction mechanism requires two passes. 
+        /// Pass IntPtr.Zero for the buffer to compute width, height, rowsize, and outputSize. 
+        /// Allocate an unmanaged buffer matching outputSize, and invoke the function again.
+        /// </summary>
+        /// <param name="page">Pointer to the unmanaged ddjvu_page_t instance.</param>
+        /// <param name="width">Outputs the width of the extracted image data in pixels.</param>
+        /// <param name="height">Outputs the height of the extracted image data in pixels.</param>
+        /// <param name="rowsize">Outputs the byte stride (memory row size) of the extracted image data.</param>
+        /// <param name="outputSize">Outputs the size in bytes required to store the pixel array.</param>
+        /// <param name="grays">Outputs the number of grays in the mask bitmap.</param>
+        /// <param name="buffer">Pointer to the unmanaged memory destination block. Pass IntPtr.Zero to query dimensions.</param>
+        /// <param name="bufferSize">The capacity of the destination buffer in bytes. Must be greater than or equal to outputSize.</param>
+        /// <returns>True if the parameters are valid and the block copy succeeds; otherwise false.</returns>
+        [DllImport(DjVuLibrePath, EntryPoint = "ddjvu_page_get_mask_raw", CallingConvention = CallingConvention.Cdecl, PreserveSig = true)]
+        internal static extern bool GetPageMaskData(
+            IntPtr page,
+            out int width, 
+            out int height, 
+            out int rowsize,
+            out int outputSize,
+            out int grays,
+            IntPtr buffer, 
+            int bufferSize);
+
+        /// <summary>
         /// Gets the complete, composited uncompressed raw page pixel data in BGR format (3 bytes per pixel).
         /// 
         /// This extraction mechanism requires two passes and provides direct access to the GPixmap internal memory structure. 

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using DjvuNet.Compression;
 
 namespace DjvuNet.Wavelet
@@ -12,7 +12,7 @@ namespace DjvuNet.Wavelet
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public int CodeSlice(IDataCoder coder)
+        public int CodeSlice(ZPCodec coder)
         {
             if (_CurrentBitPlane >= 0)
             {
@@ -43,7 +43,7 @@ namespace DjvuNet.Wavelet
         }
 
         [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public void DecodeBuckets(IDataCoder coder, int bit, int band,
+        public void DecodeBuckets(ZPCodec coder, int bit, int band,
             InterWaveBlock blk, int fbucket, int nbucket)
         {
             int thres = _QuantHigh[band];

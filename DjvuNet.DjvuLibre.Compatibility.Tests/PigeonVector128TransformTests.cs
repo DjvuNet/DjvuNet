@@ -98,9 +98,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (sbyte* pUnY = hybridOutY, pUnCb = hybridOutCb, pUnCr = hybridOutCr)
             fixed (byte* pNtY = nativeOutY, pNtCb = nativeOutCb, pNtCr = nativeOutCr)
             {
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, width, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
             }
         }
 
@@ -185,9 +185,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (sbyte* pUnY = hybridOutY, pUnCb = hybridOutCb, pUnCr = hybridOutCr)
             fixed (byte* pNtY = nativeOutY, pNtCb = nativeOutCb, pNtCr = nativeOutCr)
             {
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, width, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, width, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, width, 0, PixelSize._8bpp, ChannelSize._8bit));
             }
         }
 
@@ -274,9 +274,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (sbyte* pUnY = hybridOutY, pUnCb = hybridOutCb, pUnCr = hybridOutCr)
             fixed (byte* pNtY = nativeOutY, pNtCb = nativeOutCb, pNtCr = nativeOutCr)
             {
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, outRowSize, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, outRowSize, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, outRowSize, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
             }
         }
 
@@ -364,9 +364,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (sbyte* pUnY = hybridOutY, pUnCb = hybridOutCb, pUnCr = hybridOutCr)
             fixed (byte* pNtY = nativeOutY, pNtCb = nativeOutCb, pNtCr = nativeOutCr)
             {
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, outRowSize, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, outRowSize, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, outRowSize, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnY, pNtY, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCb, pNtCb, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff((byte*)pUnCr, pNtCr, width, height, outRowSize, 0, PixelSize._8bpp, ChannelSize._8bit));
             }
         }
 

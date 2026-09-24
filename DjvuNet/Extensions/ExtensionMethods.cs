@@ -10,6 +10,8 @@ using System.Drawing.Imaging;
 using System.Dynamic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics;
+using System.Runtime.Intrinsics.X86;
 using DjvuNet.Errors;
 using DjvuNet.Graphics;
 using DjvuNet.Wavelet;
@@ -261,6 +263,105 @@ namespace DjvuNet.Extensions
             }
 
             return bmp;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+        public static unsafe Graphics.Bitmap ToBitmap(this System.Drawing.Bitmap image)
+        {
+            if (image == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(image));
+            }
+
+            if (image.PixelFormat != PixelFormat.Format8bppIndexed)
+            {
+                DjvuExceptionUtil.ThrowArgument(
+                    $"{typeof(System.Drawing.Bitmap).FullName} has unsupported format for this conversion: {image.PixelFormat}. Expected Format8bppIndexed.", nameof(image));
+            }
+
+            Graphics.Bitmap gbmp = new Graphics.Bitmap();
+            bool success = false;
+            
+            try
+            {
+                gbmp.Init(image.Height, image.Width, 0, uninitialized: true);
+
+                BitmapData data = image.LockBits(new System.Drawing.Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+                try
+                {
+                    byte* pOracleStart = (byte*)data.Scan0;
+                    int width = image.Width;
+                    int height = image.Height;
+                    int stride = data.Stride;
+
+                    var mask256 = Vector256.IsHardwareAccelerated ? Vector256.Create((byte)1) : default;
+                    var mask128 = Vector128.IsHardwareAccelerated ? Vector128.Create((byte)1) : default;
+
+                    for (int y = 0; y < height; y++)
+                    {
+                        byte* pSrc = pOracleStart + (y * stride);
+                        byte* pDst = (byte*)gbmp.GetRow(height - 1 - y);
+
+                        int x = 0;
+
+                        if (Vector256.IsHardwareAccelerated && width >= 32)
+                        {
+                            for (; x <= width - 32; x += 32)
+                            {
+                                var vSrc = Vector256.Load(pSrc + x);
+                                var mapped = Vector256.Equals(vSrc, Vector256<byte>.Zero) & mask256;
+                                Vector256.Store(mapped, pDst + x);
+                            }
+
+                            if (x < width)
+                            {
+                                int tailShift = width - 32;
+                                var vSrc = Vector256.Load(pSrc + tailShift);
+                                var mapped = Vector256.Equals(vSrc, Vector256<byte>.Zero) & mask256;
+                                Vector256.Store(mapped, pDst + tailShift);
+                                x = width; 
+                            }
+                        }
+                        else if (Vector128.IsHardwareAccelerated && width >= 16)
+                        {
+                            for (; x <= width - 16; x += 16)
+                            {
+                                var vSrc = Vector128.Load(pSrc + x);
+                                var mapped = Vector128.Equals(vSrc, Vector128<byte>.Zero) & mask128;
+                                Vector128.Store(mapped, pDst + x);
+                            }
+
+                            if (x < width)
+                            {
+                                int tailShift = width - 16;
+                                var vSrc = Vector128.Load(pSrc + tailShift);
+                                var mapped = Vector128.Equals(vSrc, Vector128<byte>.Zero) & mask128;
+                                Vector128.Store(mapped, pDst + tailShift);
+                                x = width; 
+                            }
+                        }
+
+                        for (; x < width; x++)
+                        {
+                            pDst[x] = pSrc[x] == 0 ? (byte)1 : (byte)0;
+                        }
+                    }
+                }
+                finally
+                {
+                    image.UnlockBits(data);
+                }
+
+                success = true;
+                return gbmp;
+            }
+            finally
+            {
+                if (!success)
+                {
+                    gbmp.Dispose();
+                }
+            }
         }
 
     }

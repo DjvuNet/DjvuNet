@@ -1188,5 +1188,285 @@ namespace DjvuNet.Wavelet
                 }
             });
         }
+
+        /// <summary>
+        /// Vector128 (SSSE3) implementation of the fused Grayscale to PixelMap pipeline.
+        /// Reads 16-bit spatial Y channel data, bounds it, converts to grayscale (127 - Y), 
+        /// and natively interleaves it into a 24bpp BGR (PixelMap) memory layout.
+        /// Returns the number of pixels successfully processed per row (width16).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe int YGray2PixelMapVector128(short* pY, sbyte* pImg8, int height, int width, int srcStride, int rowSizeInBytes, int startX = 0)
+        {
+            if (AdvSimd.Arm64.IsSupported)
+            {
+                if (width - startX < 16) return startX;
+
+                int vectorBound = width - 16;
+                int tailShift = (16 - ((width - startX) % 16)) % 16;
+
+                Vector128<short> v32 = Vector128.Create((short)32);
+                Vector128<sbyte> v127 = Vector128.Create((sbyte)127);
+
+                Vector128<byte> mask1 = Vector128.Create((ReadOnlySpan<byte>)[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5]);
+                Vector128<byte> mask2 = Vector128.Create((ReadOnlySpan<byte>)[5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10]);
+                Vector128<byte> mask3 = Vector128.Create((ReadOnlySpan<byte>)[10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15]);
+
+                for (int y = 0, pidx = 0, ridx = 0; y < height; y++, pidx += srcStride, ridx += rowSizeInBytes)
+                {
+                    int x = startX;
+
+                    while (x < width)
+                    {
+                        int shift = (x > vectorBound) ? tailShift : 0;
+                        int j = x - shift;
+                        int pixidx = ridx + (j * 3);
+                        Vector128<short> y1 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pY + pidx + j), v32), 6);
+                        Vector128<short> y2 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pY + pidx + j + 8), v32), 6);
+
+                        Vector128<sbyte> narrowedGray = AdvSimd.ExtractNarrowingSaturateUpper(AdvSimd.ExtractNarrowingSaturateLower(y1), y2);
+                        Vector128<sbyte> gray = AdvSimd.Subtract(v127, narrowedGray);
+
+                        AdvSimd.Store((byte*)pImg8 + pixidx, AdvSimd.Arm64.VectorTableLookup(gray.AsByte(), mask1));
+                        AdvSimd.Store((byte*)pImg8 + pixidx + 16, AdvSimd.Arm64.VectorTableLookup(gray.AsByte(), mask2));
+                        AdvSimd.Store((byte*)pImg8 + pixidx + 32, AdvSimd.Arm64.VectorTableLookup(gray.AsByte(), mask3));
+
+                        x += 16 - shift;
+                    }
+                }
+
+                return width;
+            }
+            else if (Ssse3.IsSupported)
+            {
+                if (width - startX < 16) return startX;
+
+                int vectorBound = width - 16;
+                int tailShift = (16 - ((width - startX) % 16)) % 16;
+
+                Vector128<short> v32 = Vector128.Create((short)32);
+                Vector128<sbyte> v127 = Vector128.Create((sbyte)127);
+
+                Vector128<sbyte> mask1 = Vector128.Create((ReadOnlySpan<sbyte>)[0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5]);
+                Vector128<sbyte> mask2 = Vector128.Create((ReadOnlySpan<sbyte>)[5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10]);
+                Vector128<sbyte> mask3 = Vector128.Create((ReadOnlySpan<sbyte>)[10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15]);
+
+                for (int y = 0, pidx = 0, ridx = 0; y < height; y++, pidx += srcStride, ridx += rowSizeInBytes)
+                {
+                    int x = startX;
+
+                    while (x < width)
+                    {
+                        int shift = (x > vectorBound) ? tailShift : 0;
+                        int j = x - shift;
+                        int pixidx = ridx + (j * 3);
+                        Vector128<short> y1 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pY + pidx + j), v32), 6);
+                        Vector128<short> y2 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pY + pidx + j + 8), v32), 6);
+
+                        Vector128<sbyte> narrowedGray = Sse2.PackSignedSaturate(y1, y2);
+                        Vector128<sbyte> gray = Sse2.Subtract(v127, narrowedGray);
+
+                        Sse2.Store(pImg8 + pixidx, Ssse3.Shuffle(gray, mask1));
+                        Sse2.Store(pImg8 + pixidx + 16, Ssse3.Shuffle(gray, mask2));
+                        Sse2.Store(pImg8 + pixidx + 32, Ssse3.Shuffle(gray, mask3));
+
+                        x += 16 - shift;
+                    }
+                }
+
+                return width;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe int YCbCr2RgbVector128(short* pY, short* pCb, short* pCr, sbyte* pImg8, int height, int width, int srcStride, int rowSizeInBytes, int startX = 0)
+        {
+            if (AdvSimd.Arm64.IsSupported)
+            {
+                if (width - startX < 16) return startX;
+
+                int vectorBound = width - 16;
+                int tailShift = (16 - ((width - startX) % 16)) % 16;
+
+                Vector128<short> v32 = Vector128.Create((short)32);
+                Vector128<short> v128 = Vector128.Create((short)128);
+                Vector128<short> v127 = Vector128.Create((short)127);
+                Vector128<short> vNeg128 = Vector128.Create((short)-128);
+
+                Vector128<byte> maskB1 = Vector128.Create((ReadOnlySpan<byte>)[0, 255, 255, 1, 255, 255, 2, 255, 255, 3, 255, 255, 4, 255, 255, 5]);
+                Vector128<byte> maskG1 = Vector128.Create((ReadOnlySpan<byte>)[255, 0, 255, 255, 1, 255, 255, 2, 255, 255, 3, 255, 255, 4, 255, 255]);
+                Vector128<byte> maskR1 = Vector128.Create((ReadOnlySpan<byte>)[255, 255, 0, 255, 255, 1, 255, 255, 2, 255, 255, 3, 255, 255, 4, 255]);
+
+                Vector128<byte> maskB2 = Vector128.Create((ReadOnlySpan<byte>)[255, 255, 6, 255, 255, 7, 255, 255, 8, 255, 255, 9, 255, 255, 10, 255]);
+                Vector128<byte> maskG2 = Vector128.Create((ReadOnlySpan<byte>)[5, 255, 255, 6, 255, 255, 7, 255, 255, 8, 255, 255, 9, 255, 255, 10]);
+                Vector128<byte> maskR2 = Vector128.Create((ReadOnlySpan<byte>)[255, 5, 255, 255, 6, 255, 255, 7, 255, 255, 8, 255, 255, 9, 255, 255]);
+
+                Vector128<byte> maskB3 = Vector128.Create((ReadOnlySpan<byte>)[255, 11, 255, 255, 12, 255, 255, 13, 255, 255, 14, 255, 255, 15, 255, 255]);
+                Vector128<byte> maskG3 = Vector128.Create((ReadOnlySpan<byte>)[255, 255, 11, 255, 255, 12, 255, 255, 13, 255, 255, 14, 255, 255, 15, 255]);
+                Vector128<byte> maskR3 = Vector128.Create((ReadOnlySpan<byte>)[10, 255, 255, 11, 255, 255, 12, 255, 255, 13, 255, 255, 14, 255, 255, 15]);
+
+                for (int y = 0, pidx = 0, ridx = 0; y < height; y++, pidx += srcStride, ridx += rowSizeInBytes)
+                {
+                    int x = startX;
+
+                    while (x < width)
+                    {
+                        int shift = (x > vectorBound) ? tailShift : 0;
+                        int j = x - shift;
+                        int pixidx = ridx + (j * 3);
+                        Vector128<short> y1 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pY + pidx + j), v32), 6);
+                        Vector128<short> cb1 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pCb + pidx + j), v32), 6);
+                        Vector128<short> cr1 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pCr + pidx + j), v32), 6);
+
+                        y1 = AdvSimd.Max(AdvSimd.Min(y1, v127), vNeg128);
+                        cb1 = AdvSimd.Max(AdvSimd.Min(cb1, v127), vNeg128);
+                        cr1 = AdvSimd.Max(AdvSimd.Min(cr1, v127), vNeg128);
+
+                        Vector128<short> y2 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pY + pidx + j + 8), v32), 6);
+                        Vector128<short> cb2 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pCb + pidx + j + 8), v32), 6);
+                        Vector128<short> cr2 = AdvSimd.ShiftRightArithmetic(AdvSimd.Add(AdvSimd.LoadVector128(pCr + pidx + j + 8), v32), 6);
+
+                        y2 = AdvSimd.Max(AdvSimd.Min(y2, v127), vNeg128);
+                        cb2 = AdvSimd.Max(AdvSimd.Min(cb2, v127), vNeg128);
+                        cr2 = AdvSimd.Max(AdvSimd.Min(cr2, v127), vNeg128);
+
+                        // Block 1
+                        Vector128<short> cbShift1 = AdvSimd.ShiftRightArithmetic(cb1, 2);
+                        Vector128<short> crShift1 = AdvSimd.ShiftRightArithmetic(cr1, 1);
+                        Vector128<short> crAdd1 = AdvSimd.Add(cr1, crShift1);
+                        Vector128<short> yAdd1 = AdvSimd.Add(y1, v128);
+                        Vector128<short> ySub1 = AdvSimd.Subtract(yAdd1, cbShift1);
+
+                        Vector128<short> r1 = AdvSimd.Add(yAdd1, crAdd1);
+                        Vector128<short> g1 = AdvSimd.Subtract(ySub1, AdvSimd.ShiftRightArithmetic(crAdd1, 1));
+                        Vector128<short> b1 = AdvSimd.Add(ySub1, AdvSimd.Add(cb1, cb1));
+
+                        // Block 2
+                        Vector128<short> cbShift2 = AdvSimd.ShiftRightArithmetic(cb2, 2);
+                        Vector128<short> crShift2 = AdvSimd.ShiftRightArithmetic(cr2, 1);
+                        Vector128<short> crAdd2 = AdvSimd.Add(cr2, crShift2);
+                        Vector128<short> yAdd2 = AdvSimd.Add(y2, v128);
+                        Vector128<short> ySub2 = AdvSimd.Subtract(yAdd2, cbShift2);
+
+                        Vector128<short> r2 = AdvSimd.Add(yAdd2, crAdd2);
+                        Vector128<short> g2 = AdvSimd.Subtract(ySub2, AdvSimd.ShiftRightArithmetic(crAdd2, 1));
+                        Vector128<short> b2 = AdvSimd.Add(ySub2, AdvSimd.Add(cb2, cb2));
+
+                        Vector128<byte> vecR = AdvSimd.ExtractNarrowingSaturateUnsignedUpper(AdvSimd.ExtractNarrowingSaturateUnsignedLower(r1), r2);
+                        Vector128<byte> vecG = AdvSimd.ExtractNarrowingSaturateUnsignedUpper(AdvSimd.ExtractNarrowingSaturateUnsignedLower(g1), g2);
+                        Vector128<byte> vecB = AdvSimd.ExtractNarrowingSaturateUnsignedUpper(AdvSimd.ExtractNarrowingSaturateUnsignedLower(b1), b2);
+
+                        Vector128<byte> out1 = AdvSimd.Or(AdvSimd.Arm64.VectorTableLookup(vecB, maskB1), AdvSimd.Or(AdvSimd.Arm64.VectorTableLookup(vecG, maskG1), AdvSimd.Arm64.VectorTableLookup(vecR, maskR1)));
+                        Vector128<byte> out2 = AdvSimd.Or(AdvSimd.Arm64.VectorTableLookup(vecB, maskB2), AdvSimd.Or(AdvSimd.Arm64.VectorTableLookup(vecG, maskG2), AdvSimd.Arm64.VectorTableLookup(vecR, maskR2)));
+                        Vector128<byte> out3 = AdvSimd.Or(AdvSimd.Arm64.VectorTableLookup(vecB, maskB3), AdvSimd.Or(AdvSimd.Arm64.VectorTableLookup(vecG, maskG3), AdvSimd.Arm64.VectorTableLookup(vecR, maskR3)));
+
+                        AdvSimd.Store((byte*)pImg8 + pixidx, out1);
+                        AdvSimd.Store((byte*)pImg8 + pixidx + 16, out2);
+                        AdvSimd.Store((byte*)pImg8 + pixidx + 32, out3);
+
+                        x += 16 - shift;
+                    }
+                }
+                return width;
+            }
+            else if (Ssse3.IsSupported)
+            {
+                if (width - startX < 16) return startX;
+
+                int vectorBound = width - 16;
+                int tailShift = (16 - ((width - startX) % 16)) % 16;
+
+                Vector128<short> v32 = Vector128.Create((short)32);
+                Vector128<short> v128 = Vector128.Create((short)128);
+                Vector128<short> v127 = Vector128.Create((short)127);
+                Vector128<short> vNeg128 = Vector128.Create((short)-128);
+
+                Vector128<byte> maskB1 = Vector128.Create((ReadOnlySpan<byte>)[0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128, 128, 5]);
+                Vector128<byte> maskG1 = Vector128.Create((ReadOnlySpan<byte>)[128, 0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128, 128]);
+                Vector128<byte> maskR1 = Vector128.Create((ReadOnlySpan<byte>)[128, 128, 0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128]);
+
+                Vector128<byte> maskB2 = Vector128.Create((ReadOnlySpan<byte>)[128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128, 10, 128]);
+                Vector128<byte> maskG2 = Vector128.Create((ReadOnlySpan<byte>)[5, 128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128, 10]);
+                Vector128<byte> maskR2 = Vector128.Create((ReadOnlySpan<byte>)[128, 5, 128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128]);
+
+                Vector128<byte> maskB3 = Vector128.Create((ReadOnlySpan<byte>)[128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15, 128, 128]);
+                Vector128<byte> maskG3 = Vector128.Create((ReadOnlySpan<byte>)[128, 128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15, 128]);
+                Vector128<byte> maskR3 = Vector128.Create((ReadOnlySpan<byte>)[10, 128, 128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15]);
+
+                for (int y = 0, pidx = 0, ridx = 0; y < height; y++, pidx += srcStride, ridx += rowSizeInBytes)
+                {
+                    int x = startX;
+
+                    while (x < width)
+                    {
+                        int shift = (x > vectorBound) ? tailShift : 0;
+                        int j = x - shift;
+                        int pixidx = ridx + (j * 3);
+                        Vector128<short> y1 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pY + pidx + j), v32), 6);
+                        Vector128<short> cb1 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pCb + pidx + j), v32), 6);
+                        Vector128<short> cr1 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pCr + pidx + j), v32), 6);
+
+                        y1 = Sse2.Max(Sse2.Min(y1, v127), vNeg128);
+                        cb1 = Sse2.Max(Sse2.Min(cb1, v127), vNeg128);
+                        cr1 = Sse2.Max(Sse2.Min(cr1, v127), vNeg128);
+
+                        Vector128<short> y2 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pY + pidx + j + 8), v32), 6);
+                        Vector128<short> cb2 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pCb + pidx + j + 8), v32), 6);
+                        Vector128<short> cr2 = Sse2.ShiftRightArithmetic(Sse2.Add(Sse2.LoadVector128(pCr + pidx + j + 8), v32), 6);
+
+                        y2 = Sse2.Max(Sse2.Min(y2, v127), vNeg128);
+                        cb2 = Sse2.Max(Sse2.Min(cb2, v127), vNeg128);
+                        cr2 = Sse2.Max(Sse2.Min(cr2, v127), vNeg128);
+
+                        // Block 1
+                        Vector128<short> cbShift1 = Sse2.ShiftRightArithmetic(cb1, 2);
+                        Vector128<short> crShift1 = Sse2.ShiftRightArithmetic(cr1, 1);
+                        Vector128<short> crAdd1 = Sse2.Add(cr1, crShift1);
+                        Vector128<short> yAdd1 = Sse2.Add(y1, v128);
+                        Vector128<short> ySub1 = Sse2.Subtract(yAdd1, cbShift1);
+
+                        Vector128<short> r1 = Sse2.Add(yAdd1, crAdd1);
+                        Vector128<short> g1 = Sse2.Subtract(ySub1, Sse2.ShiftRightArithmetic(crAdd1, 1));
+                        Vector128<short> b1 = Sse2.Add(ySub1, Sse2.Add(cb1, cb1));
+
+                        // Block 2
+                        Vector128<short> cbShift2 = Sse2.ShiftRightArithmetic(cb2, 2);
+                        Vector128<short> crShift2 = Sse2.ShiftRightArithmetic(cr2, 1);
+                        Vector128<short> crAdd2 = Sse2.Add(cr2, crShift2);
+                        Vector128<short> yAdd2 = Sse2.Add(y2, v128);
+                        Vector128<short> ySub2 = Sse2.Subtract(yAdd2, cbShift2);
+
+                        Vector128<short> r2 = Sse2.Add(yAdd2, crAdd2);
+                        Vector128<short> g2 = Sse2.Subtract(ySub2, Sse2.ShiftRightArithmetic(crAdd2, 1));
+                        Vector128<short> b2 = Sse2.Add(ySub2, Sse2.Add(cb2, cb2));
+
+                        // Saturate to bytes
+                        Vector128<byte> vecR = Sse2.PackUnsignedSaturate(r1, r2);
+                        Vector128<byte> vecG = Sse2.PackUnsignedSaturate(g1, g2);
+                        Vector128<byte> vecB = Sse2.PackUnsignedSaturate(b1, b2);
+
+                        // Interleave and store
+                        Vector128<byte> out1 = Sse2.Or(Sse2.Or(Ssse3.Shuffle(vecB, maskB1), Ssse3.Shuffle(vecG, maskG1)), Ssse3.Shuffle(vecR, maskR1));
+                        Vector128<byte> out2 = Sse2.Or(Sse2.Or(Ssse3.Shuffle(vecB, maskB2), Ssse3.Shuffle(vecG, maskG2)), Ssse3.Shuffle(vecR, maskR2));
+                        Vector128<byte> out3 = Sse2.Or(Sse2.Or(Ssse3.Shuffle(vecB, maskB3), Ssse3.Shuffle(vecG, maskG3)), Ssse3.Shuffle(vecR, maskR3));
+
+                        Sse2.Store((byte*)pImg8 + pixidx, out1);
+                        Sse2.Store((byte*)pImg8 + pixidx + 16, out2);
+                        Sse2.Store((byte*)pImg8 + pixidx + 32, out3);
+
+                        x += 16 - shift;
+                    }
+                }
+                return width;
+            }
+            else
+            {
+                return 0;
+            }
+        }
     }
 }

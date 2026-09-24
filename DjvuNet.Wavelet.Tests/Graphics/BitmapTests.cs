@@ -2344,7 +2344,7 @@ namespace DjvuNet.Graphics.Tests
                 fixed (sbyte* pE = expected.Data)
                 fixed (sbyte* pS = source.Data)
                 {
-                    double diff = Util.ImageBinaryDiff((byte*)pE + expected.Border, (byte*)pS + source.Border, source.Width, source.Height, source.BytesPerRow, 8, 8);
+                    double diff = Util.ImageBinaryDiff((byte*)pE + expected.Border, (byte*)pS + source.Border, source.Width, source.Height, source.BytesPerRow, 0, PixelSize._8bpp, ChannelSize._8bit);
                     if (diff > 0.0)
                     {
                         var sb = new StringBuilder();

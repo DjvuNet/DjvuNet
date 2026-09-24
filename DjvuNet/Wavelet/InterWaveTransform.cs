@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics.X86;
 using System.Threading;
@@ -305,8 +305,8 @@ namespace DjvuNet.Wavelet
                         byte green = unchecked((byte)pIn->Green);
                         byte blue = unchecked((byte)pIn->Blue);
 
-                        int y_val = pRedYLUT[red] + pGreenYLUT[green] + pBlueYLUT[blue] + 32768;
-                        *pY = (sbyte)((y_val >> 16) - 128);
+                        int yVal = pRedYLUT[red] + pGreenYLUT[green] + pBlueYLUT[blue] + 32768;
+                        *pY = (sbyte)((yVal >> 16) - 128);
 
                         int cb = pRedCbLUT[red] + pGreenCbLUT[green] + pBlueCbLUT[blue] + 32768;
                         *pCb = (sbyte)Math.Max(-128, Math.Min(127, cb >> 16));
@@ -339,21 +339,58 @@ namespace DjvuNet.Wavelet
             {
                 for (int x = 0; x < width; x++, q++)
                 {
-                    sbyte y_val = q->Blue;
-                    sbyte b_val = q->Green;
-                    sbyte r_val = q->Red;
+                    sbyte yVal = q->Blue;
+                    sbyte bVal = q->Green;
+                    sbyte rVal = q->Red;
                     // This is the Pigeon transform
-                    int t1 = b_val >> 2;
-                    int t2 = r_val + (r_val >> 1);
-                    int t3 = y_val + 128 - t1;
-                    int tr = y_val + 128 + t2;
+                    int t1 = bVal >> 2;
+                    int t2 = rVal + (rVal >> 1);
+                    int t3 = yVal + 128 - t1;
+                    int tr = yVal + 128 + t2;
                     int tg = t3 - (t2 >> 1);
-                    int tb = t3 + (b_val << 1);
+                    int tb = t3 + (bVal << 1);
                     q->Red = (sbyte) Max(0, Min(255, tr));
                     q->Green = (sbyte) Max(0, Min(255, tg));
                     q->Blue = (sbyte) Max(0, Min(255, tb));
                 }
                 q = (Pixel*)((byte*)q + inPadBytesScalar);
+            }
+        }
+
+        /// <summary>
+        /// Unified kernel that reads spatial short arrays, bounds them, executes the Pigeon Transform, 
+        /// and outputs the interleaved BGR bytes.
+        /// </summary>
+        public static unsafe void YCbCr2RgbScalar(short* pY, short* pCb, short* pCr, sbyte* pImg8, int width, int height, int rowSizeInBytes, int srcStride, int startX = 0)
+        {
+            for (int y = 0, pidx = 0; y < height; y++, pidx += srcStride)
+            {
+                Pixel* q = (Pixel*)(pImg8 + (y * rowSizeInBytes) + (startX * 3));
+                for (int x = startX; x < width; x++, q++)
+                {
+                    // 1. Scale spatial shorts down to 8-bit precision (like old UnpackRowScalar)
+                    int yVal = (pY[pidx + x] + 32) >> 6;
+                    int bVal = (pCb[pidx + x] + 32) >> 6;
+                    int rVal = (pCr[pidx + x] + 32) >> 6;
+
+                    // 2. Bound to valid sbyte range
+                    yVal = yVal < -128 ? -128 : (yVal > 127 ? 127 : yVal);
+                    bVal = bVal < -128 ? -128 : (bVal > 127 ? 127 : bVal);
+                    rVal = rVal < -128 ? -128 : (rVal > 127 ? 127 : rVal);
+
+                    // 3. Execute Pigeon Transform (Math logic from old YCbCr2RgbScalar)
+                    int t1 = bVal >> 2;
+                    int t2 = rVal + (rVal >> 1);
+                    int t3 = yVal + 128 - t1;
+                    int tr = yVal + 128 + t2;
+                    int tg = t3 - (t2 >> 1);
+                    int tb = t3 + (bVal << 1);
+
+                    // 4. Saturate and store directly to interleaved BGR memory struct
+                    q->Red = (sbyte) Max(0, Min(255, tr));
+                    q->Green = (sbyte) Max(0, Min(255, tg));
+                    q->Blue = (sbyte) Max(0, Min(255, tb));
+                }
             }
         }
 

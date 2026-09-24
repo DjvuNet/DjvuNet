@@ -163,7 +163,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                         fixed (short* pCs = csCoeff)
                         {
                             // Treat 1024 shorts as a 1024x1 pixel row, stride is width in bytes
-                            double diff = Util.ImageBinaryDiff((byte*)pCs, (byte*)nativeBlockBuffer, 1024, 1, 2048, 16, 8);
+                            double diff = Util.ImageBinaryDiff((byte*)pCs, (byte*)nativeBlockBuffer, 1024, 1, 2048, 0, PixelSize._16bpp, ChannelSize._8bit);
                             if (diff > 0.0)
                             {
                                 totalBlocksWithErrors++;
@@ -312,7 +312,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
             fixed (short* pCpp = cppResult)
             {
                 // We use rowSize * 2 for byte stride because array is linear memory
-                double diff = Util.ImageBinaryDiff((byte*)pCs, (byte*)pCpp, width, height, rowSize * 2, 16, 8);
+                double diff = Util.ImageBinaryDiff((byte*)pCs, (byte*)pCpp, width, height, rowSize * 2, 0, PixelSize._16bpp, ChannelSize._8bit);
                 
                 if (diff > 0.0)
                 {
@@ -655,7 +655,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                         {
                             fixed (short* pCs = csCoeff)
                             {
-                                double diff = Util.ImageBinaryDiff((byte*)pCs, (byte*)nativeBlockBuffer, 1024, 1, 2048, 16, 8);
+                                double diff = Util.ImageBinaryDiff((byte*)pCs, (byte*)nativeBlockBuffer, 1024, 1, 2048, 0, PixelSize._16bpp, ChannelSize._8bit);
                                 if (diff > 0.0)
                                 {
                                     totalBlocksWithErrors++;
@@ -801,7 +801,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                     double diff = 0.0;
                     unsafe
                     {
-                        diff = Util.ImageBinaryDiff((byte*)csBuffer, (byte*)cppBuffer, width, height, blockWidth * 2, 16, 8);
+                        diff = Util.ImageBinaryDiff((byte*)csBuffer, (byte*)cppBuffer, width, height, blockWidth * 2, 0, PixelSize._16bpp, ChannelSize._8bit);
                     }
 
                     Assert.True(diff == 0.0, $"Spatial lifting parity failed for FG44 Doc {fileIndex}! Diff ratio: {diff}");

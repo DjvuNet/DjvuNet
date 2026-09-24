@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="RuntimeIdentifier;Platform;PlatformTarget">
+<Project Sdk="Microsoft.NET.Sdk" TreatAsLocalProperty="RuntimeIdentifier;Platform;PlatformTarget">
   <!--
       DjvuNetPackaging.props should go always first due to pack target requirements:
       first PropertyGroup in project defines packaging props
@@ -70,13 +70,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="ModuleInitialization.cs" />
     <Compile Include="BuildMajorVersion.cs" />
+    <Compile Include="DjvuNetBuildEventSource.cs" />
+    <Compile Include="DjvuNetBuildTaskFactory.cs" />
     <Compile Include="FileUpdate.cs" />
     <Compile Include="GetDateTime.cs" />
     <Compile Include="GetLastCommit.cs" />
+    <Compile Include="ModuleInitialization.cs" />
     <Compile Include="ResolveNativePdbs.cs" />
-    <Compile Include="DjvuNetBuildTaskFactory.cs" />
     <Compile Include="TaskLogger.cs" />
   </ItemGroup>
   <ItemGroup>

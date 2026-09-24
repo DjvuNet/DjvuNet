@@ -101,8 +101,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                                         nWidth,
                                         nHeight,
                                         nRowSize,
-                                        8,
-                                        8);
+                                        0,
+                                        PixelSize._8bpp,
+                                        ChannelSize._8bit);
 
                                     if (diff != 0.0 && shapeDiffs.Count < 100)
                                     {
@@ -218,8 +219,9 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                                         nWidth,
                                         nHeight,
                                         nRowSize,
-                                        8,
-                                        8);
+                                        0,
+                                        PixelSize._8bpp,
+                                        ChannelSize._8bit);
 
                                     //for(int h = 0; h < nHeight; h++, pNativePtr += nRowSize, pManagedPtr += nRowSize)
                                     //{

@@ -7,6 +7,7 @@ fi
 
 export DOTNET_CLI_TELEMETRY_OPTOUT=1
 export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+export DOTNET_NOLOGO=1
 
 # Ensure Ctrl+C kills the script and all its children immediately
 trap 'echo "BUILD: Interrupted by user. Exiting..."; exit 130' INT
@@ -270,7 +271,7 @@ check_prereqs()
     fi
 
     # Check presence of vcpkg dependencies on the path
-    for tool in curl zip tar cmake pkg-config jq; do
+    for tool in curl zip tar cmake pkg-config jq zstd; do
         hash $tool 2>/dev/null
         if ! [[ $? -eq 0 ]]; then
             success=0
@@ -716,7 +717,7 @@ _DefaultNetStandard="netstandard2.1"
 _NetStandardId=".NETStandard"
 _NetStandardTFM=".NETStandard,Version=v2.1"
 _Framework="$_DefaultNetCoreApp"
-__ArtifactsReleaseTag="v0.15.26257.0"
+__ArtifactsReleaseTag="v0.16.26267.0"
 __GithubDjvuNetReleaseUri="https://github.com/DjvuNet/artifacts/releases/download/${__ArtifactsReleaseTag}/"
 __ArtifactsTestDataUri="https://github.com/DjvuNet/artifacts/archive/refs/tags/${__ArtifactsReleaseTag}.tar.gz"
 __ArtifactsDirName="artifacts-${__ArtifactsReleaseTag#v}"
@@ -1410,7 +1411,15 @@ if [ -n "$_BuildTests" ]; then
                 rm -rf artifacts
                 mkdir artifacts
                 tar -xzf artifacts.tar.gz -C artifacts --strip-components=1
-                rm artifacts.tar.gz
+                if [ $? -ne 0 ]; then
+                    echo ""
+                    echo "BUILD: Error: artifacts extraction returned error"
+                    __FailedCommands+=("extract_artifacts")
+                    _ForceCloneArtifacts=1
+                    if [[ -n "$_FastFail" ]]; then exit 1; fi
+                else
+                    rm artifacts.tar.gz
+                fi
             else
                 _ForceCloneArtifacts=1
             fi
@@ -1426,11 +1435,48 @@ if [ -n "$_BuildTests" ]; then
             git_clone_retry "https://github.com/DjvuNet/artifacts.git" "artifacts" $__CloneArgs
 
             if [ $? -ne 0 ]; then
-                echo ""
-                echo "BUILD: Error: artifacts git clone returned error"
-                exit 1
+                _SkipTests=1
             fi
         fi
+    fi
+
+    if [ -z "$_SkipTests" ]; then
+        if [ -d "artifacts/data/extracted" ]; then
+            echo ""
+            echo "BUILD: Running: Decompress_Rle_Artifacts"
+            pushd artifacts/data/extracted > /dev/null
+            if [ -f zstd_files.txt ]; then rm zstd_files.txt; fi
+            for f in *.zst; do
+                if [ ! -f "${f%.zst}" ]; then
+                    echo "$f" >> zstd_files.txt
+                fi
+            done
+            if [ -f zstd_files.txt ]; then
+                zstd -d -f --no-progress --filelist zstd_files.txt
+                exit_code=$?
+            else
+                exit_code=0
+            fi
+
+            if [ $exit_code -ne 0 ]; then
+                echo "BUILD: Error: Decompress_Rle_Artifacts returned error code $exit_code"
+                __FailedCommands+=("Decompress_Rle_Artifacts")
+                _SkipTests=1
+                if [[ -n "$_FastFail" ]]; then popd > /dev/null; exit 1; fi
+            else
+                __SuccessfulCommands+=("Decompress_Rle_Artifacts")
+            fi
+            popd > /dev/null
+        fi
+    fi
+
+    echo ""
+
+    if [ -n "$_SkipTests" ]; then
+        echo "BUILD: WARNING: Artifacts acquisition or decompression failed. Tests will be skipped."
+        _Test=""
+        _BuildTests=""
+        _RunTests=""
     fi
 
     # Build test projects

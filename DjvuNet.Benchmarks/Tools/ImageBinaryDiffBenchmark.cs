@@ -64,6 +64,7 @@ namespace DjvuNet.Tools.Benchmarks
                             p2,
                             (uint)ImageWidth,
                             (uint)ImageHeight,
+                            stride,
                             stride
                         );
                     }
@@ -87,7 +88,7 @@ namespace DjvuNet.Tools.Benchmarks
                     {
                         GetIterationPointersImageBinaryDiff(j, stride, pinnedBase1, pinnedBase2, out byte* p1, out byte* p2);
 
-                        Util.ImageDiffVector256(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride);
+                        Util.ImageDiffVector256(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride, stride);
                     }
                 }
             }
@@ -109,7 +110,7 @@ namespace DjvuNet.Tools.Benchmarks
                     {
                         GetIterationPointersImageBinaryDiff(j, stride, pinnedBase1, pinnedBase2, out byte* p1, out byte* p2);
 
-                        Util.ImageDiffVector128(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride);
+                        Util.ImageDiffVector128(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride, stride);
                     }
                 }
             }
@@ -131,7 +132,7 @@ namespace DjvuNet.Tools.Benchmarks
                     {
                         GetIterationPointersImageBinaryDiff(j, stride, pinnedBase1, pinnedBase2, out byte* p1, out byte* p2);
 
-                        Util.ImageDiffParallel256(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride, _options);
+                        Util.ImageDiffParallel256(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride, stride, _options);
                     }
                 }
             }
@@ -153,7 +154,7 @@ namespace DjvuNet.Tools.Benchmarks
                     {
                         GetIterationPointersImageBinaryDiff(j, stride, pinnedBase1, pinnedBase2, out byte* p1, out byte* p2);
 
-                        Util.ImageDiffParallel128(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride, _options);
+                        Util.ImageDiffParallel128(p1, p2, (uint)ImageWidth, (uint)ImageHeight, stride, stride, _options);
                     }
                 }
             }

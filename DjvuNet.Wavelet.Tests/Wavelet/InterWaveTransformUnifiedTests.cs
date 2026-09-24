@@ -80,7 +80,7 @@ namespace DjvuNet.Wavelet.Tests
 
                 InterWaveTransform.YCbCr2Rgb((Pixel*)ptrUnified, width, height, rowSizeInBytes);
 
-                double diff = Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 24, 8);
+                double diff = Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 0, PixelSize._24bpp, ChannelSize._8bit);
                 Assert.Equal(0.0, diff);
             }
         }
@@ -116,7 +116,7 @@ namespace DjvuNet.Wavelet.Tests
 
                 InterWaveTransform.YCbCr2Rgb((Pixel*)ptrUnified, width, height, rowSizeInBytes);
 
-                double diff = Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 24, 8);
+                double diff = Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 0, PixelSize._24bpp, ChannelSize._8bit);
 
                 // Assert that the scalar method matches the rowSizeInBytes-safe method
                 Assert.Equal(0.0, diff);
@@ -153,7 +153,7 @@ namespace DjvuNet.Wavelet.Tests
 
                 InterWaveTransform.YCbCr2Rgb((Pixel*)ptrUnified, width, height, rowSizeInBytes);
 
-                double diff = Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 24, 8);
+                double diff = Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 0, PixelSize._24bpp, ChannelSize._8bit);
                 Assert.Equal(0.0, diff);
             }
         }
@@ -440,7 +440,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)ptrScalar, width, height, rowSizeInBytes);
                 InterWaveTransform.YCbCr2Rgb((Pixel*)ptrUnified, width, height, rowSizeInBytes);
-                Assert.Equal(0.0, Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 24, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 0, PixelSize._24bpp, ChannelSize._8bit));
             }
         }
 
@@ -489,9 +489,9 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.Rgb2YCbCrScalar((Pixel*)pIn, width, height, rowSizeInBytes, (sbyte*)pYS, (sbyte*)pCbS, (sbyte*)pCrS, outRowSizeInBytes);
                 InterWaveTransform.Rgb2YCbCr((Pixel*)pIn, width, height, rowSizeInBytes, (sbyte*)pYU, (sbyte*)pCbU, (sbyte*)pCrU, outRowSizeInBytes);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pYS, pYU, width, height, outRowSizeInBytes, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pCbS, pCbU, width, height, outRowSizeInBytes, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pCrS, pCrU, width, height, outRowSizeInBytes, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(pYS, pYU, width, height, outRowSizeInBytes, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(pCbS, pCbU, width, height, outRowSizeInBytes, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(pCrS, pCrU, width, height, outRowSizeInBytes, 0, PixelSize._8bpp, ChannelSize._8bit));
             }
         }
 
@@ -527,7 +527,7 @@ namespace DjvuNet.Wavelet.Tests
             {
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)ptrScalar, width, height, rowSizeInBytes);
                 InterWaveTransform.YCbCr2Rgb((Pixel*)ptrUnified, width, height, rowSizeInBytes);
-                Assert.Equal(0.0, Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 24, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(ptrScalar, ptrUnified, width, height, rowSizeInBytes, 0, PixelSize._24bpp, ChannelSize._8bit));
             }
         }
 
@@ -572,9 +572,9 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.Rgb2YCbCrScalar((Pixel*)pIn, width, height, rowSizeInBytes, (sbyte*)pYS, (sbyte*)pCbS, (sbyte*)pCrS, outRowSizeInBytes);
                 InterWaveTransform.Rgb2YCbCr((Pixel*)pIn, width, height, rowSizeInBytes, (sbyte*)pYU, (sbyte*)pCbU, (sbyte*)pCrU, outRowSizeInBytes);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pYS, pYU, width, height, outRowSizeInBytes, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pCbS, pCbU, width, height, outRowSizeInBytes, 8, 8));
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pCrS, pCrU, width, height, outRowSizeInBytes, 8, 8));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(pYS, pYU, width, height, outRowSizeInBytes, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(pCbS, pCbU, width, height, outRowSizeInBytes, 0, PixelSize._8bpp, ChannelSize._8bit));
+                Assert.Equal(0.0, Util.ImageBinaryDiff(pCrS, pCrU, width, height, outRowSizeInBytes, 0, PixelSize._8bpp, ChannelSize._8bit));
             }
         }
     }

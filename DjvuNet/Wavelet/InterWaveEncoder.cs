@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using DjvuNet.Compression;
 
@@ -51,7 +51,7 @@ namespace DjvuNet.Wavelet
         /// </summary>
         /// <param name="zp"></param>
         /// <returns></returns>
-        public int CodeSlice(IDataCoder zp)
+        public int CodeSlice(ZPCodec zp)
         {
             // Check that code_slice can still run
             if (_CurrentBitPlane < 0)
@@ -209,7 +209,7 @@ namespace DjvuNet.Wavelet
         /// <param name="eblk"></param>
         /// <param name="fbucket"></param>
         /// <param name="nbucket"></param>
-        public void EncodeBuckets(IDataCoder zp, int bit, int band,
+        public void EncodeBuckets(ZPCodec zp, int bit, int band,
             InterWaveBlock blk, InterWaveBlock eblk, int fbucket, int nbucket)
         {
             // compute state of all coefficients in all buckets
@@ -534,7 +534,7 @@ namespace DjvuNet.Wavelet
         /// </summary>
         /// <param name="zp"></param>
         /// <returns></returns>
-        public int FinishCodeSlice(IDataCoder zp)
+        public int FinishCodeSlice(ZPCodec zp)
         {
             // Reduce quantization threshold
             _QuantHigh[_CurrentBand] = _QuantHigh[_CurrentBand] >> 1;

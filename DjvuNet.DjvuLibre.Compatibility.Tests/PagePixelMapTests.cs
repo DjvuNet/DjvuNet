@@ -54,11 +54,11 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                 fixed (sbyte* pManaged = managedMap.Data)
                 {
                     int stride = managedMap.Width * PixelMap.BytesPerPixel;
-                    double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pManaged, (uint)nWidth, (uint)nHeight, stride, 24, 8);
+                    double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pManaged, (uint)nWidth, (uint)nHeight, stride, PixelSize._24bpp, ChannelSize._8bit);
                     
                     if (diff != 0.0)
                     {
-                        Util.DumpImageMismatchDetails(pNative, (byte*)pManaged, managedMap.Data.Length, managedMap.Width, fileIndex, "Background");
+                        Util.DumpImageMismatch(pNative, (byte*)pManaged, managedMap.Data.Length, managedMap.Width, fileIndex, "Background");
                         Console.WriteLine($"Background Diff: {diff}");
                     }
                     
@@ -107,11 +107,11 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                 fixed (sbyte* pManaged = managedMap.Data)
                 {
                     int stride = managedMap.Width * PixelMap.BytesPerPixel;
-                    double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pManaged, (uint)nWidth, (uint)nHeight, stride, 24, 8);
+                    double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pManaged, (uint)nWidth, (uint)nHeight, stride, PixelSize._24bpp, ChannelSize._8bit);
                     
                     if (diff != 0.0)
                     {
-                        Util.DumpImageMismatchDetails(pNative, (byte*)pManaged, managedMap.Data.Length, managedMap.Width, fileIndex, "Foreground");
+                        Util.DumpImageMismatch(pNative, (byte*)pManaged, managedMap.Data.Length, managedMap.Width, fileIndex, "Foreground");
                         Console.WriteLine($"Foreground Diff: {diff}");
                     }
                     
@@ -160,7 +160,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                 fixed (sbyte* pManaged = managedMap.Data)
                 {
                     int stride = managedMap.Width * PixelMap.BytesPerPixel;
-                    double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pManaged, (uint)nWidth, (uint)nHeight, stride, 24, 8);
+                    double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pManaged, (uint)nWidth, (uint)nHeight, stride, PixelSize._24bpp, ChannelSize._8bit);
                     
                     if (diff != 0.0)
                     {
@@ -246,11 +246,11 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                     fixed (sbyte* pCs = csMap.Data)
                     {
                         byte* pNative = (byte*)rawBuffer;
-                        double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pCs, (uint)width, (uint)height, width * PixelMap.BytesPerPixel, 24, 8);
+                        double diff = Util.ImageBinaryDiffCore(pNative, (byte*)pCs, (uint)width, (uint)height, width * PixelMap.BytesPerPixel, PixelSize._24bpp, ChannelSize._8bit);
                         
                         if (diff != 0.0)
                         {
-                            Util.DumpImageMismatchDetails(pNative, (byte*)pCs, bufferSize, width, fileIndex, "Raw IW44");
+                            Util.DumpImageMismatch(pNative, (byte*)pCs, bufferSize, width, fileIndex, "Raw IW44");
                             Console.WriteLine($"Raw IW44 Diff: {diff}");
                         }
                         
@@ -361,13 +361,13 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                         int stride = width * PixelMap.BytesPerPixel;
                         
                         double diff = Util.ImageBinaryDiffCore(
-                            pNative, (byte*)pCs, (uint)width, (uint)height, stride, 24, 8);
+                            pNative, (byte*)pCs, (uint)width, (uint)height, stride, PixelSize._24bpp, ChannelSize._8bit);
 
                         double threshold = 0.0;
                         
                         if (diff > threshold)
                         {
-                            Util.DumpImageMismatchDetails(
+                            Util.DumpImageMismatch(
                                 pNative, (byte*)pCs, bufferSize, width, fileIndex, "Raw FG44");
                                 
                             Console.WriteLine($"Raw FG44 Diff: {diff}");
@@ -474,13 +474,13 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
                         int stride = width * PixelMap.BytesPerPixel;
                         
                         double diff = Util.ImageBinaryDiffCore(
-                            pNative, (byte*)pCs, (uint)width, (uint)height, stride, 24, 8);
+                            pNative, (byte*)pCs, (uint)width, (uint)height, stride, PixelSize._24bpp, ChannelSize._8bit);
 
                         double threshold = 0.0;
 
                         if (diff > threshold)
                         {
-                            Util.DumpImageMismatchDetails(
+                            Util.DumpImageMismatch(
                                 pNative, (byte*)pCs, bufferSize, width, fileIndex, "Raw FG44 Linear");
                                 
                             Console.WriteLine($"Raw FG44 Linear Diff: {diff}");

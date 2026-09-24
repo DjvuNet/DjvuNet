@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using LibGit2Sharp;
@@ -60,15 +60,18 @@ namespace DjvuNet.Build.Tasks
         public override bool Execute()
         {
             TaskLogger.Current = this.Log;
+            DjvuNetBuildEventSource.Log.GetLastCommitStart();
             if (String.IsNullOrWhiteSpace(RepoRoot))
             {
                 Log.LogError($"Invalid path string: {RepoRoot}");
+                DjvuNetBuildEventSource.Log.GetLastCommitStop();
                 return false;
             }
 
             if (!Directory.Exists(RepoRoot))
             {
                 Log.LogError($"Path does not exist: {RepoRoot}");
+                DjvuNetBuildEventSource.Log.GetLastCommitStop();
                 return false;
             }
 
@@ -80,10 +83,16 @@ namespace DjvuNet.Build.Tasks
 
                 try
                 {
+                    DjvuNetBuildEventSource.Log.InstantiateRepositoryStart();
                     Repository repo = new Repository(RepoRoot);
+                    DjvuNetBuildEventSource.Log.InstantiateRepositoryStop();
+
                     headBranch = repo.Head;
+
+                    DjvuNetBuildEventSource.Log.IterateCommitsStart();
                     var commits = repo.Commits;
                     commit = commits.FirstOrDefault();
+                    DjvuNetBuildEventSource.Log.IterateCommitsStop(commit != null ? 1 : 0);
                 }
                 catch(LibGit2SharpException)
                 {
@@ -124,6 +133,7 @@ namespace DjvuNet.Build.Tasks
                 Log.LogErrorFromException(ex, true);
             }
 
+            DjvuNetBuildEventSource.Log.GetLastCommitStop();
             return !Log.HasLoggedErrors;
         }
     }

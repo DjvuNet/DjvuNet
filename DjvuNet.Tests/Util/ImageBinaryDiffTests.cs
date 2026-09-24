@@ -22,7 +22,7 @@ namespace DjvuNet.Shared.Tests
             // We add 2 bytes of padding, so Stride = 392 bytes.
             int width = 130;
             int height = 3;
-            int pixelSize = 24; // 24 bpp (3 bytes/pixel)
+            PixelSize pixelSize = PixelSize._24bpp; // 24 bpp (3 bytes/pixel)
             int stride = 392;
             int totalBytes = height * stride;
 
@@ -63,7 +63,7 @@ namespace DjvuNet.Shared.Tests
             fixed (byte* ptr2 = buffer2)
             {
                 // The method should ignore the difference in the padding byte (index 390)
-                double actualDiff = Util.ImageBinaryDiff(ptr1, ptr2, width, height, stride, pixelSize);
+                double actualDiff = Util.ImageBinaryDiff(ptr1, ptr2, width, height, stride, 0, pixelSize);
 
                 // AVX2 uses floats internally for some calculations before casting to double,
                 // so we assert with a small precision tolerance.
@@ -146,7 +146,7 @@ namespace DjvuNet.Shared.Tests
             fixed (byte* ptr2 = img2)
             {
                 // channelSize = 1, pixelSize = 8 (1 byte per pixel)
-                double diff = Util.ImageBinaryDiffCore(ptr1, ptr2, (uint)width, (uint)height, stride, 8, 8);
+                double diff = Util.ImageBinaryDiffCore(ptr1, ptr2, (uint)width, (uint)height, stride, PixelSize._8bpp, ChannelSize._8bit);
 
                 Console.WriteLine($"\nTested AVX2 Diff: {diff}");
                 for (int y = 0; y < height; y++)
@@ -220,7 +220,7 @@ namespace DjvuNet.Shared.Tests
                 double maxChannelValue = 255.0;
                 double expectedFinalDiff = expectedRawDiff / (width * height * maxChannelValue);
 
-                double actualDiff = Util.ImageBinaryDiffCore(ptr1, ptr2, (uint)width, (uint)height, stride, 8, 8);
+                double actualDiff = Util.ImageBinaryDiffCore(ptr1, ptr2, (uint)width, (uint)height, stride, PixelSize._8bpp, ChannelSize._8bit);
 
                 Assert.Equal(expectedFinalDiff, actualDiff);
             }
@@ -234,7 +234,6 @@ namespace DjvuNet.Shared.Tests
             int height = 3;
             int stride = width; // Contiguous visible data
             int totalPixels = height * stride;
-            int pixelSizeInBits = 8; // 1 byte per pixel
 
             // Allocate extra space to hold "padding" bytes at the very end
             int allocationSize = totalPixels + 2;
@@ -260,7 +259,7 @@ namespace DjvuNet.Shared.Tests
             fixed (byte* p2 = img2)
             {
                 // widthBytes = 10, pixelSizeInBits = 8 (1 byte per pixel)
-                double diff = Util.ImageBinaryDiffScalar(p1, p2, (uint)width, (uint)height, stride, pixelSizeInBits);
+                double diff = Util.ImageBinaryDiffScalar(p1, p2, (uint)width, (uint)height, stride, pixelSize: PixelSize._8bpp);
 
                 Console.WriteLine($"\nTested Scalar 8-bpp Diff: {diff}");
                 Console.WriteLine($"\n--- Hex Dump: Last 16 bytes + Poisoned Padding ---");
@@ -309,7 +308,7 @@ namespace DjvuNet.Shared.Tests
                     Marshal.Copy(data.Scan0, copy, 0, copy.Length);
                     fixed (byte* copyPtr = copy)
                     {
-                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, 24);
+                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, pixelSize: PixelSize._24bpp);
                         double vectorDiff = Util.ImageDiffVector256(scan0, copyPtr, width, height, stride);
 
                         Assert.Equal(scalarDiff, vectorDiff, 10);
@@ -343,7 +342,7 @@ namespace DjvuNet.Shared.Tests
                     Marshal.Copy(data.Scan0, copy, 0, copy.Length);
                     fixed (byte* copyPtr = copy)
                     {
-                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, 24);
+                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, pixelSize: PixelSize._24bpp);
                         double vectorDiff = Util.ImageDiffVector128(scan0, copyPtr, width, height, stride);
 
                         Assert.Equal(scalarDiff, vectorDiff, 10);
@@ -393,7 +392,7 @@ namespace DjvuNet.Shared.Tests
                     fixed (byte* copyPtr = copy)
                     {
                         var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, 24);
+                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, pixelSize: PixelSize._24bpp);
                         double parallelDiff = Util.ImageDiffParallel256(scan0, copyPtr, width, height, stride, options);
 
                         Assert.Equal(0.0, scalarDiff);
@@ -445,7 +444,7 @@ namespace DjvuNet.Shared.Tests
                     fixed (byte* copyPtr = copy)
                     {
                         var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, 24);
+                        double scalarDiff = Util.ImageBinaryDiffScalar(scan0, copyPtr, width, height, stride, pixelSize: PixelSize._24bpp);
                         double parallelDiff = Util.ImageDiffParallel128(scan0, copyPtr, width, height, stride, options);
 
                         Assert.Equal(0.0, scalarDiff);
@@ -476,7 +475,7 @@ namespace DjvuNet.Shared.Tests
             fixed (byte* p1 = buffers.img1)
             fixed (byte* p2 = buffers.img2)
             {
-                Assert.Equal(0.5, Util.ImageBinaryDiffScalar(p1, p2, 12, 2, 36, 24));
+                Assert.Equal(0.5, Util.ImageBinaryDiffScalar(p1, p2, 12, 2, 36, pixelSize: PixelSize._24bpp));
             }
         }
 
@@ -536,7 +535,7 @@ namespace DjvuNet.Shared.Tests
             fixed (byte* p1 = buffers.img1)
             fixed (byte* p2 = buffers.img2)
             {
-                Assert.Equal(0.5, Util.ImageBinaryDiffCore(p1, p2, 12, 2, 36, 24, 8));
+                Assert.Equal(0.5, Util.ImageBinaryDiffCore(p1, p2, 12, 2, 36, PixelSize._24bpp, ChannelSize._8bit));
             }
         }
 
@@ -586,7 +585,7 @@ namespace DjvuNet.Shared.Tests
                 }
                 else if (method == "Core")
                 {
-                    ex = Assert.Throws<DjvuNet.Errors.DjvuArgumentNullException>(() => Util.ImageBinaryDiffCore(p1, p2, 12, 2, 36, 24, 8));
+                    ex = Assert.Throws<DjvuNet.Errors.DjvuArgumentNullException>(() => Util.ImageBinaryDiffCore(p1, p2, 12, 2, 36, PixelSize._24bpp, ChannelSize._8bit));
                 }
                 else if (method == "Scalar")
                 {
@@ -656,9 +655,9 @@ namespace DjvuNet.Shared.Tests
         {
             if (!Vector128.IsHardwareAccelerated) Assert.Skip("Vector128 not supported on this CPU.");
 
-            int pixelSize = 24;
-            int channelSize = 8;
-            uint widthBytes = (uint)width * (uint)(pixelSize / 8);
+            PixelSize pixelSize = PixelSize._24bpp;
+            ChannelSize channelSize = ChannelSize._8bit;
+            uint widthBytes = (uint)width * pixelSize.AsUintBytes();
             int stride = isPadded ? (int)((widthBytes + 3) & ~3) : (int)widthBytes;
             int totalBytes = stride * height;
 
@@ -690,9 +689,9 @@ namespace DjvuNet.Shared.Tests
         {
             if (!Avx2.IsSupported) Assert.Skip("AVX2 not supported on this CPU.");
 
-            int pixelSize = 24;
-            int channelSize = 8;
-            uint widthBytes = (uint)width * (uint)(pixelSize / 8);
+            PixelSize pixelSize = PixelSize._24bpp;
+            ChannelSize channelSize = ChannelSize._8bit;
+            uint widthBytes = (uint)width * pixelSize.AsUintBytes();
             int stride = isPadded ? (int)((widthBytes + 3) & ~3) : (int)widthBytes;
             int totalBytes = stride * height;
 
@@ -723,9 +722,9 @@ namespace DjvuNet.Shared.Tests
         [InlineData(1024, 100, true)]  // Padded multi thread routing
         public unsafe void ImageBinaryDiffCore_RoutingEdgeCases_MatchesScalar(int width, int height, bool isPadded)
         {
-            int pixelSize = 24;
-            int channelSize = 8;
-            uint widthBytes = (uint)width * (uint)(pixelSize / 8);
+            PixelSize pixelSize = PixelSize._24bpp;
+            ChannelSize channelSize = ChannelSize._8bit;
+            uint widthBytes = (uint)width * pixelSize.AsUintBytes();
             int stride = isPadded ? (int)((widthBytes + 3) & ~3) : (int)widthBytes;
             int totalBytes = stride * height;
 

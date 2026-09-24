@@ -277,7 +277,7 @@ namespace DjvuNet.JB2.Tests
                 fixed (sbyte* pOrig = origBitmap.Data)
                 fixed (sbyte* pVar = varBitmap.Data)
                 {
-                    diff = Util.ImageBinaryDiff((byte*)pOrig + origBitmap.Border, (byte*)pVar + varBitmap.Border, origBitmap.Width, origBitmap.Height, origBitmap.BytesPerRow, 8);
+                    diff = Util.ImageBinaryDiff((byte*)pOrig + origBitmap.Border, (byte*)pVar + varBitmap.Border, origBitmap.Width, origBitmap.Height, origBitmap.BytesPerRow, 0, PixelSize._8bpp);
                 }
             }
             Assert.True(diff == 0.0, $"Managed pixel parity mismatch! Diff: {diff}. Variant: {Path.GetFileName(variantFile)} vs {Path.GetFileName(originalSjbzPath)}");

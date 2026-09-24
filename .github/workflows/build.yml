@@ -57,7 +57,7 @@ jobs:
       if: runner.os == 'macOS'
       run: |
         # cmake, jq, ninja, apple-clang, pkg-config are pre-installed
-        brew install autoconf automake libtool mono-libgdiplus
+        brew install autoconf automake libtool mono-libgdiplus zstd
 
     - name: Run Build (Windows)
       if: runner.os == 'Windows'

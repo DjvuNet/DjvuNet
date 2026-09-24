@@ -30,6 +30,7 @@ DjvuNet.Shared.Tests/XunitExtensions/
 
 # Unignore build tools
 !eng/tools/
+!DjvuNet.Benchmarks/Tools/
 eng/tools/DjvuNet.Artifacts.Build/
 eng/tools/DjvuNet.Build.Tasks.Tests/
 eng/tools/libgit2sharp/

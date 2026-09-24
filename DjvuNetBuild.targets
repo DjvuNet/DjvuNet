@@ -28,7 +28,22 @@
       <UsingTask Condition="'$(MSBuildRuntimeType)' != 'Core'" TaskName="DjvuNet.Build.Tasks.GetDateTime" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
       <UsingTask Condition="'$(MSBuildRuntimeType)' != 'Core'" TaskName="MSBuild.Community.Tasks.FileUpdate" AssemblyFile="$(GitTasksAssembly)" TaskFactory="DjvuNet.Build.Tasks.DjvuNetBuildTaskFactory" />
 
-  <Target Name="CalculateVersion" BeforeTargets="InjectVersion">
+  <Target Name="LoadVersionCache" BeforeTargets="InjectVersion">
+    <!-- Always safely preload the cache. If CalculateVersion runs, it overwrites these in memory. New in-memory values are persisted into the cache file during execution. -->
+    <ReadLinesFromFile File="$(MSBuildThisFileDirectory).build.version" Condition="Exists('$(MSBuildThisFileDirectory).build.version')">
+      <Output TaskParameter="Lines" PropertyName="_EagerVersionCacheContent" />
+    </ReadLinesFromFile>
+    <PropertyGroup Condition="'$(_EagerVersionCacheContent)' != ''">
+      <DjvuAssemblyVersion>$(_EagerVersionCacheContent.Split(';')[0])</DjvuAssemblyVersion>
+      <InformationalVersion>$(_EagerVersionCacheContent.Split(';')[1])</InformationalVersion>
+      <BYear>$(_EagerVersionCacheContent.Split(';')[2])</BYear>
+      <BuildBranch>$(_EagerVersionCacheContent.Split(';')[3])</BuildBranch>
+      <CommitVersion>$(_EagerVersionCacheContent.Split(';')[4])</CommitVersion>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="CalculateVersion" BeforeTargets="InjectVersion" DependsOnTargets="LoadVersionCache"
+          Condition="!Exists('$(MSBuildThisFileDirectory).build.version') Or $([System.DateTime]::Now.Subtract($([System.IO.File]::GetLastWriteTime('$(MSBuildThisFileDirectory).build.version'))).TotalSeconds) &gt; 30">
     <ReadLinesFromFile File="$(MSBuildThisFileDirectory)library.version">
       <Output TaskParameter="Lines" PropertyName="LibraryVersion" />
     </ReadLinesFromFile>
@@ -56,9 +71,7 @@
       <Output TaskParameter="Version" PropertyName="DjvuAssemblyVersion" />
       <Output TaskParameter="FullVersion" PropertyName="InformationalVersion" />
     </BuildMajorVersion>
-  </Target>
 
-  <Target Name="UpdateVersionCache" BeforeTargets="InjectVersion" DependsOnTargets="CalculateVersion">
     <PropertyGroup>
       <VersionCacheFile>$(MSBuildThisFileDirectory).build.version</VersionCacheFile>
       <CalculatedCacheContent>$(DjvuAssemblyVersion);$(InformationalVersion);$(BYear);$(BuildBranch);$(CommitVersion)</CalculatedCacheContent>
@@ -68,11 +81,6 @@
     <ReadLinesFromFile File="$(VersionCacheFile)" Condition="Exists('$(VersionCacheFile)')">
       <Output TaskParameter="Lines" PropertyName="ExistingCacheContent" />
     </ReadLinesFromFile>
-
-    <Message Importance="High" Text="  ================= VERSION CACHE ==================" />
-    <Message Importance="High" Text="  = Existing:   [$(ExistingCacheContent)]" />
-    <Message Importance="High" Text="  = Calculated: [$(CalculatedCacheContent)]" />
-    <Message Importance="High" Text="  ==================================================" />
 
     <ItemGroup>
       <VersionCacheLines Include="$(DjvuAssemblyVersion)" />
@@ -86,6 +94,23 @@
     <!-- File participates in the incremental build logic preventing unnecessary writes and build lock race conditions -->
     <WriteLinesToFile File="$(VersionCacheFile)" Lines="@(VersionCacheLines)" Overwrite="true"
                       Condition="!Exists('$(VersionCacheFile)') Or '$(ExistingCacheContent)' != '$(CalculatedCacheContent)'" />
+
+    <!-- Touch the cache file to update its TTL ONLY if we skipped writing to it -->
+    <Touch Files="$(VersionCacheFile)" AlwaysCreate="true" 
+           Condition="Exists('$(VersionCacheFile)') And '$(ExistingCacheContent)' == '$(CalculatedCacheContent)'" />
+  </Target>
+
+  <Target Name="UpdateVersionCache" BeforeTargets="InjectVersion" DependsOnTargets="CalculateVersion">
+    <ReadLinesFromFile File="$(MSBuildThisFileDirectory).build.version" Condition="Exists('$(MSBuildThisFileDirectory).build.version')">
+      <Output TaskParameter="Lines" PropertyName="_VersionCacheContent" />
+    </ReadLinesFromFile>
+    <PropertyGroup Condition="'$(_VersionCacheContent)' != ''">
+      <DjvuAssemblyVersion>$(_VersionCacheContent.Split(';')[0])</DjvuAssemblyVersion>
+      <InformationalVersion>$(_VersionCacheContent.Split(';')[1])</InformationalVersion>
+      <BYear>$(_VersionCacheContent.Split(';')[2])</BYear>
+      <BuildBranch>$(_VersionCacheContent.Split(';')[3])</BuildBranch>
+      <CommitVersion>$(_VersionCacheContent.Split(';')[4])</CommitVersion>
+    </PropertyGroup>
   </Target>
 
   <Target Name="InjectVersion" BeforeTargets="CoreCompile" DependsOnTargets="UpdateVersionCache"

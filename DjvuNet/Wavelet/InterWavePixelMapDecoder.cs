@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+using System.Runtime.CompilerServices;
 using DjvuNet.Compression;
 using DjvuNet.Configuration;
 
@@ -95,7 +95,7 @@ namespace DjvuNet.Wavelet
                 }
             }
 
-            IDataCoder coder = DjvuSettings.Current.CoderFactory.CreateCoder(reader.BaseStream, false);
+            ZPCodec coder = (ZPCodec) DjvuSettings.Current.CoderFactory.CreateCoder(reader.BaseStream, false);
 
             for (int flag = 1; flag != 0 && _CSlices < nslices; _CSlices++)
             {

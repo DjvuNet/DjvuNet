@@ -3,6 +3,7 @@ setlocal EnableDelayedExpansion EnableExtensions
 
 set DOTNET_CLI_TELEMETRY_OPTOUT=1
 set DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+set DOTNET_NOLOGO=1
 
 set "__MsgPrefix=BUILD: "
 set "__RepoRootDir=%~dp0"
@@ -93,7 +94,7 @@ set "_DefaultNetCoreApp=net10.0"
 set "_NetCoreAppId=.NETCoreApp"
 set "_NetCoreAppTFM=.NETCoreApp,Version=v10.0"
 set "_Framework=%_DefaultNetCoreApp%"
-set "__ArtifactsReleaseTag=v0.15.26257.0"
+set "__ArtifactsReleaseTag=v0.16.26267.0"
 set "__GithubDjvuNetReleaseUri=https://github.com/DjvuNet/artifacts/releases/download/%__ArtifactsReleaseTag%/"
 set "__ArtifactsTestDataUri=https://github.com/DjvuNet/artifacts/archive/refs/tags/%__ArtifactsReleaseTag%.zip"
 set "__ArtifactsDirName=artifacts-%__ArtifactsReleaseTag:v=%"
@@ -261,6 +262,21 @@ if defined _RunTests (
         )
     )
 )
+
+    set "__NeedsZstd="
+    if defined _Test set "__NeedsZstd=1"
+    if defined _BuildTests set "__NeedsZstd=1"
+    if defined _RunTests set "__NeedsZstd=1"
+
+    if defined __NeedsZstd (
+        where zstd.exe >nul 2>nul
+        if not [!ERRORLEVEL!]==[0] (
+            echo !__MsgPrefix!Error: zstd.exe not found on PATH. Required for test artifacts decompression.
+            set "__FailedCommands=!__FailedCommands! check_zstd"
+            set "_SkipTests=1"
+            if defined _FastFail goto exit_error
+        )
+    )
 
 set "__RootBuildDir=%__RepoRootDir%build\bin\"
 
@@ -895,9 +911,11 @@ if not defined _Test (
             goto exit_success
         )
     ) else (
+        echo.
         echo %__MsgPrefix%Preparing to build tests
     )
 ) else (
+        echo.
         echo %__MsgPrefix%Preparing to build and run tests
 )
 
@@ -916,9 +934,12 @@ if not exist .\artifacts\test001C.djvu (
             if not [!ERRORLEVEL!]==[0] (
                 echo.
                 echo !__MsgPrefix!Error: artifacts extraction returned error
-                goto exit_error
+                set "__FailedCommands=!__FailedCommands! extract_artifacts"
+                set "_ForceCloneArtifacts=1"
+                if defined _FastFail goto exit_error
+            ) else (
+                del artifacts.tar.gz
             )
-            del artifacts.tar.gz
         ) else (
             set "_ForceCloneArtifacts=1"
         )
@@ -935,12 +956,45 @@ if not exist .\artifacts\test001C.djvu (
             "!__CloneArgs!"
 
         if not [!ERRORLEVEL!]==[0] (
-            echo.
-            echo !__MsgPrefix!Error: artifacts git clone returned error
-            goto exit_error
+            set "_SkipTests=1"
         )
     )
     echo.
+)
+
+if not defined _SkipTests (
+    if exist artifacts\data\extracted\ (
+        echo.
+        echo !__MsgPrefix!Running: Decompress_Rle_Artifacts
+        pushd artifacts\data\extracted
+        if exist zstd_files.txt del zstd_files.txt
+        for %%f in (*.zst) do (
+            if not exist "%%~nf" echo %%f>> zstd_files.txt
+        )
+        if exist zstd_files.txt zstd.exe -d -f --no-progress --filelist zstd_files.txt
+
+        if not [!ERRORLEVEL!]==[0] (
+            echo !__MsgPrefix!Error: Decompress_Rle_Artifacts returned error code !ERRORLEVEL!
+            set "__FailedCommands=!__FailedCommands! Decompress_Rle_Artifacts"
+            set "_SkipTests=1"
+            if defined _FastFail (
+                popd
+                goto exit_error
+            )
+        ) else (
+            set "__SuccessfulCommands=!__SuccessfulCommands! Decompress_Rle_Artifacts"
+        )
+        popd
+    )
+)
+
+echo.
+
+if defined _SkipTests (
+    echo !__MsgPrefix!WARNING: Artifacts acquisition or decompression failed. Tests will be skipped.
+    set "_Test="
+    set "_BuildTests="
+    set "_RunTests="
 )
 
 REM Setup test environment

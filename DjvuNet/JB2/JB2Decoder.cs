@@ -1,10 +1,11 @@
 using System;
+using System.Data.Common;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using DjvuNet.Compression;
-using DjvuNet.Graphics;
 using DjvuNet.Errors;
+using DjvuNet.Graphics;
 
 namespace DjvuNet.JB2
 {
@@ -120,24 +121,78 @@ namespace DjvuNet.JB2
 
         #region Protected Methods
 
+        // --- OLD IMPLEMENTATION (Commented out for easy swapping) ---
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // protected sealed override bool CodeBit(bool ignored, MutableValue<sbyte> ctx)
+        // {
+        //     byte ctxVal = unchecked((byte)ctx.Value);
+        //     int value = _Coder.Decoder(ref ctxVal);
+        //     ctx.Value = (sbyte) ctxVal;
+        //     return (value != 0);
+        // }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override bool CodeBit(bool ignored, MutableValue<sbyte> ctx)
+        protected sealed override bool CodeBit(bool ignored, MutableValue<sbyte> ctx)
         {
-            byte ctxVal = unchecked((byte)ctx.Value);
-            int value = _Coder.Decoder(ref ctxVal);
-            ctx.Value = (sbyte) ctxVal;
-            return (value != 0);
+            // Safe Z-Coder inlining fast path
+            ref byte ctxVal = ref Unsafe.As<sbyte, byte>(ref ctx.Value);
+            
+            uint z = _Coder._AValue + _Coder._PArray[ctxVal];
+            if (z <= _Coder._Fence)
+            {
+                _Coder._AValue = z;
+                return (ctxVal & 1) != 0;
+            }
+            
+            // Slow path: ZPCodec handles stream reads and state synchronization
+            return _Coder.DecodeSub(ref ctxVal, z) != 0;
         }
 
+        // --- OLD IMPLEMENTATION (Commented out for easy swapping) ---
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // protected sealed override int CodeBit(bool ignored, sbyte[] array, int offset)
+        // {
+        //     _ZpBitHolder = unchecked((byte )array[offset]);
+        //     int retval = _Coder.Decoder(ref _ZpBitHolder);
+        //     array[offset] = unchecked((sbyte)_ZpBitHolder);
+        //     return retval;
+        // }
+
+        // --- OLD IMPLEMENTATION (Commented out for easy swapping) ---
+        // [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        // protected sealed override int CodeBit(bool ignored, sbyte[] array, int offset)
+        // {
+        //     // Safe Z-Coder inlining fast path
+        //     ref byte ctxVal = ref Unsafe.As<sbyte, byte>(ref array[offset]);
+        //     
+        //     uint z = _Coder._AValue + _Coder._PArray[ctxVal];
+        //     if (z <= _Coder._Fence)
+        //     {
+        //         _Coder._AValue = z;
+        //         return ctxVal & 1;
+        //     }
+        //     
+        //     // Slow path: ZPCodec handles stream reads and state synchronization
+        //     return _Coder.DecodeSub(ref ctxVal, z);
+        // }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected override int CodeBit(bool ignored, sbyte[] array, int offset)
+        private int CodeBitInline(sbyte[] array, int offset)
         {
-            _ZpBitHolder = unchecked((byte )array[offset]);
-            int retval = _Coder.Decoder(ref _ZpBitHolder);
-            array[offset] = unchecked((sbyte)_ZpBitHolder);
-            return retval;
+            ref byte ctxVal = ref Unsafe.As<sbyte, byte>(ref array[offset]);
+            
+            uint z = _Coder._AValue + _Coder._PArray[ctxVal];
+            if (z <= _Coder._Fence)
+            {
+                _Coder._AValue = z;
+                return ctxVal & 1;
+            }
+            
+            return _Coder.DecodeSub(ref ctxVal, z);
         }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected sealed override int CodeBit(bool ignored, sbyte[] array, int offset) => CodeBitInline(array, offset);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected int CodeNum(int low, int high, MutableValue<int> ctx)
@@ -185,7 +240,7 @@ namespace DjvuNet.JB2
 
                 for (int dx = 0; dx < dw; )
                 {
-                    int n = CodeBit(false, _CBitDist, context);
+                    int n = CodeBitInline(_CBitDist, context);
                     bm.SetByteAt(up0 + dx++, (sbyte) n);
                     context = ShiftCrossContext(ref bm, ref cbm, context, n, up1, up0, xup1, xup0, xdn1, dx);
                 }
@@ -204,13 +259,26 @@ namespace DjvuNet.JB2
         {
             while (dy >= 0)
             {
-                int context = GetCrossContext(pUp1, pUp0, pXup1, pXup0, pXdn1, 0);
+                // Inlined: GetCrossContext
+                int context = ((pUp1[-1] << 10) | (pUp1[0] << 9) |
+                               (pUp1[1] << 8)   | (pUp0[-1] << 7) |
+                               (pXup1[0] << 6)  | (pXup0[-1] << 5) |
+                               (pXup0[0] << 4)  | (pXup0[1] << 3) |
+                               (pXdn1[-1] << 2) | (pXdn1[0] << 1) |
+                               (byte)pXdn1[1]);
 
                 for (int dx = 0; dx < dw; )
                 {
-                    int n = CodeBit(false, _CBitDist, context);
+                    int n = CodeBitInline(_CBitDist, context);
+                    
                     pUp0[dx++] = (sbyte)n;
-                    context = ShiftCrossContext(context, n, pUp1, pUp0, pXup1, pXup0, pXdn1, dx);
+
+                    // Inlined: ShiftCrossContext
+                    // Note: 'dx' has been pre-incremented on the previous line. 
+                    // The indices here (dx, dx + 1) naturally rely on this shifted offset.
+                    context = (((context << 1) & 0x636) | (pUp1[dx + 1] << 8) |
+                               (pXup1[dx] << 6) | (pXup0[dx + 1] << 3) |
+                               (byte)pXdn1[dx + 1] | (n << 7));
                 }
 
                 pUp1 = pUp0;
@@ -229,7 +297,7 @@ namespace DjvuNet.JB2
 
                 for (int dx = 0; dx < dw; )
                 {
-                    int n = CodeBit(false, _BitDist, context);
+                    int n = CodeBitInline(_BitDist, context);
 
                     bm.SetByteAt(up0 + dx++, (sbyte) n);
                     context = ShiftDirectContext(ref bm, context, n, up2, up1, up0, dx);
@@ -245,14 +313,24 @@ namespace DjvuNet.JB2
         {
             while (dy >= 0)
             {
-                int context = GetDirectContext(pUp2, pUp1, pUp0, 0);
+                // Inlined: int context = GetDirectContext(pUp2, pUp1, pUp0, 0);
+
+                int context = ((pUp2[-1] << 9) | (pUp2[0] << 8) |
+                               (pUp2[1] << 7) | (pUp1[-2] << 6) |
+                               (pUp1[-1] << 5) | (pUp1[0] << 4) |
+                               (pUp1[1] << 3) | (pUp1[2] << 2) |
+                               (pUp0[-2] << 1) | (byte)pUp0[-1]);
 
                 for (int dx = 0; dx < dw; )
                 {
-                    int n = CodeBit(false, _BitDist, context);
+                    int n = CodeBitInline(_BitDist, context);
 
                     pUp0[dx++] = (sbyte)n;
-                    context = ShiftDirectContext(context, n, pUp2, pUp1, pUp0, dx);
+
+                    // Inlined: context = ShiftDirectContext(context, n, pUp2, pUp1, pUp0, dx);
+                    // Note: 'dx' has been pre-incremented on the previous line.
+                    // The indices here naturally rely on this shifted offset.
+                    context = ((context << 1) & 0x37a) | (pUp1[dx + 2] << 2) | (pUp2[dx + 1] << 7) | n;
                 }
 
                 pUp2 = pUp1;

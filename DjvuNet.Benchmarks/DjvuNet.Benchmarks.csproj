@@ -20,6 +20,7 @@
       <Compile Include="Tools\ImageBinaryDiffBenchmark.cs" />
       <Compile Include="Tools\ImageCacheBenchmark.cs" />
       <Compile Include="Wavelet\InterWaveMapImageBenchmark.cs" />
+      <Compile Include="Wavelet\InterWavePixelMapBenchmark.cs" />
       <Compile Include="Wavelet\Rgb2YCbCrHybridVsUnifiedBenchmark.cs" />
       <Compile Include="Wavelet\Rgb2YCbCrMatrixBenchmark.cs" />
       <Compile Include="Wavelet\Rgb2YCbCrUnifiedBenchmark.cs" />

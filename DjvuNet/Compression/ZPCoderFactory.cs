@@ -12,7 +12,7 @@ namespace DjvuNet.Compression
         public IDataCoder CreateCoder(Stream stream, bool encoding = false, bool compatibility = true)
         {
             ZPCodec codec = new ZPCodec { DjvuCompat = compatibility, Encoding = encoding };
-            return codec.Initializa(stream);
+            return codec.Initialize(stream);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using LibGit2Sharp;
 using Microsoft.Build.Framework;
@@ -22,6 +22,7 @@ namespace DjvuNet.Build.Tasks
         public override bool Execute()
         {
             TaskLogger.Current = this.Log;
+            DjvuNetBuildEventSource.Log.BuildMajorVersionStart();
             try
             {
                 if (!System.Version.TryParse(MajorMinorVersion, out System.Version baseVersion))
@@ -38,14 +39,17 @@ namespace DjvuNet.Build.Tasks
                 {
                     try
                     {
+                        DjvuNetBuildEventSource.Log.InstantiateRepositoryStart();
                         using (var repo = new Repository(RepoRoot))
                         {
+                            DjvuNetBuildEventSource.Log.InstantiateRepositoryStop();
                             var headCommit = repo.Head.Tip;
                             if (headCommit != null)
                             {
                                 commitDate = headCommit.Author.When.UtcDateTime;
 
                                 var dateToMatch = commitDate.Date;
+                                DjvuNetBuildEventSource.Log.IterateCommitsStart();
                                 foreach (var commit in repo.Commits)
                                 {
                                     if (commit.Author.When.UtcDateTime.Date == dateToMatch)
@@ -53,13 +57,17 @@ namespace DjvuNet.Build.Tasks
                                     else
                                         break;
                                 }
+                                DjvuNetBuildEventSource.Log.IterateCommitsStop(commitOrderToday);
 
                                 commitOrderToday--; // 0-based index
                                 if (commitOrderToday < 0) commitOrderToday = 0;
 
                                 string shortHash = headCommit.Sha.Substring(0, 7);
-                                RepositoryStatus status = repo.RetrieveStatus();
+                                DjvuNetBuildEventSource.Log.RetrieveStatusStart();
+                                var statusOpts = new StatusOptions { IncludeIgnored = false };
+                                RepositoryStatus status = repo.RetrieveStatus(statusOpts);
                                 bool isDirty = status.IsDirty;
+                                DjvuNetBuildEventSource.Log.RetrieveStatusStop(isDirty);
 
                                 hashSuffix = isDirty ? $"{shortHash}-dev" : $"{shortHash}";
                             }
@@ -87,6 +95,7 @@ namespace DjvuNet.Build.Tasks
                 Log.LogErrorFromException(ex, true);
             }
 
+            DjvuNetBuildEventSource.Log.BuildMajorVersionStop();
             return !Log.HasLoggedErrors;
         }
     }

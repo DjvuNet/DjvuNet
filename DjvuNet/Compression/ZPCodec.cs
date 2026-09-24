@@ -1,45 +1,35 @@
 using System;
 using System.IO;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using DjvuNet.Errors;
 
 namespace DjvuNet.Compression
 {
-    public class ZPCodec : IDataCoder, IDisposable
+    public sealed class ZPCodec : IDataCoder, IDisposable
     {
-        #region Protected Fields
+        #region Internal Fields
 
-        protected const int _ArraySize = 256;
-        protected byte _ZByte;
-        protected byte _SCount;
-        protected byte _Delay;
-        protected uint _Code;
-        protected uint _Fence;
-        protected uint _Buffer;
-        protected uint _NRun;
-        protected uint _Subend;
-        protected ulong _Bitcount;
-        protected ZPTable[] _DefaultTable;
-        protected sbyte[] _FFZT;
+        internal const int _ArraySize = 256;
+        internal byte _ZByte;
+        internal byte _SCount;
+        internal byte _Delay;
+        internal uint _Code;
+        internal uint _Fence;
+        internal uint _Buffer;
+        internal uint _NRun;
+        internal uint _Subend;
+        internal ulong _Bitcount;
+        internal ZPTable[] _DefaultTable;
 
-        #endregion Protected Fields
+        #endregion Internal Fields
 
         #region Internal Properties
-
-        /// <summary>
-        /// Gets the FFZT data
-        /// </summary>
-        internal sbyte[] FFZT { get { return _FFZT; } }
 
         /// <summary>
         /// Gets or sets the A Value for the item
         /// </summary>
         internal uint _AValue;
-
-        /// <summary>
-        /// Gets the Ffzt data
-        /// </summary>
-        internal sbyte[] _Ffzt;
 
         #endregion Internal Properties
 
@@ -78,7 +68,7 @@ namespace DjvuNet.Compression
         public ZPCodec(Stream dataStream, bool encoding = false, bool djvuCompat = true)
         {
             InitializeInternal(encoding, djvuCompat);
-            Initializa(dataStream);
+            Initialize(dataStream);
         }
 
         #endregion Constructors
@@ -87,19 +77,6 @@ namespace DjvuNet.Compression
         {
             Encoding = encoding;
             DjvuCompat = djvuCompat;
-
-            _FFZT = new sbyte[_ArraySize];
-
-            for (int i = 0; i < _ArraySize; i++)
-            {
-                for (int j = i; (j & 0x80) > 0; j <<= 1)
-                {
-                    FFZT[i]++;
-                }
-            }
-
-            _Ffzt = new sbyte[FFZT.Length];
-            Buffer.BlockCopy(FFZT, 0, _Ffzt, 0, _Ffzt.Length);
 
             _Down = new byte[_ArraySize];
             _Up = new byte[_ArraySize];
@@ -132,7 +109,7 @@ namespace DjvuNet.Compression
 
         #region IDisposable Implementation
 
-        protected bool _Disposed;
+        internal bool _Disposed;
 
         public bool Disposed { get { return _Disposed; } }
 
@@ -142,7 +119,7 @@ namespace DjvuNet.Compression
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        internal void Dispose(bool disposing)
         {
             if (!_Disposed && Encoding)
             {
@@ -362,9 +339,7 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z>>1);
 #else
-            uint d = 0x6000 + ((z + _AValue) >> 2);
-            if (z > d)
-                z = d;
+            z = Math.Min(z, 0x6000 + ((z + _AValue) >> 2));
 #endif
 
               /* Test MPS/LPS */
@@ -389,11 +364,7 @@ namespace DjvuNet.Compression
                     Preload();
                 }
                 /* Adjust fence */
-                _Fence = _Code;
-                if (_Code >= 0x8000)
-                {
-                    _Fence = 0x7fff;
-                }
+                _Fence = Math.Min(_Code, 0x7FFF);
 
                 return bit ^ 1;
             }
@@ -414,11 +385,7 @@ namespace DjvuNet.Compression
                     Preload();
                 }
                 /* Adjust fence */
-                _Fence = _Code;
-                if (_Code >= 0x8000)
-                {
-                    _Fence = 0x7fff;
-                }
+                _Fence = Math.Min(_Code, 0x7FFF);
 
                 return bit;
             }
@@ -430,11 +397,7 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = 0x6000 + ((z + _AValue) >> 2);
-            if (z > d)
-            {
-                z = d;
-            }
+            z = Math.Min(z, 0x6000 + ((z + _AValue) >> 2));
 #endif
             /* Test MPS/LPS */
             if (z > _Code)
@@ -456,11 +419,7 @@ namespace DjvuNet.Compression
                     Preload();
                 }
                 /* Adjust fence */
-                _Fence = _Code;
-                if (_Code >= 0x8000)
-                {
-                    _Fence = 0x7fff;
-                }
+                _Fence = Math.Min(_Code, 0x7FFF);
 
                 return mps ^ 1;
             }
@@ -478,11 +437,7 @@ namespace DjvuNet.Compression
                     Preload();
                 }
                 /* Adjust fence */
-                _Fence = _Code;
-                if (_Code >= 0x8000)
-                {
-                    _Fence = 0x7fff;
-                }
+                _Fence = Math.Min(_Code, 0x7FFF);
 
                 return mps;
             }
@@ -510,11 +465,7 @@ namespace DjvuNet.Compression
                     Preload();
                 }
                 /* Adjust fence */
-                _Fence = _Code;
-                if (_Code >= 0x8000)
-                {
-                    _Fence = 0x7fff;
-                }
+                _Fence = Math.Min(_Code, 0x7FFF);
 
                 return mps ^ 1;
             }
@@ -532,11 +483,7 @@ namespace DjvuNet.Compression
                     Preload();
                 }
                 /* Adjust fence */
-                _Fence = _Code;
-                if (_Code >= 0x8000)
-                {
-                    _Fence = 0x7fff;
-                }
+                _Fence = Math.Min(_Code, 0x7FFF);
 
                 return mps;
             }
@@ -675,11 +622,7 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = (uint)(0x6000 + ((z + _AValue) >> 2));
-            if (z > d)
-            {
-                z = d;
-            }
+            z = Math.Min(z, (uint)(0x6000 + ((z + _AValue) >> 2)));
 #endif
             ctx = _Down[ctx];
             z = 0x10000 - z;
@@ -729,11 +672,7 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
-            if (z > d)
-            {
-                z = d;
-            }
+            z = Math.Min(z, 0x6000 + ((z + (uint)_AValue) >> 2));
 #endif
             _AValue = z;
 
@@ -752,11 +691,7 @@ namespace DjvuNet.Compression
             if (z >= 0x8000)
                 z = 0x4000 + (z >> 1);
 #else
-            uint d = 0x6000 + ((z + (uint)_AValue) >> 2);
-            if (z > d)
-            {
-                z = d;
-            }
+            z = Math.Min(z, 0x6000 + ((z + (uint)_AValue) >> 2));
 #endif
             z = 0x10000 - z;
             _Subend += z;
@@ -794,11 +729,11 @@ namespace DjvuNet.Compression
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int FFZ(uint x)
         {
-            return ((unchecked((int)0xffffffffL) & x) < 65280L) ? _Ffzt[0xff & (x >> 8)] : (_Ffzt[0xff & x] + 8);
+            return BitOperations.LeadingZeroCount((~x << 16) | 0x8000);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ZPCodec Initializa(Stream inputStream)
+        public ZPCodec Initialize(Stream inputStream)
         {
             DataStream = inputStream;
             if (!Encoding)
@@ -867,12 +802,7 @@ namespace DjvuNet.Compression
             _Delay = 25;
             _SCount = 0;
             Preload();
-            _Fence = _Code;
-
-            if (_Code >= 0x8000)
-            {
-                _Fence = 0x7fff;
-            }
+            _Fence = Math.Min(_Code, 0x7FFF);
         }
 
         /// <summary>

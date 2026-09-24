@@ -29,15 +29,7 @@ namespace DjvuNet.Compression.Tests
             }
         }
 
-        [Fact()]
-        public void ZPCodecTest001()
-        {
-            using (ZPCodec codec = new ZPCodec())
-            {
-                Assert.NotNull(codec.FFZT);
-                Assert.Equal<int>(256, codec.FFZT.Length);
-            }
-        }
+
 
         [Fact()]
         public void ZPCodecTest002()
@@ -346,7 +338,6 @@ namespace DjvuNet.Compression.Tests
                 Assert.True(codec.Encoding);
                 Assert.Same(stream, codec.DataStream);
                 // TODO Finish test implementation
-                sbyte[] ffzt = codec.FFZT;
             }
         }
 

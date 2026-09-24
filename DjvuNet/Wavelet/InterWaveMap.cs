@@ -671,19 +671,24 @@ namespace DjvuNet.Wavelet
             fixed (sbyte* pImg8 = img8)
             {
                 short* pOffset = pData + (nrect.YMin * dataw) + nrect.XMin;
+                UnpackPixels(pOffset, pImg8, nrect.Height, targetWidth, index, rowSize, pixelDist, dataw);
+            }
+        }
 
-                if (Avx2.IsSupported && targetWidth >= 32)
-                {
-                    UnpackPixelsAvx2(pOffset, pImg8, nrect.Height, targetWidth, index, rowSize, pixelDist, dataw);
-                }
-                else if (Ssse3.IsSupported && targetWidth >= 16)
-                {
-                    UnpackPixelsSsse3(pOffset, pImg8, nrect.Height, targetWidth, index, rowSize, pixelDist, dataw);
-                }
-                else
-                {
-                    UnpackPixelsScalar(pOffset, pImg8, nrect.Height, targetWidth, index, rowSize, pixelDist, dataw);
-                }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe void UnpackPixels(short* pData, sbyte* pImg8, int height, int targetWidth, int index, int rowSize, int pixelDist, int srcStride)
+        {
+            if (Avx2.IsSupported && targetWidth >= 32)
+            {
+                UnpackPixelsAvx2(pData, pImg8, height, targetWidth, index, rowSize, pixelDist, srcStride);
+            }
+            else if (Ssse3.IsSupported && targetWidth >= 16)
+            {
+                UnpackPixelsSsse3(pData, pImg8, height, targetWidth, index, rowSize, pixelDist, srcStride);
+            }
+            else
+            {
+                UnpackPixelsScalar(pData, pImg8, height, targetWidth, index, rowSize, pixelDist, srcStride);
             }
         }
 

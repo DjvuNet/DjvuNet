@@ -3,15 +3,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using DjvuNet;
 using DjvuNet.Compression;
 using DjvuNet.DataChunks;
 using DjvuNet.DjvuLibre;
+using DjvuNet.Extensions;
 using DjvuNet.Graphics;
 using DjvuNet.JB2;
 using DjvuNet.Tests;
+using Microsoft.Testing.Platform.Extensions.Messages;
 using Xunit;
+using SysBitmap = System.Drawing.Bitmap;
 
 namespace DjvuNet.DjvuLibre.Compatibility.Tests
 {
@@ -119,51 +125,7 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
 
         public static IEnumerable<object[]> JB2ImageTestData => Util.GetJB2ImageTestData(
             skipDocs: new int[] { },
-            skipChunks: new string[]
-            {
-                "test001C_P19.sjbz", "test001C_P21.sjbz", "test001C_P22.sjbz", "test001C_P23.sjbz", "test001C_P29.sjbz",
-                "test002C_P08.sjbz", "test002C_P09.sjbz", "test003C_P04.sjbz", "test003C_P14.sjbz", "test003C_P20.sjbz",
-                "test003C_P21.sjbz", "test003C_P34.sjbz", "test003C_P38.sjbz", "test003C_P59.sjbz", "test003C_P63.sjbz",
-                "test003C_P68.sjbz", "test003C_P92.sjbz", "test003C_P93.sjbz", "test003C_P94.sjbz", "test003C_P98.sjbz",
-                "test004C_P09.sjbz", "test008C_P10.sjbz", "test024C_P13.sjbz", "test027C_P06.sjbz", "test031C_P05.sjbz",
-                "test031C_P07.sjbz", "test036C_P02.sjbz", "test036C_P03.sjbz", "test036C_P08.sjbz", "test036C_P09.sjbz",
-                "test037C_P02.sjbz", "test038C_P11.sjbz", "test039C_P12.sjbz", "test039C_P17.sjbz", "test040C_P12.sjbz",
-                "test040C_P17.sjbz", "test040C_P23.sjbz", "test040C_P24.sjbz", "test040C_P25.sjbz", "test040C_P26.sjbz",
-                "test040C_P28.sjbz", "test040C_P33.sjbz", "test040C_P34.sjbz", "test040C_P36.sjbz", "test040C_P37.sjbz",
-                "test040C_P38.sjbz", "test040C_P39.sjbz", "test040C_P40.sjbz", "test040C_P44.sjbz", "test040C_P45.sjbz",
-                "test040C_P47.sjbz", "test040C_P51.sjbz", "test040C_P54.sjbz", "test045C_P04.sjbz", "test045C_P08.sjbz",
-                "test045C_P11.sjbz", "test045C_P12.sjbz", "test045C_P13.sjbz", "test045C_P14.sjbz", "test045C_P15.sjbz",
-                "test045C_P16.sjbz", "test045C_P18.sjbz", "test045C_P21.sjbz", "test045C_P25.sjbz", "test045C_P28.sjbz",
-                "test045C_P32.sjbz", "test045C_P34.sjbz", "test045C_P37.sjbz", "test045C_P39.sjbz", "test045C_P46.sjbz",
-                "test045C_P51.sjbz", "test045C_P54.sjbz", "test045C_P57.sjbz", "test045C_P59.sjbz", "test045C_P62.sjbz",
-                "test045C_P64.sjbz", "test045C_P66.sjbz", "test045C_P68.sjbz", "test045C_P69.sjbz", "test045C_P70.sjbz",
-                "test045C_P73.sjbz", "test045C_P76.sjbz", "test045C_P77.sjbz", "test046C_P02.sjbz", "test046C_P04.sjbz",
-                "test046C_P11.sjbz", "test046C_P16.sjbz", "test048C_P08.sjbz", "test050C_P04.sjbz", "test050C_P07.sjbz",
-                "test050C_P08.sjbz", "test050C_P09.sjbz", "test050C_P10.sjbz", "test050C_P12.sjbz", "test050C_P13.sjbz",
-                "test050C_P15.sjbz", "test050C_P16.sjbz", "test050C_P17.sjbz", "test050C_P18.sjbz", "test050C_P20.sjbz",
-                "test051C_P01.sjbz", "test051C_P05.sjbz", "test051C_P11.sjbz", "test051C_P13.sjbz", "test052C_P03.sjbz",
-                "test052C_P19.sjbz", "test053C_P03.sjbz", "test053C_P09.sjbz", "test053C_P12.sjbz", "test053C_P14.sjbz",
-                "test056C_P30.sjbz", "test057C_P08.sjbz", "test057C_P12.sjbz", "test057C_P18.sjbz", "test057C_P20.sjbz",
-                "test057C_P22.sjbz", "test059C_P03.sjbz", "test059C_P05.sjbz", "test059C_P07.sjbz", "test059C_P11.sjbz",
-                "test059C_P21.sjbz", "test059C_P25.sjbz", "test059C_P34.sjbz", "test059C_P59.sjbz", "test059C_P61.sjbz",
-                "test059C_P63.sjbz", "test059C_P68.sjbz", "test059C_P72.sjbz", "test059C_P73.sjbz", "test059C_P74.sjbz",
-                "test059C_P79.sjbz", "test059C_P81.sjbz", "test061C_P04.sjbz", "test061C_P07.sjbz", "test061C_P09.sjbz",
-                "test061C_P10.sjbz", "test061C_P12.sjbz", "test061C_P14.sjbz", "test061C_P16.sjbz", "test061C_P19.sjbz",
-                "test061C_P21.sjbz", "test061C_P22.sjbz", "test061C_P23.sjbz", "test061C_P24.sjbz", "test061C_P26.sjbz",
-                "test061C_P28.sjbz", "test061C_P33.sjbz", "test061C_P38.sjbz", "test061C_P40.sjbz", "test061C_P43.sjbz",
-                "test061C_P45.sjbz", "test061C_P47.sjbz", "test061C_P49.sjbz", "test061C_P51.sjbz", "test061C_P55.sjbz",
-                "test061C_P57.sjbz", "test061C_P59.sjbz", "test061C_P61.sjbz", "test061C_P63.sjbz", "test061C_P65.sjbz",
-                "test061C_P68.sjbz", "test061C_P69.sjbz", "test061C_P71.sjbz", "test061C_P73.sjbz", "test061C_P74.sjbz",
-                "test061C_P75.sjbz", "test061C_P76.sjbz", "test061C_P78.sjbz", "test061C_P80.sjbz", "test061C_P81.sjbz",
-                "test061C_P83.sjbz", "test061C_P85.sjbz", "test061C_P89.sjbz", "test061C_P91.sjbz", "test061C_P93.sjbz",
-                "test061C_P94.sjbz", "test061C_P95.sjbz", "test061C_P98.sjbz", "test061C_P99.sjbz", "test061C_P101.sjbz",
-                "test061C_P103.sjbz", "test061C_P105.sjbz", "test061C_P107.sjbz", "test061C_P109.sjbz", "test061C_P111.sjbz",
-                "test061C_P113.sjbz", "test061C_P114.sjbz", "test061C_P116.sjbz", "test061C_P117.sjbz", "test061C_P122.sjbz",
-                "test061C_P123.sjbz", "test061C_P126.sjbz", "test062C_P18.sjbz", "test062C_P30.sjbz", "test068C_P02.sjbz",
-                "test068C_P13.sjbz", "test070C_P03.sjbz", "test070C_P06.sjbz", "test070C_P24.sjbz", "test070C_P26.sjbz",
-                "test071C_P09.sjbz", "test071C_P13.sjbz", "test071C_P25.sjbz", "test072C_P08.sjbz", "test072C_P14.sjbz",
-                "test072C_P15.sjbz", "test072C_P33.sjbz", "test074C_P01.sjbz",
-            },
+            skipChunks: new string[] { },
             coverage: TestCoverage.UniqueOnly
         );
 
@@ -197,6 +159,88 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
         {
 
             string sjbzFilePath = Path.Combine(Util.ArtifactsDataPath, sjbzFileName);
+            byte[] djbzData = djbzFileName != null ? File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, djbzFileName)) : null;
+            byte[] sjbzData = File.ReadAllBytes(sjbzFilePath);
+
+            byte[] djbzPayload = djbzData;
+            byte[] sjbzPayload = sjbzData;
+
+            // 3. Managed Decoding
+            JB2Dictionary djbzDict = null;
+            if (djbzPayload != null)
+            {
+                djbzDict = new JB2Dictionary();
+                using (var ms = new MemoryStream(djbzPayload))
+                using (var reader = new DjvuReader(ms))
+                {
+                    djbzDict.Decode(reader);
+                }
+            }
+
+            var jb2Image = new JB2Image();
+
+            using (var ms = new MemoryStream(sjbzPayload))
+            using (var reader = new DjvuReader(ms))
+            {
+                jb2Image.Decode(reader, djbzDict);
+            }
+
+            Assert.True(jb2Image.ShapeCount > 0, "Failed to decode JB2 data from chunks.");
+
+            Bitmap decoded = jb2Image.GetBitmap(1, 4);
+
+            Bitmap oracle = default(Bitmap);
+
+            using (FileStream oracleStream = File.OpenRead(sjbzFilePath.Replace(".sjbz", ".rle")))
+            {
+                oracle = Bitmap.CreateBitmap(oracleStream, decoded.Border);
+            }
+
+            Assert.NotNull(oracle.Data);
+
+            Assert.True(oracle.Width == decoded.Width, $"Width values differ: {oracle.Width} != {decoded.Width}");
+            Assert.True(oracle.Height == decoded.Height, $"Width values differ: {oracle.Height} != {decoded.Height}");
+            Assert.True(oracle.Border == decoded.Border, $"Border values differ: oracle Bitmap {oracle.Border} != decoded Bitmap {decoded.Border}");
+            Assert.True(oracle.BytesPerRow == decoded.BytesPerRow, $"BytesPerRow values differ: {oracle.BytesPerRow} != {decoded.BytesPerRow}");
+
+            (bool result, double diff) = Util.ImageBinarySimilarity(ref oracle, ref decoded);
+
+            if (!result)
+            {
+                lock (_fixture.Diffs)
+                {
+                    _fixture.Diffs[sjbzFileName] = (djbzFileName, sjbzFileName, diff, oracle.Width, oracle.Height, oracle.Border, oracle.BytesPerRow);
+                }
+
+                Util.DumpImageMismatch(ref oracle, ref decoded, 0);
+            }
+
+            string msg = $"JB2Image compatibility mask match with Width: {oracle.Width}, Height: {oracle.Height}, Border: {oracle.Border}, BytePerRow {oracle.BytesPerRow}, Diff ratio: {diff:F10}";
+            Assert.True(diff == 0.0, msg);
+        }
+
+        public static IEnumerable<object[]> JB2ImageAllData => Util.GetJB2ImageTestData(
+                    skipDocs: new int[] { },
+                    skipChunks: new string[]
+                    {}, coverage: TestCoverage.All);
+
+
+        [Theory(Skip = "Dumps RLE encoded GBitmap Masks using function NativeMethods.GetJb2ImageRleMask")]
+        [MemberData(nameof(JB2ImageAllData))]
+        [InlineData("extracted/test002C_D1868.djbz", "extracted/test002C_P02_nonmark.sjbz")]
+        [InlineData("extracted/test002C_D1868.djbz", "extracted/test002C_P03_nonmark.sjbz")]
+        [InlineData("extracted/test003C_D1030.djbz", "extracted/test003C_P07_nonmark.sjbz")]
+        [InlineData("extracted/test003C_D1030.djbz", "extracted/test003C_P09_nonmark.sjbz")]
+        [InlineData("extracted/test003C_D76090.djbz", "extracted/test003C_P11_nonmark.sjbz")]
+        public unsafe void ExtractNativeMaskBitmapRle(string djbzFileName, string sjbzFileName)
+        {
+            string sjbzFilePath = Path.Combine(Util.ArtifactsDataPath, sjbzFileName);
+            string rleFileName = Path.GetFileNameWithoutExtension(sjbzFilePath);
+            string rleFilePath = Path.Combine(Util.ArtifactsDataPath, "extracted", rleFileName + ".rle");
+
+            if (File.Exists(rleFilePath))
+                return;
+
             byte[] djbzData = djbzFileName != null ? File.ReadAllBytes(Path.Combine(Util.ArtifactsDataPath, djbzFileName)) : null;
             byte[] sjbzData = File.ReadAllBytes(sjbzFilePath);
 
@@ -243,75 +287,27 @@ namespace DjvuNet.DjvuLibre.Compatibility.Tests
 
                 }
 
-                // 2. Extract Native Bitmap matching C#'s
+                // We have JB2Image handle and we can extract GBitmap data and geometry in RLE format
 
-                bool getBmpInfo = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 1, 4, out int nWidth, out int nHeight, out int nRowSize, out int nBorder, IntPtr.Zero, 0);
-                Assert.True(getBmpInfo, "Native GetDjvuJb2ImageBitmap dimension query failed.");
+                int rleMaskSize = 0;
 
-                Assert.True(nWidth > 0, "Native decoded image has 0 width.");
-                Assert.True(nHeight > 0, "Native decoded image has 0 height.");
+                // 1. Get the RLE buffer size from the native JB2Image
+                NativeMethods.GetJb2ImageRleMask(nativeImage, 1, 1, IntPtr.Zero, 0, out rleMaskSize);
 
-                int bufferSize = Util.CalculateBufferSize(nHeight, nRowSize, nBorder);
-                byte[] nativeBuffer = new byte[bufferSize];
+                // 2. Create buffer to hold RLE compressed data
+                byte[] rleBuffer = GC.AllocateUninitializedArray<byte>(rleMaskSize, true);
+                byte* rleBufferPtr = (byte*)Unsafe.AsPointer(ref MemoryMarshal.GetArrayDataReference(rleBuffer));
+                NativeMethods.GetJb2ImageRleMask(nativeImage, 1, 1, (nint)rleBufferPtr, rleMaskSize, out _);
 
-                bool getBmpData = false;
-                fixed (byte* pNative = nativeBuffer)
+                using (FileStream fs = File.OpenWrite(rleFilePath))
                 {
-                    getBmpData = NativeMethods.GetDjvuJb2ImageBitmap(nativeImage, 1, 4, out nWidth, out nHeight, out nRowSize, out nBorder, (IntPtr)pNative, nativeBuffer.Length);
-                }
-                Assert.True(getBmpData, "Native GetDjvuJb2ImageBitmap extraction failed.");
-
-                // 3. Managed Decoding
-                JB2Dictionary djbzDict = null;
-                if (djbzPayload != null)
-                {
-                    djbzDict = new JB2Dictionary();
-                    using (var ms = new MemoryStream(djbzPayload))
-                    using (var reader = new DjvuReader(ms))
-                    {
-                        djbzDict.Decode(reader);
-                    }
+                    fs.Write(rleBuffer, 0, rleBuffer.Length);
+                    fs.Flush();
                 }
 
-                var jb2Image = new JB2Image();
-
-                using (var ms = new MemoryStream(sjbzPayload))
-                using (var reader = new DjvuReader(ms))
-                {
-                    jb2Image.Decode(reader, djbzDict);
-                }
-
-                Assert.True(jb2Image.ShapeCount > 0, "Failed to decode JB2 data from chunks.");
-
-                Bitmap managedBitmap = jb2Image.GetBitmap();
-
-                Assert.Equal(managedBitmap.Width, nWidth);
-                Assert.Equal(managedBitmap.Height, nHeight);
-                Assert.Equal(managedBitmap.BytesPerRow, nRowSize);
-                Assert.Equal(managedBitmap.Border, nBorder);
-
-                    // 4. Structural Binary Equivalence Verification (1 byte per pixel for 8bpp mask)
-                    // ImageBinaryDiff inherently skips memory padding since strides match.
-                    unsafe
-                    {
-                        fixed (byte* pNative = nativeBuffer)
-                        fixed (sbyte* pManagedData = managedBitmap.Data)
-                        {
-                            double diff = Util.ImageBinaryDiff(pNative, ((byte*)pManagedData + managedBitmap.Border), nWidth, nHeight, nRowSize, 8);
-
-                            if (diff > 0.0)
-                            {
-                                lock (_fixture.Diffs)
-                                {
-                                    _fixture.Diffs[sjbzFileName] = (djbzFileName, sjbzFileName, diff, nWidth, nHeight, nBorder, nRowSize);
-                                }
-                            }
-
-                            string msg = $"JB2Image compatibility mask match with Width: {nWidth}, Height: {nHeight}, Border: {nBorder}, BytePerRow {nRowSize}, Diff ratio: {diff:F4}";
-                            Assert.True(diff == 0.0, msg);
-                            // Console.WriteLine(msg);
-                        }
-                    }
+                Assert.True(File.Exists(rleFilePath));
+                Console.WriteLine($"Written {rleFileName}");
+               
             }
             finally
             {

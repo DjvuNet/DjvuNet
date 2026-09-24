@@ -467,10 +467,10 @@ namespace DjvuNet.Wavelet.Tests
             fixed (sbyte* pExp = expectedImg)
             fixed (sbyte* pAct = actualImg)
             {
-                double diff = Util.ImageBinaryDiff((byte*)pExp, (byte*)pAct, rect.Width, rect.Height, rect.Width * pixsep, pixsep * 8, 8);
+                double diff = Util.ImageBinaryDiff((byte*)pExp, (byte*)pAct, rect.Width, rect.Height, rect.Width * pixsep, 0, (PixelSize)(pixsep * 8), ChannelSize._8bit);
                 if (diff > 0.0)
                 {
-                    Util.DumpImageMismatchDetails((byte*)pExp, (byte*)pAct, expectedImg.Length, rect.Width, 0, testName);
+                    Util.DumpImageMismatch((byte*)pExp, (byte*)pAct, expectedImg.Length, rect.Width, 0, testName);
                 }
                 Assert.True(diff == 0.0, $"[{testName}] SIMD Pixel Parity mismatch! Diff score: {diff}.");
             }

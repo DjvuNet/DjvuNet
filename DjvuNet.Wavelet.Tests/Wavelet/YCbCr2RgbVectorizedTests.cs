@@ -228,7 +228,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2Rgb((Pixel*)pOutVec, width, height, rowSizeInBytes);
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pOutScl, width, height, rowSizeInBytes);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pOutScl, pOutVec, width, height, rowSizeInBytes));
+                AssertParity(pOutScl, pOutVec, outVec.Length, width, height, rowSizeInBytes);
             }
         }
 
@@ -255,7 +255,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbParallelVector128((Pixel*)pVec, width, height, rowSizeInBytes, options);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
             }
         }
 
@@ -282,7 +282,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbParallelVector128((Pixel*)pVec, width, height, rowSizeInBytes, options);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
             }
         }
         [Fact]
@@ -308,7 +308,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbParallelVector256((Pixel*)pVec, width, height, rowSizeInBytes, options);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
             }
         }
 
@@ -335,7 +335,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbParallelVector256((Pixel*)pVec, width, height, rowSizeInBytes, options);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
             }
         }
         [Fact]
@@ -359,7 +359,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbVector128((Pixel*)pVec, width, height, rowSizeInBytes);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
             }
         }
 
@@ -384,7 +384,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbVector128((Pixel*)pVec, width, height, rowSizeInBytes);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
             }
         }
 
@@ -409,7 +409,7 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbVector256((Pixel*)pVec, width, height, rowSizeInBytes);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
             }
         }
 
@@ -434,7 +434,18 @@ namespace DjvuNet.Wavelet.Tests
                 InterWaveTransform.YCbCr2RgbScalar((Pixel*)pScl, width, height, rowSizeInBytes);
                 InterWaveSimd.YCbCr2RgbVector256((Pixel*)pVec, width, height, rowSizeInBytes);
 
-                Assert.Equal(0.0, Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes));
+                AssertParity(pScl, pVec, totalBytes, width, height, rowSizeInBytes);
+            }
+        }
+
+        private unsafe void AssertParity(byte* pScl, byte* pVec, int totalBytes, int width, int height, int rowSizeInBytes)
+        {
+            string testName = Xunit.TestContext.Current.Test.TestDisplayName;
+            double diff = Util.ImageBinaryDiff(pScl, pVec, width, height, rowSizeInBytes);
+            if (diff > 0.0)
+            {
+                Util.DumpImageMismatch(pScl, pVec, totalBytes, width, 0, testName);
+                Assert.Fail($"Image mismatch in {testName}. Diff score: {diff}");
             }
         }
     }

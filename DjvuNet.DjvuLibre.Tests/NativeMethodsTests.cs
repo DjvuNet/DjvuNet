@@ -8,6 +8,7 @@ using DjvuNet.Errors;
 using DjvuNet.Tests;
 using DjvuNet.DataChunks;
 using Xunit;
+using System.Runtime.CompilerServices;
 
 namespace DjvuNet.DjvuLibre.Tests
 {
@@ -261,7 +262,7 @@ namespace DjvuNet.DjvuLibre.Tests
                     fixed (byte* pOrig = sjbzPayload)
                     fixed (byte* pAllZero = payloadAllZero)
                     {
-                        double diff = Util.ImageBinaryDiff(pOrig, pAllZero, compareLength, 1, compareLength, 8, 8);
+                        double diff = Util.ImageBinaryDiff(pOrig, pAllZero, compareLength, 1, compareLength, 0, PixelSize._8bpp, ChannelSize._8bit);
                         string msg = $"Bitstreams identical - diff: {diff:F4}. Original size {sjbzPayload.Length}, AllZero size {payloadAllZero.Length}";
                         bool isIdentical = diff == 0.0 && sjbzPayload.Length == payloadAllZero.Length;
                         if (isIdentical)
@@ -386,7 +387,7 @@ namespace DjvuNet.DjvuLibre.Tests
                         Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeOriginal, 1, 4, out _, out _, out _, out _, (IntPtr)pOrigPix, origPixels.Length));
                         Assert.True(NativeMethods.GetDjvuJb2ImageBitmap(nativeVariant, 1, 4, out _, out _, out _, out _, (IntPtr)pVarPix, varPixels.Length));
 
-                        diff = Util.ImageBinaryDiff(pOrigPix, pVarPix, origW, origH, origRow, 8, 8);
+                        diff = Util.ImageBinaryDiff(pOrigPix, pVarPix, origW, origH, origRow, 0, PixelSize._8bpp, ChannelSize._8bit);
                     }
                 }
 
@@ -604,7 +605,7 @@ namespace DjvuNet.DjvuLibre.Tests
                     fixed (byte* pAllZero = allZeroChunk)
                     fixed (byte* pNonMark = nonMarkChunk)
                     {
-                        double diff = Util.ImageBinaryDiff(pAllZero, pNonMark, compareLength, 1, compareLength, 8, 8);
+                        double diff = Util.ImageBinaryDiff(pAllZero, pNonMark, compareLength, 1, compareLength, 0, PixelSize._8bpp, ChannelSize._8bit);
                         string msg = $"Bitstreams - diff: {diff:F4}. NON_MARK_DATA record type was encoded: {diff != 0.0 || outSizeAllZero != outSizeNonMark} - shape count {shapeCount}," +
                                         $" inherited shape count {inheritedShapeCount}. AllZero size {outSizeAllZero}, NonMark size {outSizeNonMark}";
                         Assert.False(diff == 0.0 && outSizeAllZero == outSizeNonMark, msg);
@@ -849,6 +850,47 @@ namespace DjvuNet.DjvuLibre.Tests
                     {
                         bool result2 = NativeMethods.GetPageForegroundData(page.Page, ref renderRect, ref pageRect, out _, out _, out _, rawBuffer, outputSize);
                         Console.WriteLine($"Foreground Image Data: test0{fileIndex}C.djvu page 1 passed {result2}: width: {width}, height: {height}, buffer size {outputSize:###\' \'###\' \'###\' \'###}");
+
+                        Assert.True(result2);
+                    }
+                    finally
+                    {
+                        DjvuMarshal.FreeHGlobal(rawBuffer);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(23)]
+        [InlineData(33)]
+        [InlineData(74)]
+        [InlineData(75)]
+        [InlineData(77)]
+        public unsafe void GetPageMaskData(int fileIndex)
+        {
+            using (DjvuDocumentInfo document = DjvuDocumentInfo.CreateDjvuDocumentInfo(Util.GetTestFilePath(fileIndex)))
+            using (DjvuPageInfo page = new DjvuPageInfo(document, 0))
+            {
+                Assert.NotEqual(IntPtr.Zero, page.Page);
+                DjvuRectangle pageRect = new DjvuNet.Graphics.Rectangle(0, 0, page.Width, page.Height);
+                DjvuRectangle renderRect = pageRect;
+
+                bool result1 = NativeMethods.GetPageMaskData(page.Page, out int width, out int height, out int rowsize, out int outputSize, out int grays, IntPtr.Zero, 0);
+                Assert.True(result1);
+
+
+                if (outputSize > 0)
+                {
+                    Assert.Equal(page.Width, width);
+                    Assert.Equal(page.Height, height);
+                    Assert.True(rowsize >= width);
+                    
+                    IntPtr rawBuffer = DjvuMarshal.AllocHGlobal((uint)outputSize);
+                    try
+                    {
+                        bool result2 = NativeMethods.GetPageMaskData(page.Page, out _, out _, out _, out _, out _, rawBuffer, outputSize);
+                        Console.WriteLine($"Mask Image Data: test0{fileIndex}C.djvu page 1 passed {result2}: width: {width}, height: {height}, rowsize: {rowsize}, border: {rowsize - width}, grays: {grays}, buffer size {outputSize:###' '###' '###' '###}");
 
                         Assert.True(result2);
                     }

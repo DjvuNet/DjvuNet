@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
+using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.Arm;
 using System.Runtime.Intrinsics.X86;
@@ -20,6 +21,7 @@ using DjvuNet.Errors;
 using DjvuNet.Serialization;
 using Xunit;
 using SysGraphics = System.Drawing.Graphics;
+using SysBitmap = System.Drawing.Bitmap;
 
 namespace DjvuNet.Tests
 {
@@ -40,6 +42,45 @@ namespace DjvuNet.Tests
         All,
         UniqueOnly,
         DjbzNotNull
+    }
+
+    public enum PixelSize : byte
+    {
+        _1bpp = 1,
+        _2bpp = 2,
+        _4bpp = 4,
+        _8bpp = 8,
+        _16bpp = 16,
+        _24bpp = 24,
+        _32bpp = 32,
+        _48bpp = 48
+    }
+
+    public enum ChannelSize : byte
+    {
+        _1bit = 1,
+        _2bit = 2,
+        _4bit = 4,
+        _8bit = 8,
+        _10bit = 10,
+        _12bit = 12,
+        _14bit = 14,
+        _16bit = 16
+    }
+
+    public static class FormatSizeExtensions
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint AsUintBytes(this PixelSize size) => (uint)size / 8;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int AsIntBytes(this PixelSize size) => (int)size / 8;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static double AsDoubleBits(this PixelSize size) => (double)size;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int AsIntBits(this ChannelSize size) => (int)size;
     }
 
     public static partial class Util
@@ -412,7 +453,7 @@ namespace DjvuNet.Tests
             }
         }
 
-        private static bool IsImageBinaryComparable(Bitmap image1, Bitmap image2, out bool pixelFormatMismatch)
+        private static bool IsImageBinaryComparable(SysBitmap image1, SysBitmap image2, out bool pixelFormatMismatch)
         {
             bool result = true;
             pixelFormatMismatch = false;
@@ -453,10 +494,99 @@ namespace DjvuNet.Tests
             return result;
         }
 
-        public static bool CompareImagesForBinarySimilarity(Bitmap image1, Bitmap image2, double diffThreshold = 0.05, bool logDiff = false, string message = null)
+        public static unsafe bool ImageBinarySimilarity(SysBitmap oracle, Graphics.PixelMap map, double diffThreshold = 0.0, bool logDiff = false, string message = null)
+        {
+            if (oracle.Width != map.Width || oracle.Height != map.Height)
+            {
+                return false;
+            }
+
+            Rectangle rect = new Rectangle(0, 0, oracle.Width, oracle.Height);
+            BitmapData data = oracle.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+            
+            try
+            {
+                int rowSize = map.Width * 3;
+                fixed (sbyte* pMap = map.Data)
+                {
+                    // Oracle is Top-Down, Map is Bottom-Up. We pass negative stride to SIMD diff.
+                    byte* pOracleStart = (byte*)data.Scan0 + ImageMemoryOffset(map.Height - 1, data.Stride);
+                    double diff = ImageBinaryDiff(
+                        pOracleStart, 
+                        (byte*)pMap, 
+                        map.Width, 
+                        map.Height, 
+                        -data.Stride, 
+                        rowSize, 
+                        Tests.PixelSize._24bpp, 
+                        Tests.ChannelSize._8bit);
+                        
+                    if (logDiff)
+                    {
+                        Console.WriteLine((message ?? "") + $" Image diff: {diff:#0.000000}, passed: {diff <= diffThreshold}");
+                    }
+                        
+                    return diff <= diffThreshold;
+                }
+            }
+            finally
+            {
+                oracle.UnlockBits(data);
+            }
+        }
+
+        public static unsafe bool ImageBinarySimilarity(SysBitmap oracle, ref Graphics.Bitmap map, double diffThreshold = 0.0, bool logDiff = false, string message = null)
+        {
+            if (oracle == null || map.Data == null || oracle.Width != map.Width || oracle.Height != map.Height) return false;
+
+            Rectangle rect = new Rectangle(0, 0, oracle.Width, oracle.Height);
+            BitmapData data = oracle.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format8bppIndexed);
+            
+            try
+            {
+                byte* pOracleStart = (byte*)data.Scan0 + ImageMemoryOffset(map.Height - 1, data.Stride);
+                byte* pMap = (byte*)map.GetRow(0);
+                
+                double diff = ImageBinaryDiff(
+                    pOracleStart, 
+                    pMap, 
+                    map.Width, 
+                    map.Height, 
+                    -data.Stride, 
+                    map.BytesPerRow, 
+                    Tests.PixelSize._8bpp, 
+                    Tests.ChannelSize._8bit);
+                    
+                if (logDiff) Console.WriteLine((message ?? "") + $" Image diff: {diff:#0.000000}, passed: {diff <= diffThreshold}");
+                return diff <= diffThreshold;
+            }
+            finally
+            {
+                oracle.UnlockBits(data);
+            }
+        }
+
+        public static unsafe ValueTuple<bool, double> ImageBinarySimilarity(ref Graphics.Bitmap oracle, ref Graphics.Bitmap map, double diffThreshold = 0.0, bool logDiff = false, string message = null)
+        {
+            if (oracle.Data == null || map.Data == null || oracle.Width != map.Width || oracle.Height != map.Height)
+                return (false, double.NaN);
+            
+            double diff = ImageBinaryDiff(
+                (byte*)oracle.GetRow(0), (byte*)map.GetRow(0), 
+                map.Width, map.Height, 
+                oracle.BytesPerRow, map.BytesPerRow, 
+                Tests.PixelSize._8bpp, Tests.ChannelSize._8bit);
+                    
+            if (logDiff)
+                Console.WriteLine((message ?? "") + $" Image diff: {diff:#0.000000}, passed: {diff <= diffThreshold}");
+
+            return (diff <= diffThreshold, diff); 
+        }
+
+        public static bool ImageBinarySimilarity(SysBitmap image1, SysBitmap image2, double diffThreshold = 0.0, bool logDiff = false, string message = null)
         {
             double diff;
-            bool result = CompareImagesForBinarySimilarity(image1, image2, out diff, diffThreshold);
+            bool result = ImageBinarySimilarity(image1, image2, out diff, diffThreshold);
 
             if (logDiff)
             {
@@ -466,14 +596,14 @@ namespace DjvuNet.Tests
             return result;
         }
 
-        public static bool CompareImagesForBinarySimilarity(Bitmap image1, Bitmap image2, out double diffValue, double diffThreshold = 0.05)
+        public static bool ImageBinarySimilarity(SysBitmap image1, SysBitmap image2, out double diffValue, double diffThreshold = 0.0)
         {
             bool formatMismatch;
             bool result = IsImageBinaryComparable(image1, image2, out formatMismatch);
 
             diffValue = double.NaN;
-            Bitmap bmp1 = null;
-            Bitmap bmp2 = null;
+            SysBitmap bmp1 = null;
+            SysBitmap bmp2 = null;
 
             try
             {
@@ -482,14 +612,14 @@ namespace DjvuNet.Tests
                 {
                     if (image1.PixelFormat != PixelFormat.Format24bppRgb)
                     {
-                        bmp1 = new Bitmap(image1.Width, image1.Height, PixelFormat.Format24bppRgb);
+                        bmp1 = new SysBitmap(image1.Width, image1.Height, PixelFormat.Format24bppRgb);
                         using SysGraphics gfx = SysGraphics.FromImage(bmp1);
                         gfx.DrawImage(image1, new Rectangle(0, 0, image1.Width, image1.Height));
                     }
 
                     if (image2.PixelFormat != PixelFormat.Format24bppRgb)
                     {
-                        bmp2 = new Bitmap(image2.Width, image2.Height, PixelFormat.Format24bppRgb);
+                        bmp2 = new SysBitmap(image2.Width, image2.Height, PixelFormat.Format24bppRgb);
                         using SysGraphics gfx = SysGraphics.FromImage(bmp2);
                         gfx.DrawImage(image2, new Rectangle(0, 0, image2.Width, image2.Height));
                     }
@@ -550,10 +680,10 @@ namespace DjvuNet.Tests
             {
                 return imageData1.PixelFormat switch
                 {
-                    PixelFormat.Format32bppArgb => ImageBinaryDiff(imageData1, imageData2, 32),
+                    PixelFormat.Format32bppArgb => ImageBinaryDiff(imageData1, imageData2, PixelSize._32bpp),
                     PixelFormat.Format24bppRgb => ImageBinaryDiff(imageData1, imageData2),
-                    PixelFormat.Format8bppIndexed => ImageBinaryDiff(imageData1, imageData2, 8),
-                    PixelFormat.Format16bppGrayScale => ImageBinaryDiff(imageData1, imageData2, 16, 16),
+                    PixelFormat.Format8bppIndexed => ImageBinaryDiff(imageData1, imageData2, PixelSize._8bpp),
+                    PixelFormat.Format16bppGrayScale => ImageBinaryDiff(imageData1, imageData2, PixelSize._16bpp, ChannelSize._16bit),
                     _ => throw new ArgumentException("Unsupported Image PixelFormat", nameof(imageData1.PixelFormat))
                 };
             }
@@ -571,21 +701,55 @@ namespace DjvuNet.Tests
         /// <param name="ptr2">Pointer to the second image buffer.</param>
         /// <param name="width">The width of the image in pixels.</param>
         /// <param name="height">The height of the image in pixels.</param>
-        /// <param name="stride">The row stride (in bytes), including any padding and preserving the sign (for bottom-up images).</param>
+        /// <param name="stride1">The row stride of the first image (in bytes). This parameter serves a dual function: 1) its magnitude accounts for row memory padding, and 2) its sign accounts for the direction of processing (a negative reverse stride allows comparing images existing in different coordinate spaces, e.g., top-down vs bottom-up). Both functions combine naturally.</param>
+        /// <param name="stride2">The row stride of the second image (in bytes). It shares the exact same dual functionality as stride1, allowing fully independent memory layout and coordinate space comparisons. If 0, it falls back to stride1.</param>
         /// <param name="pixelSize">The size of a single pixel in bits (e.g., 24 for 24bpp RGB, 32 for ARGB).</param>
         /// <param name="channelSize">The size of a single color channel in bits (e.g., 8 for standard RGB channels).</param>
         /// <returns>A ratio between 0.0 (identical) and 1.0 (completely opposite) representing the average pixel difference.</returns>
-        internal static unsafe double ImageBinaryDiff(byte* ptr1, byte* ptr2, int width, int height, int stride, int pixelSize = 24, int channelSize = 8)
+        internal static unsafe double ImageBinaryDiff(byte* ptr1, byte* ptr2, int width, int height, int stride1, int stride2 = 0, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
         {
-            if (ptr1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(ptr1), "First image buffer pointer cannot be null.");
-            if (ptr2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(ptr2), "Second image buffer pointer cannot be null.");
-            if (width <= 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height <= 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            if (ptr1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(ptr1), "First image buffer pointer cannot be null.");
+            }
 
-            uint widthBytes = (uint)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+            if (ptr2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(ptr2), "Second image buffer pointer cannot be null.");
+            }
+
+            if (width <= 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            }
+
+            if (height <= 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+            
+            int actualStride2 = stride2 == 0 ? stride1 : stride2;
+
+            uint widthBytes = (uint)width * pixelSize.AsUintBytes();
+            if ((ulong)Math.Abs((long)stride1) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride1 must be large enough to contain the width bytes.", nameof(stride1));
+            }
+
+            if ((ulong)Math.Abs((long)actualStride2) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride2 must be large enough to contain the width bytes.", nameof(actualStride2));
+            }
 
             int threadCount = GetThreadCountForImageBinaryDiff((long)width * height);
 
@@ -595,31 +759,31 @@ namespace DjvuNet.Tests
                 {
                     if (widthBytes >= 32)
                     {
-                        return ImageDiffVector256(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                        return ImageDiffVector256(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                     }
                     else if (widthBytes >= 16)
                     {
-                        return ImageDiffVector128(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                        return ImageDiffVector128(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                     }
                     else
                     {
-                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                     }
                 }
                 else if (Vector128.IsHardwareAccelerated)
                 {
                     if (widthBytes >= 16)
                     {
-                        return ImageDiffVector128(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                        return ImageDiffVector128(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                     }
                     else
                     {
-                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                     }
                 }
                 else
                 {
-                    return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                    return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                 }
             }
             else
@@ -629,31 +793,31 @@ namespace DjvuNet.Tests
                 {
                     if (widthBytes >= 32)
                     {
-                        return ImageDiffParallel256(ptr1, ptr2, (uint)width, (uint)height, stride, options, pixelSize, channelSize);
+                        return ImageDiffParallel256(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, options, pixelSize, channelSize);
                     }
                     else if (widthBytes >= 16)
                     {
-                        return ImageDiffParallel128(ptr1, ptr2, (uint)width, (uint)height, stride, options, pixelSize, channelSize);
+                        return ImageDiffParallel128(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, options, pixelSize, channelSize);
                     }
                     else
                     {
-                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                     }
                 }
                 else if (Vector128.IsHardwareAccelerated)
                 {
                     if (widthBytes >= 16)
                     {
-                        return ImageDiffParallel128(ptr1, ptr2, (uint)width, (uint)height, stride, options, pixelSize, channelSize);
+                        return ImageDiffParallel128(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, options, pixelSize, channelSize);
                     }
                     else
                     {
-                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                        return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                     }
                 }
                 else
                 {
-                    return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride, pixelSize, channelSize);
+                    return ImageBinaryDiffScalar(ptr1, ptr2, (uint)width, (uint)height, stride1, actualStride2, pixelSize, channelSize);
                 }
             }
         }
@@ -666,22 +830,34 @@ namespace DjvuNet.Tests
         /// <param name="pixelSize">The size of a single pixel in bits (e.g., 24 for 24bpp RGB, 32 for ARGB).</param>
         /// <param name="channelSize">The size of a single color channel in bits (e.g., 8 for standard RGB channels).</param>
         /// <returns>A ratio between 0.0 (identical) and 1.0 (completely opposite) representing the average pixel difference.</returns>
-        internal static unsafe double ImageBinaryDiff(BitmapData imageData1, BitmapData imageData2, int pixelSize = 24, int channelSize = 8)
+        internal static unsafe double ImageBinaryDiff(BitmapData imageData1, BitmapData imageData2, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
         {
-            if (imageData1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(imageData1), "First image data cannot be null.");
-            if (imageData2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(imageData2), "Second image data cannot be null.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
-
-            if (imageData1.Stride != imageData2.Stride)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && (imageData1.Stride < 0 || imageData2.Stride < 0))
             {
-                // We do not support comparing images with different strides.
-                return 1.0;
+                DjvuExceptionUtil.ThrowNotSupported("Negative stride memory parity checking is not supported on non-Windows OSes due to upstream libgdiplus bounds bugs.");
             }
 
-            int stride = imageData1.Stride;
+            if (imageData1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(imageData1), "First image data cannot be null.");
+            }
 
-            return ImageBinaryDiff((byte*)imageData1.Scan0, (byte*)imageData2.Scan0, imageData1.Width, imageData1.Height, stride, pixelSize, channelSize);
+            if (imageData2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(imageData2), "Second image data cannot be null.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+
+            return ImageBinaryDiff((byte*)imageData1.Scan0, (byte*)imageData2.Scan0, imageData1.Width, imageData1.Height, imageData1.Stride, imageData2.Stride, pixelSize, channelSize);
         }
 
         /// <summary>
@@ -718,17 +894,65 @@ namespace DjvuNet.Tests
         /// large images while avoiding the latency of horizontal widening instructions in the hot path.
         /// </para>
         /// </remarks>
-        internal static unsafe double ImageBinaryDiffCore(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize, int channelSize)
+        internal static unsafe double ImageBinaryDiffCore(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, PixelSize pixelSize, ChannelSize channelSize)
         {
-            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            return ImageBinaryDiffCore(scan0_1, scan0_2, width, height, stride, stride, pixelSize, channelSize);
+        }
 
-            ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+        /// <summary>
+        /// Calculates the aggregate average absolute difference per pixel across an entire image using SIMD hardware acceleration.
+        /// </summary>
+        /// <param name="scan0_1">Pointer to the start of the first image buffer in memory.</param>
+        /// <param name="scan0_2">Pointer to the start of the second image buffer in memory.</param>
+        /// <param name="width">The width of the image in pixels.</param>
+        /// <param name="height">The height of the image in pixels.</param>
+        /// <param name="stride1">The row stride of the first image (in bytes). This parameter serves a dual function: 1) its magnitude accounts for row memory padding, and 2) its sign accounts for the direction of processing (a negative reverse stride allows comparing images existing in different coordinate spaces, e.g., top-down vs bottom-up). Both functions combine naturally.</param>
+        /// <param name="stride2">The row stride of the second image (in bytes). It shares the exact same dual functionality as stride1, allowing fully independent memory layout and coordinate space comparisons. If 0, it falls back to stride1.</param>
+        /// <param name="pixelSize">The total size of a single pixel in bits (e.g., 24 for RGB).</param>
+        /// <param name="channelSize">The size of a single color channel in bits (e.g., 8 for standard channels).</param>
+        /// <returns>A <see cref="double"/> representing the average pixel difference across the image channels.</returns>
+        internal static unsafe double ImageBinaryDiffCore(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride1, int stride2, PixelSize pixelSize, ChannelSize channelSize)
+        {
+            if (scan0_1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            }
+
+            if (scan0_2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            }
+
+            if (width == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            }
+
+            if (height == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+
+            ulong widthBytes = (ulong)width * pixelSize.AsUintBytes();
+            if ((ulong)Math.Abs((long)stride1) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride1 must be large enough to contain the width bytes.", nameof(stride1));
+            }
+
+            if ((ulong)Math.Abs((long)stride2) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride2 must be large enough to contain the width bytes.", nameof(stride2));
+            }
 
             uint pixelSizeInBytes = (uint)pixelSize / 8;
             double result = 0.0;
@@ -749,8 +973,8 @@ namespace DjvuNet.Tests
 
                 for (uint i = 0; i < height; i++)
                 {
-                    byte* p1 = scan0_1 + ((long)i * stride);
-                    byte* p2 = scan0_2 + ((long)i * stride);
+                    byte* p1 = scan0_1 + ((long)i * stride1);
+                    byte* p2 = scan0_2 + ((long)i * stride2);
                     ulong x = 0;
 
                     while (x + 96 <= vectorBound)
@@ -820,8 +1044,8 @@ namespace DjvuNet.Tests
 
                 for (uint i = 0; i < height; i++)
                 {
-                    byte* p1 = scan0_1 + ((long)i * stride);
-                    byte* p2 = scan0_2 + ((long)i * stride);
+                    byte* p1 = scan0_1 + ((long)i * stride1);
+                    byte* p2 = scan0_2 + ((long)i * stride2);
                     ulong x = 0;
 
                     while (x <= vectorBound)
@@ -881,128 +1105,1260 @@ namespace DjvuNet.Tests
             else
         #endif
             {
-                result += ImageBinaryDiffSimdFallback(scan0_1, scan0_2, (uint)widthBytes, height, stride);
+                result += ImageBinaryDiffSimdFallback(scan0_1, scan0_2, (uint)widthBytes, height, stride1, stride2);
             }
 
-            double maxChannelValue = (1L << channelSize) - 1;
-            return result / ((double)width * height * ((double)pixelSize / channelSize) * maxChannelValue);
+            double maxChannelValue = (1L << channelSize.AsIntBits()) - 1;
+            return result / ((double)width * height * (pixelSize.AsDoubleBits() / channelSize.AsIntBits()) * maxChannelValue);
         }
 
-        public static unsafe void DumpImageMismatchDetails(Bitmap native, Bitmap managed, int fileIndex, string mapType)
+        /// <summary>
+        /// A highly robust, hardware-aligned memory dumping engine designed to visualize discrepancies between two 
+        /// pixel buffers (e.g., Oracle vs. Test). It treats the image as a stride-aligned 2D memory map, ensuring that 
+        /// asymmetric strides and buffer padding lengths are rendered in perfectly synchronized columns.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The engine scans for mismatches at the pixel level but renders the diagnostic output at the byte level. 
+        /// This decoupled approach allows developers to inspect memory corruption, bit-shifts, and trailing padding 
+        /// values directly. Absolute byte offsets are provided for each rendered row, enabling rapid translation to 
+        /// conditional hardware breakpoints in a debugger (e.g., <c>address + offset</c>).
+        /// </para>
+        /// <para>
+        /// By supporting negative strides natively, this engine can directly compare buffers mapped in inverse 
+        /// coordinate systems (e.g., Bottom-Up C# arrays vs. Top-Down GDI+ unmanaged surfaces) without pre-processing.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// <code>
+        /// Legend: [O]racle (Padding: 0), [T]est (Padding: 6), [D]ifference (Out-of-bounds/No-padding indicated by --)
+        /// 
+        /// Mismatch Block 1
+        /// Row: 4 | Column: 40 | Byte Offset In Row: 120
+        /// 0x0000016E O: FF FF FF FF -- -- -- -- -- -- 
+        /// 0x00000186 T: 00 00 00 00 00 00 00 00 00 00 
+        ///            D: FF FF FF FF                   
+        /// </code>
+        /// </example>
+        /// <param name="oracle">Pointer to the start of the primary (Oracle) image buffer.</param>
+        /// <param name="data">Pointer to the start of the secondary (Test) image buffer.</param>
+        /// <param name="width">The active logical pixel width of the images.</param>
+        /// <param name="height">The active logical pixel height of the images.</param>
+        /// <param name="strideOracle">The byte stride of the primary buffer. Negative values dictate a bottom-up memory layout.</param>
+        /// <param name="strideData">The byte stride of the secondary buffer. Negative values dictate a bottom-up memory layout.</param>
+        /// <param name="pixelSize">The bit depth of a single pixel. Sub-byte values (e.g., 1bpp) will be expanded to their byte containers.</param>
+        /// <param name="channelSize">The bit depth of a single color channel.</param>
+        /// <param name="sb">The string builder responsible for receiving the output. Minimizes I/O blocking during high-frequency parallel tests.</param>
+        /// <param name="leadingPixels">The number of matching, non-corrupted pixels to render before the detected mismatch to provide context.</param>
+        /// <param name="maxMismatchPixels">The maximum continuous pixel limit to render in a single diagnostic block to prevent terminal flooding.</param>
+        /// <param name="maxBlocks">The maximum number of disconnected mismatch patches to render. Allows discovery of patchy artifacts.</param>
+        /// <param name="bytesPerLine">The maximum visual byte width per rendered hex line. 64 is default to fit standard terminal windows.</param>
+        private static ReadOnlySpan<char> BitonalChars => 
+        [
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
+            'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+            'U', 'V', 'W', 'X', 'Y', 'Z'
+        ];
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        internal static void FormatByte(byte val, int colInChunk, int bitsPerPixel, bool is8bppBitonal, StringBuilder sb, char boundaryChar = ' ')
         {
-            Rectangle rect = new Rectangle(0, 0, native.Width, native.Height);
-            BitmapData data1 = null;
-            BitmapData data2 = null;
-
-            try
+            if (bitsPerPixel >= 8) 
             {
-                data1 = native.LockBits(rect, ImageLockMode.ReadOnly, native.PixelFormat);
-                data2 = managed.LockBits(rect, ImageLockMode.ReadOnly, managed.PixelFormat);
-                
-                int stride = Math.Abs(data1.Stride);
-                byte* p1 = (byte*)data1.Scan0;
-                byte* p2 = (byte*)data2.Scan0;
-
-                Console.WriteLine($"\nDiff Mismatches for test0{fileIndex:00#}C.djvu:");
-                
-                for (int y = 0; y < native.Height; y++)
+                if (is8bppBitonal)
                 {
-                    for (int x = 0; x < native.Width; x++)
+                    Span<char> bitonalChars = stackalloc char[4];
+                    bitonalChars[0] = val <= 35 ? BitonalChars[val] : '#';
+                    bitonalChars[1] = boundaryChar;
+                    int bitonalLen = 2;
+                    if ((colInChunk & 7) == 7) 
                     {
-                        int offset = (y * stride) + (x * 3);
-                        
-                        if (p1[offset] != p2[offset] || 
-                            p1[offset + 1] != p2[offset + 1] || 
-                            p1[offset + 2] != p2[offset + 2])
+                        bitonalChars[2] = ' ';
+                        bitonalChars[3] = ' ';
+                        bitonalLen = 4;
+                    }
+                    sb.Append(bitonalChars.Slice(0, bitonalLen));
+                    return;
+                }
+                Span<char> hexChars = stackalloc char[3];
+                hexChars[0] = BitonalChars[val >> 4];
+                hexChars[1] = BitonalChars[val & 0x0F];
+                hexChars[2] = boundaryChar;
+                sb.Append(hexChars);
+                return;
+            }
+            Span<char> chars = stackalloc char[11];
+            int pos = 0;
+            for (int i = 7; i >= 0; i--)
+            {
+                chars[pos++] = (val & (1 << i)) != 0 ? '1' : '0';
+                if (i > 0 && ((bitsPerPixel == 4 && i == 4) || (bitsPerPixel == 2 && (i % 2) == 0)))
+                {
+                    chars[pos++] = ' ';
+                }
+            }
+            sb.Append(chars.Slice(0, pos));
+            sb.Append(boundaryChar);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        private static void FormatMissingByte(int colInChunk, int bitsPerPixel, bool is8bppBitonal, StringBuilder sb, char boundaryChar = ' ')
+        {
+            if (is8bppBitonal) 
+            {
+                Span<char> missChars = stackalloc char[4];
+                missChars[0] = '-';
+                missChars[1] = boundaryChar;
+                int missLen = 2;
+                if ((colInChunk & 7) == 7) 
+                {
+                    missChars[2] = ' ';
+                    missChars[3] = ' ';
+                    missLen = 4;
+                }
+                sb.Append(missChars.Slice(0, missLen));
+                return;
+            }
+            sb.Append(bitsPerPixel >= 8 ? "--" : 
+                      bitsPerPixel == 4 ? "---- ----" : 
+                      bitsPerPixel == 2 ? "-- -- -- --" : 
+                      "--------");
+            sb.Append(boundaryChar);
+        }
+
+        /// <summary>
+        /// Calculates the physical unmanaged memory byte offset for a given logical row and column.
+        /// Unmanaged Contract: A negative stride naturally steps backwards from the highest memory address.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int ImageMemoryOffset(int row, int stride, int column = 0, int leftPadding = 0)
+        {
+            return  (row * stride) + column + leftPadding;
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int PixelsToBytes(int pixels, int bitsPerPixel, int bytesPerPixel)
+        {
+            return bitsPerPixel >= 8 ? (pixels * bytesPerPixel) : ((pixels * bitsPerPixel) / 8);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int BytesToPixels(int bytes, int bitsPerPixel, int bytesPerPixel)
+        {
+            return bitsPerPixel >= 8 ? (bytes / bytesPerPixel) : ((bytes * 8) / bitsPerPixel);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe void FormatHexDump(
+            byte* buffer, int chunkStart, int chunkEnd, 
+            int dumpLineWidth, int maxLeftPad, int bufferLeftPad, int bufferAbsStride, 
+            int stride, int height, int startPixelLimit, int endPixelLimit,
+            int bitsPerPixel, bool is8bppBitonal, StringBuilder sb)
+        {
+            for (int curr = chunkStart; curr < chunkEnd; curr++)
+            {
+                int r = curr / dumpLineWidth;
+                int v = curr % dumpLineWidth;
+                char bChar = (v == startPixelLimit) ? '[' : ((v == endPixelLimit) ? ']' : ' ');
+                int rowByteIndex = v - maxLeftPad + bufferLeftPad;
+                
+                if (r < height && rowByteIndex >= 0 && rowByteIndex < bufferAbsStride) 
+                {
+                    int memOffset = ImageMemoryOffset(r, stride, rowByteIndex);
+                    FormatByte(buffer[memOffset], curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+                }
+                else 
+                {
+                    FormatMissingByte(curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+                }
+            }
+            sb.AppendLine();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static unsafe bool FormatHexDumpV2(
+            byte* buffer, int chunkStart, int chunkEnd, 
+            int dumpLineWidth, int maxLeftPad, int bufferLeftPad, int bufferAbsStride, 
+            int stride, int height, int startPixelLimit, int endPixelLimit,
+            int bitsPerPixel, bool is8bppBitonal, bool carryBracket, StringBuilder sb)
+        {
+            if (carryBracket)
+            {
+                sb.Append('[');
+            }
+            else
+            {
+                sb.Append(' ');
+            }
+
+            bool nextCarry = false;
+
+            for (int curr = chunkStart; curr < chunkEnd; curr++)
+            {
+                int r = curr / dumpLineWidth;
+                int v = curr % dumpLineWidth;
+                
+                char bChar = ' ';
+                if (v == startPixelLimit)
+                {
+                    if (curr == chunkEnd - 1)
+                    {
+                        nextCarry = true; // Defer printing to the next chunk
+                    }
+                    else
+                    {
+                        bChar = '[';
+                    }
+                }
+                else if (v == endPixelLimit)
+                {
+                    bChar = ']';
+                }
+
+                int rowByteIndex = v - maxLeftPad + bufferLeftPad;
+                
+                if (r < height && rowByteIndex >= 0 && rowByteIndex < bufferAbsStride) 
+                {
+                    int memOffset = ImageMemoryOffset(r, stride, rowByteIndex);
+                    FormatByte(buffer[memOffset], curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+                }
+                else 
+                {
+                    FormatMissingByte(curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+                }
+            }
+            sb.AppendLine();
+            return nextCarry;
+        }
+
+
+
+        ///// <summary>
+        ///// Performs a direct unmanaged memory comparison between two image buffers and formats detailed diagnostic output for mismatching regions.
+        ///// </summary>
+        ///// <param name="oracle">Pointer to the logical first row (Row 0) of the reference image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        ///// <param name="data">Pointer to the logical first row (Row 0) of the test image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        ///// <param name="width">The visual width of the active image data in pixels.</param>
+        ///// <param name="height">The visual height of the active image data in rows.</param>
+        ///// <param name="strideOracle">The signed bytes per row of the oracle buffer. A negative value instructs the engine to step backwards in memory.</param>
+        ///// <param name="strideData">The signed bytes per row of the data buffer. A negative value instructs the engine to step backwards in memory.</param>
+        ///// <param name="pixelSize">The structural bit depth of a single pixel.</param>
+        ///// <param name="channelSize">The bit depth of a single color channel.</param>
+        ///// <param name="sb">The string builder where the diagnostic output is appended.</param>
+        ///// <param name="leadingPixels">The number of matching pixels to print before the mismatch occurs for contextual debugging.</param>
+        ///// <param name="maxMismatchPixels">The maximum number of pixels to process in a single mismatch block.</param>
+        ///// <param name="maxBlocks">The maximum number of distinct mismatch blocks to log before aborting.</param>
+        ///// <param name="bytesPerLine">The maximum number of bytes to render per visual line of the console output.</param>
+        ///// <param name="comparePadding">Determines if the unmanaged memory padding regions should be evaluated for mismatches.</param>
+        //internal static unsafe void DumpImageMismatchCore(
+        //    byte* oracle, byte* data,
+        //    int width, int height,
+        //    int strideOracle, int strideData,
+        //    PixelSize pixelSize, ChannelSize channelSize,
+        //    StringBuilder sb,
+        //    uint leadingPixels = 4,
+        //    uint maxMismatchPixels = 32,
+        //    uint maxBlocks = 1,
+        //    uint bytesPerLine = 64,
+        //    bool comparePadding = false)
+        //{
+        //    DumpImageMismatchCore(oracle, data, width, height, strideOracle, strideData, 0, 0, pixelSize, channelSize, sb, leadingPixels, maxMismatchPixels, maxBlocks, bytesPerLine, comparePadding);
+        //}
+
+        ///// <summary>
+        ///// Performs a direct unmanaged memory comparison between two image buffers and formats detailed diagnostic output for mismatching regions.
+        ///// </summary>
+        ///// <param name="oracle">Pointer to the logical first row (Row 0) of the reference image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        ///// <param name="data">Pointer to the logical first row (Row 0) of the test image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        ///// <param name="width">The visual width of the active image data in pixels.</param>
+        ///// <param name="height">The visual height of the active image data in rows.</param>
+        ///// <param name="strideOracle">The signed bytes per row of the oracle buffer. A negative value instructs the engine to step backwards in memory.</param>
+        ///// <param name="strideData">The signed bytes per row of the data buffer. A negative value instructs the engine to step backwards in memory.</param>
+        ///// <param name="oracleLeftPad">The number of padding bytes located before the active visual boundary in the oracle buffer.</param>
+        ///// <param name="dataLeftPad">The number of padding bytes located before the active visual boundary in the data buffer.</param>
+        ///// <param name="pixelSize">The structural bit depth of a single pixel.</param>
+        ///// <param name="channelSize">The bit depth of a single color channel.</param>
+        ///// <param name="sb">The string builder where the diagnostic output is appended.</param>
+        ///// <param name="leadingPixels">The number of matching pixels to print before the mismatch occurs for contextual debugging.</param>
+        ///// <param name="maxMismatchPixels">The maximum number of pixels to process in a single mismatch block.</param>
+        ///// <param name="maxBlocks">The maximum number of distinct mismatch blocks to log before aborting.</param>
+        ///// <param name="bytesPerLine">The maximum number of bytes to render per visual line of the console output.</param>
+        ///// <param name="comparePadding">Determines if the unmanaged memory padding regions should be evaluated for mismatches.</param>
+        //internal static unsafe void DumpImageMismatchCore(
+        //    byte* oracle, byte* data, 
+        //    int width, int height, 
+        //    int strideOracle, int strideData, 
+        //    int oracleLeftPad, int dataLeftPad, 
+        //    PixelSize pixelSize, ChannelSize channelSize, 
+        //    StringBuilder sb,
+        //    uint leadingPixels = 4, 
+        //    uint maxMismatchPixels = 32,
+        //    uint maxBlocks = 1,
+        //    uint bytesPerLine = 64,
+        //    bool comparePadding = false)
+        //{
+        //    if (oracle == null || data == null || sb == null)
+        //    {
+        //        return;
+        //    }
+
+        //    if (width <= 0 || height <= 0 || (int)pixelSize <= 0)
+        //    {
+        //        return;
+        //    }
+
+        //    if (strideOracle == 0 || strideData == 0)
+        //    {
+        //        return;
+        //    }
+
+        //    int bitsPerPixel = (int)pixelSize;
+        //    int bytesPerPixel = Math.Max(1, bitsPerPixel / 8);
+        //    int imageWidthInBytes = PixelsToBytes(width, bitsPerPixel, bytesPerPixel);
+
+        //    int oracleAbsStride = Math.Abs(strideOracle);
+        //    int dataAbsStride = Math.Abs(strideData);
+
+        //    if (oracleAbsStride < imageWidthInBytes)
+        //    {
+        //        DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width,
+        //            $"Oracle stride absolute value ({oracleAbsStride}) is less than image width expressed in bytes ({imageWidthInBytes}).");
+        //    }
+
+        //    if (dataAbsStride < imageWidthInBytes)
+        //    {
+        //        DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width,
+        //            $"Data stride absolute value ({dataAbsStride}) is less than image width expressed in bytes ({imageWidthInBytes}).");
+        //    }
+
+        //    bytesPerLine = Math.Max(4u, bytesPerLine);
+        //    if (bitsPerPixel < 8)
+        //    {
+        //        bytesPerLine = Math.Max(4u, bytesPerLine / 8);
+        //    }
+
+        //    maxMismatchPixels = Math.Max(1u, maxMismatchPixels);
+        //    maxBlocks = Math.Max(1u, maxBlocks);
+
+        //    if (leadingPixels >= maxMismatchPixels)
+        //    {
+        //        throw new ArgumentException(
+        //            $"leadingPixels ({leadingPixels}) must be strictly less than maxMismatchPixels ({maxMismatchPixels}) to guarantee the mismatched pixel is rendered within the diagnostic block.", 
+        //            nameof(leadingPixels));
+        //    }
+
+        //    bool is8bppBitonal = (bitsPerPixel == 8 && (int)channelSize == 1);
+        //    bool is1bppBitonal = (bitsPerPixel == 1 && (int)channelSize == 1);
+
+        //    int blocksDumped = 0;
+        //    int leadingBytes = (int)leadingPixels * bytesPerPixel;
+        //    int maxMismatchBytes = (int)maxMismatchPixels * bytesPerPixel;
+            
+        //    int maxLeftPad = Math.Max(oracleLeftPad, dataLeftPad);
+
+        //    // TDOD: that's wrong - requires fixing - stride does not include left padding but only width * bytesPerPixel and right padding
+        //    // Fix requires removal of oracleLeftPad from equation - currently its passed always as 0 for Bitmap so tests pass
+        //    int oracleRightPad = Math.Max(0, oracleAbsStride - imageWidthInBytes /* - oracleLeftPad*/);
+        //    int dataRightPad = Math.Max(0, dataAbsStride - imageWidthInBytes /* - dataLeftPad*/);
+        //    int maxRightPad = Math.Max(oracleRightPad, dataRightPad);
+            
+        //    int dumpLineWidth = Math.Max(oracleAbsStride, dataAbsStride); // maxLeftPad +  imageWidthInBytes + maxRightPad;
+            
+        //    int oracleTotalPad = oracleRightPad + oracleLeftPad;
+        //    int dataTotalPad = dataRightPad + dataLeftPad;
+
+        //    string GetPadString(int pad)
+        //    {
+        //        return $"Pad: {pad}";
+        //    }
+
+        //    sb.AppendLine(
+        //        $"Legend: [O]racle ({GetPadString(Math.Max(0, oracleAbsStride - imageWidthInBytes))}), " +
+        //        $"[T]est ({GetPadString(Math.Max(0, dataAbsStride - imageWidthInBytes))}), [D]ifference (No buffer: -)");
+
+        //    if (is8bppBitonal)
+        //    {
+        //        sb.AppendLine("Legend (8bpp Bitonal): Base36 (0-Z) encoding, value > 35: #");
+        //    }
+        //    sb.AppendLine($"Format: {bitsPerPixel}bpp (Channel: {(int)channelSize}bit) | Area: {width} x {height} pixels");
+
+        //    int startByte = 0;
+        //    for (int y = 0; y < height; y++)
+        //    {
+        //        int rowOffsetOracle = ImageMemoryOffset(y, strideOracle, oracleLeftPad);
+        //        int rowOffsetData = ImageMemoryOffset(y, strideData, dataLeftPad);
+
+        //        int rowBytesToCompare = comparePadding 
+        //            ? Math.Min(oracleAbsStride, dataAbsStride) 
+        //            : PixelsToBytes(width, bitsPerPixel, bytesPerPixel);
+
+        //        if (comparePadding && y == 0)
+        //        {
+        //            rowOffsetOracle = 0;
+        //            rowOffsetData = 0;
+        //            rowBytesToCompare += Math.Min(oracleLeftPad, dataLeftPad);
+        //        }
+
+        //        int currentByte = startByte;
+        //        startByte = 0; // reset for subsequent rows
+
+        //        while (currentByte < rowBytesToCompare)
+        //        {
+        //            ReadOnlySpan<byte> oracleSpan = new ReadOnlySpan<byte>(oracle + rowOffsetOracle + currentByte, rowBytesToCompare - currentByte);
+        //            ReadOnlySpan<byte> dataSpan = new ReadOnlySpan<byte>(data + rowOffsetData + currentByte, rowBytesToCompare - currentByte);
+                    
+        //            int commonLen = oracleSpan.CommonPrefixLength(dataSpan);
+                    
+        //            if (commonLen == oracleSpan.Length)
+        //            {
+        //                break; 
+        //            }
+
+        //            int mismatchByte = currentByte + commonLen;
+        //            int x = BytesToPixels(mismatchByte, bitsPerPixel, bytesPerPixel);
+        //            int pxByte = PixelsToBytes(x, bitsPerPixel, bytesPerPixel);
+
+        //            int padAdjust = (comparePadding && y == 0) ? Math.Min(oracleLeftPad, dataLeftPad) : 0;
+        //            int mismatchDumpIndex = y * dumpLineWidth + maxLeftPad - padAdjust + pxByte;
+        //            int dumpStartIndex = Math.Max(0, mismatchDumpIndex - leadingBytes);
+                    
+        //            int subunitSize = 1;
+        //            if (is8bppBitonal) subunitSize = 8;
+        //            else if (is1bppBitonal) subunitSize = 1; // 1 byte = 8 pixels
+
+        //            dumpStartIndex = (dumpStartIndex / subunitSize) * subunitSize;
+                    
+        //            int dumpEndIndex = Math.Min(height * dumpLineWidth, mismatchDumpIndex + maxMismatchBytes);
+
+        //            sb.AppendLine($"\nMismatch Block {blocksDumped + 1}");
+                    
+        //            // Determine the raw byte offset of the mismatch relative to the start of the pixel payload.
+        //            // The Bitmap format consists of a single global Border (leading bytes) before Row 0,
+        //            // followed by Rows consisting of Pixels and Right Padding. There is no per-row Left Padding.
+        //            // Therefore, we calculate the absolute linear distance from the start of the row's pixels.
+        //            int rowByteOffset = mismatchDumpIndex - (y * dumpLineWidth + maxLeftPad);
+        //            int visualWidthBytes = width * bytesPerPixel;
+                    
+        //            int reportedY = y;
+        //            string colString;
+                    
+        //            // If the byte offset is negative, the mismatch occurred in the global Left Border.
+        //            // Due to the physical geometry of Bitmap, this can ONLY happen before Row 0's pixels.
+        //            if (rowByteOffset < 0)
+        //            {
+        //                colString = $"[Leading Padding: {rowByteOffset} bytes (to row start)]";
+        //            }
+        //            // If the byte offset exceeds the pixel width, it falls into the Right Padding 
+        //            // (the memory between the end of Row y and the start of Row y+1).
+        //            else if (rowByteOffset >= visualWidthBytes)
+        //            {
+        //                int rightOffset = rowByteOffset - visualWidthBytes + 1;
+        //                colString = $"[Border: {rightOffset} bytes (from row end)]";
+        //            }
+        //            // Otherwise, the mismatch is squarely within the active pixel payload (so we calculate pixel column).
+        //            else
+        //            {
+        //                int pixelCol = BytesToPixels(rowByteOffset, bitsPerPixel, bytesPerPixel);
+        //                colString = $"{pixelCol}";
+        //            }
+
+        //            sb.AppendLine($"Row: {reportedY} | Column: {colString} | Byte Offset In Row: {rowByteOffset}");
+
+        //            int startPixelLimit = maxLeftPad > 0 ? maxLeftPad - 1 : -1;
+        //            int endPixelLimit = maxLeftPad > 0 ? maxLeftPad + (width * bytesPerPixel) - 1 : -1;
+
+        //                for (int chunkStart = dumpStartIndex; chunkStart < dumpEndIndex; chunkStart += (int)bytesPerLine)
+        //                {
+        //                    int chunkEnd = Math.Min(dumpEndIndex, chunkStart + (int)bytesPerLine);
+        //                    int dumpRow = chunkStart / dumpLineWidth;
+        //                    int dumpCol = chunkStart % dumpLineWidth;
+                            
+        //                    // Oracle Hex Dump
+        //                    int oracleRowByteIndex = dumpCol - maxLeftPad + oracleLeftPad;
+        //                    int oracleBufferIndex = ImageMemoryOffset(dumpRow, strideOracle, oracleRowByteIndex);
+        //                    sb.Append($"0x{oracleBufferIndex:X8} O: ");
+        //                    FormatHexDump(
+        //                        oracle, chunkStart, chunkEnd, dumpLineWidth, maxLeftPad, oracleLeftPad, oracleAbsStride,
+        //                        strideOracle, height, startPixelLimit, endPixelLimit, bitsPerPixel, is8bppBitonal, sb);
+
+        //                    // Test Hex Dump
+        //                    int dataRowByteIndex = dumpCol - maxLeftPad + dataLeftPad;
+        //                    int dataBufferIndex = ImageMemoryOffset(dumpRow, strideData, dataRowByteIndex);
+        //                    sb.Append($"0x{dataBufferIndex:X8} T: ");
+        //                    FormatHexDump(
+        //                        data, chunkStart, chunkEnd, dumpLineWidth, maxLeftPad, dataLeftPad, dataAbsStride,
+        //                        strideData, height, startPixelLimit, endPixelLimit, bitsPerPixel, is8bppBitonal, sb);
+
+        //                    // Difference Dump
+        //                    sb.Append($"           D: ");
+        //                    for (int curr = chunkStart; curr < chunkEnd; curr++)
+        //                    {
+        //                        int r = curr / dumpLineWidth;
+        //                        int v = curr % dumpLineWidth;
+        //                        char bChar = (v == startPixelLimit) ? '[' : ((v == endPixelLimit) ? ']' : ' ');
+        //                        int cO = v - maxLeftPad + oracleLeftPad;
+        //                        int cT = v - maxLeftPad + dataLeftPad;
+                                
+        //                        if (r < height && cO >= 0 && cO < oracleAbsStride && cT >= 0 && cT < dataAbsStride) 
+        //                        {
+        //                            int memOffsetOracle = ImageMemoryOffset(r, strideOracle, cO);
+        //                            int memOffsetData = ImageMemoryOffset(r, strideData, cT);
+                                    
+        //                            byte diff = (bitsPerPixel < 8)
+        //                                ? (byte)(oracle[memOffsetOracle] ^ data[memOffsetData]) 
+        //                                : (byte)Math.Abs(oracle[memOffsetOracle] - data[memOffsetData]);
+                                        
+        //                            FormatByte(diff, curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+        //                        }
+        //                        else 
+        //                        {
+        //                            FormatMissingByte(curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+        //                        }
+        //                    }
+        //                    sb.AppendLine();
+        //                    sb.AppendLine(); // Empty separator between line chunks
+        //                }
+
+        //                blocksDumped++;
+        //                if (blocksDumped >= maxBlocks) return;
+
+        //                int nextLogical = dumpEndIndex;
+        //                int nextY = nextLogical / dumpLineWidth;
+        //                int nextC = nextLogical % dumpLineWidth;
+
+        //                int padAdjustForNext = comparePadding ? Math.Min(oracleLeftPad, dataLeftPad) : 0;
+        //                int nextPxByte = nextC - maxLeftPad + padAdjustForNext;
+
+        //                if (nextY > y)
+        //                {
+        //                    y = nextY - 1; // Outer loop will increment
+        //                    startByte = Math.Max(0, nextPxByte);
+        //                    break; 
+        //                }
+        //                else
+        //                {
+        //                    currentByte = Math.Max(0, nextPxByte);
+        //                    if (currentByte <= pxByte) currentByte = pxByte + 1; // prevent infinite loops if block was 0 length (which shouldn't happen, but just in case)
+        //                }
+        //        }
+        //    }
+        //}
+
+        /// <summary>
+        /// Performs a direct unmanaged memory comparison between two image buffers and formats detailed diagnostic output for mismatching regions.
+        /// </summary>
+        /// <param name="oracle">Pointer to the logical first row (Row 0) of the reference image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        /// <param name="data">Pointer to the logical first row (Row 0) of the test image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        /// <param name="width">The visual width of the active image data in pixels.</param>
+        /// <param name="height">The visual height of the active image data in rows.</param>
+        /// <param name="strideOracle">The signed bytes per row of the oracle buffer. A negative value instructs the engine to step backwards in memory.</param>
+        /// <param name="strideData">The signed bytes per row of the data buffer. A negative value instructs the engine to step backwards in memory.</param>
+        /// <param name="pixelSize">The structural bit depth of a single pixel.</param>
+        /// <param name="channelSize">The bit depth of a single color channel.</param>
+        /// <param name="sb">The string builder where the diagnostic output is appended.</param>
+        /// <param name="leadingPixels">The number of matching pixels to print before the mismatch occurs for contextual debugging.</param>
+        /// <param name="maxMismatchPixels">The maximum number of pixels to process in a single mismatch block.</param>
+        /// <param name="maxBlocks">The maximum number of distinct mismatch blocks to log before aborting.</param>
+        /// <param name="bytesPerLine">The maximum number of bytes to render per visual line of the console output.</param>
+        /// <param name="comparePadding">Determines if the unmanaged memory padding regions should be evaluated for mismatches.</param>
+        internal static unsafe void DumpImageMismatchCore(
+            byte* oracle, byte* data,
+            int width, int height,
+            int strideOracle, int strideData,
+            PixelSize pixelSize, ChannelSize channelSize,
+            StringBuilder sb,
+            uint leadingPixels = 4,
+            uint maxMismatchPixels = 32,
+            uint maxBlocks = 1,
+            uint bytesPerLine = 64,
+            bool comparePadding = false)
+        {
+            DumpImageMismatchCore(oracle, data, width, height, strideOracle, strideData, 0, 0, pixelSize, channelSize, sb, leadingPixels, maxMismatchPixels, maxBlocks, bytesPerLine, comparePadding);
+        }
+
+        /// <summary>
+        /// Performs a direct unmanaged memory comparison between two image buffers and formats detailed diagnostic output for mismatching regions.
+        /// </summary>
+        /// <param name="oracle">Pointer to the logical first row (Row 0) of the reference image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        /// <param name="data">Pointer to the logical first row (Row 0) of the test image buffer. For negative strides, this must point to the highest valid memory address of the active buffer.</param>
+        /// <param name="width">The visual width of the active image data in pixels.</param>
+        /// <param name="height">The visual height of the active image data in rows.</param>
+        /// <param name="strideOracle">The signed bytes per row of the oracle buffer. A negative value instructs the engine to step backwards in memory.</param>
+        /// <param name="strideData">The signed bytes per row of the data buffer. A negative value instructs the engine to step backwards in memory.</param>
+        /// <param name="oracleLeftPad">The number of padding bytes located before the active visual boundary in the oracle buffer.</param>
+        /// <param name="dataLeftPad">The number of padding bytes located before the active visual boundary in the data buffer.</param>
+        /// <param name="pixelSize">The structural bit depth of a single pixel.</param>
+        /// <param name="channelSize">The bit depth of a single color channel.</param>
+        /// <param name="sb">The string builder where the diagnostic output is appended.</param>
+        /// <param name="leadingPixels">The number of matching pixels to print before the mismatch occurs for contextual debugging.</param>
+        /// <param name="maxMismatchPixels">The maximum number of pixels to process in a single mismatch block.</param>
+        /// <param name="maxBlocks">The maximum number of distinct mismatch blocks to log before aborting.</param>
+        /// <param name="bytesPerLine">The maximum number of bytes to render per visual line of the console output.</param>
+        /// <param name="comparePadding">Determines if the unmanaged memory padding regions should be evaluated for mismatches.</param>
+        internal static unsafe void DumpImageMismatchCore(
+            byte* oracle, byte* data,
+            int width, int height,
+            int strideOracle, int strideData,
+            int oracleLeftPad, int dataLeftPad,
+            PixelSize pixelSize, ChannelSize channelSize,
+            StringBuilder sb,
+            uint leadingPixels = 4,
+            uint maxMismatchPixels = 32,
+            uint maxBlocks = 1,
+            uint bytesPerLine = 64,
+            bool comparePadding = false)
+        {
+            if (oracle == null || data == null || sb == null)
+            {
+                return;
+            }
+
+            if (width <= 0 || height <= 0 || (int)pixelSize <= 0)
+            {
+                return;
+            }
+
+            if (strideOracle == 0 || strideData == 0)
+            {
+                return;
+            }
+
+            int bitsPerPixel = (int)pixelSize;
+            int bytesPerPixel = Math.Max(1, bitsPerPixel / 8);
+            int imageWidthInBytes = PixelsToBytes(width, bitsPerPixel, bytesPerPixel);
+
+            int oracleAbsStride = Math.Abs(strideOracle);
+            int dataAbsStride = Math.Abs(strideData);
+
+            if (oracleAbsStride < imageWidthInBytes)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width,
+                    $"Oracle stride absolute value ({oracleAbsStride}) is less than image width expressed in bytes ({imageWidthInBytes}).");
+            }
+
+            if (dataAbsStride < imageWidthInBytes)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width,
+                    $"Data stride absolute value ({dataAbsStride}) is less than image width expressed in bytes ({imageWidthInBytes}).");
+            }
+
+            if (oracleLeftPad < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(oracleLeftPad), oracleLeftPad, "Oracle left padding must be positive or zero.");
+            }
+
+            if (dataLeftPad < 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(dataLeftPad), dataLeftPad, "Data left padding must be positive or zero.");
+            }
+
+            bytesPerLine = Math.Max(4u, bytesPerLine);
+            if (bitsPerPixel < 8)
+            {
+                bytesPerLine = Math.Max(4u, bytesPerLine / 8);
+            }
+
+            maxMismatchPixels = Math.Max(1u, maxMismatchPixels);
+            maxBlocks = Math.Max(1u, maxBlocks);
+
+            if (leadingPixels >= maxMismatchPixels)
+            {
+                throw new ArgumentException(
+                    $"leadingPixels ({leadingPixels}) must be strictly less than maxMismatchPixels ({maxMismatchPixels}) to guarantee the mismatched pixel is rendered within the diagnostic block.",
+                    nameof(leadingPixels));
+            }
+
+            bool is8bppBitonal = (bitsPerPixel == 8 && (int)channelSize == 1);
+            bool is1bppBitonal = (bitsPerPixel == 1 && (int)channelSize == 1);
+
+            int blocksDumped = 0;
+            int leadingBytes = (int)leadingPixels * bytesPerPixel;
+            int maxMismatchBytes = (int)maxMismatchPixels * bytesPerPixel;
+
+            int maxLeftPad = Math.Max(oracleLeftPad, dataLeftPad);
+
+            // TDOD: that's wrong - requires fixing - stride does not include left padding but only width * bytesPerPixel and right padding
+            // Fix requires removal of oracleLeftPad from equation - currently its passed always as 0 for Bitmap so tests pass
+            int oracleRightPad = Math.Max(0, oracleAbsStride - imageWidthInBytes /* - oracleLeftPad*/);
+            int dataRightPad = Math.Max(0, dataAbsStride - imageWidthInBytes /* - dataLeftPad*/);
+            int maxRightPad = Math.Max(oracleRightPad, dataRightPad);
+
+            int dumpLineWidth = Math.Max(oracleAbsStride, dataAbsStride); // maxLeftPad +  imageWidthInBytes + maxRightPad;
+
+            int oracleTotalPad = oracleRightPad + oracleLeftPad;
+            int dataTotalPad = dataRightPad + dataLeftPad;
+
+            string GetPadString(int pad)
+            {
+                return $"Pad: {pad}";
+            }
+
+            sb.AppendLine(
+                $"Legend: [O]racle ({GetPadString(Math.Max(0, oracleAbsStride - imageWidthInBytes))}), " +
+                $"[T]est ({GetPadString(Math.Max(0, dataAbsStride - imageWidthInBytes))}), [D]ifference (No buffer: -)");
+
+            if (is8bppBitonal)
+            {
+                sb.AppendLine("Legend (8bpp Bitonal): Base36 (0-Z) encoding, value > 35: #");
+            }
+            sb.AppendLine($"Format: {bitsPerPixel}bpp (Channel: {(int)channelSize}bit) | Area: {width} x {height} pixels");
+
+            int startByte = 0;
+            for (int y = 0; y < height; y++)
+            {
+                int rowOffsetOracle = ImageMemoryOffset(y, strideOracle, oracleLeftPad);
+                int rowOffsetData = ImageMemoryOffset(y, strideData, dataLeftPad);
+
+                int rowBytesToCompare = comparePadding
+                    ? Math.Min(oracleAbsStride, dataAbsStride)
+                    : PixelsToBytes(width, bitsPerPixel, bytesPerPixel);
+
+                int overlap = 0;
+                if (comparePadding && y == 0)
+                {
+                    overlap = Math.Min(oracleLeftPad, dataLeftPad);
+                    rowOffsetOracle = ImageMemoryOffset(0, strideOracle, oracleLeftPad - overlap);
+                    rowOffsetData = ImageMemoryOffset(0, strideData, dataLeftPad - overlap);
+                    rowBytesToCompare += overlap;
+                }
+
+                int currentByte = startByte;
+                startByte = 0; // reset for subsequent rows
+
+                while (currentByte < rowBytesToCompare)
+                {
+                    ReadOnlySpan<byte> oracleSpan = new ReadOnlySpan<byte>(oracle + rowOffsetOracle + currentByte, rowBytesToCompare - currentByte);
+                    ReadOnlySpan<byte> dataSpan = new ReadOnlySpan<byte>(data + rowOffsetData + currentByte, rowBytesToCompare - currentByte);
+
+                    int commonLen = oracleSpan.CommonPrefixLength(dataSpan);
+
+                    if (commonLen == oracleSpan.Length)
+                    {
+                        break;
+                    }
+
+                    int mismatchByte = currentByte + commonLen;
+                    int rowByteIndex = mismatchByte - overlap;
+                    
+                    int pixelMismatchByteIndex;
+                    if (rowByteIndex < 0)
+                    {
+                        pixelMismatchByteIndex = rowByteIndex;
+                    }
+                    else
+                    {
+                        int x = BytesToPixels(rowByteIndex, bitsPerPixel, bytesPerPixel);
+                        pixelMismatchByteIndex = PixelsToBytes(x, bitsPerPixel, bytesPerPixel);
+                    }
+
+                    int mismatchDumpIndex = y * dumpLineWidth + maxLeftPad + pixelMismatchByteIndex;
+                    int dumpStartIndex = Math.Max(0, mismatchDumpIndex - leadingBytes);
+
+                    int subunitSize = 1;
+                    if (is8bppBitonal)
+                        subunitSize = 8;
+                    else if (is1bppBitonal)
+                        subunitSize = 1; // 1 byte = 8 pixels
+
+                    dumpStartIndex = (dumpStartIndex / subunitSize) * subunitSize;
+
+                    int dumpEndIndex = Math.Min(height * dumpLineWidth, mismatchDumpIndex + maxMismatchBytes);
+
+                    sb.AppendLine($"\nMismatch Block {blocksDumped + 1}");
+
+                    // Determine the raw byte offset of the mismatch relative to the start of the pixel payload.
+                    // The Bitmap format consists of a single global Border (leading bytes) before Row 0,
+                    // followed by Rows consisting of Pixels and Right Padding. There is no per-row Left Padding.
+                    // Therefore, we calculate the absolute linear distance from the start of the row's pixels.
+                    //int rowByteIndex = mismatchDumpIndex - (y * dumpLineWidth + maxLeftPad);
+                    int visualWidthBytes = width * bytesPerPixel;
+
+                    int reportedY = y;
+                    string colString;
+
+                    // If the byte offset is negative, the mismatch occurred in the global Left Border.
+                    // Due to the physical geometry of Bitmap, this can ONLY happen before Row 0's pixels.
+                    if (rowByteIndex < 0)
+                    {
+                        colString = $"[Leading Padding: {rowByteIndex} bytes (to row start)]";
+                    }
+                    // If the byte offset exceeds the pixel width, it falls into the Right Padding 
+                    // (the memory between the end of Row y and the start of Row y+1).
+                    else if (rowByteIndex >= visualWidthBytes)
+                    {
+                        int rightOffset = rowByteIndex - visualWidthBytes + 1;
+                        colString = $"[Border: {rightOffset} bytes (from row end)]";
+                    }
+                    // Otherwise, the mismatch is squarely within the active pixel payload (so we calculate pixel column).
+                    else
+                    {
+                        int pixelCol = BytesToPixels(rowByteIndex, bitsPerPixel, bytesPerPixel);
+                        colString = $"{pixelCol}";
+                    }
+
+                    sb.AppendLine($"Row: {reportedY} | Column: {colString} | Byte Offset In Row: {rowByteIndex}");
+
+                    int startPixelLimit = maxLeftPad > 0 ? maxLeftPad - 1 : -1;
+                    int endPixelLimit = maxLeftPad > 0 ? maxLeftPad + imageWidthInBytes - 1 : -1;
+
+                    bool carryOracle = false;
+                    bool carryData = false;
+                    bool carryDiff = false;
+
+                    for (int chunkStart = dumpStartIndex; chunkStart < dumpEndIndex; chunkStart += (int)bytesPerLine)
+                    {
+                        int chunkEnd = Math.Min(dumpEndIndex, chunkStart + (int)bytesPerLine);
+                        int dumpRow = chunkStart / dumpLineWidth;
+                        int dumpCol = chunkStart % dumpLineWidth;
+
+                        // Oracle Hex Dump
+                        int oracleRowByteIndex = dumpCol - maxLeftPad + oracleLeftPad;
+                        int oracleBufferIndex = ImageMemoryOffset(dumpRow, strideOracle, oracleRowByteIndex);
+                        sb.Append($"0x{oracleBufferIndex:X8} O: ");
+                        carryOracle = FormatHexDumpV2(
+                            oracle, chunkStart, chunkEnd, dumpLineWidth, maxLeftPad, oracleLeftPad, oracleAbsStride,
+                            strideOracle, height, startPixelLimit, endPixelLimit, bitsPerPixel, is8bppBitonal, carryOracle, sb);
+
+                        // Test Hex Dump
+                        int dataRowByteIndex = dumpCol - maxLeftPad + dataLeftPad;
+                        int dataBufferIndex = ImageMemoryOffset(dumpRow, strideData, dataRowByteIndex);
+                        sb.Append($"0x{dataBufferIndex:X8} T: ");
+                        carryData = FormatHexDumpV2(
+                            data, chunkStart, chunkEnd, dumpLineWidth, maxLeftPad, dataLeftPad, dataAbsStride,
+                            strideData, height, startPixelLimit, endPixelLimit, bitsPerPixel, is8bppBitonal, carryData, sb);
+
+                        // Difference Dump
+                        sb.Append($"           D: ");
+                        if (carryDiff)
                         {
-                            int startX = Math.Max(0, x - 3);
-                            int endX = Math.Min(native.Width, startX + 32);
-                            
-                            Console.WriteLine($"Mismatch block starting at Row: {y}, Col: {startX}");
-                            
-                            Console.Write("ImgN:");
-                            for (int i = startX; i < endX; i++)
-                            {
-                                int pxOffset = (y * stride) + (i * 3);
-                                Console.Write($" {p1[pxOffset]:X2} {p1[pxOffset + 1]:X2} {p1[pxOffset + 2]:X2}");
-                            }
-                                
-                            Console.Write("\nImgM:");
-                            for (int i = startX; i < endX; i++)
-                            {
-                                int pxOffset = (y * stride) + (i * 3);
-                                Console.Write($" {p2[pxOffset]:X2} {p2[pxOffset + 1]:X2} {p2[pxOffset + 2]:X2}");
-                            }
-                                
-                            Console.Write("\nDiff:");
-                            for (int i = startX; i < endX; i++)
-                            {
-                                int pxOffset = (y * stride) + (i * 3);
-                                Console.Write($" {Math.Abs(p1[pxOffset] - p2[pxOffset]):X2} {Math.Abs(p1[pxOffset + 1] - p2[pxOffset + 1]):X2} {Math.Abs(p1[pxOffset + 2] - p2[pxOffset + 2]):X2}");
-                            }
-                            
-                            Console.WriteLine($"\n{mapType} PixelMap Binary Mismatch for test0{fileIndex:00#}C.djvu.");
-                            return;
+                            sb.Append('[');
                         }
+                        else
+                        {
+                            sb.Append(' ');
+                        }
+                        bool nextCarryDiff = false;
+
+                        for (int curr = chunkStart; curr < chunkEnd; curr++)
+                        {
+                            int r = curr / dumpLineWidth;
+                            int v = curr % dumpLineWidth;
+                            
+                            char bChar = ' ';
+                            if (v == startPixelLimit)
+                            {
+                                if (curr == chunkEnd - 1)
+                                {
+                                    nextCarryDiff = true;
+                                }
+                                else
+                                {
+                                    bChar = '[';
+                                }
+                            }
+                            else if (v == endPixelLimit)
+                            {
+                                bChar = ']';
+                            }
+                            
+                            int cO = v - maxLeftPad + oracleLeftPad;
+                            int cT = v - maxLeftPad + dataLeftPad;
+
+                            if (r < height && cO >= 0 && cO < oracleAbsStride && cT >= 0 && cT < dataAbsStride)
+                            {
+                                int memOffsetOracle = ImageMemoryOffset(r, strideOracle, cO);
+                                int memOffsetData = ImageMemoryOffset(r, strideData, cT);
+
+                                byte diff = (bitsPerPixel < 8)
+                                    ? (byte)(oracle[memOffsetOracle] ^ data[memOffsetData])
+                                    : (byte)Math.Abs(oracle[memOffsetOracle] - data[memOffsetData]);
+
+                                FormatByte(diff, curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+                            }
+                            else
+                            {
+                                FormatMissingByte(curr - chunkStart, bitsPerPixel, is8bppBitonal, sb, bChar);
+                            }
+                        }
+                        sb.AppendLine();
+                        carryDiff = nextCarryDiff;
+                        sb.AppendLine(); // Empty separator between line chunks
+                    }
+
+                    blocksDumped++;
+                    if (blocksDumped >= maxBlocks)
+                        return;
+
+                    int nextLogical = dumpEndIndex;
+                    int nextY = nextLogical / dumpLineWidth;
+                    int nextC = nextLogical % dumpLineWidth;
+
+                    int padAdjustForNext = comparePadding ? Math.Min(oracleLeftPad, dataLeftPad) : 0;
+                    int nextPxByte = nextC - maxLeftPad + padAdjustForNext;
+
+                    if (nextY > y)
+                    {
+                        y = nextY - 1; // Outer loop will increment
+                        startByte = Math.Max(0, nextPxByte);
+                        break;
+                    }
+                    else
+                    {
+                        currentByte = Math.Max(0, nextPxByte);
+                        if (currentByte <= pixelMismatchByteIndex)
+                            currentByte = pixelMismatchByteIndex + 1; // prevent infinite loops if block was 0 length (which shouldn't happen, but just in case)
                     }
                 }
             }
-            finally
+        }
+
+        public static unsafe void DumpImageMismatch(SysBitmap oracle, SysBitmap data, int fileIndex, string mapType,
+            uint leadingPixels = 4,
+            uint maxMismatchPixels = 32,
+            uint maxBlocks = 1,
+            uint bytesPerLine = 64,
+            bool comparePadding = false)
+        {
+            try
             {
-                if (data1 != null)
+                if (oracle == null || data == null)
                 {
-                    native.UnlockBits(data1);
+                    Console.WriteLine($"\n{mapType} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image references are null.");
+                    return;
+                }
+                if (oracle.Width == 0 || oracle.Height == 0)
+                {
+                    Console.WriteLine($"\n{mapType} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions are {oracle.Width}x{oracle.Height}. Skipping.");
+                    return;
+                }
+                if (oracle.Width != data.Width || oracle.Height != data.Height)
+                {
+                    Console.WriteLine($"\n{mapType} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions mismatch ({oracle.Width}x{oracle.Height} vs {data.Width}x{data.Height}).");
+                    return;
+                }
+                if (oracle.PixelFormat != data.PixelFormat)
+                {
+                    Console.WriteLine($"\n{mapType} Mismatch Details for test0{fileIndex:00#}C.djvu: PixelFormat mismatch ({oracle.PixelFormat} vs {data.PixelFormat}).");
+                    return;
                 }
 
-                if (data2 != null)
+                BitmapData data1 = null;
+                BitmapData data2 = null;
+                try
                 {
-                    managed.UnlockBits(data2);
+                    data1 = oracle.LockBits(new Rectangle(0, 0, oracle.Width, oracle.Height), ImageLockMode.ReadOnly, oracle.PixelFormat);
+                    data2 = data.LockBits(new Rectangle(0, 0, data.Width, data.Height), ImageLockMode.ReadOnly, data.PixelFormat);
+                    
+                    int bitsPerPixel = Image.GetPixelFormatSize(oracle.PixelFormat);
+                    
+                    ChannelSize cSize = ChannelSize._8bit;
+                    if (bitsPerPixel == 1) cSize = ChannelSize._1bit;
+                    else if (bitsPerPixel == 2) cSize = ChannelSize._2bit;
+                    else if (bitsPerPixel == 4) cSize = ChannelSize._4bit;
+                    else if (bitsPerPixel >= 48) cSize = ChannelSize._16bit;
+
+                    StringBuilder sb = new StringBuilder(1024);
+                    sb.AppendLine($"\n{mapType} Mismatches for test0{fileIndex:00#}C.djvu:");
+                    
+                    DumpImageMismatchCore((byte*)data1.Scan0, (byte*)data2.Scan0, oracle.Width, oracle.Height, 
+                        data1.Stride, data2.Stride, 0, 0,
+                        (PixelSize)bitsPerPixel, cSize, sb,
+                        leadingPixels, maxMismatchPixels, maxBlocks, bytesPerLine, comparePadding);
+                        
+                    Console.Write(sb.ToString());
                 }
+                finally
+                {
+                    if (data1 != null) oracle.UnlockBits(data1);
+                    if (data2 != null) data.UnlockBits(data2);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nError dumping mismatch details for test0{fileIndex:00#}C.djvu: {ex.Message}");
             }
         }
 
-        public static unsafe void DumpImageMismatchDetails(byte* pNative, byte* pManaged, int length, int width, int fileIndex, string mapType)
+        ///// <summary>
+        ///// Dumps formatted hex diagnostic blocks to the console when two DjvuNet Graphics.Bitmap buffers mismatch.
+        ///// Extracts geometric topology dynamically from the Graphics.Bitmap properties.
+        ///// </summary>
+        ///// <param name="oracle">Reference to the primary (Oracle) Bitmap object.</param>
+        ///// <param name="testImage">Reference to the secondary (Test) Bitmap object.</param>
+        ///// <param name="fileIndex">The numeric test index mapped to the file name, for console logging.</param>
+        ///// <param name="leadingPixels">The number of matching, non-corrupted pixels to render before the detected mismatch to provide context.</param>
+        ///// <param name="maxMismatchPixels">The maximum continuous pixel limit to render in a single diagnostic block to prevent terminal flooding.</param>
+        ///// <param name="maxBlocks">The maximum number of disconnected mismatch patches to render.</param>
+        ///// <param name="bytesPerLine">The maximum visual byte width per rendered hex line.</param>
+        //public static unsafe void DumpImageMismatch(
+        //    ref Graphics.Bitmap oracle, ref Graphics.Bitmap data, int fileIndex,
+        //    bool bitonal = false,
+        //    uint leadingPixels = 4,
+        //    uint maxMismatchPixels = 32,
+        //    uint maxBlocks = 1,
+        //    uint bytesPerLine = 64,
+        //    bool comparePadding = false)
+        //{
+        //    try
+        //    {
+        //        string typeName = typeof(Graphics.Bitmap).FullName;
+
+        //        if (Unsafe.IsNullRef(ref oracle) || Unsafe.IsNullRef(ref data))
+        //        {
+        //            Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image references are null.");
+        //            return;
+        //        }
+                
+        //        if (oracle.Data == null && oracle.RleData != null) oracle.Decompress();
+        //        if (data.Data == null && data.RleData != null) data.Decompress();
+                
+        //        if (oracle.Data == null || data.Data == null)
+        //        {
+        //            Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image Data buffers are null.");
+        //            return;
+        //        }
+                
+        //        long oracleExpected = (long)oracle.Height * oracle.BytesPerRow;
+        //        long dataExpected = (long)data.Height * data.BytesPerRow;
+                
+        //        if (oracle.Data.Length < oracleExpected || data.Data.Length < dataExpected)
+        //        {
+        //            Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image Data buffers are undersized.");
+        //            return;
+        //        }
+                
+        //        if (oracle.Width == 0 || oracle.Height == 0)
+        //        {
+        //            Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions are {oracle.Width}x{oracle.Height}. Border checks are not visualized.");
+        //            return;
+        //        }
+                
+        //        if (oracle.Width != data.Width || oracle.Height != data.Height)
+        //        {
+        //            Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions mismatch ({oracle.Width}x{oracle.Height} vs {data.Width}x{data.Height}).");
+        //            return;
+        //        }
+
+        //        StringBuilder sb = new StringBuilder(1024);
+        //        sb.AppendLine($"\n{typeName} Mismatches for test0{fileIndex:00#}C.djvu:");
+                
+        //        DumpImageMismatchCore((byte*)oracle.DataPointer, (byte*)data.DataPointer, oracle.Width, oracle.Height, 
+        //            oracle.BytesPerRow, data.BytesPerRow, 
+        //            oracle.Border, data.Border,
+        //            PixelSize._8bpp, bitonal ? ChannelSize._1bit : ChannelSize._8bit, sb,
+        //            leadingPixels, maxMismatchPixels, maxBlocks, bytesPerLine, comparePadding);
+                    
+        //        Console.Write(sb.ToString());
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"\nError dumping mismatch details for test0{fileIndex:00#}C.djvu: {ex.Message}");
+        //    }
+        //}
+
+        /// <summary>
+        /// Dumps formatted hex diagnostic blocks to the console when two DjvuNet Graphics.Bitmap buffers mismatch.
+        /// Extracts geometric topology dynamically from the Graphics.Bitmap properties.
+        /// </summary>
+        /// <param name="oracle">Reference to the primary (Oracle) Bitmap object.</param>
+        /// <param name="testImage">Reference to the secondary (Test) Bitmap object.</param>
+        /// <param name="fileIndex">The numeric test index mapped to the file name, for console logging.</param>
+        /// <param name="leadingPixels">The number of matching, non-corrupted pixels to render before the detected mismatch to provide context.</param>
+        /// <param name="maxMismatchPixels">The maximum continuous pixel limit to render in a single diagnostic block to prevent terminal flooding.</param>
+        /// <param name="maxBlocks">The maximum number of disconnected mismatch patches to render.</param>
+        /// <param name="bytesPerLine">The maximum visual byte width per rendered hex line.</param>
+        public static unsafe void DumpImageMismatch(
+            ref Graphics.Bitmap oracle, ref Graphics.Bitmap data, int fileIndex,
+            bool bitonal = false,
+            uint leadingPixels = 4,
+            uint maxMismatchPixels = 32,
+            uint maxBlocks = 1,
+            uint bytesPerLine = 64,
+            bool comparePadding = false)
         {
-            Console.WriteLine($"\nDiff Mismatches for test0{fileIndex}C.djvu:");
-            int firstMismatch = -1;
-            for (int i = 0; i < length; i++)
+            try
             {
-                if (pNative[i] != pManaged[i])
+                string typeName = typeof(Graphics.Bitmap).FullName;
+
+                if (Unsafe.IsNullRef(ref oracle) || Unsafe.IsNullRef(ref data))
                 {
-                    firstMismatch = i;
-                    break;
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image references are null.");
+                    return;
                 }
-            }
 
-            if (firstMismatch != -1)
+                if (oracle.Data == null && oracle.RleData != null)
+                    oracle.Decompress();
+                if (data.Data == null && data.RleData != null)
+                    data.Decompress();
+
+                if (oracle.Data == null || data.Data == null)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image Data buffers are null.");
+                    return;
+                }
+
+                long oracleExpected = (long)oracle.Height * oracle.BytesPerRow;
+                long dataExpected = (long)data.Height * data.BytesPerRow;
+
+                if (oracle.Data.Length < oracleExpected || data.Data.Length < dataExpected)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image Data buffers are undersized.");
+                    return;
+                }
+
+                if (oracle.Width == 0 || oracle.Height == 0)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions are {oracle.Width}x{oracle.Height}. Border checks are not visualized.");
+                    return;
+                }
+
+                if (oracle.Width != data.Width || oracle.Height != data.Height)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions mismatch ({oracle.Width}x{oracle.Height} vs {data.Width}x{data.Height}).");
+                    return;
+                }
+
+                StringBuilder sb = new StringBuilder(1024);
+                sb.AppendLine($"\n{typeName} Mismatches for test0{fileIndex:00#}C.djvu:");
+
+                DumpImageMismatchCore((byte*)oracle.DataPointer, (byte*)data.DataPointer, oracle.Width, oracle.Height,
+                    oracle.BytesPerRow, data.BytesPerRow,
+                    oracle.Border, data.Border,
+                    PixelSize._8bpp, bitonal ? ChannelSize._1bit : ChannelSize._8bit, sb,
+                    leadingPixels, maxMismatchPixels, maxBlocks, bytesPerLine, comparePadding);
+
+                Console.Write(sb.ToString());
+            }
+            catch (Exception ex)
             {
-                int firstPixel = firstMismatch / 3;
-                int startPixel = System.Math.Max(0, firstPixel - 3);
-                int startIndex = startPixel * 3;
-                int limitBytes = System.Math.Min(length - startIndex, 96);
-                
-                int row = startPixel / width;
-                int col = startPixel % width;
-                
-                Console.WriteLine($"Mismatch block starting at Row: {row}, Col: {col} (Index: {startIndex})");
-
-                Console.Write("ImgN:");
-                for (int i = 0; i < limitBytes; i++)
-                    Console.Write($" {pNative[startIndex + i]:X2}");
-                Console.WriteLine();
-                
-                Console.Write("ImgM:");
-                for (int i = 0; i < limitBytes; i++)
-                    Console.Write($" {pManaged[startIndex + i]:X2}");
-                Console.WriteLine();
-                
-                Console.Write("Diff:");
-                for (int i = 0; i < limitBytes; i++)
-                    Console.Write($" {System.Math.Abs(pNative[startIndex + i] - pManaged[startIndex + i]):X2}");
-                Console.WriteLine();
+                Console.WriteLine($"\nError dumping mismatch details for test0{fileIndex:00#}C.djvu: {ex.Message}");
             }
-            
-            Console.WriteLine($"{mapType} PixelMap Binary Mismatch for test0{fileIndex}C.djvu.");
+        }
+
+        public static unsafe void DumpImageMismatch(
+            Graphics.PixelMap oracle, Graphics.PixelMap data, int fileIndex,
+            uint leadingPixels = 4,
+            uint maxMismatchPixels = 32,
+            uint maxBlocks = 1,
+            uint bytesPerLine = 64)
+        {
+            try
+            {
+                string typeName = typeof(Graphics.PixelMap).FullName;
+
+                if (oracle == null || data == null)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image references are null.");
+                    return;
+                }
+                
+                if (oracle.Width == 0 || oracle.Height == 0)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions are {oracle.Width}x{oracle.Height}.");
+                    return;
+                }
+                
+                if (oracle.Data == null || data.Data == null)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image Data buffers are null.");
+                    return;
+                }
+                
+                long oracleExpected = (long)oracle.Width * oracle.Height * Graphics.PixelMap.BytesPerPixel;
+                long dataExpected = (long)data.Width * data.Height * Graphics.PixelMap.BytesPerPixel;
+                
+                if (oracle.Data.Length < oracleExpected || data.Data.Length < dataExpected)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image Data buffers are undersized.");
+                    return;
+                }
+                
+                if (oracle.Width != data.Width || oracle.Height != data.Height)
+                {
+                    Console.WriteLine($"{typeName} Mismatch Details for test0{fileIndex:00#}C.djvu: Dimensions mismatch ({oracle.Width}x{oracle.Height} vs {data.Width}x{data.Height}).");
+                    return;
+                }
+
+                StringBuilder sb = new StringBuilder(1024);
+                sb.AppendLine($"\n{typeName} Mismatches for test0{fileIndex:00#}C.djvu:");
+                
+                fixed (sbyte* pOracle = oracle.Data)
+                fixed (sbyte* pData = data.Data)
+                {
+                    // PixelMap has no physical native borders or padding offsets
+                    // GetRowSize() returns pixel width. Stride requires byte width.
+                    DumpImageMismatchCore((byte*)pOracle, (byte*)pData, oracle.Width, oracle.Height, 
+                        oracle.Width * Graphics.PixelMap.BytesPerPixel, data.Width * Graphics.PixelMap.BytesPerPixel, 
+                        0, 0, 
+                        PixelSize._24bpp, ChannelSize._8bit, sb,
+                        leadingPixels, maxMismatchPixels, maxBlocks, bytesPerLine, false);
+                }
+                    
+                Console.Write(sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nError dumping mismatch details for test0{fileIndex:00#}C.djvu: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Dumps formatted hex and binary diagnostic blocks to the console when two raw image buffers mismatch.
+        /// Extracts geometric topology dynamically from the provided byte length and width based on pixel bit-depth.
+        /// </summary>
+        /// <param name="pOracle">Pointer to the primary (Oracle) image buffer.</param>
+        /// <param name="pData">Pointer to the secondary (Test) image buffer.</param>
+        /// <param name="length">The total length of the image buffers in bytes.</param>
+        /// <param name="width">The logical pixel width of the images.</param>
+        /// <param name="fileIndex">The numeric test index mapped to the file name, for console logging.</param>
+        /// <param name="mapType">The string label of the map type (e.g. 'Foreground', 'Background') for console logging.</param>
+        /// <param name="pixelSize">The structural bit depth of a single pixel. Default is 24bpp.</param>
+        /// <param name="channelSize">The bit depth of a single color channel. Default is 8bit.</param>
+        /// <param name="leadingPixels">The number of matching, non-corrupted pixels to render before the detected mismatch to provide context.</param>
+        /// <param name="maxMismatchPixels">The maximum continuous pixel limit to render in a single diagnostic block to prevent terminal flooding.</param>
+        /// <param name="maxBlocks">The maximum number of disconnected mismatch patches to render.</param>
+        /// <param name="bytesPerLine">The maximum visual byte width per rendered hex line.</param>
+        public static unsafe void DumpImageMismatch(
+            byte* pOracle, byte* pData, 
+            int length, int width, 
+            int fileIndex, string mapType, 
+            PixelSize pixelSize = PixelSize._24bpp, 
+            ChannelSize channelSize = ChannelSize._8bit,
+            uint leadingPixels = 4,
+            uint maxMismatchPixels = 32,
+            uint maxBlocks = 1,
+            uint bytesPerLine = 64,
+            bool comparePadding = false)
+        {
+            try
+            {
+                if (pOracle == null || pData == null)
+                {
+                    Console.WriteLine($"\n{mapType} Mismatch Details for test0{fileIndex:00#}C.djvu: One or both image references are null.");
+                    return;
+                }
+                
+                int bitsPerPixel = (int)pixelSize;
+                int bytesPerPixel = Math.Max(1, bitsPerPixel / 8);
+                
+                int stride = bitsPerPixel >= 8 ? (width * bytesPerPixel) : ((width * bitsPerPixel) / 8);
+                int height = stride > 0 ? length / stride : 1;
+                if (height == 0) height = 1;
+                
+                StringBuilder sb = new StringBuilder(1024);
+                sb.AppendLine($"\n{mapType} Mismatches for test0{fileIndex:00#}C.djvu:");
+                
+                DumpImageMismatchCore(pOracle, pData, width, height, 
+                    stride, stride, 
+                    pixelSize, channelSize, sb,
+                    leadingPixels, maxMismatchPixels, maxBlocks, bytesPerLine, comparePadding);
+                    
+                Console.Write(sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\nError dumping mismatch details for test0{fileIndex:00#}C.djvu: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -1020,17 +2376,54 @@ namespace DjvuNet.Tests
         /// <exception cref="PlatformNotSupportedException">Thrown when the CPU does not support AVX2 hardware acceleration.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="width"/> produces a byte width less than 32 bytes, which would cause an unsafe memory overread.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        internal static unsafe double ImageDiffVector256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize = 24, int channelSize = 8)
+        internal static unsafe double ImageDiffVector256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
         {
-            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            return ImageDiffVector256(scan0_1, scan0_2, width, height, stride, stride, pixelSize, channelSize);
+        }
 
-            ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        internal static unsafe double ImageDiffVector256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride1, int stride2, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
+        {
+            if (scan0_1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            }
+
+            if (scan0_2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            }
+
+            if (width == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            }
+
+            if (height == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+
+            ulong widthBytes = (ulong)width * pixelSize.AsUintBytes();
+            if ((ulong)Math.Abs((long)stride1) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride1 must be large enough to contain the width bytes.", nameof(stride1));
+            }
+
+            if ((ulong)Math.Abs((long)stride2) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride2 must be large enough to contain the width bytes.", nameof(stride2));
+            }
 
             if (!Avx2.IsSupported)
             {
@@ -1054,8 +2447,8 @@ namespace DjvuNet.Tests
 
             for (uint i = 0; i < height; i++)
             {
-                byte* p1 = scan0_1 + ((long)i * stride);
-                byte* p2 = scan0_2 + ((long)i * stride);
+                byte* p1 = scan0_1 + ((long)i * stride1);
+                byte* p2 = scan0_2 + ((long)i * stride2);
                 ulong x = 0;
 
                 while (x + 96 <= vectorBound)
@@ -1111,8 +2504,8 @@ namespace DjvuNet.Tests
 
             double result = Vector256.Sum(resultVecU);
 
-            double maxChannelValue = (1L << channelSize) - 1;
-            return result / ((double)width * height * ((double)pixelSize / channelSize) * maxChannelValue);
+            double maxChannelValue = (1L << channelSize.AsIntBits()) - 1;
+            return result / ((double)width * height * (pixelSize.AsDoubleBits() / channelSize.AsIntBits()) * maxChannelValue);
         }
 
         /// <summary>
@@ -1130,17 +2523,54 @@ namespace DjvuNet.Tests
         /// <exception cref="PlatformNotSupportedException">Thrown when the CPU does not support Vector128 hardware acceleration.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when <paramref name="width"/> produces a byte width less than 16 bytes, which would cause an unsafe memory overread.</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        internal static unsafe double ImageDiffVector128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize = 24, int channelSize = 8)
+        internal static unsafe double ImageDiffVector128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
         {
-            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            return ImageDiffVector128(scan0_1, scan0_2, width, height, stride, stride, pixelSize, channelSize);
+        }
 
-            ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        internal static unsafe double ImageDiffVector128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride1, int stride2, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
+        {
+            if (scan0_1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            }
+
+            if (scan0_2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            }
+
+            if (width == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            }
+
+            if (height == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+
+            ulong widthBytes = (ulong)width * pixelSize.AsUintBytes();
+            if ((ulong)Math.Abs((long)stride1) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride1 must be large enough to contain the width bytes.", nameof(stride1));
+            }
+
+            if ((ulong)Math.Abs((long)stride2) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride2 must be large enough to contain the width bytes.", nameof(stride2));
+            }
 
             if (!Vector128.IsHardwareAccelerated)
             {
@@ -1164,8 +2594,8 @@ namespace DjvuNet.Tests
 
             for (uint i = 0; i < height; i++)
             {
-                byte* p1 = scan0_1 + ((long)i * stride);
-                byte* p2 = scan0_2 + ((long)i * stride);
+                byte* p1 = scan0_1 + ((long)i * stride1);
+                byte* p2 = scan0_2 + ((long)i * stride2);
                 ulong x = 0;
 
                 while (x <= vectorBound)
@@ -1222,25 +2652,69 @@ namespace DjvuNet.Tests
             Vector128<ulong> finalSum64 = Vector128.Add(imageAccum64L, imageAccum64H);
             result += Vector128.Sum(finalSum64);
 
-            double maxChannelValue = (1L << channelSize) - 1;
-            return result / ((double)width * height * ((double)pixelSize / channelSize) * maxChannelValue);
+            double maxChannelValue = (1L << channelSize.AsIntBits()) - 1;
+            return result / ((double)width * height * (pixelSize.AsDoubleBits() / channelSize.AsIntBits()) * maxChannelValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        internal static unsafe double ImageDiffParallel256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, ParallelOptions options, int pixelSize = 24, int channelSize = 8)
+        internal static unsafe double ImageDiffParallel256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, ParallelOptions options, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
         {
-            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            return ImageDiffParallel256(scan0_1, scan0_2, width, height, stride, stride, options, pixelSize, channelSize);
+        }
 
-            ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        internal static unsafe double ImageDiffParallel256(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride1, int stride2, ParallelOptions options, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
+        {
+            if (scan0_1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            }
 
-            if (!Avx2.IsSupported) throw new PlatformNotSupportedException("AVX2 hardware acceleration is not supported on this platform.");
-            if (widthBytes < 32) throw new DjvuArgumentOutOfRangeException(nameof(width), widthBytes, "Buffer width must be at least 32 bytes to fill a Vector256 (AVX2) register.");
+            if (scan0_2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            }
+
+            if (width == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            }
+
+            if (height == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+
+            ulong widthBytes = (ulong)width * pixelSize.AsUintBytes();
+            if ((ulong)Math.Abs((long)stride1) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride1 must be large enough to contain the width bytes.", nameof(stride1));
+            }
+
+            if ((ulong)Math.Abs((long)stride2) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride2 must be large enough to contain the width bytes.", nameof(stride2));
+            }
+
+            if (!Avx2.IsSupported)
+            {
+                throw new PlatformNotSupportedException("AVX2 hardware acceleration is not supported on this platform.");
+            }
+
+            if (widthBytes < 32)
+            {
+                throw new DjvuArgumentOutOfRangeException(nameof(width), widthBytes, "Buffer width must be at least 32 bytes to fill a Vector256 (AVX2) register.");
+            }
 
             object resultLock = new object();
             ulong totalResult = 0;
@@ -1258,8 +2732,8 @@ namespace DjvuNet.Tests
                 () => Vector256<ulong>.Zero,
                 (long y, ParallelLoopState loopState, Vector256<ulong> localAccumVec) =>
                 {
-                    byte* p1 = scan0_1 + (y * stride);
-                    byte* p2 = scan0_2 + (y * stride);
+                    byte* p1 = scan0_1 + (y * stride1);
+                    byte* p2 = scan0_2 + (y * stride2);
                     ulong x = 0;
                     Vector256<ulong> resultVecU = Vector256<ulong>.Zero;
 
@@ -1321,25 +2795,69 @@ namespace DjvuNet.Tests
                 }
             );
 
-            double maxChannelValue = (1L << channelSize) - 1;
-            return (double)totalResult / ((double)width * height * ((double)pixelSize / channelSize) * maxChannelValue);
+            double maxChannelValue = (1L << channelSize.AsIntBits()) - 1;
+            return (double)totalResult / ((double)width * height * (pixelSize.AsDoubleBits() / channelSize.AsIntBits()) * maxChannelValue);
                 }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-        internal static unsafe double ImageDiffParallel128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, ParallelOptions options, int pixelSize = 24, int channelSize = 8)
+        internal static unsafe double ImageDiffParallel128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, ParallelOptions options, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
         {
-            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            return ImageDiffParallel128(scan0_1, scan0_2, width, height, stride, stride, options, pixelSize, channelSize);
+        }
 
-            ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+        [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+        internal static unsafe double ImageDiffParallel128(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride1, int stride2, ParallelOptions options, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
+        {
+            if (scan0_1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            }
 
-            if (!Vector128.IsHardwareAccelerated) throw new PlatformNotSupportedException("Vector128 hardware acceleration is not supported on this platform.");
-            if (widthBytes < 16) throw new DjvuArgumentOutOfRangeException(nameof(width), widthBytes, "Buffer width must be at least 16 bytes to fill a Vector128 register.");
+            if (scan0_2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            }
+
+            if (width == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            }
+
+            if (height == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+
+            ulong widthBytes = (ulong)width * pixelSize.AsUintBytes();
+            if ((ulong)Math.Abs((long)stride1) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride1 must be large enough to contain the width bytes.", nameof(stride1));
+            }
+
+            if ((ulong)Math.Abs((long)stride2) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride2 must be large enough to contain the width bytes.", nameof(stride2));
+            }
+
+            if (!Vector128.IsHardwareAccelerated)
+            {
+                throw new PlatformNotSupportedException("Vector128 hardware acceleration is not supported on this platform.");
+            }
+
+            if (widthBytes < 16)
+            {
+                throw new DjvuArgumentOutOfRangeException(nameof(width), widthBytes, "Buffer width must be at least 16 bytes to fill a Vector128 register.");
+            }
 
             object resultLock = new object();
             ulong totalResult = 0;
@@ -1355,8 +2873,8 @@ namespace DjvuNet.Tests
                 () => (Vector128<ulong>.Zero, Vector128<ulong>.Zero),
                 (long y, ParallelLoopState loopState, (Vector128<ulong> Item1, Vector128<ulong> Item2) localAccumTuple) =>
                 {
-                    byte* p1 = scan0_1 + (y * stride);
-                    byte* p2 = scan0_2 + (y * stride);
+                    byte* p1 = scan0_1 + (y * stride1);
+                    byte* p2 = scan0_2 + (y * stride2);
                     ulong x = 0;
 
                     Vector128<ulong> imageAccum64L = Vector128<ulong>.Zero;
@@ -1424,8 +2942,8 @@ namespace DjvuNet.Tests
                 }
             );
 
-            double maxChannelValue = (1L << channelSize) - 1;
-            return (double)totalResult / ((double)width * height * ((double)pixelSize / channelSize) * maxChannelValue);
+            double maxChannelValue = (1L << channelSize.AsIntBits()) - 1;
+            return (double)totalResult / ((double)width * height * (pixelSize.AsDoubleBits() / channelSize.AsIntBits()) * maxChannelValue);
         }
 
         /// <summary>
@@ -1450,13 +2968,13 @@ namespace DjvuNet.Tests
         /// </para>
         /// </remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static unsafe ulong ImageBinaryDiffSimdFallback(byte* scan0_1, byte* scan0_2, uint widthBytes, uint height, int stride)
+        private static unsafe ulong ImageBinaryDiffSimdFallback(byte* scan0_1, byte* scan0_2, uint widthBytes, uint height, int stride1, int stride2)
         {
             ulong result = 0;
             for (ulong i = 0; i < height; i++)
             {
-                byte* p1 = scan0_1 + ((long)i * stride);
-                byte* p2 = scan0_2 + ((long)i * stride);
+                byte* p1 = scan0_1 + ((long)i * stride1);
+                byte* p2 = scan0_2 + ((long)i * stride2);
 
                 ulong wb = 0;
                 // Unrolled calculation explicitly reading 8 individual bytes
@@ -1505,26 +3023,75 @@ namespace DjvuNet.Tests
         /// <param name="scan0_2"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        /// <param name="stride"></param>
+        /// <param name="stride">The row stride in bytes.</param>
         /// <param name="pixelSize"></param>
         /// <param name="channelSize"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe double ImageBinaryDiffScalar(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, int pixelSize = 24, int channelSize = 8)
+        internal static unsafe double ImageBinaryDiffScalar(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
         {
-            if (scan0_1 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
-            if (scan0_2 == null) DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
-            if (width == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
-            if (height == 0) DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
-            if (pixelSize <= 0 || pixelSize % 8 != 0) DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
-            if (channelSize != 8) DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            return ImageBinaryDiffScalar(scan0_1, scan0_2, width, height, stride, stride, pixelSize, channelSize);
+        }
 
-            ulong widthBytes = (ulong)width * (uint)(pixelSize / 8);
-            if ((ulong)Math.Abs((long)stride) < widthBytes) DjvuExceptionUtil.ThrowArgument("Stride must be large enough to contain the width bytes.", nameof(stride));
+        /// <summary>
+        /// Calculates the difference between two image buffers using a scalar fallback loop.
+        /// </summary>
+        /// <param name="scan0_1">Pointer to the start of the first image buffer.</param>
+        /// <param name="scan0_2">Pointer to the start of the second image buffer.</param>
+        /// <param name="width">The width of the image in pixels.</param>
+        /// <param name="height">The height of the image in pixels.</param>
+        /// <param name="stride1">The row stride of the first image (in bytes). This parameter serves a dual function: 1) its magnitude accounts for row memory padding, and 2) its sign accounts for the direction of processing (a negative reverse stride allows comparing images existing in different coordinate spaces, e.g., top-down vs bottom-up). Both functions combine naturally.</param>
+        /// <param name="stride2">The row stride of the second image (in bytes). It shares the exact same dual functionality as stride1, allowing fully independent memory layout and coordinate space comparisons. If 0, it falls back to stride1.</param>
+        /// <param name="pixelSize">The total size of a single pixel in bits.</param>
+        /// <param name="channelSize">The size of a single color channel in bits.</param>
+        /// <returns>A double representing the average pixel difference.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe double ImageBinaryDiffScalar(byte* scan0_1, byte* scan0_2, uint width, uint height, int stride1, int stride2, PixelSize pixelSize = PixelSize._24bpp, ChannelSize channelSize = ChannelSize._8bit)
+        {
+            if (scan0_1 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_1), "First image buffer pointer cannot be null.");
+            }
 
-            ulong result = ImageBinaryDiffSimdFallback(scan0_1, scan0_2, (uint)widthBytes, height, stride);
-            double maxChannelValue = (1L << channelSize) - 1;
-            return (double)result / (width * height * ((double)pixelSize / channelSize) * maxChannelValue);
+            if (scan0_2 == null)
+            {
+                DjvuExceptionUtil.ThrowArgumentNull(nameof(scan0_2), "Second image buffer pointer cannot be null.");
+            }
+
+            if (width == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(width), width, "Width must be positive.");
+            }
+
+            if (height == 0)
+            {
+                DjvuExceptionUtil.ThrowArgumentOutOfRange(nameof(height), height, "Height must be positive.");
+            }
+
+            if ((byte)pixelSize == 0 || (byte)pixelSize % 8 != 0)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only pixel sizes that are a positive multiple of 8 bits.", nameof(pixelSize));
+            }
+
+            if (channelSize != ChannelSize._8bit)
+            {
+                DjvuExceptionUtil.ThrowArgument("Method supports only 8-bit channel sizes.", nameof(channelSize));
+            }
+
+            ulong widthBytes = (ulong)width * pixelSize.AsUintBytes();
+            if ((ulong)Math.Abs((long)stride1) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride1 must be large enough to contain the width bytes.", nameof(stride1));
+            }
+
+            if ((ulong)Math.Abs((long)stride2) < widthBytes)
+            {
+                DjvuExceptionUtil.ThrowArgument("Stride2 must be large enough to contain the width bytes.", nameof(stride2));
+            }
+
+            ulong result = ImageBinaryDiffSimdFallback(scan0_1, scan0_2, (uint)widthBytes, height, stride1, stride2);
+            double maxChannelValue = (1L << channelSize.AsIntBits()) - 1;
+            return (double)result / (width * height * (pixelSize.AsDoubleBits() / channelSize.AsIntBits()) * maxChannelValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -1545,7 +3112,7 @@ namespace DjvuNet.Tests
 #endif
         }
 
-        public static bool CompareImages(Bitmap image1, Bitmap image2)
+        public static bool CompareImages(SysBitmap image1, SysBitmap image2)
         {
             bool pixelFormatMismatch = false;
             bool result = IsImageBinaryComparable(image1, image2, out pixelFormatMismatch);
@@ -1598,7 +3165,7 @@ namespace DjvuNet.Tests
 
             unsafe
             {
-                ulong rowSize = (ulong) ((pixelSize / 8) * image1.Width);
+                ulong rowSize = (ulong) (((uint)pixelSize / 8) * image1.Width);
                 ulong rowSizeWithPadding = (ulong) image1.Stride;
                 ulong* longCheckSize;
 
@@ -1646,7 +3213,7 @@ namespace DjvuNet.Tests
 
             unsafe
             {
-                uint rowSize = (uint)((pixelSize / 8) * image1.Width);
+                uint rowSize = (uint)(((uint)pixelSize / 8) * image1.Width);
                 uint rowSizeWithPadding = (uint)image1.Stride;
                 uint* longCheckSize;
 
@@ -1688,7 +3255,7 @@ namespace DjvuNet.Tests
             return true;
         }
 
-        public static Bitmap InvertColor(Bitmap source)
+        public static SysBitmap InvertColor(SysBitmap source)
         {
             ColorMatrix colorMatrix = new ColorMatrix(
                 new float[][]
@@ -1703,9 +3270,9 @@ namespace DjvuNet.Tests
             return TransformBitmap(source, colorMatrix);
         }
 
-        public static Bitmap TransformBitmap(Bitmap source, ColorMatrix colorMatrix)
+        public static SysBitmap TransformBitmap(SysBitmap source, ColorMatrix colorMatrix)
         {
-            Bitmap result = new Bitmap(source.Width, source.Height, source.PixelFormat);
+            SysBitmap result = new SysBitmap(source.Width, source.Height, source.PixelFormat);
 
             using (SysGraphics g = SysGraphics.FromImage(result))
             {

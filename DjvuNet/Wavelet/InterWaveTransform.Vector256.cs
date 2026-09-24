@@ -1661,5 +1661,176 @@ namespace DjvuNet.Wavelet
                 }
             });
         }
+
+        internal static unsafe int YCbCr2RgbVector256(short* pY, short* pCb, short* pCr, sbyte* pImg8, int height, int width, int srcStride, int rowSizeInBytes, int startX = 0)
+        {
+            if (Avx2.IsSupported)
+            {
+                Vector256<short> v32 = Vector256.Create((short)32);
+                Vector256<short> v128 = Vector256.Create((short)128);
+                Vector256<short> v127 = Vector256.Create((short)127);
+                Vector256<short> vNeg128 = Vector256.Create((short)-128);
+                
+                if (width - startX < 32) return startX;
+
+                int vectorBound = width - 32;
+                int tailShift = (32 - ((width - startX) % 32)) % 32;
+
+                // .rdata allocated 256-bit masks (duplicated 128-bit lanes)
+                Vector256<byte> maskB1 = Vector256.Create((ReadOnlySpan<byte>)[0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128, 128, 5, 0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128, 128, 5]);
+                Vector256<byte> maskG1 = Vector256.Create((ReadOnlySpan<byte>)[128, 0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128, 128, 128, 0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128, 128]);
+                Vector256<byte> maskR1 = Vector256.Create((ReadOnlySpan<byte>)[128, 128, 0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128, 128, 128, 0, 128, 128, 1, 128, 128, 2, 128, 128, 3, 128, 128, 4, 128]);
+
+                Vector256<byte> maskB2 = Vector256.Create((ReadOnlySpan<byte>)[128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128, 10, 128, 128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128, 10, 128]);
+                Vector256<byte> maskG2 = Vector256.Create((ReadOnlySpan<byte>)[5, 128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128, 10, 5, 128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128, 10]);
+                Vector256<byte> maskR2 = Vector256.Create((ReadOnlySpan<byte>)[128, 5, 128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128, 128, 5, 128, 128, 6, 128, 128, 7, 128, 128, 8, 128, 128, 9, 128, 128]);
+
+                Vector256<byte> maskB3 = Vector256.Create((ReadOnlySpan<byte>)[128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15, 128, 128, 128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15, 128, 128]);
+                Vector256<byte> maskG3 = Vector256.Create((ReadOnlySpan<byte>)[128, 128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15, 128, 128, 128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15, 128]);
+                Vector256<byte> maskR3 = Vector256.Create((ReadOnlySpan<byte>)[10, 128, 128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15, 10, 128, 128, 11, 128, 128, 12, 128, 128, 13, 128, 128, 14, 128, 128, 15]);
+
+                for (int y = 0, pidx = 0, ridx = 0; y < height; y++, pidx += srcStride, ridx += rowSizeInBytes)
+                {
+                    int x = startX;
+
+                    while (x < width)
+                    {
+                        int shift = (x > vectorBound) ? tailShift : 0;
+                        int j = x - shift;
+                        int pixidx = ridx + (j * 3);
+                        // Block 1 (Pixels 0-15)
+                        Vector256<short> y1 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pY + pidx + j), v32), 6);
+                        Vector256<short> cb1 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pCb + pidx + j), v32), 6);
+                        Vector256<short> cr1 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pCr + pidx + j), v32), 6);
+
+                        y1 = Avx2.Max(Avx2.Min(y1, v127), vNeg128);
+                        cb1 = Avx2.Max(Avx2.Min(cb1, v127), vNeg128);
+                        cr1 = Avx2.Max(Avx2.Min(cr1, v127), vNeg128);
+
+                        // Block 2 (Pixels 16-31)
+                        Vector256<short> y2 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pY + pidx + j + 16), v32), 6);
+                        Vector256<short> cb2 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pCb + pidx + j + 16), v32), 6);
+                        Vector256<short> cr2 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pCr + pidx + j + 16), v32), 6);
+
+                        y2 = Avx2.Max(Avx2.Min(y2, v127), vNeg128);
+                        cb2 = Avx2.Max(Avx2.Min(cb2, v127), vNeg128);
+                        cr2 = Avx2.Max(Avx2.Min(cr2, v127), vNeg128);
+
+                        // Transform Block 1
+                        Vector256<short> cbShift1 = Avx2.ShiftRightArithmetic(cb1, 2);
+                        Vector256<short> crShift1 = Avx2.ShiftRightArithmetic(cr1, 1);
+                        Vector256<short> crAdd1 = Avx2.Add(cr1, crShift1);
+                        Vector256<short> yAdd1 = Avx2.Add(y1, v128);
+                        Vector256<short> ySub1 = Avx2.Subtract(yAdd1, cbShift1);
+
+                        Vector256<short> r1 = Avx2.Add(yAdd1, crAdd1);
+                        Vector256<short> g1 = Avx2.Subtract(ySub1, Avx2.ShiftRightArithmetic(crAdd1, 1));
+                        Vector256<short> b1 = Avx2.Add(ySub1, Avx2.Add(cb1, cb1));
+
+                        // Transform Block 2
+                        Vector256<short> cbShift2 = Avx2.ShiftRightArithmetic(cb2, 2);
+                        Vector256<short> crShift2 = Avx2.ShiftRightArithmetic(cr2, 1);
+                        Vector256<short> crAdd2 = Avx2.Add(cr2, crShift2);
+                        Vector256<short> yAdd2 = Avx2.Add(y2, v128);
+                        Vector256<short> ySub2 = Avx2.Subtract(yAdd2, cbShift2);
+
+                        Vector256<short> r2 = Avx2.Add(yAdd2, crAdd2);
+                        Vector256<short> g2 = Avx2.Subtract(ySub2, Avx2.ShiftRightArithmetic(crAdd2, 1));
+                        Vector256<short> b2 = Avx2.Add(ySub2, Avx2.Add(cb2, cb2));
+
+                        // Saturate 16-bit to 8-bit. AVX2 splits lanes during packing.
+                        Vector256<byte> vecR = Avx2.PackUnsignedSaturate(r1, r2);
+                        Vector256<byte> vecG = Avx2.PackUnsignedSaturate(g1, g2);
+                        Vector256<byte> vecB = Avx2.PackUnsignedSaturate(b1, b2);
+
+                        // Untangle the 128-bit lanes (0xD8 = 11_01_10_00) to linearize the bytes.
+                        Vector256<byte> vecR_ordered = Avx2.Permute4x64(vecR.AsInt64(), 0xD8).AsByte();
+                        Vector256<byte> vecG_ordered = Avx2.Permute4x64(vecG.AsInt64(), 0xD8).AsByte();
+                        Vector256<byte> vecB_ordered = Avx2.Permute4x64(vecB.AsInt64(), 0xD8).AsByte();
+
+                        // Shuffle and interleave across both lanes simultaneously
+                        Vector256<byte> out1_4 = Avx2.Or(Avx2.Or(Avx2.Shuffle(vecB_ordered, maskB1), Avx2.Shuffle(vecG_ordered, maskG1)), Avx2.Shuffle(vecR_ordered, maskR1));
+                        Vector256<byte> out2_5 = Avx2.Or(Avx2.Or(Avx2.Shuffle(vecB_ordered, maskB2), Avx2.Shuffle(vecG_ordered, maskG2)), Avx2.Shuffle(vecR_ordered, maskR2));
+                        Vector256<byte> out3_6 = Avx2.Or(Avx2.Or(Avx2.Shuffle(vecB_ordered, maskB3), Avx2.Shuffle(vecG_ordered, maskG3)), Avx2.Shuffle(vecR_ordered, maskR3));
+
+                        // Extract 128-bit chunks and route them to their proper memory offsets
+                        Sse2.Store((byte*)pImg8 + pixidx, out1_4.GetLower());
+                        Sse2.Store((byte*)pImg8 + pixidx + 48, out1_4.GetUpper());
+
+                        Sse2.Store((byte*)pImg8 + pixidx + 16, out2_5.GetLower());
+                        Sse2.Store((byte*)pImg8 + pixidx + 64, out2_5.GetUpper());
+
+                        Sse2.Store((byte*)pImg8 + pixidx + 32, out3_6.GetLower());
+                        Sse2.Store((byte*)pImg8 + pixidx + 80, out3_6.GetUpper());
+
+                        x += 32 - shift;
+                    }
+                }
+                return width;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe int YGray2PixelMapVector256(short* pY, sbyte* pImg8, int height, int width, int srcStride, int rowSizeInBytes, int startX)
+        {
+            if (Avx2.IsSupported)
+            {
+                if (width - startX < 32) return startX;
+
+                int vectorBound = width - 32;
+                int tailShift = (32 - ((width - startX) % 32)) % 32;
+
+                Vector256<short> v32 = Vector256.Create((short)32);
+                Vector256<sbyte> v127 = Vector256.Create((sbyte)127);
+
+                Vector256<byte> mask1 = Vector256.Create((ReadOnlySpan<byte>)[
+                    0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5,
+                    5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10]);
+
+                Vector256<byte> mask2 = Vector256.Create((ReadOnlySpan<byte>)[
+                    10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15,
+                    0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5]);
+
+                Vector256<byte> mask3 = Vector256.Create((ReadOnlySpan<byte>)[
+                    5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9, 10, 10,
+                    10, 11, 11, 11, 12, 12, 12, 13, 13, 13, 14, 14, 14, 15, 15, 15]);
+
+                for (int y = 0, pidx = 0, ridx = 0; y < height; y++, pidx += srcStride, ridx += rowSizeInBytes)
+                {
+                    int x = startX;
+
+                    while (x < width)
+                    {
+                        int shift = (x > vectorBound) ? tailShift : 0;
+                        int j = x - shift;
+                        int pixidx = ridx + (j * 3);
+                        Vector256<short> y1 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pY + pidx + j), v32), 6);
+                        Vector256<short> y2 = Avx2.ShiftRightArithmetic(Avx2.Add(Avx2.LoadVector256(pY + pidx + j + 16), v32), 6);
+
+                        Vector256<sbyte> narrowed = Avx2.PackSignedSaturate(y1, y2);
+                        narrowed = Avx2.Permute4x64(narrowed.AsInt64(), 0xD8).AsSByte();
+                        Vector256<sbyte> gray = Avx2.Subtract(v127, narrowed);
+
+                        Vector256<sbyte> grayLow = Avx2.Permute2x128(gray.AsInt64(), gray.AsInt64(), 0x00).AsSByte();
+                        Vector256<sbyte> grayHigh = Avx2.Permute2x128(gray.AsInt64(), gray.AsInt64(), 0x11).AsSByte();
+
+                        Vector256<byte> out1 = Avx2.Shuffle(grayLow.AsByte(), mask1);
+                        Vector256<byte> out2 = Avx2.Shuffle(gray.AsByte(), mask2);
+                        Vector256<byte> out3 = Avx2.Shuffle(grayHigh.AsByte(), mask3);
+
+                        Avx2.Store((byte*)pImg8 + pixidx, out1);
+                        Avx2.Store((byte*)pImg8 + pixidx + 32, out2);
+                        Avx2.Store((byte*)pImg8 + pixidx + 64, out3);
+
+                        x += 32 - shift;
+                    }
+                }
+                return width;
+            }
+            return 0;
+        }
     }
 }
